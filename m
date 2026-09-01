@@ -1,47 +1,47 @@
-Received: from BL2PR02CU003.outbound.protection.outlook.com (mail-eastusazon11011010.outbound.protection.outlook.com [52.101.52.10])
+Received: from SJ2PR03CU001.outbound.protection.outlook.com (mail-westusazon11012000.outbound.protection.outlook.com [52.101.43.0])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 129C94A0151;
-	Tue,  1 Sep 2026 18:49:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.52.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A39C24A0911;
+	Tue,  1 Sep 2026 18:49:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.43.0
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788288553; cv=fail; b=G0OLG1gczeNSLqtuGr9HKfc4YGBJciIK32zF1L4X0RD1RjqgyQw48h3xS94hOWFAlysvs3lVZc6mxHlSFlZCSA5lQmQFeX+p/IrZ/bkF4yR6bxeuXGaAQiWbbdXFq7qTAb8udl1SHXukjQP1wnUlNw2cboptErcZs28JjGjN6WQ=
+	t=1788288555; cv=fail; b=JrIPfNzqf79djnZ1Z7teQKJLQLnXdz3nFnA9sn+XRbReQG71yCfPha2tYvQ1ji/MPfyijoozJX4bJCkIfMKU91R/+uRYh4gUw9zvQW1Q750WcFQVH0Ax58LWnB9WJD9dxrPBTKVOdnp5lw+SsDoV1jW6BRCH2yW4GBgJwsSbfRw=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788288553; c=relaxed/simple;
-	bh=ZEk8T9XCZNopBBGFEyXl2CMK5gIA98oQtTbvOVRVTwk=;
+	s=arc-20240116; t=1788288555; c=relaxed/simple;
+	bh=tCMXUeaBrrg4qOo98h3Nt/kqcy52escRntH597ghNvw=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=th7/Zo+wW9xEcJfIdx0vEpDxsSXI6leblRjLvPHFleFz9wnqZiGDxkk81ADGf6rEZ6K50GJPC9g7OUZl1W0R8/NtocpxHBfM7Pc0iwSVTWsQZ1v/xMAUMeTNz4HkmjWcLP+F+QsRkHUTKOZxKOQDlwVuJXH4jjZp5zAJL/+Hok4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=Xe1zV4YS; arc=fail smtp.client-ip=52.101.52.10
+	 Content-Type:MIME-Version; b=jKPbTqkq5n3GyflqHnY5XcllQifBt4ezVVhGV5u71+EjSPm+D8tv/CbL9pCMEwFr4ornenzmc2bv3T7UdOnTbGylDADmXaAAw8YyZ6bbTUfcenyiemYZJguToLabmxGVb43XS2YUWFfHLFntroc0pZtcsDhi+wUJ33R0tdrgug4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=JklDII3+; arc=fail smtp.client-ip=52.101.43.0
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="Xe1zV4YS"
+	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="JklDII3+"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=fD0mmZ4rWK8wXq/lZFWi7jG+hymzsreHJlLoBMsVB4TwMMfGFY7+v6Eh2zIkEXd6U+gGaBpmSP9QANPhDxWsbD40HhuZJHzDMtIE3GeL5KfrDa7h9wMh4Tq7JTeD5XAAex8VWwge2/PIJbspWisxjWE4AF/KZe777h8D61t3Kl10TjMzSfNK5Jar1jOWqUflbztOHt89YqDVvih9K/kpzvi58sCZL/3bF5bYzFzNbjhgeYycF09bNxPEKDoYeHDpxb5i2SSWYcsCDmeEwTzJp7Jb6aRaJ8RMfrO8FIamIioVzbc/Mh1aaNvrT5AiajpjVj/5xm1dDOw+3MpRyYrx3g==
+ b=ZRCjjxXhAqxFVq9STLJeW1EaJAp7fSOIItt/2T7Aj3cBGlSISCNA7M+WNo8k7G93ZXYN6Y28XKopi7/yQ6o9u2NfCqFZOQy06ZVfNb57xZcO+K4m9s9FSEcihgKVL1EzbirgViZaEcQWCmCFqHK+wLqNIlHtIycZfzRBrCIxGt5Qm7Ox3E+sq2n1foN934/xgLao5vG7Ig1V4JJ4BekO/ypbhZELQPZCwYgFaFnuttAGNZlLX18amM5/dmx3zSi4G12ddMZUMQ6/PmRZCE4UL4QmobW0q7oyr5kSTiO6XXV02NXB2luoGfQ1CW/0PDC5df/mBh/yEocEQVNVq3W8og==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=D4o9yTBiTYTouYVN0LcB07wmuxcpltyupnk2qpN90AU=;
- b=QxYXa76pLEFynYjKsLjIwq4k+K283SiE2wmI4gcBpMb/NKECpcToe8+z51p1kZ5MzL2jj3W45eM4nzdw+XC4++kn03RgoxcxYnXKjK2uhfeL3F36zRVYkeJIqnMtsfnE/bd8CdAwkTGDxQRSvuKX9RP5D36XCFFIA+NcdOKvmMkvIeG2SQsqgnAxHw5IAz4hGUbZXmMh3XcidYatN8Szja1WfK0dkDJxTqRhKwkJ6V7Dmtz9H6e5GevxnEai25nttdPmGZGUmNosZkzDrBwTVycfLh0Ppwg5imIZAf8NKCJ5szBZHhjbzozIeI8/aFoFakV7DONJiT5v638i915KbQ==
+ bh=xfUX3b9ey0mpjfO+P2SmmtmVfGZgHthu2sBydkullEg=;
+ b=nDJW88LaN8s0F14qdnUOP1ispDotUgwcdxrqzXc+CpgypmoJQjIZ9LxcnHypHboiFIDqa13wshZVQcQBlzjfA/klM7aaEYn/H001hXfgdhuTCfF68+RFyzQ+bZM4Ll+oaa/E/jz5F8YFjg4b7Fs9+VG0+SiOG+3Fu/lDM9UulFYLGnj340GpcZCBDSrQOY+ujTbzaKt9E29cmtMGRRoxfF38wZrVZOx0/wZkmC92RssYxMVUDf7wpKgLpysAEyG54BS4LyP6poYi8tKN0jTEIRqwN92PAFETVi4vA+FB32oU/xsgOpH6PqLiVUG+/XMVpSJkzzVtS3pUhHKWdZcQOQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
  dkim=pass header.d=altera.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=D4o9yTBiTYTouYVN0LcB07wmuxcpltyupnk2qpN90AU=;
- b=Xe1zV4YSiE+0R/2268v5WGwBRIbywpDa9N7AlQuHm/RA9xnUyM3YyhX5FLlhk3+gGUz0aaDIsgfNy2/4fcG01G4f+YvSEdHwC1SNGUOP0MC4xY5BnTNep//g1rIIokcGTgk9SS4QoZ56BvqpcEQ/xM3wjgruuMBts/x9uCvmf8c4LhFm1iJpTkgMo1noaS9W/rZVO9P0jKt37T+7vc1JzcoTkWokpjB3GzHGrxCjJX7/NCMOT92E8eLeQLj/3ZYqcaf445ho2idQ7MOFBozTIm5H/Fcvo3yzdiXwayLgEizK1gOiXFUcj7s5h4CpcffAf5go5EKexaZ2u9DUZDrwKw==
+ bh=xfUX3b9ey0mpjfO+P2SmmtmVfGZgHthu2sBydkullEg=;
+ b=JklDII3+AlryZiSQxM9QuTv4ZheeSHarXHIRMNAExBvoZhKBCvlr4VqiJM8CJW5uw24LI5ccnIWdPXX7SYxvSFUoOv5jybbhv/XzjX2U1EVkLm6Rd/+VAlspSC2kx6+X82xR7da/xA65AE350NpsuJSrpgwW9ttF6Lbrw4cS5TiwA3lHZjaiAKj25LJqEJpCO3gVcQ1BPPquJdIFqKx/WVdXRhawlPDH78ZcUKFrBCzbWjiKrAf8i2TYpx6jZUV5VjJ2gERCz2QbR8xCJYmY4Ifyjyly/MNgA4xNE2sZH5M1pNN+t5Eu3y4DWGwDnZaeqR3hDk7S9iuuuppcZZTaSA==
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=altera.com;
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com (2603:10b6:5:39c::19)
- by MN2PR03MB5278.namprd03.prod.outlook.com (2603:10b6:208:1eb::17) with
+ by PH7PR03MB7338.namprd03.prod.outlook.com (2603:10b6:510:2f7::15) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.6; Tue, 1 Sep 2026
- 18:49:08 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.13; Tue, 1 Sep
+ 2026 18:49:05 +0000
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04]) by DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04%3]) with mapi id 15.21.0360.008; Tue, 1 Sep 2026
- 18:49:08 +0000
+ 18:49:05 +0000
 From: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
 To: linux-mmc@vger.kernel.org
 Cc: ulfh@kernel.org,
@@ -53,10 +53,11 @@ Cc: ulfh@kernel.org,
 	p.zabel@pengutronix.de,
 	devicetree@vger.kernel.org,
 	Tanmay Kathpalia <tanmay.kathpalia@altera.com>,
+	Conor Dooley <conor.dooley@microchip.com>,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v7 6/9] mmc: sdhci-cadence: rename SD4HC symbols for SD6HC groundwork
-Date: Tue,  1 Sep 2026 11:48:15 -0700
-Message-Id: <20260901184828.15653-7-tanmay.kathpalia@altera.com>
+Subject: [PATCH v7 4/9] dt-bindings: arm: altera: add Agilex5 SOCDK eMMC board variant
+Date: Tue,  1 Sep 2026 11:48:13 -0700
+Message-Id: <20260901184828.15653-5-tanmay.kathpalia@altera.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20260901184828.15653-1-tanmay.kathpalia@altera.com>
 References: <20260901184828.15653-1-tanmay.kathpalia@altera.com>
@@ -72,246 +73,82 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|MN2PR03MB5278:EE_
-X-MS-Office365-Filtering-Correlation-Id: c7fd4581-0cfe-4225-476e-08df0859b46f
+X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|PH7PR03MB7338:EE_
+X-MS-Office365-Filtering-Correlation-Id: ecbfcccc-51f5-450d-f94f-08df0859b2cf
 X-MS-Exchange-AtpMessageProperties: SA
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|23010399003|1800799024|376014|7416014|11063799006|56012099006|10067099003|22082099003|55112099003|18002099003;
+	BCL:0;ARA:13230040|1800799024|7416014|376014|23010399003|366016|56012099006|10067099003|11063799006|18002099003|22082099003|55112099003;
 X-Microsoft-Antispam-Message-Info:
-	DWYIHtXUM8ytNg25OT3BX0ratz+z4cFLD6sjX+tWtNgraUrcJyb/wunCujXPZYVYGZCV/RIg3XqCWTM4GFiy9Ne0tRsQW+xNklI05ouYHKTf9Vyp+WE1DW6gIJQCVPbeo4IumQwfni7DM3z/bonT+SljzW0yeLHyGrvynaKJUX0uSX523NtareMZZ2SuLztD7Och+V4p/ASEK71UbnIv0KM1Ty+wJQ/w16vT6PQlaWALKnLSyByI1hRh1bSo1vfazT5mcg+qkoOiwz9EmfxQVxGaXBEi2fau/I0lYTtQ8KJOEtT2qvgqHGaZ8hSO6U09aNI++1Mr1GyV6QQlQjCGSTisOZDmVl+KukMcxD7MrTxn9wurqBjvuVaehi+CLYamIywOwUKa9yGCL+aSF++3m+NthYMYFmmo1r1gKXd3zpZrlI5da90T9kRuN55i2YpUsTmXX/g59D6cS7CbouyamU7TYClrwLI2viriGx0ESYo16aI8/B4iB520OFhs1YFkIt9emjl2AnsgFDNzwAiADW//ACABp6dAeoKlT+kI3iiciKMLAYMvmYMsv6TfJJSNixshAQvYMzMEgqtDyZn8MdbbH2mG3QCKDA/HgF5pemw/ihpag1JAaNdZ4n805sKKEYdfiB53ykX5PZ2P0b9HM9pkyyDtwikx7juCFhQHQjM=
+	tFV8OmsEd32eW8PcWCiMBFNKLq5IoBn3dEHhc5kdnOOiNIHZyjhNMAptuTUzw+AbYnxew5tary6iT2DIxkMk6dCSVYbJ/Ym0qg4J4LA6Bm/sIdMIQdcDE+xu46Bze5khRaVS+C7IgL82/vJi0RG0Cud13yt07bEJjXgFnJoan6zYGT4SsdUd988jvKt/NgdBTZEB4I+ya+nWhuM3EHyN1DUfEidep78O2ujgCbOu7YGhpVxwP8yHpxz4LDPhn9VAjaBtQXY0mlxZQERnHQREDed1A31saUAuXagrOLPRsfY/e38MtxbeD/7bfoqPQUtNNnoh3AsxAd7BG24PiCWC7kaiPjq6bI1w5uP9SOuGXjqi6BLaUeTkEfqY68WeZgEEDIpalluqA+d5WewFwO3GAXGxwjYDs4wN9dd0njVM6Mhh38ALtDU5cpltUPcaneDGgJxkuaQnLpaCWC9RPvZbw+LLtZGFZ90Kqkkn16T024w0mqTsBTa/21x4eGeAmltYmxHsPiAIudDZsL4lcLD38iI7yEL9zmM7/UxvEJu5Mii6SFQMdhmwdmMBlE9YcfhuSodUN0oC343iLg+82Xl5YQuPnCHU0nZBwv2SuhjYGB/IAS3UznYDMGsAMpPUJ06cF2V6Q8+5JZSkA8n15Yqj5J7SJmfM0VGdq/CnKkGhAr0=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(23010399003)(1800799024)(376014)(7416014)(11063799006)(56012099006)(10067099003)(22082099003)(55112099003)(18002099003);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(7416014)(376014)(23010399003)(366016)(56012099006)(10067099003)(11063799006)(18002099003)(22082099003)(55112099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?YmFrSVj3tYbZ4q4tps1f843JtLFKJcxqmtnCzccVwMzBL6WEPhPurNtppvi6?=
- =?us-ascii?Q?msTDHrYG0gMSEE05tg1spB8Pb7rC4xBGBxCQk0nZr8hXbmjZJecJXYPvAraB?=
- =?us-ascii?Q?psM0Pb6jyq5IIMgjJnYxiGWI10fgai7eI3hIBbgj5mM3/pV5tBT5HLnA7VsB?=
- =?us-ascii?Q?8qluHeslFR3QbdBgPXSYOaU6Gkx/dKXm4ET+7JZNFmGrmxBbxValnY7J6PXR?=
- =?us-ascii?Q?tjXxMbDRvNIpWRYY5AWrkhb8EFBVDff98K3v0SnhQtPHHF2Vdf+dEZnAmkfL?=
- =?us-ascii?Q?xzhcyKSeoDWnwS7fYKxffGHdglt8xKfBruSvNWt+oLVuuRyQfA13KUsWYqna?=
- =?us-ascii?Q?q07/MM1Lblu6jfoYbF6dWuasDEsa3Rtvz/ogmbVSL5nJcn2FISXzYT5jQeBh?=
- =?us-ascii?Q?hxfvsEx4VjbaHIVvcbHIbzfBo+nsud8qD9IyHegeRW0dL5is/FZYdpu+MKBe?=
- =?us-ascii?Q?XxrWCl5wROPI8aw6bkwE+HyWsr6QFuUjSJ9Wsf+h0YEh9wWCL6OZv6XBDyZ5?=
- =?us-ascii?Q?ZXEE2geUgRpvclaM1YP+LJXfhgLsjjyNzYrEWqtS1MlwV0ZP8iwTTN6VwsKk?=
- =?us-ascii?Q?b0dO590LZKgORZ1Okr8k/JH+8C2f5Uf9sv9wgO7Nipxmqam8ctjurF843qbu?=
- =?us-ascii?Q?W2rb3YTdC1Cu8hXiZtbbw/ktOOrYWoEBPHNfSSl90svqnwxgZwKYHP2OHsu1?=
- =?us-ascii?Q?V2Dry5Pcnp5+h11vUHlb72uB2kck9g9+PgbMDHCsn+OUf7SlFTdYM9jCeb1Y?=
- =?us-ascii?Q?vMthuYXQuPysEU5OkdN9KnOyxCWRfLuUNOgxvpT33s9X3Qb2gnyMkmYEfOR5?=
- =?us-ascii?Q?6oMAsX3DExQyDn90hVzt8I9LOa/y77WUCOh1tvTePAUk/2KAaPMv7aRm0G2E?=
- =?us-ascii?Q?JC5bJGpJ23rKCTGGq38PGhQuZDpG9QfFV12pn3lc0wH2UL/Enb05gu+7ya3E?=
- =?us-ascii?Q?MUDs/7K1U2I5pJyC/DcndrdwNom7QkiVPVbHvIegRP3uB6oestPZO2mThOfE?=
- =?us-ascii?Q?i9LOV7v0FVlPM8RDazw3XNDF0QHlOSd2aGMKuVrv3hdeL1m0HglSGFCYu+Yo?=
- =?us-ascii?Q?yeyF/sAuLvxoTg0cMijGy72irN+3VDZwDCJ0UnHGuKmsAtj52N40D3nntD+5?=
- =?us-ascii?Q?FX+Am3MAq5QZmgT8+2SWWTR/T7FVfccPlFAt7mScZ8m6lAEuKDxl1aLcx9+2?=
- =?us-ascii?Q?bgeSowxbwzctyUhy0eh7Gm+pJ0s/LW4wqKr/LIQ9OiiWKEbziQQ9ESnLGzLH?=
- =?us-ascii?Q?q/zt783gqln+iYBHWo7NePFrucBHNdsQwBr4aXVvnYlMD68FCBZDa/Pov/4n?=
- =?us-ascii?Q?EbxOEp19mwcxdWD2BrJolOs9LPXBLCkdfbCXtW/oBJtbwVjVpANKsxHwuwlL?=
- =?us-ascii?Q?unbsRStpiUO3+ijS+CUeAECbBhdgqtPMJsOI5MA/znr1dEzE/Ap9f4UO7D5y?=
- =?us-ascii?Q?/p6yYZoFJseAo2XaWDU8A2rzgdQhE9F4B4SxaBJgzzsARsSSpgbOropwVa8F?=
- =?us-ascii?Q?s4X2SdlOiMg6FwCM6BiPWGSQkt0sD69NGE89bFwNV4xeU90EjYCauQ1dDxcL?=
- =?us-ascii?Q?wpktPESlzmhsC/ap3I8A5dOh2rYtSmJQ94wjd7gLrLh0GUjlGwH0k0qn/kj4?=
- =?us-ascii?Q?+rmGcm8SMSy3rnVqUSLNz8PqcKNXbdgcf0kUFDi1BBqmUdt2bbOM7Q9v8kzo?=
- =?us-ascii?Q?PL/oiwm/D1Mn4AEzRKVzkrIePUw0jpUi7/WPHQmsSF0gRAuJtga9iKpAYy3f?=
- =?us-ascii?Q?4RQkJYmoes9zVPfabR6VcEnmVD/iXL0=3D?=
+	=?us-ascii?Q?VjSaeBqehvhScE3bRG86/5+VpeYkjICsyeHZpCWQDtJTNKChhuV6ONWOtrgx?=
+ =?us-ascii?Q?zEMd6c9rvEj5xhfzYSd2AU9uiMxWb+B1aRPRijmZGSPk3jihTgOpL2M4oLD4?=
+ =?us-ascii?Q?/hoBq6GCK4Z1lyYSjVvRZqqLGdMcHvhFmcLfjJbSzs5vzntJ7+k9PJ8r/CCC?=
+ =?us-ascii?Q?MQF9TO6Br9lEn4tgZW2Kfxd3BgTsaJ37DJ355B7cy9TJeFznU28VMMu7D/yX?=
+ =?us-ascii?Q?gG4BQbCezQq8vpInRNHBWog1Sb3onF6l5ANlfVw3yYI8HYHXiKzBkAxOOz29?=
+ =?us-ascii?Q?LsBIxNyOQdX8TEdZEJeNXR08MurPEm2xZmjBOwZXcUqfetrqVuGzDaxG7Gs6?=
+ =?us-ascii?Q?lTWvi3q4exAeDkLJ5WL24rPZ0XRCNPehDoI7mSxelwyDZZGvo6unam1jisct?=
+ =?us-ascii?Q?lT80SOLx84ye/sqQ52dGlfhLjMKosGqveBhSURsRCRYn+WStucSx18XlcB6t?=
+ =?us-ascii?Q?QIJn7Y0d5ls1pd1M+TGdS/05b5N7qQJ3kWZ/L0hMDLQRM+6cTJ9s8OozeYiu?=
+ =?us-ascii?Q?H2vVWrh5smI6XHDd7RIGNkJvHsw0vT/Y/6GVHjmQbzJ+uiAgt/hQF2neGBgo?=
+ =?us-ascii?Q?CFHPK43COZ/Xc2ytL9Dv7nh41mGufllTBfkMebyeuVAv14GEc6qY+rdmlvtH?=
+ =?us-ascii?Q?JCgVaT2RPB89yjWqqLJFN+Lr+TTc8Tu4DiubiuxU8DIj0jHYT8DCRncgSa87?=
+ =?us-ascii?Q?f05Ro0zH/GNDZxOwWOmfGcsPiJyLLyQ9xG1mZxAKWOb7tKos1WJLPKV0S55O?=
+ =?us-ascii?Q?8jmf01/LItUY+BIPBITcf/RarjS87GI/G3M68dI44OoxRG0G+UB5NJWc+YC0?=
+ =?us-ascii?Q?JwY74fjN+fxAURLSvKfi+Tc25mcnDVRbnVft7wUOdwHQ605JENHScNeO0mss?=
+ =?us-ascii?Q?3P0gddH8IxSuHUpCuJ0nF3npm8lH5gcpXRcVHJBkxcxJ7M4nOGFgcGeMAtU6?=
+ =?us-ascii?Q?+LrRoBQ4RYhuEdh356FdJXU+72yJCBvAGjI+Nl7bIbQEvov6E9wpv4WcnYj7?=
+ =?us-ascii?Q?Ojd2XzfMKg7Wz5UYBR1O27Fp5ikLDTr7NJLEoiL143NGWIORyI1llMWeDfv4?=
+ =?us-ascii?Q?+gGUUkQK1bMv4j2BvzZYD3ZoLE7y9zGerREAiZlX/ensh4sn2uDUjteSbOOF?=
+ =?us-ascii?Q?PG+ThLz3s5HXDwPFe6c9V6H/GOduZkCgWwV6d8xkfKoqrg44ALG6Dv6imq6+?=
+ =?us-ascii?Q?nUEIA0cecNlkSDJ41tEut+DZQ0N09jiltuk3svSjL/fSM6oaw6fKe65P8SVs?=
+ =?us-ascii?Q?AwS/1JyLG4tbx9dz5/ORL6cy3Pc0f8fvbQnTQwP/BgYRlcj4PbdBRHqWrUlZ?=
+ =?us-ascii?Q?zM1gOC2nhXYUMjyP/ZbgezFLyBrjd/I37EgmG+1GyPj7vQ0+GOqiNYJunbBP?=
+ =?us-ascii?Q?sezZXa/CjQ23W2yw1YD+IrTuV1S1Vl4kAh1hoj8BUjTAUJqAJ+pc9KnASiJB?=
+ =?us-ascii?Q?qnu0ezMwwMO42RslSZkhTE/1m7Ac1jGiWEsa8S56ofKSiUbmy8DVDvj0u99V?=
+ =?us-ascii?Q?egHuCDBSz252Iv1hHfaqO7B6sBSBW3N/Gq1BHiGgWOdCga+izAysBiVdEhIL?=
+ =?us-ascii?Q?wLSmxiAeK5Kx2MCnJoWPCLCxTz+0K9fnzm2KyknFRUqHrkM8qfZRnRGpI1LU?=
+ =?us-ascii?Q?xb9OKsPwNL711hIKZD2k+XhAlonhnPL3QB6TlkxgYOjl7G1Jy7jJ3DR1ngOK?=
+ =?us-ascii?Q?EVgxdGKS3GMXrKa+DS+9CGM8WxBd3EygiTVebATGJju5wcxVjLg9PBUzgSRO?=
+ =?us-ascii?Q?g3fmYBQw9fBkbYnZnQy/a5J7tC0/4H8=3D?=
 X-OriginatorOrg: altera.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: c7fd4581-0cfe-4225-476e-08df0859b46f
+X-MS-Exchange-CrossTenant-Network-Message-Id: ecbfcccc-51f5-450d-f94f-08df0859b2cf
 X-MS-Exchange-CrossTenant-AuthSource: DM4PR03MB6208.namprd03.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 01 Sep 2026 18:49:08.3174
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 01 Sep 2026 18:49:05.6603
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: pJ/zdUcyzid+56Qum4ZTVMVL7VT7/dtKdpGC7IJq3vkDhEZkJuOXYn+zxWPsePweRLfcGq9a02VpCHxSqrpoNAa2uFpfZkvymU1UlgGlnDI=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR03MB5278
+X-MS-Exchange-CrossTenant-UserPrincipalName: 8Vd8NPIXGJymolNKbNqJVhF+HS5S0ymBpXK+HU5OpSbsFwwRjhnZ1xGagkNc9anGjw4SBX9kS0VccJr43eiVuVUXopilj43b01Z97nUJ4gU=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR03MB7338
 
-SD4HC PHY helpers and the default ops/drv_data are not marked as
-version-specific, so it is unclear what is shared versus SD4HC-only
-ahead of SD6HC support.
-
-Rename those symbols with a cdns4 prefix to separate the SD4HC paths
-from the shared driver core and avoid clashes when SD6HC is added.
-
-No functional change.
+Document the Agilex5 SoCDK with the eMMC daughter card, which uses the
+shared HPS SD/eMMC host for onboard eMMC instead of an SD slot.
 
 Signed-off-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
 ---
- drivers/mmc/host/sdhci-cadence.c | 55 +++++++++++++++-----------------
- 1 file changed, 26 insertions(+), 29 deletions(-)
+ Documentation/devicetree/bindings/arm/altera.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 435603c8c00b..8a6ef6d9d1dd 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -78,7 +78,7 @@
-  */
- #define SDHCI_CDNS_MAX_TUNING_LOOP	40
- 
--struct sdhci_cdns_phy_param {
-+struct sdhci_cdns4_phy_param {
- 	u8 addr;
- 	u8 data;
- };
-@@ -91,10 +91,10 @@ struct sdhci_cdns_priv {
- 	void (*priv_writel)(struct sdhci_cdns_priv *priv, u32 val, void __iomem *reg);
- 	struct reset_control *rst_hw;
- 	unsigned int nr_phy_params;
--	struct sdhci_cdns_phy_param phy_params[];
-+	struct sdhci_cdns4_phy_param phy_params[];
- };
- 
--struct sdhci_cdns_phy_cfg {
-+struct sdhci_cdns4_phy_cfg {
- 	const char *property;
- 	u8 addr;
- };
-@@ -104,7 +104,7 @@ struct sdhci_cdns_drv_data {
- 	const struct sdhci_pltfm_data pltfm_data;
- };
- 
--static const struct sdhci_cdns_phy_cfg sdhci_cdns_phy_cfgs[] = {
-+static const struct sdhci_cdns4_phy_cfg sdhci_cdns4_phy_cfgs[] = {
- 	{ "cdns,phy-input-delay-sd-highspeed", SDHCI_CDNS_PHY_DLY_SD_HS, },
- 	{ "cdns,phy-input-delay-legacy", SDHCI_CDNS_PHY_DLY_SD_DEFAULT, },
- 	{ "cdns,phy-input-delay-sd-uhs-sdr12", SDHCI_CDNS_PHY_DLY_UHS_SDR12, },
-@@ -124,8 +124,7 @@ static inline void cdns_writel(struct sdhci_cdns_priv *priv, u32 val,
- 	writel(val, reg);
- }
- 
--static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
--				    u8 addr, u8 data)
-+static int sdhci_cdns4_write_phy_reg(struct sdhci_cdns_priv *priv, u8 addr, u8 data)
- {
- 	void __iomem *reg = priv->hrs_addr + SDHCI_CDNS_HRS04;
- 	u32 tmp;
-@@ -156,44 +155,42 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
- 	return ret;
- }
- 
--static unsigned int sdhci_cdns_phy_param_count(struct device_node *np)
-+static unsigned int sdhci_cdns4_phy_param_count(struct device_node *np)
- {
- 	unsigned int count = 0;
- 	int i;
- 
--	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs); i++)
--		if (of_property_present(np, sdhci_cdns_phy_cfgs[i].property))
-+	for (i = 0; i < ARRAY_SIZE(sdhci_cdns4_phy_cfgs); i++)
-+		if (of_property_present(np, sdhci_cdns4_phy_cfgs[i].property))
- 			count++;
- 
- 	return count;
- }
- 
--static void sdhci_cdns_phy_param_parse(struct device_node *np,
--				       struct sdhci_cdns_priv *priv)
-+static void sdhci_cdns4_phy_param_parse(struct device_node *np, struct sdhci_cdns_priv *priv)
- {
--	struct sdhci_cdns_phy_param *p = priv->phy_params;
-+	struct sdhci_cdns4_phy_param *p = priv->phy_params;
- 	u32 val;
- 	int ret, i;
- 
--	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs); i++) {
--		ret = of_property_read_u32(np, sdhci_cdns_phy_cfgs[i].property,
--					   &val);
-+	for (i = 0; i < ARRAY_SIZE(sdhci_cdns4_phy_cfgs); i++) {
-+		ret = of_property_read_u32(np, sdhci_cdns4_phy_cfgs[i].property, &val);
- 		if (ret)
- 			continue;
- 
--		p->addr = sdhci_cdns_phy_cfgs[i].addr;
-+		p->addr = sdhci_cdns4_phy_cfgs[i].addr;
- 		p->data = val;
- 		p++;
- 	}
- }
- 
--static int sdhci_cdns_phy_init(struct sdhci_cdns_priv *priv)
-+static int sdhci_cdns4_phy_init(struct sdhci_cdns_priv *priv)
- {
- 	int ret, i;
- 
- 	for (i = 0; i < priv->nr_phy_params; i++) {
--		ret = sdhci_cdns_write_phy_reg(priv, priv->phy_params[i].addr,
--					       priv->phy_params[i].data);
-+		ret = sdhci_cdns4_write_phy_reg(priv, priv->phy_params[i].addr,
-+						priv->phy_params[i].data);
- 		if (ret)
- 			return ret;
- 	}
-@@ -470,7 +467,7 @@ static int elba_drv_init(struct platform_device *pdev)
- 	return 0;
- }
- 
--static const struct sdhci_ops sdhci_cdns_ops = {
-+static const struct sdhci_ops sdhci_cdns4_ops = {
- 	.set_clock = sdhci_set_clock,
- 	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
- 	.set_bus_width = sdhci_set_bus_width,
-@@ -481,7 +478,7 @@ static const struct sdhci_ops sdhci_cdns_ops = {
- 
- static const struct sdhci_cdns_drv_data sdhci_cdns_uniphier_drv_data = {
- 	.pltfm_data = {
--		.ops = &sdhci_cdns_ops,
-+		.ops = &sdhci_cdns4_ops,
- 		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	},
- };
-@@ -495,14 +492,14 @@ static const struct sdhci_cdns_drv_data sdhci_elba_drv_data = {
- 
- static const struct sdhci_cdns_drv_data sdhci_eyeq_drv_data = {
- 	.pltfm_data = {
--		.ops = &sdhci_cdns_ops,
-+		.ops = &sdhci_cdns4_ops,
- 		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	},
- };
- 
--static const struct sdhci_cdns_drv_data sdhci_cdns_drv_data = {
-+static const struct sdhci_cdns_drv_data sdhci_cdns4_drv_data = {
- 	.pltfm_data = {
--		.ops = &sdhci_cdns_ops,
-+		.ops = &sdhci_cdns4_ops,
- 	},
- };
- 
-@@ -560,9 +557,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 
- 	data = of_device_get_match_data(dev);
- 	if (!data)
--		data = &sdhci_cdns_drv_data;
-+		data = &sdhci_cdns4_drv_data;
- 
--	nr_phy_params = sdhci_cdns_phy_param_count(dev->of_node);
-+	nr_phy_params = sdhci_cdns4_phy_param_count(dev->of_node);
- 	host = sdhci_pltfm_init(pdev, &data->pltfm_data,
- 				struct_size(priv, phy_params, nr_phy_params));
- 	if (IS_ERR(host))
-@@ -593,9 +590,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	if (ret)
- 		return ret;
- 
--	sdhci_cdns_phy_param_parse(dev->of_node, priv);
-+	sdhci_cdns4_phy_param_parse(dev->of_node, priv);
- 
--	ret = sdhci_cdns_phy_init(priv);
-+	ret = sdhci_cdns4_phy_init(priv);
- 	if (ret)
- 		return ret;
- 
-@@ -622,7 +619,7 @@ static int sdhci_cdns_resume(struct device *dev)
- 	if (ret)
- 		return ret;
- 
--	ret = sdhci_cdns_phy_init(priv);
-+	ret = sdhci_cdns4_phy_init(priv);
- 	if (ret)
- 		goto disable_clk;
- 
+diff --git a/Documentation/devicetree/bindings/arm/altera.yaml b/Documentation/devicetree/bindings/arm/altera.yaml
+index 0b418d9d60db..ce3a8c1679e5 100644
+--- a/Documentation/devicetree/bindings/arm/altera.yaml
++++ b/Documentation/devicetree/bindings/arm/altera.yaml
+@@ -112,6 +112,7 @@ properties:
+               - intel,socfpga-agilex5-socdk
+               - intel,socfpga-agilex5-socdk-013b
+               - intel,socfpga-agilex5-socdk-debug
++              - intel,socfpga-agilex5-socdk-emmc
+               - intel,socfpga-agilex5-socdk-modular
+               - intel,socfpga-agilex5-socdk-nand
+           - const: intel,socfpga-agilex5
 -- 
 2.43.7
 
