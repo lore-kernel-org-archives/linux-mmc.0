@@ -1,117 +1,175 @@
-Received: from mail-pj1-f52.google.com (mail-pj1-f52.google.com [209.85.216.52])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx1.white.stw.pengutronix.de (mx1.white.stw.pengutronix.de [185.203.200.13])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5AC5B3A75AC
-	for <linux-mmc@vger.kernel.org>; Tue,  1 Sep 2026 04:41:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B907B3264D9;
+	Tue,  1 Sep 2026 08:44:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.200.13
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788237662; cv=none; b=S5Irz1hvfavikSWvUPYlM8Q+FaozabVzCvHOpqD1UyoEvNZ/4IQ9+sxNzIeMxFHNOLpzRJAs0EfRC6YqRckULfHHV5I4ODMI2/vaBomIZJV12hb6XqCdZOyFrhC4Rl6DM4t2gC00mWW5PlzB+CO011cgko7P3/YjZwRT8PQT9Qg=
+	t=1788252272; cv=none; b=cH3OpfOy5ysCQGKb74HlThrlziJvcMSiDeJq4PtUDQ3fMGYDw5XU1bESKlg0RJFJuJBFDa/NcoaVTGQYsQK7zhyE83P5vtZB9H/f8mULwCDGuqTMxTTeHznO5NwTYHYdMsYqdvDMfGcTlz23dgUFx0gWLar8uEa3QxzYUvem/DI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788237662; c=relaxed/simple;
-	bh=fogOGiECK46KlKG6A90Hn/KlqqibbAb1EYawhy5Q3e8=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=AUWCldYo9Pz+eU10svHoEtmrj2qe+YvvL/+WQ7YJjOyK+9sOfyXB912+J5JC/9Ia2j/1gg+mxVXWHIz8Hv5Mef6a7+nSdOqn9Rik72P+2rDw94+d4Mv+1G4HUnpOXyGN8EIKGgLG8FdrolKEyx5+oxlba4BUt9JO5jPDP80nJ1s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=U1Ki526U; arc=none smtp.client-ip=209.85.216.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="U1Ki526U"
-Received: by mail-pj1-f52.google.com with SMTP id 98e67ed59e1d1-38759bcd877so4249000a91.2
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Aug 2026 21:41:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1788237660; x=1788842460; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=Z+IXFWSB63JkB5NPYaCMrM5Ux3r1uuXw5+BbmZrpfR4=;
-        b=U1Ki526UzcU7HSRfP0dbKkJq4UBNwubEWklY6ykphDoDHG5PTa3gNpMn+dVBWCCuzS
-         ZQ+8vFHxmF3OiTGfut2jG4uJDjaujVCyw/mjxiop17oFdjtMIKbhXKgV1EV/YsaamLl6
-         rQwflboxTyBDWgVUyRCxM5UtCtwraBs8/IQR2borP6/YfbL3w59cz2BDbpIol+rzzPZV
-         /BgLK+q/JL2rVpQ50Jwt/B0heYTIoKxk06DeCiwqoBWDXRPU0PRRCyBE58EK8fu4RztD
-         2is1Kc0spBKmeZhp/qygY+cNk9a9zt59j5U4hqHhOuGrm55ThMRn6eK0gDXP6bTIdb5/
-         40xQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788237660; x=1788842460;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=Z+IXFWSB63JkB5NPYaCMrM5Ux3r1uuXw5+BbmZrpfR4=;
-        b=m7zhUY+VwFlB2GYgEtRIm9aeWfSd5dbSdb/5dP3D2J6h3fpqdjp7Rt5Y/OzBzChuIK
-         S1zq4xLp/utHMIlWe/9tjjkGNGiqUnfrcUqZY1sb/kWW0rNKJpBwRA3cZFu9gnKGm/Zd
-         KJiFDamGZvVV7FkOvCmAqb3r5bINrqHiKAfGPoYVj+//K7Jk34xTIXxaobJednItdNok
-         Bgn2nKBZb1FG30wd18P6k4Sf/czJhLiX2jSWX2Xbmd8rKixpZvWbsl0O7wJFRErlj4OG
-         8bLaDfTgbKKYrAE7qw7tbbFjoKWYEihauwKNTCLxzHwtq2qayDlSxCk786PnWKAZRfCV
-         nrrA==
-X-Gm-Message-State: AFuF++lVsJyeZFkwidK0OYSm463uPKgTrLHRWvQ+ZDHbU5PTofAO5QZK
-	3qzzaMo2eiLv938c0cSfiDiTPhgCpYbu16KgKrv7xlRMXsmwFUJkTCE3
-X-Gm-Gg: AYBFou0niubuNs3M9Vc08EvfOggzs6WTd1eMPvEOWuuPH1syqQ0cUUlyz+kMjmEXQz6
-	l1dcs5K0zf4PygZrjxX4kUR9sCXM9gbUJqi1e4UL8syx/lMzpizme2JriVh6zaiZZT6Knw+3hJM
-	j4TCQdWuQzUNo7bnlz9muPsAJFSAr8HPHIm0VOEeaJT1kA//zfS2HsjdT/WP6qlUaX6E+NXSv02
-	HKp+kMCGJhV025lpUOr4E5Lz2uWqqAvaxlzs9kvSpWTmJpF//Da1RIWFWM8Z5oZSUhQtLRsXWfL
-	DSMqDtrfbOiAmuHRKD+8wXQIZ3NGDsKEqptVWahI24FwK10rRqY6BwSC1YEai9j0uWLUYBEq9bf
-	ownN+Pr4J1W11VN+lJoJJB4DNSCziq4B8TUwbRO3udmXYk3SEiHSJMGcIwYQKLGtZlJnH2wf+GL
-	umUBprxOHvfhdPqSpGgX5zCPoR8mGcxdUia8LCUn6MBiGao9OOdnDZ0DKv+BLe7NbTLVPp
-X-Received: by 2002:a17:90b:2b4b:b0:398:9beb:5c18 with SMTP id 98e67ed59e1d1-3989beb635dmr33964438a91.19.1788237660571;
-        Mon, 31 Aug 2026 21:41:00 -0700 (PDT)
-Received: from i386.168.1.127 ([2402:a00:163:2ce9:6882:91b7:8e79:7958])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-142e0de4de3sm45447647c88.12.2026.08.31.21.40.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 31 Aug 2026 21:41:00 -0700 (PDT)
-From: Hrushiraj Gandhi <hrushirajg23@gmail.com>
-To: ulfh@kernel.org
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Hrushiraj Gandhi <hrushirajg23@gmail.com>
-Subject: [PATCH] mmc: sdio_cis: use strscpy() instead of strcpy() in cistpl_vers_1()
-Date: Tue,  1 Sep 2026 10:10:54 +0530
-Message-ID: <20260901044054.346524-1-hrushirajg23@gmail.com>
-X-Mailer: git-send-email 2.47.3
+	s=arc-20240116; t=1788252272; c=relaxed/simple;
+	bh=wAmMl1ueBEMxFGVvtEJ6rMk45ZH4RjeATS51DVQndWU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=U5Cve2d028pHNeWLOFaaeFvL8fZsWcfkQ40iCLoUAilNU3D4Ye54GmIGGvGGr2vD9BPtT139qDUiCE4ZdJc6TcryGf/aTXLYQXxtWGa0mm3b4zAwPVlPMcAPCS3bqFYCCT6b66LMQkZiJLlqF8tnjNqaTAqPL4Sj3sOhceGpKtM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.200.13
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from ptx.office.stw.pengutronix.de (ptx.office.stw.pengutronix.de [IPv6:2a0a:edc0:0:900:1d::109])
+	(Authenticated sender: relay-from-ptx.office.stw.pengutronix.de)
+	by mx1.white.stw.pengutronix.de (Postfix) with ESMTPSA id BC3FB201552;
+	Tue, 01 Sep 2026 10:44:15 +0200 (CEST)
+Received: by ptx.office.stw.pengutronix.de (Postfix, from userid 1056)
+	id 9D1181BF8B0; Tue, 01 Sep 2026 10:44:15 +0200 (CEST)
+Date: Tue, 1 Sep 2026 10:44:15 +0200
+From: Michael Tretter <m.tretter@pengutronix.de>
+To: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
+Cc: linux-mmc@vger.kernel.org, ulfh@kernel.org, adrian.hunter@intel.com,
+	krzk+dt@kernel.org, robh@kernel.org, conor+dt@kernel.org,
+	dinguyen@kernel.org, p.zabel@pengutronix.de,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v6 2/8] arm64: dts: agilex5: add SD/eMMC host controller
+Message-ID: <apaQX_bHpEcP4Tp5@pengutronix.de>
+References: <20260829184252.27644-1-tanmay.kathpalia@altera.com>
+ <20260829184252.27644-3-tanmay.kathpalia@altera.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20260829184252.27644-3-tanmay.kathpalia@altera.com>
 
-cistpl_vers_1() copies each NUL-terminated string out of the raw CIS
-TPLLV1_INFO data into a single kzalloc()'d blob shared by all of the
-strings, using strcpy() with no bound. The strings are already known
-to be well-formed within `size` bytes by the counting loop above, so
-this isn't currently exploitable, but strcpy()'s lack of any bound is
-still worth removing on general principle.
+On Sat, 29 Aug 2026 11:42:44 -0700, Tanmay Kathpalia wrote:
+> The Agilex5 HPS includes a Cadence SD6HC that drives either an SD card
+> or eMMC, depending on the SOCDK daughter card. It uses separate SDMCLK
+> (CIU) and L4_MP (BIU) clocks, and has three resets for the host
+> controller, Combo PHY, and SDMMC OCP bridge.
+> 
+> On the SOCDK OOBE card the slot is SD-only: fixed 3.3 V card supply and
+> a GPIO-selected 3.3 V / 1.8 V I/O supply for UHS-I signalling up to
+> SDR104.
+> 
+> Signed-off-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
+> ---
+>  .../arm64/boot/dts/intel/socfpga_agilex5.dtsi | 25 ++++++++++++++
+>  .../boot/dts/intel/socfpga_agilex5_socdk.dts  | 34 ++++++++++++++++++-
+>  2 files changed, 58 insertions(+), 1 deletion(-)
+> 
+> diff --git a/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi b/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
+> index b06c6d5d60ee..5ccbd7bf2034 100644
+> --- a/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
+> +++ b/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
+> @@ -300,6 +300,31 @@ portb: gpio-controller@0 {
+>  			};
+>  		};
+>  
+> +		/*
+> +		 * Shared SD/eMMC controller node. On the SOCDK OOBE daughter-card
+> +		 * this is used for SD card operation; on the SOCDK eMMC daughter-card
+> +		 * it is configured for eMMC.
+> +		 */
 
-Track the end of the allocated string storage and use strscpy() with
-the remaining space as an explicit, always-safe bound instead.
+The documentation about the daughter-card configuration belongs into the
+device trees of the daughter-cards and not in the SoC device tree.
 
-No functional change.
+> +		emmc: mmc@10808000 {
 
-Signed-off-by: Hrushiraj Gandhi <hrushirajg23@gmail.com>
----
- drivers/mmc/core/sdio_cis.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+The HPS register address map uses the name "sdmmc" for this group. Maybe
+that's a better label than emmc, if the controller may be used for eMMC
+or SD card.
 
-diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
-index afaa6cab1adc..24f670a798e2 100644
---- a/drivers/mmc/core/sdio_cis.c
-+++ b/drivers/mmc/core/sdio_cis.c
-@@ -27,7 +27,7 @@ static int cistpl_vers_1(struct mmc_card *card, struct sdio_func *func,
- {
- 	u8 major_rev, minor_rev;
- 	unsigned i, nr_strings;
--	char **buffer, *string;
-+	char **buffer, *string, *string_end;
- 
- 	if (size < 2)
- 		return 0;
-@@ -57,10 +57,11 @@ static int cistpl_vers_1(struct mmc_card *card, struct sdio_func *func,
- 		return -ENOMEM;
- 
- 	string = (char*)(buffer + nr_strings);
-+	string_end = string + size;
- 
- 	for (i = 0; i < nr_strings; i++) {
- 		buffer[i] = string;
--		strcpy(string, buf);
-+		strscpy(string, buf, string_end - string);
- 		string += strlen(string) + 1;
- 		buf += strlen(buf) + 1;
- 	}
+> +			compatible = "altr,agilex5-sd6hc", "cdns,sd6hc";
+> +			reg = <0x10808000 0x1000>;
+> +			/*
+> +			 * "ciu" (SDMCLK) is listed first so it is selected as the
+> +			 * primary clock by the SDHCI platform layer; the SD6HC PHY
+> +			 * timing calculations are derived from this clock rate.
+> +			 */
+
+This is surprising to me and I can't find where the first clock is
+selected as primary clock by the SDHCI platform layer.
+
+Could you point me to the code that relies on the order of clocks in the
+device tree?
+
+> +			clocks = <&clkmgr AGILEX5_SDMCLK>, <&clkmgr AGILEX5_L4_MP_CLK>;
+> +			clock-names = "ciu", "biu";
+> +			dma-coherent;
+> +			interrupts = <GIC_SPI 96 IRQ_TYPE_LEVEL_HIGH>;
+> +			iommus = <&smmu 5>;
+> +			resets = <&rst SDMMC_RESET>, <&rst COMBOPHY_RESET>,
+> +				 <&rst SDMMC_OCP_RESET>;
+> +			reset-names = "sdhc-reset", "combophy", "sdmmc-ocp";
+> +
+> +			status = "disabled";
+> +		};
+> +
+>  		nand: nand-controller@10b80000 {
+>  			compatible = "cdns,hp-nfc";
+>  			reg = <0x10b80000 0x10000>,
+> diff --git a/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts b/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts
+> index 57d3c5807c65..93222b199038 100644
+> --- a/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts
+> +++ b/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts
+> @@ -36,9 +36,37 @@ memory@80000000 {
+>  		/* We expect the bootloader to fill in the reg */
+>  		reg = <0x0 0x80000000 0x0 0x0>;
+>  	};
+> +
+> +	vqmmc_io_reg: regulator-1p8v {
+> +		compatible = "regulator-gpio";
+> +		gpios = <&portb 3 GPIO_ACTIVE_HIGH>;
+> +		gpios-states = <0>;
+> +		regulator-max-microvolt = <3300000>;
+> +		regulator-min-microvolt = <1800000>;
+> +		regulator-name = "vqmmc-io";
+> +		states = <1800000 0x1>,
+> +			 <3300000 0x0>;
+> +	};
+> +
+> +	vmmc_reg: regulator-fixed-3p3v {
+> +		compatible = "regulator-fixed";
+> +		regulator-always-on;
+> +		regulator-max-microvolt = <3300000>;
+> +		regulator-min-microvolt = <3300000>;
+> +		regulator-name = "vcc-sd";
+> +	};
+>  };
+>  
+> -&gpio0 {
+> +&emmc {
+> +	bus-width = <4>;
+> +	cap-sd-highspeed;
+> +	disable-wp;
+> +	max-frequency = <200000000>;
+> +	no-mmc;
+> +	sd-uhs-sdr104;
+> +	vmmc-supply = <&vmmc_reg>;
+> +	vqmmc-supply = <&vqmmc_io_reg>;
+> +
+>  	status = "okay";
+
+I'd have split the addition of the controller to the SoC device tree and
+the enabling for the board in two separate patches, but that's probably
+just personal taste.
+
+Michael
+
+>  };
+>  
+> @@ -59,6 +87,10 @@ emac2_phy0: ethernet-phy@0 {
+>  	};
+>  };
+>  
+> +&gpio0 {
+> +	status = "okay";
+> +};
+> +
+>  &gpio1 {
+>  	status = "okay";
+>  };
+> -- 
+> 2.43.7
+> 
