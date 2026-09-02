@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC6F436E47E;
-	Wed,  2 Sep 2026 08:05:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AB75390214;
+	Wed,  2 Sep 2026 08:05:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788336308; cv=none; b=tFdMi333zEotCgDnXMR/vHfQ/8sC17Mt67H5R+2Bvmhse6A1Ju0OZCXi//aEb7Ltcj42TUnE7UkZ/GKQ8Iq42ZrqxkUGx6JAU2moNQbZWFgNSjrFzKXhpatOXiMKihSdD4mGFLqxboP7epcP9Naekhy+izOTwFd6ZYHV4jFL/ko=
+	t=1788336310; cv=none; b=Rsj8032cP4nGqQW1tFJAgJViRr+H4QRsvmM3ujRFKtxKhLwnfigdqMqscR8AOUgVcHx4ph1z4BgWfC2FZXz1yFOMTBPVd8yq/TsqiACHhCT2bfyfgUGbkPOF9EVqk/qe8UzjzxfrugBH7V1QkeqMWKQ1VVQbS2JgLA4Ys3QZBYo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788336308; c=relaxed/simple;
-	bh=7PePD1SbU/YvM6WSdNSnR8+2grOGT/TlTZPbbFHpWgo=;
+	s=arc-20240116; t=1788336310; c=relaxed/simple;
+	bh=TG1nbZjuatmpnqUiwNEy45uI4OKsntHMwN6/FS38ozI=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=JdfWZfrqwghNqqSAv8887PEFnEfWerit24J2rEEW5qGwX6OFpZhYEQsOAPVr9tRECIebYB+ksA8jR7evdnGJ+2WwdHK2IZnhk011sY0KeODvSYKGPFu3qdNnGGhf306V7Ul/NQWoBXVkkUt1AtOU1EoXgkU5xeS2VIpj8b7of7c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XvlTbvek; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=pVvpaP3LWjd+KrFC2qfAfQf8FXrhhIjtGeEbnqVXNh8Z0UXXCMTW5Zcz+LNXRrODEZ+qzBZF/mbiQ3VKjWDoAL9xTFh89QOaTF6NL+1d6HDXeGOTSXBjWdHDydCvtdGKvr4FgUyVLVQQnUhUmSVwgJjXRy2Akt7tG710KE7e/DA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ROO8Ih8P; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XvlTbvek"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA9B81F00A3A;
-	Wed,  2 Sep 2026 08:05:05 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ROO8Ih8P"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C0E801F000E9;
+	Wed,  2 Sep 2026 08:05:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788336307;
-	bh=POBeg5oYSCo+FIQDgbq/vxgIQF5Bm0qqPNwWPMShsUQ=;
+	s=k20260515; t=1788336309;
+	bh=VTBHZqMzNtfGu0/ii6nYXJrwVNlixijnWIIxoUCWQXk=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=XvlTbvekBbQsDRT9x9URH+yjddUxu44FY3AuDSSfhDjCn347ZrPt4ZnpCjCI2AjDx
-	 HKKIKCXqlpyrKMRp4xbCyVsWEQYi61hghQaHnm3+gOgzZx7p1TCC7QopI6Jhtw5l2u
-	 vRqr4+Or0CVxQZZLhhcDIGwhr4Nd2ZqcmhtS9ex33Nkl+vYV8IDUu8fk6sN7o6+FlJ
-	 p/CN5xxcOXa6YTCb2WQ9xXbbUxmfxQFC246+APtpOOjtGBhhykrZsL/3R5XitOu3qz
-	 Y20Tdcsar6heuwzAXDDrZwiyCbBhTsOq224swnXziV0n7U9dgWpjtQVNbqjVoUsPGc
-	 dlWJZXDefjllw==
+	b=ROO8Ih8PuAw0rLCyOMi8UQ8EKLb0OiVCrXqqpJfz4bOgRcjJE1MrJQqK0OIgtmLMF
+	 CcOcDk6E4bB1g1N0fhYG10tQbnvCza1Np2UwW8hBfUkksiNEpSigXyVypds3QLEO3W
+	 cHuE2cmI8MaOVv3JwbB7uq13KXZ1zUdvkD8eDOWEIVjF61HezQCRuqJrsbsHIX9sKE
+	 YAp0GN3wrcEZ2Ovw0dr+XYm8DpF9S275O9A4iixW0cWG6e4ykKTSswxptKpm/9qyCG
+	 W/Zr9HYr4j+Ad8pr0siACb9/P1FXIakgZ6Go10TsRRCKZoy8sNoK0sq552eTUoKb5g
+	 ZIrkJlJjGli4A==
 From: Yixun Lan <dlan@kernel.org>
-Date: Wed, 02 Sep 2026 08:04:24 +0000
-Subject: [PATCH 3/7] mmc: sdhci-of-k1: configure PHY mode
+Date: Wed, 02 Sep 2026 08:04:25 +0000
+Subject: [PATCH 4/7] mmc: sdhci-of-k1: Improve power control
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -37,7 +37,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260902-07-k3-sdhci-fix-v1-3-b15c5d0f64fd@kernel.org>
+Message-Id: <20260902-07-k3-sdhci-fix-v1-4-b15c5d0f64fd@kernel.org>
 References: <20260902-07-k3-sdhci-fix-v1-0-b15c5d0f64fd@kernel.org>
 In-Reply-To: <20260902-07-k3-sdhci-fix-v1-0-b15c5d0f64fd@kernel.org>
 To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>
@@ -45,78 +45,51 @@ Cc: Long Wan <long.wan@linux.spacemit.com>, linux-mmc@vger.kernel.org,
  linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org, 
  spacemit@lists.linux.dev, Yixun Lan <dlan@kernel.org>
 X-Mailer: b4 0.16.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2220; i=dlan@kernel.org;
- h=from:subject:message-id; bh=Jj2IrYEAi5D0nXnzkcztq1+cyG4TMVNHVzNCRfauSlw=;
- b=owEB6QIW/ZANAwAKATGq6kdZTbvtAcsmYgBql9iaaM4UZp/vQE0cYI7qdKb/qkdldb2BP3Yok
- ZkLj5AwgG+JAq8EAAEKAJkWIQS1urjJwxtxFWcCI9wxqupHWU277QUCapfYmhsUgAAAAAAEAA5t
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1065; i=dlan@kernel.org;
+ h=from:subject:message-id; bh=ZZnwSyRWem1cufE+ykT/c74WDL6JDGMXan1pWqJy6GA=;
+ b=owEB6QIW/ZANAwAKATGq6kdZTbvtAcsmYgBql9id5/j9bEGbznCN/oeX7c5UcrLyeiwrT9Z/N
+ FnF9u2RecuJAq8EAAEKAJkWIQS1urjJwxtxFWcCI9wxqupHWU277QUCapfYnRsUgAAAAAAEAA5t
  YW51MiwyLjUrMS4xMiwyLDJfFIAAAAAALgAoaXNzdWVyLWZwckBub3RhdGlvbnMub3BlbnBncC5
  maWZ0aGhvcnNlbWFuLm5ldEI1QkFCOEM5QzMxQjcxMTU2NzAyMjNEQzMxQUFFQTQ3NTk0REJCRU
- QACgkQMarqR1lNu+0Msw/+I23tD+FYekZsEEvIjt4vcC+6cm3wV2ysurUvKd4XlKf1zCiQ9cB03
- HB+bim6LQ+d4xzQqxagvtewZU4V1P7Lj1cd91eul7iZMYGefmAYQ0LXqDXt6E3MJr5ALW9bqMyZ
- V3BYHXQF7DvQHLIqNrTerfSI3w6pWmj9CBCd/mlutgF1oC4sYTfEEGTnPKrHXU+X4VgPDNjEzys
- 1ewJaiPdAYZ8z6FaIEOpyKSPkfObAAjDtbAEZjz0X/g+xBPWAWILN9sPYMe4t9RXtPlXfYU5oTs
- 1liU5+kMPJ0Pl7CXvo50E+s4C1XRHk0cq+teFSngkGjxYJfict9E7/pghly/t5eP+khEdvYMASs
- ojG3DoCCSoEgU827w2uyZB+z6RQjjG86O1b40K2I+2l5/gDLn7FeN0LftODzpBJJw02kRfis2uX
- ziMFQEgRwlUW8tFh4ZZAdz3shf1SH69Ir9n+aMUdwOp9/vnbuA6UqPH6zut4i2XkYvycGedb6tu
- AdK2FFCBSgz6TYxiHTdcOiCbwxQKy+K+/YYRQUPaW5iKr0hxzpKSe4Z4P86wzbNPG7teOkYljOP
- 4oGCdOCJnZZ5ZAtx62u8unPe9jHYMJSTSVB+1MtALer1nXfSGF4joEwQQOnj9FVFB0F1WLTQX58
- AVnx2jzs6BvE2XwpPeFPc0SfLXlRx8=
+ QACgkQMarqR1lNu+2Enw/9FeHpWaCDIgagCZFIhkm8Y/pzQR5CPvoPpu7bpu+wTsDFQNtNR3IMz
+ JQG9a+S9AyRyvNo7NVc8Dj1UhfFczYukpA4Q3BhkRMA50VxM1x7kYv0N/kjynX5jpvX1G44eiQX
+ JbDfD7GqZ94q4KxXlemTVuWDytioeDIKwVsw3RAC2+mScY9cadb5Oe5ST8S6ZQZ3QPqDuTdonHC
+ IPi2KvuJU23HuCD2sVQUADpc3JnW5AG/GuciRPRMQBwfj/B7hw0czRRamfhXnp1y+5jSxjXuzEh
+ VaGh2DFcL4ZvDXiKUiFFfWcRyCOxFkeGLCKrYdJJDxPWsmcAwOyzyWYhTqFBbM79llVtEsR/dWk
+ TSXNAI3KX6dAsNqev6VM5HEeTwHEtBHrnakr0MF+6lAhQIeLwXJ6Zv3AQo+wUFSI16FvBl7jfuj
+ oS4b11PhrMvdJc0dWh2mi1AFhe5IjRG0nNX6ztWVXk/RWxyvFjW0UCn0ZqTNYUN8qmQcxOmOPjR
+ MfWvlnY54ufkWsosPaGTuAs/tc4K1l6/wSmV/Xo36wzyMHfBILtHXcivTKU9EV0aG48C8ug1iDP
+ Yge8qgd95ynZgTm/wVqvWPi6A2FeB11VnCE4iMeRxS1lzvvbqBD5LE430I/UaItbkaBtl/A/psc
+ yi6O2byc8WesXkBwG6hWkp2xWhwYVI=
 X-Developer-Key: i=dlan@kernel.org; a=openpgp;
  fpr=50B03A1A5CBCD33576EF8CD7920C0DBCAABEFD55
 
 From: Long Wan <long.wan@linux.spacemit.com>
 
-Apply PHY configuration only for eMMC hosts which enable PHY function mode,
-and configure drive strength and bias. While for SD/SDIO hosts mode, bypass
-the PHY mode and select TX internal clock instead.
+The default sdhci_set_power() skips the SD bus voltage select field
+entirely when a vmmc regulator is present, leaving SD Bus Power in off
+state of the power control register. To fix this, configure the bus
+voltage explicitly.
 
-Fixes: f87b273e4b6d ("mmc: sdhci-of-k1: enable essential clock infrastructure for SD operation")
+Fixes: e5502d15b0f3 ("mmc: sdhci-of-k1: add support for SpacemiT K1 SoC")
 Signed-off-by: Long Wan <long.wan@linux.spacemit.com>
 Signed-off-by: Yixun Lan <dlan@kernel.org>
 ---
- drivers/mmc/host/sdhci-of-k1.c | 26 ++++++++++++++------------
- 1 file changed, 14 insertions(+), 12 deletions(-)
+ drivers/mmc/host/sdhci-of-k1.c | 1 +
+ 1 file changed, 1 insertion(+)
 
 diff --git a/drivers/mmc/host/sdhci-of-k1.c b/drivers/mmc/host/sdhci-of-k1.c
-index afd9536f2368..5dccdd4b217d 100644
+index 5dccdd4b217d..be770e8a9884 100644
 --- a/drivers/mmc/host/sdhci-of-k1.c
 +++ b/drivers/mmc/host/sdhci-of-k1.c
-@@ -169,21 +169,23 @@ static void spacemit_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	if (mask != SDHCI_RESET_ALL)
- 		return;
- 
--	spacemit_sdhci_setbits(host, SDHC_PHY_FUNC_EN | SDHC_PHY_PLL_LOCK,
--			       SPACEMIT_SDHC_PHY_CTRL_REG);
--
--	spacemit_sdhci_clrsetbits(host, SDHC_PHY_DRIVE_SEL,
--				  SDHC_RX_BIAS_CTRL | FIELD_PREP(SDHC_PHY_DRIVE_SEL, 4),
--				  SPACEMIT_SDHC_PHY_PADCFG_REG);
--
--	if (!(host->mmc->caps2 & MMC_CAP2_NO_MMC))
--		spacemit_sdhci_setbits(host, SDHC_MMC_CARD_MODE, SPACEMIT_SDHC_MMC_CTRL_REG);
--
--	spacemit_sdhci_setbits(host, SDHC_GEN_PAD_CLK_ON, SPACEMIT_SDHC_LEGACY_CTRL_REG);
-+	if (host->mmc->caps2 & MMC_CAP2_NO_MMC) {
-+		/* SD/SDIO: bypass PHY, use TX internal clock */
-+		spacemit_sdhci_setbits(host, SDHC_TX_INT_CLK_SEL, SPACEMIT_SDHC_TX_CFG_REG);
- 
--	if (host->mmc->caps2 & MMC_CAP2_NO_MMC)
- 		spacemit_sdhci_setbits(host, SDHC_OVRRD_CLK_OEN | SDHC_FORCE_CLK_ON,
- 				       SPACEMIT_SDHC_OP_EXT_REG);
-+	} else {
-+		/* eMMC: use PHY function mode */
-+		spacemit_sdhci_setbits(host, SDHC_PHY_FUNC_EN | SDHC_PHY_PLL_LOCK,
-+				       SPACEMIT_SDHC_PHY_CTRL_REG);
-+
-+		spacemit_sdhci_clrsetbits(host, SDHC_PHY_DRIVE_SEL,
-+					  SDHC_RX_BIAS_CTRL | FIELD_PREP(SDHC_PHY_DRIVE_SEL, 4),
-+					  SPACEMIT_SDHC_PHY_PADCFG_REG);
-+
-+		spacemit_sdhci_setbits(host, SDHC_MMC_CARD_MODE, SPACEMIT_SDHC_MMC_CTRL_REG);
-+	}
- }
- 
- static void spacemit_sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned int timing)
+@@ -496,6 +496,7 @@ static const struct sdhci_ops spacemit_sdhci_ops = {
+ 	.reset			= spacemit_sdhci_reset,
+ 	.set_bus_width		= sdhci_set_bus_width,
+ 	.set_clock		= spacemit_sdhci_set_clock,
++	.set_power		= sdhci_set_power_and_bus_voltage,
+ 	.set_uhs_signaling	= spacemit_sdhci_set_uhs_signaling,
+ 	.platform_execute_tuning = spacemit_sdhci_execute_tuning,
+ };
 
 -- 
 2.55.0
