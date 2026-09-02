@@ -1,47 +1,52 @@
 Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4BD643BDDE
-	for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2026 10:51:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E22A24734EE
+	for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2026 10:52:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788346273; cv=none; b=frSbAmayOi9qWvPXQAzmoQmhIdPjq4r0sZzSUiBhmuUIPn5Ke/NF0ZrgIONTHDsCvFMfwSHGzDULkWNP7QmZfanATMHWprGfhfoJvWD/SN8OyddDj/dzv8yjqUdDJ6RdUjuiQ67muveIPvXc436KHZZOntlHUAx61N1mjL4kSes=
+	t=1788346363; cv=none; b=g6owAm4AaTRbPPHAg4nIrN9H5K8ydyOq5+2j7zRWNJ1kJzyZrZ0EwXlejprWnZQpVlM4Ogmbajf9C5XhPBRsEg4pCy9uZmBnq9hG5skTSdhM55BjPEreGee4CAKgld/9x+dJhKSsOLjrGqbOfaFIxnF1E32HRGrI4aaXEfaLnZk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788346273; c=relaxed/simple;
-	bh=7+pgVRiEqs6a0HKoe4GsO/ApMXXLth0gkdAXurYMzdI=;
+	s=arc-20240116; t=1788346363; c=relaxed/simple;
+	bh=g4aJZ2RjcwW7U0smS6IixfD2FH2m9/1ImTEShl4a4GI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FDQMyNQU/kU+y2DNKj5qaDhBS0aUhTaL12xWADI3RYvBQkq8Q3d7kVjj9nxQAjdxrN+E55inpg2kf3vS14h0P5KWhzXQf+trnjzpasC6HU8wjEk9+XaaCR+KC7DQhK3eZB6B2qA5UcSdCDH9gWqXlekuH3Oyu+Ddd1fauDravtA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=TXKjq/JN; arc=none smtp.client-ip=194.117.254.33
+	 Content-Type:Content-Disposition:In-Reply-To; b=USdokJ+65alw7BCPpjk6kU5htgoHui8MMBiNhcAtw5zQlkseR0d299t7EglFNfy+zPJiUPUVkuWfPHMK0m1cLhJ/llm1VkWqpTdAaRx/KVU6Igy3dIRwzv6xOUtRgZu4i4R9iTmwcEFWK09WGe4vtMvW6ZlE+HWDWqJh0nWBJro=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=VUU9pYBi; arc=none smtp.client-ip=194.117.254.33
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="TXKjq/JN"
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="VUU9pYBi"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
 	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=KUZS
-	pW9cXyMvfhg/XJ45RuGZTMIRYgou34R5eqncWgk=; b=TXKjq/JNhIf3gToySB1B
-	Vw90Hzhzkvzhu6rILqiFh7olV2fsa7/5t26ErITAZxYufz5sJ8rArEIjPA9OIxc1
-	RlIXARpNVAaZMlBITdQJ7fw0CQ7Q1dR/BYkcZgRbjieZm6fAbIOOIzYC5noHSbKy
-	LNL5qg9v6UmKUK22XlbhOxqidv0/YUCMj/EuO/b06XyF/AJ+ZZDNZipCLfeBvyrI
-	DmgWuTgMs8f7a0vAbunseOnJ6C6H2aKx6XWfoxSVlYe86WEwZQKGv6P2fdOm6KrP
-	nAmSGs4JtmaANYlDy6/oNcJc67TVYqyF+461PnI4aOA0lVHAs0c2/x37bX9iSI/y
-	qg==
-Received: (qmail 602205 invoked from network); 2 Sep 2026 12:51:02 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 2 Sep 2026 12:51:02 +0200
-X-UD-Smtp-Session: l3s3148p1@QHKrz31arNEujnuD
-Date: Wed, 2 Sep 2026 12:51:01 +0200
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=g4aJ
+	Z2RjcwW7U0smS6IixfD2FH2m9/1ImTEShl4a4GI=; b=VUU9pYBi0gyTMLI9uuds
+	yuq3ct+yiN3Q7jw+AORlKKjfyoVjhQUXvZqOzXvK3DBALCLl+MoCDVQ5f8ZFofnZ
+	TIzoapaTfsL8s/e4FWoqJuAeKOEnN+M1fOq33QOJUu90kunDgeCbKz398U0EUjPK
+	FGH/DSD9x61Yz3ZoQ/NBj9F1rTjWVSjWxH4RFE+abywWS5XB7u0Es65f9WUf9JPu
+	bVqFkBaxU80h+1n616GJtHQHSL5bG2eRbWck8akhzLdQePJLP5bxucdvwPwHf07U
+	qbm8kZGzMw678Cdlc0M4+UpMEa6/ED98FBo7398Kmvpk/xWxDWcLDzn42HjoMLD4
+	Iw==
+Received: (qmail 600530 invoked from network); 2 Sep 2026 12:45:44 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 2 Sep 2026 12:45:44 +0200
+X-UD-Smtp-Session: l3s3148p1@RAa5vH1aJJkujnuD
+Date: Wed, 2 Sep 2026 12:45:43 +0200
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 To: Biju <biju.das.au@gmail.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Biju Das <biju.das.jz@bp.renesas.com>,
-	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
+Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
 	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: Re: [PATCH v24 03/15] mmc: renesas_sdhi: Add clk_mask field to
- support flexible clock divider widths
-Message-ID: <apf_lZA1TgMkItYw@shikoro>
+	Magnus Damm <magnus.damm@gmail.com>,
+	Biju Das <biju.das.jz@bp.renesas.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+	Conor Dooley <conor.dooley@microchip.com>
+Subject: Re: [PATCH v24 01/15] dt-bindings: mmc: renesas,sdhi: Document
+ RZ/G3L (r9a08g046) SoC
+Message-ID: <apf-U05yy4eNwfIB@shikoro>
 References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
- <20260820171657.62815-4-biju.das.jz@bp.renesas.com>
+ <20260820171657.62815-2-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -49,48 +54,54 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="MEO7vtC4g3Cr2ZB2"
+	protocol="application/pgp-signature"; boundary="PROTVcDqJHsMEqco"
 Content-Disposition: inline
-In-Reply-To: <20260820171657.62815-4-biju.das.jz@bp.renesas.com>
+In-Reply-To: <20260820171657.62815-2-biju.das.jz@bp.renesas.com>
 
---MEO7vtC4g3Cr2ZB2
+--PROTVcDqJHsMEqco
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Thu, Aug 20, 2026 at 06:16:31PM +0100, Biju wrote:
+> From: Biju Das <biju.das.jz@bp.renesas.com>
+>=20
+> Document the RZ/G3L (r9a08g046) SDHI controller. The RZ/G3L SDHI
+> controller is similar to RZ/G2L but has five clocks (core, clkh,
+> cd, aclkm, aclks) and three resets (rst, axim, axis), so update the
+> clocks/clock-names maximum to 5 and resets/reset-names maximum to 3.
+> It has an internal divider for all modes except HS400, and a 2048-bit
+> divider compared to 512 on others.
+>=20
+> Acked-by: Conor Dooley <conor.dooley@microchip.com>
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+
+Looks good to me. Adding new SoCs might turn into an adventure game with
+serious logic puzzles, though. Not your fault, of course.
+
+DT checks pass here as well.
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
-> +#define SDHI_CLK_MASK_DEFAULT		0x80000080
-
-ULL suffix maybe?
-
-> @@ -101,6 +101,7 @@ static const struct renesas_sdhi_of_data of_data_rza2 = {
->  	/* DMAC can handle 32bit blk count but only 1 segment */
->  	.max_blk_count	= UINT_MAX / TMIO_MAX_BLK_SIZE,
->  	.max_segs	= 1,
-> +	.clk_mask	= SDHI_CLK_MASK_DEFAULT,
-
-I'd vote to not initialize clk_mask when it uses the default value. We
-have code handling this case. This makes the instances having a
-non-default value more obvious, I'd say.
-
-
---MEO7vtC4g3Cr2ZB2
+--PROTVcDqJHsMEqco
 Content-Type: application/pgp-signature; name=signature.asc
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmqX/5UACgkQFA3kzBSg
-KbaCCw//VbTrKiMJx6qkHoBtGKicFTw6lTZ/FTWifz1YNQTB/7kOsFs6BteGWkPP
-4yiO7xf3inqXUQ6CmFb+INtA/23+QxW4arnaP2yfVPExgwTv9kofoj/ODS7WH+cF
-9TjxrWvzfaYFVDDaHNolEBrn69zJxGryrzzlC8w6etVxxDJNJSrEnm3cEb9UQDzK
-QxGuWzslhByXVBm6J7dGlmvRGruYcu0izwT8qSeLAYXPMEkNEnlxgkMprFoZLr0Z
-WAM9mm4pbYajf2u+Z+1V8qA/5rP83RR03izgYeGeM3z+yVJXfudqrDpOc2h6714W
-KmJqo1E3LIGud+qInQxG1k6x02yXMZAzeTOO6vTU4fC/vo4a6DHJcSa8o+/1QW1p
-ffZM61HBT3V1jJTTUD/ZnEldEyTBl0yFhQyl8+3GS9BP7JOKIAfAau5u27FT1GLt
-fTPwqkhDgMRhnXQBet3tllOaWxzp95+uJWBH1LUERVstEtCRTm3jAGYFVyjJdIi/
-dsy4TUYkWN4+OW5RYSSNpSaTs15/TLVEnKd37HQuJPvwMAx5nrxdIgZshkaKJdjS
-cFsckC1idigdfNwsQeoa6gm1nzrpT3oaf8Otdtya/tNqEEaKbGEZPdTjW6zLxKmc
-fsNNxAcdMjxZYoV91SaxFnEDM+cgPHLTe0c+gm6flnaereJrtss=
-=BOkc
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmqX/lQACgkQFA3kzBSg
+KbYiFQ/+PvEF+HCEx/rzup0RhIbsZNqtE2qf090ahioHUHwBH6QyPDTslA8hGsvt
+y0EZ73SbnsMiEgRXaXWFs3uejhpi4eTnMkd5fexWlsOzV+3Pye2G0E7K33FlK46t
+H1eJgQJULjp8th6ha/k7HVkRJiFjj0bAHPyi0ksFrFrdsghNZSVYGqS7l+J/Ok10
+sNlVu9DC/VbnZKIy/nwcOYyS1jPrMp9avmxmawPZz19/aIjGMePKEok2ZaqKzqL8
+T8tTDtBRMlUGDy5pdLJuVkjATozZOFUsMu0qHAcGmNfjCzBZ/OgTNac2f+PV+rac
+M4HwsGufWBJx3//vJSSz7p2irhyZ2XMbdz/2+mBUpYQCEZy0iCHt2ysvBG3iNqBo
+wPocf4Ju4ar9nagthGbJdN0Y+3kj1z458GP/3mnb2jS+RWibBGJgHLS5YNWI5Xcp
+iWBceG29mt41xvfL3H6PKUyhn/jwqjQKsM22+7mVyeFAIoXfpJdwc1JvU1w7AQjJ
+RjSnRpqvTL5LEjKhTgfGF5ZLgxo5ILYDuvzjosyGclvdEdcDRBZ3hPchTFMc7FZE
+l4JhfBvpqb5MN6/dfUrljRjIHqParN7um/2B2Bnk8Eh3pRJPTUauELAHZ3LQUiK9
+MQWMrrLJlMQ6Yf/dnFxQXp5LLQWO2Yw6jlPADHFBIvfZDitP1n0=
+=zrcg
 -----END PGP SIGNATURE-----
 
---MEO7vtC4g3Cr2ZB2--
+--PROTVcDqJHsMEqco--
