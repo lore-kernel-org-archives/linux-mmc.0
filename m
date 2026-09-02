@@ -1,118 +1,84 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oo1-f69.google.com (mail-oo1-f69.google.com [209.85.161.69])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D965382299;
-	Wed,  2 Sep 2026 18:03:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8676E4A5EDE
+	for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2026 20:33:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.69
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788372226; cv=none; b=gp5ImR+lWct7eYEpvTF4+f8KSJMihVxEcihmnh9rhL/TARxM9Srual0LOnzxZu57lbtLbEh1roX9yD8u+ojeuMHPM3XcaX3erHZvm1cfUhFCaehShfP1yTuLI55sriz+L4CjZTepej7txa3x8dgIFE0uUpoLL5Q0DORLMfeXfXY=
+	t=1788381214; cv=none; b=MFZgRDHGlU8MXNU+vWFFrJOJ9YBddxtkx9G6W6vfjOcwNZC4Aq08AM1bgYy2ZdY3y/hQMMOJ0RRh9Ivm2oWvqtC3T7YZPxcus05GeKL8krt6TcYd/YAv87gua4zPWkxXuKjId7w7AO6GsL3rz0NAGojqdTbJfGjI8NOWTPGsJXk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788372226; c=relaxed/simple;
-	bh=U0DQvdMBxlrrrjlvjwHNoQY0+Gbfmq4eCEwuD81yDYU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rzzobXqNZPdmLH1JfvF52XtM2wOlfmIcurOLX/HlbItnCZkjlpwCCA+ojBVMxwUpyz++eM1D8GPgTsvuofehzDfO8q47HVOtaIsJlmWVf3EdfptLyysmS/w1wtvqvovZxD/dAsGSBO0TbiwEHMDsbXELWiLrHkHDNhzjuH4hCuo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YryQdOG6; arc=none smtp.client-ip=100.103.45.18
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YryQdOG6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DA8A41F000E9;
-	Wed,  2 Sep 2026 18:03:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788372225;
-	bh=Uj9/RDwv9k2iRrF8z8+r037C19R/tl/T6HaynuHBg7Q=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=YryQdOG6rCS+CoxXuEhmKqZdD8O0bh7F0WgNxh8InFZjr/iLSM0valYUf4rdXM5E6
-	 Vxe3whVlTKMY0QPvSa04XFtUlbX8YsISoVn3NrW+crTxg88qsYsTr3tnLISd4Kd8Dt
-	 iYtrHEj2YTmG3kJJLChg+lb7XBELtrMweBQCCo7iZ7+muXc64rjY96EBBYmH/+R6ie
-	 NwZVU3R9XH//x33Z0hYhHJPSQgGQgNRvyr5CmG+ouEnbkdMnmMRfgYhJMMsAhhnpiT
-	 jMljJ/6L/ziJe6kbaA5W9kRZrJn7mcUOgv+T88DR0r/Pk39Ub4KzjoNcLcZbgbgdgO
-	 1DQu/IxJCAB5w==
-Date: Wed, 2 Sep 2026 19:03:40 +0100
-From: Conor Dooley <conor@kernel.org>
-To: Yixun Lan <dlan@kernel.org>
-Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Long Wan <long.wan@linux.spacemit.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
-	spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/4] dt-bindings: mmc: spacemit,sdhci: Add tx delay
- property
-Message-ID: <20260902-crept-player-b3f30ab4e6f6@spud>
-References: <20260902-07-k3-sdhci-dts-v1-0-4e7909cf4233@kernel.org>
- <20260902-07-k3-sdhci-dts-v1-2-4e7909cf4233@kernel.org>
+	s=arc-20240116; t=1788381214; c=relaxed/simple;
+	bh=TKQE0Yy3foDPlcmNS1BnEh/QhnxXKzqDxPCqTlGXzls=;
+	h=MIME-Version:Date:Message-ID:Subject:From:To:Content-Type; b=szGoW1PS0okjal3/icLA+H4OWwooVmnqHEt6iMfClOH4qpM2l1VOPLxAHt3tDo8kIUw6hTZJ33+8py2u/JM0VcdXQ6j3Euo5HNiY1j6J318Xzj0cgz/2m2NB2eAEO/wwvis8Z9r05OSnQE+ExJcyw6TCRU9V3HTdWY4oMBUbEus=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=209.85.161.69
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
+Received: by mail-oo1-f69.google.com with SMTP id 006d021491bc7-6b1bf511988so1459591eaf.2
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2026 13:33:32 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788381211; x=1788986011;
+        h=content-type:to:from:subject:message-id:date:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=y9poOxTJtGZ13dtkoCYfv5SN403qG7VA+AweL/ra9Xg=;
+        b=jucwI0jSdwBQWcwDmzCiVrWNxf46uioQ8V7ZMI1jzQfbCH1qMbsSyuJ9azzNK9KlS/
+         TJhJEg8Z+7a/QM2/DNN0Rc35HL3jfy6ep4DZ2bw1LZhnXlGv3qffPhzTaFUbVyusger/
+         Zu/7IwHjcwvpSWzWa0Za0y8xq57lMJOc62dNfWkWmfkemKkiboB+dd7HOC1OS+o1tJt5
+         liXkXOL9OZ8ascFovzEV9+c3Pha8cic7ztvDuhZYCEg1uhYrZuFmWbkzXz+3aPogdGoa
+         4tCahYi3lNB13KwZAS1/8Frh6tSQu1boTvKR+2Svw5kuGuhGNEEqXFtP+FkiJVMuiFzR
+         3Cig==
+X-Forwarded-Encrypted: i=1; AHgh+Rq3723PFO/pBFTP+0EmxqQJ2jTh+pabapT+vTL4WJcIXlGqQ7sp+FoXcX7G3fIaK57GIx0lix/RjKY=@vger.kernel.org
+X-Gm-Message-State: AFuF++keR3ap/d4uCArvF+8WimhPpfUzH6LSHJS2zlSyYS0UI76t+biI
+	HiTMZNAH7NgKfh4a2RW4WrxbyqpsX6P1sFHlxKHHEfTuYFw2+yUDSmbTPQHkFpbCRGfuErcDymv
+	PTm5TaEk2odBVyEvlvMCgkCJeC2KvfhgxdKdZDVOzPGczUh2KKdzgl9jaeBQ=
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="JPvI9JMjjGIUeUlx"
-Content-Disposition: inline
-In-Reply-To: <20260902-07-k3-sdhci-dts-v1-2-4e7909cf4233@kernel.org>
+X-Received: by 2002:a05:6820:2d0b:b0:6b1:4e36:fb80 with SMTP id
+ 006d021491bc7-6b47fd3531bmr6466900eaf.15.1788381211511; Wed, 02 Sep 2026
+ 13:33:31 -0700 (PDT)
+Date: Wed, 02 Sep 2026 13:33:31 -0700
+X-Google-Appengine-App-Id: s~syzkaller
+X-Google-Appengine-App-Id-Alias: syzkaller
+Message-ID: <6a98881b.9266084e.bf0d7.000f.GAE@google.com>
+Subject: [syzbot] Monthly mmc report (Sep 2026)
+From: syzbot <syzbot+listf1b540672df393834e95@syzkaller.appspotmail.com>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	syzkaller-bugs@googlegroups.com, ulf.hansson@linaro.org
+Content-Type: text/plain; charset="UTF-8"
 
---JPvI9JMjjGIUeUlx
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hello mmc maintainers/developers,
 
-On Wed, Sep 02, 2026 at 07:03:13AM +0000, Yixun Lan wrote:
-> From: Long Wan <long.wan@linux.spacemit.com>
->=20
-> Introduce a vendor specific property to configure the step count of TX
-> delay line which should be applied before RX tuning, compensating for
-> board level trace differences. The TX delay line result comes from test
-> out of real board which vary from different hardware layout.
->=20
-> Signed-off-by: Long Wan <long.wan@linux.spacemit.com>
-> Signed-off-by: Yixun Lan <dlan@kernel.org>
+This is a 31-day syzbot report for the mmc subsystem.
+All related reports/information can be found at:
+https://syzkaller.appspot.com/upstream/s/mmc
 
-Everyone seems to have their own custom delays, so what's another..
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
-pw-bot: not-applicable
+During the period, 4 new issues were detected and 0 were fixed.
+In total, 4 issues are still open.
+There is also 1 low-priority issue.
 
-> ---
->  Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml | 10 ++++++++++
->  1 file changed, 10 insertions(+)
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml b/=
-Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-> index f35bf7ce08dd..3399a2d076dc 100644
-> --- a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-> @@ -63,6 +63,16 @@ properties:
->    pinctrl-1:
->      description: Optional pinctrl state for 1.8V UHS operation with "uhs=
-" name
-> =20
-> +  spacemit,tx-delay:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    minimum: 0
-> +    maximum: 255
-> +    description:
-> +      TX delay line setting applied before RX tuning, compensating for
-> +      board level trace differences. This is a delay line step count with
-> +      no fixed time-per-step conversion; determined empirically per board
-> +      specific, used on SD/SDIO hosts.
-> +
->  required:
->    - compatible
->    - reg
->=20
-> --=20
-> 2.55.0
->=20
+Some of the still happening issues:
 
---JPvI9JMjjGIUeUlx
-Content-Type: application/pgp-signature; name=signature.asc
+Ref Crashes Repro Title
+<1> 2725    Yes   BUG: sleeping function called from invalid context in mmc_free_host
+                  https://syzkaller.appspot.com/bug?extid=0e06aa1bdc6495bac24b
+<2> 113     No    WARNING: suspicious RCU usage in cancel_delayed_work_sync
+                  https://syzkaller.appspot.com/bug?extid=9c1988bc953fca2086a3
+<3> 12      No    WARNING in mmc_free_host
+                  https://syzkaller.appspot.com/bug?extid=82a0a7de6d84867d030e
 
------BEGIN PGP SIGNATURE-----
+---
+This report is generated by a bot. It may contain errors.
+See https://goo.gl/tpsmEJ for more information about syzbot.
+syzbot engineers can be reached at syzkaller@googlegroups.com.
 
-iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCaphk/AAKCRB4tDGHoIJi
-0po+AQCA6PqLcTKT7imRX8EmzXyV4cbV44EdaTRHvitAdUV6IgD/ViMPsvHGYEO1
-7Ph5zn0Vyp3Oo8iHwbyKP3VfMdWVMQg=
-=fS0X
------END PGP SIGNATURE-----
+To disable reminders for individual bugs, reply with the following command:
+#syz set <Ref> no-reminders
 
---JPvI9JMjjGIUeUlx--
+To change bug's subsystems, reply with:
+#syz set <Ref> subsystems: new-subsystem
+
+You may send multiple commands in a single email message.
