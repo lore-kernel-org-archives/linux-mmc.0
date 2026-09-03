@@ -1,135 +1,138 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2458448821B
-	for <linux-mmc@vger.kernel.org>; Thu,  3 Sep 2026 10:32:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84F00431A22;
+	Thu,  3 Sep 2026 10:37:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788431584; cv=none; b=e3k9m/z5iec5y8MdilK0xGYXKlkoCu2hVy7+wjpMBEPKaB9/cSwzIW+6f6SVVIX4k3QshH+S9cfAeMAcTKRvAScY+PklX26Ua7bh7NPlgq+YeMBiGhIAvSqUMklXHyUad0H3h2Lv9h5LpGpFaMN1878uflR5QlcdwrUPSAJ6Gl0=
+	t=1788431875; cv=none; b=nynfDDEX3CNa/PYt3JHevmNBNMraRljJldi3GKYZg7GnOfBajaf8HlEKYtgkAamSCStgoyk5L01nM76wN5NtyM963Kz+RMUTFgs7VPIbDS0YhsaXVzYmOBov8b7ow6v8PJsvhviaavuGlFhGaW+XcPDMy2ANCZTlQDWHllkVsoE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788431584; c=relaxed/simple;
-	bh=1pg5bjnnTADzEUkOaTVelG4SX/AoNaaGBLV125Jc5LI=;
+	s=arc-20240116; t=1788431875; c=relaxed/simple;
+	bh=RVpZN1lKrfRh/Kb7Yb4O6MFbCJ/baBovd4jOM2EwlUY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HmsSpV75uBcWNqLytcgO9d3gJd4t4D3nWE90HKM1SRjAemSuq2b8EFppJqcUWRDJMhHCFE/3E9e3wqCbZLzH3gae8NR5daepJKSXAHno+J3ErmFMpVsT/O/1qMpy2hejNcyF0WHM0/eQQYQFgXa/PM7hyO83Skb7YX2DhKtcO70=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=KGOFzSc1; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=gusnrUe6CzbeHfm+qDq9+MyOa7c/gSApDbxOa2venvy54Lo03X8k49lENEZcOMpEozVjE/s1E2ab6pUVQq634+bZJMspyuN7JX2bCJhQHkvH5Kt+NI6KHJE1eYeOhniMlD3zQ9+35jJF5Coo5sSPU2DOVqmK6i0+JjCfg1oZAIM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lapq4Jcp; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="KGOFzSc1"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=7xyv
-	c+hzDyQkOoghz8pVOPfk8aNeYZ8rq5mea95KcSM=; b=KGOFzSc1mBTA4l09xwha
-	iMOZmpa6LjXs+wEWICouWWqEW/CZphVEAUMq2gtSUS8iEyPnP+zDlYBvOXGjJYv1
-	Fy4+phKoua+514wB/5xxodELGbJ6x+Oj/5ZAHC7xNi0TPoTW2vjcMqMN/DIDm7u7
-	CNLoAa3Z+ET3uSnlDMQCGVZPHoENVmoa18rR2a8QlE3kieR67E7wMoGpbepc+ff+
-	Pqj5Q7fVD8Tbwv6jVd85thMoyL2OcsVWLWFxzyTQC5SOQrVOpRrzffNZ7UWxhDjM
-	rLD//XBoFbtkhLIEXhjuUNhsBRZuJUGCoQa8cfRF++NmEdQr/kZ1Y2LdHEaHz4V4
-	AQ==
-Received: (qmail 1010148 invoked from network); 3 Sep 2026 12:32:52 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Sep 2026 12:32:52 +0200
-X-UD-Smtp-Session: l3s3148p1@EuiWrJFaVOgujntC
-Date: Thu, 3 Sep 2026 12:32:52 +0200
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Biju <biju.das.au@gmail.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Biju Das <biju.das.jz@bp.renesas.com>,
-	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: Re: [PATCH v24 10/15] mmc: renesas_sdhi: Add write32_hook for
- CTL_SD_CARD_CLK_CTL register writes
-Message-ID: <aplM1LLFJ4eo4YJ3@shikoro>
-References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
- <20260820171657.62815-11-biju.das.jz@bp.renesas.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lapq4Jcp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 856F91F000E9;
+	Thu,  3 Sep 2026 10:37:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788431873;
+	bh=LfEUm61UAnFxFCDwYCcGPaECxT78ZX20G6SRen0PmCk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=lapq4JcpXh2EdT5CtHGldRjhzK+EeM7FDQ17fM8aayLExDmULweYBoUFvnSTgV/CG
+	 oyH1ZIinJ2W8x2FCDvfAMyqLw7OuDepb81Ei9a6k5Mxo9KIbts6HZuqaju7VriutUz
+	 fu8Lhi0Nx0FDGrjzbCa8pppqq7h37FnceKSX7ULZI6dmHrTVHvDpDTiPrSNYfun2pG
+	 8t484gzCyEJcmpqkGoS+WUBG0JVoQeGLZSZ/4aMsWOfB9prh4NPTXksFAB2hmtgJu6
+	 OMhVJZwriZS/YNlnkkG77YFgSxQYH0foS7EM2igTWJ4nLr2OHIlWm24nn21yNDO1/8
+	 X8VPHQAGUV6Cw==
+Date: Thu, 3 Sep 2026 10:37:51 +0000
+From: Yixun Lan <dlan@kernel.org>
+To: Troy Mitchell <troy.mitchell@linux.spacemit.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Long Wan <long.wan@linux.spacemit.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
+	spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 4/4] mmc: sdhci-of-k1: Add TX tuning parameter
+Message-ID: <20260903103751-GKA53903@kernel.org>
+References: <20260902-07-k3-sdhci-dts-v1-0-4e7909cf4233@kernel.org>
+ <20260902-07-k3-sdhci-dts-v1-4-4e7909cf4233@kernel.org>
+ <DL5D12BKMIWN.QUCX18JF8GDU@linux.spacemit.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="vyt5JrzZ0I2IKlXI"
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260820171657.62815-11-biju.das.jz@bp.renesas.com>
+In-Reply-To: <DL5D12BKMIWN.QUCX18JF8GDU@linux.spacemit.com>
 
---vyt5JrzZ0I2IKlXI
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hi Troy,
 
-> Thank you for your contribution! Sashiko AI review found 1 potential issu=
-e(s) to consider:
-> - [High] tmio_mmc_host_probe() clears write16_hook when TMIO_MMC_HAS_IDLE=
-_WAIT is not set, but fails to clear the newly added write32_hook.
-> --
->=20
-> --- Patch [10]: [PATCH v24 10/15] mmc: renesas_sdhi: Add write32_hook for=
- CTL_SD_CARD_CLK_CTL register writes ---
-> commit 57d55ff6257b421b4e27c4306c5ee441c02c3087
-> Author: Biju Das <biju.das.jz@bp.renesas.com>
->=20
-> mmc: renesas_sdhi: Add write32_hook for CTL_SD_CARD_CLK_CTL register writ=
-es
->=20
-> This patch introduces a write32_hook for the Renesas SDHI driver to wait
-> for the SD bus to become idle before 32-bit writes to the
-> CTL_SD_CARD_CLK_CTL register. Writes are skipped if the hook returns an
-> error.
->=20
-> > diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/re=
-nesas_sdhi_core.c
-> > --- a/drivers/mmc/host/renesas_sdhi_core.c
-> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
->=20
-> [ ... ]
->=20
-> > @@ -1203,6 +1211,7 @@ int renesas_sdhi_probe(struct platform_device *pd=
-ev,
+On 11:27 Thu 03 Sep     , Troy Mitchell wrote:
+> On Wed Sep 2, 2026 at 3:03 PM +08, Yixun Lan wrote:
+> > From: Long Wan <long.wan@linux.spacemit.com>
+> >
+> > Instead of setting the TX delay code via hardcoded parameter, configuring
+> > it via device tree property, which make it able to adapt according to
+> > board specific tuning requirement.
+> >
+> > Signed-off-by: Long Wan <long.wan@linux.spacemit.com>
+> > Signed-off-by: Yixun Lan <dlan@kernel.org>
+> > ---
+> >  drivers/mmc/host/sdhci-of-k1.c | 25 +++++++++++++++++++++++--
+> >  1 file changed, 23 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-of-k1.c b/drivers/mmc/host/sdhci-of-k1.c
+> > index e6ab40c9a555..6cab06332747 100644
+> > --- a/drivers/mmc/host/sdhci-of-k1.c
+> > +++ b/drivers/mmc/host/sdhci-of-k1.c
+> > @@ -97,6 +97,7 @@ struct spacemit_sdhci_host {
+> >  	struct pinctrl *pinctrl;
+> >  	struct pinctrl_state *pinctrl_default;
+> >  	struct pinctrl_state *pinctrl_uhs;
+> > +	u8 tx_delaycode;
+> >  };
+> >  
+> >  /* All helper functions will update clr/set while preserve rest bits */
+> > @@ -263,6 +264,7 @@ static int spacemit_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+> >  	int max_pass_len = 0, max_pass_start = 0;
+> >  	struct mmc_host *mmc = host->mmc;
+> >  	struct mmc_ios ios = mmc->ios;
+> > +	struct spacemit_sdhci_host *sdhst = sdhci_pltfm_priv(sdhci_priv(host));
+> This is only a minor style suggestion, not a requirement. Would it be
+> clearer to make `sdhst` the first local declaration? That would make the
+> declaration block easier to scan.
+
+somehow I hate to bring extra unnecessary changes..
+but if we want to follow reverse christmas tree style and put struct declaration first,
+then we should also move "int max_pass_len = 0, max_pass_start = 0;" down below
+
+I can adjust this if maintainer/others don't mind..
+
+> >  	u8 final_delay;
+> >  	int ret = 0;
+> >  	int i;
+> > @@ -279,11 +281,11 @@ static int spacemit_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+> >  
+> >  	if (mmc->caps2 & MMC_CAP2_NO_MMC) {
+> >  		spacemit_sdhci_set_tx_dline_reg(host, SPACEMIT_TX_TUNING_DLINE_REG);
+> > -		spacemit_sdhci_set_tx_delay(host, SPACEMIT_TX_TUNING_DELAYCODE);
+> > +		spacemit_sdhci_set_tx_delay(host, sdhst->tx_delaycode);
+> >  		spacemit_sdhci_tx_tuning_prepare(host);
+> >  
+> >  		dev_dbg(mmc_dev(host->mmc), "TX tuning: dline_reg=%d, delaycode=%d\n",
+> > -			SPACEMIT_TX_TUNING_DLINE_REG, SPACEMIT_TX_TUNING_DELAYCODE);
+> > +			SPACEMIT_TX_TUNING_DLINE_REG, sdhst->tx_delaycode);
 > >  	}
-> > =20
-> >  	host->write16_hook =3D renesas_sdhi_write16_hook;
-> > +	host->write32_hook =3D renesas_sdhi_write32_hook;
->=20
-> [Severity: High]
-> Should write32_hook also be conditionally cleared in tmio_mmc_host_probe()
-> when TMIO_MMC_HAS_IDLE_WAIT is missing?
->=20
-> Looking at drivers/mmc/host/tmio_mmc_core.c:tmio_mmc_host_probe(),
-> write16_hook is actively cleared for devices without this flag:
->=20
->         if (!(pdata->flags & TMIO_MMC_HAS_IDLE_WAIT))
->                 _host->write16_hook =3D NULL;
->=20
-> If write32_hook remains set on older or fallback configurations lacking t=
-his
-> flag, polling for TMIO_STAT_SCLKDIVEN will time out after 1ms.=20
->=20
-> The hook would then return -EBUSY, causing sd_ctrl_write32() to skip the
-> register write entirely, which ultimately fails SD controller initializat=
-ion.
+> >  
+> >  	spacemit_sdhci_prepare_tuning(host);
+> > @@ -496,6 +498,23 @@ static inline void spacemit_sdhci_get_pins(struct device *dev,
+> >  		sdhst->pinctrl_default, sdhst->pinctrl_uhs);
+> >  }
+> >  
+> > +static void spacemit_sdhci_get_tuning_params(struct device *dev,
+> > +					     struct sdhci_pltfm_host *pltfm_host)
+> > +{
+> > +	struct spacemit_sdhci_host *sdhst = sdhci_pltfm_priv(pltfm_host);
+> > +	u32 val;
+> > +
+> > +	sdhst->tx_delaycode = SPACEMIT_TX_TUNING_DELAYCODE;
+> > +
+> > +	/* Override from DT property */
+> > +	if (!device_property_read_u32(dev, "spacemit,tx-delay", &val)) {
+> > +		if (val <= U8_MAX)
+> > +			sdhst->tx_delaycode = val;
+> > +		else
+> > +			dev_warn(dev, "ignoring invalid tx delay: %u\n", val);
+> Should this warning also report the default delay code that will be used
+> instead?
+> 
+yes, can improve a bit
 
-Please check this, too.
-
-
---vyt5JrzZ0I2IKlXI
-Content-Type: application/pgp-signature; name=signature.asc
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmqZTNQACgkQFA3kzBSg
-KbYz/w//Ygoql5hp0Ff/kU2y+OC73vExZpvK242pR83m0q23+e0SLcm3awgvwiwy
-nTNczWYoq5e5/+KRWov5XIVYeHfNXYsAiVy4cg1JSW65P2TFDLnYgbdHBEXsNp91
-fglKUrh/s2hI0zGx7wY7m7M1stZKmWTPlgqmG0rchJTbPlpvkiHeTPOWGAjTI5S0
-f3lzbj+wTKiXqXu2BUY7AzqKTkFdpRr3n5C7bvO52ixyCOVF0RtdLvdFPG97r/l8
-WATXcxwmHDZ1+t82NktojOE29JQQ8CS8/Wvv/DCur80LYHWSHvRXjJAt5tslcKav
-k/bM4ZmFe0Jz0JHKUNCs+wByKfzew7iWFbM8UbIya/D92/1gALb0G3/kdRsFy8Db
-tU1Tha9c6OT74UMSxOxIrjJiQG5VTrt27Ke1d7tR2L4/XO2kPZsZJKMJZaYdjWB7
-0Wjg8d1EfjyT5q32aI3/Ci8c6wR+imH4u8L9VpGQLYAYVUkGN2FK1cs8FknCYKmn
-3MSHFX3fSTb5RV5HZq1qO2YM7YCqlv9h2HfTHTaS46wrSSBPEF4byIMAdLBWY5bV
-EzoCGIc4BaRJ64FBndMTGzpngVXUbWO/fcWL16GRUNhrRQrBu1GEc6TbbpqsweVQ
-NFiuH21VAdEMtJv3b04t9NpJjlbcZszERp92TCxjLO7C42nGCmc=
-=3HZj
------END PGP SIGNATURE-----
-
---vyt5JrzZ0I2IKlXI--
+-- 
+Yixun Lan (dlan)
