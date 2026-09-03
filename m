@@ -1,35 +1,35 @@
 Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3727E481257
-	for <linux-mmc@vger.kernel.org>; Thu,  3 Sep 2026 10:30:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2458448821B
+	for <linux-mmc@vger.kernel.org>; Thu,  3 Sep 2026 10:32:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788431435; cv=none; b=GKUTK+C5peqeQhcytGHQx5Rt4exOF/1xr6zrtz6HuLwtlbvFozoWe0ArRu4FB7/Ra93F0IQXk345pqJM4nVVEodUD8c6mmWb9H92RNKU5aHMQHRlHKvgfkk511Q501VTZubqxXTUVeVJfi9C3a+iyuOnwJS0m3EvRlUqsbvQYPg=
+	t=1788431584; cv=none; b=e3k9m/z5iec5y8MdilK0xGYXKlkoCu2hVy7+wjpMBEPKaB9/cSwzIW+6f6SVVIX4k3QshH+S9cfAeMAcTKRvAScY+PklX26Ua7bh7NPlgq+YeMBiGhIAvSqUMklXHyUad0H3h2Lv9h5LpGpFaMN1878uflR5QlcdwrUPSAJ6Gl0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788431435; c=relaxed/simple;
-	bh=i4XmDCjXkn59ZVUkKiXrN08n8fp2zjPNWvkJx/a1/IE=;
+	s=arc-20240116; t=1788431584; c=relaxed/simple;
+	bh=1pg5bjnnTADzEUkOaTVelG4SX/AoNaaGBLV125Jc5LI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qYpgnGkp7mzn+DbpqMaIUO/ZMq19afMkuYXZOIU09TQXKcfxTBgKwiuTWUby893Tyc+LpK/waMH9GZ1J0AxvzSKotiZqy5im9JNFtRisIGeSRzD3XUw3Op7JnVPlQHc+gbvQ4I6uZhafLQkXhgRo/CBvuHnfLGhwvj/t8IMWpfQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=B0yMxSbv; arc=none smtp.client-ip=194.117.254.33
+	 Content-Type:Content-Disposition:In-Reply-To; b=HmsSpV75uBcWNqLytcgO9d3gJd4t4D3nWE90HKM1SRjAemSuq2b8EFppJqcUWRDJMhHCFE/3E9e3wqCbZLzH3gae8NR5daepJKSXAHno+J3ErmFMpVsT/O/1qMpy2hejNcyF0WHM0/eQQYQFgXa/PM7hyO83Skb7YX2DhKtcO70=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=KGOFzSc1; arc=none smtp.client-ip=194.117.254.33
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="B0yMxSbv"
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="KGOFzSc1"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
 	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=sU0t
-	HS5UGwhb0TZkzSFiUQVjiIgLv8Y7NkvNB3Tv+UM=; b=B0yMxSbvHs23kgSns6cB
-	tbc/HXAj0De7xyVY3CbzvWSFk3v7IS4875KOMW6KQK2JbfWuwqoN3XG6FHIOB/9J
-	2SjKXeyEUc+NyjTxzJ6YtD2ZAFbIJEkfcUomOVQ15LVHh3RKDy4BiWQJwwr3Qws/
-	4rQgO9HhuA8kar5JfOh86NmrNXKnjeWNHBakXkzqw5jc+gXhaJ7wCrSjsMu9zwvg
-	lAz/NevZAMlv5CQv4C6nOjSef1Iw8Oi/EOIi/I+yhGlhqV0gX/c8qqKXLkK7Inyi
-	SXpTVqD5qy4lmjAhJw/AvIm02GG8CJWDhELkYArgbGSvRY3GNYYjeb/iH8XrBh5u
-	9g==
-Received: (qmail 1009339 invoked from network); 3 Sep 2026 12:30:18 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Sep 2026 12:30:18 +0200
-X-UD-Smtp-Session: l3s3148p1@Trxfo5FaxOAujntC
-Date: Thu, 3 Sep 2026 12:30:17 +0200
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=7xyv
+	c+hzDyQkOoghz8pVOPfk8aNeYZ8rq5mea95KcSM=; b=KGOFzSc1mBTA4l09xwha
+	iMOZmpa6LjXs+wEWICouWWqEW/CZphVEAUMq2gtSUS8iEyPnP+zDlYBvOXGjJYv1
+	Fy4+phKoua+514wB/5xxodELGbJ6x+Oj/5ZAHC7xNi0TPoTW2vjcMqMN/DIDm7u7
+	CNLoAa3Z+ET3uSnlDMQCGVZPHoENVmoa18rR2a8QlE3kieR67E7wMoGpbepc+ff+
+	Pqj5Q7fVD8Tbwv6jVd85thMoyL2OcsVWLWFxzyTQC5SOQrVOpRrzffNZ7UWxhDjM
+	rLD//XBoFbtkhLIEXhjuUNhsBRZuJUGCoQa8cfRF++NmEdQr/kZ1Y2LdHEaHz4V4
+	AQ==
+Received: (qmail 1010148 invoked from network); 3 Sep 2026 12:32:52 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Sep 2026 12:32:52 +0200
+X-UD-Smtp-Session: l3s3148p1@EuiWrJFaVOgujntC
+Date: Thu, 3 Sep 2026 12:32:52 +0200
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 To: Biju <biju.das.au@gmail.com>
 Cc: Ulf Hansson <ulfh@kernel.org>, Biju Das <biju.das.jz@bp.renesas.com>,
@@ -39,7 +39,7 @@ Cc: Ulf Hansson <ulfh@kernel.org>, Biju Das <biju.das.jz@bp.renesas.com>,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Subject: Re: [PATCH v24 10/15] mmc: renesas_sdhi: Add write32_hook for
  CTL_SD_CARD_CLK_CTL register writes
-Message-ID: <aplMNoRlIYbVZH5-@shikoro>
+Message-ID: <aplM1LLFJ4eo4YJ3@shikoro>
 References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
  <20260820171657.62815-11-biju.das.jz@bp.renesas.com>
 Precedence: bulk
@@ -49,58 +49,87 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="I9oGEfjpYOistGFg"
+	protocol="application/pgp-signature"; boundary="vyt5JrzZ0I2IKlXI"
 Content-Disposition: inline
 In-Reply-To: <20260820171657.62815-11-biju.das.jz@bp.renesas.com>
 
---I9oGEfjpYOistGFg
+--vyt5JrzZ0I2IKlXI
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Aug 20, 2026 at 06:16:40PM +0100, Biju wrote:
-> From: Biju Das <biju.das.jz@bp.renesas.com>
+> Thank you for your contribution! Sashiko AI review found 1 potential issu=
+e(s) to consider:
+> - [High] tmio_mmc_host_probe() clears write16_hook when TMIO_MMC_HAS_IDLE=
+_WAIT is not set, but fails to clear the newly added write32_hook.
+> --
 >=20
-> Add a write32_hook, analogous to the existing write16_hook, so that
-> sd_ctrl_write32() can wait for the SD bus to become idle before
-> certain 32-bit register writes.
+> --- Patch [10]: [PATCH v24 10/15] mmc: renesas_sdhi: Add write32_hook for=
+ CTL_SD_CARD_CLK_CTL register writes ---
+> commit 57d55ff6257b421b4e27c4306c5ee441c02c3087
+> Author: Biju Das <biju.das.jz@bp.renesas.com>
 >=20
-> renesas_sdhi_write32_hook() checks whether the target register is
-> CTL_SD_CARD_CLK_CTL and, if so, waits for TMIO_STAT_SCLKDIVEN via
-> renesas_sdhi_wait_idle() before the write proceeds. Other registers
-> are unaffected. As with write16_hook, the write is skipped if the
-> hook returns a non-zero error.
+> mmc: renesas_sdhi: Add write32_hook for CTL_SD_CARD_CLK_CTL register writ=
+es
+>=20
+> This patch introduces a write32_hook for the Renesas SDHI driver to wait
+> for the SD bus to become idle before 32-bit writes to the
+> CTL_SD_CARD_CLK_CTL register. Writes are skipped if the hook returns an
+> error.
+>=20
+> > diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/re=
+nesas_sdhi_core.c
+> > --- a/drivers/mmc/host/renesas_sdhi_core.c
+> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
+>=20
+> [ ... ]
+>=20
+> > @@ -1203,6 +1211,7 @@ int renesas_sdhi_probe(struct platform_device *pd=
+ev,
+> >  	}
+> > =20
+> >  	host->write16_hook =3D renesas_sdhi_write16_hook;
+> > +	host->write32_hook =3D renesas_sdhi_write32_hook;
+>=20
+> [Severity: High]
+> Should write32_hook also be conditionally cleared in tmio_mmc_host_probe()
+> when TMIO_MMC_HAS_IDLE_WAIT is missing?
+>=20
+> Looking at drivers/mmc/host/tmio_mmc_core.c:tmio_mmc_host_probe(),
+> write16_hook is actively cleared for devices without this flag:
+>=20
+>         if (!(pdata->flags & TMIO_MMC_HAS_IDLE_WAIT))
+>                 _host->write16_hook =3D NULL;
+>=20
+> If write32_hook remains set on older or fallback configurations lacking t=
+his
+> flag, polling for TMIO_STAT_SCLKDIVEN will time out after 1ms.=20
+>=20
+> The hook would then return -EBUSY, causing sd_ctrl_write32() to skip the
+> register write entirely, which ultimately fails SD controller initializat=
+ion.
 
-While technically correct, the commit message is totally not helpful
-because it misses to say WHY the change is needed. It only says WHAT is
-done but I can see that. G3L exceeds the 16-bit width, this is why we
-need to change the code here. I know you use AI to assist with commit
-messages but please keep a suspicious eye on the results.
-
-> +	host->write32_hook =3D renesas_sdhi_write32_hook;
-
-Have you checked that all SoCs handled by this driver support 32-bit
-access to this register?
+Please check this, too.
 
 
---I9oGEfjpYOistGFg
+--vyt5JrzZ0I2IKlXI
 Content-Type: application/pgp-signature; name=signature.asc
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmqZTDYACgkQFA3kzBSg
-Kbby9A//RumI6iNFibcLj68lexEHIaMWAwDK99MpeSja5J6fOQQiHtqIDI9MD5vI
-Qew4SfFBapqs47od/38urBcHKonWxVqVNCOdKsjO/z3e3Bs2SeIbIp/NFTFeUVeu
-6TTyMzr3z4dfdivay9GwWAG3qGB/1sfP1baRcwE3pajocuSQz3Zt35Y21sDFI/2U
-bnFNrK1OPlpA/ha7Vcdi8fa1xDz9LO871gS+3qS1ZCX4q6nTd7/cwCG5ajKsbzbE
-EtctPgZiuWBhT8mfIZ5XnSeRjNv90fBd4LhuYyJsvPs2QDwjFd5B9c2OG2si8Ua7
-b3N/vss8AiiB1tLjlT41e8MU4Cmiga6vB/ojVPFwD0S3NjyG4eKwEosa4I3m1SNB
-p9Dux895G+m3ixwLHs/5DE/hC3wG0LBf37ZLs9Gfe/eCcHKAKxqOPurZwbnwTH0S
-HujLvkf58P2rf+DOaYXcHe7S6OC5mjB2cOt3Fqo4u7nQ7S/LW20kbaYJq6cIiujP
-xHXdoiC8049AFHOyx4ksRnKnV17zgcB+WpDno3HC1pRA1Xe7PlAuI2J4DpWjTLRz
-T6b/tTi3fIxDDQfsJIirZkiCnNwJgUQ6JNpLTzGwf/7o7HF74IEJ4r1bGFd7xX+p
-TSTMSP6eTjCJTfIVC3XVoQSWbKcrGh1sorZSpuwubFk586uR1lg=
-=3pni
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmqZTNQACgkQFA3kzBSg
+KbYz/w//Ygoql5hp0Ff/kU2y+OC73vExZpvK242pR83m0q23+e0SLcm3awgvwiwy
+nTNczWYoq5e5/+KRWov5XIVYeHfNXYsAiVy4cg1JSW65P2TFDLnYgbdHBEXsNp91
+fglKUrh/s2hI0zGx7wY7m7M1stZKmWTPlgqmG0rchJTbPlpvkiHeTPOWGAjTI5S0
+f3lzbj+wTKiXqXu2BUY7AzqKTkFdpRr3n5C7bvO52ixyCOVF0RtdLvdFPG97r/l8
+WATXcxwmHDZ1+t82NktojOE29JQQ8CS8/Wvv/DCur80LYHWSHvRXjJAt5tslcKav
+k/bM4ZmFe0Jz0JHKUNCs+wByKfzew7iWFbM8UbIya/D92/1gALb0G3/kdRsFy8Db
+tU1Tha9c6OT74UMSxOxIrjJiQG5VTrt27Ke1d7tR2L4/XO2kPZsZJKMJZaYdjWB7
+0Wjg8d1EfjyT5q32aI3/Ci8c6wR+imH4u8L9VpGQLYAYVUkGN2FK1cs8FknCYKmn
+3MSHFX3fSTb5RV5HZq1qO2YM7YCqlv9h2HfTHTaS46wrSSBPEF4byIMAdLBWY5bV
+EzoCGIc4BaRJ64FBndMTGzpngVXUbWO/fcWL16GRUNhrRQrBu1GEc6TbbpqsweVQ
+NFiuH21VAdEMtJv3b04t9NpJjlbcZszERp92TCxjLO7C42nGCmc=
+=3HZj
 -----END PGP SIGNATURE-----
 
---I9oGEfjpYOistGFg--
+--vyt5JrzZ0I2IKlXI--
