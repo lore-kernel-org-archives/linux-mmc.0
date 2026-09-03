@@ -1,83 +1,89 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F2FB14AA581;
-	Thu,  3 Sep 2026 13:00:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32E6051123D
+	for <linux-mmc@vger.kernel.org>; Thu,  3 Sep 2026 20:11:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788440452; cv=none; b=u3PbT57PiePTylQzmbgZjEQHhq7In7Mxko9Xg8Al1CXU1gWkg327lgiYsXJ2ikaD7gPxHuPLir5kntlAINB7SSJAL2mGwKk+cm9/O3HOWxgKep+HF1Y50DIak30Ft8B603JKg6s7zi/vga96CvVYZVW42DH+7GrA+ioGzTTtGqc=
+	t=1788466317; cv=none; b=bXwgHPzPBCwuK8Gf39ucY3mYyt0CMn9WImua3La54//jMzHE5/VjI6Tk1Pv+OCNBaUVByoRIasbzVaJTErI1eDEWChjzKy6Spzk4H3HX5Ij21C8YtlwfN6XTkETQQkn9mflAzlGcKZ4MJXLm+irFw0rDiS7sYe5Si6+ifTLi4IQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788440452; c=relaxed/simple;
-	bh=2jCCbt+FQXCbWg0CbWpY7BWoaZps7tU2RqU8vFlYFJQ=;
+	s=arc-20240116; t=1788466317; c=relaxed/simple;
+	bh=vmH0h3WK8ZD57844TEFW/v3WxY4vsVlqFAWdc0w4qDI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=R4p5LtOxPF7O+FeY4mfDxoVAok/rXkEsnH7u6OWokgGul7vlIBoL77BSx+VbEXyfR287crK5BcmpsdUFYklcuxMfSaHveine4KKOlVeBs1Sr/3HioOePcHrWTzeqNggBwQxJnsymPKEG//6Zs6UHae6CzsXufLbI5r8xvUsxIMw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JuaBmTRR; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=doFJgwNowxXwwHzZ3yfrofcyxfPCfHiwRLJ5JQByGmIvw+58KRpKqgLlxXqrAVbjxfr4VtaQihuPaZzaElM5pVR6S3MHNKMvL36BoMhMQVe6FK/yhaFKKCJRKZCUPOMqGDfNNweEMhzT5HtioPcXbsaPoOXOcYQifOH66EjjURM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=j/yhbIOG; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JuaBmTRR"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C0BC11F000E9;
-	Thu,  3 Sep 2026 13:00:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788440443;
-	bh=iegNva3kkOGJqjCoKK1iRqK5iFz7ZD4YDy8u6AOCQVc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=JuaBmTRR2rTrs+dzlAeqYCZZFwDrmCKGd3uT8IPDU4YSqKWK3PnBdTDk20//uAy14
-	 VhPiw1hy90EnkF/yrhvEX7blaDtM3iCXX1+a9rm4cqngxZCvjrdIUo8N781ht6zl+n
-	 ZGoDZzuJJYpfO52npPPSmT0MeXUx02U5Q0coe1Wf3yoobyrmJ5UjDj6FcyKudyS2Jj
-	 X0T8F3vy4cqCKhKe6SXb8Ug76wWClmniPyilsvJylEG194A+/lA3V9k/cDkCjZB0+G
-	 2R/m1C6D5+LwDKC5MglHBL2ieJISBwnsUKXQX1y0uJFG+uUeYP6EymykyJ8k++0rUo
-	 0vWPUZHVHHUZQ==
-Date: Thu, 3 Sep 2026 15:00:39 +0200
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Yixun Lan <dlan@kernel.org>
-Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Long Wan <long.wan@linux.spacemit.com>, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-riscv@lists.infradead.org, 
-	spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/4] dt-bindings: mmc: spacemit,sdhci: Add tx delay
- property
-Message-ID: <20260903-tactful-scorpion-from-nibiru-a4ebe2@quoll>
-References: <20260902-07-k3-sdhci-dts-v1-0-4e7909cf4233@kernel.org>
- <20260902-07-k3-sdhci-dts-v1-2-4e7909cf4233@kernel.org>
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="j/yhbIOG"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=vmH0
+	h3WK8ZD57844TEFW/v3WxY4vsVlqFAWdc0w4qDI=; b=j/yhbIOGWR5UXucdwg+e
+	f9SSQWfvigGHOUE6drQChlLsmg+zoCYIw3Cy5DpybVZyZCEwdxIfi0R9gHPmTZEi
+	U4yDhNhK22lG81yO+TM42bttmOYcvvaynowsaPdo49j0IiZYtGTqFIv3pSXQGCgC
+	ac3hpejp1zAZkBT8Cekwfplo8fqRM1OjhwUSGIFdz0rpkNhmSFqySMUHFQsLGdor
+	QTr/8pAXytTClDC0a3eFNVRiYzn05d+gaFd/0jMZprBTjTkCQWkc8ES/a2MJJbB+
+	oeZThBZdR+tG1s56ma0IMwkjylFbl4wOmT+3GU8yehqpq0c6BQa9nwgkegU4EnCC
+	mg==
+Received: (qmail 1175407 invoked from network); 3 Sep 2026 22:11:46 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Sep 2026 22:11:46 +0200
+X-UD-Smtp-Session: l3s3148p1@rFLewplaLM8ujntC
+Date: Thu, 3 Sep 2026 22:11:43 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Biju <biju.das.au@gmail.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Philipp Zabel <p.zabel@pengutronix.de>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Biju Das <biju.das.jz@bp.renesas.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: Re: [PATCH v24 00/15] Add Renesas RZ/G3L SD/eMMC support
+Message-ID: <apnUfCIcTG4bmYZF@ninjato>
+References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="yOE/FRGSfTSAVCGO"
 Content-Disposition: inline
-In-Reply-To: <20260902-07-k3-sdhci-dts-v1-2-4e7909cf4233@kernel.org>
+In-Reply-To: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
 
-On Wed, Sep 02, 2026 at 07:03:13AM +0000, Yixun Lan wrote:
-> From: Long Wan <long.wan@linux.spacemit.com>
-> 
-> Introduce a vendor specific property to configure the step count of TX
-> delay line which should be applied before RX tuning, compensating for
-> board level trace differences. The TX delay line result comes from test
-> out of real board which vary from different hardware layout.
-> 
-> Signed-off-by: Long Wan <long.wan@linux.spacemit.com>
-> Signed-off-by: Yixun Lan <dlan@kernel.org>
-> ---
->  Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml | 10 ++++++++++
->  1 file changed, 10 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-> index f35bf7ce08dd..3399a2d076dc 100644
-> --- a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-> @@ -63,6 +63,16 @@ properties:
->    pinctrl-1:
->      description: Optional pinctrl state for 1.8V UHS operation with "uhs" name
->  
-> +  spacemit,tx-delay:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    minimum: 0
-> +    maximum: 255
+--yOE/FRGSfTSAVCGO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-default: 0, I guess?
 
-Best regards,
-Krzysztof
+Although there are still issues to be handled, I tested this series on a
+R-Car S4 (Spider) with HS400 eMMC and on a R-Car V4H (SparrowHawk) with
+a UHS SD card. No regressions.
 
+
+--yOE/FRGSfTSAVCGO
+Content-Type: application/pgp-signature; name=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmqZ1HwACgkQFA3kzBSg
+KbbZ+RAAmh7Bk/uuR0hRrNkdvymdbyBydX8Nh4YqTkh4g4/0YEVLbBpJCK59Sjxx
+d3FRxJzRAPEmsxlcflWuGh6oEiK4LXh2wVfzBZur6yIGybfRFeYJSWaArDGkMuWM
+omc+Lh9K/33Rz1EAH+a/z86ve1ApKDcU0leVx6BbdfmoBmSbFA08NkBJpvSwmr/s
+jvtMOlm/sE13c/ZjAi70CxY8KHwsZpd+3/z5JZBqHcx4jpBtkqa/7BH06dacbl4h
+RH8ja4xPC8HZAlmLoYqAyhUV5d1T1E/J7xK8GDJzf+KjaH0a5x+xtTXxBcQkvebQ
+D0IEjuEDpR3C/unMZVDndyGQ52wBlm3KPAlIyGox8HaCIRbDMnquHK4hrLzp/pjT
+Gh0FosMu2Fdiz9I1ux+vgidb2ycsmEprsm4YbShm/elsHuwlGbhf7hjJiU6tLula
+HFD4F2N9OqB498w+7TRafVPHJgPkRn6fdKz4oHZOAuJCc0RhNF5+TZjeeJezL/6Z
+J+5Q8hmzjcAXWEywMexHiObS2u0t5J8v64w3NlyV2WAZd3Mx5/4WaweRa2pfSsev
+mmEkF0aPmfnP3PiTOYUKnMcunQGCD38FKj+Ya1vMlJklyAXQEw1u2Yx3mJ0asOFs
+BdcVb78D6jNFSaC7wTSg862j6JLdyUaLh7XDQvBVb0AREUYfk0M=
+=80b8
+-----END PGP SIGNATURE-----
+
+--yOE/FRGSfTSAVCGO--
