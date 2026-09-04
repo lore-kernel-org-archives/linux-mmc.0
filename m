@@ -1,307 +1,219 @@
-Received: from mail-m32108.qiye.163.com (mail-m32108.qiye.163.com [220.197.32.108])
+Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11010055.outbound.protection.outlook.com [52.101.228.55])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D9D648822C
-	for <linux-mmc@vger.kernel.org>; Fri,  4 Sep 2026 12:39:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.108
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788525553; cv=none; b=R2wHK6KoYtV1YTbW3pDYVp3vzJhPNDOG2NNi4p+4D5X2lvfavGQvcXlHkc2b94IhAXzvgZQ6jSq0UuNq60JfxZEoJd6VpBhd8Yxv0QDQ6Fe2B9nIdAaekbQ9SYkfDboV4MbHQzql50Qt2dx+B7nVs2ezsT4Ni7y7roeSlrHILtw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788525553; c=relaxed/simple;
-	bh=F2OXNhMCPRKIBeWbUzqqe81xVsy0py88XrW4kixCDx8=;
-	h=From:To:Cc:Subject:Date:Message-Id; b=cpFHi6z18YOBcr8UINdircUD9uE7AFMISaDnthFBInZOzwbKnY5CdipVNcl/JkDQ3K/4tg0trWrcAuuOuGzltR713qaNcA8kU+qLxqTcRYS2MY3hWKw7057a9xWYyjSvdbYrQOnmrs1YV4Hx+KdzAkXYSAKnjiUuXqfULo3+BeY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=T6oXfB8V; arc=none smtp.client-ip=220.197.32.108
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F24984908D2;
+	Fri,  4 Sep 2026 12:46:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.55
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788526015; cv=fail; b=LJYwlJYUf8AWomUPeZ/MydaoxtSdeWz7Wl/IcLcbk61gmC8D0S10xNnOLfN1+vhak+wSbTzOm0yfQdBVmGwl3g0QZuAT/BSEjc0VUnT/tdspe5NjlN5Swd1OUgrW7JjkJKPsS+RegwfE0plp/X85NuFt2fZqxl+VGslNuPgyQDE=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788526015; c=relaxed/simple;
+	bh=vuyti3sAS9pgWfMQUkjUfymY7Wnq28dtZBBalu+dfHQ=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=fpdKWH0Z4j4y/FcuPqaYkTB5yE4oJtA/B92uwKMnD6xriNm9iD/7hNn54EvOgCRElbUpEw6tNbmxqrp2rm0Vm8KLvbSOvucQoBu9l0bp0r0kqEl69isPOnJXNvgPVnixqdLPSnWJ2c5PxkF+LM8nyAvBkljDQ+uaW6w7WbNzuks=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=KFRfMxXu; arc=fail smtp.client-ip=52.101.228.55
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="T6oXfB8V"
-Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 4c9331ca9;
-	Fri, 4 Sep 2026 20:33:47 +0800 (GMT+08:00)
-From: Shawn Lin <shawn.lin@rock-chips.com>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: linux-mmc@vger.kernel.org,
-	Avri Altman <avri.altman@sandisk.com>,
-	Shawn Lin <shawn.lin@linux.dev>
-Subject: [PATCH] mmc-utils: Add health command for eMMC health reporting
-Date: Fri,  4 Sep 2026 20:33:34 +0800
-Message-Id: <1788525214-40803-1-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-X-HM-Tid: 0aa06c692bc103a4kunmc343671017336b
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1kYFggdWUFKV1ktWUFJV1kPCRoVCBIfWUFZGUwaSlYZSR1DGE8aT0
-	1CTk1WFRQJFhoXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0
-	tIVUpLSU9PT0hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=T6oXfB8V0N56tTjuI7aGSwZSdX3PbjYRs+BSqv01170hKIuzcC9vw7KuwUdYtRc/YrHbYJlNiGsdTU8SUQIiogq6QNS5SctJ7pl2i3Z77HGFQNcJzhGqhktpHS1JG9RPSSJgpTqYhypqUFAhw1avcRcRWCg/PtcaRkxrBb7pfys=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=cOnQqZqU1c3Oda2sorxlBdwD9h7S+fhX5OcEkoBp6VE=;
-	h=date:mime-version:subject:message-id:from;
+	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="KFRfMxXu"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=nimzsfsetej4EpM+HtBDM0UQ4KI/d/ig0/kJTvZR713GiBoJKWQ3Gc3X1CTW+gJhFiV9ilmOnWnMKJyjbo4uIwBEfcSWo+JPSrtg7ljQZJjdhQt5RrAE6sC0igc87jW7LDrTJFpMSPJdmGioZ9oXBTOP8uPEQlQp0ADI70P1KU304RBJEMqgZNol2KUwdF8O9FrBZqMBVPPf1SZ0p6K5iLp3zS6C3xHWOMIFidA1xfcYav/MHcUQ+QHUn2XGUpEV6v86GFmrVx/vAYRtI0/qEzVclmBd0HViZAUZ0s0Zs9dhSxEEvZtvDq6A6UUWeaXdbJVKc6M5iuOj/nhuww0ydA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=H/UZqRYDei9pwENx0x1YfP3vDm43oJH2nvdLMgzZEXA=;
+ b=cHNTL8H1GOe9cUMOW/BwGthW+aALr3h5e9ms+qMkFGikYbTo3NN8h9yF51iKpssleZzZlAcHH+A8wNTt/vUnGqsWyoSvhRVH6jhqtAcVFeP8A2aCwIkcwQ6nhdnk/innkNych8YZwuJdvD+GRltORFaQk2kD5MW0fPLPkXU8R9C70bAaeaPMPrwjcmuqoqRDhwGE2DQ3XQUHW0DgVpkRPDQ+NFdkPWeIadX1nAtA0iScadMD9GeliDBoOfYj/LuV51YCqbteLq2FcThmEHd/EzThfyYxur6mPfR/M71ac68r3JCr46VegmYoXtjGliuFbUOOxrlZadhK/o7FoE0SVA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
+ header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=H/UZqRYDei9pwENx0x1YfP3vDm43oJH2nvdLMgzZEXA=;
+ b=KFRfMxXukM8nLswrqB4cEb6FNI+bWLgTNtwZ1oeZsTtMR2vQZh0fdKk1Svg2Qx5f33dZxQfht/cAL08dBc8TyUieDJ3QTtAYH/TnfHWuzGDC+AU+vYo+ht+SZtz0qXhSblY9Aq44akUUWolEIo/UAqyXbmf1HFisym7x8E1THQY=
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
+ by OS7PR01MB12011.jpnprd01.prod.outlook.com (2603:1096:604:23e::12) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.13; Fri, 4 Sep
+ 2026 12:46:50 +0000
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de%4]) with mapi id 15.21.0360.008; Fri, 4 Sep 2026
+ 12:46:47 +0000
+From: Biju Das <biju.das.jz@bp.renesas.com>
+To: wsa+renesas <wsa+renesas@sang-engineering.com>, "biju.das.au"
+	<biju.das.au@gmail.com>
+CC: Ulf Hansson <ulfh@kernel.org>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org"
+	<linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: RE: [PATCH v24 04/15] mmc: renesas_sdhi: Add max_divider field to
+ support SoC-specific clock ranges
+Thread-Topic: [PATCH v24 04/15] mmc: renesas_sdhi: Add max_divider field to
+ support SoC-specific clock ranges
+Thread-Index: AQHdMMe7RxxJrlR3AEiECnq/qqkha7a7NF8AgAM8VaA=
+Date: Fri, 4 Sep 2026 12:46:47 +0000
+Message-ID:
+ <TY3PR01MB11346696A5DF407A8E25150F186B52@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
+ <20260820171657.62815-5-biju.das.jz@bp.renesas.com>
+ <apgC-m7SrDNU9YmQ@shikoro>
+In-Reply-To: <apgC-m7SrDNU9YmQ@shikoro>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=bp.renesas.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|OS7PR01MB12011:EE_
+x-ms-office365-filtering-correlation-id: 374da713-c4ea-4a32-ac29-08df0a829537
+x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|1800799024|23010399003|366016|376014|56012099006|22082099003|18002099003|38070700021|11063799006|4143699003|10067099003;
+x-microsoft-antispam-message-info:
+ 1fOqU3UEVu21UgBDg1vLkNmGBs+9n+lXY6b1pYUJu3IerVAcz+kQ9vQRMoYA8UDhp6poSNu3YwAyeADKXTEmoXkEeQ3i/zeSQZ/wIdee4ZEz6UhYMgqYE8XUs9pH/g26xnk7bo0onvrDiRB4+h4+ZUCDtIMMTTZd1i+3gwPsJXktzm3jvA7DUe0Cz8POPaecoX9/TaCr4wjA2YsnG9GszrXnPBrthbbTeUTMovzBl7klvdKfmNd6cZOxUG4AaKk0QifY/Qvsfe/YwcMp919X64Q1jx3rBqVBYP5cSgNa2WLUHOS2zn3bWtTzVU1wgahrciBwQIaE/M9B+YSFWh8Xd6rS3XhOIEk4Yak6lwuf47UaYAEcr3x5+e6QXxjDYyl0Y8jP355eXYLJr0IdpNzvkGOxW8XPe8SxlQH0IrP92BQnKt77pZ9WT41Mr1+WL2Ma6EfWfYSK1cgYed9SoSSdolyWIxAiz9j0rcuzJSSdxARCN0q0e2YbEUhGahNP68YpZ/kyYevYgkTXJ5iMq8jW9qqV/zc0+xgd6YsX4ZAKotHPOUM97G4Gk+iuh319ygfsvomQ7Ds5NBC2qaTvIJXr6CNvyiZFpJ0lgwMVfWmTbX5dXQQWAVRpNswF5gVv9+3wCjs821cytLI10QyVydbEfx1hfw+YrvRkfag7qLuevMVhAv3tIl4Ie5rxjXEkzWmF1CWttAfNu8c+ikemQbckSm0CuNNDKmFlQuYUgpPYzCM=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(23010399003)(366016)(376014)(56012099006)(22082099003)(18002099003)(38070700021)(11063799006)(4143699003)(10067099003);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?PIlKvdBsbpaeVCHc6cPQnwWEr04mMgwSN9SWspnbIyzXhOjs0IzAxZgoogM8?=
+ =?us-ascii?Q?KyOmmJ0GvsAICzKDBfwlJxrGiqbS8jLLI6HAY3cNzuav41U5e+X7wJGwifZX?=
+ =?us-ascii?Q?5FeSE3VfoGBo2EiatbbrSQGAbFU/CElPAtL5pPC6AyRBuaO8YenK877/5Or1?=
+ =?us-ascii?Q?9uq4jB2WvySH6p8J/H6OyCNZvhL9J35IrNCkxcJE1lE/1t3qDMTtIgxdHuHw?=
+ =?us-ascii?Q?pHE5ZRty1cYWt3YU/UVb6nQRFvKQxvxr4dqxsAJ8avNebWXi1494alf4hbiO?=
+ =?us-ascii?Q?hKEuYWJ2Gc7TNnBT4n5maXjzZpMeZjTE8v6OBY5lhYCepikBbSfJurWCp81Y?=
+ =?us-ascii?Q?VC9A0wbMcLM1ZbNDhizVKvudlarQ++vGlYOjA7uiv4l5wdHdvOX7iryCjdcO?=
+ =?us-ascii?Q?ULNv7nRvUPOHRVfY6ctnyAE5Js8XxnHh/hjO+lpYzuVcXTruFqyGKVKdZtc9?=
+ =?us-ascii?Q?NRmAiWnIGz5uJkBgl3RPmY3egBLBKrm5sjeoQlUhbzF3v1pdUv7CyIiHybg4?=
+ =?us-ascii?Q?teyeydyyYjWwTfMrcP+B7+uuijvOOUGAwNm75I/Wv1JbDXuISZd5AStdJsnR?=
+ =?us-ascii?Q?r9byIspWFFkXKSzsdmbWS2/9AO8LkrOjPOfrLXPrJLJvpmlzPCCV+DeN+7Iq?=
+ =?us-ascii?Q?T2NQaoLn2vUTuk4s8y6vlYGPEY6uMQ3NBHf3ndPDxryyXCkg+yPS+RvO4Yun?=
+ =?us-ascii?Q?APhs891SkD4q8VSVI0214Vn+ONSTrSeIVUiPpZnygC+JujJE4u1/WZ9z38WP?=
+ =?us-ascii?Q?1zM9zJ/FGzYicN1RmpUcTVzChkrT9iHfBbG7C+c7FWNtvXiLsthHSsVbS2gl?=
+ =?us-ascii?Q?7p48Di9wBwFBiNmQ4lt3FxlrPaBvWkoj7/2TInUUo1FnDyV60/K+0iFoDjg1?=
+ =?us-ascii?Q?CWJS3nFDncnUWbwPVu5a1M+ntbAOwXnNMu906RkHVKuznZNyHsLr6HKxQToB?=
+ =?us-ascii?Q?yjoV54YUByv8h2QwKjqsPD9N2f3bqtyQ94DVRZE530UDngSjr0istPQqAMS5?=
+ =?us-ascii?Q?NnnKsTf1IxzOYx7TX+laBLHTH4/luVJC+BpmMySfDlaZ8lryUUa4CGJk8fB8?=
+ =?us-ascii?Q?e1xCt8Kde7HsAR/9ImwFgoVcDIKf3+fwEyQxEmtf4uvqqjACTYaznxzL/SFu?=
+ =?us-ascii?Q?lgXZjSE9rYwTAcbYD33y5MtI0BENKJ/QlGq9g/Z2BTcbepMd6EmA/Q+ym3bG?=
+ =?us-ascii?Q?82Wj1JHkLq8j1yl9VNTiDnc7EDC5HZpdjyKnfyOYn95mXNq6TFHTF2L0PE2w?=
+ =?us-ascii?Q?rZOkWPCB/HxzGwYjM4iBGccp9oKu6LfsnULaALEt2H3nmZbxrduNnHH4SAwl?=
+ =?us-ascii?Q?so/jti+tyai880U5zxFhFQkzUHgV8wVgFlimmD4eA08KZyU5hxZ8nuMvSzWt?=
+ =?us-ascii?Q?MYW1P9uWHaT6hs5/rBj5f09Oha8M1EpYLTlLGEl7Q59HLghDq4m1/yjvcFZJ?=
+ =?us-ascii?Q?H/4PBabGK8sSptR90N18mglBqr7R0F/I3dfBg+m7e5bl7ue6LFWt+xofJPPf?=
+ =?us-ascii?Q?fi/sbz0VdFW2Xaaz7S0yeibxLmPgJxqNXzDHunh71w+YqD+jac8kLhMqINGw?=
+ =?us-ascii?Q?cJlosvO7L6Lbo3ri0BtbDpCsk3/2h9ZaCVqi/h7XOi46ZFon4URkfsST4cjm?=
+ =?us-ascii?Q?SNTptYvjO7dISq2psz17rU3gMwKKpKquP7EP5cd6XeLlkQvCx6ihMTCH12Op?=
+ =?us-ascii?Q?p7U4GolqdJJqKzjB2N7xd1FqJ4gtVdPByRcLWIMRM0Yl+hQjHHSBifLUrWGa?=
+ =?us-ascii?Q?RIV2YR5AGA=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+X-OriginatorOrg: bp.renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 374da713-c4ea-4a32-ac29-08df0a829537
+X-MS-Exchange-CrossTenant-originalarrivaltime: 04 Sep 2026 12:46:47.4946
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 2ERla/rd38fn4CYwYb1v9pIkKNGgNLQuURg/GxQjdK14f4s5H/iXRqSiBDkrVZSBTt19ePtzqgnVsfC5LmM/YE1svqGc12rv7GNfFZVz4w8=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS7PR01MB12011
 
-From: Shawn Lin <shawn.lin@linux.dev>
+Hi Wolfram,
 
-Add a "mmc health <device>" command that prints a health summary of an
-eMMC device: Pre EOL info, device life time estimates (type A and B)
-and BKOPS status, each with a human readable decode of the raw field,
-plus a final verdict line.
+> -----Original Message-----
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Sent: 02 September 2026 12:06
+> Subject: Re: [PATCH v24 04/15] mmc: renesas_sdhi: Add max_divider field t=
+o support SoC-specific clock
+> ranges
+>=20
+>=20
+> > v22->v23:
+> >  * Changed the data type of max_divider from unsigned int to signed int=
+.
+>=20
+> You changed this because of a Sashiko report. While the report was correc=
+t, I think the solution of
+> simply using 'int' is suboptimal...
 
-The per-field values and their level semantics come from the eMMC 5.0
-spec (JESD84-B50, EXT_CSD fields 267/268/269/33); the aggregated
-verdict takes the worst of the three wear related fields and maps it
-onto an exit code, so the command can be used directly from production
-test scripts and CI:
+Yes that is correct, based on Sashiko report I changed the data type.
 
-  0 healthy, 1 warning, 2 urgent, 3 unsupported (eMMC < 5.0),
-  4 not an eMMC device (EXT_CSD read failed).
+>=20
+> > -	mmc->f_min =3D max(clk_round_rate(priv->clk, 1) / 512, 1L);
+> > +	mmc->f_min =3D max(clk_round_rate(priv->clk, 1) /
+> > +host->pdata->max_divider, 1L);
+>=20
+> ... because the existing code is just too subtle / fragile and hard to un=
+derstand. I think we should move
+> clk_round_rate() out of max() and handle it seperatly before. What do you=
+ think?
 
-The command is eMMC only: SD cards do not have EXT_CSD and do not
-report any standardized health data.
+You mean use, max(clk_get_rate(priv->clk) / 512, 1);
 
-Execution effect on an eMMC 5.1 device:
+clk_get_rate() returns unsigned long compared to clk_round_rate() which ret=
+urn long??
 
-  # mmc health /dev/block/mmcblk0
-  =============================================
-    eMMC Health Report: /dev/block/mmcblk0
-  =============================================
-  eMMC rev:         1.8 (MMC 5.1)
-  Pre EOL info:     0x01 [Normal]
-  Life time type A: 0x01 [0%-10% of device life time used]
-  Life time type B: 0x01 [0%-10% of device life time used]
-  BKOPS status:     0x01 [Level 1: background operation required (non-urgent)]
-  Result: HEALTHY
+>=20
+> >  	 * greater than, new_clock.  As we can divide by 1 << i for
+> > -	 * any i in [0, 9] we want the input clock to be as close as
+> > +	 * any i in [0, {9,11}] we want the input clock to be as close as
+>=20
+> Maybe instead of "{9,11}" use "ilog2(max_divider)" or something? This mat=
+ches the code and is more
+> future-proof if the divider gets extended again.
+OK.
 
-Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
----
- mmc.c      |   8 +++
- mmc.h      |   1 +
- mmc_cmds.c | 165 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- mmc_cmds.h |   1 +
- 4 files changed, 175 insertions(+)
+>=20
+> > diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> > b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> > index c6db0418de15..2bf354331b2d 100644
+> > --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> > +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> > @@ -102,6 +102,7 @@ static const struct renesas_sdhi_of_data of_data_rz=
+a2 =3D {
+> >  	.max_blk_count	=3D UINT_MAX / TMIO_MAX_BLK_SIZE,
+> >  	.max_segs	=3D 1,
+> >  	.clk_mask	=3D SDHI_CLK_MASK_DEFAULT,
+> > +	.max_divider	=3D SDHI_MAX_DIVIDER_DEFAULT,
+>=20
+> Same comment as for clk_mask, I would not initialize to the default value=
+.
 
-diff --git a/mmc.c b/mmc.c
-index b0f1f9b..e0fc0e8 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -106,6 +106,14 @@ static struct Command commands[] = {
- 	  "status get", "<device>\n"
- 	  "Print the response to STATUS_SEND (CMD13).",
- 	},
-+	{ do_health, -1,
-+	  "health", "<device>\n"
-+	  "Print a health summary of the eMMC <device>: Pre EOL info,\n"
-+	  "device life time estimates and BKOPS status. eMMC only, SD\n"
-+	  "cards do not report health data.\n"
-+	  "Exit code: 0 healthy, 1 warning, 2 urgent, 3 unsupported\n"
-+	  "(eMMC < 5.0), 4 not an eMMC device.",
-+	},
- 	{ do_write_boot_en, -3,
- 	  "bootpart enable", "<boot_partition> " "<send_ack> " "<device>\n"
- 		"Enable the boot partition for the <device>.\nDisable the boot partition for the <device> if <boot_partition> is set to 0.\nTo receive acknowledgment of boot from the card set <send_ack>\nto 1, else set it to 0.",
-diff --git a/mmc.h b/mmc.h
-index 2bb346b..af0ad87 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -120,6 +120,7 @@
- #define EXT_CSD_WR_REL_SET		167
- #define EXT_CSD_WR_REL_PARAM		166
- #define EXT_CSD_SANITIZE_START		165
-+#define EXT_CSD_BKOPS_STATUS		33	/* RO */
- #define EXT_CSD_BKOPS_EN		163	/* R/W */
- #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
- #define EXT_CSD_PARTITIONING_SUPPORT	160	/* RO */
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index a7e4784..43dcdcc 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -981,6 +981,171 @@ out_free:
- 	return ret;
- }
- 
-+static const char *extcsd_rev_to_string(__u8 rev)
-+{
-+	switch (rev) {
-+	case 9:
-+	case 8:
-+		return "5.1";
-+	case 7:
-+		return "5.0";
-+	case 6:
-+		return "4.5";
-+	case 5:
-+		return "4.41";
-+	case 3:
-+		return "4.3";
-+	case 2:
-+		return "4.2";
-+	case 1:
-+		return "4.1";
-+	case 0:
-+		return "4.0";
-+	default:
-+		return "unknown";
-+	}
-+}
-+
-+static const char *pre_eol_info_to_string(__u8 val)
-+{
-+	switch (val) {
-+	case 0x00:
-+		return "Not defined";
-+	case 0x01:
-+		return "Normal";
-+	case 0x02:
-+		return "Warning: reserved blocks are consumed";
-+	case 0x03:
-+		return "Urgent: reserved blocks are exhausted";
-+	default:
-+		return "Reserved";
-+	}
-+}
-+
-+static const char *life_time_est_to_string(__u8 val)
-+{
-+	static const char * const strs[] = {
-+		"Not defined",                                     /* 0x00 */
-+		"0%-10% of device life time used",                 /* 0x01 */
-+		"10%-20% of device life time used",                /* 0x02 */
-+		"20%-30% of device life time used",                /* 0x03 */
-+		"30%-40% of device life time used",                /* 0x04 */
-+		"40%-50% of device life time used",                /* 0x05 */
-+		"50%-60% of device life time used",                /* 0x06 */
-+		"60%-70% of device life time used",                /* 0x07 */
-+		"70%-80% of device life time used",                /* 0x08 */
-+		"80%-90% of device life time used",                /* 0x09 */
-+		"90%-100% of device life time used",               /* 0x0A */
-+		"Exceeded the maximum estimated device life time", /* 0x0B */
-+	};
-+
-+	if (val > 0x0B)
-+		return "Reserved";
-+
-+	return strs[val];
-+}
-+
-+static const char *bkops_status_to_string(__u8 val)
-+{
-+	switch (val) {
-+	case 0x00:
-+		return "No background operation required";
-+	case 0x01:
-+		return "Level 1: background operation required (non-urgent)";
-+	case 0x02:
-+		return "Level 2: background operation required (performance impacted)";
-+	case 0x03:
-+		return "Level 3: background operation required (urgent)";
-+	default:
-+		return "Reserved";
-+	}
-+}
-+
-+/*
-+ * Print a health summary of the device. Exit codes:
-+ *   0 healthy (or no degradation reported)
-+ *   1 warning level
-+ *   2 urgent level
-+ *   3 health data not supported (eMMC < 5.0)
-+ *   4 not an eMMC device (EXT_CSD read failed)
-+ * Only meaningful for eMMC; SD cards do not report health data.
-+ */
-+int do_health(int nargs, char **argv)
-+{
-+	__u8 ext_csd[512], ext_csd_rev, pre_eol, life_typ_a, life_typ_b, bkops;
-+	int fd, ret;
-+	char *device;
-+
-+	if (nargs != 2) {
-+		print_usage(do_health);
-+		exit(1);
-+	}
-+
-+	device = argv[1];
-+
-+	fd = open(device, O_RDWR);
-+	if (fd < 0) {
-+		perror("open");
-+		exit(1);
-+	}
-+
-+	ret = read_extcsd(fd, ext_csd);
-+	if (ret) {
-+		fprintf(stderr, "Could not read EXT_CSD from %s, "
-+				"not an eMMC device?\n", device);
-+		close(fd);
-+		exit(4);
-+	}
-+
-+	ext_csd_rev = ext_csd[EXT_CSD_REV];
-+	pre_eol = ext_csd[EXT_CSD_PRE_EOL_INFO];
-+	life_typ_a = ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A];
-+	life_typ_b = ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B];
-+	bkops = ext_csd[EXT_CSD_BKOPS_STATUS];
-+
-+	printf("=============================================\n");
-+	printf("  eMMC Health Report: %s\n", device);
-+	printf("=============================================\n");
-+	printf("eMMC rev:         1.%d (MMC %s)\n", ext_csd_rev,
-+	       extcsd_rev_to_string(ext_csd_rev));
-+	printf("Pre EOL info:     0x%02x [%s]\n", pre_eol,
-+	       pre_eol_info_to_string(pre_eol));
-+	printf("Life time type A: 0x%02x [%s]\n", life_typ_a,
-+	       life_time_est_to_string(life_typ_a));
-+	printf("Life time type B: 0x%02x [%s]\n", life_typ_b,
-+	       life_time_est_to_string(life_typ_b));
-+	printf("BKOPS status:     0x%02x [%s]\n", bkops,
-+	       bkops_status_to_string(bkops));
-+
-+	if (ext_csd_rev < 7) {
-+		printf("Result: UNSUPPORTED (health data requires eMMC 5.0)\n");
-+		ret = 3;
-+		goto out;
-+	}
-+
-+	if (pre_eol == 0x03 || life_typ_a == 0x0B || life_typ_b == 0x0B) {
-+		printf("Result: URGENT\n");
-+		ret = 2;
-+	} else if (pre_eol == 0x02 || life_typ_a == 0x0A ||
-+		   life_typ_b == 0x0A) {
-+		printf("Result: WARNING\n");
-+		ret = 1;
-+	} else if (pre_eol == 0x00 && life_typ_a == 0x00 &&
-+		   life_typ_b == 0x00) {
-+		printf("Result: UNKNOWN (device does not report health data)\n");
-+	} else {
-+		printf("Result: HEALTHY\n");
-+	}
-+
-+	if (bkops == 0x03)
-+		printf("Note: urgent background operation is pending, "
-+		       "do not power off the device right now\n");
-+
-+out:
-+	close(fd);
-+	return ret;
-+}
-+
- static unsigned int get_sector_count(__u8 *ext_csd)
- {
- 	return (ext_csd[EXT_CSD_SEC_COUNT_3] << 24) |
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index 033cc09..88caf85 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -39,6 +39,7 @@ int do_hwreset_en(int nargs, char **argv);
- int do_hwreset_dis(int nargs, char **argv);
- int do_sanitize(int nargs, char **argv);
- int do_status_get(int nargs, char **argv);
-+int do_health(int nargs, char **argv);
- int do_create_gp_partition(int nargs, char **argv);
- int do_enh_area_set(int nargs, char **argv);
- int do_write_reliability_set(int nargs, char **argv);
--- 
-2.25.1
+Agreed will remove.
+
+>=20
+> > @@ -62,5 +62,6 @@ struct tmio_mmc_data {
+> >  	unsigned int			max_blk_count;
+> >  	unsigned short			max_segs;
+> >  	u64				clk_mask;
+> > +	int				max_divider;
+>=20
+> I hope that moving clk_round_rate() out of max() will allow 'unsigned int=
+' here again.
+
+By using clk_get_rate() I can still use unsigned int here.
+
+Or
+
+if you prefer to remove max() then the option is to use clk_round_rate(),
+assign the value to 1 if It is 0 or negative.
+
+Please let me know how to proceed.
+
+Cheers,
+Biju
+
+
 
