@@ -1,153 +1,98 @@
-Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
+Received: from mail-vk1-f172.google.com (mail-vk1-f172.google.com [209.85.221.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 146113B14BB
-	for <linux-mmc@vger.kernel.org>; Fri,  4 Sep 2026 07:56:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D0DD33D566A
+	for <linux-mmc@vger.kernel.org>; Fri,  4 Sep 2026 08:01:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788508598; cv=none; b=X8NCuypAXGpwQeMATMi3IdXxiB05qGGa4aQ8z8gi50KIVoNYd342pe7AiL7JXd5h1U8TBVmtFaura4AB2Op6sgqoMHPYXWsHd8KSVIQqudZZ8RCGx3vWKidvdVnjfjaxJae6r9zWgYa3TZxjUVFG9XGJzFATXOKK+cL7wF+1XHc=
+	t=1788508863; cv=none; b=q38Bft2Z5pM98jmajsgmtsWwaNw45YpKidH8D490e7X3MBufg4+OF8H72GhJ9x0fPrTeubeyfN69Pua0TLorGcMIiRlGaE2frpC3FCy/iP5T5B96zIVBDisdw1Abehf+uiarU7AuA5bVmZnAfR3doHb5oQhwcpSdzFrV1In+pkc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788508598; c=relaxed/simple;
-	bh=OCuEAwsPo6LAGIuWYwcbqhhesjnLgIEo8HDpHcn3pe4=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=rHcUClBUjyrhkYDay2COt5HtSVGjqFba0eElNdRCAzD3BYl20Fvo8xXH72KXlqLYcyqo9aPCb9wS+m+K8GZP3dEV369wxfxCUMdPGs/JKPwJu/N/fJj3sngXHjQxQgZQXIiIAnRO6aYWp+2dIzByqxtwPceWm13PQ8N85JVc2gs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre.com header.i=@baylibre.com header.b=I46e16s/; arc=none smtp.client-ip=209.85.128.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre.com header.i=@baylibre.com header.b="I46e16s/"
-Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-49b96837ca3so4592705e9.3
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Sep 2026 00:56:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre.com; s=google; t=1788508593; x=1789113393; darn=vger.kernel.org;
-        h=content-type:mime-version:message-id:date:references:in-reply-to
-         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=XJ1UH6hAE4wf/eMnhUQvleFgKZgGdJ6vWxvyx+MhAOw=;
-        b=I46e16s/lJPPo/AOimII5N/KE0XA6zmndbyha3mmX3GZhSRffL+Dbb5F+4i6Cp7qNz
-         WE3x4L3zvCvbQK1pYH5OFJSrAVguAcZD5wT6F79+RFUpftFbhV1SxFflBrU+02tpv4Vi
-         rW7XUGltMowYXAbYWn8EXSlp51PfFTrkwXvz7UsdNEgv94TJtTBKi4DjpbgUWTG27tBl
-         4lLagagOBzD/weoh00ggTZ403in733n0WizzCe8vOFtUYGWlpQsdDSXDsoFQO30FHIaY
-         JOEec6ww5767bXf8uyRG0hysUil0Oc/bHDP45qxcj9uEPrdB9TY5hc7vDdNK1HHn/Vc7
-         DxVA==
+	s=arc-20240116; t=1788508863; c=relaxed/simple;
+	bh=5STgmEpuSXLAENtQSqsuFnM5l/nP8haJUcsvw0rzQek=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=khgOaqHstVWjwkSDb5wXm4gpIqlSZM8kJdwua1cAZulMubF7tZtprQdJsqwDPd6I96v1ia0zWNG69fd3xgE5F3YG+3Kn8rbYB+IPMxZjFKRilLeYy4/9H8p3P4lgsXuLUKmY0dwiaMDff8haVTcCBhtQIexAmoXC4ilCDRSMXFM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-vk1-f172.google.com with SMTP id 71dfb90a1353d-5c5f23666d0so694394e0c.3
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Sep 2026 01:01:01 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788508593; x=1789113393;
-        h=content-type:mime-version:message-id:date:references:in-reply-to
-         :subject:cc:to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=XJ1UH6hAE4wf/eMnhUQvleFgKZgGdJ6vWxvyx+MhAOw=;
-        b=SWof7GPxGExHTy/DaNDHle030gvEzPcsdn4tWlToU0d3pCpnNsccdtZMYh3pcrHXcA
-         pX5AKia57tEFcjQecJMw5euGa979TwYO60izDIjxOR++791lOWODrLvg/hegrZe6xTGL
-         qCXt5OmRu6pP1vn7cPLdhFy+SBbVHa/CGCRps24/gGcN/TaX2PKNBhuxv0zRgo3NZV46
-         B7O4K+VdPTtV6aOHJZrfXpDOr3UrNUHnAaoxe0fx8cUSGJdrAA8l6IGgUe94W56xEkC9
-         /GolUMnoNgZvZegNJIBaM4S5juUFjaR53jyGZQIEKTAfSkdtnb1m4YV+UrIAqZGkGKh8
-         3ggw==
-X-Forwarded-Encrypted: i=1; AKwUvBw0BlT39weZOBq+dvyEZwySSiabMojeia+HFVtsPQe0vCPu7uBMdYxdfUq4QE6eeX/RttK0zXMQK6w=@vger.kernel.org
-X-Gm-Message-State: AFuF++kxsQDuG/XVyxnHoLB6qin3Hi/p+/INFfyvimMr26cUM/IlN4q4
-	ncTIw/eLKsAxOne44aToEnQZ1rzm5cGugU29QJAC6GerPDrZhtg4R+H29QADIuoriJk=
-X-Gm-Gg: AYBFou0hcB8QbNw0B1QIUyXCgY4S4SO3cU/LVFy8RBWR0ctyZeTINyNsphD3/AvhSm+
-	QBQwyLSXGwvSn6O26fm1xE/G7g02qTbzFt3tjytWISanlop+e7YEDIDFXolrb6SkQex99PzTAEN
-	yrbnax57d7hxtRhMJItfwxJPypluVC7hlspsZVIyPAoM/WAw/5ivm83rhD4f5Hd3bQcTrCEmMwT
-	QS302oEalHSOhbmPeMDMBKgHb3YsAzcnsTr52Q1lNbMbguPR8Jy4mmlO1XGcCpy249e+a3SQBng
-	leUAPxM+z30Y3cewpujamjLH/EkFh1TgSrB+obLuIrkc8+kVEoj3x9z9wy7F7PoPY0CQMcXSLw1
-	bSJ6+VKEDA9CGQTGtxYAfOfSCnGJo4/eM6X80rEXXn4ZbZ5XEsxNQDzywPqJMxwOL5Th5UPSsN5
-	Xcmz244lAhDD6VCnRNTQQxyPu7Otkm99VZqiLhkqY0AW5dm/avDlXPqgB/3qmEKXvzFTtebu0Ou
-	jGfU2sMUpQbG2mjaA==
-X-Received: by 2002:a05:600c:1c29:b0:49c:fc6c:be03 with SMTP id 5b1f17b1804b1-49cfc6cc06cmr15228165e9.26.1788508593241;
-        Fri, 04 Sep 2026 00:56:33 -0700 (PDT)
-Received: from localhost (82-67-6-57.subs.proxad.net. [82.67.6.57])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49cfd3f8192sm10480125e9.3.2026.09.04.00.56.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 04 Sep 2026 00:56:32 -0700 (PDT)
-From: Jerome Brunet <jbrunet@baylibre.com>
-To: Lucas Tanure <tanure@linux.com>, Ulf Hansson <ulfh@kernel.org>, Rob
- Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor
- Dooley <conor+dt@kernel.org>, Neil Armstrong <neil.armstrong@linaro.org>,
- Kevin Hilman <khilman@baylibre.com>, Martin Blumenstingl
- <martin.blumenstingl@googlemail.com>, Stephen Boyd <sboyd@kernel.org>
-Cc: Brian Masney <bmasney+clk@redhat.com>, Chuan Liu
- <chuan.liu@amlogic.com>, Jian Hu <jian.hu@amlogic.com>, Ronald Claveau
- <linux-kernel-dev@aliel.fr>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-amlogic@lists.infradead.org, linux-clk@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 4/4] clk: meson: t7: don't mark sys_ampipe_nand as critical
-In-Reply-To: <20260903225921.2290441-5-tanure@linux.com>
-References: <20260903225921.2290441-1-tanure@linux.com>
- <20260903225921.2290441-5-tanure@linux.com>
-Date: Fri, 04 Sep 2026 09:56:31 +0200
-Message-ID: <1jpkytlaa8.fsf@starbuckisacylon.baylibre.com>
+        d=1e100.net; s=20251104; t=1788508860; x=1789113660;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=DHcVzyvg5T1LbBIIYfTsEAB71A8C4BjQEyDgYTrzH78=;
+        b=kRPjlFkbSvbTP0vRc5pxKmiyW45r7UXCw7dPRTChNogQNgmgJ6IvQEJ5DJGdVbkvQL
+         kDzueWxEKxxhKObvM2eTf9Dfz+O95hDbEq9zT548x/oqAgUsHXFINUeCyk7xCt1TZmZ1
+         AGGP4UOLyTqqoUIJ0QSyDJcMoqfUET+47WT/XmL6r/09lHc+T0fVaBshV9u8tOaC3DvZ
+         SxEe4+Ec1Glk0BDlVUxypcznMOUUo4wxQfMHPMQVBhoS/ZGsjNxno7seH1K61lVqRUPc
+         gN4VqI/odFZE2lo3C/Fl/er9t4oahH5k8gPaImWEAX+bKMfwFwelRBtyv8dFVeTkFaVH
+         ftzQ==
+X-Forwarded-Encrypted: i=1; AKwUvByCXOunp/oacGgs1Xh6rBevWe06UNjjXrrfEub+vrYTE2LmAK5AlfvBYu7Zk76TbY2b0Y9DtVmFsY0=@vger.kernel.org
+X-Gm-Message-State: AFuF++mMhK90D/hwWPNkyUkZ301yc5GvAhRcuFYag72YR9JOniYxDISg
+	Zv6yJ++GP5uHz7vIAl3SZOb8B5FQcpiaM23CTZyz0sls7kH5zktGXJkABkNP+nc5xy0=
+X-Gm-Gg: AYBFou1JIVYeGanK9v6OeMZvuVIEPbLdETAEWc/JpNIj5GVmfa7M9QJGZttr7STVxWY
+	ON2oCN/nmZXBV72BNZz0E+C3AVOhKRFboZisSusKJRfYItNHik00xmb4KmNkAnO7s07HRHAi39z
+	0rU+/XTPTazSOmN84LpLCz8ACMa2x+G7y0aps3mEp8G/9s7o8Py5zDs9tuQ4S0XUyBtfXH9sEsU
+	Q/QdmLdiT9WfwDMrjX5PyUgxYuhVmHrp4ljDDPfBLDqd+vBDu3AY6lvcdNf6WL2h+BD6r6eVjCJ
+	ZtXTfiIbGSDw2LN5n6T4OgRBMj+qYPbfi9dTkMzEBzsaBVPAYqeZAbh2byaXW1lFS6ZS/scRvU+
+	ObXk5rwEwVTDOm1S+o0eA6GSq+BSzITa/lJoe6q/64/apR4EX9Azs/sl6toOLKa7eRsx7rxppyH
+	nJ8FXdMGMQSij0+gjMIcf6p3S83e5L741Cg/G+Ilj4ranr2KqUoEpF0mv/xeDlbFOzTAfLjH/6x
+	vpl+voQu6AFAzE7my4Ev3/aOxyBLu2gYKWL
+X-Received: by 2002:a05:6122:2205:b0:5c7:ebed:1018 with SMTP id 71dfb90a1353d-5c7ed7f9e30mr1858102e0c.8.1788508860645;
+        Fri, 04 Sep 2026 01:01:00 -0700 (PDT)
+Received: from mail-vs1-f50.google.com (mail-vs1-f50.google.com. [209.85.217.50])
+        by smtp.gmail.com with ESMTPSA id 71dfb90a1353d-5c7ebf559cbsm1650684e0c.0.2026.09.04.01.01.00
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 04 Sep 2026 01:01:00 -0700 (PDT)
+Received: by mail-vs1-f50.google.com with SMTP id ada2fe7eead31-7542a2ee156so435753137.0
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Sep 2026 01:01:00 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AKwUvByOQBHe2uSO4g2H5FrXLxo6Rr/qxva1PP318lcgR23n8Y5UVki9j0VcLtMiIKOBDBsZJ08eKfvgs40=@vger.kernel.org
+X-Received: by 2002:a05:6102:e0d:b0:778:5bbb:b2d2 with SMTP id
+ ada2fe7eead31-78a4a97bda0mr1434786137.11.1788508859808; Fri, 04 Sep 2026
+ 01:00:59 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com> <apnUfCIcTG4bmYZF@ninjato>
+In-Reply-To: <apnUfCIcTG4bmYZF@ninjato>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Fri, 4 Sep 2026 10:00:48 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdVOY2CYKfhmx4qmRPkf3a002NEbWuwafLvrJTXvLb9PLA@mail.gmail.com>
+X-Gm-Features: AcwNN1URdf1eUYUIsC6Dx67B7nRZjxmnJO7wd9vXW0tYWJ8jFblIIeeoKCEUiQM
+Message-ID: <CAMuHMdVOY2CYKfhmx4qmRPkf3a002NEbWuwafLvrJTXvLb9PLA@mail.gmail.com>
+Subject: Re: [PATCH v24 00/15] Add Renesas RZ/G3L SD/eMMC support
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Biju <biju.das.au@gmail.com>, Ulf Hansson <ulfh@kernel.org>, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Geert Uytterhoeven <geert+renesas@glider.be>, Philipp Zabel <p.zabel@pengutronix.de>, 
+	Magnus Damm <magnus.damm@gmail.com>, Biju Das <biju.das.jz@bp.renesas.com>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 
-On jeu. 03 sept. 2026 at 23:59, Lucas Tanure <tanure@linux.com> wrote:
+On Thu, 3 Sept 2026 at 22:11, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> Although there are still issues to be handled, I tested this series on a
+> R-Car S4 (Spider) with HS400 eMMC and on a R-Car V4H (SparrowHawk) with
+> a UHS SD card. No regressions.
 
-> sys_ampipe_nand clocks the pipeline stage inserted in the bus path
-> between the SD/eMMC controllers and the NIC_MATRIX fabric. It does have
-> identifiable consumers - the three MMC controllers - so marking it
-> critical was the wrong tool: the clock should be referenced from the
-> consumer nodes and claimed by the mmc driver instead.
->
-> Drop the CLK_IS_CRITICAL flag and update the comment accordingly.
-> sys_am2axi0..2 remain critical as they clock the AXI DMA bus itself and
-> have no single identifiable consumer.
->
-> This depends on the MMC controllers actually referencing the clock:
-> the dt-bindings, mmc driver and t7 DTS changes adding the "pipeline"
-> clock must land before this one, otherwise the boot hangs and memory
-> corruption this clock caused are reintroduced.
+FTR, boot-tested on a wide range of Renesas platforms (RZ/A1H, RZ/A2M,
+R-Mobile A1, SH-Mobile AG5, R-Car Gen1-4, RZ/Five)
+Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-This information typically goes bellow the '---' because we will not
-keep it for posterity. Please resend when your dependencies have been satisfied. 
+Gr{oetje,eeting}s,
 
->
-> Fixes: 43e1705ecab9 ("clk: meson: t7: keep the memory fabric clocks running")
-
-Thinking of it, we probably do not want stable to pick this up since
-your other change are improvements that will no be backported. You can
-drop the Fixes
-
-> Assisted-by: Claude Fable 5 <noreply@anthropic.com>
-
-The Assisted-by should not have an email, especially a no reply one.
-check https://docs.kernel.org/process/coding-assistants.html
-
-> Signed-off-by: Lucas Tanure <tanure@linux.com>
-> ---
->  drivers/clk/meson/t7-peripherals.c | 10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/clk/meson/t7-peripherals.c b/drivers/clk/meson/t7-peripherals.c
-> index 55d09e78593b..2f429ea86796 100644
-> --- a/drivers/clk/meson/t7-peripherals.c
-> +++ b/drivers/clk/meson/t7-peripherals.c
-> @@ -945,13 +945,13 @@ static T7_SYS_PCLK(sys_aucpu,		SYS_CLK_EN0_REG0, 14,	0);
->  static T7_SYS_PCLK(sys_cec,		SYS_CLK_EN0_REG0, 16,	0);
->  static T7_SYS_PCLK(sys_gdc,		SYS_CLK_EN0_REG0, 17,	0);
->  static T7_SYS_PCLK(sys_deswarp,		SYS_CLK_EN0_REG0, 18,	0);
-> +static T7_SYS_PCLK(sys_ampipe_nand,	SYS_CLK_EN0_REG0, 19,	0);
-> +static T7_SYS_PCLK(sys_ampipe_eth,	SYS_CLK_EN0_REG0, 20,	0);
->  /*
-> - * NOTE: sys_ampipe_nand and sys_am2axi0..2 provide the clock to the AXI bus
-> - * used for DMA between the peripherals and the DRAM. After the clocks are
-> - * disabled, a device that starts a transfer cannot complete it.
-> + * NOTE: sys_am2axi0..2 provide the clock to the AXI bus used for DMA between
-> + * the peripherals and the DRAM. After the clocks are disabled, a device that
-> + * starts a transfer cannot complete it.
->   */
-> -static T7_SYS_PCLK(sys_ampipe_nand,	SYS_CLK_EN0_REG0, 19,	CLK_IS_CRITICAL);
-> -static T7_SYS_PCLK(sys_ampipe_eth,	SYS_CLK_EN0_REG0, 20,	0);
->  static T7_SYS_PCLK(sys_am2axi0,		SYS_CLK_EN0_REG0, 21,	CLK_IS_CRITICAL);
->  static T7_SYS_PCLK(sys_am2axi1,		SYS_CLK_EN0_REG0, 22,	CLK_IS_CRITICAL);
->  static T7_SYS_PCLK(sys_am2axi2,		SYS_CLK_EN0_REG0, 23,	CLK_IS_CRITICAL);
-> -- 
-> 2.55.0
->
+                        Geert
 
 -- 
-Jerome
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
