@@ -1,192 +1,193 @@
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF3F94582E6
-	for <linux-mmc@vger.kernel.org>; Fri,  4 Sep 2026 09:41:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8112C4611CA
+	for <linux-mmc@vger.kernel.org>; Fri,  4 Sep 2026 09:42:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788514918; cv=pass; b=BovAErpgTg206v9baNRLBKIF9a5D1Kc+Ew637H7B+sNXQbPTDAZc1eoahdQUvDuQjuNvieHQ1qTUBSm12PCMvC4az2kN2Yp1tYPlMBL+IguHj8LP+FgFKLyBM/fx9zD0Ej3X3NZ27VtyPeciVCRP2XXSQJbQA/G4qNfsCefwFNw=
+	t=1788514922; cv=pass; b=EveAs59qXEh/68OsUaKJ7s7sv02xOQmQkviKkV/Hllq9a3KplkFgiVb6RKs5uYsgkfrOBhf+5tpYrXh03u5QBI2evpVAkVRBLFtIk5yBBGIjbC2ShlZn3YuSxW+z2/12aosvG+W8HMqTZNwAuBkCBWrH8hGKGo3xWGdRXgeB29U=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788514918; c=relaxed/simple;
-	bh=qRGzzdaOPo3OS6XeDCZ3Be7zPlIFi7jn0EjMfIZ+rxE=;
+	s=arc-20240116; t=1788514922; c=relaxed/simple;
+	bh=zu7emRKboLzHXzyXbEcjLUBn53PCvlKoXemd+/irgw8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JoFLt8L3hX7dgR58fMnaSnOT6GI2rtzoxYd2Zd6FUL2udPSg43J2/+e4znDt+SzVNjguS3iEi9NIcrKE3qW+nqwlwnKWun/GFcNde8m/h4HuNfIzo+VliGQe/iV/uLl5blf5Q9c/FgKi2gcinHWggRyaPsHOnx9WHpdB9c5gFzU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=BuzxoCzS; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=J8NNo92Y; arc=pass smtp.client-ip=205.220.168.131
+	 To:Cc:Content-Type; b=RR3ePNackALNfkqsPyuh3qi35NnyFcGeplwK1mrj51o4g5O/5PxuqjNyyoeLsHg1YUpH84O1TALGo37k9TEgDEkX1kYw+rRB/4EnmgIT0LIQlbscJ0Wd03EbWz6FtWHmjrl1vS7L/Bx1LThkizRFZMwNtn9OYBiSfXhYCfKS+mE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=NNWooOyY; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=RyDT/8MK; arc=pass smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="BuzxoCzS";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="J8NNo92Y"
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6847n3r02976828
-	for <linux-mmc@vger.kernel.org>; Fri, 4 Sep 2026 09:41:56 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="NNWooOyY";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="RyDT/8MK"
+Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6847mptO2292489
+	for <linux-mmc@vger.kernel.org>; Fri, 4 Sep 2026 09:42:00 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	Tj5w9Ay0zp2EkGqnRPIaa5YhxwHFgmpY35Ucat+9+Y8=; b=BuzxoCzS6uD10tGP
-	S8/k97MAZ6tZ4xbSJ8ip7+J6EK5FS0J8ZDtPEoqRSTaaqEw11Ym2B0A16de2cARK
-	3qwh8/KmJ9oHXTPF6+gK1hezY2WJqW1ELNPbVtpzosFgJDiU/NzE79hCigLbxjXu
-	dcU1UhP306/q4Uj5JqeJWcmivQl9ri1vRs9390ykHBoBcFsuz8wICFQl4mpgp+AU
-	wcupHf46/e3HCadlTy8zT6Fv3zk5Fy1xZTG0lirKzwNty/8PIFjgYjONMaAXVWhd
-	UZWV66rxUmYq33OZSS+m9kFB5lUdX+ym7T0QcdtI3ywuUX0Ru95RXDUHztk17VXw
-	EWc70A==
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com [209.85.214.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gfdyxjxu0-1
+	MymcqnZkHOqjUJcCaTmpmg9eKweEy9UxXP0OOYlsdYI=; b=NNWooOyY48IabF6h
+	3KcJixiMdydZRJXN8MGlW/Vns1nXSqMnNboKvm3FVCX1gk/MYu8ftA7HhKPj3HkK
+	KX1Dm0P/Jbh+pQ5tmhVDELDu8xZx3UTYHNgerZCd96PbmiiepMW9jaLNrGkBiKvZ
+	wO7sgch6Hm0Ea5oHpkCX1u/2fz+Y4rxp0M05Pe4Q0Nq6BWdK5y6Lg1RahFvtchbB
+	2FNqTkOxiuCZanqSop7wfwN+c2vS6woWA54JtXJOEbo6UzVedCRkxOEZD8uJi+Ek
+	H+c6JmDzsrJW4GiZcHy7Mu1Qz2+Tty9VwmGJsYXlQwUwn4z7tczYYX00DIuatwJQ
+	kjRycQ==
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com [209.85.210.200])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gfdyp2y8s-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 04 Sep 2026 09:41:56 +0000 (GMT)
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2ce7dff6253so22315245ad.1
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Sep 2026 02:41:55 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1788514915; cv=none;
+	for <linux-mmc@vger.kernel.org>; Fri, 04 Sep 2026 09:41:59 +0000 (GMT)
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-848568a6f62so986469b3a.0
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Sep 2026 02:41:59 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1788514919; cv=none;
         d=google.com; s=arc-20260327;
-        b=WHac2Y+IiiULKIwbu/POw3X4MuiYJjclX/u5hr2HfTcqzQcUoKFlKSneBEn02OJ7/1
-         KvqTt6sB8gGdgCEExxJ/W4UsMAJXC3bok24Tjg/A1biJ3yl10oPGkY0Wboe3mnrvQDA4
-         7QzHZCRDSiZ5i2Kgqvk/5wPgTQsoz247NooFA/B2FCSzapX4fv6Fp9km85EdIycfwZL7
-         LGDjN3rWQFVpsrulWZ38T6F5bJfuguJ6T6zLI/Dw96szOoqzIBCCqM/bHdrkGB2HC4pv
-         ONUXXTVzSvkz79YjTJNV77j175HiXycKbdJVWI3mmzZAalZFTogIHLyhiG3czUnCQPEE
-         0I7g==
+        b=J5gAiepaW9flQUhXnMRhIL8HFIMSSUwxB+9o5VuFdgYMu1ZvZ4CXcljwJn3xNShPwt
+         Wu7ZRKiyI/le0q5+RRGiaIH3C9mNCQXdMYI29X6ycKIvNHe4DBVAXgz8eLolj2YefY/y
+         ZglCH+fGbFx31/qRQCbu3bmVp71N1w7hUg0DGk0n1lniIhxvgEfhZ7C42q/Dp5Q8KJVu
+         D81VO1hqfi5DgGI26U62J2TdziGlgHSEI9JZGGZ27Byq0GbkUyWfwEY40AMfPuIc/PqR
+         miZMv603b2ZJ8Ao7hYN1wApy4dynRXuc23zKY60yOR+sXyt2Avh5yoHoPPHb4rNegHW7
+         zGJg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=Tj5w9Ay0zp2EkGqnRPIaa5YhxwHFgmpY35Ucat+9+Y8=;
-        fh=i8YCMglgFCwYdAPiz6a4TFs1Q4Z8DwAG7BEB8AELe+k=;
-        b=fxmYGn+8DHAQ5axNLDaltC8YCnc/bZlH+s6/X3I1kWR0TwAASV33dZxuvObMltIEj6
-         ZXphC91zlRK1Vh+lVJ+lqoXohxLMQ1eEQFMchv/yWZhBl2BznWHaQJC9LXAjIsEHOJln
-         Qi3pni33deIobNdWqrwVojnTl32wwL50LIxhWNg5hButhUUvKfEaxXay4+DHY9u4fwX7
-         9nFHcwPbkUBPPJYWX7tp5pLaqBc+TZlDvz1NnYQHsUi97hDycRUsQ8RMZoh0mYnY0P4s
-         2je6WFyPbZqsbyiFcCZf9mBy9VdwDM4mnBAm6PQRvPwi7FhwvGPsX2VTMPvVC8iY1Xkt
-         2dkQ==;
+        bh=MymcqnZkHOqjUJcCaTmpmg9eKweEy9UxXP0OOYlsdYI=;
+        fh=VswdUGQZcwDqTPDDY8Lz7MwGqpBXyQl7t1VlntCJx6Y=;
+        b=kTcA72t1G2XRHh+tuJcUAAQI8HqfEWJkxfAf25Ux4Syzgud649zsN2kyWfydE4mu7f
+         JZjEkXoxDp6btrFxBhzU2B0mgXsqLL0kJ2QMBExhhnCkjoKfQwhB5Wqcvz67OnpXnxDt
+         uqUri2QseTxuAABbh9FxYxv0J7IcpbI2wAuvPO1n0jnJKflrV5XkT5ruvhBV1fPJRtYr
+         oTklC5nmbtHRTuYM1yKSVKHyfwYlVqeQTobWXpwY+fbPYjJnYNjDA5cLD+rly4xnYJwX
+         /bF/NQ0FiCUr5N0PDNFA9mMCOQ54neE/v+YzPEJAdeCoKrwJ0+7+MfGuk5D6xvUzEgAe
+         ZNtA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1788514915; x=1789119715; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1788514919; x=1789119719; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=Tj5w9Ay0zp2EkGqnRPIaa5YhxwHFgmpY35Ucat+9+Y8=;
-        b=J8NNo92Y2zT9FO2JwSrjM75XtDkISaPbnv61Z1/oHKFd+mdAMxk4cdzkfZ4nd9Fn9z
-         CWxNXZ14tDqUlKhDLMZiSBAbdGpCntzyVYaTS/CV+GpCmt4Zq/gUa3zikkrXDHsD4Lo6
-         QZRWKWfxIRIZn2T6kTyz3EuLYVzRo07ajmPZgFGV6v1d+BhiPO6GSjqyV533wRznU3RC
-         KuJMrz2Ipsr6F8m4ZaX3xBxpjysuUQgrZJc3gHGrjG8TtKlpmfLDugZxRmDz7hWzV/62
-         fA5lC9PENMrdpupmgcnWYnO2WVc4ygJdH+jrLLLPF/K2njUkopO8XeZ14l0Ta5c461zB
-         50Jw==
+        bh=MymcqnZkHOqjUJcCaTmpmg9eKweEy9UxXP0OOYlsdYI=;
+        b=RyDT/8MKoEkDnaWBrCz29P/QGTipLbDhtmiGv2nNCdr1cvCFY8AnA/H50+Q+9DPDT0
+         EhsR329e+C2hMEhYz0eaaYtg8BICLyxvXDTMspHh2J+FVZW67gzCPrpaelnbHjUdHuOp
+         sm6C1Hl3oLYmXg6PP8vS6hx7cvvgx/ZIAMA9KKKfnqePFDy2cPaIoZfSRoabqf9nS/m/
+         tCyT1QylgPsq81q9yVzBH1O8cM7lQhLnGDNcj1unYi0mxF2+GcRVRCw0iH8ZzGQubXfi
+         ZB8VFIyHSXUS8/WXqztXLfmZOAX82OyLaVZhSXAipsAs521LLfZqsCurDooxtmFuZsze
+         UHAg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788514915; x=1789119715;
+        d=1e100.net; s=20251104; t=1788514919; x=1789119719;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=Tj5w9Ay0zp2EkGqnRPIaa5YhxwHFgmpY35Ucat+9+Y8=;
-        b=mwlfnUJMg56H/+rk0pc8LhmHV0nEW6mRfOiubTXL8VPVUezss3wr7HGhDrYTJVNOSK
-         fmxPQuxI1m/Hcxjvsz+q49F2cW63jr3UD/h44oYDOycBA9mslfXDqQCgRM/438r+gvjv
-         4Xo06p6VU09toFnbNnGRzJg5+EmZmMRK3V9/jBtxIUECuNdWNaxYh8Ihu446+O1HO+yc
-         CCX9PufLQSZ3zNIP2TWNo8L6ncOiyqT1uxR2wixetVK9cGObYT4U6dec+ZxlsnPehdY7
-         5b74bVO4MqCYvbHEhjtgsQXuMwYvVyHLB8aPxH9yTBo6cTDXUGBqgKFEfomfgGJYfl4a
-         7dEA==
-X-Forwarded-Encrypted: i=1; AKwUvBzDqfeUf2kIfeknMseQc3ps/iEO7IWKyCV7PQ6oNQWevx9m+N5uEfX+pqykPtc9enBP/aQQ2BRpHyE=@vger.kernel.org
-X-Gm-Message-State: AFuF++k9I7iK0iU6Tzazr7dO19xpyC7md0hMjv9qechnqGgA3hJPm/UQ
-	IwZvS6S8edtG+fpVUG+mKLB7PaD8Ssb7ixqS0bU/lrproLLR8fvNF8Jxwc1ZQJMmFPPtrlvksRI
-	3SP5P7aAlMRVENc93/oF59cBpQxx2jdUIjaD+dH1a6ibdc8MupvFcrwi/isyKHGf9UmeyZdPqla
-	tcP+DXvgz0ZMhXD6IsJWJ9bqkHuz8bNcjkGwiJzw==
-X-Gm-Gg: AYBFou0pGnyIzYm6YP0Ag9RX4TN+rtPpT17/51Yrc+DWEyK2I2B2FdSHJWNzqq4MOVP
-	dXU1N9x3++bZPXZD5alJAMquN8/zugpBm+m/edRT/A8CxXJTGTxRN/+pMsg41V4YEGapEwYj9u9
-	NIUJQ9NfWTwfQUVKNZqeChyc8tzxYS1+S2J+gm6Pvi72o8aZei62Vrj1xs5A==
-X-Received: by 2002:a17:902:d4cf:b0:2d8:d4cf:fe4a with SMTP id d9443c01a7336-2db15bd9addmr33760805ad.16.1788514915383;
-        Fri, 04 Sep 2026 02:41:55 -0700 (PDT)
-X-Received: by 2002:a17:902:d4cf:b0:2d8:d4cf:fe4a with SMTP id
- d9443c01a7336-2db15bd9addmr33760515ad.16.1788514914955; Fri, 04 Sep 2026
- 02:41:54 -0700 (PDT)
+        bh=MymcqnZkHOqjUJcCaTmpmg9eKweEy9UxXP0OOYlsdYI=;
+        b=PoVQHt6pKp34P7lIVw8Wa7s7lx4tXWH0djlCIacblt0fvLj174pN+KPFabQv+tGeSX
+         oJoggzvhffYawGETtQc6fyOPBilKbHPE9vu0Xi1u/maQdB/bAyxAVc8tyNtD0XnnNof+
+         tiX0wkpVHc/tr0F/0A/OTv4+gS9cAwne8qstitmmarvN0yvveQIu2bimsIzVocUNh4jG
+         BnFt3FjtahaD2FFCkJn20LhtNIvmLFuibpggHs+KUx0NmLCukwedm6eOZ3BhwsZYCSTn
+         c5+RzMBqY2Lm8xWMdYEnzQ7o46FqfshcX+f70aLRU5jSuhY0RnGuhezhYOboP9xNaaEC
+         m+tA==
+X-Forwarded-Encrypted: i=1; AKwUvBy/Y6HaXKygA4Ps5cCpx5eBlZfXYE4FSvoYpKs14DkPC2DgseOoOsxke6mEQdqU6OF8VcihHuOxsQ8=@vger.kernel.org
+X-Gm-Message-State: AFuF++nyVMt1LuKaFTejhDjtXQ6OYXei7oLUYGO6pp42JHjraxS1PMjv
+	G8TeT9xHtpg78SeSvv8DhlyYj0AgnP5RVcFxeVgQzprOF2Q+3iL1LpuuZqidVDYAZT/4ATYgWXM
+	n2DiRhUOo23Evr6P4pC11X4/j5uasdJOHYItWK/PJDhEC6XAEUbKaI42u+rTReshAGV+ZgpcF8k
+	Zu+VdXFlOCWV3x2bFQv9JajCVcpm4QcBeRSY49LWJk8Ygtcw==
+X-Gm-Gg: AYBFou1RTd1OGFfykU7z3AJp6KjWUw2QSKLrlFqZWbY19zIZu3qjiVbDKaxoYQufEjt
+	nComXBp6GSjvcxz66a5yos6NGR0H5Ei9i96XQolQdoK/G4MZAmft8xYAjFbLgZqgfo9qQGpRUo6
+	mGSg8c7A6fOBwbovriBUPRbJ/yOhMWwU9Wo+pYE1uYNfbr7TNlvY1NNMFFZw==
+X-Received: by 2002:a05:6a00:400e:b0:84e:e741:174f with SMTP id d2e1a72fcca58-861669c6df9mr7906451b3a.7.1788514919166;
+        Fri, 04 Sep 2026 02:41:59 -0700 (PDT)
+X-Received: by 2002:a05:6a00:400e:b0:84e:e741:174f with SMTP id
+ d2e1a72fcca58-861669c6df9mr7906397b3a.7.1788514918708; Fri, 04 Sep 2026
+ 02:41:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260806162202.657512-1-jm@ti.com>
-In-Reply-To: <20260806162202.657512-1-jm@ti.com>
+References: <20260807-am654-sdhci-v3-0-acc91d7d7e50@bootlin.com>
+In-Reply-To: <20260807-am654-sdhci-v3-0-acc91d7d7e50@bootlin.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Fri, 4 Sep 2026 11:41:43 +0200
-X-Gm-Features: AcwNN1WuovdSU_2kEKvHD8EEYyXMloGWDohy5Yd4DT2AHl_0YEhIymeBDEfX6pI
-Message-ID: <CAPx+jO9bWbwzZqgjW1pzYwD4OfsHLBuxEEsqkvzLgF0NLT4Rmg@mail.gmail.com>
-Subject: Re: [PATCH v3 0/2] mmc: Add power_off_delay_us support
-To: Judith Mendez <jm@ti.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Sebastian Reichel <sebastian.reichel@collabora.com>
+Date: Fri, 4 Sep 2026 11:41:47 +0200
+X-Gm-Features: AcwNN1WY3Q65S3OXvIJFG9cyzWdBxYBgoNhzeyg3bRWcOCH2qLTUuWKCE0IcBIQ
+Message-ID: <CAPx+jO8UoYuWmKRi7ZNb=5mhnoeZB0iLHeqRqC3d+_NO1mx3zg@mail.gmail.com>
+Subject: Re: [PATCH v3 0/4] mmc: sdhci_am654: Fix DDR50 mode for cards without
+ tuning support
+To: "Diogo Ivo (Schneider Electric)" <diogo.ivo@bootlin.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
+        Faiz Abbas <faiz_abbas@ti.com>, Judith Mendez <jm@ti.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Pascal EBERHARD <pascal.eberhard@se.com>,
+        Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-ORIG-GUID: SIifRP0Zc1uBRi4hllgyMvljtBererK0
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTA0MDA4OCBTYWx0ZWRfX8SxidxY/bPO5
- /dXGFncKNnvxzaoUkzjMjvE8lxfmopuhauDk/EqyEEEd355q8Fhp5TaFxjXHsc7wSM403S7LLKj
- PlCrp19PIwp7zlGWNer8Cy8mHDqdW3s=
-X-Proofpoint-GUID: SIifRP0Zc1uBRi4hllgyMvljtBererK0
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTA0MDA4OCBTYWx0ZWRfX6O1m76jziZvW
- LStBRt+/H5MLOe7A+QXua/cd3e+dxJTTuedH3NdVo0S2Ssfx2p9NLCVoKoBFr7EA5AgvsAlvbR5
- d2wmaYG+LQAwKCtTRq1VxpD7r9sVtRYOvsqef9cLuJ9g8RISJldWqHXz6AiWvcp064+2+ScfADK
- P5AiK5y3VGDnIzQX8Rfd16PMbKN4GXaZsJCNgWpttlUE70oX7wPExwjLLplodBJVMNrkk8afUym
- OMydh25/nH483JowkEx4c0JU/1PhNs+OzMSr87PmvgcbzpIpumFTddKjmxqC8hlk/FipG3UeSNi
- S8/lwb3oncVvyRJ2Ly+TmFr/lxBtyGtB6+8uuSupTl52XYD7EIqoFRytxf2SGjJbjUDJHI2Qp2p
- fRkBUnFe5Dc+eq6xait39WiT+ifs2COGXFl68yF/Uc9mVms5IQd6i8kpRABbKrrMpWDoR44YaMp
- T1VGjP5KOIsIRugT/yA==
-X-Authority-Analysis: v=2.4 cv=X9Zi7mTe c=1 sm=1 tr=0 ts=6a9a9264 cx=c_pps
- a=cmESyDAEBpBGqyK7t0alAg==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
+X-Proofpoint-ORIG-GUID: JZMS5ke_HX3-3frqgei5YGnfybyg5LGN
+X-Proofpoint-GUID: JZMS5ke_HX3-3frqgei5YGnfybyg5LGN
+X-Authority-Analysis: v=2.4 cv=Q5XiJY2a c=1 sm=1 tr=0 ts=6a9a9267 cx=c_pps
+ a=mDZGXZTwRPZaeRUbqKGCBw==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=yOCtJkima9RkubShWh1s:22 a=VwQbUJbxAAAA:8 a=sozttTNsAAAA:8
- a=Z57f2_SGLxpEgxUGCI4A:9 a=QEXdDO2ut3YA:10 a=1OuFwYUASf3TG4hYMiVC:22
+ a=YMgV9FUhrdKAYTUUvYB2:22 a=bC-a23v3AAAA:8 a=P-IC7800AAAA:8
+ a=Yx-hDG8L3HprUginNkQA:9 a=QEXdDO2ut3YA:10 a=zc0IvFSfCIW2DFIPzwfm:22
+ a=FO4_E8m0qiDe52t0p3_H:22 a=d3PnA9EDa4IxuAV0gXij:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTA0MDA4OCBTYWx0ZWRfX5qjqWVp9Ep+i
+ bBxilbucpH5JW/IECtVwXv0/wXx45Fck33lYcL3abBb7sQWr7xg5DZaggPgWdi4BIvcE4a5du1A
+ 24987ZVp8HAQjyWsH7fVyxssvRfN8bV2U5CekZL9i2mGdZrsa+4uO6Gqvjhcs3b/DDsZpb11BlO
+ fLBHzdcHl9bIrAkJ4GkgDw2UQ8CVXrEM2yShZtQ6TwFN1zvYpG+fXOG3gbbtTLG0n4lz7dSycN1
+ /+/opE35JAmnFCS+s5ydz/zSC6cCv0ZjrZIkhVqVbgeFD9pYMEhmnfsoY8zMxUabdJYWNanx6Vk
+ fjVsqKgxtlrUlXn6cXPokAHnqR9R2xOWT66ldnx+WCKTvoctbfnZJQtY17DNnvzWOx9691ueEc+
+ 2knb1FBqqXfAWmVM/M8svS2qQV9vx/Iq3gK7c17jzcFOKS8Xx9XdP4avDW1QDZ3aiAf55DZM8il
+ aHgHuMYbzOlbbbR/8Xg==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTA0MDA4OCBTYWx0ZWRfX+vh/A4khHsxg
+ QsOrNlzVrVnJBYPKQejhJQ1rKu7eMqzE9zI0vf2AXqC8gHaOU1jxgLtfYVrIfb9/KDbDkMFgl4s
+ nAVfSbYFesUjgosntaw4xHqD8dUPus0=
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-09-04_02,2026-09-03_01,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 malwarescore=0 bulkscore=0 clxscore=1015 lowpriorityscore=0
- impostorscore=0 suspectscore=0 priorityscore=1501 spamscore=0 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2609040088
+ malwarescore=0 phishscore=0 priorityscore=1501 lowpriorityscore=0
+ clxscore=1015 impostorscore=0 adultscore=0 bulkscore=0 spamscore=0
+ suspectscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
+ definitions=main-2609040088
 
-On Thu, Aug 6, 2026 at 6:23=E2=80=AFPM Judith Mendez <jm@ti.com> wrote:
+On Fri, Aug 7, 2026 at 1:08=E2=80=AFPM Diogo Ivo (Schneider Electric)
+<diogo.ivo@bootlin.com> wrote:
 >
-> This series adds power_off_delay_us support for MMC controllers,
-> enabling boards to specify custom delays after MMC power off to work arou=
-nd
-> hardware issues such as slow RC circuites on MMC VDD rails.
+> DDR50 mode is not required to support the tuning command CMD19 by the
+> eMMC/SD specification, meaning that calibration may fail on cards that
+> do not implement it. This series fixes four issues discovered when
+> using such cards:
 >
-> Rather than adding host driver-specific workarounds, we abstract the
-> implementation into the MMC core and pickup the delay value with a device
-> tree property (power-off-delay-us). This allows any board with slow
-> power off requirements to configure the necessary delay without code
-> changes.
+>   - Patch 1 moves the tuning_loop counter from a persistent struct field
+>     to a local variable, preventing failed tuning attempts from depleting
+>     the retry budget across calls.
 >
-> The solution is minimal and follows existing patterns as with
-> power_delay_ms. The allowed minimum value =3D 0 ms (early return).
-> The default value is 1000us to not deviate from the
-> original 1ms delay set in mmc_power_off().
+>   - Patch 2 ensures the command/data line reset is always performed
+>     after tuning, even on failure, preventing stale data in the
+>     controller buffer.
 >
-> Link to v1:
-> https://lore.kernel.org/all/20260716232641.2659710-1-jm@ti.com/
-> Link to v2:
-> https://lore.kernel.org/all/20260722205701.372789-1-jm@ti.com/
+>   - Patch 3 clears the ITAPDLY enable and delay values on tuning
+>     failure so that leftover calibration values do not interfere with
+>     subsequent I/O.
 >
-> Changes since v2:
-> - allow 0us as lowest possible value (early return)
-> - Change custom logic in mmc_delay_us() to use fsleep()
-> - drop dt parsing checkers
+>   - Patch 4 falls back to the DT-provided itap delay value for DDR50
+>     when tuning fails in this mode, making a best-effort attempt at a
+>     known-good delay being programmed.
 >
-> Judith Mendez (2):
->   dt-bindings: mmc: Add power-off-delay-us property
->   mmc: core: Add power-off-delay-us support
+> Together these changes make DDR50 functional on TI J721E SoCs with
+> cards that lack CMD19 tuning support. This second version addresses
+> all comments from Sashiko, which I found to be correct.
 >
->  .../devicetree/bindings/mmc/mmc-controller-common.yaml | 10 ++++++++++
->  drivers/mmc/core/core.c                                |  2 +-
->  drivers/mmc/core/core.h                                |  8 ++++++++
->  drivers/mmc/core/host.c                                |  4 ++++
->  include/linux/mmc/host.h                               |  1 +
->  5 files changed, 24 insertions(+), 1 deletion(-)
->
-> --
-> 2.54.0
+> Signed-off-by: Diogo Ivo (Schneider Electric) <diogo.ivo@bootlin.com>
+> ---
+> Changes in v3:
+> - Collect R-b from Judith and A-b from Adrian
+> - Add debug print when applying DT fallback values (Patch 4)
+> - Link to v2: https://patch.msgid.link/20260803-am654-sdhci-v2-0-a5ee5be8=
+6133@bootlin.com
 >
 
-The series applied for next, thanks!
+The series applied for fixes, thanks!
+
+Note that, I added a fixes/stable tag to patch1 as well since the
+other patches depend on it.
 
 Kind regards
 Uffe
