@@ -1,471 +1,120 @@
-Received: from esa.hc6817-7.iphmx.com (esa.hc6817-7.iphmx.com [216.71.154.88])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f43.google.com (mail-wr1-f43.google.com [209.85.221.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E05B548EBE0
-	for <linux-mmc@vger.kernel.org>; Sat,  5 Sep 2026 11:33:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.154.88
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788607990; cv=fail; b=dKels05S3gIzK1IOFwWyB8flopVrfULHNiMBu28itGzA+TCCAU6OEcV1xmVOfB+bRgZyT1aptZv6g5UzgOYl7BfkY61TEh8vBElori0eaZrYmDBP3sCXehnecVOVi8/O1FxBXCgz0xDs2SAGi8PzthkD2i1wKkrEuCJkb78aGp4=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788607990; c=relaxed/simple;
-	bh=aeFTuKjfkIA9gVanlpCZrv+nwvGhGcoHEDU1/B81+rQ=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=gnPT6Ik8jj0SnzMzJe4l9azWKzognOEegsylpPJbfMJ/S8INUpoA5nTr41bTUjZAq79pkAoOSC8zNxofzwN57RxJ4IAjRs5WTAIQW8/li+dilo91DCM86YvIabCeApr1PXx2k5CsRKRBk4MM/Kv5rXxqmvxTqcnIjVwz3LsTMHM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=NPN51Dl0; arc=fail smtp.client-ip=216.71.154.88
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="NPN51Dl0"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=sandisk.com; i=@sandisk.com; q=dns/txt;
-  s=dkimnew.sandisk.com; t=1788607989; x=1820143989;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=aeFTuKjfkIA9gVanlpCZrv+nwvGhGcoHEDU1/B81+rQ=;
-  b=NPN51Dl05XY8Z4Y0biPsA2Gx5Miai7NsgH/4t05tjJbYq1zQWCEki1K6
-   Lvk1u8u4FIre1A65HLqISwhqeuQhAH+wa1/E1aGA9nwYann/nMTFB4Gys
-   NZ6zYAKTy4HdoSU4zB0UcCBoT6KQwmMZPmelKKwfJAqMBUvCP93e761qs
-   F26HhZOs1ieM86aIG6UidNK25wcjfKNDOAWpFybaQIDIspcWZYK8w9Ifg
-   F+omZD+FbOB1OAGlFubpl809ZHYheE36N+lTZ87NjC8W50V+MHhR3VKUe
-   S0ricTUp1ygEuSrLuLXu9TCrEEItiz/qAW+Wfmtqcziu15diuZf1ikDh1
-   w==;
-X-CSE-ConnectionGUID: 36cdRGVmRHa6HkfjhXLGdw==
-X-CSE-MsgGUID: MatspxL8SUWSG/MCCnHHHg==
-X-IronPort-RemoteIP: 40.107.208.124
-X-IronPort-MID: 29765559
-X-IronPort-Reputation: None
-X-IronPort-Listener: OutgoingMail
-X-IronPort-SenderGroup: RELAY_O365
-X-IronPort-MailFlowPolicy: $RELAYED
-Received: from mail-westus3azon11021124.outbound.protection.outlook.com (HELO PH0PR06CU001.outbound.protection.outlook.com) ([40.107.208.124])
-  by ob1.hc6817-7.iphmx.com with ESMTP; 05 Sep 2026 04:33:02 -0700
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=CnThIDoW4897GsCQ5REtaZc7cRUFazJmpmADx1Z4w0AVG24RqafPiIPB2XKMbonYqXFcceTO6eM8uOZzmDktGpiadKjDGTlOyxBaxsvkd4WY1bAj2ssIjf0maB8P099BqFOzv0kNcT/H5iYOoMJ9dgxYhmkIcXI5FgH69Tj09Y0E96Gavl5wdM1AR2nQ323wzZNQNSe0VYEg2d+t520iSikOvh8KpolMjl1Gn5Q+qvsw/9TygvGynzdDZa6ychM1/Izii+tKJcxM7h6GA6qVh0xfNo9jPJfaVhnV0u7FLaPHu87Fj2JHkuEC/dcP+EWY2q2aXfx3MRjJLPLtcuSdBg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=OHBryDq/TyFa2h1g/PiNPN2R0U7UUO7LK3cUCTlswF0=;
- b=iCoOqaSZHpwHylQtVTcAKlJTaR24pC7JLrKw4wjHZse17EWdL/7DmmDwdGpgtEfXaYpmuQZZeBwFVGmO40Ax+P6CILredomk7ocTckDn1PaVVrgIDX6UKIASNUtib+TyWNRi5TIpQZ4aRvw6sJ6gNTjKcjUGXmMP4fUs33CRvugPAvek8TddTYAUqTWvow8Kt0NbcLi6Ad3EA6IEogzO/GaMmfXWJblO7mxrTzUPNR4d0eF//3wjCQcMred6eII+1ng7qWa7fqiYX3IxWE5cDlMuetqLEjA2MPMYrg7fXYjDn/UhJjOx89EN5V4hAcc2lZGtrBXE+LeIZaaHnd55SQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=sandisk.com; dmarc=pass action=none header.from=sandisk.com;
- dkim=pass header.d=sandisk.com; arc=none
-Received: from DS1PR16MB6753.namprd16.prod.outlook.com (2603:10b6:8:1ec::5) by
- LV3PR16MB5600.namprd16.prod.outlook.com (2603:10b6:408:1d4::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.382.14; Sat, 5 Sep
- 2026 11:33:00 +0000
-Received: from DS1PR16MB6753.namprd16.prod.outlook.com
- ([fe80::72d7:97b5:4539:a90]) by DS1PR16MB6753.namprd16.prod.outlook.com
- ([fe80::72d7:97b5:4539:a90%5]) with mapi id 15.21.0382.007; Sat, 5 Sep 2026
- 11:33:00 +0000
-From: Avri Altman <Avri.Altman@sandisk.com>
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulfh@kernel.org>
-CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Lin
-	<shawn.lin@linux.dev>
-Subject: RE: [PATCH] mmc-utils: Add health command for eMMC health reporting
-Thread-Topic: [PATCH] mmc-utils: Add health command for eMMC health reporting
-Thread-Index: AQHdPGmoGtsQkfbfhEqLw78G6hZ6Y7a/0HqA
-Date: Sat, 5 Sep 2026 11:32:59 +0000
-Message-ID:
- <DS1PR16MB6753DA98DCC26E114D325284E5B42@DS1PR16MB6753.namprd16.prod.outlook.com>
-References: <1788525214-40803-1-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1788525214-40803-1-git-send-email-shawn.lin@rock-chips.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=sandisk.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DS1PR16MB6753:EE_|LV3PR16MB5600:EE_
-x-ms-office365-filtering-correlation-id: 2bd79f96-5ae6-49db-192f-08df0b41709c
-x-ms-exchange-atpmessageproperties: SA
-sndkipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|1800799024|366016|376014|23010399003|10070799003|38070700021|3023799007|10067099003|56012099006|11063799006|22082099003|18002099003|55112099003;
-x-microsoft-antispam-message-info:
- RecrW4ouDiUqkqoIbt644gdByA/4RpmnCFT2jMYB9JtxOFIywx7J1IaOZt3Wi+OEHn+0uwwa7QKqBc+pJi4NWfzEbPqXQZi1gVSg7b1tUxB6dovnOfccHuyinZRI6kyzBW699O03Gxw8C2/RlwrsFfT6u0PONlHvMwBBg9R6CX/4jsyHS3poy3/+82aXb+ikXQxz3n+Z5WA/o84+p8KaDoyIJ7VjTVBq6uWzIxb8AucIdMPdwyo4Q28rJfz2zI2JedQUKrd9KNRrJY5EVr+tgf5qvH01cvKFErupijbinjzyRY/ywQESbfU+YbjMLeAOVR0Vw1Q2xUwDDk63ns2Ou7YKNrLJYsKYa/qWcUl4GBvyoMnmFuxVkDi78PIDzzxgQ0C7m+O/7BtQ++K+hQOD3Awb+iUbXXjdVhcumwREH1+JM0KhEOzxIntWLa7p8nbeZPXJ1TaIO1Z+X8z6Ooru5fIVxqtpuH8l4QFRNek/tf1a9BTvlzioG+xq5Ho9h2HBg4mXTCnsgEz6ZcjPz24M/Vqiy5cHE+3VS9YFmjlu3y2uAoFv4nWPaP1gaJ3DL7t9OIUaB0cIamS53RT9Da09UKlhekIi0clHI26qYaHyMp/58BoJHq/0eafaodfSMulng1g4sl6mrbEbNRz610VC29B2CuBCqEVAsIg2X/HY6W5MTPuiGSfcZudAbl0ednGv8JnR7zgVIh8IvFF+YW6oz4NJOMi0y4UxTD8OIMsECi0=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DS1PR16MB6753.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(23010399003)(10070799003)(38070700021)(3023799007)(10067099003)(56012099006)(11063799006)(22082099003)(18002099003)(55112099003);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 2
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?FSJ557C5/HodrHEzbHvjjMp/XdDp/GIDQy/g/yJopR9KaJrzJ4JcWcP47r8+?=
- =?us-ascii?Q?5csDY8d39LmBc1gqy9YOWzHDJhXo7PWHA3TOs1hQCdNqNlJh4m+UpN4uv0wV?=
- =?us-ascii?Q?L+MPWn+S86Odgo1WqnaeNYRAqHyu6aOPePBsHvvGMCBwvh3i6vQuHadM1ve6?=
- =?us-ascii?Q?0Gad3CKXtPczorBkG37pVWy8ACr4iH8mBIPO2VRwXWis6J3N2dbimhY6gzeL?=
- =?us-ascii?Q?iX1L3UOzi1dKpuSaTf2ziGIztHFbhmMOa74seUU1XHfwia+S0JwHLTbBAJUG?=
- =?us-ascii?Q?vzgX1IqWDyqMSQtGozdr6aUpp1WfFeFUde52dyZjtq9n9koeCRLOZETmyy1B?=
- =?us-ascii?Q?T22VYYrLQzMeNVgsNm9i1yNelYv7TQbsX1v7Velp3yy6ZUfDKNdwzWz6s2BN?=
- =?us-ascii?Q?XWV+XIV5NsoDlM4bj2DCw8R0uv/Rwgj9f1xUiohk7IKF/rhtHUoMWqQKSMaF?=
- =?us-ascii?Q?y5p29gk3t6FVEMNqUCw9srek2KHSqPwS8sPqgE2GVTL/dvBLJSt/DGnxCI9D?=
- =?us-ascii?Q?qpGf9Bsp1X3s9YEZP3pQz0pEk+uktVYTFsXgjbpQWnUOPJ6/N6fYd5LrFiEP?=
- =?us-ascii?Q?HIc5eesqlchCRAPXV5aLv4nhbEcn8j/EAFhr/avO5yWjV3U3YAsuhjxVHq/8?=
- =?us-ascii?Q?MpSKxd5J9O7wNXW+G+X9p+0ghDV2zZcuceCIEC5+LoiA5D7laELZG2OyM30t?=
- =?us-ascii?Q?cWVaLqemmCeZ1DY8cvv6Xl7AJ+aIArSzh/3395iiJkBQfbmnRzYCYgYfXLS1?=
- =?us-ascii?Q?xCJgZt/qVSCZpPQJ/u2vE5YEN2j4e6bQ41pJ+W1zJasgj/RlOoUpEmROdtpM?=
- =?us-ascii?Q?EHkv902s0XQJEUUc98Zlsmgo1AK3RADrrMN3qshgjvdPO9PvJp6KZlVS1YTr?=
- =?us-ascii?Q?vThHhAGaKaO1pJw0/3JiClHVSCNA5+tlOw8JiijdMZKT7zfvahYngbeRfoVf?=
- =?us-ascii?Q?FRzrMTzMd1mkfvTfSMctM11X4tfhScjQZUvtUU/BhaeN0RRaMfjajKTFaMTM?=
- =?us-ascii?Q?wxy5/5KZNb1W3K2v5VtncHcOY9ei4MF08jTHxKwR1wl5aStyB5thr8smIQBx?=
- =?us-ascii?Q?e55AhHOnrR5Gt1gGEh9WMjqJ4JvCq/D2GotVPWLAsbIqV+8S7QKODJqFdczX?=
- =?us-ascii?Q?k5JjNExCbDBsYDJJgVK8+1nS5pj6EL+ibyy/IxijxKzVoN0hUvW/DpT8j5yv?=
- =?us-ascii?Q?/AIRTbC+meHl7RM0kGAhwt9oWdM1qBw/rjJ/ieOteHsr9ihALB+FvcTNPCUt?=
- =?us-ascii?Q?tG1WcWh+dOV6fdjOXqTBNrV/iJcrfziHW1zXQE+nTzwbkBh+vjYfjsX21+Dk?=
- =?us-ascii?Q?+MTqlS3Ni1ei+loMB6T878GTnEXBSB2m16zFm4LldG+JEHQ/hXagYk86EkA8?=
- =?us-ascii?Q?Mxbq7e3YUwobByLPx5I2fISYu5aLhbazpE9uH5KorA63oZa/rQxI+2tyRKzF?=
- =?us-ascii?Q?/pbnHxtA9kzh8p3vgkyJgZbfetDydoWG2ih6qQ3Ym+9aLgTXcXGIljxPhPUF?=
- =?us-ascii?Q?i0PoIuhJYDWTcBJwO3eSbFOV3BRSVJTyF6Juyhelx4t1MxBV5/icqIIRclmQ?=
- =?us-ascii?Q?oIgLD2BphG1wl+BSFUyYdSx3K2gSUlgI6Lgt8zILF8NzsahDLaBXNSGANUv6?=
- =?us-ascii?Q?DyxdWEPSjDhVyPdeTOWztAjelc2hwAJ9N8K/gilpC+noI40gQOZZrHRnnYQx?=
- =?us-ascii?Q?3RhM4lw6gzACgZ2ZOKjgXqoo3S+iiKw0S99HU6CZYwxPaL6+mQQrc+VW5ReM?=
- =?us-ascii?Q?PuiY1nKULZ8TAdq2LRy7V1SJXhCUaeGLObguoBR44LBbvEmR41E1b4R0Xh6V?=
-x-ms-exchange-antispam-messagedata-1: y8HmQiMhEDXxuA==
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C4D6F320CD1
+	for <linux-mmc@vger.kernel.org>; Sat,  5 Sep 2026 15:32:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.43
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788622359; cv=none; b=G3VseqCY03EO0EtGNQ8sone+5iNJdBtq0pK249sfvuLPuLLj6kUSWgv9cNj/lY00PE/FEixlVRAMZ5PqH7OH76mRLpxQaqRjLNoU3mhLUztUlxBxtcY5rRnlsP2Ymc6hR2DdpDjQXUxvVSMNS867V0p9E/+zsv5w79eCx4Tec9o=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788622359; c=relaxed/simple;
+	bh=8J1UiXJhzVvrBOSm0Tr/M27LUtZiz4TFzi/G029Oths=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=JWiu4ZqyS9s0eBPu9YB0AzTp09M4aCJrFPJLd2NrVGpu82xyUN2okhm65S9tasm0UypiR5E7pe02ajcI51vopTK0ImvjyFTOAe3CMsvuj0vmtqBf+P7wnOvdhIpZ7hdOpfGY7jwhCKxqflrlouzsrEuFM9y+A9w+tgLYpyNAqnI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-wr1-f43.google.com with SMTP id ffacd0b85a97d-482f9309813so1835809f8f.1
+        for <linux-mmc@vger.kernel.org>; Sat, 05 Sep 2026 08:32:37 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788622356; x=1789227156;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=jSU4aZpbll1PpORySxMO+b6aF9erqEZX1yTwxUGQHwY=;
+        b=ceyTrXcZh0xSeMqQ3DcKEii0E7AfdMGfJ2txQ0gyuikz8b/6CWgADaXY8Rv5zTjYIH
+         t0CXh+bPlxO0zdBQ6wvOeGyUHJ4Xcwc6DuYfuyshkH8AXWaF9/wVkU47iwWnzFisQsLy
+         LwXicf//5coi+/0T12umA/zloI2aiH/m+2aupxNQIjujqkY5sSZRQyNZwe3uG0Bg9kyK
+         GHdgDs2Cu4MgFcmyhCX3DfUsPpD5lYWae9vPJYay/JIfmzyCCJ2CplkNUphYcUi72rKS
+         I8wqP1zwBzpifB4E0PXraLGpKyHp6u/LHSaNeoWmcnAbvG1CqQRDND9qMHUxNSmRIhcq
+         2zLg==
+X-Forwarded-Encrypted: i=1; AKwUvBzLO9cPg6o8CW0Jc6BCK9Hk50OpDY4lrLA0ssGocltYRMw0xRsNTTyuQIyG8nHzJQvX4WMjznt+O2s=@vger.kernel.org
+X-Gm-Message-State: AFuF++mLx8ia2HQ2YKUu2I/GaFGcvarDqTlOu1LiW7iLgj0YhZMASdub
+	5Z7g3zff1zyKD+N/nzsZuulyxf0xVE1FP+qNbiXdztPoxkKTXPus19Q7
+X-Gm-Gg: AYBFou0JN+0MQA/3+80bHSENBpNRqhvxlpMT+LjVib3Wv225Np8Vg/AWG0IpxRjajkw
+	YjDMsyXlWquKgClX6hoxplw+tq4gmm7gfEOEEK8DLVrUwUIqi/bDUB+dPNZYxwnBgpb9TPpH8qX
+	rkpl2pe/XvcWCKD1nJ4KXHC0Owf3wtOniVIM0+SUM0VWzpKwZ93rZbswZwV0cEvUYpg2JXWBTKy
+	w/bvTTTvtdnzGz8M+rJd1qSxDdMNaQ607vTAe3bxwqpeBQKYgOdRCKKzboOIEK8WLp8it82S2Ys
+	kJgEQh0CgFcZk5mNipRb3JgdSHpJz6NT9sCdBvl6GCZC1WYOeCcTU02sgcA62B4VF8YFGtDWuMx
+	zFH3cHwBiXFThF1xi/qgNzdoA8qIIv0QXHJ7MunWm5PjgfPOo09WlByOGl9ikP63/KRAX9rb2NG
+	7AUpczd1wndG3KJsVnDPOJkuyw8u1kzQKatF2rSQd5CQHQUVardELePR6M/MPX1q4fGyaL1Pv2z
+	DHtjw+/qapBj+vWs2duvdV1PA==
+X-Received: by 2002:a05:6000:2287:b0:485:8b5c:da39 with SMTP id ffacd0b85a97d-4858b5ce1bdmr10859250f8f.12.1788622355807;
+        Sat, 05 Sep 2026 08:32:35 -0700 (PDT)
+Received: from threads.localdomain ([84.68.179.181])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-485883c6ba4sm16691913f8f.25.2026.09.05.08.32.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 05 Sep 2026 08:32:35 -0700 (PDT)
+From: Lucas Tanure <tanure@linux.com>
+To: Ulf Hansson <ulfh@kernel.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Neil Armstrong <neil.armstrong@linaro.org>,
+	Jerome Brunet <jbrunet@baylibre.com>,
+	Kevin Hilman <khilman@baylibre.com>,
+	Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+	Stephen Boyd <sboyd@kernel.org>
+Cc: Brian Masney <bmasney+clk@redhat.com>,
+	Chuan Liu <chuan.liu@amlogic.com>,
+	Jian Hu <jian.hu@amlogic.com>,
+	Ronald Claveau <linux-kernel-dev@aliel.fr>,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-amlogic@lists.infradead.org,
+	linux-clk@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2 0/4] amlogic: t7: give the MMC bus pipeline clock real consumers
+Date: Sat,  5 Sep 2026 16:32:30 +0100
+Message-ID: <20260905153234.133217-1-tanure@linux.com>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	Cj1EITu2ntB/oe+zFI4yrh82E0D8JriABNzkkas3PePp5Udvt7FYMZ8Y5SFb/fos0qzRr2rac5X2sD8L7ggOz0sbCbiy4vcpwZ2nPGVvVEQVs5aLjjjAl5lJ/QPV8XfCt6o0zhcY5JKhlWiIsbcMm4OJ7WrtniB6B3/7lUCaMj+nVbMQPWfq+xJ+rtHYZWRYc+3f994yJOzABHdhJOXZN6Hzo1/gw2J4xXX00F13mr2YBuhf1aiuh6H79xbwsMTTXp29sPrW90oKvGAwZWWdyVqF1dXHNhtiPA4Dgv4hV9itN5J76MWYjmvQ9MOlsgemyVdqknWdzcyW5TAAJ0KHCQ==
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	MmysrVHcT053Z2mdLjG7X6e00nylbUyN5OKSx5i0Qt1WOLWJTypgp4Ahy2TaBrsaI4urB5BVQcPHm4uFMhvURIFfc1oUi5ppzx3M5bw1BS70Xkn0obM5Te67ISJc+emRmT8RgtHf8lP1RhPxrNwDn8p9scZagJ8DS+7LU/cqBWtzr9hjR3z+s+Ft8qk6ohw5jzVjiiZRYhAdgL/pu07uiuOwYx5F11BlWqwlJHUf/O99UFbR014zTxXm92/Qoqd8tiJlgH34TIORZaLxFsWePak3/p52PcKcPL5ChF7wovFumQ1LXgLBGEB0b8jRE9mP557/LvjVVoA2J+ewBaEXsjiIn98fP7preHAEz4pPFyEx+awT6lRjiE1GwT37qcrmN5d4SYcKjtsrPUx2R/nURwLwKhCmNPYhsEzc2TWeF/AFgo0pPLfAv/A7GvNUw5iaMugPDnZVX1ScTRHCV8mFI4iL7Ff1GWMxfexH89BIuxKZ121pgPilbKYDglml5hN37PN+x/6iBGn1TzVnOB5HctLs3SmHK2ETZUjuJfoN51FvNq2YCKaPZPo5bcKxTrnU3uKLcRrOPM/OwejEDQl+TRCeZ52PNddYnF6D0FnEk4GG1bv7UY1t+j2aVt2t1JT/fN1N6pcMqeKUjkGCu690yg==
-X-OriginatorOrg: sandisk.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DS1PR16MB6753.namprd16.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2bd79f96-5ae6-49db-192f-08df0b41709c
-X-MS-Exchange-CrossTenant-originalarrivaltime: 05 Sep 2026 11:32:59.9790
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 7ffe0ff2-35d0-407e-a107-79fc32e84ec4
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: rIsCgqzZCXlmdDrho328AmA5oIhfQ+ncE8dYEOqq+wOMVPSmHEwepnAVJhYOvkuqGqDTX8Lyp3ywOvKof33/3w==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: LV3PR16MB5600
+Content-Transfer-Encoding: 8bit
 
-> From: Shawn Lin <shawn.lin@linux.dev>
->=20
-> Add a "mmc health <device>" command that prints a health summary of an
-> eMMC device: Pre EOL info, device life time estimates (type A and B) and =
-BKOPS
-> status, each with a human readable decode of the raw field, plus a final =
-verdict
-> line.
->=20
-> The per-field values and their level semantics come from the eMMC 5.0 spe=
-c
-> (JESD84-B50, EXT_CSD fields 267/268/269/33); the aggregated verdict takes=
- the
-> worst of the three wear related fields and maps it onto an exit code, so =
-the
-> command can be used directly from production test scripts and CI:
->=20
->   0 healthy, 1 warning, 2 urgent, 3 unsupported (eMMC < 5.0),
->   4 not an eMMC device (EXT_CSD read failed).
-If you are inventing a device health measure, better make sure to clearly i=
-ndicate that this is mmc-utils's own indicator.
-Also, worth mentioning VENDOR_PROPRIETARY_HEALTH_REPORT [301-270], and CMD5=
-6 in the commit log.
+The previous series for the intermittent boot hangs on the VIM4
+marked sys_ampipe_nand as critical. But as Chuan Liu from Amlogic
+explained, sys_ampipe_nand clocks a pipeline stage that the
+hardware design inserts in the bus path between the SD/eMMC
+controllers and the NIC_MATRIX fabric to help timing closure.
 
->=20
-> The command is eMMC only: SD cards do not have EXT_CSD and do not report
-> any standardized health data.
->=20
-> Execution effect on an eMMC 5.1 device:
->=20
->   # mmc health /dev/block/mmcblk0
->   =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->     eMMC Health Report: /dev/block/mmcblk0
->   =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->   eMMC rev:         1.8 (MMC 5.1)
->   Pre EOL info:     0x01 [Normal]
->   Life time type A: 0x01 [0%-10% of device life time used]
->   Life time type B: 0x01 [0%-10% of device life time used]
->   BKOPS status:     0x01 [Level 1: background operation required (non-urg=
-ent)]
->   Result: HEALTHY
->=20
-> Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
-> ---
->  mmc.c      |   8 +++
->  mmc.h      |   1 +
->  mmc_cmds.c | 165
-> +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  mmc_cmds.h |   1 +
->  4 files changed, 175 insertions(+)
->=20
-> diff --git a/mmc.c b/mmc.c
-> index b0f1f9b..e0fc0e8 100644
-> --- a/mmc.c
-> +++ b/mmc.c
-> @@ -106,6 +106,14 @@ static struct Command commands[] =3D {
->           "status get", "<device>\n"
->           "Print the response to STATUS_SEND (CMD13).",
->         },
-> +       { do_health, -1,
-> +         "health", "<device>\n"
-> +         "Print a health summary of the eMMC <device>: Pre EOL info,\n"
-> +         "device life time estimates and BKOPS status. eMMC only, SD\n"
-> +         "cards do not report health data.\n"
-> +         "Exit code: 0 healthy, 1 warning, 2 urgent, 3 unsupported\n"
-> +         "(eMMC < 5.0), 4 not an eMMC device.",
-> +       },
->         { do_write_boot_en, -3,
->           "bootpart enable", "<boot_partition> " "<send_ack> " "<device>\=
-n"
->                 "Enable the boot partition for the <device>.\nDisable the=
- boot partition
-> for the <device> if <boot_partition> is set to 0.\nTo receive acknowledgm=
-ent of
-> boot from the card set <send_ack>\nto 1, else set it to 0.", diff --git a=
-/mmc.h
-> b/mmc.h index 2bb346b..af0ad87 100644
-> --- a/mmc.h
-> +++ b/mmc.h
-> @@ -120,6 +120,7 @@
->  #define EXT_CSD_WR_REL_SET             167
->  #define EXT_CSD_WR_REL_PARAM           166
->  #define EXT_CSD_SANITIZE_START         165
-> +#define EXT_CSD_BKOPS_STATUS           33      /* RO */
-BKOPS_STATUS [246]
+So the clock has real consumers: reference it from the three MMC
+controller nodes and drop CLK_IS_CRITICAL instead.
 
->  #define EXT_CSD_BKOPS_EN               163     /* R/W */
->  #define EXT_CSD_RST_N_FUNCTION         162     /* R/W */
->  #define EXT_CSD_PARTITIONING_SUPPORT   160     /* RO */
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index a7e4784..43dcdcc 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -981,6 +981,171 @@ out_free:
->         return ret;
->  }
->=20
-> +static const char *extcsd_rev_to_string(__u8 rev) {
-Already in do_read_extcsd, maybe factor it out (as a preparatory patch) ?
+The series crosses three trees; patch 4 (clk) must only land after
+patches 1-3, otherwise the DMA hangs fixed by 43e1705ecab9 come back.
 
-> +       switch (rev) {
-> +       case 9:
-> +       case 8:
-> +               return "5.1";
-> +       case 7:
-> +               return "5.0";
-> +       case 6:
-> +               return "4.5";
-> +       case 5:
-> +               return "4.41";
-> +       case 3:
-> +               return "4.3";
-> +       case 2:
-> +               return "4.2";
-> +       case 1:
-> +               return "4.1";
-> +       case 0:
-> +               return "4.0";
-> +       default:
-> +               return "unknown";
-> +       }
-> +}
-> +
-> +static const char *pre_eol_info_to_string(__u8 val) {
-> +       switch (val) {
-> +       case 0x00:
-> +               return "Not defined";
-> +       case 0x01:
-> +               return "Normal";
-> +       case 0x02:
-> +               return "Warning: reserved blocks are consumed";
-Consumed 80% of reserved block
-
-> +       case 0x03:
-> +               return "Urgent: reserved blocks are exhausted";
-The spec gives no description at all for 0x03 aside of urgent.
-
-> +       default:
-> +               return "Reserved";
-> +       }
-> +}
-> +
-> +static const char *life_time_est_to_string(__u8 val) {
-> +       static const char * const strs[] =3D {
-> +               "Not defined",                                     /* 0x0=
-0 */
-> +               "0%-10% of device life time used",                 /* 0x0=
-1 */
-> +               "10%-20% of device life time used",                /* 0x0=
-2 */
-> +               "20%-30% of device life time used",                /* 0x0=
-3 */
-> +               "30%-40% of device life time used",                /* 0x0=
-4 */
-> +               "40%-50% of device life time used",                /* 0x0=
-5 */
-> +               "50%-60% of device life time used",                /* 0x0=
-6 */
-> +               "60%-70% of device life time used",                /* 0x0=
-7 */
-> +               "70%-80% of device life time used",                /* 0x0=
-8 */
-> +               "80%-90% of device life time used",                /* 0x0=
-9 */
-> +               "90%-100% of device life time used",               /* 0x0=
-A */
-> +               "Exceeded the maximum estimated device life time", /* 0x0=
-B */
-> +       };
-> +
-> +       if (val > 0x0B)
-> +               return "Reserved";
-> +
-> +       return strs[val];
-> +}
-> +
-> +static const char *bkops_status_to_string(__u8 val) {
-> +       switch (val) {
-> +       case 0x00:
-> +               return "No background operation required";
-> +       case 0x01:
-> +               return "Level 1: background operation required (non-urgen=
-t)";
-> +       case 0x02:
-> +               return "Level 2: background operation required (performan=
-ce
-> impacted)";
-> +       case 0x03:
-> +               return "Level 3: background operation required (urgent)";
-> +       default:
-> +               return "Reserved";
-> +       }
-> +}
-> +
-> +/*
-> + * Print a health summary of the device. Exit codes:
-> + *   0 healthy (or no degradation reported)
-> + *   1 warning level
-> + *   2 urgent level
-> + *   3 health data not supported (eMMC < 5.0)
-> + *   4 not an eMMC device (EXT_CSD read failed)
-> + * Only meaningful for eMMC; SD cards do not report health data.
-> + */
-> +int do_health(int nargs, char **argv)
-> +{
-> +       __u8 ext_csd[512], ext_csd_rev, pre_eol, life_typ_a, life_typ_b, =
-bkops;
-> +       int fd, ret;
-> +       char *device;
-> +
-> +       if (nargs !=3D 2) {
-> +               print_usage(do_health);
-> +               exit(1);
-> +       }
-> +
-> +       device =3D argv[1];
-> +
-> +       fd =3D open(device, O_RDWR);
-> +       if (fd < 0) {
-> +               perror("open");
-> +               exit(1);
-> +       }
-> +
-> +       ret =3D read_extcsd(fd, ext_csd);
-> +       if (ret) {
-> +               fprintf(stderr, "Could not read EXT_CSD from %s, "
-> +                               "not an eMMC device?\n", device);
-> +               close(fd);
-> +               exit(4);
-> +       }
-> +
-> +       ext_csd_rev =3D ext_csd[EXT_CSD_REV];
-> +       pre_eol =3D ext_csd[EXT_CSD_PRE_EOL_INFO];
-> +       life_typ_a =3D ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A];
-> +       life_typ_b =3D ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B];
-> +       bkops =3D ext_csd[EXT_CSD_BKOPS_STATUS];
-only bits [1:0] are defined, better mask?  ext_csd[EXT_CSD_BKOPS_STATUS] & =
-3
-
-> +
-> +       printf("=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D\n");
-> +       printf("  eMMC Health Report: %s\n", device);
-> +       printf("=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D\n");
-> +       printf("eMMC rev:         1.%d (MMC %s)\n", ext_csd_rev,
-> +              extcsd_rev_to_string(ext_csd_rev));
-eMMC rev:  --> Extended CSD rev=20
-
-> +       printf("Pre EOL info:     0x%02x [%s]\n", pre_eol,
-> +              pre_eol_info_to_string(pre_eol));
-> +       printf("Life time type A: 0x%02x [%s]\n", life_typ_a,
-> +              life_time_est_to_string(life_typ_a));
-> +       printf("Life time type B: 0x%02x [%s]\n", life_typ_b,
-> +              life_time_est_to_string(life_typ_b));
-> +       printf("BKOPS status:     0x%02x [%s]\n", bkops,
-> +              bkops_status_to_string(bkops));
-> +
-> +       if (ext_csd_rev < 7) {
-EXT_CSD_REV_V5_0
-
-> +               printf("Result: UNSUPPORTED (health data requires eMMC 5.=
-0)\n");
-But you already printed the health fields...
-
-> +               ret =3D 3;
-> +               goto out;
-> +       }
-> +
-> +       if (pre_eol =3D=3D 0x03 || life_typ_a =3D=3D 0x0B || life_typ_b =
-=3D=3D 0x0B) {
-> +               printf("Result: URGENT\n");
-> +               ret =3D 2;
-> +       } else if (pre_eol =3D=3D 0x02 || life_typ_a =3D=3D 0x0A ||
-> +                  life_typ_b =3D=3D 0x0A) {
-> +               printf("Result: WARNING\n");
-> +               ret =3D 1;
-Collides with exit(1).
-So what it would be: "the device has a wear warning" or "the command failed=
-" ?
+Changes since v1 [3]:
+ - Dropped the Fixes: tag; this series is an improvement and should not
+   be picked up by stable (Jerome Brunet)
+ - Moved the patch 4 dependency note below the --- so it is not kept
+   for posterity (Jerome Brunet)
+ - Dropped the e-mail address from the Assisted-by trailer, see
+   Documentation/process/coding-assistants.rst (Jerome Brunet)
+ - Fixed the space-indented error path added to meson_mmc_probe() in
+   patch 2, it did not pass checkpatch
+ - Dropped the CLK_PIPELINE() macro from patch 2; has_pipeline_clk is a
+   capability flag, not an SD_EMMC_CLOCK register field
 
 Thanks,
-Avri
-> +       } else if (pre_eol =3D=3D 0x00 && life_typ_a =3D=3D 0x00 &&
-> +                  life_typ_b =3D=3D 0x00) {
-> +               printf("Result: UNKNOWN (device does not report health da=
-ta)\n");
-> +       } else {
-> +               printf("Result: HEALTHY\n");
-> +       }
-> +
-> +       if (bkops =3D=3D 0x03)
-> +               printf("Note: urgent background operation is pending, "
-> +                      "do not power off the device right now\n");
-> +
-> +out:
-> +       close(fd);
-> +       return ret;
-> +}
-> +
->  static unsigned int get_sector_count(__u8 *ext_csd)  {
->         return (ext_csd[EXT_CSD_SEC_COUNT_3] << 24) | diff --git a/mmc_cm=
-ds.h
-> b/mmc_cmds.h index 033cc09..88caf85 100644
-> --- a/mmc_cmds.h
-> +++ b/mmc_cmds.h
-> @@ -39,6 +39,7 @@ int do_hwreset_en(int nargs, char **argv);  int
-> do_hwreset_dis(int nargs, char **argv);  int do_sanitize(int nargs, char =
-**argv);
-> int do_status_get(int nargs, char **argv);
-> +int do_health(int nargs, char **argv);
->  int do_create_gp_partition(int nargs, char **argv);  int do_enh_area_set=
-(int
-> nargs, char **argv);  int do_write_reliability_set(int nargs, char **argv=
-);
-> --
-> 2.25.1
+Lucas
+
+Lucas Tanure (4):
+  dt-bindings: mmc: amlogic,meson-gx-mmc: document the T7 pipeline clock
+  mmc: meson-gx: enable the bus pipeline clock on T7
+  arm64: dts: amlogic: t7: add the pipeline clock to the MMC controllers
+  clk: meson: t7: don't mark sys_ampipe_nand as critical
+
+ .../bindings/mmc/amlogic,meson-gx-mmc.yaml    | 29 ++++++++++++++++++-
+ arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi   | 15 ++++++----
+ drivers/clk/meson/t7-peripherals.c            | 10 +++----
+ drivers/mmc/host/meson-gx-mmc.c               | 20 +++++++++++++
+ 4 files changed, 62 insertions(+), 12 deletions(-)
+
+-- 
+2.55.0
 
