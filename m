@@ -1,50 +1,50 @@
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
+Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C17C549EC5F
-	for <linux-mmc@vger.kernel.org>; Sat,  5 Sep 2026 15:32:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A9044B147C
+	for <linux-mmc@vger.kernel.org>; Sat,  5 Sep 2026 15:32:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788622363; cv=none; b=A0H12CEYZ9EQJK2jrsNtQL32cpaUQaV/+nyt0KskMTMWeuzmmA8tDX/8dlg4Gr2C0dSB90l9DHVseCL+LxlQQ4k9nB9WTA54wA0RxOn37PCamGyWUQFa6yRIXUJj5awg0q7x9Ocq126gwKqWLafDIJ/UmzBFUkanZZdJ2+mB9FE=
+	t=1788622364; cv=none; b=fTUZlQEBHTUySvaBgR1JvGNkd6qnAzqZ5ns4aJcaFMYvEHboM/sP8M4jtuafDP8eNiDRVZoXuFqY0wgNnnJAEB2JY/nqVDUldevScEdBmxJ5udsIpvi6PoeokGO/Z7V9X0FLX/rpCLE1z6zqYfLTchF4CWdh96erk8FnN1RrnrU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788622363; c=relaxed/simple;
-	bh=1vLHCU8lWJSitlPYnCaz7byT5JPQIj0L3X0Yw58PruY=;
+	s=arc-20240116; t=1788622364; c=relaxed/simple;
+	bh=HlStx7vx3piFzayiVi0TqGQGaEyIJNcVSIFbgAKrR84=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=tafkhDyUrSd91DFq5lOHp0WmttNkyXwtHl54MmCz4PJ7i2IN7of3y0dwc/4nM8xvYLNNtj2TDdt1JpR79kep6CNxEWwn7Bs9LkwmEH/kwn4vztTkAVf2uoXzxxHMwHZGEItNytwlWTXwooWfm4xQ+HUyws6oMe4v/u2sDRXy4/g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.48
+	 MIME-Version; b=qCkE5+Rgf4rZw9GDzXjSB30cwbR25fqzmP9O8HIDeS8o7aoTWOqAsOAZrCG0pgbDQW5mOTCnBowyYmORrfFEvFVkahNIg4bgVXMlu9p302q11ykfaX/AwgkuKrarTnT83vUQMfWOokWZsuWByojDk/An4G74OJTv79pLW++LRIs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-49d05d51553so3029485e9.2
-        for <linux-mmc@vger.kernel.org>; Sat, 05 Sep 2026 08:32:40 -0700 (PDT)
+Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-482dd6ee390so2236976f8f.3
+        for <linux-mmc@vger.kernel.org>; Sat, 05 Sep 2026 08:32:41 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788622359; x=1789227159;
+        d=1e100.net; s=20251104; t=1788622360; x=1789227160;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=n9Z1qKT7EogtF26L5TwSpOWlLsafa9aGvAtJ1Qh1QBg=;
-        b=Uhak5oZDNc+lqXV3R4gShBrcMV8H8kNtpC9UQ0UyS+KFwDodZZWFP7ANajKx7snj6L
-         fi1LwwqdPNgoLRsGTEc0g4VoTkvUSeBkV9We4P6hK8V1cVEwjqQJj3JdsaOpzq2vt4dV
-         ovDfUQZM246TJUz7AVbj2C1wznW276+7008us2kcTlS98Sx+QUVfZ42tuUHRYEFky2LR
-         poszQpBBICfqpNXllXOi6o79pKyfnKkEphNP+esCooMsO7rLIloG3lUy0vq6aX9eRjZy
-         g+NkInChZ5W7xqOiNAPbTMkXJpKbrhulUg0yxK0/VPyzXobH3WQu5fXYQ9X+5KDF+Ueq
-         ENmw==
-X-Forwarded-Encrypted: i=1; AKwUvBx+sDAy4FN1+MgZeqAMmWk5AolLKNJNzk1mlzw0mO+j8AGdNgdMYf/SyXGbexC1SsgBaSJaTpXwh2w=@vger.kernel.org
-X-Gm-Message-State: AFuF++nOxK6lcXrWZfU5MOJWAmsen962OCfVOvTCwH0mTn3r4ggwSqL2
-	K/+D8BNbiP2C3BIRvvr6kXwK4fL9YvLT8EOLgDu19NJhS01zd/K5zjKp
-X-Gm-Gg: AYBFou0m4FmPz/7OAjIEXXqKTiPirmsPhz8OR071iMdI6B4eyhsWA7ruQnFfPVtzP5/
-	FHqWR6OuH39kpNI38Me7CqCvhRIuM+dr56jiIY1UvWos0AMOZLEFpnhBi33ZBfl+ONDHpwdJe/s
-	gh3lMnudCpUb9CrhUaCt4ozOpa6Ms16XoO1BLhnWiV9opbo13ug7ixzj4BlZ+/6G2uLMR72epLw
-	Twx+mtlGNA1383Bqrl5j8j7d8Cv44xvq985jIXbms2FPc8W2Lp7ghHejb5c8Gx2BLYT9esv1sXq
-	SSxLpaZslmXNLPcvM1IYkjix97cvA8wTVTu3+3h9ag5irnPTZWb8ZenzSpWZ0E5CseygQ+3fQ/t
-	Qt3dlLYdgq88XUykeL1QlK5EUSh/xsDtC0FfF3Up19qy0Xp6se4tsTXUfmR0b4VRuL0/Ny572jk
-	AM7QAx8ioi2/6btdCIh1/TMo187EgxNyioUXQAaeU/T9g6zynqzmUv09MYaYfgeRQNH8j+D9xjI
-	mjHP0DR9ubHbple01iRR08d/Q==
-X-Received: by 2002:a05:600c:a0a:b0:495:5890:8f6c with SMTP id 5b1f17b1804b1-49cf820ccdcmr130205405e9.7.1788622358693;
-        Sat, 05 Sep 2026 08:32:38 -0700 (PDT)
+        bh=rBqYYCS5py1zvvdbPLcK4Z1TQdgdHGp93LoH6od28Gw=;
+        b=eNtCJI5VrS6fRFCVs28nUsZEkv1T4NpzLRq2BmdL6R3+ghIypoFHgYjmLIF+/PHXZF
+         lBAxlpAeQHYwN7H380sOxweS0T5lk6KXqE15RTqaaBWPJTo9xQc+ms1py0tMvkFMJyb0
+         vqu1BtuZVd2LbdDd1DNwg2wUK7Hz0+Prki/k6BBnDaoMlOR1fQgwSY69bg9+32fCA9ke
+         iKWYadgXI6uI77CmD9QfvnBdMPHWcaDhcquO2GZwQlDf2fv8B2rL+2n0saHF0auBbkQ2
+         dPMbD9CFzUbYgpbwhlvspVBdKIisGrPCq8gGXkespfpVW7BTPtCIkAdBL1DnTy3+KIRy
+         d0AQ==
+X-Forwarded-Encrypted: i=1; AKwUvBw5et1odmGDZ1w0U2nspsqGoH1eKndLapi5MZJlH2ESJ+K34J9rMie08c/tEK0cEl4mrUC5I1KvN4A=@vger.kernel.org
+X-Gm-Message-State: AFuF++lG3wXY9HjDDc3LfyOyAF1AgPF861BiqmCiV5ljP6o9n7hhr7mu
+	SgnEiWpL6WqahGhUf79AL7dtvRbs8ma7/mGMUwmPs0EJf5nyik/CP4/I
+X-Gm-Gg: AYBFou0qCxPBu3haRDY6kNESPije6aZq58Pcs0Q3QGWsGcJT5cZ8/InF6XL4+D3A3eH
+	5iPslmqLq6Q9GYFV5G8XtVXQ/gFCRMSmD8daJYm9hRNbOWhsHRXp4X9ZX11ozo3JmG6AyUJPNrF
+	bMaUyCwCqifAiaOabjpdk7dLHO6If6cL6hfVax2uUv22+d+eD0fouIvbS5vKtzSE3itHNYTdcg5
+	sqK8JcRkeyuZZoUKudbjqhKkpEC6XD7t5NCXiS5rAC+XRxHpQ+aYEANKwDr7+KXKztS5eMuCq18
+	H29d0xY7a18QPuBeFVySlrIpZyZiOBCkUciWZlCNfmLNlneltlx7Lu6WVkwTrJYjOuZToZwN+l6
+	Nh5PS40pez4KNrq91McdsQRGvUyv9N1Iy1JtFxPr806M/mHe8W/92kA8JAJv5d66RAeVitGSD2l
+	+TyQK4GaabmHFfhgiuYcO1j1u9E8TmuaKEChf0kuc1n1lDkn9LK37k158Eqy1dTtQIrdYkeZPKJ
+	Jm3qTwv/XLPL5UyytnBSd05GA==
+X-Received: by 2002:a5d:5f09:0:b0:484:3332:d1ce with SMTP id ffacd0b85a97d-48586bf9cfdmr14652908f8f.0.1788622359412;
+        Sat, 05 Sep 2026 08:32:39 -0700 (PDT)
 Received: from threads.localdomain ([84.68.179.181])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-485883c6ba4sm16691913f8f.25.2026.09.05.08.32.37
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-485883c6ba4sm16691913f8f.25.2026.09.05.08.32.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 05 Sep 2026 08:32:38 -0700 (PDT)
+        Sat, 05 Sep 2026 08:32:39 -0700 (PDT)
 From: Lucas Tanure <tanure@linux.com>
 To: Ulf Hansson <ulfh@kernel.org>,
 	Rob Herring <robh@kernel.org>,
@@ -65,9 +65,9 @@ Cc: Brian Masney <bmasney+clk@redhat.com>,
 	linux-amlogic@lists.infradead.org,
 	linux-clk@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 3/4] arm64: dts: amlogic: t7: add the pipeline clock to the MMC controllers
-Date: Sat,  5 Sep 2026 16:32:33 +0100
-Message-ID: <20260905153234.133217-4-tanure@linux.com>
+Subject: [PATCH v2 4/4] clk: meson: t7: don't mark sys_ampipe_nand as critical
+Date: Sat,  5 Sep 2026 16:32:34 +0100
+Message-ID: <20260905153234.133217-5-tanure@linux.com>
 X-Mailer: git-send-email 2.55.0
 In-Reply-To: <20260905153234.133217-1-tanure@linux.com>
 References: <20260905153234.133217-1-tanure@linux.com>
@@ -79,61 +79,50 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The SD/eMMC controllers reach the DRAM through a pipeline stage that
-the hardware design inserts in the bus path to the NIC_MATRIX fabric,
-clocked by CLKID_SYS_AMPIPE_NAND. When that clock is disabled, a
-controller that starts a DMA transfer can never complete it.
+sys_ampipe_nand clocks the pipeline stage inserted in the bus path
+between the SD/eMMC controllers and the NIC_MATRIX fabric. It does have
+identifiable consumers - the three MMC controllers - so marking it
+critical was the wrong tool: the clock should be referenced from the
+consumer nodes and claimed by the mmc driver instead.
 
-Reference the clock from the three MMC controller nodes so the driver
-keeps it running, instead of relying on the clock being marked critical
-in the clock controller.
+Drop the CLK_IS_CRITICAL flag and update the comment accordingly.
+sys_am2axi0..2 remain critical as they clock the AXI DMA bus itself and
+have no single identifiable consumer.
 
 Assisted-by: Claude:claude-fable-5
 Signed-off-by: Lucas Tanure <tanure@linux.com>
 ---
- arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi | 15 +++++++++------
- 1 file changed, 9 insertions(+), 6 deletions(-)
+This patch depends on the MMC controllers actually referencing the clock:
+the dt-bindings, mmc driver and t7 DTS changes adding the "pipeline"
+clock must land before this patch, otherwise the boot hangs and memory
+corruption this clock caused are reintroduced.
 
-diff --git a/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi b/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
-index c3dc479b137d..dbb4a95652c6 100644
---- a/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
-+++ b/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
-@@ -730,8 +730,9 @@ sd_emmc_a: mmc@88000 {
- 				interrupts = <GIC_SPI 176 IRQ_TYPE_LEVEL_HIGH>;
- 				clocks = <&clkc_periphs CLKID_SYS_SD_EMMC_A>,
- 					 <&clkc_periphs CLKID_SD_EMMC_A>,
--					 <&scmi_clk CLKID_FCLK_DIV2>;
--				clock-names = "core", "clkin0", "clkin1";
-+					 <&scmi_clk CLKID_FCLK_DIV2>,
-+					 <&clkc_periphs CLKID_SYS_AMPIPE_NAND>;
-+				clock-names = "core", "clkin0", "clkin1", "pipeline";
- 				resets = <&reset RESET_SD_EMMC_A>;
- 				assigned-clocks = <&clkc_periphs CLKID_SD_EMMC_A_SEL>;
- 				assigned-clock-parents = <&xtal>;
-@@ -744,8 +745,9 @@ sd_emmc_b: mmc@8a000 {
- 				interrupts = <GIC_SPI 177 IRQ_TYPE_EDGE_RISING>;
- 				clocks = <&clkc_periphs CLKID_SYS_SD_EMMC_B>,
- 					 <&clkc_periphs CLKID_SD_EMMC_B>,
--					 <&scmi_clk CLKID_FCLK_DIV2>;
--				clock-names = "core", "clkin0", "clkin1";
-+					 <&scmi_clk CLKID_FCLK_DIV2>,
-+					 <&clkc_periphs CLKID_SYS_AMPIPE_NAND>;
-+				clock-names = "core", "clkin0", "clkin1", "pipeline";
- 				resets = <&reset RESET_SD_EMMC_B>;
- 				assigned-clocks = <&clkc_periphs CLKID_SD_EMMC_B_SEL>;
- 				assigned-clock-parents = <&xtal>;
-@@ -758,8 +760,9 @@ sd_emmc_c: mmc@8c000 {
- 				interrupts = <GIC_SPI 178 IRQ_TYPE_EDGE_RISING>;
- 				clocks = <&clkc_periphs CLKID_SYS_SD_EMMC_C>,
- 					 <&clkc_periphs CLKID_SD_EMMC_C>,
--					 <&scmi_clk CLKID_FCLK_DIV2>;
--				clock-names = "core", "clkin0", "clkin1";
-+					 <&scmi_clk CLKID_FCLK_DIV2>,
-+					 <&clkc_periphs CLKID_SYS_AMPIPE_NAND>;
-+				clock-names = "core", "clkin0", "clkin1", "pipeline";
- 				resets = <&reset RESET_SD_EMMC_C>;
- 				assigned-clocks = <&clkc_periphs CLKID_SD_EMMC_C_SEL>;
- 				assigned-clock-parents = <&xtal>;
+ drivers/clk/meson/t7-peripherals.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/clk/meson/t7-peripherals.c b/drivers/clk/meson/t7-peripherals.c
+index 55d09e78593b..2f429ea86796 100644
+--- a/drivers/clk/meson/t7-peripherals.c
++++ b/drivers/clk/meson/t7-peripherals.c
+@@ -945,13 +945,13 @@ static T7_SYS_PCLK(sys_aucpu,		SYS_CLK_EN0_REG0, 14,	0);
+ static T7_SYS_PCLK(sys_cec,		SYS_CLK_EN0_REG0, 16,	0);
+ static T7_SYS_PCLK(sys_gdc,		SYS_CLK_EN0_REG0, 17,	0);
+ static T7_SYS_PCLK(sys_deswarp,		SYS_CLK_EN0_REG0, 18,	0);
++static T7_SYS_PCLK(sys_ampipe_nand,	SYS_CLK_EN0_REG0, 19,	0);
++static T7_SYS_PCLK(sys_ampipe_eth,	SYS_CLK_EN0_REG0, 20,	0);
+ /*
+- * NOTE: sys_ampipe_nand and sys_am2axi0..2 provide the clock to the AXI bus
+- * used for DMA between the peripherals and the DRAM. After the clocks are
+- * disabled, a device that starts a transfer cannot complete it.
++ * NOTE: sys_am2axi0..2 provide the clock to the AXI bus used for DMA between
++ * the peripherals and the DRAM. After the clocks are disabled, a device that
++ * starts a transfer cannot complete it.
+  */
+-static T7_SYS_PCLK(sys_ampipe_nand,	SYS_CLK_EN0_REG0, 19,	CLK_IS_CRITICAL);
+-static T7_SYS_PCLK(sys_ampipe_eth,	SYS_CLK_EN0_REG0, 20,	0);
+ static T7_SYS_PCLK(sys_am2axi0,		SYS_CLK_EN0_REG0, 21,	CLK_IS_CRITICAL);
+ static T7_SYS_PCLK(sys_am2axi1,		SYS_CLK_EN0_REG0, 22,	CLK_IS_CRITICAL);
+ static T7_SYS_PCLK(sys_am2axi2,		SYS_CLK_EN0_REG0, 23,	CLK_IS_CRITICAL);
 -- 
 2.55.0
 
