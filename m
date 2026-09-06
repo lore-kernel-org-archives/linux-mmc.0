@@ -1,156 +1,231 @@
-Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
+Received: from mail-oo2-f11.google.com (mail-oo2-f11.google.com [74.125.231.139])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AFD64AF9F2
-	for <linux-mmc@vger.kernel.org>; Sat,  5 Sep 2026 15:32:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38FD92512C8
+	for <linux-mmc@vger.kernel.org>; Sun,  6 Sep 2026 00:24:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.231.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788622363; cv=none; b=YFsaZx9JC9k6AHxN12d0g3sP1mwfSIP05CbUSvadNglInHxeAvHnwMSjxRJQZSIJM1in+nNt8GyeTy4VpbJuzj3fDc4yJS1Cfrb0Y7+eoFTjPTrMaZgHSEHuPV0C72bFcLMOrYErY/qXcvijm/j9eA8yktBwA9e9rLzhKiQjky0=
+	t=1788654278; cv=none; b=pOyIE+C5PzD0v+geyxYfud8mKQqf8q1IW3mqNnxsv42OleFmQTGG0XBiBzi+BiQfN9TDXguhP+Jf5CrgVawgPMoKnY3JX7EmUbiJRyxHMkFINIdcAI1rGQlTSl8eiBqa19TiBHf7Od25jB9HiDwUA0hPJMRHc3uzK2bib+5u/J4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788622363; c=relaxed/simple;
-	bh=oLDcY6kImT6VejPH+8oQ5pUx6Jmf88kTwnGUpUh8fuM=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=rLa42PrqH2EAmOp7wE1+QGDAEP1MCxSSd0PBKd47h6qUzldt9SQPsUEKklrsm5OXdpfOLpLPyvmSrN1Aq4+rP4QvBQEtI3e9HkBtVpdRDw7o4J8eFq6FA3qZHnPBCEpP6oOLJYIij+rH+VDYkZXlds6Cfo0athgptEv6k/aI9Is=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-48584dc164fso1951607f8f.0
-        for <linux-mmc@vger.kernel.org>; Sat, 05 Sep 2026 08:32:39 -0700 (PDT)
+	s=arc-20240116; t=1788654278; c=relaxed/simple;
+	bh=8yBfIaVCKkFtBGdNziL6Ub3E/07/sjtEFZcY5kv2NU8=;
+	h=MIME-Version:Date:Message-ID:Subject:From:To:Content-Type; b=aaVssQluOY/8n5O4CUNzpIJUp502nzKa5Ytwjd5EkLgbzFqz42traWNgW7WDTR8dLIHpF4pIjkj6c7xuikTTUuEzRJ9dAxepqLRWHOvaR8qXQWc07jbj9cEE9CU2RzwsVL/sHEeSwFRW9GzxH8cR7ngc+d9LQQagtY3Af/geEsg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=74.125.231.139
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
+Received: by mail-oo2-f11.google.com with SMTP id 006d021491bc7-6aaf6076546so1200229eaf.1
+        for <linux-mmc@vger.kernel.org>; Sat, 05 Sep 2026 17:24:36 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788622358; x=1789227158;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=6cvLPMe39R/AaBDs2Mh5u5mXzrtCLtGEuv4B7IhLgiQ=;
-        b=ryZYthBNnVoA2Ub5PeI9l6cE1Z0NsAU7nM4AyU4tzhZRqgDivkFPEQR+iqrhjUQ6eN
-         T5M9YmYstilXlmSSAqJBRm/7eLlPJi8f64Kp2335EpBi1YHflATtZleOUlLpc7kOflt3
-         EhGR2Zr7AliWGf32FLQEbJPdjJYAIqbgXpW0x/m7NLpp/AReAH4HTU2jB+KK9z/274jr
-         JUFJB1ht6t01AtAvW2JOky/E6OYKooo1abXGcjc14fLxT2rj6LSLz3lRgh5fxqFVmCoJ
-         r64ZW+jaqfNjqQrRsWQaeqgaXslS2X8DvkrpVRUbCmfVCqLCfzVYZpT/OS+9FJwkBmGc
-         ej6g==
-X-Forwarded-Encrypted: i=1; AKwUvBw91cIWD78Qy0vMVbFZYFpvHVpzC05HgqGuxOaCg0Wt6Ps1WtsJe+VjEqzBuz+MCnxRrdzV3WYlS68=@vger.kernel.org
-X-Gm-Message-State: AFuF++k7On7ftC5SOJ0HabMJAq1sru2emCepoAnOCb077CFyl6+xbpy1
-	XU1oM1sJ4q9PJQPEM9sP7vkj82134erYJR23sPyYyeg73yj8UAK0SSLV
-X-Gm-Gg: AYBFou17s+IcZJlaTqjHkQjXJOGq7tP6m5u/GxBaXr7ug/ecQtwB4DFPzzqOS/K2t1y
-	4GXRplVCicQ1fiOd1HRFIBbT4BWKQAvQBOByZRKTKXpL66xYPn5R8ikGTnqDlZpCaVOqslAYeJW
-	/ntSjatcepwIYjw3A/W6iH85oaDhhHFSzKyxIm1+VxDyk84I8QBj4MRjV4MMUz4Ve+yUFGGtTPN
-	Hj9suelDljdTx+k/5sQzq8j4xYJwCy0Phsl4wKFa1K8cABJZozrDHg4VMyw2uLf4RgS4CiHAdcy
-	rSPLVi3yCseLT9jyU8YVPV1hVz7Cu3EOlHtGI+MLLwrdHPJi/F/A1BdFVH6cmnhTA+CTz2ZtODn
-	Yy2rElhzEkE1/OAz9c23tCLiH1ENxFWPfS9wldu0Bhvzo9bb4EZGvPpmAt1vOyY05opBFyzwz4m
-	rnawQ4x+Trj3OYFfb93FlkxMjTKoKSW+nGLgw1nF43kdEiSdz2mywcfnCaJLsxfHE7dQSBKutbu
-	QnRt94AfXN2GZXVwXG+k1NaJeFgNiSvx3bF
-X-Received: by 2002:a05:6000:470c:b0:485:8a46:705c with SMTP id ffacd0b85a97d-4858a4671b8mr11204628f8f.46.1788622357649;
-        Sat, 05 Sep 2026 08:32:37 -0700 (PDT)
-Received: from threads.localdomain ([84.68.179.181])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-485883c6ba4sm16691913f8f.25.2026.09.05.08.32.36
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 05 Sep 2026 08:32:37 -0700 (PDT)
-From: Lucas Tanure <tanure@linux.com>
-To: Ulf Hansson <ulfh@kernel.org>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Jerome Brunet <jbrunet@baylibre.com>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-	Stephen Boyd <sboyd@kernel.org>
-Cc: Brian Masney <bmasney+clk@redhat.com>,
-	Chuan Liu <chuan.liu@amlogic.com>,
-	Jian Hu <jian.hu@amlogic.com>,
-	Ronald Claveau <linux-kernel-dev@aliel.fr>,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-amlogic@lists.infradead.org,
-	linux-clk@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 2/4] mmc: meson-gx: enable the bus pipeline clock on T7
-Date: Sat,  5 Sep 2026 16:32:32 +0100
-Message-ID: <20260905153234.133217-3-tanure@linux.com>
-X-Mailer: git-send-email 2.55.0
-In-Reply-To: <20260905153234.133217-1-tanure@linux.com>
-References: <20260905153234.133217-1-tanure@linux.com>
+        d=1e100.net; s=20251104; t=1788654275; x=1789259075;
+        h=content-type:to:from:subject:message-id:date:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=XMcV92eNZSSR8R0sqktgYFUedPdRG6GXkBf/Ho7XOj0=;
+        b=nLAaDmkKfB6OPw7Y4ZLLgBZVphovdB8yu1LHc1GBwR2YCI7O+OBoxoEEShX1oWExE/
+         Z04HOm5Anzezzmy1wE73sq6CPY9iYT5FWw/wI0hCIEbzJmS9KTJ81t6WFj4ZEg1PBouH
+         dUmd9np2M39Zm3WskpXdh/CHZvQZJ+anIaP28E4ATsWS8xiQM9m5i9df0mYuPNNHs6eR
+         iDRwnOEjdmJoCqyzzXPNqs9LRDPbO4hNBZjKJ1tHW0x/1rvpJoiAz7GdRL6/GpQrTfPV
+         3h85e16odBHIc8hEYgbvfc8T3mOBsTIMqHn8CVrAp/9TvtqyeNulkBXFrM1WPthCEx7v
+         Ms2g==
+X-Forwarded-Encrypted: i=1; AKwUvBxofd8MiEXxgKyHI5/FJqUKe9wy5pBqdmKQLjot2YkkGwNgOwD9ztuWBfOIplW3uvN4cD9QI/jMLyw=@vger.kernel.org
+X-Gm-Message-State: AFuF++kc4ceoR0vVt+SCkXt0YfFOQDTvaoYGpUwIv90gXIoEs6XslA5k
+	H7ot5AAinN8lYNBQd1YodTme5xeqXW4b1/EOLa1Kr09bOkzA79iKnr0hftcZqCi24S5q08urg9w
+	8HdmH2v7klQH8pHOoc0JdTQXnWrtsKmB5fJD+mUOK0HA7mY3jIpbN/16Kyh0=
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-Received: by 2002:a05:6820:1894:b0:6ae:8fc0:dbaf with SMTP id
+ 006d021491bc7-6b6f98d0006mr10468151eaf.1.1788654275245; Sat, 05 Sep 2026
+ 17:24:35 -0700 (PDT)
+Date: Sat, 05 Sep 2026 17:24:35 -0700
+X-Google-Appengine-App-Id: s~syzkaller
+X-Google-Appengine-App-Id-Alias: syzkaller
+Message-ID: <6a9cb2c3.a5e650b3.26d8a.0013.GAE@google.com>
+Subject: [syzbot] [mmc?] KASAN: slab-use-after-free Read in mmc_host_classdev_release
+From: syzbot <syzbot+f312381a95cc080992fd@syzkaller.appspotmail.com>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-usb@vger.kernel.org, syzkaller-bugs@googlegroups.com, 
+	ulf.hansson@linaro.org, ulfh@kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On the T7 SoC, the bus path between the SD/eMMC controllers and the
-NIC_MATRIX fabric goes through a pipeline stage inserted by the hardware
-design to help timing closure. The stage has its own gate clock and,
-when that clock is disabled, a controller that starts a DMA transfer can
-never complete it, hanging the storage devices and, from there, the
-whole system.
+Hello,
 
-Add a dedicated match data for the amlogic,t7-mmc compatible that makes
-the driver claim and enable the "pipeline" clock for as long as the
-device is bound.
+syzbot found the following issue on:
 
-The clock is deliberately not optional: the hardware cannot do DMA
-without it, and failing the probe with a clear error is preferable to
-booting and hitting an undiagnosable DMA hang later.
+HEAD commit:    5704a4065c2c usb: typec: mux: gpio-sbu: enable when only u..
+git tree:       https://git.kernel.org/pub/scm/linux/kernel/git/gregkh/usb.git usb-testing
+console output: https://syzkaller.appspot.com/x/log.txt?x=128ed779580000
+kernel config:  https://syzkaller.appspot.com/x/.config?x=c451f9f64434b622
+dashboard link: https://syzkaller.appspot.com/bug?extid=f312381a95cc080992fd
+compiler:       gcc (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44
 
-Assisted-by: Claude:claude-fable-5
-Signed-off-by: Lucas Tanure <tanure@linux.com>
+Unfortunately, I don't have any reproducer for this issue yet.
+
+Downloadable assets:
+disk image: https://storage.googleapis.com/syzbot-assets/0b09fe5d8020/disk-5704a406.raw.xz
+vmlinux: https://storage.googleapis.com/syzbot-assets/53db10338c28/vmlinux-5704a406.xz
+kernel image: https://storage.googleapis.com/syzbot-assets/b978629971dd/bzImage-5704a406.xz
+
+IMPORTANT: if you fix the issue, please add the following tag to the commit:
+Reported-by: syzbot+f312381a95cc080992fd@syzkaller.appspotmail.com
+
+==================================================================
+BUG: KASAN: slab-use-after-free in mmc_host_classdev_release+0xfb/0x120 drivers/mmc/core/host.c:70
+Read of size 8 at addr ffff88813b57a4c0 by task kworker/u8:1/8349
+
+CPU: 0 UID: 0 PID: 8349 Comm: kworker/u8:1 Not tainted syzkaller #0 PREEMPT(lazy) 
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/24/2026
+Workqueue: kvub300d vub300_deadwork_thread
+Call Trace:
+ <TASK>
+ __dump_stack lib/dump_stack.c:94 [inline]
+ dump_stack_lvl+0x100/0x190 lib/dump_stack.c:120
+ print_address_description mm/kasan/report.c:378 [inline]
+ print_report+0x13d/0x4b0 mm/kasan/report.c:482
+ kasan_report+0xdf/0x1c0 mm/kasan/report.c:595
+ mmc_host_classdev_release+0xfb/0x120 drivers/mmc/core/host.c:70
+ device_release+0xd2/0x270 drivers/base/core.c:2640
+ kobject_cleanup lib/kobject.c:689 [inline]
+ kobject_release lib/kobject.c:720 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ kobject_put+0x1f7/0x640 lib/kobject.c:737
+ put_device+0x1f/0x30 drivers/base/core.c:3884
+ vub300_delete drivers/mmc/host/vub300.c:379 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ vub300_deadwork_thread+0x22c/0x550 drivers/mmc/host/vub300.c:739
+ process_one_work+0xac7/0x1b10 kernel/workqueue.c:3387
+ process_scheduled_works kernel/workqueue.c:3470 [inline]
+ worker_thread+0x5ef/0xe50 kernel/workqueue.c:3551
+ kthread+0x373/0x450 kernel/kthread.c:436
+ ret_from_fork+0x69f/0xc90 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+ </TASK>
+
+Allocated by task 5304:
+ kasan_save_stack+0x30/0x50 mm/kasan/common.c:57
+ kasan_save_track+0x14/0x30 mm/kasan/common.c:78
+ poison_kmalloc_redzone mm/kasan/common.c:398 [inline]
+ __kasan_kmalloc+0x8f/0xa0 mm/kasan/common.c:415
+ kasan_kmalloc include/linux/kasan.h:263 [inline]
+ __kmalloc_cache_noprof+0x2d8/0x680 mm/slub.c:5563
+ _kmalloc_noprof include/linux/slab.h:991 [inline]
+ _kzalloc_noprof include/linux/slab.h:1312 [inline]
+ usb_alloc_dev+0x55/0x1090 drivers/usb/core/usb.c:651
+ hub_port_connect drivers/usb/core/hub.c:5483 [inline]
+ hub_port_connect_change drivers/usb/core/hub.c:5720 [inline]
+ port_event drivers/usb/core/hub.c:5884 [inline]
+ hub_event+0x2c5d/0x4510 drivers/usb/core/hub.c:5966
+ process_one_work+0xac7/0x1b10 kernel/workqueue.c:3387
+ process_scheduled_works kernel/workqueue.c:3470 [inline]
+ worker_thread+0x5ef/0xe50 kernel/workqueue.c:3551
+ kthread+0x373/0x450 kernel/kthread.c:436
+ ret_from_fork+0x69f/0xc90 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+
+Freed by task 8349:
+ kasan_save_stack+0x30/0x50 mm/kasan/common.c:57
+ kasan_save_track+0x14/0x30 mm/kasan/common.c:78
+ kasan_save_free_info+0x3b/0x70 mm/kasan/generic.c:584
+ poison_slab_object mm/kasan/common.c:253 [inline]
+ __kasan_slab_free+0x43/0x70 mm/kasan/common.c:285
+ kasan_slab_free include/linux/kasan.h:235 [inline]
+ slab_free_hook mm/slub.c:2748 [inline]
+ slab_free mm/slub.c:6499 [inline]
+ kfree+0x20c/0x650 mm/slub.c:6792
+ device_release+0xd2/0x270 drivers/base/core.c:2640
+ kobject_cleanup lib/kobject.c:689 [inline]
+ kobject_release lib/kobject.c:720 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ kobject_put+0x1f7/0x640 lib/kobject.c:737
+ put_device+0x1f/0x30 drivers/base/core.c:3884
+ usb_put_dev+0x23/0x30 drivers/usb/core/usb.c:790
+ vub300_delete drivers/mmc/host/vub300.c:378 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ vub300_deadwork_thread+0x224/0x550 drivers/mmc/host/vub300.c:739
+ process_one_work+0xac7/0x1b10 kernel/workqueue.c:3387
+ process_scheduled_works kernel/workqueue.c:3470 [inline]
+ worker_thread+0x5ef/0xe50 kernel/workqueue.c:3551
+ kthread+0x373/0x450 kernel/kthread.c:436
+ ret_from_fork+0x69f/0xc90 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+
+The buggy address belongs to the object at ffff88813b57a000
+ which belongs to the cache kmalloc-2k of size 2048
+The buggy address is located 1216 bytes inside of
+ freed 2048-byte region [ffff88813b57a000, ffff88813b57a800)
+
+The buggy address belongs to the physical page:
+page: refcount:0 mapcount:0 mapping:0000000000000000 index:0x0 pfn:0x13b578
+head: order:3 mapcount:0 entire_mapcount:0 nr_pages_mapped:0 pincount:0
+flags: 0x200000000000040(head|node=0|zone=2)
+page_type: f5(slab)
+raw: 0200000000000040 ffff888100042000 dead000000000100 dead000000000122
+raw: 0000000000000000 0000000000080008 00000000f5000000 0000000000000000
+head: 0200000000000040 ffff888100042000 dead000000000100 dead000000000122
+head: 0000000000000000 0000000000080008 00000000f5000000 0000000000000000
+head: 0200000000000003 fffffffffffffe01 00000000ffffffff 00000000ffffffff
+head: 0000000000000000 0000000000000000 00000000ffffffff 0000000000000008
+page dumped because: kasan: bad access detected
+page_owner tracks the page as allocated
+page last allocated via order 3, migratetype Unmovable, gfp_mask 0xd2000(__GFP_NOWARN|__GFP_NORETRY|__GFP_COMP|__GFP_NOMEMALLOC), pid 24, tgid 24 (kworker/1:0), ts 125638469489
+ set_page_owner include/linux/page_owner.h:33 [inline]
+ post_alloc_hook+0xfd/0x120 mm/page_alloc.c:1871
+ prep_new_page mm/page_alloc.c:1879 [inline]
+ get_page_from_freelist+0xf4b/0x3440 mm/page_alloc.c:3943
+ __alloc_frozen_pages_noprof+0x2d7/0x2f70 mm/page_alloc.c:5436
+ alloc_slab_page mm/slub.c:3347 [inline]
+ allocate_slab mm/slub.c:3462 [inline]
+ new_slab+0xa9/0x6e0 mm/slub.c:3513
+ refill_objects+0xe3/0x410 mm/slub.c:7410
+ refill_sheaf mm/slub.c:2885 [inline]
+ __pcs_replace_empty_main+0x35e/0x650 mm/slub.c:4774
+ alloc_from_pcs mm/slub.c:4850 [inline]
+ slab_alloc_node mm/slub.c:4984 [inline]
+ __kmalloc_cache_noprof+0x4a1/0x680 mm/slub.c:5559
+ _kmalloc_noprof include/linux/slab.h:991 [inline]
+ _kzalloc_noprof include/linux/slab.h:1312 [inline]
+ usb_set_configuration+0x10cb/0x1c60 drivers/usb/core/message.c:2096
+ usb_generic_driver_probe+0xa1/0xe0 drivers/usb/core/generic.c:250
+ usb_probe_device+0xef/0x400 drivers/usb/core/driver.c:293
+ call_driver_probe drivers/base/dd.c:628 [inline]
+ really_probe+0x241/0xa60 drivers/base/dd.c:706
+ __driver_probe_device+0x210/0x460 drivers/base/dd.c:868
+ driver_probe_device+0x4a/0x140 drivers/base/dd.c:898
+ __device_attach_driver+0x1df/0x320 drivers/base/dd.c:1026
+ bus_for_each_drv+0x159/0x1e0 drivers/base/bus.c:500
+ __device_attach+0x1e4/0x4d0 drivers/base/dd.c:1098
+page_owner free stack trace missing
+
+Memory state around the buggy address:
+ ffff88813b57a380: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+ ffff88813b57a400: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+>ffff88813b57a480: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+                                           ^
+ ffff88813b57a500: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+ ffff88813b57a580: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+==================================================================
+
+
 ---
- drivers/mmc/host/meson-gx-mmc.c | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
+This report is generated by a bot. It may contain errors.
+See https://goo.gl/tpsmEJ for more information about syzbot.
+syzbot engineers can be reached at syzkaller@googlegroups.com.
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 694bb443d5f3..c0f1e929fc13 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -139,6 +139,7 @@ struct meson_mmc_data {
- 	unsigned int always_on;
- 	unsigned int adjust;
- 	unsigned int irq_sdio_sleep;
-+	bool has_pipeline_clk;
- };
- 
- struct sd_emmc_desc {
-@@ -1204,6 +1205,15 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	if (IS_ERR(core_clk))
- 		return PTR_ERR(core_clk);
- 
-+	if (host->data->has_pipeline_clk) {
-+		struct clk *pipe_clk;
-+
-+		pipe_clk = devm_clk_get_enabled(&pdev->dev, "pipeline");
-+		if (IS_ERR(pipe_clk))
-+			return dev_err_probe(&pdev->dev, PTR_ERR(pipe_clk),
-+					     "missing pipeline clock\n");
-+	}
-+
- 	ret = meson_mmc_clk_init(host);
- 	if (ret)
- 		return ret;
-@@ -1322,12 +1332,22 @@ static const struct meson_mmc_data meson_axg_data = {
- 	.irq_sdio_sleep	= CLK_V3_IRQ_SDIO_SLEEP,
- };
- 
-+static const struct meson_mmc_data meson_t7_data = {
-+	.tx_delay_mask	= CLK_V3_TX_DELAY_MASK,
-+	.rx_delay_mask	= CLK_V3_RX_DELAY_MASK,
-+	.always_on	= CLK_V3_ALWAYS_ON,
-+	.adjust		= SD_EMMC_V3_ADJUST,
-+	.irq_sdio_sleep	= CLK_V3_IRQ_SDIO_SLEEP,
-+	.has_pipeline_clk = true,
-+};
-+
- static const struct of_device_id meson_mmc_of_match[] = {
- 	{ .compatible = "amlogic,meson-gx-mmc",		.data = &meson_gx_data },
- 	{ .compatible = "amlogic,meson-gxbb-mmc", 	.data = &meson_gx_data },
- 	{ .compatible = "amlogic,meson-gxl-mmc",	.data = &meson_gx_data },
- 	{ .compatible = "amlogic,meson-gxm-mmc",	.data = &meson_gx_data },
- 	{ .compatible = "amlogic,meson-axg-mmc",	.data = &meson_axg_data },
-+	{ .compatible = "amlogic,t7-mmc",		.data = &meson_t7_data },
- 	{}
- };
- MODULE_DEVICE_TABLE(of, meson_mmc_of_match);
--- 
-2.55.0
+syzbot will keep track of this issue. See:
+https://goo.gl/tpsmEJ#status for how to communicate with syzbot.
 
+If the report is already addressed, let syzbot know by replying with:
+#syz fix: exact-commit-title
+
+If you want to overwrite report's subsystems, reply with:
+#syz set subsystems: new-subsystem
+(See the list of subsystem names on the web dashboard)
+
+If the report is a duplicate of another one, reply with:
+#syz dup: exact-subject-of-another-report
+
+If you want to undo deduplication, reply with:
+#syz undup
