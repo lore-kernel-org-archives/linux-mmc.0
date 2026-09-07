@@ -1,129 +1,115 @@
-Received: from esa.hc6817-7.iphmx.com (esa.hc6817-7.iphmx.com [216.71.152.95])
+Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11010055.outbound.protection.outlook.com [52.101.229.55])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94B5137E5E1
-	for <linux-mmc@vger.kernel.org>; Mon,  7 Sep 2026 05:20:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.152.95
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 64D9B3FA5EB;
+	Mon,  7 Sep 2026 06:37:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.55
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788758447; cv=fail; b=N4InaUAHX+WzyxMPeOC6zpsmfIF+eAIVBCNeTUXP8b0wBAZGvc81ug+ssuOow73I5ol7a+oewZARcvy+my2y82jEOak9f+UIoOWeVzYfJeCG3nB8O82zp6Xc77Qy0rhkjJOivbwW+nxNkA3UsfbDNj+4g26p0Ws89ezmWjpi6iE=
+	t=1788763027; cv=fail; b=fIeG4EO09mZQviIMWMqHP9dPWzd1KdCrm+ey/7QLl9snaRGgwEhYO8mBWAlqz2shVCIBvJYHn+JNL/vmBCExcv+YBtqgdiACeBwNC5TuvUkogzkgDEdHKXOO1bY+1qtyFz/Y9RMNq8unDslZoZkH4FDFsgtjp93hbco+yH5THfo=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788758447; c=relaxed/simple;
-	bh=BgjOxWivKyJ6BJ9IAn8lMBu9gfoFn4A7SXY+pkrIy1E=;
+	s=arc-20240116; t=1788763027; c=relaxed/simple;
+	bh=g8waLZ/r5wIB/AA+ZiezOt4woVzlDSpb6QquGg/C3hc=;
 	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=i3eMjEURwQT0edK4sMKi6CgRCEDgDV7XoqsG5+wBMGoxnX/olz+a/HK0Dze9Q0k51M2VCNamJ5TjBK0AAOuscKrwISdOZSi+HE3+I6OBnch2ANq2GUTNqCEfD0lTAW4tpc7kOrJtU99NTt83AyfN4HsVLBshvln2ZwlU6Gz4Aes=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=aYhc3uMS; arc=fail smtp.client-ip=216.71.152.95
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
+	 Content-Type:MIME-Version; b=cVZDsxqPRvN+YYhUuRzIGJtCNbqkTXp27pqxvZgIKeF4PhC8DWM4yyecpb27rVmOIg4c1xZL4e3PgrFv/wFPsDTRg9gS0jtujJAPQS904Jpz4izhdyOQCkORafUYKNlXhihga4MGpNMP1nMFo8PAU9Iw8BSpXUXk+9gOtM9bCds=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=t0TAiFi5; arc=fail smtp.client-ip=52.101.229.55
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="aYhc3uMS"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=sandisk.com; i=@sandisk.com; q=dns/txt;
-  s=dkimnew.sandisk.com; t=1788758446; x=1820294446;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=BgjOxWivKyJ6BJ9IAn8lMBu9gfoFn4A7SXY+pkrIy1E=;
-  b=aYhc3uMSvF3d0ZVNStGo4xd/s6F9yS3cIRhEk3SCGMP3twshjn6JpD6e
-   RqDOLkuvThjkRFWsiaY9Yz/SnFwl7zaZaeugDV47ENKkHZW7zhAibZdjr
-   2T1y+AWjlrHHDcuc1vg7E2FMq3kZUk7rpwBydsGj9f9PP/VDTqLQKZ7dL
-   wM16JypDmw7USZfoI9n8sPWWrXbsXzcbIvy5vmmLqeW3yFI5dmKC9PMc5
-   mY8tql0CPladXGw4Y5ABknPDDn5ZKY/p1Jh3zrJ7XhGUqq37WoPvjIy3t
-   PNlqzazzlrFM8Dmpc5y8HK9egqIOVIaU0F065pTUU1z+pSO/6Z0sO8A/W
-   A==;
-X-CSE-ConnectionGUID: +E7oEOHmRAqw2FUYqFBr4w==
-X-CSE-MsgGUID: tpPqjBZCSTCZ2XIV8Osc7Q==
-X-IronPort-RemoteIP: 40.107.200.97
-X-IronPort-MID: 29630251
-X-IronPort-Reputation: None
-X-IronPort-Listener: OutgoingMail
-X-IronPort-SenderGroup: RELAY_O365
-X-IronPort-MailFlowPolicy: $RELAYED
-Received: from mail-northcentralusazon11022097.outbound.protection.outlook.com (HELO CH5PR02CU005.outbound.protection.outlook.com) ([40.107.200.97])
-  by ob1.hc6817-7.iphmx.com with ESMTP; 06 Sep 2026 22:20:39 -0700
+	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="t0TAiFi5"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=gU3O/qL+nvDAbEjKZltPS6rcgWW99LPTzlt3mP7r5Eao//OXh3qlULefobrHff4em4FmN/l7y/6zR36LlT+bYGkRgxZ6kkyiJe0KSP/YwpFglZ4LkQMRAC25apBTjmuFjkWDvqazG1+OQztGsRK59FCXk451WY76FzztfPzwHS9cRXq0THsovWOTL/hIYBi+LF2Ixp2BwUaovxsfyE9+6mUJjOVnoLJGdu+aWwbNvMjFxxChc9DRMNsrBcbtqCRvwPheHOmhL7PyEJTYaCMWaCbfbqJOv5pYSsJfcTUgb2nV1X/TXQsLLUh8ufUw6sMNcjhWyFHlTYrpgmzLMaIVkA==
+ b=hvKi8JUL8YlWaNWNa3t27kX3EHhK4Zz93YQVn1b1PjLluZPlXFVlIXeWNxxJjQuDeAhDFdeJoDKXxN+WaheZ8I9Gecy6Bp4fJF0r6unXiua1WXxFRNW1W9PqXL80Tc/fqf1qHfaVVjUh1vWUFpWbQtJex/CaqdfiR2V07737S1jhZh1u5gn1lqpp5fFsqlGekG30oZ5W8NF0+60i56ImdCYf+mu2qE6CIO6ZJdmnyVH7lpkkzFevA/u1KdCnljwFlxlgL1RTwXAAjASpKNsAXFwdrorzTc8srMVDO/J4evwj9ZxNwfuZtLPu8EtgivTr3QK85LdXmW4GaQg3mpJnNw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=BgjOxWivKyJ6BJ9IAn8lMBu9gfoFn4A7SXY+pkrIy1E=;
- b=hGTK4mP6IosI8bPah7wJcmxq3S73trSAKr6mA8LNhtdhNfSz5B4dyGewxwqz/C9NRn6g+R1FR/uKjG/hAeCLZDnTJIX+hnUVV9YknCLGKwaFtUMAe3EeKCy5DB0uUcVCtHPig6mbwR02hAFgcT+q5PHblKXxswLAgi2er/x42oqXQR1ZfKAw14XkbBnUUA04aQCGGwsShJogbm8c5AkUFU1ZawNpUWH5YkHzMWMfy1/Z35SYOuMA/6Pjo1wwkpGvBYieV03U3MXC9TcIMsKw3Xs+vw4u0VBphv5EIDoECjGT0qOYGT4RHUJasfr3LHrtfMPDS+wph9NoWkvpEezGfg==
+ bh=TIrRfxYza4E6TI7IXUlWHmOQ+y5PeqqDGKgMT8N4s+A=;
+ b=wD+Tn82Fqk/kqkT/MbcRrYodAeDOFW5h1IOn9e9mmhK70ydoPA/iIQ+D/IDNc/sHq0g8+ZenoO5lugNaJ63WQCp0bzadlJPzjhzPGORjok6MHcrTNPDPGhnWZzmx7Fh3ke/9KyQPPidQzBFYDRSkAiqCOP1nZ8uxSuRPgpF/EdIPNoCPFx5wav6wxtnDO8ue0dKZG52mqcbetMnwm6vEwQQC+bON/c+f4hhY1wBCi+iPqpNViL5igsehRDT9IoQe4ZmNViP35Q7Gs8cCfXCMHtw7HBYClWhGc3nCqy94EmyNrwBVii9FHML/h0A3C4aidO200NhlEmwfX+KbBNUHgw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=sandisk.com; dmarc=pass action=none header.from=sandisk.com;
- dkim=pass header.d=sandisk.com; arc=none
-Received: from DS1PR16MB6753.namprd16.prod.outlook.com (2603:10b6:8:1ec::5) by
- SA1PR16MB6243.namprd16.prod.outlook.com (2603:10b6:806:3d7::16) with
+ smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
+ header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=TIrRfxYza4E6TI7IXUlWHmOQ+y5PeqqDGKgMT8N4s+A=;
+ b=t0TAiFi5gqBWX8Xzo325j6Iqt8wpU1w21mvzGTIF0nNXCqlHvFEu+Py293udeMMcWwbkOB7lg1SwCYYj28W24EAz9Qe57EkUazxZG7WSn1zfl6CsL0PYgfnWGAQ2ImJHortwkGlpzoJtDSSYoQH6CVSG1mL0UfO1AqdylIxc8Z4=
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
+ by TY3PR01MB10353.jpnprd01.prod.outlook.com (2603:1096:400:251::9) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.382.15; Mon, 7 Sep
- 2026 05:20:38 +0000
-Received: from DS1PR16MB6753.namprd16.prod.outlook.com
- ([fe80::72d7:97b5:4539:a90]) by DS1PR16MB6753.namprd16.prod.outlook.com
- ([fe80::72d7:97b5:4539:a90%5]) with mapi id 15.21.0382.014; Mon, 7 Sep 2026
- 05:20:38 +0000
-From: Avri Altman <Avri.Altman@sandisk.com>
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulfh@kernel.org>
-CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Lin
-	<shawn.lin@linux.dev>
-Subject: RE: [PATCH v2 1/2] mmc-utils: Factor out extcsd revision to string
- helper
-Thread-Topic: [PATCH v2 1/2] mmc-utils: Factor out extcsd revision to string
- helper
-Thread-Index: AQHdPmSWMifg7+0dgE+Dg21c6oznZrbClEnA
-Date: Mon, 7 Sep 2026 05:20:38 +0000
+ 2026 06:37:02 +0000
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de%4]) with mapi id 15.21.0382.014; Mon, 7 Sep 2026
+ 06:37:02 +0000
+From: Biju Das <biju.das.jz@bp.renesas.com>
+To: wsa+renesas <wsa+renesas@sang-engineering.com>, "biju.das.au"
+	<biju.das.au@gmail.com>
+CC: Ulf Hansson <ulfh@kernel.org>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org"
+	<linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: RE: [PATCH v24 08/15] mmc: renesas_sdhi: Add
+ TMIO_MMC_INTERNAL_DIVIDER flag
+Thread-Topic: [PATCH v24 08/15] mmc: renesas_sdhi: Add
+ TMIO_MMC_INTERNAL_DIVIDER flag
+Thread-Index: AQHdMMe+SeXRDHnYx0S0S9Te31Iesba8rjuAgAYGtQA=
+Date: Mon, 7 Sep 2026 06:37:02 +0000
 Message-ID:
- <DS1PR16MB6753505912E785E6A4664AE2E5B22@DS1PR16MB6753.namprd16.prod.outlook.com>
-References: <1788742944-94637-1-git-send-email-shawn.lin@rock-chips.com>
- <1788742944-94637-2-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1788742944-94637-2-git-send-email-shawn.lin@rock-chips.com>
-Accept-Language: en-US
+ <TY3PR01MB11346EC6636C810EEBA215F4E86B22@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
+ <20260820171657.62815-9-biju.das.jz@bp.renesas.com>
+ <apk_81IYqxrWZyJK@shikoro>
+In-Reply-To: <apk_81IYqxrWZyJK@shikoro>
+Accept-Language: en-GB, en-US
 Content-Language: en-US
 X-MS-Has-Attach:
 X-MS-TNEF-Correlator:
 authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=sandisk.com;
+ header.d=none;dmarc=none action=none header.from=bp.renesas.com;
 x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DS1PR16MB6753:EE_|SA1PR16MB6243:EE_
-x-ms-office365-filtering-correlation-id: 32038c08-4a6a-4189-8002-08df0c9fc0b9
-x-ms-exchange-atpmessageproperties: SA
-sndkipoutbound: EOP-TRUE
+x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|TY3PR01MB10353:EE_
+x-ms-office365-filtering-correlation-id: 5329292a-8fa2-4604-83af-08df0caa6cf6
+x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
 x-microsoft-antispam:
- BCL:0;ARA:13230040|1800799024|23010399003|366016|376014|10067099003|56012099006|11063799006|4143699003|3023799007|18002099003|22082099003|55112099003|38070700021;
+ BCL:0;ARA:13230040|376014|366016|23010399003|1800799024|10067099003|6133799003|4143699003|56012099006|11063799006|18002099003|22082099003|38070700021;
 x-microsoft-antispam-message-info:
- 4cPJWYFzbpaMPpe0LWN4ktIr3dHzSZ/wKelbWAMWvnkcqJibWYfzwsDQJ5+ob/NXOXwX5YH2mQ7MxWDzvb2Q9c8xaDk2sqgg0aMchAll6uNnIBVeLe62kNymVxINaPRqDlI5vOb0jvuTqlUEE8Zf8jmsAyMm28zoWszxCQzNEX6M9OEnjRDjqAuPSu7C9SE4jM8WClj5CO+Y/u53LJISiFT7RtsqDOfM0IBJz327iykMFQRnCN6fmafPLeOtAxMr56lt6GcV7FDERaDqyYFz+Zd42rhzIVz0Kckk8lnYDqOWt5Pjv5KRNBiNWmVTpamzOtXkjPfWwiw+FGzuCrQjpUZmJ4pP4Gwj7nm4Q89X0dhLI/uPsNBY7eK1sMn08qKlyf6ZUIewGtbNsrzCzqmK6clLFtNE2d/KxvS8yCUhPLmOfxlivuNjAhjcsFJmmReLQrPXnbP0QsXA+etX66gx3lNYG793NFJnU9L0Bm91k92uI9tVuDlPYDnqK8PaJEYGzb3NqGkLnIzMMw3FW0JSkKOYcZ+xigAUCQNQO8ESCwbOxvQAnLqicafyXLAY1QEomO/dNdS79GQib6f3BBUB5ejTwcpXLaAYOvetv9M6ZEmA5B388VBS0iSDxiatGGS7fPUy4a5oMTgYxDVGwE4ACVnFYAhTBQUJg9fqG8gwq8N7N9OMR2h0M36VEcQ2/vcozb72Pa64apAS/U8qpOM4BA2GYOCYlVg+WC9/2C9cs+c=
+ 3mvk6WVpMEt+YVoG9fG+iA5kbR5Iw26OMIzYoZeS8iDKVt1gr3NQ9vHTYiX4Um16UNo50e1aJHTuLftWfCdiq0I0nC0MSjNpNl3rA4aC1xVWwRwanFEZdgZeKAg83l3Y/ImcKB2gkZG8C69WvdfJDOG8BndLwjhjc3J+rfNNxkYQWeTFeTe+WzhZR3riLS+WqbalmEV9lRwoNYo4obDgwz2XrHYtM7bJTZLtVOOnsf0kIhVNn93hlK5vVv63Zw2TJW2nhIi7nnd997IRMfNz+V8Gyk0TryvQrOO9PHv/ondPMmM/Hcdz5vBVRZgcQO3Pgbjqv8tuSl03l3CpaXC7WXtW7ys6Sk+2E2cXnfKg/9AtHWriHyCmdYlveGGpIl3FCVrAqUDdXdj1knq0SM2/fmNcDnDb/+a8hMg7j+pWyetWqGt92tL3zTWh2e6+4it+Ssf6bjUGF+6lG/3KyaSaZcaBGOGiYRqcptpfOEvNBryVCsLJ4+AqVt2hGV/WTY178MZh4HoVGWNncmf3+AZ2pId1BgI40EtClvDPN5gyMnlffLWD5G/tEdSQF9Z1i5N7XedJwMy4NU4AuNVpuEbLufCmJlwCCyZvVOyWWO/88K0T91OsAThVkGipr1/sKFXpxfpftFslemDWr9KtlJHjpJS5hyUt7CoHaydtc+8UbI9xoh3AOjzUQNiXSgjmQjD18ARC2rXK7leh+l+jis+ItqOs4PtDXvsaqf+S2LCfYFw=
 x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DS1PR16MB6753.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(23010399003)(366016)(376014)(10067099003)(56012099006)(11063799006)(4143699003)(3023799007)(18002099003)(22082099003)(55112099003)(38070700021);DIR:OUT;SFP:1102;
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(23010399003)(1800799024)(10067099003)(6133799003)(4143699003)(56012099006)(11063799006)(18002099003)(22082099003)(38070700021);DIR:OUT;SFP:1101;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
 x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?MR9vhJnamyYPOADzc/0Da47YeUQpbR5EcvyNGtthxfZ3GA1JXca5GB5ewkRX?=
- =?us-ascii?Q?HC4/hvM9GszEsxl/fJcahI9LIbaMz92M4m8+8UU7lbXHciPqldH52N9dqG1d?=
- =?us-ascii?Q?yb+thQZBHQy+mRKj0z82q3YKW0qCnvNldfQ6BdB+df7HdcvUa6NWkiLYiBNj?=
- =?us-ascii?Q?ex9sakq1mAx15pFOkJoi/DX/yKk1J/3Mx0FPr/fHup+qywPv8611bL3Ntu4v?=
- =?us-ascii?Q?hlreE8P1BfBMEId1vMB0IdnvHEHjRSn3e0eTXebeY4DRd76P1IV01lt6CHWG?=
- =?us-ascii?Q?lq829msIXhMCQMP9hS0AMxWBk+f8zcQ+gaCeqpAo37vFGskf2DPb1fFHgrd8?=
- =?us-ascii?Q?blfBKpo+cQ5H+blyi12yAVvMJhdm3Tla6TfMnH0yWjyRaKpfXATczvu02QM0?=
- =?us-ascii?Q?zq+KiX67Ba4Tz4aA5BdJSybOzM6GwvH2ck3rKHJILwm2/s/ixGBHlHA6xWGZ?=
- =?us-ascii?Q?3gvzlWGzj/+ruEnS4CNwJPAvZvs/BCNjvGNpiEiG4xwC3p8KFrSTwRqE8Kvy?=
- =?us-ascii?Q?XFi1PuN1GYmr+9G0/4rs3HfkVOKT9AWb6czyXoUCEXXEgICh/8HrWNVQxbmW?=
- =?us-ascii?Q?LASyKnLqndFKtVD6XDsvS3MKFlG7WBKKEU7JmwnpoYk6EAKr+De1Xyz8xE3l?=
- =?us-ascii?Q?gsJtjJmsYGVXRNXLTWpXic6FMC3RefhOUfHVomd4Fj4IiftyN87oZGF8ozw3?=
- =?us-ascii?Q?mgLy18sNki9FB1x8CyCqNLrxOFWV1IdCqHQveWbzBmB/RT7JiSngEUt0mX5w?=
- =?us-ascii?Q?INJFqZM6x9Tg2iQAh6xi00Sh8QczM69bfkjDmpfxzl/8X/Vdjvgaq3gIyCyg?=
- =?us-ascii?Q?ygKEY4m7YoSJs891wVUwV+Grz0IFI8D9dQv3HSK/Q58ZBkoUNa1x+qFRkIvk?=
- =?us-ascii?Q?2dKhQ8M0uuQOOBK/FAsaGszkzWnxeYtNIF9BtPXox+OF/vfUAf4wtCoIa0Dm?=
- =?us-ascii?Q?KnPUTowz01V37nBlIElDYn5VycHNuX2VWNTEBQJIdXl/q6W7d+AZ1qDFuahD?=
- =?us-ascii?Q?7GZVMEch8Ppm7se731ljOQ/tNaw18xtY9Y2WeNwRR/vBuauVlAJNGJyJMBYV?=
- =?us-ascii?Q?dZvRsorVRLykz7kBYdeDSJFFZNA7uQsomI7x8dJAu5yJPzdmkpWs+n2QI/pW?=
- =?us-ascii?Q?PMOh1AvQk4PvYN9cISk4/muQRcR90Fk6qWD2wmHpO76iBe3EesSWpbrqAyup?=
- =?us-ascii?Q?YPoB8//LjtqNno7zhycgVL8b5rxc4SHPysHdF68F8YJhp03iFYGUvtpIHVSV?=
- =?us-ascii?Q?ESRHycDIIdws5TOoiRS25n2iNOtBq4URix/ZsNr4vdyWyCqxWdtWkZjFGLfK?=
- =?us-ascii?Q?ir5tG9blOQnortFWwiJs6Pf+syN2vSsLBsGg5C3PchaV9gPsigPtTP6vbZeN?=
- =?us-ascii?Q?1Iuk+WCQsBBlir1IoU7bXYZ32GqccINHHlWqyC08DDOjZtdyXgMFVx4kB6iO?=
- =?us-ascii?Q?o3phW2p0EYpVOwh48anPPPWQWhVlCGmk8QJLPVQk74aADNQKxfvJwib40L67?=
- =?us-ascii?Q?xsTDBQ244uegjwcqoqDz2tuR3nCxBHgLHtHlJx+vNiGh0U5KShoFY2XRsCKV?=
- =?us-ascii?Q?SzU1chIkr26Mkuj/SunK6U6245VUog8RBQYyX76uoqDvIgPRWU8likzDQcos?=
- =?us-ascii?Q?sFB2S839AYMwVxCPhHVgt2AVrdYFLCYPPEN1778zW9AoxMulgMOgfGMc6FHK?=
- =?us-ascii?Q?Il3cRnBP8EaZW+DrX2K3I+kQtfwgOcAZWF6crtItooJBq7XFayDRvRz2hNpc?=
- =?us-ascii?Q?Cc/QFoXghw=3D=3D?=
+ =?us-ascii?Q?7bEGpqaLBhDQMoqxh6SRrPgc4jbYr9DZacH12nQzeEX3vEKWYTMX69d3N5bu?=
+ =?us-ascii?Q?IX9axHf5xHIy8En2HBHhKqcLaX9PwV0AY5nvdhVv9i2JmlHHKrt1ovjcLwD5?=
+ =?us-ascii?Q?/I1WPJ17AVgf5YF/5SZXlSUIgg2AZQ0kSR3KJrD8Qvkq9vN8FX6Qroyfr+1m?=
+ =?us-ascii?Q?FadoYsi8EX4jBmr9f8Fh+RPbzbmesVYLm+Z468jOs01ds3JdpfPBRtguE1kM?=
+ =?us-ascii?Q?lqtKvELiNzAKJFQ/CKCeo7TjoAriwS6alaLE2KmSYa4JeaeHbD1kjSp5Jp/M?=
+ =?us-ascii?Q?j71smS29zpPW8L2IPKg5Ht1xDdJ4WcpXFxZY3hKfEhN2bF8OaNzioNucDn+x?=
+ =?us-ascii?Q?W+Be3/7td7z7yHYFrZ1iPETxN2TMI/dJ6JYXXS6wJ+aA5YdIWlKHrCwog8Cs?=
+ =?us-ascii?Q?JOMYarS417EMZqo9z/Cf2WhbeQPXRMHcS3Pvc2XDFhiCWoECsSAo7d0yoemF?=
+ =?us-ascii?Q?KXCU3Er0G6R+10KPCE0G1+b14HbfS24/gNKdo1KZeSCukBrw3RjWNk//UGh+?=
+ =?us-ascii?Q?nJCO3jOFAJr0Fs0vSNPjbRKF+/nyJPAHUuuj8Fd35+LBpiIC52P5G9cErtxn?=
+ =?us-ascii?Q?Gbd51hz9+mbwe3IamFHYZnvUBSfWoH1jHY2nGI9tZ3L41l/2LHw/VssUzpAX?=
+ =?us-ascii?Q?Cz98Z/2iadkSNsoKufU9l/Tz4jGSTmrX1uR1jda8qnSJ/5rfAixusOY52OKP?=
+ =?us-ascii?Q?TOn7Tq8uZL4vhlTTHJpTj9SZ7kd4H9cc+9FfgUZOVXn1vU/fleZJ/DTwWeN1?=
+ =?us-ascii?Q?zO4OYgLoX67HL6EcOzLc382gp2TRMoGTbyJ70lXxLAmLtcc5UajpD9/9ipDa?=
+ =?us-ascii?Q?gJ/DGQY5neVwj90HKAqaglf5ejApAC3y2163N8c+oeNl8hqBUrXY8s1Biemk?=
+ =?us-ascii?Q?z6G8Bbx2VBEaRXM6+ghUHrk20pQmGRMmepToW1mFBgJDjUWQYw9ez7aVs13L?=
+ =?us-ascii?Q?aGFXB8oOenNx5o9g4LLqo0WAcdj0UBbulSh9ZRFyNCYIttOAoCIxk/GzK+Ce?=
+ =?us-ascii?Q?30nH9O+z15YRKVFW8e7CfbVzqLhuwb1teMCiArRAKZ8pDDPm0n04jC3n9rXe?=
+ =?us-ascii?Q?Gvnr93+dHzMFQE+Jhr0JFzw0pwJXBp+f2p2kYA5KEhJWfVs+ZWj92a7Rb7ou?=
+ =?us-ascii?Q?u7i8RQErxjBg4dxsnIQBu3usV3bN2nG1xxoniXB7P4Xvz/P8F3vEu5ps4jyu?=
+ =?us-ascii?Q?2yYLph2m8g2suuB5o6kDprVHZ+2E+NdtzaG/YOB3XzYnaJYyoVyfTaZNzK21?=
+ =?us-ascii?Q?8adL3h4gY8TM8QTE6iaQgZ9l0mhcgaAKm85GeiR3ON6rJ3U8bS5c1JHbYgCX?=
+ =?us-ascii?Q?6UFzuBHnJNxt6PKmtlG1gNZQLiHqZTBLcUPso3U/3pMxfXVD7GDRRLp7d5iB?=
+ =?us-ascii?Q?5S1132oAEz1zz5OLJTALIfJ5IAGBGK9B7JvFEWkB0pdhHwCqhwTOon3y6A6W?=
+ =?us-ascii?Q?VP54F5jEScjzbPyYmZfkKno558gKBi20rBIBfVURZ6z/Lqd9FogBBkQ9/lvU?=
+ =?us-ascii?Q?BGSau+mxh7Ovc+WXbQlU//gPKzvHnfTXlroycaoRBPhx1uoGuR9qYLYmx93Q?=
+ =?us-ascii?Q?dXWyUQ95ctJetfvbNuIpYTKUTEoduRVax6bebjjbf06p7pn4ODOSjK5g+PnT?=
+ =?us-ascii?Q?KWZCo1i/desGfUvGpXGENyqZrTy3mM5Wubo//ksYVoGFM0cD3fAvcclwEbfM?=
+ =?us-ascii?Q?A7W1fEpc64plWFw6EijAsj+lqkOjZ6dUl8vlAxQWJFf7o8zOndYCISH4KlCW?=
+ =?us-ascii?Q?Gn63A3Y7IQ=3D=3D?=
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
@@ -132,31 +118,135 @@ List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	Z4ZUNKviKJOGHiRlHbv1jtUGaIfMOhS+9T5JfuT9DhcCS0kSWBrr3/uIIrEh84IxaDeYM5L58/s7EuNLtDW+CQ6HL9z1VTzjiVueKeTWzxeXtqeyWcxPLHo/pXLwLOr2/WxKhQBpaLgC8gxmYL1GEsVgLlGn3elANdaIiZ2q9wMdfoYimx97409TlBgp6ZmjQ+kcztbVtvsApb9WCFvdg8f9OaGvaj4LW2CvCtWIOENEHs6/AkbzLJVbFXslTGhxprY4qjzgAsWAgb7KRyiRS3xtM9NWPeoXyvn3oVHWWnI7ngChite90uweQWzk5ZaoUdCJr9CAWTos6M7Qh11R2A==
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	jR42VFtAiW4fgqra5ohSsNi6jPJh/l7s62sE1xmFeszb1Wj0PnuwRxpmPjJ+m48I+yC3T4pRG2i4J+FJF0NjkteWwi6IiK+G2Rek6MK0RB3wWMc/qmgQmMnk1mmFn9Ld8E+PQww6zpeQ/o50g6kNeU7iT3cFbZhMSmOouAx9U164BEGX6UFlVeEnmOqZvNH+baF9a2CeFu6cCnP0k5y1tfpmQHT6v3wdi/O1chEV6M4kr9R3f/VO2P7ZevwwVGWP0xxfVk6Gvy7LgMQEaoTpD5GlNMrQsRRxsaUwfGuA4z8XqClJ7IPDaTYtW41xe3Z6T+01oBGFj13b5qaFLG852fJA8/g5c/gFyJAhZJwN/3BtRR4P8tOd6U/328TQoPrZgWyCLRCfS/N+UxQTDIFZklGINxr4WmgYaU1sayp/sQT4cLiqM10hiIcGHG54axAVvkSFSyyGgZIxT6q97BaneSx78sYeB+xIS1cc0xbqA0yMao+Z6x/H4aOJGqhTCp/8a7dUQ/VHmsI0SgDra4PuNgj17/k/d6yasaBUEk+DftlbCGggigsFTha4HkT2uYsNv3HNeYbvvD+SaNbP+BAeNEArACrSTKxqGJmN3IfHkZ+Hu9e3PR5/VxQ5SBFQljNzOjharrGD6byv3j39ZOMkOw==
-X-OriginatorOrg: sandisk.com
+X-OriginatorOrg: bp.renesas.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DS1PR16MB6753.namprd16.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 32038c08-4a6a-4189-8002-08df0c9fc0b9
-X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Sep 2026 05:20:38.2578
+X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 5329292a-8fa2-4604-83af-08df0caa6cf6
+X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Sep 2026 06:37:02.1550
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 7ffe0ff2-35d0-407e-a107-79fc32e84ec4
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: mg4GVcXtHlVVvZsRORyy539tdxlRoIMVM7P442LJO+Elk1I0y6K0p2e/noBA8S/yTxEajpcBZug8wYG28XdZxQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR16MB6243
+X-MS-Exchange-CrossTenant-userprincipalname: t/CQwz67JhMJMUWMPGJyrbsm4G5MAwOk3YBL+T9QY5xFYymc4Itc38WGqWqojKNbd+tnpLPfbO/K9R21WoTNrO0EJZpczyoPGGbmuHGJ0pg=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY3PR01MB10353
 
-> From: Shawn Lin <shawn.lin@linux.dev>
+Hi Wolfram,
+
+Thanks for the feedback.
+
+> -----Original Message-----
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Sent: 03 September 2026 10:38
+> Subject: Re: [PATCH v24 08/15] mmc: renesas_sdhi: Add TMIO_MMC_INTERNAL_D=
+IVIDER flag
 >=20
-> The extended CSD revision to MMC version string mapping is open coded in
-> do_read_extcsd(). Factor it out into a helper, so that it can be shared w=
-ith
-> upcoming commands.
+> > Thank you for your contribution! Sashiko AI review found 1 potential is=
+sue(s) to consider:
+> > - [Medium] Fallback `f_max` and `f_min` initialization fails to account=
+ for the internal clock divider.
+> > --
+> >
+> > --- Patch [8]: [PATCH v24 08/15] mmc: renesas_sdhi: Add
+> > TMIO_MMC_INTERNAL_DIVIDER flag --- commit
+> > c4a63c19303286f5b383bdabaa2a3f3827a8c5c5
+> > Author: Biju Das <biju.das.jz@bp.renesas.com>
+> >
+> > mmc: renesas_sdhi: Add TMIO_MMC_INTERNAL_DIVIDER flag
+> >
+> > This commit introduces the TMIO_MMC_INTERNAL_DIVIDER flag to support
+> > SoCs like RZ/G3L that have a fixed internal /2 clock divider. It adds
+> > a helper function to fold this division into the reported clock rate
+> > and uses it in the clock update path.
+> >
+> > > diff --git a/drivers/mmc/host/renesas_sdhi_core.c
+> > > b/drivers/mmc/host/renesas_sdhi_core.c
+> > > index ff428b6187bbd..b5f2ff68db758 100644
+> > > --- a/drivers/mmc/host/renesas_sdhi_core.c
+> > > +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> > > @@ -125,6 +125,27 @@ static int renesas_sdhi_clk_enable(struct tmio_m=
+mc_host *host)
+> > >  	return 0;
+> > >  }
+> > >
+> >
+> > [Severity: Medium]
+> > Since this patch introduces an internal /2 clock divider, should
+> > renesas_sdhi_clk_enable() (which is just above this hunk) also be
+> > updated to account for it?
+
+For this patch, we don't have a SoC with TMIO_MMC_INTERNAL_DIVIDER flag set=
+.
+So, it retains previous functionality. Please comment if you think otherwis=
+e.
+
+> >
+> > If the device tree omits the max-frequency property, f_max defaults to
+> > the raw parent clock rate:
+> >
+
+This behaviour is same as there is no SoC has set with TMIO_MMC_INTERNAL_DI=
+VIDER flag.
+
+> > drivers/mmc/host/renesas_sdhi_core.c:renesas_sdhi_clk_enable() {
+> >     ...
+> > 	if (!mmc->f_max)
+> > 		mmc->f_max =3D clk_get_rate(priv->clk);
+
+The SoC with TMIO_MMC_INTERNAL_DIVIDER has always frequency defined in SoC =
+dtsi
+and this condition is skipped. Please let me know should I add a comment he=
+re??
+
+> >
+> > 	/*
+> > 	 * Minimum frequency is the minimum input clock frequency
+> > 	 * divided by our maximum divider.
+> > 	 */
+> > 	mmc->f_min =3D max(clk_round_rate(priv->clk, 1) / host->pdata->max_div=
+ider, 1L);
+> >     ...
+> > }
+> >
+> > For hardware with the internal divider, this advertises double the
+> > actual achievable bus frequency. If the clock provider cannot scale up
+> > to 4x the requested frequency, the MMC core might negotiate a
+> > high-speed mode that the hardware cannot satisfy, resulting in a mode
+> > mismatch where the bus silently runs at half the expected speed.
+
+SDx_Clock (HS clk) Figure 4.4-8 Block Diagram of the Deformed Clock System =
+(7)
+IMCLK =3D SDx_Clock/2
+
+SD_Clock  Figure 6.2-2 Functional Diagram of Clock Divider for SD_CLK
+
+SD_Clock is dynamic setting based on the speed mode.
+
+For HS400 mode, SD_CLK =3D IMCLK =3D SDx_Clock/2 and SD_CLK_CTRL =3D 0
+
+For Non-HS400 mode, SD_CLK =3D IMCLK /2 =3D SDx_Clock/4 and SD_CLK_CTRL =3D=
+ 0xff for 1/1 option and
+other values for non 1/1 option.
+
+We know the maximum frequency supported by the SoC and we must define this =
+in SoC dtsi.
+
+I believe we should support the below check only for non-DT platforms as we=
+ don't know
+the SoC max sd clock capability.
+
+	if (!mmc->f_max)
+		mmc->f_max =3D clk_get_rate(priv->clk);
+
+
+> >
+> > Could mmc->f_max and mmc->f_min calculation be adjusted when the
+> > TMIO_MMC_INTERNAL_DIVIDER flag is set?
 >=20
-> No functional change.
->=20
-> Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
-Reviewed-by: Avri Altman <avri.altman@sandisk.com>
+> Looks valid from a glimpse. Please comment if you think this report makes=
+ sense or not.
+
+Please comment on my response.
+
+Cheers,
+Biju
+
