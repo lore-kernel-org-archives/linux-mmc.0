@@ -1,103 +1,118 @@
-Received: from mail-wr1-f51.google.com (mail-wr1-f51.google.com [209.85.221.51])
+Received: from mail-ua1-f45.google.com (mail-ua1-f45.google.com [209.85.222.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7140146D096
-	for <linux-mmc@vger.kernel.org>; Mon,  7 Sep 2026 11:18:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB05021254B
+	for <linux-mmc@vger.kernel.org>; Mon,  7 Sep 2026 12:18:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788779884; cv=none; b=Br+UoH5nQufqWJPAlK/ZrTUbrecHTRDl+tmbrpQE58QM/om3gAPA5hdqp1xXVCdswHpUqpdDcYEMTG7zS5O9iMDpQP2MAc5JIb8OeAHcBjaUZJiMcEPllR3KGZ2qTO9tFuoJCc1lEaD0onS9DuYhVRJbgMfW3HNpZKrYJ9phNus=
+	t=1788783482; cv=none; b=u6epN2SdORGx3N4zwulYoSYJHbI66j54MJfLfWjZddIUtVVhvnN4y3bwdi2BdkA8ie5fqh1SWYtpJz1i8PioKQAFOB3ZvxlAvzIEGeJ4JSziHBHiQLoHmVUmVc98CWUQ4QOANJeOQyKDlcssavZD76sBCDIGCWaPmkhr+9aEABg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788779884; c=relaxed/simple;
-	bh=XYqEV1M0GpB+fKUY4FbmTaxiqGTleihRUV7J7Wx1cSI=;
-	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:From:To:
-	 References:In-Reply-To; b=ahWn6b9cYoVobjEkXomZl0TXwtxHmBnURJ3p1FCuwb16BBqAi5LolrMSpcO8Vjdf4fANt9c2oBp+XLJhnqWbcGjOKY2FHZZbgZ03CUi+a3nWzVWfNToCHsT0ouycOf1EwETusoG9WTWZYHS6/8Y4/7mTID0GLVYGcWdjMQMISqY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TtGcz1qC; arc=none smtp.client-ip=209.85.221.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+	s=arc-20240116; t=1788783482; c=relaxed/simple;
+	bh=VEx282xJoSaEd9yFgg0bC7E3UZwOapIeeglnsmObeHE=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=MT//iz3oBbTX0AGqn3Uz3nedT+nAgj8HLpxg0GIREZChauqj5MfiWYqKMf4Cty2bs5iT6GUs762I4VzKu8d+jiYx9WjqZYcVC/3pDc28FgDBHQGrtuJ/sJLDBpXTWPFR7fYhTFA9W/t6s0Kfqg9Qa38rn8xI/TIQcYME9IqZjow=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.222.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TtGcz1qC"
-Received: by mail-wr1-f51.google.com with SMTP id ffacd0b85a97d-48441a2ba1bso2438931f8f.1
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Sep 2026 04:18:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1788779879; x=1789384679; darn=vger.kernel.org;
-        h=in-reply-to:references:to:from:subject:cc:message-id:date
-         :content-type:content-transfer-encoding:mime-version:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=XYqEV1M0GpB+fKUY4FbmTaxiqGTleihRUV7J7Wx1cSI=;
-        b=TtGcz1qCoGur1AWzOGbC7r+6KXeDxBiuaJBX7bCeFzbBUdW/aUKItYWvZoe7RsBYvm
-         5TzIbCE5VynFN92BICU4PzI834qCfCwkVWOjlJ2JRlGbFRAHZRzat7IgXvviPgcGzwOq
-         +QR4E7G2uEHx1DVbOh8lUNwrjTjEK/jiKTDR3GPQ94uw9JoO5Ff1AglPy2AYbn3H3ZQP
-         JrySE7ss5NpUtZgqviEURQPaUdzZKguI7mY2y5AIe0U9KxZpf+GOgKwvmlZZKoXOZ8VU
-         qnnVvSHmeAO0yfmbJ+Zn9mD2HSG8ObJauwJYpVa+1iONbWdWS9BKWTYY2T71npsfyhoH
-         EAlA==
+Received: by mail-ua1-f45.google.com with SMTP id a1e0cc1a2514c-97fcda3952aso873429241.0
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Sep 2026 05:18:00 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788779879; x=1789384679;
-        h=in-reply-to:references:to:from:subject:cc:message-id:date
-         :content-type:content-transfer-encoding:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=XYqEV1M0GpB+fKUY4FbmTaxiqGTleihRUV7J7Wx1cSI=;
-        b=sCtbbffxCBi8dhqDpWs6LIF9nymuEOK+AE9IugqXFSxMWnaGiD8cxDeeIrCbbeJncg
-         bQOjKVS9sb/0qGtsYEDawMTR1VSZJF9tBpeEcyS0UxfGxdfSTIaQB6AjVDqvYMMNCe1H
-         K674ch1mvH6QVF+riHWg01vEAta6kyboIkFg7UgSkHaOzNF7ZFVjREV0DHUDFP56fXAf
-         Ae6yC6QYWHWM1kwlHRNtFhRCaJOcs7eD3G93cItWvDb5O9jc4DRk1OiiFde4x8/HYvx+
-         JxPozEGKfedgJCMb8724hZW2s6mz5Tgil7WeldyNBd5rLy0WTAco546xQpthoCB9VDmh
-         aP3Q==
-X-Gm-Message-State: AFuF++mrjfddtCMf4IF1e/8oGUGXAwDbca4wCGwMVlLRhF6jJukI6s0H
-	AQ1yLqJYTuRLhWElWbOY1rd8FZv/36ZCYhuIDq4+uJuzT4jujXnGE/k=
-X-Gm-Gg: AYBFou2Fc9r3om2MotTPb2Sqnewo9t8vPjAV6e4mm5MaIKKhcsIqFlW7K1K2d2wg+5r
-	AIMJd7j0bQtFnXcvVF17UtUwdt8e0sO8EPHz+v3si+uQOGe06tXQZsz76pqldQ72PZMJFEnu2BH
-	tZP0ASzkZWQyoKQRU39oCizybKCWHsWUalGs8QTTw2c9dFSUah4QvXVUiAhac9p8lb+AzO3eUwY
-	4xpLE5fdQjLNXOajnyLw0gFCkF0AzVTJDVudd1HJFH6JsUBI52DeXWl60OjbbS6q3I2YlhFGwnI
-	WVeOTqgbXHBekulrnlJ35IGVy+92CJZJbZ8eRmyaN0HGNifP48DgEyyp6IyEbT3EYghvsBFTwYb
-	bR1NpEbh7ltmEkTQmE0Ytb7RRObjZm3iFPL6zDOdtuIEsDTGFIvgkYnS+rggStiRZ0jQPorgmYK
-	gFt17esExgdJxZke0URpHwj91eT1X2v3Utv+ndfw/HeiMdvDEhCOEBZJ/Soy9VOAE0nkQybQIKd
-	o0pJRZTI39vF+h91fc7L8+Cukvae1at5AKqvLGHF4VyqiIYmZ30nRjbNajk0muU1QD1kYEOIQKA
-	nN0SD+LSCh5dnYOdUXrC5I0+nbjNiKwziNx4Ulj1GVZYGqsYmq/z3RJsWypl9Q==
-X-Received: by 2002:a5d:55d1:0:b0:481:4697:8808 with SMTP id ffacd0b85a97d-485872dee4cmr22090578f8f.22.1788779879457;
-        Mon, 07 Sep 2026 04:17:59 -0700 (PDT)
-Received: from localhost (92-242-248-12.broadband.mtnet.hr. [92.242.248.12])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48591eb3d3bsm16032918f8f.0.2026.09.07.04.17.58
+        d=1e100.net; s=20251104; t=1788783480; x=1789388280;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=ICs1H2dY7Gpq4y5UR8p+p9hgLN+TaINBuRZGUQCEu4w=;
+        b=PSGboUnoHmLxHihD6eNkuF55RQBsTEFrPM6+MLgZKFifLN03aFtdQ9IrKRTgKalR0h
+         zBcP6aA9NDLGtJd06dlkbhVnMpTp1MyAeXb02kQgawfJ3fHo5xR8+jeqYvLrgq1kVaqk
+         BcDiibhSCVXn5RcvSUTe2JeW75KwjOzgoBEIYsAgfEWsku1+BQI7CUxEdREu6cslvyXP
+         VbbXgQhqsEEhDmPGHa0L2SiVGZIii0BRkFGRuCgpMqDzTWcT1sjpBF/XuSw7WdKO1ATs
+         fwU8olVPgjLiyTIeHiUFL7iz7BtPCUm9o3ZjMwM70jQhoYsxnsbGh6ArM1a4U628MjT3
+         UwvA==
+X-Forwarded-Encrypted: i=1; AKwUvByqZ5meSJ3tx6DLzXtc3nuGhePOkvV1Tv3mRepyKhfhdZ1EOhi+evGNaTrr7/Hpet4F5IwBoLJTQI0=@vger.kernel.org
+X-Gm-Message-State: AFuF++mF7Ug9cj9kljTnSip+eLRJhS/eF2TP0s5Qo3S3D09dLxVB8dwa
+	93cwPa9+Ne0xlc5q1AIsiTMvNNqe8US0Rt+YlTT9P/Sa6R1tioKLUa1hj0WvlovC
+X-Gm-Gg: AYBFou3nKFbj3SPT07Uw4f7t0kUcIf+a933J5qhDWydtCsdO0pNBSdvAQvmJeHtee1g
+	C1LCVdnk8YFLzMVFgTFMAygs1uTvw1RZOVeCmI1WMGQuTB5JCHYz4QlB+KF6NEnfhpel0a1LNTR
+	SZsrH3nJhVqmQswuIKM0VTJBYkZg0JzLfznEraOkCrlsNusHqRqJ1I9ADelSK5lmG2f8fXNgH7U
+	D5HchneKl26RBE+vgw6I6jtmiI6BNrwTIR8HWzg3vaBsK+IA/DEweO+9Fhe3RYJVlkdRndGnenh
+	4o1nKPyhb7MbKfBpeXq9Hl5bFQXQkq3171MXonR7YgAuQXQ5vceSN3tKCV6GDZ8fxAA8o7J/xXl
+	1daBoDgdfiEesx7q8yqdE/I4v0l0qxYd/YCs6JrLZCi6fLSvMnpJydGxmXGYTgImNzFUUY59KrT
+	CS4G1vssc/zFIG7i6rhnJAaKrkTu1TVh7K7OB3LcRZgSYJoF+Fh0r87LmxOrmrExYDQtqsIc/+G
+	xWXg7s78zDq+n5/Kk+fe0OgzH0l1WUAgQa3
+X-Received: by 2002:a05:6102:3a0e:b0:786:c223:ad84 with SMTP id ada2fe7eead31-78a4a9c39cfmr8878434137.9.1788783479699;
+        Mon, 07 Sep 2026 05:17:59 -0700 (PDT)
+Received: from mail-ua1-f48.google.com (mail-ua1-f48.google.com. [209.85.222.48])
+        by smtp.gmail.com with ESMTPSA id ada2fe7eead31-78a47b3468csm7016724137.11.2026.09.07.05.17.58
+        for <linux-mmc@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 07 Sep 2026 04:17:59 -0700 (PDT)
+        Mon, 07 Sep 2026 05:17:58 -0700 (PDT)
+Received: by mail-ua1-f48.google.com with SMTP id a1e0cc1a2514c-97c7afa485bso1987106241.3
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Sep 2026 05:17:58 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AKwUvByVusiDxv8UX1GgilccQT/1lNyfcn1lKZ1pJlXki5GWMd7a7QkXaZ5Udth1stacYqUGNqb+CjjAPKA=@vger.kernel.org
+X-Received: by 2002:a05:6102:5126:b0:785:5a17:739b with SMTP id
+ ada2fe7eead31-78a4a4944femr9543602137.0.1788783478176; Mon, 07 Sep 2026
+ 05:17:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
-Date: Mon, 07 Sep 2026 13:16:59 +0200
-Message-Id: <DL91IWM6YXRN.3892K60CVKZ3U@gmail.com>
-Cc: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
- <linux-kernel-mentees@lists.linux.dev>, "Ulf Hansson" <ulfh@kernel.org>,
- "Guangshuo Li" <lgs201920130244@gmail.com>, "Runyu Xiao"
- <runyu.xiao@seu.edu.cn>, "Shuah Khan" <skhan@linuxfoundation.org>,
- <syzbot+1ee4f3b9228e35f14677@syzkaller.appspotmail.com>, "Geert
- Uytterhoeven" <geert+renesas@glider.be>
+MIME-Version: 1.0
+References: <20260816153809.7067-1-jakovnovak30@gmail.com> <aoLCr8JEYaYxcJcQ@hovoldconsulting.com>
+In-Reply-To: <aoLCr8JEYaYxcJcQ@hovoldconsulting.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Mon, 7 Sep 2026 14:17:45 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdU_Rx4ZGi9SsNxKUDyYmV-GbD8rD9NMVzYginBMXdZDMg@mail.gmail.com>
+X-Gm-Features: AcwNN1UGIwaDEpSQZPDqi3a020L7heHOErQjuz6sflvRFDaDCrMR20u-OR5PZhk
+Message-ID: <CAMuHMdU_Rx4ZGi9SsNxKUDyYmV-GbD8rD9NMVzYginBMXdZDMg@mail.gmail.com>
 Subject: Re: [PATCH] mmc: vub300: fix sleeping function call from invalid
  context in vub300_inactivity_timer_expired
-From: "Jakov Novak" <jakovnovak30@gmail.com>
-To: "Tetsuo Handa" <penguin-kernel@I-love.SAKURA.ne.jp>, "Johan Hovold"
- <johan@kernel.org>, "Jakov Novak" <jakovnovak30@gmail.com>
-X-Mailer: aerc 0.21.0-0-g5549850facc2
-References: <20260816153809.7067-1-jakovnovak30@gmail.com>
- <aoLCr8JEYaYxcJcQ@hovoldconsulting.com>
- <61c4cee5-3c63-4b09-abbf-bf945b538403@I-love.SAKURA.ne.jp>
-In-Reply-To: <61c4cee5-3c63-4b09-abbf-bf945b538403@I-love.SAKURA.ne.jp>
+To: Johan Hovold <johan@kernel.org>
+Cc: Jakov Novak <jakovnovak30@gmail.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-kernel-mentees@lists.linux.dev, 
+	Ulf Hansson <ulfh@kernel.org>, Guangshuo Li <lgs201920130244@gmail.com>, 
+	Runyu Xiao <runyu.xiao@seu.edu.cn>, Shuah Khan <skhan@linuxfoundation.org>, 
+	syzbot+1ee4f3b9228e35f14677@syzkaller.appspotmail.com, 
+	Geert Uytterhoeven <geert+renesas@glider.be>
+Content-Type: text/plain; charset="UTF-8"
 
-> syzbot has an AI-generated patch at
-> https://lkml.kernel.org/r/49982079-95f4-4e8c-bbbc-bcb127e2f378@mail.kerne=
-l.org .
+Hi Johan,
+
+On Mon, 17 Aug 2026 at 10:13, Johan Hovold <johan@kernel.org> wrote:
+> On Sun, Aug 16, 2026 at 05:38:09PM +0200, Jakov Novak wrote:
+> >  Currently, the function vub300_inactivity_timer_expired, which gets
+> >  called in a softirq context, calls a sleeping function in the following
+> >  call chain:
+> >
+> >  vub300_inactivity_timer_expired -> kref_put -> vub300_delete ->
+> >  mmc_free_host -> cancel_delayed_work_sync -> __cancel_work_sync ->
+> >  might_sleep -> BUG
+> >
+> >  Fix this by replacing kref_put(&vub300->kref, vub300_delete) with
+> >  vub300_queue_dead_work(vub300), which does the same thing, but in a
+> >  workqueue context.
+> >
+> > Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
 >
-> Please check.
-I checked the AI-generated patch and it just uses the deadworkqueue in a
-new function. That is the same thing I am doing except that I'm using
-the vub300_queue_dead_work function instead of writing some new code
-that does the same thing.
+> This isn't the commit that introduced the issue. The blocking call in
+> mmc_free_host() was added by commit 1036f69e2513 ("mmc: core: Cancel
+> delayed work before releasing host") in 2023.
+>
+> I didn't look at this in any detail, but having that call in
+> mmc_free_host() (e.g. rather than in mmc_remove_host()) looks wrong so
+> perhaps the fix really lies in MMC core.
 
-The real question is whether mmc_free_host should be allowed to invoke
-the sleep function or not. Geert needs to elaborate on that since he
-added this change in 1036f69e2513 ("mmc: core: Cancel
-delayed work before releasing host").
+mmc_remove_host() can only be called after a sucessful probe, while
+commit 1036f69e2513 fixed an issue where the last probe step failed
+with -EPROBE_DEFER.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
