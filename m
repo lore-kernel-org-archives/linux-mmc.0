@@ -1,252 +1,293 @@
-Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11010055.outbound.protection.outlook.com [52.101.229.55])
+Received: from mail-m49222.qiye.163.com (mail-m49222.qiye.163.com [45.254.49.222])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 64D9B3FA5EB;
-	Mon,  7 Sep 2026 06:37:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.55
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788763027; cv=fail; b=fIeG4EO09mZQviIMWMqHP9dPWzd1KdCrm+ey/7QLl9snaRGgwEhYO8mBWAlqz2shVCIBvJYHn+JNL/vmBCExcv+YBtqgdiACeBwNC5TuvUkogzkgDEdHKXOO1bY+1qtyFz/Y9RMNq8unDslZoZkH4FDFsgtjp93hbco+yH5THfo=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788763027; c=relaxed/simple;
-	bh=g8waLZ/r5wIB/AA+ZiezOt4woVzlDSpb6QquGg/C3hc=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=cVZDsxqPRvN+YYhUuRzIGJtCNbqkTXp27pqxvZgIKeF4PhC8DWM4yyecpb27rVmOIg4c1xZL4e3PgrFv/wFPsDTRg9gS0jtujJAPQS904Jpz4izhdyOQCkORafUYKNlXhihga4MGpNMP1nMFo8PAU9Iw8BSpXUXk+9gOtM9bCds=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=t0TAiFi5; arc=fail smtp.client-ip=52.101.229.55
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B8853C1966
+	for <linux-mmc@vger.kernel.org>; Mon,  7 Sep 2026 06:45:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.222
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788763541; cv=none; b=cvGjv0PYpcLplxwx2Le0mrNZ4bzUUno2X0jKOtmSntlxZ/iNeeozDnsek0Tg8y8Faoq5Nf4kzJ16h0bevhpZSAOezvKNKLHet3raqp3FzvZpQb6Y6nmplEsrhqJggtUouh0gEKOnDRIZbuR9otlzFw42KnLe4VfjpnrV6ukm09M=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788763541; c=relaxed/simple;
+	bh=h9s5grPBgq875qJSJ7f1iWvnW/bbDXrWzkeqTA41fy0=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=kPPXj1A6TvTZc84OmfiRpfRvVcBU6r4ttzR2muPm/15D9OCgqSyC79VBVgf2H5Udv6cpWZa/uLVW8X5ftk6nYuR4j4PBaKFzZonLiyPHrk7Tj3PuEbSjmlzeLoRLVqmRgbno8TUalF4EEc9t7roZ/a7MRm/D18erw5xBct7rUqw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=Atticm0r; arc=none smtp.client-ip=45.254.49.222
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="t0TAiFi5"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=hvKi8JUL8YlWaNWNa3t27kX3EHhK4Zz93YQVn1b1PjLluZPlXFVlIXeWNxxJjQuDeAhDFdeJoDKXxN+WaheZ8I9Gecy6Bp4fJF0r6unXiua1WXxFRNW1W9PqXL80Tc/fqf1qHfaVVjUh1vWUFpWbQtJex/CaqdfiR2V07737S1jhZh1u5gn1lqpp5fFsqlGekG30oZ5W8NF0+60i56ImdCYf+mu2qE6CIO6ZJdmnyVH7lpkkzFevA/u1KdCnljwFlxlgL1RTwXAAjASpKNsAXFwdrorzTc8srMVDO/J4evwj9ZxNwfuZtLPu8EtgivTr3QK85LdXmW4GaQg3mpJnNw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=TIrRfxYza4E6TI7IXUlWHmOQ+y5PeqqDGKgMT8N4s+A=;
- b=wD+Tn82Fqk/kqkT/MbcRrYodAeDOFW5h1IOn9e9mmhK70ydoPA/iIQ+D/IDNc/sHq0g8+ZenoO5lugNaJ63WQCp0bzadlJPzjhzPGORjok6MHcrTNPDPGhnWZzmx7Fh3ke/9KyQPPidQzBFYDRSkAiqCOP1nZ8uxSuRPgpF/EdIPNoCPFx5wav6wxtnDO8ue0dKZG52mqcbetMnwm6vEwQQC+bON/c+f4hhY1wBCi+iPqpNViL5igsehRDT9IoQe4ZmNViP35Q7Gs8cCfXCMHtw7HBYClWhGc3nCqy94EmyNrwBVii9FHML/h0A3C4aidO200NhlEmwfX+KbBNUHgw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
- header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=TIrRfxYza4E6TI7IXUlWHmOQ+y5PeqqDGKgMT8N4s+A=;
- b=t0TAiFi5gqBWX8Xzo325j6Iqt8wpU1w21mvzGTIF0nNXCqlHvFEu+Py293udeMMcWwbkOB7lg1SwCYYj28W24EAz9Qe57EkUazxZG7WSn1zfl6CsL0PYgfnWGAQ2ImJHortwkGlpzoJtDSSYoQH6CVSG1mL0UfO1AqdylIxc8Z4=
-Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
- by TY3PR01MB10353.jpnprd01.prod.outlook.com (2603:1096:400:251::9) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.382.15; Mon, 7 Sep
- 2026 06:37:02 +0000
-Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
- ([fe80::87d1:4928:d55:97de]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
- ([fe80::87d1:4928:d55:97de%4]) with mapi id 15.21.0382.014; Mon, 7 Sep 2026
- 06:37:02 +0000
-From: Biju Das <biju.das.jz@bp.renesas.com>
-To: wsa+renesas <wsa+renesas@sang-engineering.com>, "biju.das.au"
-	<biju.das.au@gmail.com>
-CC: Ulf Hansson <ulfh@kernel.org>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org"
-	<linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: RE: [PATCH v24 08/15] mmc: renesas_sdhi: Add
- TMIO_MMC_INTERNAL_DIVIDER flag
-Thread-Topic: [PATCH v24 08/15] mmc: renesas_sdhi: Add
- TMIO_MMC_INTERNAL_DIVIDER flag
-Thread-Index: AQHdMMe+SeXRDHnYx0S0S9Te31Iesba8rjuAgAYGtQA=
-Date: Mon, 7 Sep 2026 06:37:02 +0000
-Message-ID:
- <TY3PR01MB11346EC6636C810EEBA215F4E86B22@TY3PR01MB11346.jpnprd01.prod.outlook.com>
-References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
- <20260820171657.62815-9-biju.das.jz@bp.renesas.com>
- <apk_81IYqxrWZyJK@shikoro>
-In-Reply-To: <apk_81IYqxrWZyJK@shikoro>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=bp.renesas.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|TY3PR01MB10353:EE_
-x-ms-office365-filtering-correlation-id: 5329292a-8fa2-4604-83af-08df0caa6cf6
-x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|376014|366016|23010399003|1800799024|10067099003|6133799003|4143699003|56012099006|11063799006|18002099003|22082099003|38070700021;
-x-microsoft-antispam-message-info:
- 3mvk6WVpMEt+YVoG9fG+iA5kbR5Iw26OMIzYoZeS8iDKVt1gr3NQ9vHTYiX4Um16UNo50e1aJHTuLftWfCdiq0I0nC0MSjNpNl3rA4aC1xVWwRwanFEZdgZeKAg83l3Y/ImcKB2gkZG8C69WvdfJDOG8BndLwjhjc3J+rfNNxkYQWeTFeTe+WzhZR3riLS+WqbalmEV9lRwoNYo4obDgwz2XrHYtM7bJTZLtVOOnsf0kIhVNn93hlK5vVv63Zw2TJW2nhIi7nnd997IRMfNz+V8Gyk0TryvQrOO9PHv/ondPMmM/Hcdz5vBVRZgcQO3Pgbjqv8tuSl03l3CpaXC7WXtW7ys6Sk+2E2cXnfKg/9AtHWriHyCmdYlveGGpIl3FCVrAqUDdXdj1knq0SM2/fmNcDnDb/+a8hMg7j+pWyetWqGt92tL3zTWh2e6+4it+Ssf6bjUGF+6lG/3KyaSaZcaBGOGiYRqcptpfOEvNBryVCsLJ4+AqVt2hGV/WTY178MZh4HoVGWNncmf3+AZ2pId1BgI40EtClvDPN5gyMnlffLWD5G/tEdSQF9Z1i5N7XedJwMy4NU4AuNVpuEbLufCmJlwCCyZvVOyWWO/88K0T91OsAThVkGipr1/sKFXpxfpftFslemDWr9KtlJHjpJS5hyUt7CoHaydtc+8UbI9xoh3AOjzUQNiXSgjmQjD18ARC2rXK7leh+l+jis+ItqOs4PtDXvsaqf+S2LCfYFw=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(23010399003)(1800799024)(10067099003)(6133799003)(4143699003)(56012099006)(11063799006)(18002099003)(22082099003)(38070700021);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?7bEGpqaLBhDQMoqxh6SRrPgc4jbYr9DZacH12nQzeEX3vEKWYTMX69d3N5bu?=
- =?us-ascii?Q?IX9axHf5xHIy8En2HBHhKqcLaX9PwV0AY5nvdhVv9i2JmlHHKrt1ovjcLwD5?=
- =?us-ascii?Q?/I1WPJ17AVgf5YF/5SZXlSUIgg2AZQ0kSR3KJrD8Qvkq9vN8FX6Qroyfr+1m?=
- =?us-ascii?Q?FadoYsi8EX4jBmr9f8Fh+RPbzbmesVYLm+Z468jOs01ds3JdpfPBRtguE1kM?=
- =?us-ascii?Q?lqtKvELiNzAKJFQ/CKCeo7TjoAriwS6alaLE2KmSYa4JeaeHbD1kjSp5Jp/M?=
- =?us-ascii?Q?j71smS29zpPW8L2IPKg5Ht1xDdJ4WcpXFxZY3hKfEhN2bF8OaNzioNucDn+x?=
- =?us-ascii?Q?W+Be3/7td7z7yHYFrZ1iPETxN2TMI/dJ6JYXXS6wJ+aA5YdIWlKHrCwog8Cs?=
- =?us-ascii?Q?JOMYarS417EMZqo9z/Cf2WhbeQPXRMHcS3Pvc2XDFhiCWoECsSAo7d0yoemF?=
- =?us-ascii?Q?KXCU3Er0G6R+10KPCE0G1+b14HbfS24/gNKdo1KZeSCukBrw3RjWNk//UGh+?=
- =?us-ascii?Q?nJCO3jOFAJr0Fs0vSNPjbRKF+/nyJPAHUuuj8Fd35+LBpiIC52P5G9cErtxn?=
- =?us-ascii?Q?Gbd51hz9+mbwe3IamFHYZnvUBSfWoH1jHY2nGI9tZ3L41l/2LHw/VssUzpAX?=
- =?us-ascii?Q?Cz98Z/2iadkSNsoKufU9l/Tz4jGSTmrX1uR1jda8qnSJ/5rfAixusOY52OKP?=
- =?us-ascii?Q?TOn7Tq8uZL4vhlTTHJpTj9SZ7kd4H9cc+9FfgUZOVXn1vU/fleZJ/DTwWeN1?=
- =?us-ascii?Q?zO4OYgLoX67HL6EcOzLc382gp2TRMoGTbyJ70lXxLAmLtcc5UajpD9/9ipDa?=
- =?us-ascii?Q?gJ/DGQY5neVwj90HKAqaglf5ejApAC3y2163N8c+oeNl8hqBUrXY8s1Biemk?=
- =?us-ascii?Q?z6G8Bbx2VBEaRXM6+ghUHrk20pQmGRMmepToW1mFBgJDjUWQYw9ez7aVs13L?=
- =?us-ascii?Q?aGFXB8oOenNx5o9g4LLqo0WAcdj0UBbulSh9ZRFyNCYIttOAoCIxk/GzK+Ce?=
- =?us-ascii?Q?30nH9O+z15YRKVFW8e7CfbVzqLhuwb1teMCiArRAKZ8pDDPm0n04jC3n9rXe?=
- =?us-ascii?Q?Gvnr93+dHzMFQE+Jhr0JFzw0pwJXBp+f2p2kYA5KEhJWfVs+ZWj92a7Rb7ou?=
- =?us-ascii?Q?u7i8RQErxjBg4dxsnIQBu3usV3bN2nG1xxoniXB7P4Xvz/P8F3vEu5ps4jyu?=
- =?us-ascii?Q?2yYLph2m8g2suuB5o6kDprVHZ+2E+NdtzaG/YOB3XzYnaJYyoVyfTaZNzK21?=
- =?us-ascii?Q?8adL3h4gY8TM8QTE6iaQgZ9l0mhcgaAKm85GeiR3ON6rJ3U8bS5c1JHbYgCX?=
- =?us-ascii?Q?6UFzuBHnJNxt6PKmtlG1gNZQLiHqZTBLcUPso3U/3pMxfXVD7GDRRLp7d5iB?=
- =?us-ascii?Q?5S1132oAEz1zz5OLJTALIfJ5IAGBGK9B7JvFEWkB0pdhHwCqhwTOon3y6A6W?=
- =?us-ascii?Q?VP54F5jEScjzbPyYmZfkKno558gKBi20rBIBfVURZ6z/Lqd9FogBBkQ9/lvU?=
- =?us-ascii?Q?BGSau+mxh7Ovc+WXbQlU//gPKzvHnfTXlroycaoRBPhx1uoGuR9qYLYmx93Q?=
- =?us-ascii?Q?dXWyUQ95ctJetfvbNuIpYTKUTEoduRVax6bebjjbf06p7pn4ODOSjK5g+PnT?=
- =?us-ascii?Q?KWZCo1i/desGfUvGpXGENyqZrTy3mM5Wubo//ksYVoGFM0cD3fAvcclwEbfM?=
- =?us-ascii?Q?A7W1fEpc64plWFw6EijAsj+lqkOjZ6dUl8vlAxQWJFf7o8zOndYCISH4KlCW?=
- =?us-ascii?Q?Gn63A3Y7IQ=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="Atticm0r"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 4cb8dbfa6;
+	Mon, 7 Sep 2026 09:02:35 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	Avri Altman <avri.altman@sandisk.com>,
+	Shawn Lin <shawn.lin@linux.dev>
+Subject: [PATCH v2 2/2] mmc-utils: Add health command for eMMC health reporting
+Date: Mon,  7 Sep 2026 09:02:24 +0800
+Message-Id: <1788742944-94637-3-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1788742944-94637-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1788742944-94637-1-git-send-email-shawn.lin@rock-chips.com>
+X-HM-Tid: 0aa0796370b303a4kunm8383fd3f2ced29
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1kYFggdWUFKV1ktWUFJV1kPCRoVCBIfWUFZGRhJTVZPSx5NSRpNH0
+	JDHUNWFRQJFhoXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0
+	tIVUpLSU9PT0hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=Atticm0rqwaw1zNRRmAc4IIu0TgSjDDLsUhDR1fGOF0/2Xh2aYyBTlOZAPAvFajaOMH5cuwHZAl84JfY4gHpsLBUUbWRpjdPpGp6ZuhMzGEqjvFES7SRPnXV3r4KczdMpZcwRAIbkjGed9BrI0Y24bNL2mfozUqje8pjj0Yw4Jw=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=WJmLGv6VVZNDaPtNyoP+QG3mv8fbt6zGRfvuzBbGA9s=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-X-OriginatorOrg: bp.renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 5329292a-8fa2-4604-83af-08df0caa6cf6
-X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Sep 2026 06:37:02.1550
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: t/CQwz67JhMJMUWMPGJyrbsm4G5MAwOk3YBL+T9QY5xFYymc4Itc38WGqWqojKNbd+tnpLPfbO/K9R21WoTNrO0EJZpczyoPGGbmuHGJ0pg=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY3PR01MB10353
 
-Hi Wolfram,
+From: Shawn Lin <shawn.lin@linux.dev>
 
-Thanks for the feedback.
+Add a "mmc health <device>" command that prints a health summary of an
+eMMC device: Pre EOL info, device life time estimates (type A and B)
+and BKOPS status, each with a human readable decode of the field and a
+final verdict line.
 
-> -----Original Message-----
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Sent: 03 September 2026 10:38
-> Subject: Re: [PATCH v24 08/15] mmc: renesas_sdhi: Add TMIO_MMC_INTERNAL_D=
-IVIDER flag
->=20
-> > Thank you for your contribution! Sashiko AI review found 1 potential is=
-sue(s) to consider:
-> > - [Medium] Fallback `f_max` and `f_min` initialization fails to account=
- for the internal clock divider.
-> > --
-> >
-> > --- Patch [8]: [PATCH v24 08/15] mmc: renesas_sdhi: Add
-> > TMIO_MMC_INTERNAL_DIVIDER flag --- commit
-> > c4a63c19303286f5b383bdabaa2a3f3827a8c5c5
-> > Author: Biju Das <biju.das.jz@bp.renesas.com>
-> >
-> > mmc: renesas_sdhi: Add TMIO_MMC_INTERNAL_DIVIDER flag
-> >
-> > This commit introduces the TMIO_MMC_INTERNAL_DIVIDER flag to support
-> > SoCs like RZ/G3L that have a fixed internal /2 clock divider. It adds
-> > a helper function to fold this division into the reported clock rate
-> > and uses it in the clock update path.
-> >
-> > > diff --git a/drivers/mmc/host/renesas_sdhi_core.c
-> > > b/drivers/mmc/host/renesas_sdhi_core.c
-> > > index ff428b6187bbd..b5f2ff68db758 100644
-> > > --- a/drivers/mmc/host/renesas_sdhi_core.c
-> > > +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> > > @@ -125,6 +125,27 @@ static int renesas_sdhi_clk_enable(struct tmio_m=
-mc_host *host)
-> > >  	return 0;
-> > >  }
-> > >
-> >
-> > [Severity: Medium]
-> > Since this patch introduces an internal /2 clock divider, should
-> > renesas_sdhi_clk_enable() (which is just above this hunk) also be
-> > updated to account for it?
+The per-field values and their level semantics come from the eMMC 5.0
+spec (JESD84-B50, EXT_CSD fields 267/268/269/246). The aggregated
+verdict takes the worst of the three wear related fields and maps it
+onto an exit code, so the command can be used directly from production
+test scripts and CI:
 
-For this patch, we don't have a SoC with TMIO_MMC_INTERNAL_DIVIDER flag set=
-.
-So, it retains previous functionality. Please comment if you think otherwis=
-e.
+  0 healthy, 1 command failure, 2 wrong argument count, 3 warning,
+  4 urgent, 5 unsupported (eMMC < 5.0), 6 not an eMMC device.
 
-> >
-> > If the device tree omits the max-frequency property, f_max defaults to
-> > the raw parent clock rate:
-> >
+Note that this verdict is an mmc-utils derived indicator: the eMMC
+spec does not define such an aggregated health measure. Devices may
+additionally expose a vendor proprietary health report (EXT_CSD
+[301:270], read via CMD56), which is not covered by this command.
 
-This behaviour is same as there is no SoC has set with TMIO_MMC_INTERNAL_DI=
-VIDER flag.
+The command is eMMC only: SD cards do not have EXT_CSD and do not
+report any standardized health data.
 
-> > drivers/mmc/host/renesas_sdhi_core.c:renesas_sdhi_clk_enable() {
-> >     ...
-> > 	if (!mmc->f_max)
-> > 		mmc->f_max =3D clk_get_rate(priv->clk);
+Execution effect on an eMMC 5.1 device:
 
-The SoC with TMIO_MMC_INTERNAL_DIVIDER has always frequency defined in SoC =
-dtsi
-and this condition is skipped. Please let me know should I add a comment he=
-re??
+  # mmc health /dev/block/mmcblk0
+  =============================================
+    eMMC Health Report: /dev/block/mmcblk0
+  =============================================
+  Extended CSD rev: 1.8 (MMC 5.1)
+  Pre EOL info:     0x01 [Normal]
+  Life time type A: 0x01 [0%-10% of device life time used]
+  Life time type B: 0x01 [0%-10% of device life time used]
+  BKOPS status:     0x00 [No background operation required]
+  Result: HEALTHY
 
-> >
-> > 	/*
-> > 	 * Minimum frequency is the minimum input clock frequency
-> > 	 * divided by our maximum divider.
-> > 	 */
-> > 	mmc->f_min =3D max(clk_round_rate(priv->clk, 1) / host->pdata->max_div=
-ider, 1L);
-> >     ...
-> > }
-> >
-> > For hardware with the internal divider, this advertises double the
-> > actual achievable bus frequency. If the clock provider cannot scale up
-> > to 4x the requested frequency, the MMC core might negotiate a
-> > high-speed mode that the hardware cannot satisfy, resulting in a mode
-> > mismatch where the bus silently runs at half the expected speed.
+Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
+---
+ mmc.c      |  11 +++++
+ mmc.h      |   1 +
+ mmc_cmds.c | 141 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h |   1 +
+ 4 files changed, 154 insertions(+)
 
-SDx_Clock (HS clk) Figure 4.4-8 Block Diagram of the Deformed Clock System =
-(7)
-IMCLK =3D SDx_Clock/2
-
-SD_Clock  Figure 6.2-2 Functional Diagram of Clock Divider for SD_CLK
-
-SD_Clock is dynamic setting based on the speed mode.
-
-For HS400 mode, SD_CLK =3D IMCLK =3D SDx_Clock/2 and SD_CLK_CTRL =3D 0
-
-For Non-HS400 mode, SD_CLK =3D IMCLK /2 =3D SDx_Clock/4 and SD_CLK_CTRL =3D=
- 0xff for 1/1 option and
-other values for non 1/1 option.
-
-We know the maximum frequency supported by the SoC and we must define this =
-in SoC dtsi.
-
-I believe we should support the below check only for non-DT platforms as we=
- don't know
-the SoC max sd clock capability.
-
-	if (!mmc->f_max)
-		mmc->f_max =3D clk_get_rate(priv->clk);
-
-
-> >
-> > Could mmc->f_max and mmc->f_min calculation be adjusted when the
-> > TMIO_MMC_INTERNAL_DIVIDER flag is set?
->=20
-> Looks valid from a glimpse. Please comment if you think this report makes=
- sense or not.
-
-Please comment on my response.
-
-Cheers,
-Biju
+diff --git a/mmc.c b/mmc.c
+index b0f1f9b..ce8b454 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -106,6 +106,17 @@ static struct Command commands[] = {
+ 	  "status get", "<device>\n"
+ 	  "Print the response to STATUS_SEND (CMD13).",
+ 	},
++	{ do_health, -1,
++	  "health", "<device>\n"
++	  "Print a health summary of the eMMC <device>: Pre EOL info,\n"
++	  "device life time estimates and BKOPS status. eMMC only, SD\n"
++	  "cards do not report health data.\n"
++	  "Note: the verdict is an mmc-utils derived indicator, the\n"
++	  "eMMC spec does not define an aggregated health measure.\n"
++	  "Exit code: 0 healthy, 1 command failure, 2 wrong argument\n"
++	  "count, 3 warning, 4 urgent, 5 unsupported (eMMC < 5.0),\n"
++	  "6 not an eMMC device.",
++	},
+ 	{ do_write_boot_en, -3,
+ 	  "bootpart enable", "<boot_partition> " "<send_ack> " "<device>\n"
+ 		"Enable the boot partition for the <device>.\nDisable the boot partition for the <device> if <boot_partition> is set to 0.\nTo receive acknowledgment of boot from the card set <send_ack>\nto 1, else set it to 0.",
+diff --git a/mmc.h b/mmc.h
+index 2bb346b..89862bd 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -97,6 +97,7 @@
+ #define EXT_CSD_CACHE_SIZE_2		251
+ #define EXT_CSD_CACHE_SIZE_1		250
+ #define EXT_CSD_CACHE_SIZE_0		249
++#define EXT_CSD_BKOPS_STATUS		246	/* RO */
+ #define EXT_CSD_SEC_FEATURE_SUPPORT	231
+ #define EXT_CSD_BOOT_INFO		228	/* R/W */
+ #define EXT_CSD_BOOT_MULT		226	/* RO */
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index c70c337..35663f1 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -1007,6 +1007,147 @@ static const char *extcsd_rev_to_string(__u8 rev)
+ 	}
+ }
+ 
++static const char *pre_eol_info_to_string(__u8 val)
++{
++	switch (val) {
++	case 0x00:
++		return "Not defined";
++	case 0x01:
++		return "Normal";
++	case 0x02:
++		return "Warning: Consumed 80% of reserved block";
++	case 0x03:
++		return "Urgent";
++	default:
++		return "Reserved";
++	}
++}
++
++static const char *life_time_est_to_string(__u8 val)
++{
++	static const char * const strs[] = {
++		"Not defined",                                     /* 0x00 */
++		"0%-10% of device life time used",                 /* 0x01 */
++		"10%-20% of device life time used",                /* 0x02 */
++		"20%-30% of device life time used",                /* 0x03 */
++		"30%-40% of device life time used",                /* 0x04 */
++		"40%-50% of device life time used",                /* 0x05 */
++		"50%-60% of device life time used",                /* 0x06 */
++		"60%-70% of device life time used",                /* 0x07 */
++		"70%-80% of device life time used",                /* 0x08 */
++		"80%-90% of device life time used",                /* 0x09 */
++		"90%-100% of device life time used",               /* 0x0A */
++		"Exceeded the maximum estimated device life time", /* 0x0B */
++	};
++
++	if (val > 0x0B)
++		return "Reserved";
++
++	return strs[val];
++}
++
++static const char *bkops_status_to_string(__u8 val)
++{
++	switch (val) {
++	case 0x00:
++		return "No background operation required";
++	case 0x01:
++		return "Level 1: background operation required (non-urgent)";
++	case 0x02:
++		return "Level 2: background operation required (performance impacted)";
++	case 0x03:
++		return "Level 3: background operation required (urgent)";
++	default:
++		return "Reserved";
++	}
++}
++
++/*
++ * Print a health summary of the device. Exit codes:
++ *   0 healthy (or no degradation reported)
++ *   1 warning level
++ *   2 urgent level
++ *   3 health data not supported (eMMC < 5.0)
++ *   4 not an eMMC device (EXT_CSD read failed)
++ * Only meaningful for eMMC; SD cards do not report health data.
++ */
++int do_health(int nargs, char **argv)
++{
++	__u8 ext_csd[512], ext_csd_rev, pre_eol, life_typ_a, life_typ_b, bkops;
++	int fd, ret;
++	char *device;
++	const char *str;
++
++	if (nargs != 2) {
++		print_usage(do_health);
++		exit(1);
++	}
++
++	device = argv[1];
++
++	fd = open(device, O_RDWR);
++	if (fd < 0) {
++		perror("open");
++		exit(1);
++	}
++
++	ret = read_extcsd(fd, ext_csd);
++	if (ret) {
++		fprintf(stderr, "Could not read EXT_CSD from %s, "
++				"not an eMMC device?\n", device);
++		close(fd);
++		exit(6);
++	}
++
++	ext_csd_rev = ext_csd[EXT_CSD_REV];
++	pre_eol = ext_csd[EXT_CSD_PRE_EOL_INFO];
++	life_typ_a = ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A];
++	life_typ_b = ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B];
++	bkops = ext_csd[EXT_CSD_BKOPS_STATUS] & 0x3;
++
++	printf("=============================================\n");
++	printf("  eMMC Health Report: %s\n", device);
++	printf("=============================================\n");
++	str = extcsd_rev_to_string(ext_csd_rev);
++	printf("Extended CSD rev: 1.%d (MMC %s)\n", ext_csd_rev,
++	       str ? str : "unknown");
++	printf("Pre EOL info:     0x%02x [%s]\n", pre_eol,
++	       pre_eol_info_to_string(pre_eol));
++	printf("Life time type A: 0x%02x [%s]\n", life_typ_a,
++	       life_time_est_to_string(life_typ_a));
++	printf("Life time type B: 0x%02x [%s]\n", life_typ_b,
++	       life_time_est_to_string(life_typ_b));
++	printf("BKOPS status:     0x%02x [%s]\n", bkops,
++	       bkops_status_to_string(bkops));
++
++	if (ext_csd_rev < EXT_CSD_REV_V5_0) {
++		ret = 5;
++		goto out;
++	}
++
++	if (pre_eol == 0x03 || life_typ_a == 0x0B || life_typ_b == 0x0B) {
++		printf("Result: URGENT\n");
++		ret = 4;
++	} else if (pre_eol == 0x02 || life_typ_a == 0x0A ||
++		   life_typ_b == 0x0A) {
++		printf("Result: WARNING\n");
++		ret = 3;
++	} else if (pre_eol == 0x00 && life_typ_a == 0x00 &&
++		   life_typ_b == 0x00) {
++		printf("Result: UNKNOWN (device does not report health data)\n");
++	} else {
++		printf("Result: HEALTHY\n");
++	}
++
++	if (bkops == 0x03)
++		printf("Note: urgent background operation is pending, "
++		       "do not power off the device right now\n");
++
++out:
++	close(fd);
++	return ret;
++}
++
+ static unsigned int get_sector_count(__u8 *ext_csd)
+ {
+ 	return (ext_csd[EXT_CSD_SEC_COUNT_3] << 24) |
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index 033cc09..88caf85 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -39,6 +39,7 @@ int do_hwreset_en(int nargs, char **argv);
+ int do_hwreset_dis(int nargs, char **argv);
+ int do_sanitize(int nargs, char **argv);
+ int do_status_get(int nargs, char **argv);
++int do_health(int nargs, char **argv);
+ int do_create_gp_partition(int nargs, char **argv);
+ int do_enh_area_set(int nargs, char **argv);
+ int do_write_reliability_set(int nargs, char **argv);
+-- 
+2.25.1
 
