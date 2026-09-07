@@ -1,288 +1,356 @@
-Received: from mail-oo2-f8.google.com (mail-oo2-f8.google.com [74.125.231.136])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-m21473.qiye.163.com (mail-m21473.qiye.163.com [117.135.214.73])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5470D2F6577
-	for <linux-mmc@vger.kernel.org>; Sun,  6 Sep 2026 18:03:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.231.136
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3F6C4CCDEC
+	for <linux-mmc@vger.kernel.org>; Mon,  7 Sep 2026 00:59:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=117.135.214.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788717817; cv=none; b=qhm7Ec3iRcfeOBFb1o+8CUWE3t3Qxifzbdcnd0srb2WQ3+aXkHWlDJZ8CaFjIpxlvj9ncNsavuAfl01WU3nX8QIVz5NtBEy4VIDh5U0/NX7dM+IXd3UqCGR+UH8IhPqCR8IaPDVYB3zYg9DAEPlVDL+RGtRsEAvJ9lPGEJuCT6E=
+	t=1788742802; cv=none; b=DCmD1uTJc6jMTXa+6+krEcFLaWjHY16sBIc0kJEfbPUu23FD0ESV8IoDkM0gQQdUrNqpP6SZcChBB91n9vRZMX5b6+aAfnqyRrTjJeZLQFb4PUDdN6tBQ/65N/WRSx6Y/JwDtiNePCNPcNFdXZp5ZBiVFxXjX05ln/SNsTBudh8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788717817; c=relaxed/simple;
-	bh=4gqD9sv07dzm/6lWtMgltcBYGDg/Yt9/3GApfAIFmpQ=;
-	h=MIME-Version:Date:Message-ID:Subject:From:To:Content-Type; b=MYidvPpj4dIMGaDsjUAqXCCXPppdUGHbIWtE2ht5ZYcgFvIKAhq2qXZkl9Emkh5ksZjGSJLAqhIzi5AwEI7PFzGUmxeKpFIqtbGWj3+NxnFUhWAOlGfnaxP9E4sravw6YIxSQxOYGIFp4qJ+3RLbaDWrN+9dJkJVd06Lu64N0x4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=74.125.231.136
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
-Received: by mail-oo2-f8.google.com with SMTP id 006d021491bc7-6b1bf394d3bso424275eaf.0
-        for <linux-mmc@vger.kernel.org>; Sun, 06 Sep 2026 11:03:35 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788717814; x=1789322614;
-        h=content-type:to:from:subject:message-id:date:mime-version
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=Dp95l++1UdRwAR4kmpEP87mlCfFuiW6dCRayJfOYNVQ=;
-        b=qQYVKdyEB21b5d54AvT4amXPKumo2DTsh4VZ+xryKS+Xg47LUMeYwdTewR1A7g0jfr
-         tEIxNZUptRaRVZmqJSJQhmc9Es2CQTdxt+cDOLfA6L8tFXtZ2GkuRvsTRlsJkHeVfauT
-         esuTr5qc/JgkylPnqepCrfMCISgmn2pPInn0Pc9qpTbT+4LfGWMeo5oUyCFokPftIdg1
-         1rFxnn8asVoAq5Opl1ZoAZEGSzveqMWYBDF2g9aS1kVupWSF+6kk9H4Bv6Mfy0135Y8J
-         LPQ43UzfxApozTjqsGxOr0rEJwPs1Mt/kURRo8Is/dIxGsldW/NeDQq7KwxgdPxlDuGJ
-         j0IA==
-X-Forwarded-Encrypted: i=1; AKwUvByB+Mh1y8RN0RhAY5KZ0MDep91kt9q8jhi56D5vEhN4BguQnJfke6mzv7BVnqeBN/8JI8vsRoOpP/o=@vger.kernel.org
-X-Gm-Message-State: AFuF++nr0Nkq1y9rSa+eWaTbA8puJwPrzCSkjWR5uPlSN9Fm7u2LemEr
-	oFAGOslXH5gaL9d763wI7YH3denZgOP5XYJ1og0Y1w0G2Els/iho9eKS/FEYeMBUht/HtiwbFmo
-	lJmMAJm2NmywXntn0QXaCsHPxQErcJEFlUp5DXGd1epH8FfV64kYIwBbIRLs=
+	s=arc-20240116; t=1788742802; c=relaxed/simple;
+	bh=9BR7XlgjA9oCEAzYdFV2PiyA99DBegF3/qypWB9qHxk=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=tA/K1ErKcjsqw0jXb7nU8ee7S7Dir5OJyWBF3zCdH2FIxryEpHXrY5RycKJxUYpc+a9+yjXlGQKq0rlTuqX8S4B39FDGa1ZvqsKpi1tT/S8r2AWU6Im475gqQfjyC2awp/GN19nGjNuyIbzYRJoHTgDRgHz0r/gtX3mK2OefOAQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=gUMxgrCy; arc=none smtp.client-ip=117.135.214.73
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="gUMxgrCy"
+Received: from [172.16.12.48] (unknown [61.154.14.86])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 4cb849b95;
+	Mon, 7 Sep 2026 08:44:29 +0800 (GMT+08:00)
+Message-ID: <50dc2445-2483-485b-aab4-5e56fdc0a166@rock-chips.com>
+Date: Mon, 7 Sep 2026 08:44:26 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Received: by 2002:a05:6820:4dcd:b0:6b1:6636:e919 with SMTP id
- 006d021491bc7-6b6fb6d206cmr20280543eaf.11.1788717814180; Sun, 06 Sep 2026
- 11:03:34 -0700 (PDT)
-Date: Sun, 06 Sep 2026 11:03:34 -0700
-X-Google-Appengine-App-Id: s~syzkaller
-X-Google-Appengine-App-Id-Alias: syzkaller
-Message-ID: <6a9daaf6.a5e650b3.26d8a.001f.GAE@google.com>
-Subject: [syzbot] [mmc?] INFO: task hung in mmc_io_rw_direct_host
-From: syzbot <syzbot+fd993974345f022e97f2@syzkaller.appspotmail.com>
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	syzkaller-bugs@googlegroups.com, ulf.hansson@linaro.org, ulfh@kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ Shawn Lin <shawn.lin@linux.dev>
+Subject: Re: [PATCH] mmc-utils: Add health command for eMMC health reporting
+To: Avri Altman <Avri.Altman@sandisk.com>, Ulf Hansson <ulfh@kernel.org>
+References: <1788525214-40803-1-git-send-email-shawn.lin@rock-chips.com>
+ <DS1PR16MB6753DA98DCC26E114D325284E5B42@DS1PR16MB6753.namprd16.prod.outlook.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <DS1PR16MB6753DA98DCC26E114D325284E5B42@DS1PR16MB6753.namprd16.prod.outlook.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0aa07952e0cf03a4kunmd5fe00832cc131
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVlCSktCVh9NGR1CSENNHRoZQ1YVFA
+	kWGhdVEwETFhoSFyQUDg9ZV1kYEgtZQVlNSlVKTk9VSk9VQ01ZV1kWGg8SFR0UWUFZT0tIVUJCSU
+	5LVUpLS1VKQktCWQY+
+DKIM-Signature: a=rsa-sha256;
+	b=gUMxgrCyOqxXVZqkbfwDsJKjRjjqSZeE5PIPVl5G2q4BdehwWt3Ywqq8PqOujsXF8KbS0UVHgV8X5luyjcxddtCOTLL+x7TCc6cqat5xISiTa1uRQeDmaYX6YgZTq8QPdyydtWt7Ff7ow4d4ZStYn/o1iFnucCguwv9F/pzIHWA=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=dF1zS8nc73R790NjSYBixElrLYncFu9NUfxh5ENwewE=;
+	h=date:mime-version:subject:message-id:from;
 
-Hello,
+Hi Avri
 
-syzbot found the following issue on:
+在 2026/09/05 星期六 19:32, Avri Altman 写道:
+>> From: Shawn Lin <shawn.lin@linux.dev>
+>>
+>> Add a "mmc health <device>" command that prints a health summary of an
+>> eMMC device: Pre EOL info, device life time estimates (type A and B) and BKOPS
+>> status, each with a human readable decode of the raw field, plus a final verdict
+>> line.
+>>
+>> The per-field values and their level semantics come from the eMMC 5.0 spec
+>> (JESD84-B50, EXT_CSD fields 267/268/269/33); the aggregated verdict takes the
+>> worst of the three wear related fields and maps it onto an exit code, so the
+>> command can be used directly from production test scripts and CI:
+>>
+>>    0 healthy, 1 warning, 2 urgent, 3 unsupported (eMMC < 5.0),
+>>    4 not an eMMC device (EXT_CSD read failed).
+> If you are inventing a device health measure, better make sure to clearly indicate that this is mmc-utils's own indicator.
+> Also, worth mentioning VENDOR_PROPRIETARY_HEALTH_REPORT [301-270], and CMD56 in the commit log.
+> 
 
-HEAD commit:    0d9ff90a5422 Merge tag 'scsi-fixes' of git://git.kernel.or..
-git tree:       upstream
-console output: https://syzkaller.appspot.com/x/log.txt?x=16126cf9580000
-kernel config:  https://syzkaller.appspot.com/x/.config?x=8c5c3949d762a91f
-dashboard link: https://syzkaller.appspot.com/bug?extid=fd993974345f022e97f2
-compiler:       gcc (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44
+Sure, will do.
 
-Unfortunately, I don't have any reproducer for this issue yet.
+>>
+>> The command is eMMC only: SD cards do not have EXT_CSD and do not report
+>> any standardized health data.
+>>
+>> Execution effect on an eMMC 5.1 device:
+>>
+>>    # mmc health /dev/block/mmcblk0
+>>    =============================================
+>>      eMMC Health Report: /dev/block/mmcblk0
+>>    =============================================
+>>    eMMC rev:         1.8 (MMC 5.1)
+>>    Pre EOL info:     0x01 [Normal]
+>>    Life time type A: 0x01 [0%-10% of device life time used]
+>>    Life time type B: 0x01 [0%-10% of device life time used]
+>>    BKOPS status:     0x01 [Level 1: background operation required (non-urgent)]
+>>    Result: HEALTHY
+>>
+>> Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
+>> ---
+>>   mmc.c      |   8 +++
+>>   mmc.h      |   1 +
+>>   mmc_cmds.c | 165
+>> +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>   mmc_cmds.h |   1 +
+>>   4 files changed, 175 insertions(+)
+>>
+>> diff --git a/mmc.c b/mmc.c
+>> index b0f1f9b..e0fc0e8 100644
+>> --- a/mmc.c
+>> +++ b/mmc.c
+>> @@ -106,6 +106,14 @@ static struct Command commands[] = {
+>>            "status get", "<device>\n"
+>>            "Print the response to STATUS_SEND (CMD13).",
+>>          },
+>> +       { do_health, -1,
+>> +         "health", "<device>\n"
+>> +         "Print a health summary of the eMMC <device>: Pre EOL info,\n"
+>> +         "device life time estimates and BKOPS status. eMMC only, SD\n"
+>> +         "cards do not report health data.\n"
+>> +         "Exit code: 0 healthy, 1 warning, 2 urgent, 3 unsupported\n"
+>> +         "(eMMC < 5.0), 4 not an eMMC device.",
+>> +       },
+>>          { do_write_boot_en, -3,
+>>            "bootpart enable", "<boot_partition> " "<send_ack> " "<device>\n"
+>>                  "Enable the boot partition for the <device>.\nDisable the boot partition
+>> for the <device> if <boot_partition> is set to 0.\nTo receive acknowledgment of
+>> boot from the card set <send_ack>\nto 1, else set it to 0.", diff --git a/mmc.h
+>> b/mmc.h index 2bb346b..af0ad87 100644
+>> --- a/mmc.h
+>> +++ b/mmc.h
+>> @@ -120,6 +120,7 @@
+>>   #define EXT_CSD_WR_REL_SET             167
+>>   #define EXT_CSD_WR_REL_PARAM           166
+>>   #define EXT_CSD_SANITIZE_START         165
+>> +#define EXT_CSD_BKOPS_STATUS           33      /* RO */
+> BKOPS_STATUS [246]
+> 
+>>   #define EXT_CSD_BKOPS_EN               163     /* R/W */
+>>   #define EXT_CSD_RST_N_FUNCTION         162     /* R/W */
+>>   #define EXT_CSD_PARTITIONING_SUPPORT   160     /* RO */
+>> diff --git a/mmc_cmds.c b/mmc_cmds.c
+>> index a7e4784..43dcdcc 100644
+>> --- a/mmc_cmds.c
+>> +++ b/mmc_cmds.c
+>> @@ -981,6 +981,171 @@ out_free:
+>>          return ret;
+>>   }
+>>
+>> +static const char *extcsd_rev_to_string(__u8 rev) {
+> Already in do_read_extcsd, maybe factor it out (as a preparatory patch) ?
+> 
 
-Downloadable assets:
-disk image: https://storage.googleapis.com/syzbot-assets/d40c962715ec/disk-0d9ff90a.raw.xz
-vmlinux: https://storage.googleapis.com/syzbot-assets/e76513f6d7e7/vmlinux-0d9ff90a.xz
-kernel image: https://storage.googleapis.com/syzbot-assets/40a69dadb7ab/bzImage-0d9ff90a.xz
+Make sense.
 
-IMPORTANT: if you fix the issue, please add the following tag to the commit:
-Reported-by: syzbot+fd993974345f022e97f2@syzkaller.appspotmail.com
+>> +       switch (rev) {
+>> +       case 9:
+>> +       case 8:
+>> +               return "5.1";
+>> +       case 7:
+>> +               return "5.0";
+>> +       case 6:
+>> +               return "4.5";
+>> +       case 5:
+>> +               return "4.41";
+>> +       case 3:
+>> +               return "4.3";
+>> +       case 2:
+>> +               return "4.2";
+>> +       case 1:
+>> +               return "4.1";
+>> +       case 0:
+>> +               return "4.0";
+>> +       default:
+>> +               return "unknown";
+>> +       }
+>> +}
+>> +
+>> +static const char *pre_eol_info_to_string(__u8 val) {
+>> +       switch (val) {
+>> +       case 0x00:
+>> +               return "Not defined";
+>> +       case 0x01:
+>> +               return "Normal";
+>> +       case 0x02:
+>> +               return "Warning: reserved blocks are consumed";
+> Consumed 80% of reserved block
+> 
+>> +       case 0x03:
+>> +               return "Urgent: reserved blocks are exhausted";
+> The spec gives no description at all for 0x03 aside of urgent.
+> 
 
-INFO: task kworker/0:1:10 blocked for mor
-INFO: task kworker/0:1:10 blocked for more than 143 seconds.
-      Not tainted syzkaller #0
-"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-task:kworker/0:1     state:D stack:23304 pid:10    tgid:10    ppid:2      task_flags:0x4208060 flags:0x00080000
-Workqueue: events_freezable mmc_rescan
-Call Trace:
- <TASK>
- context_switch kernel/sched/core.c:5520 [inline]
- __schedule+0x1259/0x6920 kernel/sched/core.c:7270
- __schedule_loop kernel/sched/core.c:7347 [inline]
- schedule+0xdd/0x2c0 kernel/sched/core.c:7362
- schedule_timeout+0x1b2/0x280 kernel/time/sleep_timeout.c:75
- do_wait_for_common kernel/sched/completion.c:100 [inline]
- __wait_for_common+0x2e7/0x4c0 kernel/sched/completion.c:121
- mmc_wait_for_req_done+0xcd/0x3d0 drivers/mmc/core/core.c:408
- mmc_wait_for_req+0x207/0x2c0 drivers/mmc/core/core.c:619
- mmc_wait_for_cmd+0x154/0x200 drivers/mmc/core/core.c:645
- mmc_io_rw_direct_host+0x126/0x330 drivers/mmc/core/sdio_ops.c:83
- sdio_reset+0x92/0x240 drivers/mmc/core/sdio_ops.c:209
- mmc_rescan_try_freq drivers/mmc/core/core.c:2121 [inline]
- mmc_rescan+0xba9/0x11c0 drivers/mmc/core/core.c:2316
- process_one_work+0xac7/0x1b10 kernel/workqueue.c:3396
- process_scheduled_works kernel/workqueue.c:3479 [inline]
- worker_thread+0x5ef/0xe50 kernel/workqueue.c:3560
- kthread+0x373/0x450 kernel/kthread.c:436
- ret_from_fork+0x730/0xd60 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
- </TASK>
-INFO: task kworker/0:5:5708 blocked for more than 143 seconds.
-      Not tainted syzkaller #0
-"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-task:kworker/0:5     state:D stack:20216 pid:5708  tgid:5708  ppid:2      task_flags:0x4288060 flags:0x00080000
-Workqueue: usb_hub_wq hub_event
-Call Trace:
- <TASK>
- context_switch kernel/sched/core.c:5520 [inline]
- __schedule+0x1259/0x6920 kernel/sched/core.c:7270
- __schedule_loop kernel/sched/core.c:7347 [inline]
- schedule+0xdd/0x2c0 kernel/sched/core.c:7362
- schedule_timeout+0x1b2/0x280 kernel/time/sleep_timeout.c:75
- do_wait_for_common kernel/sched/completion.c:100 [inline]
- __wait_for_common+0x2e7/0x4c0 kernel/sched/completion.c:121
- __flush_work+0x7c7/0xcb0 kernel/workqueue.c:4448
- __cancel_work_sync kernel/workqueue.c:4568 [inline]
- cancel_delayed_work_sync+0xd1/0xf0 kernel/workqueue.c:4642
- __mmc_stop_host drivers/mmc/core/core.c:2368 [inline]
- __mmc_stop_host drivers/mmc/core/core.c:2357 [inline]
- mmc_stop_host+0xe9/0x400 drivers/mmc/core/core.c:2373
- mmc_remove_host+0x15/0x60 drivers/mmc/core/host.c:681
- vub300_disconnect+0x12d/0x170 drivers/mmc/host/vub300.c:2387
- usb_unbind_interface+0x1dd/0x9e0 drivers/usb/core/driver.c:461
- device_remove drivers/base/dd.c:618 [inline]
- device_remove+0x12a/0x180 drivers/base/dd.c:610
- __device_release_driver drivers/base/dd.c:1349 [inline]
- device_release_driver_internal+0x44e/0x620 drivers/base/dd.c:1372
- bus_remove_device+0x2bc/0x560 drivers/base/bus.c:664
- device_del+0x376/0x9b0 drivers/base/core.c:3965
- usb_disable_device+0x367/0x810 drivers/usb/core/message.c:1478
- usb_disconnect+0x2e2/0x9a0 drivers/usb/core/hub.c:2350
- hub_port_connect drivers/usb/core/hub.c:5420 [inline]
- hub_port_connect_change drivers/usb/core/hub.c:5720 [inline]
- port_event drivers/usb/core/hub.c:5884 [inline]
- hub_event+0x1bb1/0x4420 drivers/usb/core/hub.c:5966
- process_one_work+0xac7/0x1b10 kernel/workqueue.c:3396
- process_scheduled_works kernel/workqueue.c:3479 [inline]
- worker_thread+0x5ef/0xe50 kernel/workqueue.c:3560
- kthread+0x373/0x450 kernel/kthread.c:436
- ret_from_fork+0x730/0xd60 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
- </TASK>
+Will fix.
 
-Showing all locks held in the system:
-locks held by kworker/0:1/10: 2, on CPU#0:
- #0: ffff88801c05a140 ((wq_completion)events_freezable){+.+.}-{0:0}, at: process_one_work+0x1466/0x1b10 kernel/workqueue.c:3371
- #1: ffffc900000f7d08 ((work_completion)(&(&host->detect)->work)){+.+.}-{0:0}, at: process_one_work+0xa2c/0x1b10 kernel/workqueue.c:3372
-locks held by pr/ttyS0/16: 2, last CPU#0:
- #0: ffffffff8edd8338 (console_srcu){....}-{0:0}, at: rcu_try_lock_acquire include/linux/rcupdate.h:314 [inline]
- #0: ffffffff8edd8338 (console_srcu){....}-{0:0}, at: srcu_read_lock_nmisafe include/linux/srcu.h:439 [inline]
- #0: ffffffff8edd8338 (console_srcu){....}-{0:0}, at: console_srcu_read_lock+0x49/0x60 kernel/printk/printk.c:291
- #1: ffffffff9bc65c78 (&port_lock_key){-.-.}-{3:3}, at: __uart_port_lock_irqsave include/linux/serial_core.h:613 [inline]
- #1: ffffffff9bc65c78 (&port_lock_key){-.-.}-{3:3}, at: univ8250_console_device_lock+0x64/0xc0 drivers/tty/serial/8250/8250_core.c:413
-locks held by khungtaskd/31: 1, last CPU#1:
- #0: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #0: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #0: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: debug_show_all_locks+0x3d/0x184 kernel/locking/lockdep.c:6837
-locks held by getty/5358: 2, on CPU#0:
- #0: ffff8880363a40a0 (&tty->ldisc_sem){++++}-{0:0}, at: tty_ldisc_ref_wait+0x24/0x80 drivers/tty/tty_ldisc.c:243
- #1: ffffc9000321e2e8 (&ldata->atomic_read_lock){+.+.}-{4:4}, at: n_tty_read+0x419/0x14e0 drivers/tty/n_tty.c:2211
-locks held by syz-executor/5599: 4, last CPU#0:
- #0: ffffffff8ef3cc30 (dup_mmap_sem){++++}-{0:0}, at: dup_mm kernel/fork.c:1542 [inline]
- #0: ffffffff8ef3cc30 (dup_mmap_sem){++++}-{0:0}, at: copy_mm kernel/fork.c:1595 [inline]
- #0: ffffffff8ef3cc30 (dup_mmap_sem){++++}-{0:0}, at: copy_process+0x4806/0x8370 kernel/fork.c:2307
- #1: ffff888032f2c378 (&mm->mmap_lock){++++}-{4:4}, at: mmap_write_lock_killable include/linux/mmap_lock.h:562 [inline]
- #1: ffff888032f2c378 (&mm->mmap_lock){++++}-{4:4}, at: dup_mmap+0x127/0x2370 mm/mmap.c:1716
- #2: ffff88802a209078 (&mm->mmap_lock/1){+.+.}-{4:4}, at: mmap_write_lock_nested include/linux/mmap_lock.h:552 [inline]
- #2: ffff88802a209078 (&mm->mmap_lock/1){+.+.}-{4:4}, at: dup_mmap+0x1c9/0x2370 mm/mmap.c:1723
- #3: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #3: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #3: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x2f/0x310 mm/pgtable-generic.c:290
-locks held by syz-executor/5600: 4, last CPU#0:
- #0: ffffffff8ef3cc30 (dup_mmap_sem){++++}-{0:0}, at: dup_mm kernel/fork.c:1542 [inline]
- #0: ffffffff8ef3cc30 (dup_mmap_sem){++++}-{0:0}, at: copy_mm kernel/fork.c:1595 [inline]
- #0: ffffffff8ef3cc30 (dup_mmap_sem){++++}-{0:0}, at: copy_process+0x4806/0x8370 kernel/fork.c:2307
- #1: ffff88802a6669b8 (&mm->mmap_lock){++++}-{4:4}, at: mmap_write_lock_killable include/linux/mmap_lock.h:562 [inline]
- #1: ffff88802a6669b8 (&mm->mmap_lock){++++}-{4:4}, at: dup_mmap+0x127/0x2370 mm/mmap.c:1716
- #2: ffff88801c087678 (&mm->mmap_lock/1){+.+.}-{4:4}, at: mmap_write_lock_nested include/linux/mmap_lock.h:552 [inline]
- #2: ffff88801c087678 (&mm->mmap_lock/1){+.+.}-{4:4}, at: dup_mmap+0x1c9/0x2370 mm/mmap.c:1723
- #3: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #3: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #3: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x2f/0x310 mm/pgtable-generic.c:290
-locks held by syz-executor/5602: 1, last CPU#1:
- #0: ffff88807b45c460 (sb_writers#6){.+.+}-{0:0}, at: filename_unlinkat+0x1ad/0x730 fs/namei.c:5696
-locks held by kworker/0:5/5708: 5, on CPU#0:
- #0: ffff888023ab7d40 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: process_one_work+0x1466/0x1b10 kernel/workqueue.c:3371
- #1: ffffc90002e17d08 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: process_one_work+0xa2c/0x1b10 kernel/workqueue.c:3372
- #2: ffff88802a8a41d8 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
- #2: ffff88802a8a41d8 (&dev->mutex){....}-{4:4}, at: hub_event+0x1bb/0x4420 drivers/usb/core/hub.c:5912
- #3: ffff88804cae71d8 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
- #3: ffff88804cae71d8 (&dev->mutex){....}-{4:4}, at: usb_disconnect+0x10a/0x9a0 drivers/usb/core/hub.c:2341
- #4: ffff888035c291a0 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
- #4: ffff888035c291a0 (&dev->mutex){....}-{4:4}, at: __device_driver_lock drivers/base/dd.c:1171 [inline]
- #4: ffff888035c291a0 (&dev->mutex){....}-{4:4}, at: device_release_driver_internal+0xb2/0x620 drivers/base/dd.c:1369
-locks held by syz.4.1228/9913: 1, last CPU#1:
- #0: ffff88802a5ea460 (sb_writers#6){.+.+}-{0:0}, at: get_signal+0x1f2a/0x21e0 kernel/signal.c:3024
-locks held by syz-executor/9984: 5, last CPU#0:
- #0: ffff8880374aa460 (sb_writers#6){.+.+}-{0:0}, at: filename_create+0x10d/0x400 fs/namei.c:5085
- #1: ffff888055acb8d0 (&type->i_mutex_dir_key#5/1){+.+.}-{4:4}, at: inode_lock_nested include/linux/fs.h:1069 [inline]
- #1: ffff888055acb8d0 (&type->i_mutex_dir_key#5/1){+.+.}-{4:4}, at: __start_dirop fs/namei.c:2918 [inline]
- #1: ffff888055acb8d0 (&type->i_mutex_dir_key#5/1){+.+.}-{4:4}, at: start_dirop fs/namei.c:2942 [inline]
- #1: ffff888055acb8d0 (&type->i_mutex_dir_key#5/1){+.+.}-{4:4}, at: filename_create+0x1c0/0x400 fs/namei.c:5092
- #2: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #2: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #2: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: security_sid_to_context_core+0x21f/0x700 security/selinux/ss/services.c:1402
- #3: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #3: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #3: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: sidtab_sid2str_get+0x84/0x670 security/selinux/ss/sidtab.c:617
- #4: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #4: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #4: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: class_rcu_constructor include/linux/rcupdate.h:1216 [inline]
- #4: ffffffff8edec060 (rcu_read_lock){....}-{1:3}, at: unwind_next_frame+0xbd/0x2090 arch/x86/kernel/unwind_orc.c:495
+>> +       default:
+>> +               return "Reserved";
+>> +       }
+>> +}
+>> +
+>> +static const char *life_time_est_to_string(__u8 val) {
+>> +       static const char * const strs[] = {
+>> +               "Not defined",                                     /* 0x00 */
+>> +               "0%-10% of device life time used",                 /* 0x01 */
+>> +               "10%-20% of device life time used",                /* 0x02 */
+>> +               "20%-30% of device life time used",                /* 0x03 */
+>> +               "30%-40% of device life time used",                /* 0x04 */
+>> +               "40%-50% of device life time used",                /* 0x05 */
+>> +               "50%-60% of device life time used",                /* 0x06 */
+>> +               "60%-70% of device life time used",                /* 0x07 */
+>> +               "70%-80% of device life time used",                /* 0x08 */
+>> +               "80%-90% of device life time used",                /* 0x09 */
+>> +               "90%-100% of device life time used",               /* 0x0A */
+>> +               "Exceeded the maximum estimated device life time", /* 0x0B */
+>> +       };
+>> +
+>> +       if (val > 0x0B)
+>> +               return "Reserved";
+>> +
+>> +       return strs[val];
+>> +}
+>> +
+>> +static const char *bkops_status_to_string(__u8 val) {
+>> +       switch (val) {
+>> +       case 0x00:
+>> +               return "No background operation required";
+>> +       case 0x01:
+>> +               return "Level 1: background operation required (non-urgent)";
+>> +       case 0x02:
+>> +               return "Level 2: background operation required (performance
+>> impacted)";
+>> +       case 0x03:
+>> +               return "Level 3: background operation required (urgent)";
+>> +       default:
+>> +               return "Reserved";
+>> +       }
+>> +}
+>> +
+>> +/*
+>> + * Print a health summary of the device. Exit codes:
+>> + *   0 healthy (or no degradation reported)
+>> + *   1 warning level
+>> + *   2 urgent level
+>> + *   3 health data not supported (eMMC < 5.0)
+>> + *   4 not an eMMC device (EXT_CSD read failed)
+>> + * Only meaningful for eMMC; SD cards do not report health data.
+>> + */
+>> +int do_health(int nargs, char **argv)
+>> +{
+>> +       __u8 ext_csd[512], ext_csd_rev, pre_eol, life_typ_a, life_typ_b, bkops;
+>> +       int fd, ret;
+>> +       char *device;
+>> +
+>> +       if (nargs != 2) {
+>> +               print_usage(do_health);
+>> +               exit(1);
+>> +       }
+>> +
+>> +       device = argv[1];
+>> +
+>> +       fd = open(device, O_RDWR);
+>> +       if (fd < 0) {
+>> +               perror("open");
+>> +               exit(1);
+>> +       }
+>> +
+>> +       ret = read_extcsd(fd, ext_csd);
+>> +       if (ret) {
+>> +               fprintf(stderr, "Could not read EXT_CSD from %s, "
+>> +                               "not an eMMC device?\n", device);
+>> +               close(fd);
+>> +               exit(4);
+>> +       }
+>> +
+>> +       ext_csd_rev = ext_csd[EXT_CSD_REV];
+>> +       pre_eol = ext_csd[EXT_CSD_PRE_EOL_INFO];
+>> +       life_typ_a = ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A];
+>> +       life_typ_b = ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B];
+>> +       bkops = ext_csd[EXT_CSD_BKOPS_STATUS];
+> only bits [1:0] are defined, better mask?  ext_csd[EXT_CSD_BKOPS_STATUS] & 3
+> 
 
-=============================================
+Sure.
 
-NMI backtrace for cpu 1
-CPU: 1 UID: 0 PID: 31 Comm: khungtaskd Not tainted syzkaller #0 PREEMPT(full) 
-Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/16/2026
-Call Trace:
- <TASK>
- __dump_stack lib/dump_stack.c:94 [inline]
- dump_stack_lvl+0x100/0x190 lib/dump_stack.c:120
- nmi_cpu_backtrace.cold+0x12d/0x151 lib/nmi_backtrace.c:123
- nmi_trigger_cpumask_backtrace+0x21f/0x2a0 lib/nmi_backtrace.c:66
- trigger_all_cpu_backtrace include/linux/nmi.h:164 [inline]
- __sys_info lib/sys_info.c:157 [inline]
- sys_info+0x141/0x190 lib/sys_info.c:165
- check_hung_uninterruptible_tasks kernel/hung_task.c:353 [inline]
- watchdog+0xcb1/0x1030 kernel/hung_task.c:561
- kthread+0x373/0x450 kernel/kthread.c:436
- ret_from_fork+0x730/0xd60 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
- </TASK>
-Sending NMI from CPU 1 to CPUs 0:
-NMI backtrace for cpu 0
-CPU: 0 UID: 0 PID: 16 Comm: pr/ttyS0 Not tainted syzkaller #0 PREEMPT(full) 
-Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/16/2026
-RIP: 0010:delay_tsc+0x32/0xc0 arch/x86/lib/delay.c:77
-Code: fd bf 01 00 00 00 41 54 55 53 e8 d9 59 08 f6 e8 04 7e 01 00 41 89 c4 0f 01 f9 66 90 48 c1 e2 20 48 09 c2 48 89 d5 eb 16 f3 90 <bf> 01 00 00 00 e8 b4 59 08 f6 e8 df 7d 01 00 44 39 e0 75 36 0f 01
-RSP: 0018:ffffc90000157950 EFLAGS: 00000082
-RAX: 8000000000000002 RBX: 000000cbca961e49 RCX: 0000000000000000
-RDX: 0000000000000004 RSI: ffffffff8c620f00 RDI: 0000000000000001
-RBP: 000000cbca961bc5 R08: 0000000000000005 R09: 0000000000000000
-R10: 0000000000000814 R11: 205d313354202020 R12: 0000000000000000
-R13: 0000000000000af1 R14: fffffbfff378cbe9 R15: dffffc0000000000
-FS:  0000000000000000(0000) GS:ffff888123b5f000(0000) knlGS:0000000000000000
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 00007f73f732d380 CR3: 000000005ca75000 CR4: 00000000003526f0
-Call Trace:
- <TASK>
- udelay include/asm-generic/delay.h:62 [inline]
- wait_for_lsr+0xf3/0x210 drivers/tty/serial/8250/8250_port.c:2019
- serial8250_fifo_wait_for_lsr_thre+0x5f/0xd0 drivers/tty/serial/8250/8250_port.c:3270
- __serial8250_console_fifo_write+0xa5/0x290 drivers/tty/serial/8250/8250_port.c:3345
- serial8250_console_fifo_write drivers/tty/serial/8250/8250_port.c:3378 [inline]
- __serial8250_console_write drivers/tty/serial/8250/8250_port.c:3429 [inline]
- serial8250_console_write+0xf46/0x1330 drivers/tty/serial/8250/8250_port.c:3493
- nbcon_emit_next_record+0x8f7/0xa70 kernel/printk/nbcon.c:1070
- nbcon_emit_one+0x1a8/0x2b0 kernel/printk/nbcon.c:1157
- nbcon_kthread_func+0x613/0x7d0 kernel/printk/nbcon.c:1271
- kthread+0x373/0x450 kernel/kthread.c:436
- ret_from_fork+0x730/0xd60 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
- </TASK>
+>> +
+>> +       printf("=============================================\n");
+>> +       printf("  eMMC Health Report: %s\n", device);
+>> +       printf("=============================================\n");
+>> +       printf("eMMC rev:         1.%d (MMC %s)\n", ext_csd_rev,
+>> +              extcsd_rev_to_string(ext_csd_rev));
+> eMMC rev:  --> Extended CSD rev
+> 
+>> +       printf("Pre EOL info:     0x%02x [%s]\n", pre_eol,
+>> +              pre_eol_info_to_string(pre_eol));
+>> +       printf("Life time type A: 0x%02x [%s]\n", life_typ_a,
+>> +              life_time_est_to_string(life_typ_a));
+>> +       printf("Life time type B: 0x%02x [%s]\n", life_typ_b,
+>> +              life_time_est_to_string(life_typ_b));
+>> +       printf("BKOPS status:     0x%02x [%s]\n", bkops,
+>> +              bkops_status_to_string(bkops));
+>> +
+>> +       if (ext_csd_rev < 7) {
+> EXT_CSD_REV_V5_0
+> 
+
+Ack.
 
 
----
-This report is generated by a bot. It may contain errors.
-See https://goo.gl/tpsmEJ for more information about syzbot.
-syzbot engineers can be reached at syzkaller@googlegroups.com.
+>> +               printf("Result: UNSUPPORTED (health data requires eMMC 5.0)\n");
+> But you already printed the health fields...
+> 
+>> +               ret = 3;
+>> +               goto out;
+>> +       }
+>> +
+>> +       if (pre_eol == 0x03 || life_typ_a == 0x0B || life_typ_b == 0x0B) {
+>> +               printf("Result: URGENT\n");
+>> +               ret = 2;
+>> +       } else if (pre_eol == 0x02 || life_typ_a == 0x0A ||
+>> +                  life_typ_b == 0x0A) {
+>> +               printf("Result: WARNING\n");
+>> +               ret = 1;
+> Collides with exit(1).
+> So what it would be: "the device has a wear warning" or "the command failed" ?
+> 
 
-syzbot will keep track of this issue. See:
-https://goo.gl/tpsmEJ#status for how to communicate with syzbot.
+Good catch, will fix.
 
-If the report is already addressed, let syzbot know by replying with:
-#syz fix: exact-commit-title
+> Thanks,
+> Avri
+>> +       } else if (pre_eol == 0x00 && life_typ_a == 0x00 &&
+>> +                  life_typ_b == 0x00) {
+>> +               printf("Result: UNKNOWN (device does not report health data)\n");
+>> +       } else {
+>> +               printf("Result: HEALTHY\n");
+>> +       }
+>> +
+>> +       if (bkops == 0x03)
+>> +               printf("Note: urgent background operation is pending, "
+>> +                      "do not power off the device right now\n");
+>> +
+>> +out:
+>> +       close(fd);
+>> +       return ret;
+>> +}
+>> +
+>>   static unsigned int get_sector_count(__u8 *ext_csd)  {
+>>          return (ext_csd[EXT_CSD_SEC_COUNT_3] << 24) | diff --git a/mmc_cmds.h
+>> b/mmc_cmds.h index 033cc09..88caf85 100644
+>> --- a/mmc_cmds.h
+>> +++ b/mmc_cmds.h
+>> @@ -39,6 +39,7 @@ int do_hwreset_en(int nargs, char **argv);  int
+>> do_hwreset_dis(int nargs, char **argv);  int do_sanitize(int nargs, char **argv);
+>> int do_status_get(int nargs, char **argv);
+>> +int do_health(int nargs, char **argv);
+>>   int do_create_gp_partition(int nargs, char **argv);  int do_enh_area_set(int
+>> nargs, char **argv);  int do_write_reliability_set(int nargs, char **argv);
+>> --
+>> 2.25.1
+> 
+> 
 
-If you want to overwrite report's subsystems, reply with:
-#syz set subsystems: new-subsystem
-(See the list of subsystem names on the web dashboard)
-
-If the report is a duplicate of another one, reply with:
-#syz dup: exact-subject-of-another-report
-
-If you want to undo deduplication, reply with:
-#syz undup
