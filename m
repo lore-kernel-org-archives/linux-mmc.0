@@ -1,143 +1,195 @@
-Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
+Received: from mail-pz2-f12.google.com (mail-pz2-f12.google.com [74.125.228.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A58F5013AF
-	for <linux-mmc@vger.kernel.org>; Tue,  8 Sep 2026 09:39:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788860357; cv=none; b=uOS7lD6NjOmYEq3RpQpB27UizuBT1pK8d+/S3aBWQMjbe2iMK1pOeZ7dXywdoobSdgNOtlqMm4ro6rFspJoSU5xWBfN/0HRPp5aNM3y3AAlHrQnoN4FzM/IZj0gsnzkyetAECWtI/t8QdF/00M5L3ZVfg357RYtno35UpQXbnlM=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788860357; c=relaxed/simple;
-	bh=4Sbr75c0abt10xZybWlwcKOCX9shIU/NqqpX3auH90Y=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=Q0OJofM+5h8cHmAAVVhYWLht3as5O3eASfi2VsNuRO4DoHSj4j4iU/FRnJ2uDPEIrsVJf4N3/sWAVEqY/KwsR/InyykokUJWP2I+6fboyXnePxVkLs/rjrMLH9RZWwosJ5pxItUDSEgOY9zQA+qBTSY3vms2nTr9dmCa2BiouY0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=oPffJ0S5; arc=none smtp.client-ip=209.85.214.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 515B8551987
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Sep 2026 13:28:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.228.12
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788874114; cv=pass; b=XfVSexkJsuy06NBq85gW0XGxECv/P0voyZurNv/7xFVZ9QqQBVi8dFZR838aSBNZcaVbrpZPUKPp7KNNdI1lht4YUQP6M6JayW91stdeky9ymaoo2CiLlLF+MKv+ydEwDcHewEAIZm8J3XIHJ3PIUn0N4Ma3wbi1UGp7+sFCC/A=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788874114; c=relaxed/simple;
+	bh=XrWPQdu6aVkIEftfYKLA9OZgTitSQ0N+EPeHqgtL9RA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Dgx3nq2+FRkTvmplJZ31R9uSeOpH7zT1EO3IH1ATZDz260euKIShl6fSnTCBHhePbIAfOjLyzC636jTFTatWVlnerfm5OxyKkR3cfDncdYJZGTm2Y8zfSZh8vze5xybdhvcW3uS9QACn+z0Mai3+XKx/+yzJaILSIg9qeV97O+E=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GDzKyIQe; arc=pass smtp.client-ip=74.125.228.12
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="oPffJ0S5"
-Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-2d6e954afbdso27933935ad.2
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Sep 2026 02:39:16 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GDzKyIQe"
+Received: by mail-pz2-f12.google.com with SMTP id d2e1a72fcca58-8625b35df89so90031b3a.0
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Sep 2026 06:28:20 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1788874098; cv=none;
+        d=google.com; s=arc-20260327;
+        b=iTP0dHk2X1zSk5HAcMvYIvn2xuBNsM/jhsZU8YPQeT+HvZtoO1wxu14T+jynoLSP0j
+         kncp0mRtx3QbXfO0FQmx6PKZ7jqdh6rrlCnxMMKY06LfFkLAo9x99F15PJ0IxwiXKwwZ
+         Hryof0/v8SP+Uy5EZV2xxq55MuikjxO3kERw6rWS8XZqu1SDTZHVudIJ6hPI2oxBvwNU
+         FENLog11ZAu0xIKTa82PmgQOO6ugFGzq68t8Xoa7xs4AoLEi00b0nZrOZGAbL6fmTAud
+         ezrzNUy+5lAc1nlYlkmtOzBaPHzpqEPpJaCTMlPo9DVgD2GzGDNVE7pbtVhubFoTAJs1
+         NcVQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=JKqux52iVKTfYQy6cAyWyQ3ntl+32JLmlvNYP6anbHY=;
+        fh=/Qi6Q9OQe16Lw+ETU96MGFwKeOKm86rZT9hmojGdYos=;
+        b=Xv3P2fwx2ZATkCL0yIp6f3Q/JRkREEMpBMgzqnJqhkcA7mCFvcITDXOsyB6x+lBN4/
+         ZJqsfnu7BdaV32c6sU3oKwij1yfe5Y0zt4njMPmYepXEDp22qcKrOZU7AAwEwV1RSpjb
+         mwGy7BQf9y1J1h/MiQKrFSBsEVofWrmDRoIO2uQ/X+ouKnRb4a98UzQJWl7W3bJ7CZOH
+         DG1TySieQ4LYTE85pNleVqANalE54kwc9HhTTTmIwfBDb3hvhTx3pAUo+oVdYVCnT0ZY
+         FvYuSvmBQ5OBPgKm3ahA/mA8mlS32th8xB9OYK4tQSa9WfBYpSe8miSrlj3tcGfeTVwY
+         gT0g==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1788860355; x=1789465155; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=4UaQxBJSfqPaQYKAdjMuukZ2PpCv6cQKQMT0AYXy5/I=;
-        b=oPffJ0S5R4JqpwhDzGxlk24N1dJNWu5XIO8MzvAuQt8pnqm1ri76IBqjmlkD7pm4ew
-         +fz8Nbq56PpV+NDHHn/Jl3Ij1i2hy8k1YlygOZ5n7m3iBSn0pHRAfII1/wL8VLiQQAQ5
-         vFyyGZQLXFtLn1cTMEWkYKg1OUVZJnhbyRBJs1WZ/QWmeu0PvzfhOD6jocp56RIaL8Mv
-         MjGYVB1z3IhWngkQtOtwISroDILA5wBKWcMwiMpPozEg8l2TcNl0bg0hS+SGvN1y/uTE
-         Sa6204ILohs+qaCgMol6j8DP4x/2o5S6EMivqh5CgzZwEVypJBUdBDNInCx1Z4x7ZeKH
-         zylQ==
+        d=gmail.com; s=20251104; t=1788874098; x=1789478898; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=JKqux52iVKTfYQy6cAyWyQ3ntl+32JLmlvNYP6anbHY=;
+        b=GDzKyIQe6gkTpY6dg7Tc7eMqvtKCONPfezqQzQ5kSDS69CAoCuxI+JOe9Ujb/wFLW4
+         NNv+wf/qu5jdSqGH7GT5mO72kF2aRTO2AuMqtrXHH7wlTZ4+aSuFaIJWNgQUXuAMYx7L
+         UOXdcc7cxtrl+qMW51cYjvQYfA/iqjn8lj81IVJQxRjJq1gfEBFvoqh+lJXly7YKFn31
+         tKPwVvmvAVxONDj/w2fFNezBOlbgpMWRrSC6k0kPaKxjvM9ePRZMOPaXiM8t3LZzy41R
+         //xbVtYL4P+kxfcx0gk3zPTtdLqVTnyxH1f72xn30RhM3jKP1qExiEcevXkcF6slhrMp
+         xLSA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788860355; x=1789465155;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=4UaQxBJSfqPaQYKAdjMuukZ2PpCv6cQKQMT0AYXy5/I=;
-        b=ePbgJxBEF7ZvzoVXhKfPZc+1u5X4MCfn8Lr9zeseLqdu2QtLy4DAtYdV6x3T+y4lWE
-         KqfRBcwgruWmIrfdPkZqAsq0+rHdSoahfz46OxvNknYVCMBOTjE0Fe5aSNIo/VyGUTaM
-         VUYN389jvasyNiW7BRmhvN7wAqX3WEDngybUGdvUmd+1jgZ1VRtYKqa2o3Ot43NSaYNU
-         HvxWfqNpxNsurr4GoIp3jI5s1/2WNgf0v6BmFpuyMbl5i7fvXfmUg0PMYyz6RzILJ7vD
-         aRuHMQW2kvFbp1LuKPm0wjHG4bNhdIfP2e8CWIK8C8DE4yE+6AgejNoqWyU72qS88XAG
-         MmOg==
-X-Forwarded-Encrypted: i=1; AKwUvBxvMsS9CHrLa/kVuWDEssrxDc4JAoVBdn8UCJWwtH7uUWqwYSFqqowX6f1kGGhuMoz5VCq2HQ8MoKE=@vger.kernel.org
-X-Gm-Message-State: AFuF++kmk+dOykT+pyfDAl4GBL05bM2nfPasTg+Y+u20Ag5SHuFxNaKS
-	k8b9ni7vnjtjYa44Pe7wjs+f0Ba0Sdoeu3r2M7JtNAOq8aKXcco/b+gl
-X-Gm-Gg: AYBFou2g4NJ1YPRI20BbPh58q+GVKEUCidJReOhHTTZzNJWFOZ2T/WbdXjPPZt6T/SR
-	Mj/gxYjMYKfZ8BbiBlr5omoLKhQBVvQ19qZ25Sc/R1l3fAifkEJaMV0VadGacZNwGxWIR6cJRHO
-	cSCQC3fiD1u0MZhfM0vEwWkBp8vaXKddGRz6EqxgYDl6s6ZsQocIcwCQx1H7UvDU7k0D/Bm03dW
-	jL/MKc0I8bnuDdpk5XIQdW8u42Q5byL8pDOIfkbvd3U6vZkILM/DdvA+m9iP0w+TfMt2MVz2466
-	TZKD7L4LsracoUXYm6eU9CmpmsIlqupz5niBTwQabrIAR+UBkf3djlP/ovQkU95eMU8uLSdElvO
-	aZtUrzyhjpwTKwCf6NYHCy1YbxroC92Wvs3goZj2aZWeO1znJFThr99DceL9hDo016JrZFNVdAC
-	ZlLSO+m8x7F/quVy7Drqj7IZlUbXnFlkvw2YRRhQjoXtkfHVXnN3zGtYRI/LLM5LYYq3G40TpOi
-	EQ/1WSvamfe4T/eCq+YZH5gy7HhJCztvq5cWlpQ59PRqYApl6FAGn8eLBFLQsm4P8hK86vrSGgY
-	Vw==
-X-Received: by 2002:a17:903:4b04:b0:2d3:160b:c01f with SMTP id d9443c01a7336-2db124b1ae2mr384628815ad.6.1788860355450;
-        Tue, 08 Sep 2026 02:39:15 -0700 (PDT)
-Received: from nxpwireless-Inspiron-14-Plus-7440.tw-tpe02.nxp.com (114-25-99-144.dynamic-ip.hinet.net. [114.25.99.144])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2db1497d9f9sm54848085ad.32.2026.09.08.02.39.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 08 Sep 2026 02:39:14 -0700 (PDT)
-From: Jeff Chen <chunfan.chen@gmail.com>
-To: linux-wireless@vger.kernel.org
-Cc: johannes@sipsolutions.net,
-	francesco@dolcini.it,
-	linux-mmc@vger.kernel.org,
-	Ulf Hansson <ulfh@kernel.org>,
-	Jeff Chen <jeff.chen_1@nxp.com>
-Subject: [PATCH wireless-next 4/4] wifi: nxpwifi: Limit channel width based on firmware capability
-Date: Tue,  8 Sep 2026 17:37:58 +0800
-Message-Id: <20260908093758.596444-5-chunfan.chen@gmail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20260908093758.596444-1-chunfan.chen@gmail.com>
-References: <20260908093758.596444-1-chunfan.chen@gmail.com>
+        d=1e100.net; s=20251104; t=1788874098; x=1789478898;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=JKqux52iVKTfYQy6cAyWyQ3ntl+32JLmlvNYP6anbHY=;
+        b=ePpTYqhfjy+vMTfHDycMQevxPkNdHoddf//XB7chdTd34CEv2OpGHxI8frJlc8KHNn
+         l+d94dl/YttwRpXefbt60Kei8HJPatYHI3wXHEQ3GxCN8x/8261hB/mX3MC9Z5JTQldI
+         tQtxBMrd7p3ooYR+2NdMXGOHXoNLQMb4E7mazy00v1ZVpuOB+Hy1NRWcVYDmCH0fpPdR
+         y6B3IeXQDryegZUKUHKiJgvux6GEEo+bDsLSsvBi0yKT1bqZmTs4dGVA2SOCW8Bp2Vqc
+         RIU8l52aFgYqI+ESY5k+4Bu9NI9+ZaLTeS+s1inn9Q4LSH2/YnVwUa40djbXEIwQbP1e
+         M4TQ==
+X-Forwarded-Encrypted: i=1; AKwUvBw0XyNmRMpGjOV3bsxlUIgIgtJV6N7RX137rPpegdaXmhlW2/uVUWV6viV1Mi/RnIvmYSUXw18CZdI=@vger.kernel.org
+X-Gm-Message-State: AFuF++nPH1fHRKvMmwx/8az8FV9z9YDIe4ctWISQzU+EwAkNvYbawJsA
+	CQfVVx8j2yhfLBbG/X5KVjCMNhWoAWrwJjdJ6Mo2vrY2y24DRxA/HqNhgTVbLmZfmM0HC68b24Y
+	TTcgJvgNvnnxDS8VKvu7lX96xl9tOW2o=
+X-Gm-Gg: AYBFou27P+KZ0o/siOuZAx3u+eg6z+gVxnckXl5Pipv6VAzfFqbUoTPtAUmf4XpD/sY
+	udrRogaxHEdstNIhOxxMkO5e1uZftlPg05Tt8KVjIuSI/oFdadzg3kkuGdU+o1Wb+1i/SoZS/VI
+	+bHkA8VUjSJnLDNGNq++UcWzRTQKrz65wIbnRXc5OJflLy0iWv61phqv+uXH0rz3VBb1aKwiIjc
+	AF0wfhEzBxtqJfSdKIquYzHqmxIAaVZ9B0iaHYqS6xkY0Ru0PF4TVd7wLokP2hVDGlBor1/5Vj7
+	vUVdRIUzy9qvMUtR0QeppBziWX/9ERzxyXzQUof3gOk0brvUVEI6kWh0
+X-Received: by 2002:a05:6a00:1395:b0:84e:cd14:aeba with SMTP id
+ d2e1a72fcca58-86698fe1ea8mr6346255b3a.6.1788874097889; Tue, 08 Sep 2026
+ 06:28:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20260907151428.643841-1-adrianox@gmail.com> <ap-4khETBju3X8-T@hovoldconsulting.com>
+In-Reply-To: <ap-4khETBju3X8-T@hovoldconsulting.com>
+From: =?UTF-8?Q?Adriano_C=C3=B3rdova?= <adrianox@gmail.com>
+Date: Tue, 8 Sep 2026 10:28:06 -0300
+X-Gm-Features: AcwNN1UwNNi1uUL8ZrK4YlYg6vVWK6_rZXfk738aK_31iCexOOmSxAgWI8zqjXg
+Message-ID: <CAMGU2hXrURUh3NknkgLnmyiJiEwEqZdDz3Ujy5tO8oqVMD9OJw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: vub300: fix use-after-free in vub300 teardown
+To: Johan Hovold <johan@kernel.org>
+Cc: Ulf Hansson <ulfh@kernel.org>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, 
+	syzbot+f312381a95cc080992fd@syzkaller.appspotmail.com, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Jeff Chen <jeff.chen_1@nxp.com>
+El mar, 8 sept 2026 a las 4:26, Johan Hovold (<johan@kernel.org>) escribi=
+=C3=B3:
+>
+> On Mon, Sep 07, 2026 at 12:14:28PM -0300, Adriano Cordova wrote:
+> > Do not dereference mmc/vub300/udev after the final kref_put, because
+> > it can release them via mmc_free_host()/usb_put_dev().
+> >
+> > Fixes: 8f4d20a71022 ("mmc: vub300: fix use-after-free on disconnect")
+>
+> This commit reverted a buggy change so if anything is broken here, this
+> isn't the commit to blame.
+>
+> > Reported-by: syzbot+f312381a95cc080992fd@syzkaller.appspotmail.com
+> > Link: https://syzkaller.appspot.com/bug?extid=3Df312381a95cc080992fd
+> > Cc: stable@vger.kernel.org
+> > Signed-off-by: Adriano Cordova <adrianox@gmail.com>
+>
+> Are you missing an Assisted-by tag?
+>
+> > ---
+> >  drivers/mmc/host/vub300.c | 7 ++++---
+> >  1 file changed, 4 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+> > index 2dae474dcd06..a1a6aa1aafdb 100644
+> > --- a/drivers/mmc/host/vub300.c
+> > +++ b/drivers/mmc/host/vub300.c
+> > @@ -370,13 +370,14 @@ static void vub300_delete(struct kref *kref)
+> >  {                            /* kref callback - softirq */
+> >       struct vub300_mmc_host *vub300 =3D kref_to_vub300_mmc_host(kref);
+> >       struct mmc_host *mmc =3D vub300->mmc;
+> > +     struct usb_device *udev =3D vub300->udev;
+> >
+> >       usb_free_urb(vub300->command_out_urb);
+> >       vub300->command_out_urb =3D NULL;
+> >       usb_free_urb(vub300->command_res_urb);
+> >       vub300->command_res_urb =3D NULL;
+> > -     usb_put_dev(vub300->udev);
+> >       mmc_free_host(mmc);
+> > +     usb_put_dev(udev);
+>
+> This makes no sense at all as the driver data is freed by
+> mmc_free_host().
 
-nxpwifi_cmd_append_11n_tlv() derived the channel width solely from
-the AP's advertised operating bandwidth and could request 40/80 MHz
-operation even when the firmware did not support it.
+mmc_free_host() only frees mmc (struct mmc_host) and vub300
+(struct vub300_mmc_host), but the udev (struct usb_device, linked
+as mmc->parent) is not freed by mmc_free_host() and has to be
+freed separately.
 
-On 20 MHz-only devices such as IW610, this may cause the firmware to
-be configured with an unsupported channel width.
+But it cannot be freed before mmc_free_host(), because the kobject
+cleanup code of mmc_host accesses it in mmc_host_classdev_release()
+via host->parent->of_node.
 
-Check firmware bandwidth capabilities before selecting the channel
-width:
-- Allow 80 MHz only when ISSUPP_NO_80MHZ() is false.
-- Allow 40 MHz only when ISSUPP_40MHZ_ENABLED() is true.
-- Otherwise fall back to 20 MHz operation.
+>
+> >       /*
+> >        * and hence also frees vub300
+> >        * which is contained at the end of struct mmc
+> > @@ -1794,8 +1795,8 @@ static void vub300_cmndwork_thread(struct work_st=
+ruct *work)
+> >                       construct_request_response(vub300, cmd);
+> >                       vub300->resp_len =3D 0;
+> >                       mutex_unlock(&vub300->cmd_mutex);
+> > -                     kref_put(&vub300->kref, vub300_delete);
+> >                       mmc_request_done(vub300->mmc, req);
+> > +                     kref_put(&vub300->kref, vub300_delete);
+>
+> This order has been here since the driver was merged.
+>
+> >                       return;
+> >               }
+> >       }
+> > @@ -1946,8 +1947,8 @@ static void vub300_mmc_request(struct mmc_host *m=
+mc, struct mmc_request *req)
+> >                   satisfy_request_from_offloaded_data(vub300, cmd)) {
+> >                       cmd->error =3D 0;
+> >                       mutex_unlock(&vub300->cmd_mutex);
+> > -                     kref_put(&vub300->kref, vub300_delete);
+> >                       mmc_request_done(mmc, req);
+> > +                     kref_put(&vub300->kref, vub300_delete);
+>
+> Same here.
+>
+> So if this is wrong (it does look suspicious, but this driver is just a
+> mess) then that's the commit to blame.
 
-Assisted-by: Claude:claude-opus-4-8
-Signed-off-by: Jeff Chen <jeff.chen_1@nxp.com>
----
- drivers/net/wireless/nxp/nxpwifi/11n.c | 4 +++-
- drivers/net/wireless/nxp/nxpwifi/fw.h  | 2 ++
- 2 files changed, 5 insertions(+), 1 deletion(-)
+Hope is more clear now, it makes sense to me, and I think the Fixes:
+tag is right.
 
-diff --git a/drivers/net/wireless/nxp/nxpwifi/11n.c b/drivers/net/wireless/nxp/nxpwifi/11n.c
-index c2a54d781b42..a83e29ecc466 100644
---- a/drivers/net/wireless/nxp/nxpwifi/11n.c
-+++ b/drivers/net/wireless/nxp/nxpwifi/11n.c
-@@ -349,6 +349,7 @@ nxpwifi_cmd_append_11n_tlv(struct nxpwifi_private *priv,
- 			nxpwifi_band_to_radio_type((u8)bss_desc->bss_band);
- 
- 		if (ISSUPP_11ACENABLED(priv->adapter->fw_cap_info) &&
-+		    !ISSUPP_NO_80MHZ(priv->adapter->fw_cap_ext) &&
- 		    bss_desc->bcn_vht_oper &&
- 		    bss_desc->bcn_vht_oper->chan_width ==
- 		    IEEE80211_VHT_CHANWIDTH_80MHZ) {
-@@ -359,7 +360,8 @@ nxpwifi_cmd_append_11n_tlv(struct nxpwifi_private *priv,
- 				((CHAN_BW_80MHZ <<
- 				  BAND_CFG_CHAN_WIDTH_SHIFT_BIT) &
- 				 BAND_CFG_CHAN_WIDTH_MASK);
--		} else if (sband->ht_cap.cap &
-+		} else if (ISSUPP_40MHZ_ENABLED(priv->adapter->fw_cap_ext) &&
-+			   sband->ht_cap.cap &
- 			   IEEE80211_HT_CAP_SUP_WIDTH_20_40 &&
- 			   bss_desc->bcn_ht_oper->ht_param &
- 			   IEEE80211_HT_PARAM_CHAN_WIDTH_ANY) {
-diff --git a/drivers/net/wireless/nxp/nxpwifi/fw.h b/drivers/net/wireless/nxp/nxpwifi/fw.h
-index 188110b020cf..124728a72442 100644
---- a/drivers/net/wireless/nxp/nxpwifi/fw.h
-+++ b/drivers/net/wireless/nxp/nxpwifi/fw.h
-@@ -334,6 +334,8 @@ enum NXPWIFI_802_11_PRIVACY_FILTER {
- #define DFS_CHAN_MOVE_TIME      10000
- 
- #define ISSUPP_11AXENABLED(fw_cap_ext) ((fw_cap_ext) & BIT(7))
-+#define ISSUPP_NO_80MHZ(fw_cap_ext)      ((fw_cap_ext) & BIT(8))
-+#define ISSUPP_40MHZ_ENABLED(fw_cap_ext) ((fw_cap_ext) & BIT(15))
- 
- #define HOST_CMD_GET_HW_SPEC                       0x0003
- #define HOST_CMD_802_11_SCAN                       0x0006
--- 
-2.34.1
+>
+> >                       return;
+> >               } else {
+> >                       vub300->cmd =3D cmd;
+>
+> Johan
 
+Best,
+Adriano
