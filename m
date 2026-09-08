@@ -1,63 +1,65 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
+Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CEE234D2EDA
-	for <linux-mmc@vger.kernel.org>; Tue,  8 Sep 2026 09:38:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD5AA3E6DE8
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Sep 2026 09:38:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788860320; cv=none; b=SD3hab9t4n2jX9f53SoyhGW2dgwa4a1U4R1VtfQHdCjO8umS3h4o+KFCxpckg81DG8aznwPAu3oWyKh2HOW8UapEcCkGGCe80xtMKLyv7FpA4pz3vyTd8XtNa3BxykTlp1m2dRzzX0NpsHZxm8dWMSd4E76lWTede1TGiqrs1SY=
+	t=1788860338; cv=none; b=jmBuuOCopt5y05D8yNJbj7iIKGqlwQj3gujfn4yKGfQGp4B/HpExNvsZ39KkRIBp4U1iAnatsMoogOXpRN1EQJwBbK461nq1Fd7e/2ToUjlBNCg9WCKCEUHvfMnXybBq2ddNCWRxOyJH2GCQloTQFJH0g18K1gYdkvtd1DDsJCM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788860320; c=relaxed/simple;
-	bh=dw3ifo+Vs4AfVLuiQB5RFEfyx7qGf7x+AkemF937nMo=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=anV721k/X+cjCms6DYsK6ntcikS9YAclqFhkEqawEm58cOP5No64v6/cUVyKO60BcGm1daWP1jfFTv8ONdGk3pzKSWrlirSXcDxQiN3ggQf6/xYl/4a4VkobnuXub5CSlgyywfj3PEtDahHBydTtGRkIKvvJahQX/MfKBt//YbU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=iFyPfgmE; arc=none smtp.client-ip=209.85.214.181
+	s=arc-20240116; t=1788860338; c=relaxed/simple;
+	bh=j0S4KRpjuwt3nsK0sce2EQ3T5QreZX+v22OUsOnmgx8=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=au6mOV8TzGmQtzBSg7fphAu6yMm3L0Nc8SgKgEEOhfZVmTzVj584oXheMsLEiaG2OWuOIdUvc/jNzRCY6JUTYLdl93pYdZ/QdjyXfSHk10KS7uJVwLrhsH9yPERRWIw3TaJl/Im4nnCOlEEjrZxCQujhgwAqtrqQF5pT65OXgWM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=c/O8Ut3s; arc=none smtp.client-ip=209.85.214.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iFyPfgmE"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-2d715f4a587so61491705ad.2
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Sep 2026 02:38:38 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="c/O8Ut3s"
+Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-2d6f9e2f681so47383105ad.3
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Sep 2026 02:38:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1788860318; x=1789465118; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=4EfWoUvk4MqKppy1+qmN7/DqUC6o3V+gob+0zbDN5fk=;
-        b=iFyPfgmEn8Bfhle34DDgvcXJjKfivpDvytMbwSbl6qgnpeWvJidhAY1/hS8D+ujv99
-         MNqLX2dUZ/en62yOwHGWuu1swCLeSfmPiw48QUyx6cOvPyBwTNOwnG2ZcDZTkUYwitho
-         jUWljuYXxHAmdCiDv16JlNE2c7L87D4MQKSMewRlOzS2HRWlWoZQavdgFBDiOo9faD+W
-         9VjckdW131x2o/yctqtfV7/tu+R6TGFzTYGgF9qaa1P8EebYaeiV41i/stVQlHmL4+LL
-         RkyfIcIlV5PlmUPkfA6xjmb0owOAU+N31NZsRdMxduRTyRgYYnyfx40CsYi/urc69AzJ
-         xAmA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788860318; x=1789465118;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20251104; t=1788860337; x=1789465137; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=4EfWoUvk4MqKppy1+qmN7/DqUC6o3V+gob+0zbDN5fk=;
-        b=MjAg5G8YE4Nv7IpuOubJ5JldYxnr6KZNTAc7qtgEO2eoJqry6gJLC7w/iiSiDZCOJn
-         j3RWT6a0pP1UgdDLfdLPgqoncoXNfJNps3J4NFmFBGLLvXOXobG/p+9iKaw8gc0GtHRf
-         PPzRcm0cPQEJm1gviFX5/BnDbnWqhlWhFZ1UdaVD+J9Lh4grDKq2nJhyIj+js1GJYHLv
-         fkXfQW3ox9BjMSHPn/mQCWas4REpaFgiJEWxdtWe/G+4xOZYYSx8xR9+3OzUcHbc6hc0
-         SuLOWowqPGlovys12KSxX3zQeRynumPuFgysvDlrpCltSfK8fudwFM03HAFmyYYHapUk
-         hBNA==
-X-Forwarded-Encrypted: i=1; AKwUvBxQhvTI80McRCqGoag/P1oQX4hgPxnuP5zu7xjnVs010sq/s4flyg6dEss18GRCDbtp5Qgy2yownl4=@vger.kernel.org
-X-Gm-Message-State: AFuF++mOCwwqd3+O1K4/p7REbfEQ2EEakJ/Mo412fnELcyWyqjcBnAX9
-	PactLeuYyUsQTSyYvdLhJtMxSiNcdLCIvb+kKkiCuuycz5KzZ4dsqP7I
-X-Gm-Gg: AYBFou36vrbZUBQWK+tn8Z83Dvl5YNMU1N2upYrKjAc8BlGckGCATtvqPgOt5gMlmWO
-	TSJ393qMLj4m0pJ+iHVA5jKeMAtF9pUBhQpmwFZuDz4e1PCpCEtflxQ7ePwmun/Jb9qomXBDvTA
-	jTrBETtcErcgJY9Gn5Bsb7c10rQAuj1ijzUICTHTzk4E53PReGGrF4JFVQghpRGzI3YcKbmltsX
-	SFujbpXZRwSLMyjqsul+DTkD2CI4uIB108B/j3VmHVVsspqrYqUDZdQ3x0+T4jlIVsqzjZv2gCl
-	mQsQDseZ7IhaLmqoZIwdsiSaoEkv/fzpP2sJqwL4hTaM60NTW22cDdMMA2gEae5wFBclcYPMNB7
-	CO3BYLRVH922n3T/uhRAOoMOZp1E6mNqrVZT0DUa+fm5L6R8Ss6qY3o0BJhbm4l4I+phcmbCEhS
-	+CR06f9DVIIbH9MNvyUBQMn74Rrdt57UAlXjPhr/sZCjlX3/TubivCN/mDgEVYlBPfn8fW0xCnc
-	5b9TYGKBvhl/98IzZ19AM01FQ3jAXumh7FZN4jYsLXwOoQJdjT8mDxv70/EKyMk5UCgkkfXly48
-	Aw==
-X-Received: by 2002:a17:903:2b0d:b0:2d9:1dee:43db with SMTP id d9443c01a7336-2db1284b6dfmr404892985ad.15.1788860318084;
-        Tue, 08 Sep 2026 02:38:38 -0700 (PDT)
+        bh=r8Uf1/He7wGtBx838McXz59D2uWjpQpPbZa4QJXiQso=;
+        b=c/O8Ut3stdG2XtedLzqH4R7IQopB3Oketos65r7MPd60bHSTo8SPxVVVUzJOz6V1qf
+         WotQy8Hn7F2r/DXjrI7v21MN4DF25pVk5G+ds2OqYlQXqH4RIL2xeZnvrHgl41JDZwig
+         s5i9t2J+s9sA1IHJ7SbKC41BD1QgQ3Ca9Xoj/ki7m8chBYOLlFrDwSeOXb58wwV3hwHX
+         J0wSNYA0rP4zu+EkLq6wT14XjiMMjfv652gjKg5WXbdRj2EA3Rx/GjBLuMDJK25TBOgG
+         dcGrB1hqEX0F1H4pqarArRSwWzMTmKlCpZlaic+htCm0RawR8iL7HjI0hAOumRHFs6Gm
+         JYjA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788860337; x=1789465137;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=r8Uf1/He7wGtBx838McXz59D2uWjpQpPbZa4QJXiQso=;
+        b=lQSgZqjbF1M277es6GJAGuocrJ91AXgUhjpZqFIHZmV9DLS/cPxZHLCREP6RwNmjKn
+         yBCMdcOwtxMon8yBMWi3LF2hvfIwfFk/VjbK/6WD7t3bowkwShzAhLZ+YPyTNlPCL5MO
+         flqL2cVjkxh50vPV954RqNW4s5k1WqE7HIAAho20w9vGG3Ys+ZroVBKMdKoaGf7fMS+X
+         2cwmyNKiwcg8P+SZFZse4WS+RpYGBQgoWnToa51HGBfVf4ackRJ//Zh5mxTafrOg33zK
+         4DxvHMe8uUdWVG7c2RI8XRIzsY9a8FXauK7qzY5xE8IX7VfWMQLaPGoXv4/NmaG0ZCvP
+         NMnw==
+X-Forwarded-Encrypted: i=1; AKwUvBzhVz8gl9jw6p2Q09mIiVKxWBghdJR8BjgmHw4uTd1oTfMlOGCwX1EPbXt6cPYYOQWpWGZ98sZNTFw=@vger.kernel.org
+X-Gm-Message-State: AFuF++ncsU6CVb4ES/z7tIDjKH0gxclA0QoP3jZZ/u2dGKD49UmEQQdG
+	XrxuS7nlSN8p3U6i04BY8BWeJUkg0zmUWtD+xbj4jF9ctTtSzX/W9BGE
+X-Gm-Gg: AYBFou11HlAkn27oXEe8YRWiu+DQHR35SWzlHtnZC5T11+HgExyz+Ww2uXrctiwNJre
+	tRcD70Kur0qKMH3kMztl9OD3Dk5mpe2+5A+Y9xGkacQ/6HhL9IHTb/UYCrsukNc3/3yA7oKlR1h
+	WEx7fZTp2ZVUIKzBEKNMnja9SbRpnU/nmwPagA2ol0mgju/RiMYWcOY8rAz0i6CSo6ZvA2R5C15
+	hEh0yqt2bC40iKfwkl+NpeebxLBKx5USIIzXaMZZh4ll0+NXo68tnQa4qpeJe/iboNua4Ek4LFq
+	8Dd1FiNHh2IN0XIRnSUSoRWbA9O75iiJ2EUXeq4ZJ6BIrIZ5S+qj8oeer5pK0UvKJt/Oi83zfSU
+	iE1UVShoe9mi0UtNDwTyfLJsjBuqXd5kS06qwm91eYnbVc81H/qqGVjYebqwBcZfQE+In2TitOX
+	d4/J9bB3e7FKWG3Y/ZaoOYTHytK9RhZOblkEznF4dFyzChB1gvdL4LZJ78rnQeWiL8vDmX9D0oM
+	Uv9CLvDIAc2YmpI5ndFDeg9IsCQ98geZMHbTlE8ZNqmknM8bj12qNTloUYLLUb6pxjKr0x9wWxx
+	LA==
+X-Received: by 2002:a17:902:f690:b0:2d8:d4ce:7e3d with SMTP id d9443c01a7336-2db126326f4mr367331345ad.18.1788860336815;
+        Tue, 08 Sep 2026 02:38:56 -0700 (PDT)
 Received: from nxpwireless-Inspiron-14-Plus-7440.tw-tpe02.nxp.com (114-25-99-144.dynamic-ip.hinet.net. [114.25.99.144])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2db1497d9f9sm54848085ad.32.2026.09.08.02.38.35
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2db1497d9f9sm54848085ad.32.2026.09.08.02.38.54
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 08 Sep 2026 02:38:37 -0700 (PDT)
+        Tue, 08 Sep 2026 02:38:56 -0700 (PDT)
 From: Jeff Chen <chunfan.chen@gmail.com>
 To: linux-wireless@vger.kernel.org
 Cc: johannes@sipsolutions.net,
@@ -65,10 +67,12 @@ Cc: johannes@sipsolutions.net,
 	linux-mmc@vger.kernel.org,
 	Ulf Hansson <ulfh@kernel.org>,
 	Jeff Chen <jeff.chen_1@nxp.com>
-Subject: [PATCH wireless-next 0/4] wifi: nxpwifi: add support for SDIO IW610
-Date: Tue,  8 Sep 2026 17:37:54 +0800
-Message-Id: <20260908093758.596444-1-chunfan.chen@gmail.com>
+Subject: [PATCH wireless-next 1/4] mmc: sdio: add NXP IW610 device ID
+Date: Tue,  8 Sep 2026 17:37:55 +0800
+Message-Id: <20260908093758.596444-2-chunfan.chen@gmail.com>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260908093758.596444-1-chunfan.chen@gmail.com>
+References: <20260908093758.596444-1-chunfan.chen@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -79,54 +83,26 @@ Content-Transfer-Encoding: 8bit
 
 From: Jeff Chen <jeff.chen_1@nxp.com>
 
-This series adds support for the NXP SDIO IW610 to the nxpwifi driver.
+Add SDIO device ID (0x0215) for NXP IW610 to sdio_ids.h. It is used
+by the nxpwifi driver to probe the IW610 chip over SDIO.
 
-IW610 uses different SDIO device IDs and a different firmware image
-from the existing IW61x devices. It shares the same SDIO register
-layout, so most of the existing SDIO support can be reused.
+Signed-off-by: Jeff Chen <jeff.chen_1@nxp.com>
+---
+ include/linux/mmc/sdio_ids.h | 1 +
+ 1 file changed, 1 insertion(+)
 
-The first two patches update the MMC subsystem. They add the SDIO IDs
-needed by IW610 and apply the required
-MMC_QUIRK_BLKSZ_FOR_BYTE_MODE quirk. The last two patches add SDIO
-IW610 support to nxpwifi and limit channel width requests based on
-firmware capabilities.
-
-Ulf, could you please Ack patches 1 and 2? 
-
-  [1/4] mmc: sdio: add NXP IW610 device ID
-        Add SDIO device ID 0x0215 for IW610.
-
-  [2/4] mmc: core: add IW610 base ID and block-size quirk
-        Add base card ID 0x0214 and apply
-        MMC_QUIRK_BLKSZ_FOR_BYTE_MODE.
-
-  [3/4] wifi: nxpwifi: add support for SDIO IW610
-        Add the IW610 device descriptor and firmware name.
-
-  [4/4] wifi: nxpwifi: restrict channel width on 20 MHz-only hardware
-        Do not request 40 MHz or 80 MHz operation when the firmware
-        does not support it.
-
-Tested on:
-  - NXP i.MX93 EVK running the NXP BSP kernel
-  - Lenovo ThinkPad T430 running current wireless-next
-
-Jeff Chen (4):
-  mmc: sdio: add NXP IW610 device ID
-  mmc: core: add NXP IW610 base ID and block size quirk
-  wifi: nxpwifi: Add support for SDIO-based IW610
-  wifi: nxpwifi: Limit channel width based on firmware capability
-
- drivers/mmc/core/quirks.h               |  3 +++
- drivers/net/wireless/nxp/nxpwifi/11n.c  |  4 +++-
- drivers/net/wireless/nxp/nxpwifi/fw.h   |  2 ++
- drivers/net/wireless/nxp/nxpwifi/sdio.c | 16 ++++++++++++++++
- drivers/net/wireless/nxp/nxpwifi/sdio.h |  1 +
- include/linux/mmc/sdio_ids.h            |  2 ++
- 6 files changed, 27 insertions(+), 1 deletion(-)
-
-
-base-commit: 1b60ed34f712e9f606d80951f1586f4274ebadf1
+diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+index afae93f6f245..5eff5e348eb0 100644
+--- a/include/linux/mmc/sdio_ids.h
++++ b/include/linux/mmc/sdio_ids.h
+@@ -123,6 +123,7 @@
+ #define SDIO_VENDOR_ID_NXP			0x0471
+ #define SDIO_DEVICE_ID_NXP_IW61X_BASE		0x0204
+ #define SDIO_DEVICE_ID_NXP_IW61X		0x0205
++#define SDIO_DEVICE_ID_NXP_IW610		0x0215
+ 
+ #define SDIO_VENDOR_ID_REALTEK			0x024c
+ #define SDIO_DEVICE_ID_REALTEK_RTW8723BS	0xb723
 -- 
 2.34.1
 
