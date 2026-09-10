@@ -1,169 +1,250 @@
-Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B15F13ACEE2
-	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 07:13:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789024432; cv=none; b=t+9w+uBNGnC/tvGgVLtzGCqzVyBnShxfh/R/weovzMf1rfKbB1IHzknda9xMZQbf+W17P4T78nMl3BxPR5zOgn10gfzT/iwVBXlhLeJRsLgpH7iBYIEBmpRFZRG0AjfvPHsrs5arnmdc1ujwNWhiWDMyCcAF0HDVJupatQp6ib4=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789024432; c=relaxed/simple;
-	bh=PXh2VO4rYITeX70Qory+PjUUOYjC1peCD6QzzIWZTGA=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=jJuk+snUWsrTGI57r38QGXD+h73VmL/OnQ8iEMK2JUKjFS6IpinMErA5lDCtFzJSAhiU1scBbMuXIuBsKQ1RayOnYcM4OfUn+k/q11JoPkGW3kfVdj4O9vMRhzN44GWFlIISs/nxGwj+TBwHtO74t7oX5qyiqUzpIvHguNDeuQo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=XnSubBxC; arc=none smtp.client-ip=209.85.128.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1A7D3B47E5
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 10:17:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789035481; cv=pass; b=pN7kz7NPCLvyPOWdpCPmXGigHhm//1u+1qokV5KnTU0nLabjs40tH++13ae/f64G1ljewsnGBv84pisrN3Jra8ID7gm+GscvPBSMmS+xrdu4+D50l90AUOaYHl+KuSISwGECGIOM4ygBs+an7zUcAo7wRKgiQxEADbLOhEl0cNA=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789035481; c=relaxed/simple;
+	bh=xJtlT+brubTDzcwB1LsQU2wH8jfhem1ycRIpQIZsMuc=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=lv0Jfhn46eZtjM9R9TPFgXB+Z33Sp3+uLjTvjiwUqmz9qS7S4DWhovhaWsK25RNYdOVw8zFcof+2CBFQtcZ5uQz1Xo7ZJ4XFnvX4D26s2qYC0jL3Bea+vRfolvGLK4b9tr8Vcl37Khtg9QcZDUkYv0MobDsVOqJALJnzevrNDg4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=PGKqZv6u; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=YYG7PFlR; arc=pass smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XnSubBxC"
-Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-4956869750eso59976105e9.2
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 00:13:49 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="PGKqZv6u";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="YYG7PFlR"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68A8prOq1290004
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 10:17:59 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	5o0LQq2H5NyuqhWcIAsOhclTasLhXE6zFp16BztH0tM=; b=PGKqZv6uqTxJsb4V
+	yz/56PwDXoYI/+DTCIsMR3DS/Z1r3noojO+XzGn4dFF++mrEALLWcGYqgjyWe3WJ
+	ZHYBaIZghgOs2KV0ThF9P+XHnCRbNDHS5d/9EFsz6fhbSRUpiEfy/fBUN9IdRTOA
+	TW0teNVSH7BgXWyi7J4XQvW/RwS0u1vLSONrNTUqUcRTkuyenE4y8wVAhp7D12bc
+	YYaBUeeCvKRDcdXwi9yU0Sf8UBVOV/8PTrIKBN9qSXquo7+Dyvmf6QsOlNPpf2Yq
+	nah7yoUwbbBLZawcshuQMNKa5GbnhltI41cGg8CkvKkDjBxyHIp1j6SDVwjDSzKP
+	JBStIg==
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com [209.85.216.71])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gkcydka30-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 10:17:59 +0000 (GMT)
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-39aee9b4cf2so11222910a91.0
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 03:17:59 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1789035478; cv=none;
+        d=google.com; s=arc-20260327;
+        b=rlxZex7M9IV0WNIykUsb3hU3I9etrPU4yCFXc0K1CX8AnA5WQL53Fe+iGH2A+59v+R
+         rvwj8m6934A9LD5CDblwjumj+PvC3HuCtkLj0QRv1oYZNSd5mb/djsh0Q0EGPBRW6agN
+         kjahaD/JK606ymAP0KltUcFNgclHWwdpKg3UdnbPvrnacjqHPUfRiatxQM0y3cUahdgB
+         07ySoh+awsaxxTrJledVBbZUmLFD37Y4Z57xf58nmii72Qr9aVXZBwieeogNENmEhOBZ
+         WjB77WkIwm68XznkkpWTpwoklnvqCovF74+nI5KFNJENr8xVIuIa/f2mg1rcgezf+QFf
+         5o8A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=5o0LQq2H5NyuqhWcIAsOhclTasLhXE6zFp16BztH0tM=;
+        fh=s0ONYfbr2crawwVo9siwtL3wQn9649CNK2DTpimn094=;
+        b=fLQ1Z76cFmHxJeMBY6YDVBOdSgNJgwSPZbNwVSfNb820lCMoOASpxpWFkyR90oBLMe
+         bWNmcKRK4PySqk77TDI5knUwrdhrIwxxGjvm2J54EWZEky7bQjYWywrxFfsWzYpK2clg
+         AyqTv2UQXosmOdNnL4WofL5oDQL3FCyZLXRbrBrn3D4z+oKsRNU1OpCT1eJLDIwZluyd
+         EZhNuLT/53FS8k/LtzIyeym4BG7K56yveC0kPd68GaYH4gN5HXQV22z9+CaLPewp7ph1
+         95bcUI3fZ7vd+U7BMNtvTGz+ab43tc3GVDvXvUS/yUDvl1KJXnmRdhMsgSynM5r+JDpE
+         3QXg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1789024428; x=1789629228; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:organization
-         :autocrypt:content-language:references:cc:to:subject:reply-to:from
-         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=S9vc3vyc7s51kw3mexUDG6KTzAQ8qZ7SaFb2GyTr25M=;
-        b=XnSubBxC3C1UMzn4ifsusKXQhYpLF46DzrP7kZnCbJfwQIHH+eOzVojTe2uO8Gf0zV
-         eUvUdcWbIq0Ehq38oL1VU619DMYWI3xODqkY8zSzE63W0obJaAc4oCkBMrv5srV6C+2c
-         waEQlw/O1VbxlaJC2zylCN5m11FSah3tIk1OR9cczLLQaefD2/PkEz+/PKl3zUUtbko1
-         mWkMhhApDfrjR1M6XbyN8v1J9hI1c7Q4LpiFPQD8lLab1BTK1NfhCjDKah+EO3y/LhJz
-         0NVegKMFCTc1L55TTDJk1MvOJ70OLesgYgmopuSTHgi2t75KPbsQxFjePWRSdynd9e0P
-         VP8g==
+        d=oss.qualcomm.com; s=google; t=1789035478; x=1789640278; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=5o0LQq2H5NyuqhWcIAsOhclTasLhXE6zFp16BztH0tM=;
+        b=YYG7PFlRv/m7RtW/2T+N2DJNrZXsXtWKhFJOa1UdQ68pEJDuw2oDtyLTbu+wQWJqvJ
+         ++i1ue1XoDSxWUvDyBIiYzS/frVNffrU9P9onZSrRwyVo6A3rY3Urmmj5kvDmf/X8W6i
+         ektBJtxE8Zl+w6+R9Xsixdh5tvaKkvwfpmLOiEQHgVvxBsQnb/4j+iaQtMAQeP21m+HQ
+         dZOmFs+ZhrWX0Rep3xscs+Worxc536G8Qt4fkbY/VeIxwx/6MmOr1WFKjnVDiHZnaj+P
+         ibWw/LjhdjXtk1z5Uq5qcaG+NMejXFHerT5KsK26vYHQ8H1gRZZ7f7tnR4YQw6y4QfJ9
+         N9qg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1789024428; x=1789629228;
-        h=content-transfer-encoding:content-type:in-reply-to:organization
-         :autocrypt:content-language:references:cc:to:subject:reply-to:from
-         :user-agent:mime-version:date:message-id:x-gm-gg:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=S9vc3vyc7s51kw3mexUDG6KTzAQ8qZ7SaFb2GyTr25M=;
-        b=ZfF+7D/Z2XfOanmz370oy3wNIIjUA0FbhTDyIfzR4tXQJ9ItkZSOkiajZJm3oFl2+u
-         +Ua5Zq+WLf7nnWE6hJTBTmRv++jKDnLQZw9xVSHP1i2cGyyfzxKSpyvtp0sAPeWcVD3D
-         wCsL6tZ6E7GqjN0U0cKQ8WFBstDeDJtvAU4JQnNFcvXsZ1qyd2Qs1/T8wmqByIiW/f/S
-         O+VdsQdd+0LUD1bMrRPv8K8JVIe0a6/WTi+eCoqSHNCpI6ffO0ZnQbvzew+PgbdLiicN
-         FXIjW8qMC0fpLC4LiD0OLtP7N3Pp1mdQUE2Y+AnT6/RTwYXAUKVccAjR9KodRHjdhjrr
-         kIpA==
-X-Forwarded-Encrypted: i=1; AKwUvBxYl803/ovGGE/KQxO88hwRRmNrquk1aAMbjPlOBwXqC8lvR/xNDHomoX2maCAuX+tYZVWb5unrn64=@vger.kernel.org
-X-Gm-Message-State: AFuF++mhxxAXTazviidbN5o0t5WSN3go3lTxdV5f09Mfl2t1Q67GaUjD
-	LryE3AnjiJVwMaVupRyN9BXgJSHq6SRxg24IxN4kBje3hgGE/+tVgy7eq7XmZ8tKOgY=
-X-Gm-Gg: AYBFou2rVIKzJNOlZPd5vpRJcJpvxK4Leb6AFeJNZzO7w+nS2k0KtY5EIMzk/pPdFZ3
-	9j1VL4Sq6h7rBWaWB9cXzL269XPecOJQAdZnSRw1AkRTmRY7JZ0vWITDaaA2dEaSjM3XW9y5E8R
-	215QrZ548pwJzluSEGK41QnvEoZO0NzeoNm/Hg9EpATA5Rc5r5meswkc8rT2RQA7xF20DGCdNNU
-	PQbHE6Q6983fshabEqQ6hmpgnUwIoOfgB29XthF7hqmq6Kph/IEkWmPv17qP5i9JlCj7V3BSBTN
-	wN3ZL53RKn/0Mbq+ozU+IGaCfWEARiweiiMduO7AOas8LTwOuvE9OH7w9I20G2MbYchNJqnpBfK
-	GjwCgislTKyVG8j8cjnpasWCqySXlp7a8Uq7ZA3VO2/qJUv70FrDS83+7kCDJKMRZ28NZghoQRN
-	0Fa3N8T9R1A4VMXgGRPuoKfL8SGqv2522Pr2SxumUy6XEW1cTWYsZgmXXGGmlFCPI5UWogs6bzV
-	IrFQ4XypV2+o99XTQ42DTnfjMHn9XaDCUmTbCHxHtOd3dmJA/ZzUVkEioTFbgWCNQ==
-X-Received: by 2002:a05:600c:37c8:b0:49c:cee2:a508 with SMTP id 5b1f17b1804b1-49cf826c4e2mr379662315e9.16.1789024427828;
-        Thu, 10 Sep 2026 00:13:47 -0700 (PDT)
-Received: from ?IPV6:2a01:e0a:106d:1080:3caf:d840:c911:29a9? ([2a01:e0a:106d:1080:3caf:d840:c911:29a9])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4858d312ca0sm51612002f8f.4.2026.09.10.00.13.46
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 10 Sep 2026 00:13:47 -0700 (PDT)
-Message-ID: <d2e31f11-24ab-4d2e-8f49-d625e1aec930@linaro.org>
-Date: Thu, 10 Sep 2026 09:13:44 +0200
+        d=1e100.net; s=20251104; t=1789035478; x=1789640278;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=5o0LQq2H5NyuqhWcIAsOhclTasLhXE6zFp16BztH0tM=;
+        b=drPTx75lHSsJP/VoPjtTQX+AQnaLPEs3yIRBlivfAdwajU+PuJIUJseeA4qJdstbS/
+         gPUnyRhVU54UjoNg6ygs/S99MpJh+jGrV6QwiCBYnyGenc/JKUap/BJ2YfY+Dk+yzehy
+         h5p5gbnt+BK+oL5e+kWY2ezgUJyYZQsr4B8g9MXG2WJEq/Uj+9xsabFcBi9eetn2iGUM
+         Q9zf+xZvLC2TBsQ4ufN4PhQDWXqB96Ic2m3m765MHXolWRBBdULU0WaBVougvWt+i69A
+         +64KIvZ+tpyDsvblNss/ooEhOm3r1Ecvr5gQyfaOjBoJ/6CN9LkQ0VUkQhdYb3lGk8En
+         T1Tg==
+X-Forwarded-Encrypted: i=1; AKwUvBxWqKi/QTMaqp+HsZJkYWwxvNQYf7TtoL7MTT6chDlq9oa12RzVGTOztQBMJxvfnJMe6twg60KXuXY=@vger.kernel.org
+X-Gm-Message-State: AFuF++kyAlTiiuS6hUT12ImjsSJEQqnFxT5Q/o7C6avnde4X9cDtjJeO
+	Nq0oN0rOnVvJe5lEp8S2akpvcwBK02IregCL+kORYHqlWxm5F469IW1aPxbri17MKu0JHy/3ijF
+	72qSobtQuJDl69btG7rkLypdDkwRQjDNYFQARqLUDmMufl0m1DtDOVmiTQhs2AQZ8gwkJ2DaT0i
+	DMGGyLEJ3yaIuKPY6amZ3upnPTRDacyYXh3X2nPg==
+X-Gm-Gg: AYBFou1AZzKhhZ1+GDBTKA6HlX9pVIVGEPcjWvJnYP8o+rZB4sg/kVG9wuL+tZYi5sn
+	pSWa6tC4RH8uyEW98bYGv1h2UseZyGfSIq7vjC+A+Q72YFjBC2491Kotw5MurbU08vVqILl9RTX
+	l5kFPulUnssfZwyBIRIFH7VY/sBZvAjs/IlrFTtNfChWNFk83vA6Qrzs6C4g==
+X-Received: by 2002:a17:90b:558c:b0:38e:57a3:f218 with SMTP id 98e67ed59e1d1-39d70ae1a5emr10579641a91.13.1789035478534;
+        Thu, 10 Sep 2026 03:17:58 -0700 (PDT)
+X-Received: by 2002:a17:90b:558c:b0:38e:57a3:f218 with SMTP id
+ 98e67ed59e1d1-39d70ae1a5emr10579584a91.13.1789035478102; Thu, 10 Sep 2026
+ 03:17:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Neil Armstrong <neil.armstrong@linaro.org>
-Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
-Subject: Re: [PATCH v2 4/4] clk: meson: t7: don't mark sys_ampipe_nand as
- critical
-To: Lucas Tanure <tanure@linux.com>, Ulf Hansson <ulfh@kernel.org>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Jerome Brunet <jbrunet@baylibre.com>,
- Kevin Hilman <khilman@baylibre.com>,
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
- Stephen Boyd <sboyd@kernel.org>
-Cc: Brian Masney <bmasney+clk@redhat.com>, Chuan Liu <chuan.liu@amlogic.com>,
- Jian Hu <jian.hu@amlogic.com>, Ronald Claveau <linux-kernel-dev@aliel.fr>,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
- linux-clk@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20260905153234.133217-1-tanure@linux.com>
- <20260905153234.133217-5-tanure@linux.com>
-Content-Language: en-US, fr
-Autocrypt: addr=neil.armstrong@linaro.org; keydata=
- xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
- GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
- BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
- qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
- 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
- AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
- OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
- Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
- YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
- GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
- UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
- GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
- yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
- QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
- SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
- 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
- Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
- oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
- M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
- 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
- KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
- 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
- QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
-Organization: Linaro
-In-Reply-To: <20260905153234.133217-5-tanure@linux.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20260824-enable-ice-clock-scaling-v12-0-09271f583dc6@oss.qualcomm.com>
+ <20260824-enable-ice-clock-scaling-v12-3-09271f583dc6@oss.qualcomm.com>
+In-Reply-To: <20260824-enable-ice-clock-scaling-v12-3-09271f583dc6@oss.qualcomm.com>
+From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Date: Thu, 10 Sep 2026 12:17:46 +0200
+X-Gm-Features: AcwNN1VvsxYSlSneh1UTJxLDFcgkCYVDC7Rwi96BfcNazOVn_vX8zy2Sk9dMolo
+Message-ID: <CAPx+jO_Ltc6Q+VdUgOs81azTiM5Vx12GH1z+CXt6NW=M601THQ@mail.gmail.com>
+Subject: Re: [PATCH v12 3/6] mmc: sdhci-msm: Set ICE clk to TURBO at sdhci ICE init
+To: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
+Cc: Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+        "Martin K. Petersen" <martin.petersen@oracle.com>,
+        Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
+        Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Neeraj Soni <neeraj.soni@oss.qualcomm.com>,
+        Harshal Dev <harshal.dev@oss.qualcomm.com>,
+        Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>,
+        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org,
+        Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTEwMDExOSBTYWx0ZWRfX8wEtzsDLGkKB
+ VQBoUP8TlEsKDQg8hT5jbFL5o0me5+rQxSBw8ppbBhQOvo3pgTy5Eo4Epz8ZvcS1OgyY6a1VLwz
+ xuYFx7QRc6HbSZWyJyMOcq0eYRyikxA=
+X-Authority-Analysis: v=2.4 cv=UJNIjyfy c=1 sm=1 tr=0 ts=6aa283d7 cx=c_pps
+ a=UNFcQwm+pnOIJct1K4W+Mw==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
+ a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
+ a=Um2Pa8k9VHT-vaBCBUpS:22 a=EUspDBNiAAAA:8 a=QyXUC8HyAAAA:8
+ a=i-sMpDq2_rzAXM5hadQA:9 a=QEXdDO2ut3YA:10 a=uKXjsCUrEbL0IQVhDsJ9:22
+X-Proofpoint-GUID: 2yW8-ykCbzJtIPMFP5JCq_mvDeeCsIn-
+X-Proofpoint-ORIG-GUID: 2yW8-ykCbzJtIPMFP5JCq_mvDeeCsIn-
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTEwMDExOSBTYWx0ZWRfX0DTzQq71BhXo
+ D5NHy5Wd4tjTWQVjwuiC4g1ZdR4SAj2g0MjMvv0lhP7EfWHiafVt4JM6up+lurMEXLbi1zXDfT9
+ xxKkIpLdpfMqXPGBWSfQaPeQFYhc4IxYZ+Y6YRlB6o5mz+yQvRXemUYmgTZKYuPuTgoU8WkS1Cu
+ b8gz2QoA73QZyvojO30n92pVtLw+bIzHWfBVwKSHvut1zFGiqd0uKovlpLfIAGURIMBpIdjwTuM
+ UVwHG/oT2LnSpvubR3pOI0Ws4HiXd8oMFmUoxh3GS4dmz9E6LCyv2ohjRt4N1hBz941qhKRDwJe
+ rcFhkH7dIlbXoQF8dzBCbnIrCKLwEv1nopTHTH6hCaiVZrDWkvFGIpobCQK2//fefmNDyHsl54p
+ pUFGb11oNrm5XOV0aTz9tDsJSBAJzsYPRYwAe3RhoB6iL2+rhUY7Gh7a5f2cZGsv2CGmwMuuEfP
+ jooYJs8kwINR7p3vd6A==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-09-10_03,2026-09-09_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ phishscore=0 bulkscore=0 impostorscore=0 clxscore=1015 lowpriorityscore=0
+ spamscore=0 priorityscore=1501 malwarescore=0 adultscore=0 suspectscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609100119
 
-On 9/5/26 17:32, Lucas Tanure wrote:
-> sys_ampipe_nand clocks the pipeline stage inserted in the bus path
-> between the SD/eMMC controllers and the NIC_MATRIX fabric. It does have
-> identifiable consumers - the three MMC controllers - so marking it
-> critical was the wrong tool: the clock should be referenced from the
-> consumer nodes and claimed by the mmc driver instead.
-> 
-> Drop the CLK_IS_CRITICAL flag and update the comment accordingly.
-> sys_am2axi0..2 remain critical as they clock the AXI DMA bus itself and
-> have no single identifiable consumer.
-> 
-> Assisted-by: Claude:claude-fable-5
-> Signed-off-by: Lucas Tanure <tanure@linux.com>
+On Sun, Aug 23, 2026 at 9:48=E2=80=AFPM Abhinaba Rakshit
+<abhinaba.rakshit@oss.qualcomm.com> wrote:
+>
+> MMC controller lacks a clock scaling mechanism, unlike the UFS
+> controller. By default, the MMC controller is set to TURBO mode
+> during probe, but the ICE clock remains at XO frequency,
+> leading to read/write performance degradation on eMMC.
+>
+> To address this, set the ICE clock to TURBO during sdhci_msm_ice_init
+> to align it with the controller clock. This ensures consistent
+> performance and avoids mismatches between the controller
+> and ICE clock frequencies.
+>
+> For platforms where ICE is represented as a separate device,
+> use the OPP framework to vote for TURBO mode, maintaining
+> proper voltage and power domain constraints.
+>
+> Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
+
+This looks good to me!
+
+Although I have a question - should we never drop the vote? Like at
+suspend and runtime suspend, at least?
+
+Kind regards
+Uffe
+
 > ---
-> This patch depends on the MMC controllers actually referencing the clock:
-> the dt-bindings, mmc driver and t7 DTS changes adding the "pipeline"
-> clock must land before this patch, otherwise the boot hangs and memory
-> corruption this clock caused are reintroduced.
-> 
->   drivers/clk/meson/t7-peripherals.c | 10 +++++-----
->   1 file changed, 5 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/clk/meson/t7-peripherals.c b/drivers/clk/meson/t7-peripherals.c
-> index 55d09e78593b..2f429ea86796 100644
-> --- a/drivers/clk/meson/t7-peripherals.c
-> +++ b/drivers/clk/meson/t7-peripherals.c
-> @@ -945,13 +945,13 @@ static T7_SYS_PCLK(sys_aucpu,		SYS_CLK_EN0_REG0, 14,	0);
->   static T7_SYS_PCLK(sys_cec,		SYS_CLK_EN0_REG0, 16,	0);
->   static T7_SYS_PCLK(sys_gdc,		SYS_CLK_EN0_REG0, 17,	0);
->   static T7_SYS_PCLK(sys_deswarp,		SYS_CLK_EN0_REG0, 18,	0);
-> +static T7_SYS_PCLK(sys_ampipe_nand,	SYS_CLK_EN0_REG0, 19,	0);
-> +static T7_SYS_PCLK(sys_ampipe_eth,	SYS_CLK_EN0_REG0, 20,	0);
->   /*
-> - * NOTE: sys_ampipe_nand and sys_am2axi0..2 provide the clock to the AXI bus
-> - * used for DMA between the peripherals and the DRAM. After the clocks are
-> - * disabled, a device that starts a transfer cannot complete it.
-> + * NOTE: sys_am2axi0..2 provide the clock to the AXI bus used for DMA between
-> + * the peripherals and the DRAM. After the clocks are disabled, a device that
-> + * starts a transfer cannot complete it.
->    */
-> -static T7_SYS_PCLK(sys_ampipe_nand,	SYS_CLK_EN0_REG0, 19,	CLK_IS_CRITICAL);
-> -static T7_SYS_PCLK(sys_ampipe_eth,	SYS_CLK_EN0_REG0, 20,	0);
->   static T7_SYS_PCLK(sys_am2axi0,		SYS_CLK_EN0_REG0, 21,	CLK_IS_CRITICAL);
->   static T7_SYS_PCLK(sys_am2axi1,		SYS_CLK_EN0_REG0, 22,	CLK_IS_CRITICAL);
->   static T7_SYS_PCLK(sys_am2axi2,		SYS_CLK_EN0_REG0, 23,	CLK_IS_CRITICAL);
-
-Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
-
-Thanks,
-Neil
+>  drivers/mmc/host/sdhci-msm.c | 22 ++++++++++++++++++++++
+>  1 file changed, 22 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 0882ce74e0c9bdddd98341a67b97bcef74078e0c..1b4c276dce34d76dcbe75117d=
+e37e09ea2002633 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1902,6 +1902,16 @@ static void sdhci_msm_set_clock(struct sdhci_host =
+*host, unsigned int clock)
+>
+>  static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops; /* forward d=
+ecl */
+>
+> +static int sdhci_msm_ice_scale_clk(struct sdhci_msm_host *msm_host,
+> +                                  unsigned long target_freq,
+> +                                  bool round_ceil)
+> +{
+> +       if (msm_host->mmc->caps2 & MMC_CAP2_CRYPTO)
+> +               return qcom_ice_scale_clk(msm_host->ice, target_freq, rou=
+nd_ceil);
+> +
+> +       return 0;
+> +}
+> +
+>  static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>                               struct cqhci_host *cq_host)
+>  {
+> @@ -1959,6 +1969,11 @@ static int sdhci_msm_ice_init(struct sdhci_msm_hos=
+t *msm_host,
+>         }
+>
+>         mmc->caps2 |=3D MMC_CAP2_CRYPTO;
+> +
+> +       err =3D sdhci_msm_ice_scale_clk(msm_host, ULONG_MAX, false);
+> +       if (err && err !=3D -EOPNOTSUPP)
+> +               dev_warn(dev, "Unable to boost ICE clock to TURBO\n");
+> +
+>         return 0;
+>  }
+>
+> @@ -2149,6 +2164,13 @@ sdhci_msm_ice_suspend(struct sdhci_msm_host *msm_h=
+ost)
+>  {
+>         return 0;
+>  }
+> +
+> +static inline int
+> +sdhci_msm_ice_scale_clk(struct sdhci_msm_host *msm_host, unsigned long t=
+arget_freq,
+> +                       bool round_ceil)
+> +{
+> +       return 0;
+> +}
+>  #endif /* !CONFIG_MMC_CRYPTO */
+>
+>  /***********************************************************************=
+******\
+>
+> --
+> 2.34.1
+>
