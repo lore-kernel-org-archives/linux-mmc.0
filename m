@@ -1,157 +1,196 @@
-Received: from SHSQR01.spreadtrum.com (unknown [222.66.158.135])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7A6C36196C;
-	Thu, 10 Sep 2026 07:11:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=222.66.158.135
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D096356755
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 07:13:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789024294; cv=none; b=ed0R51u5iV3yGoGMavkAr4Wo4IVKTaKhAcQ6pdTkdZcacMmYNtUo3cjbVykt7zF/8bJMJn7eizBPnnCrk4XvpdhqBnXv5ijm4QGp45mBxOngiloRMps7Vd+EraFXwhQ04KH6hb11fvlaReGCFjFfa8gk1tkEzwdAK6lcXelwDbQ=
+	t=1789024397; cv=none; b=nOIv9QdPZLqnoTLJm+IAr/fQ6XtbJVzH1sxl+LR+aa2DbOBx8+bmuDOql8eYkS+hKJ+MQaCcNYG4MRDYW9Mz0NrR5EGwnEcvuiFl6q1gfVU+tiU/LNLYY5V6IHhVrgHl2qTQAN6BD4SLfH3yAXpaS+yh1T4GtYxXJ6F5JJEXoE8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789024294; c=relaxed/simple;
-	bh=OOred7fU+56RxD82Zb46MrrNEw+p+8Xn2R/7L276OXE=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=dAgdkv0k6Z3disjK0Ao1z2BCwaWWrDmy3e1L9rT4SaJXRKXdNXVI2poGJNp+nWexPd1+AWHsuylVsGAG1rfaky5I1+/VzRJ0I7RbVPDGnu44oOonOFApf2wh8UkiAzG7wK4Q32fXWMU9Twx0oQIwtafFup1fphAGnPERs0OJuO0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=unisoc.com; spf=pass smtp.mailfrom=unisoc.com; dkim=pass (2048-bit key) header.d=unisoc.com header.i=@unisoc.com header.b=zcqi/bby; arc=none smtp.client-ip=222.66.158.135
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=unisoc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=unisoc.com
+	s=arc-20240116; t=1789024397; c=relaxed/simple;
+	bh=gpk4QCTkMMoVEQ2hU/PY3Bgu//ErkeN2hdFFYL0E0/g=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=ECaVFFcbau+OWNuKR6HbXrYusQocoxROACuZh5dDud7aqu3Bdf2O/9wsO/8Rxjm8eIWoqF4Ftjzl28lczlfkz5cBC/twiE1+DrQMc60AhqxHILnwBoZ4YNfMMQd8FGWaJY7T1frq92KDCmGPpiQsO3JUCRr+PjK22Hq674/Ke1Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xNNGKL/O; arc=none smtp.client-ip=209.85.128.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=unisoc.com header.i=@unisoc.com header.b="zcqi/bby"
-Received: from dlp.unisoc.com ([10.29.3.86])
-	by SHSQR01.spreadtrum.com with ESMTPS id 68A7Afq1050902
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO);
-	Thu, 10 Sep 2026 15:10:41 +0800 (+08)
-	(envelope-from xiaojie.li2@unisoc.com)
-Received: from SHDLP.spreadtrum.com (unknown [10.29.3.67])
-	by dlp.unisoc.com (SkyGuard) with ESMTPS id 4hgTKj2jjLz2MBNdN;
-	Thu, 10 Sep 2026 15:08:25 +0800 (CST)
-Received: from zeshmbx09.spreadtrum.com (10.29.3.107) by
- zeshmbx14.spreadtrum.com (10.29.3.67) with Microsoft SMTP Server (TLS) id
- 15.0.1497.48; Thu, 10 Sep 2026 15:10:40 +0800
-Received: from zeshmbx09.spreadtrum.com ([fe80::7981:d4bc:3eee:c0be]) by
- zeshmbx09.spreadtrum.com ([fe80::7981:d4bc:3eee:c0be%17]) with mapi id
- 15.00.1497.048; Thu, 10 Sep 2026 15:10:40 +0800
-From: =?gb2312?B?wO7P/r3gIChYaWFvamllIExpLzEzMjMzKQ==?=
-	<xiaojie.li2@unisoc.com>
-To: Ulf Hansson <ulfh@kernel.org>
-CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        =?gb2312?B?s8LOxLOsIChXZW5jaGFvIENoZW4p?= <Wenchao.Chen@unisoc.com>,
-        =?gb2312?B?1cXI58iqIChSYWluIFpoYW5nKQ==?= <Rain.Zhang@unisoc.com>,
-        =?gb2312?B?zMbUwsHWIChZdWVsaW4gVGFuZyk=?= <yuelin.tang@unisoc.com>,
-        "cixi.geng@linux.dev" <cixi.geng@linux.dev>
-Subject: [PATCH] mmc: core: Modify the CMD1 transmission interval
-Thread-Topic: [PATCH] mmc: core: Modify the CMD1 transmission interval
-Thread-Index: AQHdNgR8DmoNOL7mLUCpmwUb62wN6bbHdPag
-Date: Thu, 10 Sep 2026 07:10:39 +0000
-Message-ID: <e2dba61ded204b86bc516cfe411e3ae9@zeshmbx09.spreadtrum.com>
-References: <20260827091436.1339716-1-xiaojie.li2@unisoc.com>
-In-Reply-To: <20260827091436.1339716-1-xiaojie.li2@unisoc.com>
-Accept-Language: zh-CN, en-US
-Content-Language: zh-CN
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-exchange-transport-fromentityheader: Hosted
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xNNGKL/O"
+Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-4995b0343c1so91901775e9.3
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 00:13:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1789024392; x=1789629192; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:organization
+         :autocrypt:content-language:references:cc:to:subject:reply-to:from
+         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=udAblsmxBxBfrNPUP96gC45YbWeS/a2NvUFAIRjIBU8=;
+        b=xNNGKL/OgvZfEgwpuu83dNNxocsmP92+qtaHINbzckwCulhu9S1M9qfYxYHPdec4RH
+         ZYOAXEX42LKanydu6VbxIFT4FcjEOXVGs/B7CEzCY13293U+AIe9kYYm1MWfQK9ihfr1
+         07jHqlcGgOWKXmKcLxTpaWOSVq9fgtkBiLfBXQtzv0eRTBbhdUyfz1dNB149+0bqmofn
+         08d4QpRrvBAsg2dvhG6J4W+CnhdNVtkSbSS5V7r0N1yj5qs8dIZueMA3/XsRX8FW1Th+
+         2T2xahvLdBndziMdeyrd+4jUU/4YfgKmnTCAcZbuyhEBTYV4qF7PhQKJZNjczEvryGEc
+         mqKw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1789024392; x=1789629192;
+        h=content-transfer-encoding:content-type:in-reply-to:organization
+         :autocrypt:content-language:references:cc:to:subject:reply-to:from
+         :user-agent:mime-version:date:message-id:x-gm-gg:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=udAblsmxBxBfrNPUP96gC45YbWeS/a2NvUFAIRjIBU8=;
+        b=bUVVmaEGGGTVMx50jk25sCjc7BruIBRWA+nJa8HJEVjz5y6QGEto8Aktu+ya/FQaJa
+         x3JKl5JtPOeY7Z2F/XmS+7gFjr9GzSgZHJjrHDdPiSOHI4/4WeRwKEb0/IJCarjqnA/3
+         PInmjYj3ZuRmKunPaa9iUYCOfNGmRcjHwE0Ul1XqLznPi4289gPvnV8mkfVrnrOgcpjT
+         G4FdnZnX1VryDN1DRnEyo3NASXZICfrbsqgZesu1DGPUV6/7cWul+hYJnvjX4nBfzs0R
+         1afikIqnvX7c+8VpN0V85VWdUZDn/e6hYtZogrRwpaoZCNJfbezXuqsn/Cdt24Yp0xrQ
+         q4Ww==
+X-Forwarded-Encrypted: i=1; AKwUvBx16oH2HYs0dXsnZAjHUaDGqZjo82umWCrHP7z1yHRxhS2RFcVQAtXJnFSBazcNndzNTeTFQzl2KSM=@vger.kernel.org
+X-Gm-Message-State: AFuF++nUtXJ9OWyUY3CWCJTizMBoxySk9rxydgN4Z/XYrBu0OIDVkbUD
+	ZgJ03HDbswrxu+Wh1nRrw4Gg1PIr2M4HbghmyiaUJhF30XyhA5hOzJADDg+yL6EHU0U=
+X-Gm-Gg: AYBFou3FcS57Hifs4M9sAnHUa1iAievBgJVXcjnYlqSc8fXfon+3kcghE/9rGLjLDsJ
+	5zdraIlLAlY32S/ylJtlbbAeuiucUuVG4ZiXka0h0BHkl5ZkH2OTWVXv/wYjJmYgjFC2evtQIDq
+	qKKd4DO29PdSMQVulq+KmLrSAkzt9FM124wOQWpzuZ2q5AX5i1ctL5rNB7DKp8vgvF7D/5UW9S6
+	A/pAGvTJZpH+7aiHCDyDnK8Dw8fVGxsJMPOg4XbpCZVajxx5JVMKYvaM+psxGOgDP0/WtJzQMKX
+	VdSe3arjKRioxUWZOayjwHwaYIjj09LjJlwE5nBsxGsdZvCUDwuuJC/W1n9ngmoQzHsWfQih98z
+	JffrOz4doAAUalh8IEASu5D7pHmAwoghb/4vHEraRsJW87oHSNrmYu8Jliz0/OX5bcLH3MSCwwW
+	uwzdX9SeeHgoqeXHaEeenvxHP5ftJAggWE6d3evamihDHe2jIIQBgPEIHPsAC6qfH3bOs9rluIc
+	1VmRltiqfu4ordQnlyO0XQup/Z0bZu9iY+T3gb4W9QRnzitvUV8xA==
+X-Received: by 2002:a05:600c:4e4c:b0:499:621a:2ec2 with SMTP id 5b1f17b1804b1-49cf8206e4dmr412212555e9.3.1789024392371;
+        Thu, 10 Sep 2026 00:13:12 -0700 (PDT)
+Received: from ?IPV6:2a01:e0a:106d:1080:3caf:d840:c911:29a9? ([2a01:e0a:106d:1080:3caf:d840:c911:29a9])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49d26be64a5sm49914055e9.6.2026.09.10.00.13.08
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 10 Sep 2026 00:13:09 -0700 (PDT)
+Message-ID: <cc06ba9b-c866-4c43-a7d4-e25188b84f22@linaro.org>
+Date: Thu, 10 Sep 2026 09:13:06 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MAIL:SHSQR01.spreadtrum.com 68A7Afq1050902
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=unisoc.com;
-	s=default; t=1789024263;
-	bh=OOred7fU+56RxD82Zb46MrrNEw+p+8Xn2R/7L276OXE=;
-	h=From:To:CC:Subject:Date:References:In-Reply-To;
-	b=zcqi/bbyEgSrJ97bh1sojvJe3GAVaJfcJo06P7pydpR3d9AJg2InnWVXgZMCbfE6b
-	 pHb3ZPyZPD9jjkoUAA4TC6Bm/BsLRsMr8WQlgIQcQlk0e2Fz6D8XIUfGzv6xt9TA3K
-	 9s/yWVtV/AS+2vV6YkdhixFVbjkwXHcIRYOBrScD2ENgl5K9j29KA/jqR7CnuDcGC2
-	 +6WtEtcxROL+VoXmT561jH0/WGLMpG5CVV+tMBlxxdsIbSh2h1Namo9D724KFc//O4
-	 mWy5ssehgR1kg6adxt2CnhlZ5k0RB8hWyuo4falzAphoswgE+OA4fhNwYmbEuCMA0U
-	 DkK5YxdobLrJA==
+User-Agent: Mozilla Thunderbird
+From: Neil Armstrong <neil.armstrong@linaro.org>
+Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
+Subject: Re: [PATCH v2 2/4] mmc: meson-gx: enable the bus pipeline clock on T7
+To: Lucas Tanure <tanure@linux.com>, Ulf Hansson <ulfh@kernel.org>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Jerome Brunet <jbrunet@baylibre.com>,
+ Kevin Hilman <khilman@baylibre.com>,
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+ Stephen Boyd <sboyd@kernel.org>
+Cc: Brian Masney <bmasney+clk@redhat.com>, Chuan Liu <chuan.liu@amlogic.com>,
+ Jian Hu <jian.hu@amlogic.com>, Ronald Claveau <linux-kernel-dev@aliel.fr>,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
+ linux-clk@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20260905153234.133217-1-tanure@linux.com>
+ <20260905153234.133217-3-tanure@linux.com>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <20260905153234.133217-3-tanure@linux.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-SGkgVWxmLA0KDQoJSnVzdCBmb2xsb3dpbmcgdXAgb24gdGhlIHBhdGNoIGJlbG93Lg0KDQoJQ291
-bGQgeW91IHBsZWFzZSBsZXQgbWUga25vdyBpZiB0aGVyZSBhcmUgYW55IGNvbmNlcm5zIG9yIGlm
-IGZ1cnRoZXIgY2hhbmdlcyBhcmUgbmVlZGVkPw0KDQpCZXN0IHJlZ2FyZHMsDQpYaWFvamllLkxp
-DQoNCi0tLS0t08q8/tStvP4tLS0tLQ0Kt6K8/sjLOiDA7s/+veAgKFhpYW9qaWUgTGkvMTMyMzMp
-IDx4aWFvamllLmxpMkB1bmlzb2MuY29tPiANCreiy83KsbzkOiAyMDI2xOo41MIyN8jVIDE3OjE1
-DQrK1bz+yMs6IFVsZiBIYW5zc29uIDx1bGZoQGtlcm5lbC5vcmc+DQqzrcvNOiBsaW51eC1tbWNA
-dmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOyDA7s/+veAgKFhp
-YW9qaWUgTGkvMTMyMzMpIDx4aWFvamllLmxpMkB1bmlzb2MuY29tPjsgs8LOxLOsIChXZW5jaGFv
-IENoZW4pIDxXZW5jaGFvLkNoZW5AdW5pc29jLmNvbT47INXFyOfIqiAoUmFpbiBaaGFuZykgPFJh
-aW4uWmhhbmdAdW5pc29jLmNvbT47IMzG1MLB1iAoWXVlbGluIFRhbmcpIDx5dWVsaW4udGFuZ0B1
-bmlzb2MuY29tPjsgY2l4aS5nZW5nQGxpbnV4LmRldg0K1vfM4jogW1BBVENIXSBtbWM6IGNvcmU6
-IE1vZGlmeSB0aGUgQ01EMSB0cmFuc21pc3Npb24gaW50ZXJ2YWwNCg0KVGhlIGN1cnJlbnQgY29k
-ZSdzIG1heGltdW0gdWRlbGF5IHZhbHVlIGlzIHNldCB0byA2NG1zLiBTaW5jZSBpdCB1c2VzIHVz
-bGVlcF9yYW5nZSh1ZGVsYXksIHVkZWxheSoyKSwgdGhpcyByZXN1bHRzIGluIGEgbWF4aW11bSB3
-YWl0IHRpbWUgb2YgMTI4bXMgYmV0d2VlbiB0d28gY29uc2VjdXRpdmUgQ01EMSBjb21tYW5kcy4g
-Rm9yIGxvd2VyLXBlcmZvcm1hbmNlIGVNTUMgY2hpcHMsIGxvY2FsIHRlc3Rpbmcgc2hvd3MgdGhh
-dCBjb21wYXJlZCB0byB0aGUgb2xkIGNvZGUgd2hpY2ggdXNlZCBtbWNfZGVsYXkoMTApLCB0aGUg
-dG90YWwgdGltZSByZXF1aXJlZCB0byB3YWl0IGZvciB0aGUgYnVzeSBiaXQgaW4gdGhlIENNRDEg
-cmVzcG9uc2UgdG8gY2hhbmdlIGhhcyBpbmNyZWFzZWQgYnkgYXBwcm94aW1hdGVseSAzMDBtcywg
-bmVnYXRpdmVseSBpbXBhY3RpbmcgdGhlIG92ZXJhbGwgZU1NQyBpbml0aWFsaXphdGlvbiB0aW1l
-Lg0KDQpBbHRob3VnaCB0aGUgY3VycmVudCBjb2RlIHNlbmRzIHRoZSBDTUQxIGNvbW1hbmQgZmV3
-ZXIgdGltZXMgdGhhbiB0aGUgb2xkIHZlcnNpb24sIHRoZSB0b3RhbCB3YWl0aW5nIHRpbWUgaXMg
-c2lnbmlmaWNhbnRseSBsb25nZXIuDQpUbyBhZGRyZXNzIHRoaXMsIGl0J3MgcHJvcG9zZWQgdG8g
-bW9kaWZ5IHRoZSBDTUQxIHNlbmRpbmcgaW50ZXJ2YWwgdG8gZm9sbG93IGEgcGF0dGVybiBsaWtl
-IDRtcywgNm1zLCA4bXMsIDEwbXMsIDEwbXMsIGV0Yy4sIGVmZmVjdGl2ZWx5IGNhcHBpbmcgdGhl
-IGxvbmdlc3Qgc2luZ2xlIHdhaXQgYXQgMTBtcy4gTG9jYWwgdGVzdGluZyBjb25maXJtcyB0aGF0
-IHRoaXMgYXBwcm9hY2ggY2FuIGJyaW5nIHRoZSB0b3RhbCB0aW1lIHdhaXRpbmcgZm9yIHRoZSBi
-dXN5IHN0YXRlIGNoYW5nZSB2ZXJ5IGNsb3NlIHRvIHRoZSBwZXJmb3JtYW5jZSBsZXZlbCBvZiB0
-aGUgb2xkIGNvZGUuDQoNClRoZSBlTU1DIGNoaXAgdXNlZCBmb3IgdGVzdGluZzogbWFuZmlkPSAw
-eDAwMDA5YiwgbmFtZT0gWTBTMTI4LCBtZHQ9IDIwMjItMTAgVGhlIGVNTUMgcGFydCBudW1iZXIg
-aXM6IFlNRUM4QjBURTJBMkMzDQoNClNpZ25lZC1vZmYtYnk6IFhpYW9qaWUgTGkgPHhpYW9qaWUu
-bGkyQHVuaXNvYy5jb20+DQotLS0NCiBkcml2ZXJzL21tYy9jb3JlL21tY19vcHMuYyB8IDg1ICsr
-KysrKysrKysrKysrKystLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQogMSBmaWxlIGNoYW5nZWQsIDM2
-IGluc2VydGlvbnMoKyksIDQ5IGRlbGV0aW9ucygtKQ0KDQpkaWZmIC0tZ2l0IGEvZHJpdmVycy9t
-bWMvY29yZS9tbWNfb3BzLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tY19vcHMuYyBpbmRleCBhOTUy
-Y2M4MjY1YWYuLjMwNzY2NjZjZjJjYSAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1j
-X29wcy5jDQorKysgYi9kcml2ZXJzL21tYy9jb3JlL21tY19vcHMuYw0KQEAgLTE4OSw2NCArMTg5
-LDUxIEBAIGludCBtbWNfZ29faWRsZShzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QpDQogCXJldHVybiBl
-cnI7DQogfQ0KIA0KLXN0YXRpYyBpbnQgX19tbWNfc2VuZF9vcF9jb25kX2NiKHZvaWQgKmNiX2Rh
-dGEsIGJvb2wgKmJ1c3kpIC17DQotCXN0cnVjdCBtbWNfb3BfY29uZF9idXN5X2RhdGEgKmRhdGEg
-PSBjYl9kYXRhOw0KLQlzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QgPSBkYXRhLT5ob3N0Ow0KLQlzdHJ1
-Y3QgbW1jX2NvbW1hbmQgKmNtZCA9IGRhdGEtPmNtZDsNCi0JdTMyIG9jciA9IGRhdGEtPm9jcjsN
-Ci0JaW50IGVyciA9IDA7DQotDQotCWVyciA9IG1tY193YWl0X2Zvcl9jbWQoaG9zdCwgY21kLCAw
-KTsNCi0JaWYgKGVycikNCi0JCXJldHVybiBlcnI7DQotDQotCWlmIChtbWNfaG9zdF9pc19zcGko
-aG9zdCkpIHsNCi0JCWlmICghKGNtZC0+cmVzcFswXSAmIFIxX1NQSV9JRExFKSkgew0KLQkJCSpi
-dXN5ID0gZmFsc2U7DQotCQkJcmV0dXJuIDA7DQotCQl9DQotCX0gZWxzZSB7DQotCQlpZiAoY21k
-LT5yZXNwWzBdICYgTU1DX0NBUkRfQlVTWSkgew0KLQkJCSpidXN5ID0gZmFsc2U7DQotCQkJcmV0
-dXJuIDA7DQotCQl9DQotCX0NCi0NCi0JKmJ1c3kgPSB0cnVlOw0KLQ0KLQkvKg0KLQkgKiBBY2Nv
-cmRpbmcgdG8gZU1NQyBzcGVjaWZpY2F0aW9uIHY1LjEgc2VjdGlvbiA2LjQuMywgd2UNCi0JICog
-c2hvdWxkIGlzc3VlIENNRDEgcmVwZWF0ZWRseSBpbiB0aGUgaWRsZSBzdGF0ZSB1bnRpbA0KLQkg
-KiB0aGUgZU1NQyBpcyByZWFkeS4gT3RoZXJ3aXNlIHNvbWUgZU1NQyBkZXZpY2VzIHNlZW0gdG8g
-ZW50ZXINCi0JICogdGhlIGluYWN0aXZlIG1vZGUgYWZ0ZXIgbW1jX2luaXRfY2FyZCgpIGlzc3Vl
-ZCBDTUQwIHdoZW4NCi0JICogdGhlIGVNTUMgZGV2aWNlIGlzIGJ1c3kuDQotCSAqLw0KLQlpZiAo
-IW9jciAmJiAhbW1jX2hvc3RfaXNfc3BpKGhvc3QpKQ0KLQkJY21kLT5hcmcgPSBjbWQtPnJlc3Bb
-MF0gfCBCSVQoMzApOw0KLQ0KLQlyZXR1cm4gMDsNCi19DQotDQogaW50IG1tY19zZW5kX29wX2Nv
-bmQoc3RydWN0IG1tY19ob3N0ICpob3N0LCB1MzIgb2NyLCB1MzIgKnJvY3IpICB7DQogCXN0cnVj
-dCBtbWNfY29tbWFuZCBjbWQgPSB7fTsNCisJdW5zaWduZWQgaW50IHVkZWxheSA9IE1NQ19PUF9D
-T05EX1BFUklPRF9VUzsNCisJdW5zaWduZWQgaW50IHVkZWxheV9tYXggPSAxMDAwMDsNCisJdW5z
-aWduZWQgbG9uZyB0aW1lb3V0ID0gamlmZmllcyArIA0KK21zZWNzX3RvX2ppZmZpZXMoTU1DX09Q
-X0NPTkRfVElNRU9VVF9NUykgKyAxOw0KIAlpbnQgZXJyID0gMDsNCi0Jc3RydWN0IG1tY19vcF9j
-b25kX2J1c3lfZGF0YSBjYl9kYXRhID0gew0KLQkJLmhvc3QgPSBob3N0LA0KLQkJLm9jciA9IG9j
-ciwNCi0JCS5jbWQgPSAmY21kDQotCX07DQogDQogCWNtZC5vcGNvZGUgPSBNTUNfU0VORF9PUF9D
-T05EOw0KIAljbWQuYXJnID0gbW1jX2hvc3RfaXNfc3BpKGhvc3QpID8gMCA6IG9jcjsNCiAJY21k
-LmZsYWdzID0gTU1DX1JTUF9TUElfUjEgfCBNTUNfUlNQX1IzIHwgTU1DX0NNRF9CQ1I7DQogDQot
-CWVyciA9IF9fbW1jX3BvbGxfZm9yX2J1c3koaG9zdCwgTU1DX09QX0NPTkRfUEVSSU9EX1VTLA0K
-LQkJCQkgIE1NQ19PUF9DT05EX1RJTUVPVVRfTVMsDQotCQkJCSAgJl9fbW1jX3NlbmRfb3BfY29u
-ZF9jYiwgJmNiX2RhdGEpOw0KLQlpZiAoZXJyKQ0KLQkJcmV0dXJuIGVycjsNCisJd2hpbGUgKCF0
-aW1lX2FmdGVyKGppZmZpZXMsIHRpbWVvdXQpKSB7DQorCQllcnIgPSBtbWNfd2FpdF9mb3JfY21k
-KGhvc3QsICZjbWQsIDApOw0KKwkJaWYgKGVycikNCisJCQlicmVhazsNCisNCisJCWlmIChtbWNf
-aG9zdF9pc19zcGkoaG9zdCkpIHsNCisJCQlpZiAoIShjbWQucmVzcFswXSAmIFIxX1NQSV9JRExF
-KSkNCisJCQkJYnJlYWs7DQorCQl9IGVsc2Ugew0KKwkJCWlmIChjbWQucmVzcFswXSAmIE1NQ19D
-QVJEX0JVU1kpDQorCQkJCWJyZWFrOw0KKwkJfQ0KKw0KKwkJLyoNCisJCSAqIEFjY29yZGluZyB0
-byBlTU1DIHNwZWNpZmljYXRpb24gdjUuMSBzZWN0aW9uIDYuNC4zLCB3ZQ0KKwkJICogc2hvdWxk
-IGlzc3VlIENNRDEgcmVwZWF0ZWRseSBpbiB0aGUgaWRsZSBzdGF0ZSB1bnRpbA0KKwkJICogdGhl
-IGVNTUMgaXMgcmVhZHkuIE90aGVyd2lzZSBzb21lIGVNTUMgZGV2aWNlcyBzZWVtIHRvIGVudGVy
-DQorCQkgKiB0aGUgaW5hY3RpdmUgbW9kZSBhZnRlciBtbWNfaW5pdF9jYXJkKCkgaXNzdWVkIENN
-RDAgd2hlbg0KKwkJICogdGhlIGVNTUMgZGV2aWNlIGlzIGJ1c3kuDQorCQkgKi8NCisJCWlmICgh
-b2NyICYmICFtbWNfaG9zdF9pc19zcGkoaG9zdCkpDQorCQkJY21kLmFyZyA9IGNtZC5yZXNwWzBd
-IHwgQklUKDMwKTsNCisNCisJCXVzbGVlcF9yYW5nZSh1ZGVsYXksIHVkZWxheSArIDEwMDApOw0K
-Kw0KKwkJaWYgKHVkZWxheSA8IHVkZWxheV9tYXgpDQorCQkJdWRlbGF5ICs9IDIwMDA7DQorCQll
-bHNlDQorCQkJdWRlbGF5ID0gdWRlbGF5X21heDsNCisJfQ0KKw0KKwlpZiAodGltZV9hZnRlcihq
-aWZmaWVzLCB0aW1lb3V0KSkNCisJCWVyciA9IC1FVElNRURPVVQ7DQogDQogCWlmIChyb2NyICYm
-ICFtbWNfaG9zdF9pc19zcGkoaG9zdCkpDQogCQkqcm9jciA9IGNtZC5yZXNwWzBdOw0KLS0NCjIu
-MzQuMQ0KDQo=
+On 9/5/26 17:32, Lucas Tanure wrote:
+> On the T7 SoC, the bus path between the SD/eMMC controllers and the
+> NIC_MATRIX fabric goes through a pipeline stage inserted by the hardware
+> design to help timing closure. The stage has its own gate clock and,
+> when that clock is disabled, a controller that starts a DMA transfer can
+> never complete it, hanging the storage devices and, from there, the
+> whole system.
+> 
+> Add a dedicated match data for the amlogic,t7-mmc compatible that makes
+> the driver claim and enable the "pipeline" clock for as long as the
+> device is bound.
+> 
+> The clock is deliberately not optional: the hardware cannot do DMA
+> without it, and failing the probe with a clear error is preferable to
+> booting and hitting an undiagnosable DMA hang later.
+> 
+> Assisted-by: Claude:claude-fable-5
+> Signed-off-by: Lucas Tanure <tanure@linux.com>
+> ---
+>   drivers/mmc/host/meson-gx-mmc.c | 20 ++++++++++++++++++++
+>   1 file changed, 20 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 694bb443d5f3..c0f1e929fc13 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -139,6 +139,7 @@ struct meson_mmc_data {
+>   	unsigned int always_on;
+>   	unsigned int adjust;
+>   	unsigned int irq_sdio_sleep;
+> +	bool has_pipeline_clk;
+>   };
+>   
+>   struct sd_emmc_desc {
+> @@ -1204,6 +1205,15 @@ static int meson_mmc_probe(struct platform_device *pdev)
+>   	if (IS_ERR(core_clk))
+>   		return PTR_ERR(core_clk);
+>   
+> +	if (host->data->has_pipeline_clk) {
+> +		struct clk *pipe_clk;
+> +
+> +		pipe_clk = devm_clk_get_enabled(&pdev->dev, "pipeline");
+> +		if (IS_ERR(pipe_clk))
+> +			return dev_err_probe(&pdev->dev, PTR_ERR(pipe_clk),
+> +					     "missing pipeline clock\n");
+> +	}
+> +
+>   	ret = meson_mmc_clk_init(host);
+>   	if (ret)
+>   		return ret;
+> @@ -1322,12 +1332,22 @@ static const struct meson_mmc_data meson_axg_data = {
+>   	.irq_sdio_sleep	= CLK_V3_IRQ_SDIO_SLEEP,
+>   };
+>   
+> +static const struct meson_mmc_data meson_t7_data = {
+> +	.tx_delay_mask	= CLK_V3_TX_DELAY_MASK,
+> +	.rx_delay_mask	= CLK_V3_RX_DELAY_MASK,
+> +	.always_on	= CLK_V3_ALWAYS_ON,
+> +	.adjust		= SD_EMMC_V3_ADJUST,
+> +	.irq_sdio_sleep	= CLK_V3_IRQ_SDIO_SLEEP,
+> +	.has_pipeline_clk = true,
+> +};
+> +
+>   static const struct of_device_id meson_mmc_of_match[] = {
+>   	{ .compatible = "amlogic,meson-gx-mmc",		.data = &meson_gx_data },
+>   	{ .compatible = "amlogic,meson-gxbb-mmc", 	.data = &meson_gx_data },
+>   	{ .compatible = "amlogic,meson-gxl-mmc",	.data = &meson_gx_data },
+>   	{ .compatible = "amlogic,meson-gxm-mmc",	.data = &meson_gx_data },
+>   	{ .compatible = "amlogic,meson-axg-mmc",	.data = &meson_axg_data },
+> +	{ .compatible = "amlogic,t7-mmc",		.data = &meson_t7_data },
+>   	{}
+>   };
+>   MODULE_DEVICE_TABLE(of, meson_mmc_of_match);
+
+Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
+
+Thanks,
+Neil
