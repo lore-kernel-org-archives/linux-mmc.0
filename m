@@ -1,231 +1,191 @@
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DE19D4BB29F
-	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:05:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACE654AB1A0
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:06:01 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.180.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789056360; cv=pass; b=SXoDGv/xD1qT/WkWeYGF0fDTqJi6qfuhhwwssVXNiF32ajgdsHfSqkxKINIf6T8YOncTAcHqG6am1oOokjaZ6wpF0+tepMKSXfsQoNANqfBeQxUwSNd8yZeTi0aqKHxQWr6cCrVp3RaLJoHixERhwDE98pcjCvxaaMgZhBTrfJU=
+	t=1789056363; cv=pass; b=JtHxuK+5m8tLS/4G+UpAEBvwpwCRm04Yh/W9aGvSaUZJonIM42Rui0DsMCu3UOIiFJOz0rUkMCZfPwE9zGRqVOwkpEmcS7KZ53o3FhzU/s9+7XI4BfvsyybzsSwgVF1oAO7JZkOflWbIWfu7GV+eX2gjg8tKd5ASrfm2Rl2f4pg=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789056360; c=relaxed/simple;
-	bh=3iOwpVluDzsXS/xAldAolUm40X+EsqehUJGmAtlu/hY=;
+	s=arc-20240116; t=1789056363; c=relaxed/simple;
+	bh=QEVsCcOWfGaLNWBpaPeA9zZXn/J/tBa9cqnHzXlkuyo=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=aYQer4Nh3yc5t15JeN737kCfeSMtE08w+QzeBdF9+CIB4C5mo4+ZXEKjr7sPAG6nsb85pKMVF4KZD4wbVIo0W2zRHnS721Xeqkw1rbAhKOZLZ5Fix2byvApBe/muoiXwhuCQiql9jvYkALO2C+ENPxOD1YUg/vOg+2p8o0Vhjv0=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=OWKFWFpQ; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=gi0qql8D; arc=pass smtp.client-ip=205.220.180.131
+	 To:Cc:Content-Type; b=F0OkPRZbqM+iX+6NKIvjsx6ntiFIVOeFNdIgjJK+zXOsrih1SuK05TAv7qfPxVu1JVLi3m81MX35QPmU23OUFz6deg5h5G3DXhiyjA/LEhIbyNuKYORV6xtaZjYL7++YH2vGlm7NYVfZ6483nS7vZUyKrfm+QDw+bmDQliSzO6M=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=dGYKOzHR; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=Fzq25TqN; arc=pass smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="OWKFWFpQ";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="gi0qql8D"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68AF4ZCd1186700
-	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:05:58 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="dGYKOzHR";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="Fzq25TqN"
+Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68AF55IY650750
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:06:00 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	X1Bu/LYRl73Dkkvy54LYXfG709cEf4Ijhpujjjq1ldY=; b=OWKFWFpQrcZc69w3
-	czKY4eALvsME0nCyaaPtffkJGzRp40Eou7atqQPYmdV4R3dzXKKe6sihMw7aPByn
-	40mCC9ZrE1e5PlLXm6XPCnQJLpYjdEhkYjLL4JVu3a6J1mgzVmwWsGuJHFDoaKOA
-	+Tckfj6F/bLE8rqTTUOMSDsxzESIb2h+OvT/KAR7eMpRrl+7GF3gv7Hh7zBN3kYz
-	MztM6jGzZndWXxFH2ehEc0jEagYtUpN/z4uINMRei0gorSIVUb2UEJfkvdT2Gokv
-	wjLq/3c/3GcIWLU603FwXtyVBQerBS/1q8VaLlrWfhguXBK+m4iet2xfKTaHcb57
-	F7ajaQ==
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com [209.85.214.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gkraka9fu-1
+	brsDMVitZFE7oxK8lWXE8MNKRDnR31VfHMnWrvmZodg=; b=dGYKOzHRMuN54eE5
+	t0pdAi1QS0cl4kWYufaWigNOxD41SeGv2zDMz+lm8m6TcM9t9GobEoLb9QEHakjw
+	LWFTa8Fb6AEUNiXPLTC2Acb7SIFiNXmd5z9WdCmccJXjccCIBxyg2KvdzWATQNZx
+	iS0ohnkDwe0rqvA90coeXeBzt7IipphWzEK4+UDiuIvyb+JjB+t90PO/XX0G3a5p
+	+wH1KeH8vTk9bldcNM+EDXXyIsp4k91oHIPpH+y6v3oJic/Bcg97AKnI/H53eKaK
+	ZJ3wdcwvjNa09J8nlPPpRs2aZ80QFAvsrwMW6f4nyg3mu2oPjp7753NJdtRXVjdw
+	x/lKoQ==
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com [209.85.214.200])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gkxv78b7v-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:05:57 +0000 (GMT)
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2d6fb956002so105921015ad.1
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 09:05:57 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1789056354; cv=none;
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:06:00 +0000 (GMT)
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2d94a158dc8so120220705ad.2
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 09:06:00 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1789056359; cv=none;
         d=google.com; s=arc-20260327;
-        b=Q4mBp2V9MdH7M7MjeiuWYCfhQ/f6r4GAmYaSoPEAocez074AvtDcC9ZH+8qLMIPEff
-         HNAu5/xKDAodnDgr/gg/F1CxSWeghs/qyCNmFeiRni09XIpzHLMy+aWt1rVL/LEGa3Qu
-         Vb99Zvn6wwOkdn58diyFWlm4IAKtfhNViaxlvyj9DDy6XnPyBTkV7L4njgAqMijwgdZH
-         ZpPqoIm2hLdV560L70+jJBXQ+9gKDVhAhU1MgGV3kSddp+RRmERNoGWMhDt+0MA1US2k
-         KKwEKXbLR+pFx6cLXrdlAJrj2L6SDWpFzndTAp2xz8vzqBlAy84rKaSa5xaVgpQQhtmt
-         aF5g==
+        b=Ah7RFWcMy4NizMg9UK/OTvdEc3RkuDZgmFFjQDc2kzVZ4u7l3hv643vBUydcxx0sNl
+         Tg070jG15IJKSQD6R7dDUuNSMEwkbxOj4Z6NJKsXvVIrMHhomZQMFWE6cTiJSVdweEB+
+         AnHKuaK0hKq0sqs/uqhrN+qxO5cvYF+Tvh1dqtlx75fBhHPMBkAksU66C+eTMVCwk5u1
+         s+knGVSYWpGknbnZNx/A9aspOCJZLyfNA1f/XHi6uRsscF6YszrQLkc8HyttfCpu+6j+
+         /iaSk6N19KQwPPufjhhRUJ8b8wJ4yT87uUgZ6rcVBMQaP/0R7jz3JDoO2CDkkLShdSee
+         jMag==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=X1Bu/LYRl73Dkkvy54LYXfG709cEf4Ijhpujjjq1ldY=;
-        fh=6Y1reOoGkoWLQBPagp3RVs8eLZ72qnIMV0ObE6uNKX4=;
-        b=AQHUExA30//ZPjajja8Ib6B80wGAaWdEHV1Arc0evRLJXdttiUJ2fZARgBCFbd3X3e
-         40j8i2G6ukqIe04q/fZdd27YcnOKJ2nL5JkQkoWcakQyR3+xWDZcJIjQdiyubqwklNqh
-         QrEz7Q+iVBU79igqtFj2FSPOpVVGVKg0UcDg8b6jUuHKW2qBCeNsPTSO+Ny/URvIPiur
-         thaQygHrRx+LYZF3P+HnymIwgeMW3RG+fF+uCXllfAIN5ngkWot6B09DHk32BkpijiuH
-         1yQB4Odz0FDyJAcPrpr2TF/7tG/sVw3JWSbohhh7EFjWC1jGrhd2vnctarnj/A+bkFYI
-         CWKQ==;
+        bh=brsDMVitZFE7oxK8lWXE8MNKRDnR31VfHMnWrvmZodg=;
+        fh=nyEufAtAboUo7pcbMxsRPIRJIwnIQruTdGI7QxiC36Q=;
+        b=IwVy8vM6TcdfK7Wf5xK/SEN3fmC7nGh7NQ+lloXdVyyDUt2FigKOgoqSeAYd4mcp7E
+         wxbjJbxMhkIOzEaqlAuq8dTL6a80czv/KZeB5TjzmruwV8zxytEbnfO/qSSHotoMA/7S
+         wdcXvJBkonRlhl2uJqhf2bVs70t1GHDIBLACETAExGKeG1YSc2je4WMjCO/veE9EwMpA
+         0k9aKZHeLF4G0/50gSHJvLyCTTIpddBufGfwxOC75zc5ldkOG4KbBc7TrAJNLUVKEu7A
+         Xi+GhV6LQn7A4YdPOBcyeJmjBkfKXKaVf7HXzsBhxCbz+KczdknpoXz6jQaLOPhCThe1
+         aYWw==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1789056354; x=1789661154; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1789056359; x=1789661159; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=X1Bu/LYRl73Dkkvy54LYXfG709cEf4Ijhpujjjq1ldY=;
-        b=gi0qql8DWzjjer326uqM3HztzXPMvs5ZoISXkp4ycnfwo0LyVPRDIX2i9LJ7fmuNC/
-         NGnnDJT5AJVvzCLKGURQjr2I53MGSthlfOcLdi+Y7l6hZLZiKyGFQqvLs+ntUJ5K3oHf
-         /4qfChdmIGx0Stys99QyV5Q0o0+m97emMbU3snwg51+vUaHvj40uYpIqqie3bRH1acUk
-         sh8OTRLHsWgxsRbs/o4I2plUaK+E9FLyIQmAu4QI9V8aJzBf4KKu3pDDVxvK13BmL5Jg
-         KaVZsXPnJWyscq+VCFB2i0hDH7sukCcU4S4WozLgDqpX4mvB6vnkThaIeGJOZPAy6kDa
-         aeFw==
+        bh=brsDMVitZFE7oxK8lWXE8MNKRDnR31VfHMnWrvmZodg=;
+        b=Fzq25TqNZseDwt94bJ/4g+eSXK2Ix0nnL92r+IfQpeNNI8mx4ELa8yVnxOYJaS23fO
+         Bq31DII6XNH0KLsdpd6XfP+m/4/bqPnRIDpY9Cf5/shaXbZLyaomypNIqrRqTPxyn77A
+         oG5rnVIrZzEJGxE9jJ0lPYqj1DI9b5Ui4qyTd2xB8kRkuLOAHnG2C7bIFVY42yuNzdLb
+         I8uPLuhaxpNbU++IvROEEnIEIz5th3RsJiiQTE8oYKuwVT2vN3ZfcYWI8vipJt14qWhb
+         7sIUxqAiWDFFEIeVQkdwrs2Sfmes6juNaw2li7kL097H8QZHTSSMmGOZnoxKP6AYxuFk
+         Xl2g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1789056354; x=1789661154;
+        d=1e100.net; s=20251104; t=1789056359; x=1789661159;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=X1Bu/LYRl73Dkkvy54LYXfG709cEf4Ijhpujjjq1ldY=;
-        b=nxUqGHeQBPOwo0xFpBivCU0fapg0ckisHhwLbeU0KA+TAgTL42iEZ5hVrKMdt61GcG
-         o3PwRyQ8+hfUmfkWxLLMhX+MV7zWcDXEa8R0YLGMr5SNCZ3qWpiCHqraPwWTkNZNTa6O
-         FgjQifMvwcTwlDvKdO+pGY1KCKEo7QmlEUp3LZ26tJRRxrEwpmyicAXMFRO5r2omXMVT
-         8FHr2MD0lalCokEArQGS/kKl+44QZs6hgckTjHyNqbquGmjn/c9y8ekrmqDOMwtFzmZN
-         XGTM/FNFNf1i2qiBIicP4mETvnLkQAUai2JXW4iAfgwu18tUnxJegpaf6gimNbAlVAMg
-         z62Q==
-X-Forwarded-Encrypted: i=1; AKwUvBwO4qPG6Y69wyZ+S2HhjQVVblOFpBhM4MEdDSRU7VmWJnqwUiqwPFehMjI2FSCrc+WysPuK8Z7g0KQ=@vger.kernel.org
-X-Gm-Message-State: AFuF++lYHBD2SvQlhoHJapoENOOBchiR4BNyLxcA1s/U6W3z1AqryQKT
-	EaDCozaTxsIq6l8N+fSvvO9ux+hfGIFiF6sCyAszV4H0559N8rFzaoj0w+yDnmTNAoRdnM6/mLG
-	4UqvC2mNKTLw1ODuo65OkuTsYtuIK0loWec+7Rc1/1yTTReO/v8cfMo+Vdflv1r3zhLs5+4k7t8
-	iKSA/LegFjeXxu0qXlHjJFp4ZPkflwPZkWnbQDjg==
-X-Gm-Gg: AYBFou1cylyXG47mqSBKU/iXH6DB6WtXLurKeDFrtEncWBG8AMWEw8Ntmyx9f6H073F
-	IUeIi9dVD7+r73/4pjYpDEF2hTTEnxMH+DAUMBZWfAk0+0GqFDwdqwp2d6XHp2TyLA1rooxr6zq
-	VHGtHsrh0vRdIv+3vPKoMzvo2c2AtpEwSoNGsAqG1CB56aYAKXQs/bv4euqg==
-X-Received: by 2002:a17:902:d549:b0:2d9:32ee:7b83 with SMTP id d9443c01a7336-2dd2a1ea649mr1642565ad.8.1789056353593;
-        Thu, 10 Sep 2026 09:05:53 -0700 (PDT)
-X-Received: by 2002:a17:902:d549:b0:2d9:32ee:7b83 with SMTP id
- d9443c01a7336-2dd2a1ea649mr1641995ad.8.1789056353149; Thu, 10 Sep 2026
- 09:05:53 -0700 (PDT)
+        bh=brsDMVitZFE7oxK8lWXE8MNKRDnR31VfHMnWrvmZodg=;
+        b=NqmR6oka2zYwSWv0v7LabHThS+xVobA3IDnDZ7pFXa84M0RuSCQ/+wEKoFRBT9KtS6
+         nPEmSU4scJCAHgcwl7W1fPuFfhoyWsEMOpeNNARPCeHtUz+o/P5H4rj/k72egP3xoM65
+         jqvYvAfRKt2Un0YHGtZhDcZCX7/Hmkv8ahMTx/LiiPTJ2IF2QaOG4GKXziPxm1862lm1
+         TE2EqoK753+bCuUSu/oJ1A5tNJ5DBNtd1tLfXscJOVe5bFLs9HFM7JQHsOE82qtmcpIY
+         5R3PRIAb0ik78s2phSbKZRfWhEMQDkHnSJb861Peil4zTLVmvW8vMgbtonLA/A9QS2mw
+         c4ZQ==
+X-Forwarded-Encrypted: i=1; AKwUvBzIrNHxH+b2tu0IYC0FcOMoRfmv8ni3KBYARZ/wsZeWclgUgEy/voD41dtbmYpsjulo++WH/HWfZ0c=@vger.kernel.org
+X-Gm-Message-State: AFuF++m0sBjDQ5U/vSMjzjcNyJvY/L7VawiYNEHcz7m9x6aBK0nq2+ak
+	FuvQN+EBlV362dA/UrwdXg/AB1nthVgA8KjfXg+3zMxvFFIsP2/2aP6yCxqoBiOcOhtryMd2F5q
+	fQd5I2+IDi/veF4UGUx+Sh/NjzWzhWm01nl9b0rlUOmO0ZJ8eYsCj69ZwGy8CO8ma5ZBGKJt6Rz
+	jQnrX8W1AFAqSkB3sqJJPiu9DK6c54mnDhIEp/tQ==
+X-Gm-Gg: AYBFou0jnghjBEM5nKWL6vRn6VmTMqhoAmFfsJiOacgcA1JbaQCkl9exME6ojrIYGIm
+	QST4jnt5hR/OQXYqN2cKw93j1jQwxnecMFi0pOBFSL3+XR6sFkIuIVf716GUJdHwp3yi+SE5lWr
+	hNlkTr1TwSi699VaSZH5KaoVVycFUEooTmNf2PWTqpxKXcAY1iitB8AjD6pg==
+X-Received: by 2002:a17:903:1508:b0:2dc:fdde:30c5 with SMTP id d9443c01a7336-2dd2a35779dmr1041785ad.17.1789056359416;
+        Thu, 10 Sep 2026 09:05:59 -0700 (PDT)
+X-Received: by 2002:a17:903:1508:b0:2dc:fdde:30c5 with SMTP id
+ d9443c01a7336-2dd2a35779dmr1041055ad.17.1789056358895; Thu, 10 Sep 2026
+ 09:05:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1788526382-45113-1-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1788526382-45113-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1788826860-153971-1-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <1788826860-153971-1-git-send-email-shawn.lin@rock-chips.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Thu, 10 Sep 2026 18:05:42 +0200
-X-Gm-Features: AcwNN1UZ3jKBzcNOBYINezQ3C7x0RueUlvm3oo4_TB_hS_N14OUKLLauSWJ6_Iw
-Message-ID: <CAPx+jO8hj_VJBdWg_6evrWVVF8N_39k1dbpV3O_aofisNZbY+Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc-utils: Close the device fd on the return paths
+Date: Thu, 10 Sep 2026 18:05:47 +0200
+X-Gm-Features: AcwNN1WZ2BqvpdG3_WtHrn-rYoRhMwcMjL8lK1omME4kry53r9whz6H7gYeYX2c
+Message-ID: <CAPx+jO-YgSkE-7YzPLY=6RRPoPDJrJJtBHoRC-bzGY+2ZjRE4A@mail.gmail.com>
+Subject: Re: [PATCH v3 0/2] mmc-utils: Add eMMC health command
 To: Shawn Lin <shawn.lin@rock-chips.com>
 Cc: Ulf Hansson <ulfh@kernel.org>, linux-mmc@vger.kernel.org,
         Avri Altman <avri.altman@sandisk.com>, Shawn Lin <shawn.lin@linux.dev>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTEwMDE5NSBTYWx0ZWRfX01vmdZW5IdIp
- CK5rnBx50MupL1GlsvAAuiX/924JODVSkj0q5mqaRgv70YfcYUaa5PDyk3aCeHjokyEIcDdx1TS
- rUNbYQiM/RCs9698rxURam6ZKa5Mwos=
-X-Proofpoint-GUID: Xa9UxAy8eLpXvLQedeHGcZTKa6rfsCsA
-X-Proofpoint-ORIG-GUID: Xa9UxAy8eLpXvLQedeHGcZTKa6rfsCsA
-X-Authority-Analysis: v=2.4 cv=EspHPicA c=1 sm=1 tr=0 ts=6aa2d565 cx=c_pps
- a=cmESyDAEBpBGqyK7t0alAg==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTEwMDE5NSBTYWx0ZWRfX58bUhEXCUqsZ
+ WUrRFHPUVE8tjIhb/GXnL51NigprXxV9ZBt7gzIJddDtLjl+K2qWvBx1aOEGJjZZw/pxBP1Re9Y
+ +f7oKnvrt6ANZjaIZbbYIsSxmvyr1NI=
+X-Proofpoint-GUID: msn9whi3OiJJRSXRgUnqc8UDfeKypAX2
+X-Authority-Analysis: v=2.4 cv=FPSOVOos c=1 sm=1 tr=0 ts=6aa2d568 cx=c_pps
+ a=IZJwPbhc+fLeJZngyXXI0A==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=ZpdpYltYx_vBUK5n70dp:22 a=s8YR1HE3AAAA:8 a=17l7gqAnU1oj5PDviSYA:9
- a=QEXdDO2ut3YA:10 a=1OuFwYUASf3TG4hYMiVC:22 a=jGH_LyMDp9YhSvY-UuyI:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTEwMDE5NSBTYWx0ZWRfX5B4lRuG8QLLq
- GwbzAUzkQfzJ0Zof6YQHs+9DcM1U8KfO69BiQYUnEeVUXlwu3vxnZK2TK3XIlmHLJ1YRBSsNw3A
- 0MEnXoCXiG9Rwdt/ZeB15FAXcX++aVfLFCT5u0ZXsR3C+R8Cb8Y96da6ZgoSs2cLgiRiuQZPFXG
- 8YyIobCsGh0kzutMzzEFqI3PvzNvHVKYqQc6juqDlwGlDQqefMZtSxSi9N3b/SFA9MM9QnENyma
- nGuunkx3pk8cW4flDD5VpyZnrtJOL3oF7PjPDKgIDXLE2Cb8yS0vx/Ij6rDo/qIOAvwws5JTncq
- OAAPR7QIS04PK+iZtS0P57AX4xVDPBz+vhS2F9JdHEmZ50ch9bWX76nJP00YHBm1gEKwU4RB6C4
- 0JMWa3uLmOu+hHrhfbVbkpLjBo+l2ygSg7E14Drc9S60sUS2b4P5IYxRTmuIokkO8UI9tGC8BQ8
- iSeaxQgI5HazyzXuwJg==
+ a=yx91gb_oNiZeI1HMLzn7:22 a=s8YR1HE3AAAA:8 a=MQgBscGg5GL2LZEJ3IcA:9
+ a=QEXdDO2ut3YA:10 a=uG9DUKGECoFWVXl0Dc02:22 a=jGH_LyMDp9YhSvY-UuyI:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTEwMDE5NSBTYWx0ZWRfX+mmtH+0fmGuj
+ hMbSs3iKKKNe1DDKQ3sM4Oe8RcfSz8S3JpXjeuODVNMxW2ybNd57ShEVV9tFvQtGqHQORJVWIZc
+ QQcuWU+ujOYl/TeJiuLVjQFiT9UBjPoQaS7SzX26C5zmRpf5k5VgJ3DMC0ZqQcbdCQVeml27Bgr
+ vhFkq2OtjsmzvtdvtD4AP6xJZJOFZliWeVjhqAJgDj1rTIrE1t25uWakfG3g4rNxnpiOjmJztrS
+ Rso8TGhTYJ2fzgZo46KtYoQVt1BHOZt3Kaw6AjuAKWaNGSuYeV3wYdk2tOjgmb1CC6IROeZCLY0
+ PtqKnQBMUOL/eLD9E6Dh+VRYHDpBfNpNcU2H5TdbLBL2HKjlCxa5LTR7IIzL+vTDV38+9aE/ukE
+ 7i5XuGu2UPfWD3xz3v61yAx88FKn0k0Owoo8PT/DC+ScqmTENnkRunyovzlNShYMpb3eSAJXd4L
+ ebYWe2zD3ICUIYYoJRg==
+X-Proofpoint-ORIG-GUID: msn9whi3OiJJRSXRgUnqc8UDfeKypAX2
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-09-10_05,2026-09-09_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- lowpriorityscore=0 suspectscore=0 spamscore=0 clxscore=1015
- priorityscore=1501 impostorscore=0 malwarescore=0 adultscore=0 phishscore=0
- bulkscore=0 classifier=typeunknown authscore=0 authtc= authcc= route=outbound
- adjust=0 reason=mlx scancount=1 engine=8.22.0-2609040000
- definitions=main-2609100195
+ phishscore=0 suspectscore=0 malwarescore=0 clxscore=1015 impostorscore=0
+ adultscore=0 priorityscore=1501 lowpriorityscore=0 spamscore=0 bulkscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609100195
 
-On Fri, Sep 4, 2026 at 2:53=E2=80=AFPM Shawn Lin <shawn.lin@rock-chips.com>=
+On Tue, Sep 8, 2026 at 2:21=E2=80=AFAM Shawn Lin <shawn.lin@rock-chips.com>=
  wrote:
 >
 > From: Shawn Lin <shawn.lin@linux.dev>
 >
-> do_read_extcsd(), do_write_extcsd(), do_writeprotect_user_set(),
-> do_create_gp_partition(), do_enh_area_set() and
-> do_write_reliability_set() open the device but never close it.
+> Hi Ulf, Avri,
 >
-> For a short lived command line tool the kernel reclaims the
-> descriptors when the process exits, so this is only visible to fd
-> tracking tools (strace open/close pairing, valgrind --track-fds=3Dyes),
-> but it is flagged as a leak and would matter if the code is reused in
-> a long lived process.
+> This series adds a "mmc health <device>" command that prints a health
+> summary of an eMMC device: the background operations status (available
+> since eMMC 4.41) and the Pre EOL info plus device life time estimates
+> (available since eMMC 5.0), each with a human readable decode of the
+> field. eMMC only, as SD cards do not report any standardized health
+> data.
 >
-> Close the descriptor on the paths that return to the caller. The error
-> paths ending in exit(1) terminate the process and rely on the kernel
-> cleanup, consistent with the rest of the codebase.
+> Changes since v2, per Avri's review:
 >
-> Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
-
-Applied for mmc-utils master, thanks!
-
-Kind regards
-Uffe
-
-
-> ---
->  mmc_cmds.c | 6 ++++++
->  1 file changed, 6 insertions(+)
+>  - Dropped the invented verdict and exit codes entirely - the printing
+>    suffices; the command exits 0 on success and 1 on failure, like the
+>    other commands.
 >
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index 43dcdcc..0692505 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -550,6 +550,7 @@ int do_writeprotect_user_set(int nargs, char **argv)
->                         exit(1);
->                 }
->         }
-> +       close(fd);
->         return ret;
+>  - The fields are now gated individually: the BKOPS status is printed
+>    for eMMC >=3D 4.41, the Pre EOL info and device life time estimates
+>    for eMMC >=3D 5.0, instead of gating the whole report after the
+>    fields have already been printed.
 >
->  usage:
-> @@ -1442,6 +1443,7 @@ int do_create_gp_partition(int nargs, char **argv)
->         if (set_partitioning_setting_completed(dry_run, device, fd))
->                 exit(1);
+>  - Documented the command in the man page and in the readthedocs
+>    HOWTO.
 >
-> +       close(fd);
->         return 0;
->  }
 >
-> @@ -1589,6 +1591,7 @@ int do_enh_area_set(int nargs, char **argv)
->         if (set_partitioning_setting_completed(dry_run, device, fd))
->                 exit(1);
+> Shawn Lin (2):
+>   mmc-utils: Factor out extcsd revision to string helper
+>   mmc-utils: Add health command for eMMC health reporting
 >
-> +       close(fd);
->         return 0;
->  }
->
-> @@ -1656,6 +1659,7 @@ int do_write_reliability_set(int nargs, char **argv=
-)
->         if (set_partitioning_setting_completed(dry_run, device, fd))
->                 exit(1);
->
-> +       close(fd);
->         return 0;
->  }
->
-> @@ -2170,6 +2174,7 @@ int do_read_extcsd(int nargs, char **argv)
->                        "Please check sysfs node '/sys/devices/.../mmc_hos=
-t/mmcX/mmcX:XXXX/cmdq_en'\n");
->         }
->  out_free:
-> +       close(fd);
->         return ret;
->  }
->
-> @@ -2202,6 +2207,7 @@ int do_write_extcsd(int nargs, char **argv)
->                 exit(1);
->         }
->
-> +       close(fd);
->         return ret;
->  }
+>  docs/HOWTO.rst |  18 +++++
+>  man/mmc.1      |   5 ++
+>  mmc.c          |   6 ++
+>  mmc.h          |   1 +
+>  mmc_cmds.c     | 183 +++++++++++++++++++++++++++++++++++++++++--------
+>  mmc_cmds.h     |   1 +
+>  6 files changed, 185 insertions(+), 29 deletions(-)
 >
 > --
 > 2.25.1
 >
+
+The v3 series applied for mmc-utils master, thanks!
+
+Kind regards
+Uffe
