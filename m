@@ -1,198 +1,191 @@
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B54D64AE8B7
-	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:05:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6B044AB1C4
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:05:41 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.180.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789056340; cv=pass; b=JTuCTmaDoHgdN7pEW4a2pKqAvKkXnBqlRjSQMrXjDpJLM2kXkTCR/1z6TZ3sZ5xzbqImJWcwBe8aySxlj/mUZKfT6gq+3XZ7iavKBapScxXMxLwhpPgBwesbVY/PpjVIYu0Ukj3THNRl14zD7yChnuuy5DCFt82s0oLCHnsE5VI=
+	t=1789056343; cv=pass; b=XAO5kbD7z76j+QXefmDRiZDCV7lYIj+E4oOODRYJYCKgDdRbYqZ4OK0lgatCMt/i1rO216JLOIvUpkW2bxMAVIJb+/cPYWrS/ysuGb7ArAVpjT7K5jOys6aDVoclM3bs1bCpQGWecBlGv/smdha4LJ43ix503MN+g4328wrlIsE=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789056340; c=relaxed/simple;
-	bh=g7nac0T0X9UeGOZxw4guHvrAN2WDr1u+ybbYZk0AUJc=;
+	s=arc-20240116; t=1789056343; c=relaxed/simple;
+	bh=3oay50WY7oA0cOuOst6u1rwKL1yGnwSpPSeA2dNG1Fk=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=tlMl2NESz1Ry1LCGyl+TyraAbkzBRrFTWreGaSnX3mW1S7JuM0gZ3GbrF0bElIEJ9/B/NyJBPRnbgtUXjTMytG1UZnMd8UQHvP/ikXo+RTsByyxjnB+XyrExnqUL9J/UpJzHZikMqJdmHIBoG65NLG26TJjX8fs9wJY7XwQOesc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=ZlNZ24py; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=R2L3aBHP; arc=pass smtp.client-ip=205.220.180.131
+	 To:Cc:Content-Type; b=JEA6qWVqX2l2rJoDhbo6o5qTdVsDulVJOg8H1qv5d8HrLEUm9qeC9eGuAiMI2i9Vx/+x6R1gDdpVv5yDz5pRWyu6spCOyLXvC3IOLC4S5k0+uJeEROlsd/96YGiEAO9OMO+WBiWc/7FPLw3YPvBLl0ejDMTP7rNZWroXsfWN27M=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=cDMfWZSg; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=PXH7aIK1; arc=pass smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="ZlNZ24py";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="R2L3aBHP"
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68AF4LIL1275346
-	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:05:37 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="cDMfWZSg";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="PXH7aIK1"
+Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68AF4KCa1494228
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:05:40 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	yoxqy27byI+/wR2v7osUw7bvc0LF57CRxz5b6DL1pSQ=; b=ZlNZ24py8MkFeZO3
-	YnE+ujzXoEKddHVM4q2uTunajtH6GljGHbALN4EhxX6SEwcSLpIEwOgCPyBTTEMo
-	hLSBDq4OsUKVm4rfHzEfBMtFuph3vHr1fY6evCs4srZkqJ0qvrknt6/y+cwSPhEA
-	RSNPP/oVF/+1eXQaO+NtfCCgMvPG3M9K61R7owLRouuaBQIcKENa+P+bDeMGKCWl
-	mRKyDoIoRwnUzIqKFT3vl7wkDT2Tj5gO452TmvmWWC6HeU/iytlQmtmxwphpjWhP
-	m/BPm7ldMXy3fXQejhb05P+ZXEb1DyrtB3lq9VHizDeXz7tEsTkbAZ7vQxaD/MU4
-	NUj0pA==
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com [209.85.210.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gkwkw8v90-1
+	x22SVoUj0EMbaUzbs6EY9GWgQ3tV9w77TMiRTqsjhJk=; b=cDMfWZSgrgV39F7+
+	pYOCoFZekczxkQzOAk7trY9ys3i0kyXPkz/DUY0YhltgFwxCz2cLgMn++aAJ9GCJ
+	9Yt5zGiYC7IPyvHSHmrYqJEWasgmCM9AnX4bgBUiIGv0JiDJVOHbm+ePE2V1BlmL
+	lEWQuTtk3gH7ovFYF1+Hb05/GbgQjFCBx9Z3AAbQ+owCS4asHUEKuor335KGv1b3
+	zTLrVmrs3DlkYrQ5g0xtbXifMxhefMyIUkWmY1ZjF4SA/JeEZ4V59DUrZJIeBsZF
+	j+y9peptrpesJNbru361cEx55VcxkXH98YRuAdPyl74nY5Gear2EcYHCaMmMzRlp
+	wWOUsw==
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com [209.85.210.200])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gkwx9rucj-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:05:36 +0000 (GMT)
-Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-853d0d87123so3608428b3a.1
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 09:05:36 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1789056336; cv=none;
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 16:05:40 +0000 (GMT)
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-8663802b58fso4385096b3a.2
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2026 09:05:40 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1789056339; cv=none;
         d=google.com; s=arc-20260327;
-        b=ru+nbZ584CdM818N26BHh8/Cj5a08mwV6lNO6FLmHOBY9mK31UlWYpB/R8y3ydF3l6
-         y/AOxEZIJNFI1auLZUmy0MbzIj0FZ9D4Y3iGPvcUH1riG7U8ofZGd0gJ8yECqP6OWxWE
-         ik6uZbcCQU1BC5q+Tw+y68F6l8bDwGkcIpBPPdXKNylzFhkYP8tJbYasIhKDbasXNZqX
-         5tEvkO9zgdooPRGDkvxBQfnkmxD26TKkXb6fken1gAYxp5nfGC76YQ35tAIx4P50hWa6
-         DbVxemWan5AP5xA2kMOC1GUmxIehUaAVz3Tj3WWYcWmXO2L5I1pkx4qs6oMNCfOLlrgY
-         XXqw==
+        b=RoklAWUG1zI+djF2n9JWsP2k/xGZqmkTugZ5rY/bR32X6pEzEe/sNqCL9zz/vOatX3
+         +4srgFciwyTtgpgf5RWNbD4MTfldlOsZXhGpVol5Ux8N7/oqK2SnLuewaBlyxdLy1aBy
+         XU7n7Bh7Xu5QGVVmJZMxNL6ZEZXCZARUepXIlKYRFNMIiTqhTa/PFxk6t5ZpNy9WBjAW
+         LpV7kacgT3oATm/U89pFfNdywPICzovjGEnVj8SVRMvnxYGM6E8EQjOh+NiFbdnOR9ut
+         wRk7saN2E392qlgEBupUjB0kpZndLYCveKRphlXyaJV1q/lKgZBwjdSkKW1DKyZaRmmA
+         DI2w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=yoxqy27byI+/wR2v7osUw7bvc0LF57CRxz5b6DL1pSQ=;
-        fh=UuVgBU1usf3s90Vde19caSD/wLzz1bEUbgDHtPYVXmY=;
-        b=Dc0Riuedxj9VRu3rHHE+d2GJFdVHcv25EwAEGMT3chW4YgWKeSRqtnXfPXmLwnRgcJ
-         8WzcIqTtxykFmaxULmrVzhz3D2IDyjV3e7VrQf2QF0L2gNbyY1EmhD7FQ1h1POHxvfdE
-         u79Vl0Cxkq/M4Zk8knXZx9oH0A7z+tDhCN0zWjGPLVwg0aU8Lo3lUpDEXlE600/URLG6
-         DXcA5xyDR3bdbBwEgvFLBb3jWT/29R+OvDru4aTvjkGQIbMDQ/DFenYPAP49AOY1GYfn
-         hpKXBi7evpz9tTKu6hGvm5/+jfGqCB5nxMI9cuwz4NnmJBsTyB+kFQbsG1ie/hmLjiUG
-         EuEg==;
+        bh=x22SVoUj0EMbaUzbs6EY9GWgQ3tV9w77TMiRTqsjhJk=;
+        fh=4dBZWQuOXMCyAi1IsR8Fts58TUkcT5uNN3cFT/qImPw=;
+        b=kH346CYzBVTRnKeElrx2+iCor7iWLdhOE4BeM5CBAxGdtw7svsxa7otAkYwP4WuJOH
+         gvJzVWgBqBvFuqPnMCaq0kB722CwwvnN7WBsjSUwZJvg/9f+JMdMj9htxJdHUAg8OS1b
+         isgKhF8Z+2PMRdoob+kdxR1eYJundPRbRcm/aUytVRDZV29bHPVZlt+BdS1uIgrSs1TS
+         3hYCD9U18BjrszE6MpMZs4lubceNNt7eDTlcm+SreJdwZm7ivq7plKJCnT/8PI6ZWS8a
+         vBy763jAQ7MiswN7eW+ucn4pXrlUe31/PUSA7LoTRkW0STrYm19J8V98vf37JC5sjcDW
+         MJEw==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1789056336; x=1789661136; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1789056339; x=1789661139; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=yoxqy27byI+/wR2v7osUw7bvc0LF57CRxz5b6DL1pSQ=;
-        b=R2L3aBHPFSGQKu5srRfviqbzKoTy6lPf1OYFwEiZ6k0joYW8i1iGOxZFGY9m12KP4j
-         cKB9UIBR2AnUhlyiW9x686zL5dr2lysXeFtMTPN0xPJIqFRUWBX+I17fcM/6p2pfD+Kl
-         SLFLE+tUpoOj92JFzTjw3qHrtguk0ubfHORsQtgSgw9lSWTLc7kDavHXi/3L6RUExSf4
-         qzxx73UImgUw/zLSfH5Ao+oCpSC2n8cMC8yZWuCPtWoWPJNHoilfKQgXfY+bSC/xYqcv
-         TmxGvor8X2Q48gZMjouoDqsVnJXU2bsRGvg1HMNgSz4GlP/O2zVm+KEY6C/kh5phEZdf
-         /Kzg==
+        bh=x22SVoUj0EMbaUzbs6EY9GWgQ3tV9w77TMiRTqsjhJk=;
+        b=PXH7aIK1FhLupA0eOu0y+nEv61l90XDyAjXbvih6qCKg/i7Gp28ULDmw7SV93FapJ6
+         7Y/nKgKD84G90bm514+7+rOwpA5PawIYFN0qFPuqZHEap9gg+5oeLCiT/QJxny6VeDMp
+         ATUnSP+MrVDddvr4N6sA1nCgfyd8wMySjR97hek2eYSGzWr7Jo2Kzy6uJcQ5vU7dDkT0
+         CDteQ7xn9fsLwtEk8I+SOtq4+GEnthipEbheHAJ7L2m46KpXyfPnpOchlKoZe7xk3W9U
+         ekg8G3eo050p8NIzTmglmT2bq3Kbcq9iw3OUnGULGdILK3jDLfF+fC7HqjCE5l5ACQ8+
+         Vn7g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1789056336; x=1789661136;
+        d=1e100.net; s=20251104; t=1789056339; x=1789661139;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=yoxqy27byI+/wR2v7osUw7bvc0LF57CRxz5b6DL1pSQ=;
-        b=Srb57fNTG1RlBGqlg5Ww3abB7uDjdkS4FxdHrh3AjiU/NI6nA76EWvcMB7MUsN6YTb
-         7hOIjkUau6zk7+/Ub5mBxPXhkLIkfnK5uevKyDgUkqvOu5/p5DeWL4lJkccY0tCUuarY
-         1aaCrFYx4ImtmXRGC/bSUVVqwuLMbbr+TanvlNVfLTVNG5pF5bEpm9uFt1iMdmFkVLK2
-         DKZ5WIJ57fOo+WSuzkf9X5eBPFZN18IanLN06JrO4H3/YgSKYlmDKb5iPQbJPs7EQx2+
-         P7hmnHPEKYSPhSZGtB/QSwYJHvOK2vqhPkR35WjksKk9ufZ11fY843D14R8OLj7Qk5ZY
-         CCjA==
-X-Forwarded-Encrypted: i=1; AKwUvBz2LyfO1Hrx4QYTAvnHSxX8BK6xNN/rQydKdyg91OMCZsxQM+Wc4tvTDGehAwD2XZloQ/9LBHH2FE0=@vger.kernel.org
-X-Gm-Message-State: AFuF++mr6XrI/1MsHiAyFqRfgH4NuWugJrDjirwPAfrZAwlRZGPUXfJQ
-	hhEcVZy7o17RWoM23PGkV33mBqF/7HJ7P1ancXEmFcd8HcErpEniT5L6LUF6w9u2Ts46KZx0MCY
-	Uo5YIB1lavs059vs6oTM2UwRTw1WBCg4dEmCiiSNydB/WaTiUh2R41w78HC2OnqXm8iQX4qFpAy
-	NqkdDfuymTqOqVNxPDB2fmrLT9/hzmckMa2gaULiqySQGZCQ==
-X-Gm-Gg: AYBFou1TRh0rljFFTlvM6/1bnkqwDWi4+/L5sQWJDFO2vqMNCY7F/Kd4FsVWzLLbEhU
-	197qH8Q5Z/Vg/9i4NmXO9wVpIFcPDh2xdX082EIArOeMGjJ7Oeasper1crTNB/9HAv+EB7+VWg/
-	plflTO9saPzPSofIYPyigezB2HlIQ12foShNEYwxvDes6N1hoB7PPo4iOVOw==
-X-Received: by 2002:a05:6a00:aa85:b0:857:7384:b5fa with SMTP id d2e1a72fcca58-86948928444mr10182756b3a.22.1789056335738;
-        Thu, 10 Sep 2026 09:05:35 -0700 (PDT)
-X-Received: by 2002:a05:6a00:aa85:b0:857:7384:b5fa with SMTP id
- d2e1a72fcca58-86948928444mr10182588b3a.22.1789056334935; Thu, 10 Sep 2026
- 09:05:34 -0700 (PDT)
+        bh=x22SVoUj0EMbaUzbs6EY9GWgQ3tV9w77TMiRTqsjhJk=;
+        b=oZr86BDv7z+TmF1d0ikdLBMGE9jJua+pZJGKspUepTtePsioBI3KE3XMSIMcRqDdkd
+         E9ZxasO1Amhw6XLZDIwuyrlDcwEXQUfvANw0dTmE6Zega+EQ7JhbBRIvTtLpzbBhW3pe
+         YWISsLe+ivLQx+c0m/xSLstKSgcKMZ45QjOO7U2T2DoIx+9MgzQ2p/A+72viiPiq5lto
+         jR8HFRtnIcpJ7dgZO/Gcd+MC//8mcXceDuFFZMWwYITJ3amEf6su4Kkz+2pW0tUuBG68
+         J5X9KbK8p1VyummHecBC8NDHatiRC0wa1NpeR0b/bZyw8IE954e49CjvxIoDXybn6mir
+         wYLA==
+X-Forwarded-Encrypted: i=1; AKwUvBzHk/HuZFEVIMa2MP89xc3xTsdNg9Ka1tuqWpoCp8em2IVkLaISpJaOAqVM5xKAeWxUCNBFd5p8xP8=@vger.kernel.org
+X-Gm-Message-State: AFuF++kREr86VDBaz53HmBEDifxuMY42LYYIrHCkQfNSxlOr/0HS/Xud
+	s4eRGVP+lvMCriDFfIftznguoIzEE18Guhj2sYZ8pPmkSJ0OhzRPQgrAuhSc7UxotOi3vO+jSHa
+	vWx+GftqwynVjM0zdjVlNq9wUn6Ns2EnDvbo6CP+m+WNUPcM2irACs8NDPbHo9BIv9SBukucAkH
+	WAy79mrMhJzaRxwsz5kDtv1mYUMXvymci3spmSNr7C9/11jg==
+X-Gm-Gg: AYBFou3k4k8Y97AdgtDEdfPykfMUh/qGOkZcNTxuU+UTQbmrmsZnzNKiNiKkADPqc3H
+	PfwcjXNPd42OHODMDffEGFxX2H2UFKjMZ/fJ6c0TK+9btZIoed3ftOsJ/v3w8MKOeCqTu2qEW/E
+	Qq0Y0b0iHvpDo8jOS3l8ETICcLW405XY519rLPyTTWMQSQCWHl45jz99FJIQ==
+X-Received: by 2002:a05:6a00:1584:b0:86a:881e:ea38 with SMTP id d2e1a72fcca58-86a881eed92mr4853520b3a.12.1789056339281;
+        Thu, 10 Sep 2026 09:05:39 -0700 (PDT)
+X-Received: by 2002:a05:6a00:1584:b0:86a:881e:ea38 with SMTP id
+ d2e1a72fcca58-86a881eed92mr4853349b3a.12.1789056338517; Thu, 10 Sep 2026
+ 09:05:38 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260824065755.35451-1-florian.maillard@mailoo.org>
-In-Reply-To: <20260824065755.35451-1-florian.maillard@mailoo.org>
+References: <50fc5e8a29e3a5e9a64c64c5f775d758dce39b71.1787603965.git.sean@starlabs.systems>
+In-Reply-To: <50fc5e8a29e3a5e9a64c64c5f775d758dce39b71.1787603965.git.sean@starlabs.systems>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Thu, 10 Sep 2026 18:05:23 +0200
-X-Gm-Features: AcwNN1XQeUn5yu0y7ja5J9fxlitv1JADg08KH-qf2e76LfTwNbg3W-ZRo2dn4tY
-Message-ID: <CAPx+jO9HV_L=Dn5nmWTPXUoA4Hy91uj5S1m2y5fvVaXh+zPbqw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: rtsx_pci_sdmmc: ignore broken write-protect on
- ThinkPad X260
-To: Florian Maillard <florian.maillard@mailoo.org>
-Cc: Ulf Hansson <ulfh@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+Date: Thu, 10 Sep 2026 18:05:26 +0200
+X-Gm-Features: AcwNN1XxhyWT_Qk5KNRESJlzw706VHXCD-vgMwiHAKKnrAT2fNk77opUBhvOjaI
+Message-ID: <CAPx+jO-TodBfjkJ6SV39LHWyTKDRj=P-Fq-VnfT=kin4VBKkvw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: rtsx_usb_sdmmc: start card power-up at 3.3V
+To: Sean Rhodes <sean@starlabs.systems>
+Cc: Ulf Hansson <ulfh@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Authority-Analysis: v=2.4 cv=EZNd0/mC c=1 sm=1 tr=0 ts=6aa2d551 cx=c_pps
- a=WW5sKcV1LcKqjgzy2JUPuA==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTEwMDE5NSBTYWx0ZWRfX6dIGv5IY3y/G
+ 1DPhp4jhpyeCC37d4817JkWAg9TfG1IHwU7Z9HlBZqk4xd3D/+nHW7jnTCldFLi4OwwiL+TJWYJ
+ LVhIhcOTxKozqh38ilL8ieFhp9oDoOdUlGZ25mYGOSd1jlZRXJQ7rjPbqtBE3Z+/X9I+Q4Taldl
+ Q27xmRpyvijEXNQ0s+HgRIwZ0A+9SzeBkrc/PyXFwmJE6BW71JNY+bY4Xx+AHmMOVZP4nV3F7AP
+ gPn5eGI1jMxlj1XM41qJAf7qpAObJ7B12tjq4tAns43nMQ1QlnIxBuXDfebmOPeefJaR6KtlTxe
+ +huPTQdbF32va+6PuXZxZ91xDddklcWezvR78nu55TV1QKd8CQWtxxWyURpsXJv1I/6oVMkWmhI
+ FJoXcM3swRnQkZnE1lsrYOTo9OoOCUDAizXVxsnGBmJ2Ot2HtliNLox7DylS+b6RLvi6NBHWKu5
+ KSqNbORHEpCJ4YosVPw==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTEwMDE5NSBTYWx0ZWRfX0XpNhCgLaM5d
+ d6LISh+mpL7Z9Mw5D7CdMeI0QfWhQYHmmmzYUMaNsEycBEO1DKhaqP02b2Ia59kw674C8tAaxVb
+ KLfIZkFH2Sn+E/ShEne+3In9ScEnnIA=
+X-Proofpoint-GUID: e1vU8AOIywQPYuNnB6FKyj3iDfICjInB
+X-Authority-Analysis: v=2.4 cv=TupzFzXh c=1 sm=1 tr=0 ts=6aa2d554 cx=c_pps
+ a=mDZGXZTwRPZaeRUbqKGCBw==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=rJkE3RaqiGZ5pbrm-msn:22 a=TqukyxIwAAAA:8 a=XevV5cechEosMP0pQycA:9
- a=QEXdDO2ut3YA:10 a=OpyuDcXvxspvyRM73sMx:22 a=e_wvXvRcY2B3oMitRgDS:22
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTEwMDE5NSBTYWx0ZWRfX1KysPPkgRYCW
- znbJD4RVg8go0QVucFQsLbFKEw6AE1tpVbhGxHGM0SyeYeddFGNqxgN02JCyqZnfFex45QEY47s
- hriP2iz1qNdxxBtYulggrYxgg1LW+kQ=
-X-Proofpoint-ORIG-GUID: nTMQPejlgo9S_A5DdiMWyPowqtyW7fQn
-X-Proofpoint-GUID: nTMQPejlgo9S_A5DdiMWyPowqtyW7fQn
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTEwMDE5NSBTYWx0ZWRfX4GKiGj+p9Ixp
- cWOQ/+EzVDKbcmCRjxUpzvJFpWX8GHImFunQNzWqsYVDppw4p72Xaf6RJXTgu5YxU9r2AALe4zF
- eLva5gBUtxLgVVoFXtyyXDnzGa5EEn9xWsrJaxA7imNrUgBpZ0uKQitKD0qhJhnczDSkdeLTOpo
- eVFdq8Jm2S1S0bsI80bwPuSEZSWXrr5yh2DFtwzJGl4q31LlclWJZle/N8lguE5UzY5v5UqoS1U
- o2fphoAo46Ua2TsSc2Uo3Wn+yX5qYY3RP4mbG8y/t4iOMfqGGTDGwAkpa6ges3KdsErlIZC4Rw8
- Dat7nOfA46JX0CLJk6/u24vvJL3zg0QV+LDKeJYu1HmWHx92AYm208FX/sxN5DqWF9FDIymfevH
- mwYH+9vmWuOSvRBKH4QOrtCobH/2QJSme1VO8DYqiyv2pHdAtuamMqgSXKi2Fs9ZpM8G5c1ZTjB
- TXDdhzr4nIkr1+vAFpw==
+ a=gowsoOTTUOVcmtlkKump:22 a=P4VcW8-MZ4Ji1alh_TMA:9 a=QEXdDO2ut3YA:10
+ a=zc0IvFSfCIW2DFIPzwfm:22
+X-Proofpoint-ORIG-GUID: e1vU8AOIywQPYuNnB6FKyj3iDfICjInB
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-09-10_05,2026-09-09_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- lowpriorityscore=0 spamscore=0 phishscore=0 malwarescore=0 impostorscore=0
- priorityscore=1501 adultscore=0 suspectscore=0 bulkscore=0 clxscore=1015
+ adultscore=0 malwarescore=0 lowpriorityscore=0 clxscore=1015 bulkscore=0
+ suspectscore=0 phishscore=0 priorityscore=1501 impostorscore=0 spamscore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
  reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609100195
 
-On Mon, Aug 24, 2026 at 8:58=E2=80=AFAM Florian Maillard
-<florian.maillard@mailoo.org> wrote:
+On Mon, Aug 24, 2026 at 10:39=E2=80=AFPM Sean Rhodes <sean@starlabs.systems=
+> wrote:
 >
-> The Realtek RTS522A card reader in the Lenovo ThinkPad X260
-> (subsystem 17aa:504a) incorrectly reports inserted SD cards as
-> write-protected.
+> A UHS session can leave the SD pads and SD18 regulator configured for
+> 1.8V. The power-off path disables card power and suspends the regulator,
+> but does not restore their voltage selection.
 >
-> This causes the MMC core to expose the card as read-only:
+> On the next power-up, this stale state remains until after the MMC core
+> requests its initial signal voltage. Restore the SD pads and SD18 regulat=
+or
+> to 3.3V before enabling card power, as the old rts5139 driver did.
 >
->   mmcblk0: mmc0:aaaa SN256 238 GiB (ro)
+> Tested: StarLite ADL with an RTS5129 tray reader; repeated 1.8V UHS
+>         sessions, power cycles, and tray removal/reinsertion.
+> Tested: StarFighter MTL with an RTS5129 trayless reader; repeated 1.8V
+>         UHS sessions, power cycles, and card removal/reinsertion.
+> Tested: Both systems re-enumerated the card after every cycle.
 >
-> and /sys/block/mmcblk0/ro reports 1.
->
-> Setting MMC_CAP2_NO_WRITE_PROTECT makes the card writable again.
-> Limit the quirk to the affected Lenovo subsystem.
->
-> Assisted-by: ChatGPT:GPT-5.6 Sol
-> Signed-off-by: Florian Maillard <florian.maillard@mailoo.org>
+> Signed-off-by: Sean Rhodes <sean@starlabs.systems>
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for next (or should this be a fix and tagged for stable?), thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 5 +++++
+>  drivers/mmc/host/rtsx_usb_sdmmc.c | 5 +++++
 >  1 file changed, 5 insertions(+)
 >
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pc=
-i_sdmmc.c
-> index 8dfbc62f16..d25d4cb59b 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -1425,6 +1425,11 @@ static void realtek_init_host(struct realtek_pci_s=
-dmmc *host)
->                 mmc->caps =3D mmc->caps | MMC_CAP_AGGRESSIVE_PM;
->         mmc->caps2 =3D MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CY=
-CLE |
->                 MMC_CAP2_NO_SDIO;
-> +
-> +       if (pcr->pci->device =3D=3D 0x522a &&
-> +           pcr->pci->subsystem_vendor =3D=3D PCI_VENDOR_ID_LENOVO &&
-> +           pcr->pci->subsystem_device =3D=3D 0x504a)
-> +               mmc->caps2 |=3D MMC_CAP2_NO_WRITE_PROTECT;
->         mmc->max_current_330 =3D 400;
->         mmc->max_current_180 =3D 800;
->         mmc->ops =3D &realtek_pci_sdmmc_ops;
->
-> base-commit: 388b607d107c07aaade04c7f22f344cab6bdccd3
-> --
-> 2.47.3
->
->
->
+> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_us=
+b_sdmmc.c
+> index bf37fab233cf..d9b33aa79165 100644
+> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> @@ -980,6 +980,11 @@ static int sd_power_on(struct rtsx_usb_sdmmc *host)
+>         }
+>         dev_dbg(sdmmc_dev(host), "%s\n", __func__);
+>         rtsx_usb_init_cmd(ucr);
+> +       /* Start SD init at 3.3V, like the old rts5139 driver. */
+> +       rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, SD_PAD_CTL,
+> +                        SD_IO_USING_1V8, SD_IO_USING_3V3);
+> +       rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, LDO_POWER_CFG,
+> +                        TUNE_SD18_MASK, TUNE_SD18_3V3);
+>         rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_SELECT, 0x07, SD_MOD_SE=
+L);
+>         rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_SHARE_MODE,
+>                         CARD_SHARE_MASK, CARD_SHARE_SD);
