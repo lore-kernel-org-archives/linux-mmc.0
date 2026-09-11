@@ -1,446 +1,160 @@
-Received: from mail-m19731120.qiye.163.com (mail-m19731120.qiye.163.com [220.197.31.120])
+Received: from BL2PR02CU003.outbound.protection.outlook.com (mail-eastusazon11011009.outbound.protection.outlook.com [52.101.52.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF145443E2A
-	for <linux-mmc@vger.kernel.org>; Fri, 11 Sep 2026 07:21:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.120
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789111288; cv=none; b=BYTIapLFe4Bpve+UyQWVpQsBPbGMuhpRtgBjlTOB3xflpm4d0UR4XlYFLxSCKGdP8RroAMlGn6yDeZKbMT7YGFTbMuTeV+aoslj8JzvVO9XGT/5BOh92WBe43hbG5sREmU1m3RwVDGcl5aAV445/j1u2QqPnpRg062Il2laxor4=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789111288; c=relaxed/simple;
-	bh=bjJ1hh8AiRHnAXA0Z6dRXWdAHOjl4Vop2PsOwkF3VmU=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=RTsVwzdFoEhSL1V2Y04B3TjJEcR2woeCNuqyp3MzdmzAeRCaheWhppruQ4HeTyBrbXs5KphFL2MabgNsYUaKIShaeJFRImyVLw0pGfiEPwV9tVc+XS9tCM6bSk65JOmp0pENWjrF91FeZv9GOH3PIU3wJucu2Eyn+CS5mfYuluI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=ACzzxN87; arc=none smtp.client-ip=220.197.31.120
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57811328B62;
+	Fri, 11 Sep 2026 07:36:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.52.9
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789112161; cv=fail; b=aCroTJC7sOz8g1in4MMrPir7ywkbcDm11+WUp0vrQdsL33Yey39+rgC7HmvlysXHIZrN4bI9PeKksdFUJovRG4b/sBv2RkVFCUdaJ8boXdqJtY0lgIhSZ5xrlOx1jO59wS998om/YinGMD/9McKgMyEIRyECLDAWujwNHTy4oQw=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789112161; c=relaxed/simple;
+	bh=G2UPEbSjcJ6z/s5NTHOH7ZzqsjuE+0nVSywTt/5Sg4U=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=BtOjDJRQxZ6JJ1FMzhVXD/YHxFYJO8w2Zw2pMOcLeKoRfN6zASueGqS7B5VJsBZmZDvThCSmYiG13I8G3XaMp0Oeiep0MQgLEh1gtYcvJQp9P55ax/GJbq5SC0Qg2Tfsu/lgklA2WP7ZLzRkYJ3zljAd5ch0InPiBIS9DcXmtYk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=YW0F1rj1; arc=fail smtp.client-ip=52.101.52.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="ACzzxN87"
-Received: from localhost.localdomain (unknown [61.154.14.86])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 4d64b9670;
-	Fri, 11 Sep 2026 14:45:45 +0800 (GMT+08:00)
-From: Shawn Lin <shawn.lin@rock-chips.com>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: linux-mmc@vger.kernel.org,
-	Avri Altman <avri.altman@sandisk.com>,
-	Shawn Lin <shawn.lin@linux.dev>
-Subject: [RFC PATCH 1/4] mmc: core: Add SDIO userspace passthrough character device
-Date: Fri, 11 Sep 2026 14:44:53 +0800
-Message-Id: <1789109096-196082-2-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1789109096-196082-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1789109096-196082-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0aa08f37106f03a4kunma7c49b4e5df208
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVlCSh1DVhgdHx1LGBpKTk8eH1YVFA
-	kWGhdVEwETFhoSFyQUDg9ZV1kYEgtZQVlNSlVKTk9VSk9VQ01ZV1kWGg8SFR0UWUFZT0tIVUpLSU
-	9PT0hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=ACzzxN87IghNO/MD3NIefdeuJPtUxzUvTlCilGeXKZqle/HInHerYrCo1oQP5bGwuVMvwPOSVnFc1vjwLCVDbRm4X5MhdMaS9a4V18SYBBpA+8K11V0ySFHIieyAtmtMme5eD6jg/azgWsXT/hEyZYyHh6yaVjOTmLyjrmVq5cM=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=cJ+N1PBCm2NJrzJACvROmIr4/xFvmBtFlRP/Dbp8Of8=;
-	h=date:mime-version:subject:message-id:from;
+	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="YW0F1rj1"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=U5uTuY4bpjK8GNDUsN0S6IPjs1X48STCqmGQqyEChz7eNKObnwO3sZqKvaaTJm/iJwQXDX6ps79V337OhTCE40EVhMBPKOuW8ixB0RxUvuiP7kgklgSyHI6ahFabGXU6fIfo68pEzmfwTpKCfZX9OzxKLKmmqGx79eKd9/i0dRvLWEMKo2Z3D/UaQOCDxZvyFX5Qj05X4SZ0z9o0Hjy/c6ZzBjYg6eDoXESzS6OgCA5f95af+eENMWOqbvxpn/WbqYB8FkcooIGqYpgn1EJBk4q5TwlIHHrZKLJ9znxHSUDCU7+UScbV1LvCRdb0PFCQ3317y5h5FGtDOWuNnUOQbQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=G2UPEbSjcJ6z/s5NTHOH7ZzqsjuE+0nVSywTt/5Sg4U=;
+ b=JdNcJErD1TqpPDFCN91j4Inn6Qf//N/o5tjODIBmJrmGwmo6FSNOUhIr9mOrOk4ZULI7xIYSTiHEnqgHq2t5PoERKTL6cMvlGlebl/kyqa5IV4LpBL4F/coVCkLDfZnGs2tJSLYPV6zD0AzTFFhTVJ4lE70JDV7qcvSGdfs29HvWN2ky/VbOCxmRSTISOZpk9L3JCUNE6mM7ELRPhVXBwt72bz2FHeAtNVEE4KLZW4/N3aQlZoB9mroq2ROTlvP/TiJ9XFbIm/ela1fLVLnT2TrRbiLDo1EIS2RK0orQuigKBZtFkNwdXSpPlTyJqvuzXVGx2a1vYt+dc0JEU9WiWw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
+ dkim=pass header.d=altera.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=G2UPEbSjcJ6z/s5NTHOH7ZzqsjuE+0nVSywTt/5Sg4U=;
+ b=YW0F1rj1fIrsXm6YT5CJvZnGC1LW0LaJ1xcjq08oo8cXV2WbuRHcWpdP7pBIuwUc+19xFifaTAZabUqdE5tLg/jsI9YO62Kbd8AERIv+I4JHXB9hije8BoGEQ8CQx6fHCYCNHmP5LCHZlSU0WvnZWXPoqE63mKCFLNxWQF87SLIK1GVqDSvqpAYcSTSHbbH53haZbaMsNPHV1fIA9SoHghV836CU0XTpusvI8kiETBWH3ZwuWUOWz/MBkhy3n6gEHiGoG2e0xgIOZTAin2NVeO55kektqs8KJV66dQEeStxTDwshlg4wulBEtVdHBivvo/NwrzDTgP4Zk1092GT/NA==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=altera.com;
+Received: from DM4PR03MB6208.namprd03.prod.outlook.com (2603:10b6:5:39c::19)
+ by DS7PR03MB8292.namprd03.prod.outlook.com (2603:10b6:8:26b::23) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.406.7; Fri, 11 Sep
+ 2026 07:35:57 +0000
+Received: from DM4PR03MB6208.namprd03.prod.outlook.com
+ ([fe80::2216:93ef:67b:9e04]) by DM4PR03MB6208.namprd03.prod.outlook.com
+ ([fe80::2216:93ef:67b:9e04%3]) with mapi id 15.21.0406.005; Fri, 11 Sep 2026
+ 07:35:57 +0000
+Message-ID: <e9559842-8283-457f-97d4-02752f1ed850@altera.com>
+Date: Fri, 11 Sep 2026 13:05:46 +0530
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v7 0/9] mmc: sdhci-cadence: add SD6HC support and Agilex5
+ enablement
+To: linux-mmc@vger.kernel.org
+Cc: ulfh@kernel.org, adrian.hunter@intel.com, krzk+dt@kernel.org,
+ robh@kernel.org, conor+dt@kernel.org, dinguyen@kernel.org,
+ p.zabel@pengutronix.de, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+References: <20260901184828.15653-1-tanmay.kathpalia@altera.com>
+Content-Language: en-US
+From: "Kathpalia, Tanmay" <tanmay.kathpalia@altera.com>
+In-Reply-To: <20260901184828.15653-1-tanmay.kathpalia@altera.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: MA5P287CA0304.INDP287.PROD.OUTLOOK.COM
+ (2603:1096:a01:21e::16) To DM4PR03MB6208.namprd03.prod.outlook.com
+ (2603:10b6:5:39c::19)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|DS7PR03MB8292:EE_
+X-MS-Office365-Filtering-Correlation-Id: 411041c0-81cd-4c06-dc1e-08df0fd75028
+X-MS-Exchange-AtpMessageProperties: SA
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|1800799024|366016|376014|7416014|23010399003|55112099003|22082099003|18002099003|11063799006|56012099006|10067099003;
+X-Microsoft-Antispam-Message-Info:
+	gLohmlVIMEWM33dPsi03UtTEtNqeIZ7vpjrwBLg9bQSK6pLa3rSOkfRwNb6s7vwyaYbrP6hRnMR0ZjlPT/YxV9rl0f9/iTRYTwVXnzPBZdia5e2athI8Osg4CGQ87KYktoioL6lLMdfPnTByOF9jfSBMLVP9+2eFcFULDXWGvuA+WZEsorXybDzpnqlAZaaXTc5ju+GpZ2vxf6dHjsrEhNNVYl4Ki67VBZg/gV67P+l+ddCnlLbdudff1A6ecfEdud+tORm9AsHUlJj+NytXqfDTTLzMWmtIv+eyZwWFSgnW6oUde1679QVRY7w8z84QWZRkQMeMFEJHLfG2Sx/GSZmBqPZdGlxuPE7yJOPS2Q2c4MFPPDWh+lPz3wSNFFWStreW4ZuRdan9Gd1JmbjpXU9CT5KKZZVHqnGs9cdRFhA6mdS0GK161rvkaSNZkyrFrgDJoDfAmsEIbYJu97uvi59AIRxlCHWPfnwzl7gKi3firTwZcpn3NgGR7/VwA7vgccJysDIn+PMsk7Xe7Rv72HGHcmmK9qeN+xJEhV/p3PG0IV37gE9Cw0x/aH2l2ml1OnP8EotqNXUKBoIyZWr9xtYDu8th2WbUyItHO6bWA3V1aGSF7K82+Z5KViwfqjpFJ3+2yZLG8ic/iigmxJnxmLf63P0/6VWLYVuE7DfzBto=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(7416014)(23010399003)(55112099003)(22082099003)(18002099003)(11063799006)(56012099006)(10067099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?SlR4OUZCcTROYXhBc3hXQzhaa3hpMm9KWlQvdTFuM0luS1hSSXduY21wQlhG?=
+ =?utf-8?B?cmI2UVQ3cVJjZko5REhNRVNVTllDQWRsRzI1YXJhV0ZIUlFKSGh4ZlI4amM4?=
+ =?utf-8?B?bFBpcmRFOWZjTUhPUjJOc2dCTXpYRVZjTmd6bFlENkM5VVVHZ2k5UUZBMkhY?=
+ =?utf-8?B?b3FFMUtUVmZXa0cxNFBlNWhkK01mZEMrcVN0R3RJWUlqK0IzS0tFaGM5d0hW?=
+ =?utf-8?B?VWxscnhiYWxhc2FPRDNTZ2dlaU5DS0E2SEdOZmRldjlHMXduMkpYdCtaR3hZ?=
+ =?utf-8?B?NHhJQTVCTXZWOHE1cGorWXFwOXRDL3JPRWJvTGlKVjZEaEZTa1R6L2RBSmJY?=
+ =?utf-8?B?V1U0UitoQlFNL0pNTnZkaVFyU2hZYXNaekpESTg3SUVJcHlsOUVqWHZKTVpX?=
+ =?utf-8?B?OWJlczlsU0xZNFpSVWlRcFpJVlNJbEJJWU5aMEpmaFlieVdsNU9ESFo5TTUx?=
+ =?utf-8?B?dHdEQThZdTlTQlNPQmd1M000RUIzelhoc202RXNPWm9WVmxvL2lleHFCeW9T?=
+ =?utf-8?B?aU1OcTBHbE1rTHR2NEQwRVhQeXllVnF0T0pNNmFqKzF0WEI2Vnlaak4vUEhj?=
+ =?utf-8?B?anZkMTh1VnR6U0ZtSFpTbW1xYnh4cWFLVWtreDNzREVFNjVJZ05GUlpkTDlx?=
+ =?utf-8?B?Qy84RUpIL0FLdnM2QlBBWDNGWDM2TWpWZXExSUtsNm53UVdrbGVLUzRta0hz?=
+ =?utf-8?B?YVhHdGpwWEd0ZTZORE5lZ0pCRFY1M3BZQ3VtVmdLZFZpT2krblFnMzUwbExG?=
+ =?utf-8?B?YnNQWVVnNjhxQjZpclFtbys5RzFYMUU3UXlpNG8wajhidWl2djJxWWZPMW5D?=
+ =?utf-8?B?QUZocGFWVWg3RWdTL3ZMT1phRmpONFA1VnpBUzV2WncweWhzUDA3M01WK2U3?=
+ =?utf-8?B?dzl3UmtkcWovb3VuQWNTMEpGWTJNY2hhN2ROamgyWE9vWkJ2L1ZHMVZMSzFU?=
+ =?utf-8?B?MzFvTFFSR0RRbmZkNk5XelZaMVZhSUZRUVhISUQ4S3VDSisySnBjb0JYUkdo?=
+ =?utf-8?B?MXppQlRBODNZaW8yOUxOeEhCc0NlWFpnakRaK2twSFY2TUQvUXRlYWwvZUl5?=
+ =?utf-8?B?dXFPZmZ4TWd3RlVoUDVKa2Q3ajRJSUhkV1J3eTI0RmxvVkpwd2REZnEweFJL?=
+ =?utf-8?B?eklKVkI0ck1oTWNaT1hJMWtLY3BNbjRLVmRxUWMyTzlKa05oUCtYbnlES0ZD?=
+ =?utf-8?B?b3VhcFk5OFFFamxaMUtYTGpwSUYvbitWbmwrZzBuUGlkRmJ5MXBvUGxHeFg1?=
+ =?utf-8?B?ak15Mk9UelZzNGNMWUZKQVdrSVNTL2ltTkpuZElXMGZHMkNsQ0krQkhBRWVy?=
+ =?utf-8?B?NFZoRXMxZlNTY3Bpa0VLVTRtclVrMkw5dHJLV0dsMzkyNjkrYTIwUElPeStZ?=
+ =?utf-8?B?RWc0QWw5eU04d3hnQ1Y1SjVyWjJza1pKTGFkTHA4cGZiUHlhclpzUktYNmVk?=
+ =?utf-8?B?RzlscEFYSC8zK1BsTzJSSEdaTHFlOXRvWmo1RDEyUXpTTC9UNWs4aEZ0bXJu?=
+ =?utf-8?B?cXYxaCtPQVJXOFgvMlF4TjhpM1JEUlBxRXZYMFArOEt5N3Ria3dLOGI4WFEr?=
+ =?utf-8?B?Q0tIbUJBS0F6QWc1dmFrUXF3dSttRVdEK2V0U1lGMzlPMFArdmNpaVhLTjZD?=
+ =?utf-8?B?cXkvUXN6aktJSXd3ai9ubVgzNGtDS0I1ZC9rOCt0OEU0bkJvM3pDOXFPVVVR?=
+ =?utf-8?B?eWdGeXdVSXFpMGxjMGVMUXdvdE9ZSUpZalBDdkdQWDl4N0RXd1hQY3hsaTZi?=
+ =?utf-8?B?eDRLRnpzS2FQcFo4Yk1WQ0s1RWRDdU5rc3VkZERQbjFkRjkxOXRrSW9GSXNP?=
+ =?utf-8?B?YjZJY0VvdzM3bTdXK0V6czhncW9Oc0Z0dDgzZDVqOUwreVFsMldlM0dmVXRI?=
+ =?utf-8?B?am42Y3V6Rk42cmppTVpKTzBwMDAwSTdTUEt4aTMwUTB3cDNWcjVuVlN0a2cx?=
+ =?utf-8?B?RTJuK1psZ3kzWEZ5dWZtN1VEcWdHTFpqUjJNTjBEZGQ0WDJFcC9zM0JmcFF3?=
+ =?utf-8?B?TTdUR1NUbCtuWXBacWxDVHFjdXVSYlI5QzhSQUtLaXFYNzhDMWhVV3VFVVdK?=
+ =?utf-8?B?WDZzMDR0NHJqL1F0WDVoNFplRUNOWnh1V2hyZTBnNzFhWHd0b09jS3lHSWZ6?=
+ =?utf-8?B?UFR0YmZKWTNzalVXZ2xMaUUwL2lBRThXeXhKTEFmUmxQaWk1VTR4ZitmU29F?=
+ =?utf-8?B?WUtnekNBL1hBaHdkZnEzMXhqK0YxaW5qT0F0RzNNTVA2U01vL2Vua2hHSUY2?=
+ =?utf-8?B?OStvSTBmWmdWR0hQTlpMc05BOFYvUkFZUmw4Qy9HOFdOR1RHZXAwQ25SR0ZH?=
+ =?utf-8?B?QVR1cTdpNUg3YzJxbUdob2YxTnVkb1NmMkk4dGNtMzhUWUtuM2U3ZFRoaVBX?=
+ =?utf-8?Q?EvW9uIhhG7dM1RWY=3D?=
+X-OriginatorOrg: altera.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 411041c0-81cd-4c06-dc1e-08df0fd75028
+X-MS-Exchange-CrossTenant-AuthSource: DM4PR03MB6208.namprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 11 Sep 2026 07:35:57.2443
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: a7TTkQDop/1ttMaa6SqomsV1vRW8zy8pGRHhax1hTrcfb9caAac4u/eTKcAc8USwXnzupv8iKC08T8deorEicIVkWpaYvtSpYudZKCUPgOI=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS7PR03MB8292
 
-From: Shawn Lin <shawn.lin@linux.dev>
+Hi Ulf, Dinh,
 
-Expose a character device (/dev/mmcX:YYYY:FN) for every SDIO
-function, providing userspace access to the SDIO register space:
+A gentle ping on this series.
 
-  - SDIO_IOC_RW issues CMD52: single byte read/write. Function 0
-    addresses the card common area (CCCR/FBR); with the raw flag the
-    register is read back after being written.
-  - SDIO_IOC_RW_EXT issues CMD53 in byte mode for 1..512 bytes.
+All comments from the earlier revisions have been addressed. Patch 1
+carries a Reviewed-by from Krzysztof Kozlowski, patch 4 an Acked-by
+from Conor Dooley, and patches 6-9 an Acked-by from Adrian Hunter.
+Thanks to everyone who reviewed it.
 
-Intended for debugging and factory test tools on systems without a
-function driver (the userspace counterpart is a new 'mmc sdio'
-command in mmc-utils). The ioctls require CAP_SYS_ADMIN, are gated
-behind CONFIG_MMC_SDIO_CDEV and take the host claim for the duration
-of each command, since raw access can disturb the state a bound
-function driver maintains.
+Could you please pick up the patches that belong in your trees?
 
-Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
----
- drivers/mmc/Kconfig                 |  11 ++
- drivers/mmc/core/Makefile           |   1 +
- drivers/mmc/core/sdio_bus.c         |  12 +-
- drivers/mmc/core/sdio_cdev.c        | 189 ++++++++++++++++++++++++++++
- drivers/mmc/core/sdio_cdev.h        |  21 ++++
- include/linux/mmc/sdio_func.h       |   4 +
- include/uapi/linux/mmc/sdio_ioctl.h |  48 +++++++
- 7 files changed, 284 insertions(+), 2 deletions(-)
- create mode 100644 drivers/mmc/core/sdio_cdev.c
- create mode 100644 drivers/mmc/core/sdio_cdev.h
- create mode 100644 include/uapi/linux/mmc/sdio_ioctl.h
+Both dependencies noted in the cover letter are now in mainline:
+ab45ecfab540 ("dt-bindings: reset: altr: add COMBOPHY_RESET for
+Agilex5") since v7.2-rc4, and 10cf797f3f8a ("arm64: dts: socfpga:
+agilex5: Enable the SMMU") since v7.3-rc1. The patches were generated on
+mmc/next, which predates both, so those commits need to be merged first
+if the DT patches are applied there.
 
-diff --git a/drivers/mmc/Kconfig b/drivers/mmc/Kconfig
-index 2436eb4996a4..5d0ddc5db281 100644
---- a/drivers/mmc/Kconfig
-+++ b/drivers/mmc/Kconfig
-@@ -13,6 +13,17 @@ menuconfig MMC
- 	  If you want MMC/SD/SDIO support, you should say Y here and
- 	  also to your specific host controller driver.
- 
-+config MMC_SDIO_CDEV
-+	bool "SDIO userspace passthrough character device"
-+	depends on MMC
-+	default y
-+	help
-+	  Expose a character device (/dev/mmcX:YYYY:FN) for every SDIO
-+	  function, providing CMD52/CMD53 register access to userspace
-+	  via ioctl. Intended for debugging and factory test tools;
-+	  raw access requires CAP_SYS_ADMIN and can disturb the state
-+	  a bound function driver maintains.
-+
- if MMC
- 
- source "drivers/mmc/core/Kconfig"
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 15b067e8b0d1..485b4f5a9dbb 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -4,6 +4,7 @@
- #
- 
- obj-$(CONFIG_MMC)		+= mmc_core.o
-+obj-$(CONFIG_MMC_SDIO_CDEV)	+= sdio_cdev.o
- mmc_core-y			:= core.o bus.o host.o \
- 				   mmc.o mmc_ops.o sd.o sd_ops.o \
- 				   sdio.o sdio_ops.o sdio_bus.o \
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 4b07098c33c3..06fc26cb3377 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -23,6 +23,7 @@
- 
- #include "core.h"
- #include "card.h"
-+#include "sdio_cdev.h"
- #include "sdio_cis.h"
- #include "sdio_bus.h"
- 
-@@ -400,9 +401,12 @@ int sdio_add_func(struct sdio_func *func)
- 	sdio_acpi_set_handle(func);
- 	device_enable_async_suspend(&func->dev);
- 	ret = device_add(&func->dev);
--	if (ret == 0)
-+	if (ret == 0) {
- 		sdio_func_set_present(func);
- 
-+		sdio_cdev_create(func);
-+	}
-+
- 	return ret;
- }
- 
-@@ -414,8 +418,12 @@ int sdio_add_func(struct sdio_func *func)
-  */
- void sdio_remove_func(struct sdio_func *func)
- {
--	if (sdio_func_present(func))
-+	if (sdio_func_present(func)) {
-+		sdio_cdev_destroy(func);
-+
- 		device_del(&func->dev);
-+	}
-+
- 
- 	of_node_put(func->dev.of_node);
- 	put_device(&func->dev);
-diff --git a/drivers/mmc/core/sdio_cdev.c b/drivers/mmc/core/sdio_cdev.c
-new file mode 100644
-index 000000000000..b48e3d22694a
---- /dev/null
-+++ b/drivers/mmc/core/sdio_cdev.c
-@@ -0,0 +1,189 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * SDIO userspace passthrough character device.
-+ *
-+ * Copyright (C) 2026 Shawn Lin <shawn.lin@linux.dev>
-+ *
-+ * Every SDIO function gets a /dev/<function name> node (e.g.
-+ * /dev/mmc1:0001:1); ioctls on the node issue CMD52 (single register
-+ * access, function 0 included for the CCCR/FBR) and CMD53 (extended
-+ * multi-byte access) to the card.
-+ *
-+ * Raw access can disturb the state a bound function driver maintains,
-+ * so the ioctls require CAP_SYS_ADMIN and take the host claim for the
-+ * duration of each command.
-+ */
-+#include <linux/capability.h>
-+#include <linux/fs.h>
-+#include <linux/miscdevice.h>
-+#include <linux/module.h>
-+#include <linux/pm_runtime.h>
-+#include <linux/slab.h>
-+#include <linux/uaccess.h>
-+
-+#include <uapi/linux/mmc/sdio_ioctl.h>
-+
-+#include <linux/mmc/card.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/sdio_func.h>
-+
-+#include "sdio_ops.h"
-+
-+static int sdio_cdev_rw(struct sdio_func *func,
-+			struct sdio_ioc_rw __user *uarg)
-+{
-+	struct sdio_ioc_rw rw;
-+	u8 data = 0;
-+	int err, ret;
-+
-+	if (!capable(CAP_SYS_ADMIN))
-+		return -EPERM;
-+
-+	if (copy_from_user(&rw, uarg, sizeof(rw)))
-+		return -EFAULT;
-+
-+	if (rw.fn > 7)
-+		return -EINVAL;
-+
-+	pm_runtime_get_sync(&func->dev);
-+	sdio_claim_host(func);
-+	if (rw.write && !rw.raw) {
-+		/*
-+		 * Plain write: pass a NULL out so the kernel does not set
-+		 * the CMD52 RAW bit - out doubles as the RAW flag there.
-+		 */
-+		err = mmc_io_rw_direct(func->card, 1, rw.fn, rw.addr,
-+				       rw.data, NULL);
-+	} else {
-+		err = mmc_io_rw_direct(func->card, rw.write, rw.fn, rw.addr,
-+				       rw.write ? rw.data : 0, &data);
-+	}
-+	sdio_release_host(func);
-+	pm_runtime_put_autosuspend(&func->dev);
-+
-+	if (err) {
-+		dev_err(&func->dev, "CMD52 fn %u addr 0x%05x failed: %d\n",
-+			rw.fn, rw.addr, err);
-+		return err;
-+	}
-+
-+	if (!rw.write || rw.raw)
-+		rw.data = data;
-+	ret = copy_to_user(uarg, &rw, sizeof(rw));
-+
-+	return ret ? -EFAULT : 0;
-+}
-+
-+static int sdio_cdev_rw_ext(struct sdio_func *func,
-+			    struct sdio_ioc_rw_ext __user *uarg)
-+{
-+	struct sdio_ioc_rw_ext rw;
-+	u8 *buf;
-+	int err;
-+
-+	if (!capable(CAP_SYS_ADMIN))
-+		return -EPERM;
-+
-+	if (copy_from_user(&rw, uarg, sizeof(rw)))
-+		return -EFAULT;
-+
-+	if (rw.fn == 0 || rw.fn > 7)
-+		return -EINVAL;
-+	if (!rw.count || rw.count > 512)
-+		return -EINVAL;
-+
-+	pm_runtime_get_sync(&func->dev);
-+
-+	/*
-+	 * Stage through a kmalloc'd buffer: rw.data lives on the ioctl
-+	 * handler's stack, which is vmalloc'd with CONFIG_VMAP_STACK -
-+	 * virt_to_page() on a vmalloc address is invalid, and the PIO
-+	 * and DMA paths of the host drivers both derive struct pages
-+	 * from the data buffer.
-+	 */
-+	buf = kmalloc(rw.count, GFP_KERNEL);
-+	if (!buf)
-+		return -ENOMEM;
-+
-+	if (rw.write)
-+		memcpy(buf, rw.data, rw.count);
-+
-+	sdio_claim_host(func);
-+	err = mmc_io_rw_extended(func->card, rw.write, rw.fn, rw.addr,
-+				 rw.incr_addr, buf, 0, rw.count);
-+	sdio_release_host(func);
-+	pm_runtime_put_autosuspend(&func->dev);
-+
-+	if (!err && !rw.write)
-+		memcpy(rw.data, buf, rw.count);
-+
-+	kfree(buf);
-+
-+	if (err) {
-+		dev_err(&func->dev, "CMD53 fn %u addr 0x%05x failed: %d
-+",
-+			rw.fn, rw.addr, err);
-+		return err;
-+	}
-+
-+	return 0;
-+}
-+
-+static long sdio_cdev_ioctl(struct file *file, unsigned int cmd,
-+			    unsigned long arg)
-+{
-+	struct miscdevice *misc = file->private_data;
-+	struct sdio_func *func = container_of(misc->parent,
-+					      struct sdio_func, dev);
-+
-+	switch (cmd) {
-+	case SDIO_IOC_RW:
-+		return sdio_cdev_rw(func, (struct sdio_ioc_rw __user *)arg);
-+	case SDIO_IOC_RW_EXT:
-+		return sdio_cdev_rw_ext(func,
-+					(struct sdio_ioc_rw_ext __user *)arg);
-+	default:
-+		return -ENOTTY;
-+	}
-+}
-+
-+static const struct file_operations sdio_cdev_fops = {
-+	.owner		= THIS_MODULE,
-+	.unlocked_ioctl	= sdio_cdev_ioctl,
-+};
-+
-+int sdio_cdev_create(struct sdio_func *func)
-+{
-+	struct miscdevice *misc;
-+	int ret;
-+
-+	misc = kzalloc(sizeof(*misc), GFP_KERNEL);
-+	if (!misc)
-+		return -ENOMEM;
-+
-+	misc->minor = MISC_DYNAMIC_MINOR;
-+	misc->name = dev_name(&func->dev);
-+	misc->fops = &sdio_cdev_fops;
-+	misc->parent = &func->dev;
-+	func->miscdev = misc;
-+
-+	ret = misc_register(func->miscdev);
-+	if (ret) {
-+		dev_err(&func->dev, "failed to register /dev/%s: %d\n",
-+			dev_name(&func->dev), ret);
-+		kfree(misc);
-+		func->miscdev = NULL;
-+	}
-+
-+	return ret;
-+}
-+
-+void sdio_cdev_destroy(struct sdio_func *func)
-+{
-+	if (!func->miscdev)
-+		return;
-+
-+	misc_deregister(func->miscdev);
-+	kfree(func->miscdev);
-+	func->miscdev = NULL;
-+}
-diff --git a/drivers/mmc/core/sdio_cdev.h b/drivers/mmc/core/sdio_cdev.h
-new file mode 100644
-index 000000000000..93bac8caf073
---- /dev/null
-+++ b/drivers/mmc/core/sdio_cdev.h
-@@ -0,0 +1,21 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+#ifndef _MMC_CORE_SDIO_CDEV_H
-+#define _MMC_CORE_SDIO_CDEV_H
-+
-+#include <linux/mmc/sdio_func.h>
-+
-+#ifdef CONFIG_MMC_SDIO_CDEV
-+int sdio_cdev_create(struct sdio_func *func);
-+void sdio_cdev_destroy(struct sdio_func *func);
-+#else
-+static inline int sdio_cdev_create(struct sdio_func *func)
-+{
-+	return 0;
-+}
-+
-+static inline void sdio_cdev_destroy(struct sdio_func *func)
-+{
-+}
-+#endif
-+
-+#endif /* _MMC_CORE_SDIO_CDEV_H */
-diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-index 5d63a6465b0d..6d0157949832 100644
---- a/include/linux/mmc/sdio_func.h
-+++ b/include/linux/mmc/sdio_func.h
-@@ -57,6 +57,10 @@ struct sdio_func {
- 	const char		**info;		/* info strings */
- 
- 	struct sdio_func_tuple *tuples;
-+
-+#ifdef CONFIG_MMC_SDIO_CDEV
-+	struct miscdevice	*miscdev;	/* userspace passthrough node */
-+#endif
- };
- 
- #define sdio_func_present(f)	((f)->state & SDIO_STATE_PRESENT)
-diff --git a/include/uapi/linux/mmc/sdio_ioctl.h b/include/uapi/linux/mmc/sdio_ioctl.h
-new file mode 100644
-index 000000000000..d099bec8047b
---- /dev/null
-+++ b/include/uapi/linux/mmc/sdio_ioctl.h
-@@ -0,0 +1,48 @@
-+/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
-+#ifndef _UAPI_LINUX_MMC_SDIO_IOCTL_H
-+#define _UAPI_LINUX_MMC_SDIO_IOCTL_H
-+
-+#include <linux/ioctl.h>
-+#include <linux/types.h>
-+
-+/*
-+ * SDIO userspace passthrough interface, issued on the character device
-+ * exposed by each SDIO function (/dev/mmcX:YYYY:FN). Requires
-+ * CAP_SYS_ADMIN. Raw access while a function driver is bound can
-+ * disturb the state the driver maintains.
-+ */
-+
-+/*
-+ * CMD52: single byte read/write. fn 0 addresses the card common area
-+ * (CCCR/FBR), functions 1-7 address the per-function registers. With
-+ * raw set, the register is read back after being written and data
-+ * carries the value actually read.
-+ */
-+struct sdio_ioc_rw {
-+	__u8 write;		/* 1 = write, 0 = read */
-+	__u8 fn;		/* function number, 0..7 */
-+	__u8 raw;		/* read back after write */
-+	__u8 data;		/* byte to write / value read */
-+	__u32 addr;		/* SDIO register address */
-+};
-+
-+/*
-+ * CMD53: extended (multiple byte) read/write in byte mode, 1..512
-+ * bytes. Function 0 is not valid for CMD53.
-+ */
-+struct sdio_ioc_rw_ext {
-+	__u8 write;		/* 1 = write, 0 = read */
-+	__u8 fn;		/* function number, 1..7 */
-+	__u8 incr_addr;		/* 1 = incrementing address, 0 = fixed */
-+	__u8 reserved1;
-+	__u32 addr;		/* SDIO register address */
-+	__u16 count;		/* number of bytes, 1..512 */
-+	__u16 reserved2;
-+	__u8 data[512];		/* data to write / buffer for read */
-+};
-+
-+#define SDIO_IOC_MAGIC		'S'
-+#define SDIO_IOC_RW		_IOWR(SDIO_IOC_MAGIC, 0x52, struct sdio_ioc_rw)
-+#define SDIO_IOC_RW_EXT		_IOWR(SDIO_IOC_MAGIC, 0x53, struct sdio_ioc_rw_ext)
-+
-+#endif /* _UAPI_LINUX_MMC_SDIO_IOCTL_H */
--- 
-2.25.1
+Thanks,
+Tanmay
 
+On 9/2/2026 12:18 AM, Tanmay Kathpalia wrote:
+> This series adds support for the Cadence SD6HC (sixth-generation) SDHCI
+> controller and enables it on Altera Agilex5 SoCs.
+>
