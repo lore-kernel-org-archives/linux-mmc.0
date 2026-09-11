@@ -1,114 +1,188 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mail-m15579.qiye.163.com (mail-m15579.qiye.163.com [101.71.155.79])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1080C42E8F8;
-	Fri, 11 Sep 2026 07:04:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C62B449B2D
+	for <linux-mmc@vger.kernel.org>; Fri, 11 Sep 2026 07:21:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.79
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789110293; cv=none; b=B9o7ZoQP+IBFUavL0oZUzyDwSHhFecTv/p74r1KVYIs+gg06A7lbyr57thkfK8aLCqKi5mFL964PBE+sbq6WtZ+RQkfccZsbO12iiqgSQkp0M2tq4vCC1Gg1t7BnP11D2pDVPxEdvJ5VBNrBvNVK8xI37iwzTFIAntQ9RCr51wA=
+	t=1789111283; cv=none; b=HIS+NEfG/8NpB7vT8Hx16Z42xkAoqQD76F+1NhciKRRIrXMbFMxDCjE85g6vyFeM4dBmLkOfgTgBLIHpeBER9N704JEeSEFwhmx6Gz+HN3MmOuspvwrzp8TRpNpZ9FfSpXxeGQtREwd1gcDlXmd7zSfrQT81TNwzZuzQd+4kyec=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789110293; c=relaxed/simple;
-	bh=5wjjclgMQHcLBZziHA24E6wMzIJIbKl/2zFWVYpkc/8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=PjMgdclmdrNlrxuGEK/J89jA8lzK4Z3cHJ+nDEx3sLHv6/6SXKiKx7NPCd9Uzivrw0ZUjmsWa0dxhLIKP0IF4X381pQPtZJBqxS28nYyy1/yDAnpbGhREo96RV7ePp9oCiCRNY5c0J+A8BZ0PL60xOfX8cT+ARxiRLnvyjZFaGg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EvJnAOn2; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789111283; c=relaxed/simple;
+	bh=EyMbagwZAMrqPyXh2Odo7NMiz5JZU5Ke1yXp6tPdaBE=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=Oy5m1veJOCca4HOl+6mOikBTVy+Ffv38p78eDjB+ReJgut+dwrjwLI9P6G9dLMw4YIVnpGtVSxZy/sD6mhOeT+f712W7U7O4NDbZpr/j+jP/4xP8WclvQPbie5b//dpygqVhPMK9Ks2R1T/td9AMiOnvF5HvR+dHksIBH3H8mm8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=BeB+ZyFO; arc=none smtp.client-ip=101.71.155.79
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EvJnAOn2"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ECA011F000FF;
-	Fri, 11 Sep 2026 07:04:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789110282;
-	bh=5wjjclgMQHcLBZziHA24E6wMzIJIbKl/2zFWVYpkc/8=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=EvJnAOn2t5c2JyRwCjOcrewLe6nb9xlMWqS/EbwJbHziNIcmH3pvJRGNqvuJyUP//
-	 +iHGwlbINk8DvJOJP64VTvFZxYgQQEsDajKkZkcGneN4Zs/nVq750P9jk3UtLwdJgq
-	 xrafAah+Ur3KHzoFsl1cTsogFQuPBSE/N2TnSdrZkqMpWpeMgKoYm09wbW8waKBfCO
-	 YqX8r7EUIT4Noq7OeFs3IKhPbC/3ab457Yk0megOUohvcT1ZVXrv3sUpjyuq5t6ujZ
-	 RlcF3uFg4z5+nH8VX8niwT2XPd5m5us56ib8MLQfMTkb6a5iu2adO2H1l/WkqNmT/Y
-	 32Jo5LY4yls8g==
-Received: from johan by xi.lan with local (Exim 4.99.4)
-	(envelope-from <johan@kernel.org>)
-	id 1x4vJP-00000002paD-15Jx;
-	Fri, 11 Sep 2026 09:04:39 +0200
-Date: Fri, 11 Sep 2026 09:04:39 +0200
-From: Johan Hovold <johan@kernel.org>
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>,
-	Ulf Hansson <ulfh@kernel.org>, Jakov Novak <jakovnovak30@gmail.com>,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-kernel-mentees@lists.linux.dev,
-	Guangshuo Li <lgs201920130244@gmail.com>,
-	Runyu Xiao <runyu.xiao@seu.edu.cn>,
-	Shuah Khan <skhan@linuxfoundation.org>,
-	syzbot+1ee4f3b9228e35f14677@syzkaller.appspotmail.com
-Subject: Re: [PATCH] mmc: vub300: fix sleeping function call from invalid
- context in vub300_inactivity_timer_expired
-Message-ID: <aqOoBwBav8JZhMQ9@hovoldconsulting.com>
-References: <20260816153809.7067-1-jakovnovak30@gmail.com>
- <aoLCr8JEYaYxcJcQ@hovoldconsulting.com>
- <CAMuHMdU_Rx4ZGi9SsNxKUDyYmV-GbD8rD9NMVzYginBMXdZDMg@mail.gmail.com>
- <ap7CaVj82BJZgjf6@hovoldconsulting.com>
- <CAMuHMdX6JfqpLMGDQJSQ8E8XNobRwr16LOzuphPt3Afs-OZdJA@mail.gmail.com>
- <aqEDb0THnCM-Q_Vy@hovoldconsulting.com>
- <aqGWWhvL5CKH2mgx@shikoro>
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="BeB+ZyFO"
+Received: from localhost.localdomain (unknown [61.154.14.86])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 4d64b9645;
+	Fri, 11 Sep 2026 14:45:37 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	Avri Altman <avri.altman@sandisk.com>,
+	Shawn Lin <shawn.lin@linux.dev>
+Subject: [RFC PATCH 0/4] Add SDIO userspace passthrough support (kernel cdev + mmc-utils)
+Date: Fri, 11 Sep 2026 14:44:52 +0800
+Message-Id: <1789109096-196082-1-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+X-HM-Tid: 0aa08f36ee5103a4kunma7c49b4e5df1aa
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVkaGR9LVkgeGksZSR4aSk9NSFYVFA
+	kWGhdVEwETFhoSFyQUDg9ZV1kYEgtZQVlNSlVKTk9VSk9VQ01ZV1kWGg8SFR0UWUFZT0tIVUpLSU
+	9PT0hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=BeB+ZyFOpEzRobcJGu6zat/O176IOmima2wE2kjhffRsa6XNvWOBiRNgpZlRux3mtzitIallMe66S1P2K8Fassb5qt+VHz2/xcFoj7RZ7ftXBehN5vHX2RRELqwEyt3e4WIVGU6YRKFEY+hVTWu8zxjvBLua5xwabz9pnAT28ek=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=IBsK0D/ReBzPbJQbNDeG0eds+EAmpQjPAwfqpDy3wxs=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="ypLbD7kLLG8T2WMv"
-Content-Disposition: inline
-In-Reply-To: <aqGWWhvL5CKH2mgx@shikoro>
 
+From: Shawn Lin <shawn.lin@linux.dev>
 
---ypLbD7kLLG8T2WMv
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hi Ulf
 
-On Wed, Sep 09, 2026 at 07:24:46PM +0200, Wolfram Sang wrote:
->=20
-> > > > Sure, but should you be scheduling rescan work before all resources=
- have
-> > > > been set up and the host has been registered?
-> > >=20
-> > > I would like to defer that question to the TMIO experts.
->=20
-> From a high level view, independently of TMIO/SDHI...
->=20
-> > Are they on CC?
-> >=20
-> > Ulf, perhaps you can take a look at this? It seems wrong to enable
-> > interrupts and trigger rescans before the host controller has been set
-> > up and registered.
->=20
-> ... it is always a good practice to enable irqs only when the device is
-> fully set up. From a glimpse, this seems to be the case here as well.
->=20
-> It needs serious testing, though. SDHI is a complex, organically grown
-> mass of code. There might be subtle side effects. It should still be
-> worth it IMO. I can put it on my todo list, but no promises...
+This RFC series adds raw userspace access to the SDIO register space,
+spanning two projects and therefore threaded into a single series:
 
-Thanks for taking a look. I guess we should fix this inconsistency in
-MMC core eventually, but that the vub300 needs to be reworked to handle
-this quirk in the mean time.
+  - Patch 1 (kernel tree): a passthrough character device exposing
+    CMD52/CMD53 to userspace for every SDIO function.
 
-If only to stop the flood of LLM generated fixes to the syzbot report...
+  - Patches 2-4 (mmc-utils tree): SDIO enumeration in 'mmc list'
+    plus 'mmc sdio' commands using the new interface, i.e. the first
+    userspace consumer of the kernel patch.
 
-Johan
+They are sent together so the kernel UAPI and its user can be reviewed
+as a whole. If you prefer, I am happy to split them into independent
+threads per project.
 
---ypLbD7kLLG8T2WMv
-Content-Type: application/pgp-signature; name=signature.asc
+=== Motivation ===
 
------BEGIN PGP SIGNATURE-----
+SDIO cards are normally driven by function drivers (brcmfmac,
+mwifiex, rtw88_8723bs, ...), but bring-up, debugging and factory
+test frequently need to poke the SDIO register space directly:
+CCCR/FBR in function 0, or vendor registers before any function
+driver is bound, and some deployments, notably lightweight IoT
+boards, want to handle the SDIO function entirely from userspace.
+Today the only way is to write a tiny kernel driver per device.
 
-iJEEABYKADkWIQQHbPq+cpGvN/peuzMLxc3C7H1lCAUCaqOoAxsUgAAAAAAEAA5t
-YW51MiwyLjUrMS4xMiwyLDIACgkQC8XNwux9ZQjVSwEAxhUSOYohLwgwRjbyWmph
-LRJqFOQ5mdeMUjtJjqfls5QBAJg938/Rjigc5olijd6lXoUhvwQAtrP6iVEZ2z8t
-EIwF
-=3HVw
------END PGP SIGNATURE-----
+eMMC and SD already have userspace tooling in mmc-utils; SDIO is
+conspicuously absent from it.
 
---ypLbD7kLLG8T2WMv--
+=== Why not lssdio? ===
+
+Standalone SDIO enumeration tooling already exists: the lssdio script
+of the sdioutils project [1], and the sdio.ids database proposed here
+comes from that very project. Still, I would rather grow mmc-utils
+than use lssdio, for two reasons:
+
+  - Userspace tooling of a subsystem is conventionally unified:
+    USB has lsusb, PCI has lspci, and MMC/SD cards are already
+    enumerated by 'mmc' from mmc-utils. SDIO devices live on the
+    same subsystem, so extending 'mmc list' is their natural home:
+    one tool, one consistent output format, one place to maintain.
+
+  - lssdio is a standalone perl script, and SDIO devices are mass
+    deployed in lightweight IoT/embedded systems where a perl
+    runtime costs 10-20MB of storage - a non-starter there. mmc-utils
+    is a tiny C binary already present on most boards shipping eMMC
+    or SD, so SDIO support comes essentially for free, and the
+    sdio.ids database it needs is a few KB.
+
+=== The patches ===
+
+Patch 1 (kernel tree) adds the passthrough interface, patches 2-4
+(mmc-utils tree) are its userspace side:
+
+  - 1/4: Behind CONFIG_MMC_SDIO_CDEV, every SDIO function gets a
+    /dev/mmcX:YYYY:FN node with two ioctls: SDIO_IOC_RW issues CMD52
+    for single byte read/write - function 0 addresses the card
+    common area (CCCR/FBR), a raw flag reads the register back
+    after write - and SDIO_IOC_RW_EXT issues CMD53 in byte mode for
+    1..512 bytes. The ioctls require CAP_SYS_ADMIN and take the
+    host claim for the duration of each command, since raw access
+    can disturb the state a bound function driver maintains.
+
+  - 2-4: mmc-utils learns about SDIO end to end. 'mmc list' now
+    enumerates SDIO cards one row per function, decoding vendor/
+    device/class ids through a new sdio.ids database imported from
+    the sdioutils project (see "Why not lssdio?" above for why this
+    lives in mmc-utils). New 'mmc sdio read/write' commands issue
+    CMD52 (single byte, function 0 included), and 'mmc sdio
+    xread/xwrite' issue CMD53 for multi-byte access - hex bytes on
+    the command line, or a binary payload via the @file form.
+    Example session on the RTL8723BS board:
+
+      # mmc list
+      DEVICE         DEV                 TYPE  MANUFACTURER                PRODUCT                                  REV   CLASS  SERIAL  DATE
+      mmc0:0001:1    /dev/mmc0:0001:1    SDIO  Realtek Semiconductor Corp. RTL8723BS [Rockchip] (WiFi 802.11b/g/n)  FF    WLAN   -       -
+      mmc0:0001:2    /dev/mmc0:0001:2    SDIO  Realtek Semiconductor Corp. Unlisted(0xc822)                         FF    00     -       -
+
+      # mmc sdio read /dev/mmc0:0001:1 0 0x0
+      fn 0 addr 0x00000: 0x43 (67)
+
+      # mmc sdio xwrite /dev/mmc0:0001:1 1 0x1000 0xaa 0x55 0x5a 0xa5
+      fn 1 addr 0x01000 wrote 4 bytes
+
+=== Testing ===
+
+Tested the full stack (cdev + all mmc commands) on a board with a
+Realtek RTL8723BS wireless module (one listed and one yet unlisted
+function);
+
+=== Open questions ===
+
+  - Device node naming: /dev/mmcX:YYYY:FN reuses dev_name() of the
+    SDIO function device, consistent with mmcblk naming. Any
+    objections from a udev/systemd point of view?
+  - UAPI: SDIO_IOC_RW_EXT embeds a 512-byte buffer in the ioctl
+    struct to keep the API dead simple; a user-pointer variant would
+    avoid the copy for larger transfers but CMD53 byte mode tops out
+    at 512 bytes anyway. Reasonable?
+  - The ioctls require CAP_SYS_ADMIN since raw access can disturb a
+    bound function driver. Is that the right knob, or should this
+    additionally/alternatively refuse access when a function driver
+    is bound?
+  - 2/4 adds a CLASS column to the existing 'mmc list' table (shown
+    as "-" for MMC/SD). Is changing the existing output acceptable?
+
+[1] lssdio announcement on linux-mmc:
+    https://lore.kernel.org/linux-mmc/20230214195702.ungo5roxliq7pjas@pali/
+
+Shawn Lin (4):
+  mmc: core: Add SDIO userspace passthrough character device
+  mmc-utils: lsmmc: Add SDIO device support to the list command
+  mmc-utils: Add sdio read/write commands for CMD52 access
+  mmc-utils: Add sdio xread/xwrite commands for CMD53 access
+
+Patch 1, against the mmc tree:
+
+ drivers/mmc/Kconfig                 |  11 +++
+ drivers/mmc/core/Makefile           |   1 +
+ drivers/mmc/core/sdio_bus.c         |  12 ++-
+ drivers/mmc/core/sdio_cdev.c        | 189 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/sdio_cdev.h        |  21 ++++
+ include/linux/mmc/sdio_func.h       |   4 +
+ include/uapi/linux/mmc/sdio_ioctl.h |  48 +++++++++
+ 7 files changed, 284 insertions(+), 2 deletions(-)
+
+Patches 2-4, against mmc-utils:
+
+ Makefile       |   4 +-
+ docs/HOWTO.rst |  29 +++++-
+ lsmmc.c        | 286 ++++++++++++++++++++++++++++++++++++++++++++++++++++++---
+ man/mmc.1      |  20 ++++
+ mmc.c          |  25 +++++
+ mmc.h          |  26 ++++++
+ mmc_cmds.c     | 234 ++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h     |   4 +
+ sdio.ids       | 206 +++++++++++++++++++++++++++++++++++++++++
+ 9 files changed, 817 insertions(+), 17 deletions(-)
+
+-- 
+2.25.1
