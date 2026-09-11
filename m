@@ -1,244 +1,692 @@
-Received: from SHSQR01.spreadtrum.com (mx1.unisoc.com [222.66.158.135])
+Received: from mail-m49216.qiye.163.com (mail-m49216.qiye.163.com [45.254.49.216])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 941DB49E123;
-	Fri, 11 Sep 2026 02:45:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=222.66.158.135
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6FCDC43304D
+	for <linux-mmc@vger.kernel.org>; Fri, 11 Sep 2026 06:51:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.216
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789094738; cv=none; b=G09uHUoovNaik8FfyBKabSGKCS5KAYLvweCdY1TmAoW/afXeFdxkg1N4xE8g2z/iPNkpghwGVf8T3FzMoEdTif2xNmKCTw8nNHQ5c5qnRkvH+4i57la7N9RJvhKHbM6tIrnflQN/hJqnqs9WGR+3EOcD2d2adojDmzOJqOE7o/w=
+	t=1789109488; cv=none; b=FZpT8RdfbjzyJ0JgqqRF8Sy0VwfbOzH2/RLlfhJpidvPhgmubzCSNb3x1pU96iw8W8ZH/ekTePBPwm7+IfcYufFHzQodrvFO9V8DYolPhNWmiPvJxnJUD8egN2eA6YXrLzIlR3xL2Pcsr2VToMEqULJrI3rytVeuGU7GULoQM4s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789094738; c=relaxed/simple;
-	bh=obOoCKbYIhGiOiQ384rB+syOJREQ7h2cyvLyd3q9gRU=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=ryq6TSduy20VPAq7Y9lloTS1SmTNMqRD0+xa5pyDxAiLZ6BPnws+ue801RGHf87ypg+6ohdEYVxzsRHnL8IL9nPfJRVFm4K2QE3ugaJKK3h6SXbSWxLDuB8oZQwC9Dp8bRmGcenLnLkLEau9kzI3AFJ/0E6pELqmlQvr36NTFL0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=unisoc.com; spf=pass smtp.mailfrom=unisoc.com; dkim=pass (2048-bit key) header.d=unisoc.com header.i=@unisoc.com header.b=b3kkwy6y; arc=none smtp.client-ip=222.66.158.135
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=unisoc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=unisoc.com
+	s=arc-20240116; t=1789109488; c=relaxed/simple;
+	bh=LB/ErzN93M9kUje1WfiwRrOOdfFZsfZirjLbqS6/syY=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=rrHE4kQKsgZtk/bEqojxJf8KHRFsejwcQPyg42kJOnvlf+oDFGO+P22VeqaSFhJFS6xtJgNYVC8aJgEWH/mN8V6WTeypKQDUu7XSjfRRXodM90XWHZBWc3vFY2D3s1FZNu3/CBxP2A4QGNaDSQL2UL4qPs6UBSgMpJPgyrhW6n8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=dotfQiqA; arc=none smtp.client-ip=45.254.49.216
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=unisoc.com header.i=@unisoc.com header.b="b3kkwy6y"
-Received: from dlp.unisoc.com ([10.29.3.86])
-	by SHSQR01.spreadtrum.com with ESMTPS id 68B2imO7052619
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO);
-	Fri, 11 Sep 2026 10:44:48 +0800 (+08)
-	(envelope-from xiaojie.li2@unisoc.com)
-Received: from SHDLP.spreadtrum.com (unknown [10.29.3.70])
-	by dlp.unisoc.com (SkyGuard) with ESMTPS id 4hgzNQ26TZz2MDxjB;
-	Fri, 11 Sep 2026 10:42:30 +0800 (CST)
-Received: from zeshmbx09.spreadtrum.com (10.29.3.107) by
- zeshmbx13.spreadtrum.com (10.29.3.70) with Microsoft SMTP Server (TLS) id
- 15.0.1497.48; Fri, 11 Sep 2026 10:44:46 +0800
-Received: from zeshmbx09.spreadtrum.com ([fe80::7981:d4bc:3eee:c0be]) by
- zeshmbx09.spreadtrum.com ([fe80::7981:d4bc:3eee:c0be%17]) with mapi id
- 15.00.1497.048; Fri, 11 Sep 2026 10:44:46 +0800
-From: =?utf-8?B?5p2O5pmT5rSBIChYaWFvamllIExpLzEzMjMzKQ==?=
-	<xiaojie.li2@unisoc.com>
-To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-CC: Ulf Hansson <ulfh@kernel.org>,
-        "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>,
-        =?utf-8?B?6ZmI5paH6LaFIChXZW5jaGFvIENoZW4p?=
-	<Wenchao.Chen@unisoc.com>,
-        =?utf-8?B?5byg5aaC5rOJIChSYWluIFpoYW5nKQ==?=
-	<Rain.Zhang@unisoc.com>,
-        =?utf-8?B?5ZSQ5pyI5p6XIChZdWVsaW4gVGFuZyk=?=
-	<yuelin.tang@unisoc.com>,
-        "cixi.geng@linux.dev" <cixi.geng@linux.dev>
-Subject: =?utf-8?B?562U5aSNOiBbUEFUQ0hdIG1tYzogY29yZTogTW9kaWZ5IHRoZSBDTUQxIHRy?=
- =?utf-8?Q?ansmission_interval?=
-Thread-Topic: [PATCH] mmc: core: Modify the CMD1 transmission interval
-Thread-Index: AQHdNgR8DmoNOL7mLUCpmwUb62wN6bbHVn+AgAFmtuA=
-Date: Fri, 11 Sep 2026 02:44:46 +0000
-Message-ID: <e69a63062a43456097939c622395cc7b@zeshmbx09.spreadtrum.com>
-References: <20260827091436.1339716-1-xiaojie.li2@unisoc.com>
- <CAPx+jO8Lc3iNNBVjBB33aJYUfdr2EJqpL8mS8weKnZcBaDf0vA@mail.gmail.com>
-In-Reply-To: <CAPx+jO8Lc3iNNBVjBB33aJYUfdr2EJqpL8mS8weKnZcBaDf0vA@mail.gmail.com>
-Accept-Language: zh-CN, en-US
-Content-Language: zh-CN
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-exchange-transport-fromentityheader: Hosted
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="dotfQiqA"
+Received: from localhost.localdomain (unknown [61.154.14.86])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 4d64b96b0;
+	Fri, 11 Sep 2026 14:45:56 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	Avri Altman <avri.altman@sandisk.com>,
+	Shawn Lin <shawn.lin@linux.dev>
+Subject: [RFC PATCH 2/4] mmc-utils: lsmmc: Add SDIO device support to the list command
+Date: Fri, 11 Sep 2026 14:44:54 +0800
+Message-Id: <1789109096-196082-3-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1789109096-196082-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1789109096-196082-1-git-send-email-shawn.lin@rock-chips.com>
+X-HM-Tid: 0aa08f373b9c03a4kunma7c49b4e5df282
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVlCGhhMVh0ZT0NPS0xISUlKGlYVFA
+	kWGhdVEwETFhoSFyQUDg9ZV1kYEgtZQVlNSlVKTk9VSk9VQ01ZV1kWGg8SFR0UWUFZT0tIVUpLSU
+	9PT0hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=dotfQiqACOUVJ5VPTYxRFrKoeWuvPYIOqi6AR+p37uB9EHYTa8MZDqJ8xoaXcUsfGry/SFfBKVd4PrFEG4ZWetAYQ9Wxpwh22RclRm1UVpfTWj/kkSQWxFGOGiexeJ61yvDrYtetCEU9ljEvTcuFpjHUHuAYnFtR6XYstTK2fN0=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=MJt0uUAmDzgknP2UyLoANI3vrwrX1YqwWJ2WAXyONK8=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-X-MAIL:SHSQR01.spreadtrum.com 68B2imO7052619
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=unisoc.com;
-	s=default; t=1789094710;
-	bh=obOoCKbYIhGiOiQ384rB+syOJREQ7h2cyvLyd3q9gRU=;
-	h=From:To:CC:Subject:Date:References:In-Reply-To;
-	b=b3kkwy6y2bXv0CmlUTntIihKsZZ8T5XXOCTMRvwPveXSnlsgD65t34EdwPzrcpf0J
-	 /seJb69z54Z/d3TGdrE3B0RzX0z7nPMQH9wyTZc5GZoLj7i47zX9bg3thTKbqVjZp+
-	 VlMSB94YuEQ4HTOj91pew8ol4RdY72mwdMIsVY53KN0wnO7gDehpUXioDMJR2wclh4
-	 ZzGnHmCprVjKiyVeoxUrJprH8qDEeyVrM5IAWjlxRWbg6X90j4vTegHW/2G0BXbKOG
-	 dNqDSVs9MB/JPZMvpookHKy3pZbyUF8f643cOeNZ5FmQtQoW5GD/WDEmbZKlTFCvSC
-	 iyMM8uM9khaFQ==
 
-SGkgVWZmZToNCglUaGFuayB5b3UgZm9yIHlvdXIgcmVwbHkuIA0KCUhvd2V2ZXIsIEkgbm90aWNl
-ZCB0aGF0IF9fbW1jX3BvbGxfZm9yX2J1c3koKSBhbmQgbW1jX3BvbGxfZm9yX2J1c3koKSBhcmUg
-aW52b2tlZCBlaXRoZXIgZGlyZWN0bHkgb3IgaW5kaXJlY3RseSBieSBtYW55IG90aGVyIGZ1bmN0
-aW9ucyB3aXRoaW4gdGhlIE1NQyBkcml2ZXIuIA0KTW9kaWZ5aW5nIHRoZW0gZGlyZWN0bHkgY291
-bGQgcG90ZW50aWFsbHkgaW50cm9kdWNlIHVuaW50ZW5kZWQgc2lkZSBlZmZlY3RzLg0KDQoJV291
-bGQgaXQgYmUgYWNjZXB0YWJsZSB0byBpbXBsZW1lbnQgYSBkZWRpY2F0ZWQgZnVuY3Rpb24gc3Bl
-Y2lmaWNhbGx5IGZvciBDTUQxPyBXZSBjb3VsZCBjcmVhdGUgYSBDTUQxLXNwZWNpZmljIHZhcmlh
-bnQgYmFzZWQgb24gdGhlIGV4aXN0aW5nIF9fbW1jX3BvbGxfZm9yX2J1c3koKS4NClRoaXMgYXBw
-cm9hY2ggd291bGQgc2lnbmlmaWNhbnRseSBtaW5pbWl6ZSB0aGUgcG90ZW50aWFsIGltcGFjdCBv
-biB0aGUgcmVzdCBvZiB0aGUgY29kZWJhc2UuDQoNClRoZSBmdW5jdGlvbnMgdGhhdCBjYWxsIGl0
-IGFyZSBhcyBmb2xsb3dzOg0K77yIMe+8iW1tY19vcHMuYw0K77yIMS4x77yJCTIzOCBlcnIgPSBf
-X21tY19wb2xsX2Zvcl9idXN5KGhvc3QsIE1NQ19PUF9DT05EX1BFUklPRF9VUywgaW4gbW1jX3Nl
-bmRfb3BfY29uZCgpDQrvvIgxLjLvvIk1NTUgcmV0dXJuIF9fbW1jX3BvbGxfZm9yX2J1c3koaG9z
-dCwgMCwgdGltZW91dF9tcywgJm1tY19idXN5X2NiLCAmY2JfZGF0YSk7IGluIG1tY19wb2xsX2Zv
-cl9idXN5KCkNCu+8iDEuM++8iTY0MSBlcnIgPSBtbWNfcG9sbF9mb3JfYnVzeShjYXJkLCB0aW1l
-b3V0X21zLCByZXRyeV9jcmNfZXJyLCBNTUNfQlVTWV9DTUQ2KTsgaW4gX19tbWNfc3dpdGNoKCkN
-Cu+8iDEuNO+8iTg4OSByZXR1cm4gbW1jX3BvbGxfZm9yX2J1c3koY2FyZCwgYnVzeV90aW1lb3V0
-X21zLCBmYWxzZSwgTU1DX0JVU1lfSFBJKTsgaW4gbW1jX3NlbmRfaHBpX2NtZCgpDQrvvIgy77yJ
-YmxvY2suYwkNCu+8iDIuMe+8iTY0OSBlcnIgPSBfX21tY19wb2xsX2Zvcl9idXN5KGNhcmQtPmhv
-c3QsIDAsIGJ1c3lfdGltZW91dF9tcywgaW4gX19tbWNfYmxrX2lvY3RsX2NtZCgpDQrvvIgyLjLv
-vIllcnIgPSBfX21tY19wb2xsX2Zvcl9idXN5KGNhcmQtPmhvc3QsIDAsIE1NQ19CTEtfVElNRU9V
-VF9NUywgaW4gbW1jX2Jsa19jYXJkX2J1c3koKQ0K77yIMi4z77yJMTc0NiBlcnIgPSBtbWNfcG9s
-bF9mb3JfYnVzeShjYXJkLCB0aW1lb3V0LCBmYWxzZSwgTU1DX0JVU1lfSU8pOyBpbiBtbWNfYmxr
-X2ZpeF9zdGF0ZSgpDQrvvIgz77yJc2QuYw0K77yIMy4x77yJMTcxMSBlcnIgPSBfX21tY19wb2xs
-X2Zvcl9idXN5KGNhcmQtPmhvc3QsIDAsIFNEX1BPV0VST0ZGX05PVElGWV9USU1FT1VUX01TLCBp
-biBzZF9wb3dlcm9mZl9ub3RpZnkoKQ0K77yIMy4y77yJMTM1OCBlcnIgPSBtbWNfcG9sbF9mb3Jf
-YnVzeShjYXJkLCBTRF9XUklURV9FWFRSX1NJTkdMRV9USU1FT1VUX01TLCBmYWxzZSwgaW4gc2Rf
-Zmx1c2hfY2FjaGUoKQ0K77yIMy4z77yJMTQwNCBlcnIgPSBtbWNfcG9sbF9mb3JfYnVzeShjYXJk
-LCBTRF9XUklURV9FWFRSX1NJTkdMRV9USU1FT1VUX01TLCBmYWxzZSwgaW4gc2RfZW5hYmxlX2Nh
-Y2hlKCkNCu+8iDMuNO+8iTE3MDQgZXJyID0gbW1jX3BvbGxfZm9yX2J1c3koY2FyZCwgU0RfV1JJ
-VEVfRVhUUl9TSU5HTEVfVElNRU9VVF9NUywgZmFsc2UsIGluIHNkX3Bvd2Vyb2ZmX25vdGlmeSgp
-DQrvvIg077yJbW1jLmMJDQrvvIg0LjHvvIkyMDExIGVyciA9IF9fbW1jX3BvbGxfZm9yX2J1c3ko
-aG9zdCwgMCwgdGltZW91dF9tcywgJm1tY19zbGVlcF9idXN5X2NiLCBob3N0KTsgaW4gbW1jX3Ns
-ZWVwKCkNCu+8iDXvvIljb3JlLmMJDQrvvIg1LjHvvIk1NTYgbW1jX3BvbGxfZm9yX2J1c3koaG9z
-dC0+Y2FyZCwgTU1DX0NRRV9SRUNPVkVSWV9USU1FT1VULCB0cnVlLCBNTUNfQlVTWV9JTyk7IGlu
-IG1tY19jcWVfcmVjb3ZlcnkoKQ0K77yINS4y77yJMTcwMSBlcnIgPSBtbWNfcG9sbF9mb3JfYnVz
-eShjYXJkLCBidXN5X3RpbWVvdXQsIGZhbHNlLCBNTUNfQlVTWV9FUkFTRSk7IGluIG1tY19kb19l
-cmFzZSgpDQoNCkJlc3QgcmVnYXJkcywNClhpYW9qaWUuTGkNCi0tLS0t6YKu5Lu25Y6f5Lu2LS0t
-LS0NCuWPkeS7tuS6ujogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQG9zcy5xdWFsY29tbS5jb20+
-IA0K5Y+R6YCB5pe26Ze0OiAyMDI25bm0OeaciDEw5pelIDIxOjAwDQrmlLbku7bkuro6IOadjuaZ
-k+a0gSAoWGlhb2ppZSBMaS8xMzIzMykgPHhpYW9qaWUubGkyQHVuaXNvYy5jb20+DQrmioTpgIE6
-IFVsZiBIYW5zc29uIDx1bGZoQGtlcm5lbC5vcmc+OyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3Jn
-OyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOyDpmYjmlofotoUgKFdlbmNoYW8gQ2hlbikg
-PFdlbmNoYW8uQ2hlbkB1bmlzb2MuY29tPjsg5byg5aaC5rOJIChSYWluIFpoYW5nKSA8UmFpbi5a
-aGFuZ0B1bmlzb2MuY29tPjsg5ZSQ5pyI5p6XIChZdWVsaW4gVGFuZykgPHl1ZWxpbi50YW5nQHVu
-aXNvYy5jb20+OyBjaXhpLmdlbmdAbGludXguZGV2DQrkuLvpopg6IFJlOiBbUEFUQ0hdIG1tYzog
-Y29yZTogTW9kaWZ5IHRoZSBDTUQxIHRyYW5zbWlzc2lvbiBpbnRlcnZhbA0KDQoNCuazqOaEjzog
-6L+Z5bCB6YKu5Lu25p2l6Ieq5LqO5aSW6YOo44CC6Zmk6Z2e5L2g56Gu5a6a6YKu5Lu25YaF5a65
-5a6J5YWo77yM5ZCm5YiZ5LiN6KaB54K55Ye75Lu75L2V6ZO+5o6l5ZKM6ZmE5Lu244CCDQpDQVVU
-SU9OOiBUaGlzIGVtYWlsIG9yaWdpbmF0ZWQgZnJvbSBvdXRzaWRlIG9mIHRoZSBvcmdhbml6YXRp
-b24uIERvIG5vdCBjbGljayBsaW5rcyBvciBvcGVuIGF0dGFjaG1lbnRzIHVubGVzcyB5b3UgcmVj
-b2duaXplIHRoZSBzZW5kZXIgYW5kIGtub3cgdGhlIGNvbnRlbnQgaXMgc2FmZS4NCg0KDQoNCk9u
-IFRodSwgQXVnIDI3LCAyMDI2IGF0IDExOjE14oCvQU0gWGlhb2ppZSBMaSA8eGlhb2ppZS5saTJA
-dW5pc29jLmNvbT4gd3JvdGU6DQo+DQo+IFRoZSBjdXJyZW50IGNvZGUncyBtYXhpbXVtIHVkZWxh
-eSB2YWx1ZSBpcyBzZXQgdG8gNjRtcy4gU2luY2UgaXQgdXNlcyANCj4gdXNsZWVwX3JhbmdlKHVk
-ZWxheSwgdWRlbGF5KjIpLCB0aGlzIHJlc3VsdHMgaW4gYSBtYXhpbXVtIHdhaXQgdGltZSBvZiAN
-Cj4gMTI4bXMgYmV0d2VlbiB0d28gY29uc2VjdXRpdmUgQ01EMSBjb21tYW5kcy4gRm9yIGxvd2Vy
-LXBlcmZvcm1hbmNlIA0KPiBlTU1DIGNoaXBzLCBsb2NhbCB0ZXN0aW5nIHNob3dzIHRoYXQgY29t
-cGFyZWQgdG8gdGhlIG9sZCBjb2RlIHdoaWNoIA0KPiB1c2VkIG1tY19kZWxheSgxMCksIHRoZSB0
-b3RhbCB0aW1lIHJlcXVpcmVkIHRvIHdhaXQgZm9yIHRoZSBidXN5IGJpdCANCj4gaW4gdGhlIENN
-RDEgcmVzcG9uc2UgdG8gY2hhbmdlIGhhcyBpbmNyZWFzZWQgYnkgYXBwcm94aW1hdGVseSAzMDBt
-cywgDQo+IG5lZ2F0aXZlbHkgaW1wYWN0aW5nIHRoZSBvdmVyYWxsIGVNTUMgaW5pdGlhbGl6YXRp
-b24gdGltZS4NCg0KT2theSwgdGhhdCdzIG5vdCBnb29kLg0KDQo+DQo+IEFsdGhvdWdoIHRoZSBj
-dXJyZW50IGNvZGUgc2VuZHMgdGhlIENNRDEgY29tbWFuZCBmZXdlciB0aW1lcyB0aGFuIHRoZSAN
-Cj4gb2xkIHZlcnNpb24sIHRoZSB0b3RhbCB3YWl0aW5nIHRpbWUgaXMgc2lnbmlmaWNhbnRseSBs
-b25nZXIuDQo+IFRvIGFkZHJlc3MgdGhpcywgaXQncyBwcm9wb3NlZCB0byBtb2RpZnkgdGhlIENN
-RDEgc2VuZGluZyBpbnRlcnZhbCB0byANCj4gZm9sbG93IGEgcGF0dGVybiBsaWtlIDRtcywgNm1z
-LCA4bXMsIDEwbXMsIDEwbXMsIGV0Yy4sIGVmZmVjdGl2ZWx5IA0KPiBjYXBwaW5nIHRoZSBsb25n
-ZXN0IHNpbmdsZSB3YWl0IGF0IDEwbXMuIExvY2FsIHRlc3RpbmcgY29uZmlybXMgdGhhdCANCj4g
-dGhpcyBhcHByb2FjaCBjYW4gYnJpbmcgdGhlIHRvdGFsIHRpbWUgd2FpdGluZyBmb3IgdGhlIGJ1
-c3kgc3RhdGUgDQo+IGNoYW5nZSB2ZXJ5IGNsb3NlIHRvIHRoZSBwZXJmb3JtYW5jZSBsZXZlbCBv
-ZiB0aGUgb2xkIGNvZGUuDQoNClRoZSBjb2RlIHlvdSByZWZlciB0byBoYXMgYmVlbiBjaGFuZ2Vk
-IGFuZCBmaXhlZCBzZXZlcmFsIHRpbWVzLiBXZSBuZWVkIHRvIGJlIGNhcmVmdWwgdG8gbm90IGJy
-ZWFrIHN1cHBvcnQgZm9yIHNvbWUgb3RoZXIgY2FyZHMuIFBsZWFzZSBoYXZlIGEgbG9vayBhdCB0
-aGUgYmVsb3cgY29tbWl0IGZvciBiZXR0ZXIgdW5kZXJzdGFuZGluZy4NCg0KZTk0OWRlZTM2MjVl
-ICgibW1jOiBjb3JlOiBGaXggYnVzeSBwb2xsaW5nIGZvciBNTUNfU0VORF9PUF9DT05EIGFnYWlu
-IikgMTc2MGZkYjZmZTlmICgibW1jOiBjb3JlOiBSZXN0b3JlIChhbG1vc3QpIHRoZSBidXN5IHBv
-bGxpbmcgZm9yDQpNTUNfU0VORF9PUF9DT05EIikNCjc2YmZjN2NjYzJmYSAoIm1tYzogY29yZTog
-YWRqdXN0IHBvbGxpbmcgaW50ZXJ2YWwgZm9yIENNRDEiKQ0KDQpUaGF0IHNhaWQsIGxldCdzIHRy
-eSB0byBmaWd1cmUgb3V0IGhvdyB0byBpbXByb3ZlIHRoaXMuIFNlZSBzb21lIG1vcmUgY29tbWVu
-dHMgYmVsb3cuDQoNCj4NCj4gVGhlIGVNTUMgY2hpcCB1c2VkIGZvciB0ZXN0aW5nOiBtYW5maWQ9
-IDB4MDAwMDliLCBuYW1lPSBZMFMxMjgsIG1kdD0gDQo+IDIwMjItMTAgVGhlIGVNTUMgcGFydCBu
-dW1iZXIgaXM6IFlNRUM4QjBURTJBMkMzDQo+DQo+IFNpZ25lZC1vZmYtYnk6IFhpYW9qaWUgTGkg
-PHhpYW9qaWUubGkyQHVuaXNvYy5jb20+DQo+IC0tLQ0KPiAgZHJpdmVycy9tbWMvY29yZS9tbWNf
-b3BzLmMgfCA4NSANCj4gKysrKysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4g
-IDEgZmlsZSBjaGFuZ2VkLCAzNiBpbnNlcnRpb25zKCspLCA0OSBkZWxldGlvbnMoLSkNCj4NCj4g
-ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jX29wcy5jIGIvZHJpdmVycy9tbWMvY29y
-ZS9tbWNfb3BzLmMgDQo+IGluZGV4IGE5NTJjYzgyNjVhZi4uMzA3NjY2NmNmMmNhIDEwMDY0NA0K
-PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL21tY19vcHMuYw0KPiArKysgYi9kcml2ZXJzL21tYy9j
-b3JlL21tY19vcHMuYw0KPiBAQCAtMTg5LDY0ICsxODksNTEgQEAgaW50IG1tY19nb19pZGxlKHN0
-cnVjdCBtbWNfaG9zdCAqaG9zdCkNCj4gICAgICAgICByZXR1cm4gZXJyOw0KPiAgfQ0KPg0KPiAt
-c3RhdGljIGludCBfX21tY19zZW5kX29wX2NvbmRfY2Iodm9pZCAqY2JfZGF0YSwgYm9vbCAqYnVz
-eSkgLXsNCj4gLSAgICAgICBzdHJ1Y3QgbW1jX29wX2NvbmRfYnVzeV9kYXRhICpkYXRhID0gY2Jf
-ZGF0YTsNCj4gLSAgICAgICBzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QgPSBkYXRhLT5ob3N0Ow0KPiAt
-ICAgICAgIHN0cnVjdCBtbWNfY29tbWFuZCAqY21kID0gZGF0YS0+Y21kOw0KPiAtICAgICAgIHUz
-MiBvY3IgPSBkYXRhLT5vY3I7DQo+IC0gICAgICAgaW50IGVyciA9IDA7DQo+IC0NCj4gLSAgICAg
-ICBlcnIgPSBtbWNfd2FpdF9mb3JfY21kKGhvc3QsIGNtZCwgMCk7DQo+IC0gICAgICAgaWYgKGVy
-cikNCj4gLSAgICAgICAgICAgICAgIHJldHVybiBlcnI7DQo+IC0NCj4gLSAgICAgICBpZiAobW1j
-X2hvc3RfaXNfc3BpKGhvc3QpKSB7DQo+IC0gICAgICAgICAgICAgICBpZiAoIShjbWQtPnJlc3Bb
-MF0gJiBSMV9TUElfSURMRSkpIHsNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgKmJ1c3kgPSBm
-YWxzZTsNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIDA7DQo+IC0gICAgICAgICAg
-ICAgICB9DQo+IC0gICAgICAgfSBlbHNlIHsNCj4gLSAgICAgICAgICAgICAgIGlmIChjbWQtPnJl
-c3BbMF0gJiBNTUNfQ0FSRF9CVVNZKSB7DQo+IC0gICAgICAgICAgICAgICAgICAgICAgICpidXN5
-ID0gZmFsc2U7DQo+IC0gICAgICAgICAgICAgICAgICAgICAgIHJldHVybiAwOw0KPiAtICAgICAg
-ICAgICAgICAgfQ0KPiAtICAgICAgIH0NCj4gLQ0KPiAtICAgICAgICpidXN5ID0gdHJ1ZTsNCj4g
-LQ0KPiAtICAgICAgIC8qDQo+IC0gICAgICAgICogQWNjb3JkaW5nIHRvIGVNTUMgc3BlY2lmaWNh
-dGlvbiB2NS4xIHNlY3Rpb24gNi40LjMsIHdlDQo+IC0gICAgICAgICogc2hvdWxkIGlzc3VlIENN
-RDEgcmVwZWF0ZWRseSBpbiB0aGUgaWRsZSBzdGF0ZSB1bnRpbA0KPiAtICAgICAgICAqIHRoZSBl
-TU1DIGlzIHJlYWR5LiBPdGhlcndpc2Ugc29tZSBlTU1DIGRldmljZXMgc2VlbSB0byBlbnRlcg0K
-PiAtICAgICAgICAqIHRoZSBpbmFjdGl2ZSBtb2RlIGFmdGVyIG1tY19pbml0X2NhcmQoKSBpc3N1
-ZWQgQ01EMCB3aGVuDQo+IC0gICAgICAgICogdGhlIGVNTUMgZGV2aWNlIGlzIGJ1c3kuDQo+IC0g
-ICAgICAgICovDQo+IC0gICAgICAgaWYgKCFvY3IgJiYgIW1tY19ob3N0X2lzX3NwaShob3N0KSkN
-Cj4gLSAgICAgICAgICAgICAgIGNtZC0+YXJnID0gY21kLT5yZXNwWzBdIHwgQklUKDMwKTsNCj4g
-LQ0KPiAtICAgICAgIHJldHVybiAwOw0KPiAtfQ0KPiAtDQo+ICBpbnQgbW1jX3NlbmRfb3BfY29u
-ZChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsIHUzMiBvY3IsIHUzMiAqcm9jcikgIHsNCj4gICAgICAg
-ICBzdHJ1Y3QgbW1jX2NvbW1hbmQgY21kID0ge307DQo+ICsgICAgICAgdW5zaWduZWQgaW50IHVk
-ZWxheSA9IE1NQ19PUF9DT05EX1BFUklPRF9VUzsNCj4gKyAgICAgICB1bnNpZ25lZCBpbnQgdWRl
-bGF5X21heCA9IDEwMDAwOw0KPiArICAgICAgIHVuc2lnbmVkIGxvbmcgdGltZW91dCA9IGppZmZp
-ZXMgKyANCj4gKyBtc2Vjc190b19qaWZmaWVzKE1NQ19PUF9DT05EX1RJTUVPVVRfTVMpICsgMTsN
-Cj4gICAgICAgICBpbnQgZXJyID0gMDsNCj4gLSAgICAgICBzdHJ1Y3QgbW1jX29wX2NvbmRfYnVz
-eV9kYXRhIGNiX2RhdGEgPSB7DQo+IC0gICAgICAgICAgICAgICAuaG9zdCA9IGhvc3QsDQo+IC0g
-ICAgICAgICAgICAgICAub2NyID0gb2NyLA0KPiAtICAgICAgICAgICAgICAgLmNtZCA9ICZjbWQN
-Cj4gLSAgICAgICB9Ow0KPg0KPiAgICAgICAgIGNtZC5vcGNvZGUgPSBNTUNfU0VORF9PUF9DT05E
-Ow0KPiAgICAgICAgIGNtZC5hcmcgPSBtbWNfaG9zdF9pc19zcGkoaG9zdCkgPyAwIDogb2NyOw0K
-PiAgICAgICAgIGNtZC5mbGFncyA9IE1NQ19SU1BfU1BJX1IxIHwgTU1DX1JTUF9SMyB8IE1NQ19D
-TURfQkNSOw0KPg0KPiAtICAgICAgIGVyciA9IF9fbW1jX3BvbGxfZm9yX2J1c3koaG9zdCwgTU1D
-X09QX0NPTkRfUEVSSU9EX1VTLA0KPiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-TU1DX09QX0NPTkRfVElNRU9VVF9NUywNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICZfX21tY19zZW5kX29wX2NvbmRfY2IsICZjYl9kYXRhKTsNCj4gLSAgICAgICBpZiAoZXJy
-KQ0KPiAtICAgICAgICAgICAgICAgcmV0dXJuIGVycjsNCj4gKyAgICAgICB3aGlsZSAoIXRpbWVf
-YWZ0ZXIoamlmZmllcywgdGltZW91dCkpIHsNCj4gKyAgICAgICAgICAgICAgIGVyciA9IG1tY193
-YWl0X2Zvcl9jbWQoaG9zdCwgJmNtZCwgMCk7DQo+ICsgICAgICAgICAgICAgICBpZiAoZXJyKQ0K
-PiArICAgICAgICAgICAgICAgICAgICAgICBicmVhazsNCj4gKw0KPiArICAgICAgICAgICAgICAg
-aWYgKG1tY19ob3N0X2lzX3NwaShob3N0KSkgew0KPiArICAgICAgICAgICAgICAgICAgICAgICBp
-ZiAoIShjbWQucmVzcFswXSAmIFIxX1NQSV9JRExFKSkNCj4gKyAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICBicmVhazsNCj4gKyAgICAgICAgICAgICAgIH0gZWxzZSB7DQo+ICsgICAgICAg
-ICAgICAgICAgICAgICAgIGlmIChjbWQucmVzcFswXSAmIE1NQ19DQVJEX0JVU1kpDQo+ICsgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgYnJlYWs7DQo+ICsgICAgICAgICAgICAgICB9DQo+
-ICsNCj4gKyAgICAgICAgICAgICAgIC8qDQo+ICsgICAgICAgICAgICAgICAgKiBBY2NvcmRpbmcg
-dG8gZU1NQyBzcGVjaWZpY2F0aW9uIHY1LjEgc2VjdGlvbiA2LjQuMywgd2UNCj4gKyAgICAgICAg
-ICAgICAgICAqIHNob3VsZCBpc3N1ZSBDTUQxIHJlcGVhdGVkbHkgaW4gdGhlIGlkbGUgc3RhdGUg
-dW50aWwNCj4gKyAgICAgICAgICAgICAgICAqIHRoZSBlTU1DIGlzIHJlYWR5LiBPdGhlcndpc2Ug
-c29tZSBlTU1DIGRldmljZXMgc2VlbSB0byBlbnRlcg0KPiArICAgICAgICAgICAgICAgICogdGhl
-IGluYWN0aXZlIG1vZGUgYWZ0ZXIgbW1jX2luaXRfY2FyZCgpIGlzc3VlZCBDTUQwIHdoZW4NCj4g
-KyAgICAgICAgICAgICAgICAqIHRoZSBlTU1DIGRldmljZSBpcyBidXN5Lg0KPiArICAgICAgICAg
-ICAgICAgICovDQo+ICsgICAgICAgICAgICAgICBpZiAoIW9jciAmJiAhbW1jX2hvc3RfaXNfc3Bp
-KGhvc3QpKQ0KPiArICAgICAgICAgICAgICAgICAgICAgICBjbWQuYXJnID0gY21kLnJlc3BbMF0g
-fCBCSVQoMzApOw0KPiArDQo+ICsgICAgICAgICAgICAgICB1c2xlZXBfcmFuZ2UodWRlbGF5LCB1
-ZGVsYXkgKyAxMDAwKTsNCj4gKw0KPiArICAgICAgICAgICAgICAgaWYgKHVkZWxheSA8IHVkZWxh
-eV9tYXgpDQo+ICsgICAgICAgICAgICAgICAgICAgICAgIHVkZWxheSArPSAyMDAwOw0KPiArICAg
-ICAgICAgICAgICAgZWxzZQ0KPiArICAgICAgICAgICAgICAgICAgICAgICB1ZGVsYXkgPSB1ZGVs
-YXlfbWF4Ow0KPiArICAgICAgIH0NCj4gKw0KPiArICAgICAgIGlmICh0aW1lX2FmdGVyKGppZmZp
-ZXMsIHRpbWVvdXQpKQ0KPiArICAgICAgICAgICAgICAgZXJyID0gLUVUSU1FRE9VVDsNCg0KV2Ug
-cmVhbGx5IG5lZWQgdG8gYXZvaWQgb3BlbiBjb2Rpbmcgb2YgYnVzeSBsb29wcyBsaWtlIHRoaXMs
-IGFzIGl0IGJlY29tZXMgYSBuaWdodG1hcmUgdG8gbWFpbnRhaW4gZm9yIHVzLg0KDQpXZSBoYXZl
-IG1vdmVkIHRvIHVzZSBfX21tY19wb2xsX2Zvcl9idXN5KCkgZm9yIHRoaXMgcmVhc29uLCBzbyBs
-ZXQncyBpbnN0ZWFkIHRyeSB0byBleHRlbmQgaXQgdG8gZml0IGJldHRlciBmb3IgTU1DX1NFTkRf
-T1BfQ09ORC4NCg0KSSBndWVzcyB0aGUgbW9zdCBzaW1wbGUgYXBwcm9hY2ggd291bGQgYmUgdG8g
-YWRkIGFub3RoZXIgcGFyYW1ldGVyIHRvIF9fbW1jX3BvbGxfZm9yX2J1c3koKSwgdG8gYWxsb3cg
-dXMgdG8gc3BlY2lmeSBhIG1heGltdW0gcG9sbGluZyBwZXJpb2QuIENhbiB5b3UgcGxlYXNlIGV4
-cGxvcmUgdGhhdCBhcHByb2FjaCBpbnN0ZWFkPw0KDQo+DQo+ICAgICAgICAgaWYgKHJvY3IgJiYg
-IW1tY19ob3N0X2lzX3NwaShob3N0KSkNCj4gICAgICAgICAgICAgICAgICpyb2NyID0gY21kLnJl
-c3BbMF07DQo+IC0tDQo+IDIuMzQuMQ0KPg0KDQpLaW5kIHJlZ2FyZHMNClVmZmUNCg==
+From: Shawn Lin <shawn.lin@linux.dev>
+
+Teach the list command about SDIO cards: devices whose sysfs type is
+"SDIO" are enumerated one row per function, reading the function
+vendor/device/class/revision ids from the card's sysfs directory and
+decoding vendor, device and interface class names from a new sdio.ids
+database (the SDIO counterpart of pci.ids, installed alongside the
+existing multimediacard.ids/sdcard.ids files).
+
+Standalone SDIO enumeration tooling already exists: the lssdio script
+of the sdioutils project, announced on linux-mmc at
+https://lore.kernel.org/linux-mmc/20230214195702.ungo5roxliq7pjas@pali/
+and also the origin of the sdio.ids database imported here. However,
+lssdio is a standalone perl script, and SDIO devices are massively
+deployed in lightweight IoT embedded systems where a perl runtime
+costs 10-20MB of storage - a non-starter there.
+
+Moreover, the userspace tooling of a subsystem is usually unified:
+lsusb for USB, lspci for PCI. Devices based on the mmc subsystem
+already have their MMC and SD cards supported by mmc-utils, so
+continuing to support SDIO enumeration in the existing list command
+is the natural home for it.
+
+The table gains a CLASS column: for SDIO functions it shows the
+interface class declared in the function's CIS, decoded through the
+sdio.ids database (e.g. "WLAN"); the non-standard class 0x00 is shown
+as-is, and MMC/SD cards do not have an interface class and show "-".
+Pure SDIO cards do not have a block device, so the DEV column shows
+"-" for them. Functions whose ids are missing from the sdio.ids
+database are reported as Unlisted(0x<device id>), so unknown devices
+are still identifiable and can be submitted to the sdioids database.
+
+sdio.ids is imported from the sdioids repository
+(https://github.com/sdioutils/sdioids), version 2026.08.10.
+
+Example output on a board with a Realtek RTL8723BS wireless module
+(and a second, yet unlisted function):
+
+  # mmc list
+  DEVICE         DEV                 TYPE  MANUFACTURER                PRODUCT                                  REV   CLASS  SERIAL  DATE
+  mmc0:0001:1    /dev/mmc0:0001:1    SDIO  Realtek Semiconductor Corp. RTL8723BS [Rockchip] (WiFi 802.11b/g/n)  FF    WLAN   -       -
+  mmc0:0001:2    /dev/mmc0:0001:2    SDIO  Realtek Semiconductor Corp. Unlisted(0xc822)                         FF    00     -       -
+
+Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
+---
+ Makefile       |   4 +-
+ docs/HOWTO.rst |   9 +-
+ lsmmc.c        | 273 ++++++++++++++++++++++++++++++++++++++++++++++---
+ sdio.ids       | 206 +++++++++++++++++++++++++++++++++++++
+ 4 files changed, 475 insertions(+), 17 deletions(-)
+ create mode 100644 sdio.ids
+
+diff --git a/Makefile b/Makefile
+index 6eb584b..1cc24b7 100644
+--- a/Makefile
++++ b/Makefile
+@@ -5,7 +5,8 @@ GIT_VERSION := "$(shell git describe --abbrev=0 --tags)-$$(git rev-list --count
+ AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE=2 \
+ 	    -DVERSION=\"$(GIT_VERSION)\" \
+ 	    -DSD_IDS_PATH=\"$(idsdir)/sdcard.ids\" \
+-	    -DMMC_IDS_PATH=\"$(idsdir)/multimediacard.ids\"
++	    -DMMC_IDS_PATH=\"$(idsdir)/multimediacard.ids\" \
++	    -DSDIO_IDS_PATH=\"$(idsdir)/sdio.ids\"
+ CFLAGS ?= -g -O2
+ bashcompletiondir ?= /usr/share/bash-completion/completions
+ objects = \
+@@ -64,6 +65,7 @@ install: $(progs)
+ 	$(INSTALL) -m755 -d $(DESTDIR)$(idsdir)
+ 	$(INSTALL) -m 644 sdcard.ids $(DESTDIR)$(idsdir)
+ 	$(INSTALL) -m 644 multimediacard.ids $(DESTDIR)$(idsdir)
++	$(INSTALL) -m 644 sdio.ids $(DESTDIR)$(idsdir)
+ 	$(INSTALL) -m755 -d $(DESTDIR)$(bashcompletiondir)
+ 	$(INSTALL) -m 644 completion/mmc $(DESTDIR)$(bashcompletiondir)/mmc
+ 
+diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst
+index 3518b0f..c4709d7 100644
+--- a/docs/HOWTO.rst
++++ b/docs/HOWTO.rst
+@@ -115,9 +115,12 @@ Running mmc-utils
+             Life time type B: 0x01 [0%-10% of device life time used]
+ 
+     ``list``
+-        List all MMC/SD devices present on the system. Output is a table with
+-        columns: DEVICE (sysfs name), DEV (/dev path), TYPE (MMC or SD),
+-        MANUFACTURER, PRODUCT, REV, SERIAL, and DATE.
++        List all MMC/SD/SDIO devices present on the system. Output is a table with
++        columns: DEVICE (sysfs name), DEV (/dev path), TYPE (MMC, SD or SDIO),
++        MANUFACTURER, PRODUCT, REV, CLASS (SDIO interface class, decoded from the
++        sdio.ids database), SERIAL, and DATE. SDIO cards are listed
++        one row per function, with names decoded from the sdio.ids database,
++        and do not have a DEV path unless the card also provides memory.
+ 
+         Example::
+ 
+diff --git a/lsmmc.c b/lsmmc.c
+index 4167095..6ea43d3 100644
+--- a/lsmmc.c
++++ b/lsmmc.c
+@@ -63,10 +63,14 @@
+ #ifndef MMC_IDS_PATH
+ #define MMC_IDS_PATH "/usr/share/misc/multimediacard.ids"
+ #endif
++#ifndef SDIO_IDS_PATH
++#define SDIO_IDS_PATH "/usr/share/misc/sdio.ids"
++#endif
+ 
+ enum bus_type {
+ 	MMC = 1,
+ 	SD,
++	SDIO,
+ };
+ 
+ struct config {
+@@ -229,6 +233,230 @@ fallback:
+ 	return strdup(name);
+ }
+ 
++/*
++ * Look up a name in an sdio.ids style database:
++ *
++ *   <vid4hex><2sp><vendor name>
++ *   \t<did4hex><2sp><device name>   (scoped to the vendor line above)
++ *   C <cls2hex><2sp><class name>
++ *
++ * @vid/@did/@cls are lowercase hex strings without the 0x prefix. For a
++ * device lookup both @vid and @did are used; for a class lookup only
++ * @cls. Returns a strdup'ed name or NULL if not found.
++ */
++static char *sdio_ids_lookup(const char *path, const char *vid,
++			     const char *did, const char *cls)
++{
++	char line[256], cur_vid[5] = "";
++	bool vendor_found = false;
++	char *name = NULL;
++	FILE *f;
++
++	if (!vid && !cls)
++		return NULL;
++
++	f = fopen(path, "r");
++	if (!f)
++		return NULL;
++
++	while (!name && fgets(line, sizeof(line), f)) {
++		char *p = line;
++
++		line[strcspn(line, "\r\n")] = '\0';
++
++		if (*p == '#' || !*p)
++			continue;
++
++		/* class line: "C <cls2hex>  <name>" */
++		if (cls && p[0] == 'C' && isspace((unsigned char)p[1])) {
++			p++;
++			while (isspace((unsigned char)*p))
++				p++;
++
++			if (isxdigit((unsigned char)p[0]) &&
++			    isxdigit((unsigned char)p[1]) &&
++			    !strncasecmp(p, cls, 2)) {
++				p += 2;
++				while (isspace((unsigned char)*p))
++					p++;
++				if (*p)
++					name = strdup(p);
++			}
++			continue;
++		}
++
++		/* vendor line: "<vid4hex>  <name>" */
++		if (vid && isxdigit((unsigned char)p[0]) &&
++		    isxdigit((unsigned char)p[1]) &&
++		    isxdigit((unsigned char)p[2]) &&
++		    isxdigit((unsigned char)p[3]) &&
++		    p[4] == ' ' && p[5] == ' ') {
++			memcpy(cur_vid, p, 4);
++			cur_vid[4] = '\0';
++			vendor_found = !strcasecmp(cur_vid, vid);
++			if (vendor_found && !did) {
++				p += 6;
++				while (*p == ' ')
++					p++;
++				if (*p)
++					name = strdup(p);
++			}
++			continue;
++		}
++
++		/* device line: "\t<did4hex>  <name>", scoped to the vendor above */
++		if (vid && did && vendor_found && p[0] == '\t' &&
++		    isxdigit((unsigned char)p[1]) &&
++		    isxdigit((unsigned char)p[2]) &&
++		    isxdigit((unsigned char)p[3]) &&
++		    isxdigit((unsigned char)p[4]) && p[5] == ' ' &&
++		    p[6] == ' ') {
++			char id[5];
++
++			memcpy(id, p + 1, 4);
++			id[4] = '\0';
++			if (!strcasecmp(id, did)) {
++				p += 7;
++				while (*p == ' ')
++					p++;
++				if (*p)
++					name = strdup(p);
++			}
++		}
++	}
++
++	fclose(f);
++	return name;
++}
++
++static char *get_sdio_ids_name(const char *vid, const char *did,
++			       const char *cls)
++{
++	static bool warned;
++	FILE *f;
++
++	f = fopen("sdio.ids", "r");
++	if (f) {
++		fclose(f);
++		return sdio_ids_lookup("sdio.ids", vid, did, cls);
++	}
++
++	f = fopen(SDIO_IDS_PATH, "r");
++	if (f) {
++		fclose(f);
++		return sdio_ids_lookup(SDIO_IDS_PATH, vid, did, cls);
++	}
++
++	if (!warned) {
++		fprintf(stderr, "Warning: sdio.ids not found (./sdio.ids or %s)\n",
++			SDIO_IDS_PATH);
++		warned = true;
++	}
++
++	return NULL;
++}
++
++/* Copy a sysfs hex id (e.g. "0x0092") into a lowercase hex string. */
++static void sdio_hex_id(const char *val, char *out, size_t outsz)
++{
++	const char *p = val;
++	size_t i;
++
++	if (p[0] == '0' && (p[1] == 'x' || p[1] == 'X'))
++		p += 2;
++
++	for (i = 0; p[i] && i + 1 < outsz; i++)
++		out[i] = tolower((unsigned char)p[i]);
++	out[i] = '\0';
++}
++
++static char *read_file_at(const char *dir, const char *name);
++
++static void print_sdio_functions(const char *devname,
++				 const char *blkdev, const char *cardpath)
++{
++	char devnode[32];
++	DIR *d;
++	struct dirent *ent;
++
++	snprintf(devnode, sizeof(devnode), "/dev/%s", blkdev ? blkdev : "-");
++
++	d = opendir(cardpath);
++	if (!d)
++		return;
++
++	while ((ent = readdir(d)) != NULL) {
++		char funcdir[PATH_MAX + 256];
++		char vid[8], did[8], cls[8], clsbuf[24];
++		char *vendor, *device, *class, *revision;
++		char *vname, *dname, *cname, *product = NULL;
++		size_t len = strlen(devname);
++
++		if (strncmp(ent->d_name, devname, len) ||
++		    ent->d_name[len] != ':' ||
++		    !isdigit((unsigned char)ent->d_name[len + 1]))
++			continue;
++
++		snprintf(funcdir, sizeof(funcdir), "%s/%s",
++			 cardpath, ent->d_name);
++
++		vendor = read_file_at(funcdir, "vendor");
++		device = read_file_at(funcdir, "device");
++		class = read_file_at(funcdir, "class");
++		revision = read_file_at(funcdir, "revision");
++
++		if (!vendor || !device) {
++			free(vendor);
++			free(device);
++			free(class);
++			free(revision);
++			continue;
++		}
++
++		sdio_hex_id(vendor, vid, sizeof(vid));
++		sdio_hex_id(device, did, sizeof(did));
++		sdio_hex_id(class ? class : "0x00", cls, sizeof(cls));
++
++		vname = get_sdio_ids_name(vid, NULL, NULL);
++		dname = get_sdio_ids_name(vid, did, NULL);
++		cname = get_sdio_ids_name(NULL, NULL, cls);
++
++		/*
++		 * Product name: the device name from the sdio.ids
++		 * database, or the raw device id when it is not listed.
++		 */
++		if (dname) {
++			product = dname;
++			dname = NULL;
++		} else {
++			product = malloc(strlen(did) + 16);
++			if (product)
++				snprintf(product, strlen(did) + 16,
++					 "Unlisted(0x%s)", did);
++		}
++
++		/* Class name from the database, or the raw class id */
++		snprintf(clsbuf, sizeof(clsbuf), "%s",
++			 cname ? cname : cls);
++
++		printf("%-14s %-14s %-5s %-20s %-32s %-5s %-20s %-12s %s\n",
++		       ent->d_name, devnode, "SDIO", vname ? vname : "Unlisted",
++		       product ? product : "Unlisted",
++		       revision ? revision : "-", clsbuf, "-", "-");
++
++		free(product);
++		free(cname);
++		free(dname);
++		free(vname);
++		free(revision);
++		free(class);
++		free(device);
++		free(vendor);
++	}
++
++	closedir(d);
++}
++
+ static char *find_block_devname(const char *sysfs_devpath)
+ {
+ 	DIR *d;
+@@ -2335,18 +2563,18 @@ static void print_list_entry(struct config *cfg, const char *devname,
+ 
+ 		parse_sd_cid(cid, &c);
+ 		mfr = get_manufacturer(cfg, c.mid);
+-		printf("%-14s %-14s SD   %-20s %-10s %u.%u  0x%08x  %u-%s\n",
++		printf("%-14s %-14s SD   %-20s %-32s %u.%u %-20s 0x%08x %u-%s\n",
+ 		       devname, devnode, mfr ? mfr : "Unlisted", c.pnm,
+-		       c.prv_major, c.prv_minor, c.psn, sd_cid_year(&c),
++		       c.prv_major, c.prv_minor, "-", c.psn, sd_cid_year(&c),
+ 		       month_name(c.mdt_month));
+ 	} else {
+ 		struct mmc_cid c;
+ 
+ 		parse_mmc_cid(cid, &c);
+ 		mfr = get_manufacturer(cfg, c.mid);
+-		printf("%-14s %-14s MMC  %-20s %-10s %u.%u  0x%08x  %u-%s\n",
++		printf("%-14s %-14s MMC  %-20s %-32s %u.%u %-20s 0x%08x %u-%s\n",
+ 		       devname, devnode, mfr ? mfr : "Unlisted", c.pnm,
+-		       c.prv_major, c.prv_minor, c.psn,
++		       c.prv_major, c.prv_minor, "-", c.psn,
+ 		       mmc_cid_year(&c, cfg->ext_csd_rev),
+ 		       month_name(c.mdt_month));
+ 	}
+@@ -2374,6 +2602,7 @@ int do_list(int nargs, char **argv)
+ 	free(get_manufacturer(&cfg, ~0u));
+ 	cfg.bus = MMC;
+ 	free(get_manufacturer(&cfg, ~0u));
++	free(get_sdio_ids_name("ffff", NULL, NULL));
+ 
+ 	while ((ent = readdir(d)) != NULL) {
+ 		char devpath[PATH_MAX];
+@@ -2391,27 +2620,45 @@ int do_list(int nargs, char **argv)
+ 		if (!type)
+ 			continue;
+ 
+-		if (strcmp(type, "MMC") != 0 && strcmp(type, "SD") != 0) {
++		if (strcmp(type, "MMC") != 0 && strcmp(type, "SD") != 0 &&
++		    strcmp(type, "SDIO") != 0) {
++			free(type);
++			continue;
++		}
++
++		blkdev = find_block_devname(resolved);
++
++		if (!header_printed) {
++			printf("%-14s %-14s %-5s %-20s %-32s %-5s %-20s %-12s %s\n",
++			       "DEVICE", "DEV", "TYPE", "MANUFACTURER", "PRODUCT",
++			       "REV", "CLASS", "SERIAL", "DATE");
++			header_printed = true;
++		}
++
++		if (!strcmp(type, "SDIO")) {
++			/*
++			 * SDIO cards carry no CID; their functions are
++			 * enumerated from the card's sysfs directory and
++			 * printed one row per function. Pure SDIO cards
++			 * do not have a block device either.
++			 */
++			print_sdio_functions(ent->d_name, blkdev,
++					     resolved);
++
++			free(blkdev);
+ 			free(type);
+ 			continue;
+ 		}
+ 
+ 		cid = read_file_at(resolved, "cid");
+ 		if (!cid) {
++			free(blkdev);
+ 			free(type);
+ 			continue;
+ 		}
+ 
+-		blkdev = find_block_devname(resolved);
+ 		cfg.bus = strcmp(type, "MMC") ? SD : MMC;
+ 
+-		if (!header_printed) {
+-			printf("%-14s %-14s %-5s%-20s %-10s %-5s %-12s %s\n",
+-			       "DEVICE", "DEV", "TYPE", "MANUFACTURER", "PRODUCT",
+-			       "REV", "SERIAL", "DATE");
+-			header_printed = true;
+-		}
+-
+ 		print_list_entry(&cfg, ent->d_name, blkdev, cid);
+ 
+ 		free(blkdev);
+diff --git a/sdio.ids b/sdio.ids
+new file mode 100644
+index 0000000..671c3d6
+--- /dev/null
++++ b/sdio.ids
+@@ -0,0 +1,206 @@
++#
++#	List of SDIO ID's
++#
++#	Version: 2026.08.10
++#	Date:    2026-08-10 01:54:06
++#
++#	Maintained by volunteers of the SDIO ID Project at
++#	https://sdioutils.github.io/sdioids/.
++#
++#	New data are always welcome, especially if they are accurate. If you
++#	have anything to contribute, please submit it through the web site
++#	above, which turns your submission into a pull request.
++#
++#	This file can be distributed under either the GNU General Public License
++#	(version 2 or higher) or the 3-clause BSD License.
++#
++#	The database is a compilation of factual data, and as such the copyright
++#	only covers the aggregation and formatting. The copyright is held by
++#	its contributors.
++#
++
++# Vendors and devices. Please keep sorted.
++
++# Syntax:
++# vendor  vendor_name
++# 	device  chip_vendor_name chip_name [marketing_name] (type)	<- single tab
++
++# SDIO vendor IDs 0000-00ff match one-byte JEDEC IDs assigned by JEDEC publication 106
++
++0020  STMicroelectronics
++	2280  CW1200 (WiFi 802.11a/b/g/n)
++0023  Wafer Scale Integration, Inc.
++	7910  KeyStream KS7010 (WiFi 802.11b/g)
++005b  Kawasaki Steel Corp.
++	7910  KeyStream KS7010 (WiFi 802.11b/g)
++0089  Intel Corp.
++	1402  IWMC3200 [Multicomm 3200 Evans Peak] (WiMAX)
++	1403  IWMC3200 [Multicomm 3200 Evans Peak] (WiFi 802.11a/b/g/n)
++	1404  IWMC3200 [Multicomm 3200 Evans Peak]
++	1405  IWMC3200 [Multicomm 3200 Evans Peak] (GPS)
++	1406  IWMC3200 [Multicomm 3200 Evans Peak] (Bluetooth 2.1)
++	1407  IWMC3200 [Multicomm 3200 Evans Peak] (WiMAX 2.5GHz)
++0092  C-guys, Inc.
++	0001  Texas Instruments, Inc. ACX100 [SD-Link11b] (WiFi 802.11b)
++	0004  Broadcom Corp. BCM4318 [EW-CG1102GC] (WiFi 802.11a/b/g)
++	0005  [SD-Radio2] (FM Radio)
++	5544  [SD-Radio] (FM Radio)
++0097  Texas Instruments, Inc.
++	4076  WL1271 [WiLink 6.0] (WiFi 802.11b/g/n)
++0098  Toshiba Corp.
++	0001  SD-BT00 (Bluetooth 1.0b)
++	0002  PA3271U [SD Card2] (Bluetooth 1.1)
++	0003  PA3370U [SD Card3] (Bluetooth 1.2)
++
++# SDIO vendor IDs 0100-ffff match PCMCIA vendor IDs managed and assigned by USB-IF
++
++0104  Socket Communications, Inc.
++	005e  IS5300/8510-00209 [SDIO In-Hand Scan Card] (Barcode Scanner)
++	00c5  Toshiba Corp. BL4800 [Bluetooth SDIO Connection Kit] (Bluetooth 1.1)
++024c  Realtek Semiconductor Corp.
++	0240  RTL8723BS [Bestbuy] (WiFi 802.11b/g/n)
++	0241  RTL8723BS [Bestbuy] (WiFi 802.11b/g/n)
++	0523  RTL8723BS [HP] (WiFi 802.11b/g/n)
++	0524  RTL8723BS [ECS] (WiFi 802.11b/g/n)
++	0525  RTL8723BS [TCL] (WiFi 802.11b/g/n)
++	0623  RTL8723BS [Acer] (WiFi 802.11b/g/n)
++	0624  RTL8723BS [Reserved] (WiFi 802.11b/g/n)
++	0625  RTL8723BS [Rockchip] (WiFi 802.11b/g/n)
++	0626  RTL8723BS [Braswell] (WiFi 802.11b/g/n)
++	0627  RTL8723BS [Acer] (WiFi 802.11b/g/n)
++	8753  RTL8723BS [Common] (WiFi 802.11b/g/n)
++	b723  RTL8723BS [Common] (WiFi 802.11b/g/n)
++	b821  RTL8821BS (WiFi 802.11a/b/g/n/ac)
++	b822  RTL8822BS (WiFi 802.11a/b/g/n/ac)
++	c821  RTL8821CS (WiFi 802.11a/b/g/n/ac)
++	c822  RTL8822CS (WiFi 802.11a/b/g/n/ac)
++	d723  RTL8723DS (WiFi 802.11b/g/n)
++	d724  RTL8723DS (WiFi 802.11b/g/n)
++	d821  RTL8821DS (WiFi 802.11a/b/g/n/ac)
++0271  Atheros Communications, Inc.
++	0108  AR6001 (WiFi 802.11a/b/g)
++	0109  AR6001 (WiFi 802.11a/b/g)
++	010a  AR6001 (WiFi 802.11a/b/g)
++	010b  AR6001 (WiFi 802.11a/b/g)
++	0200  AR6002 (WiFi 802.11a/b/g)
++	0201  AR6002 (WiFi 802.11a/b/g)
++	0300  AR6003 (WiFi 802.11a/b/g/n)
++	0301  AR6003 (WiFi 802.11a/b/g/n)
++	0400  AR6004 (WiFi 802.11a/b/g/n)
++	0401  AR6004 (WiFi 802.11a/b/g/n)
++	0402  AR6004 (WiFi 802.11a/b/g/n)
++	0403  AR6004 (WiFi 802.11a/b/g/n)
++	0411  AR6004 (WiFi 802.11a/b/g/n)
++	0418  AR6004 (WiFi 802.11a/b/g/n)
++	0419  AR6004 (WiFi 802.11a/b/g/n)
++	050a  AR6005 (WiFi 802.11b/g/n)
++	0701  QCA9377 [Tufello] (WiFi 802.11a/b/g/n/ac)
++0296  Palm, Inc.
++	5347  Arasan AC21C00/AC2200/AC2600 [SDIO-UART bridge] (UART)
++02d0  Broadcom Corp.
++	044b  BCM4318 (WiFi 802.11a/b/g)
++	4324  BCM43241 (WiFi 802.11a/b/g/n)
++	4329  BCM4329 (WiFi 802.11a/b/g/n)
++	4330  BCM4330 (WiFi 802.11a/b/g/n)
++	4334  BCM4334 (WiFi 802.11a/b/g/n)
++	4335  BCM4335/BCM4339 (WiFi 802.11a/b/g/n/ac)
++	4339  BCM4339 (WiFi 802.11a/b/g/n/ac)
++	4345  BCM4345 (WiFi 802.11a/b/g/n/ac)
++	4354  BCM4354 (WiFi 802.11a/b/g/n/ac)
++	4355  Cypress CYW89359 (WiFi 802.11a/b/g/n/ac)
++	4356  BCM4356 (WiFi 802.11a/b/g/n/ac)
++	4359  BCM4359 (WiFi 802.11a/b/g/n/ac)
++	4373  Cypress CYW4373 (WiFi 802.11a/b/g/n/ac)
++	a804  Cypress CYW43012 (WiFi 802.11a/b/g/n)
++	a887  BCM43143 (WiFi 802.11b/g/n)
++	a94c  BCM43340 (WiFi 802.11a/b/g/n)
++	a94d  BCM43341 (WiFi 802.11a/b/g/n)
++	a962  BCM43362 (WiFi 802.11b/g/n)
++	a9a4  BCM43364 (WiFi 802.11b/g/n)
++	a9a6  BCM43438 (WiFi 802.11b/g/n)
++	a9bf  BCM43455 (WiFi 802.11a/b/g/n/ac)
++02db  SyChip Inc.
++	0002  WLAN6060SD [Pegasus] (WiFi 802.11b)
++02df  Marvell Semiconductor Inc.
++	9103  88W8385/88W8686 [Libertas] (WiFi 802.11b/g)
++	9104  88W8688 [Libertas] (WiFi 802.11a/b/g)
++	9105  88W8688 [Libertas] (Bluetooth 3.0)
++	9116  88W8786 [Avastar 8700] (WiFi 802.11a/b/g/n)
++	9119  88W8787 [Avastar 8700] (WiFi 802.11a/b/g/n)
++	911a  88W8787 [Avastar 8700] (Bluetooth 4.0)
++	911b  88W8787 [Avastar 8700] (Bluetooth AMP)
++	9128  88W8797 [Avastar 8700]
++	9129  88W8797 [Avastar 8700] (WiFi 802.11a/b/g/n)
++	912a  88W8797 [Avastar 8700] (Bluetooth 4.0)
++	912c  88W8897 [Avastar 8800]
++	912d  88W8897 [Avastar 8800] (WiFi 802.11a/b/g/n/ac)
++	912e  88W8897 [Avastar 8800] (Bluetooth 4.1)
++	9134  88W8887 [Avastar 8800]
++	9135  88W8887 [Avastar 8800] (WiFi 802.11a/b/g/n/ac)
++	9136  88W8887 [Avastar 8800] (Bluetooth 4.1)
++	9139  88W8801 [Avastar 8800] (WiFi 802.11b/g/n)
++	9140  88W8997 [Avastar 8900]
++	9141  88W8997 [Avastar 8900] (WiFi 802.11a/b/g/n/ac)
++	9142  88W8997 [Avastar 8900] (Bluetooth 4.2)
++	9144  88W8977 [Avastar 8900]
++	9145  88W8977 [Avastar 8900] (WiFi 802.11a/b/g/n)
++	9146  88W8977 [Avastar 8900] (Bluetooth 4.2)
++	9148  88W8987 [Avastar 8900]
++	9149  88W8987 [Avastar 8900] (WiFi 802.11a/b/g/n/ac)
++	914a  88W8987 [Avastar 8900] (Bluetooth 4.2)
++02fe  Inprocomm, Inc.
++	2128  IPN2128 (WiFi 802.11b)
++032a  Cambridge Silicon Radio Ltd.
++	0001  UF1050 [UniFi-1] (WiFi 802.11b/g)
++	0002  UF2000 [UniFi-2] (WiFi 802.11b/g)
++	0007  UF6026/UF6027/UF6028 [UniFi-3] (WiFi 802.11b/g/n)
++	0008  CSR6030 [UniFi-4] (WiFi 802.11b/g/n)
++037a  MediaTek Inc.
++	5911  MT5911N (WiFi 802.11b/g)
++	6602  MT6632 (WiFi 802.11a/b/g/n/ac)
++	6632  MT6632 (Bluetooth 4.1)
++	7603  MT7663 (WiFi 802.11a/b/g/n/ac)
++	7608  MT7668 (WiFi 802.11a/b/g/n/ac)
++	7663  MT7663 (Bluetooth 5.0)
++	7668  MT7668 (Bluetooth 5.0)
++	7901  MT7921 (WiFi 802.11a/b/g/n/ac/ax)
++	7961  MT7921 (Bluetooth 5.0)
++039a  Siano Mobile Silicon
++	0201  SMS1140 [Nova B] (Digital TV Receiver)
++	0202  SMS1140 [Nice] (Digital TV Receiver)
++	0300  SMS1xxx [Vega] (Digital TV Receiver)
++	0301  SMS1xxx [Venice] (Digital TV Receiver)
++	0302  SMS1xxx [Ming] (Digital TV Receiver)
++	0500  SMS1xxx [Pele] (Digital TV Receiver)
++	0600  SMS2270 [Rio] (Digital TV Receiver)
++	0700  SMS2160 [Denver T-DMB] (Digital TV Receiver)
++	0800  SMS1530 [Denver ATSC-M/H] (Digital TV Receiver)
++	1100  SMS1xxx [Nova A] (Digital TV Receiver)
++	5347  SMS1xxx [Stellar] (Digital TV Receiver)
++041b  Redpine Signals, Inc.
++	9113  RS9113 (WiFi 802.11a/b/g/n)
++	9116  RS9116 (WiFi 802.11a/b/g/n)
++0501  Globalsat Technology Co.
++	f501  [SD-501] (GPS)
++104c  Texas Instruments, Inc.
++	9066  WL1251 [WiLink 4.0] (WiFi 802.11b/g)
++13d1  AboCom Systems, Inc.
++	ac02  MediaTek Inc. MT5911N [SDW11G] (WiFi 802.11b/g)
++
++# List of known interface classes
++#
++# Syntax:
++# C class  class_name
++
++# The SDIO Standard Function code defined by SDIO specification, section 6.10 Function Basic Registers and addendums
++
++# C 00  None
++C 01  UART
++C 02  Bluetooth Type-A
++C 03  Bluetooth Type-B
++C 04  GPS
++C 05  Camera
++C 06  PHS
++C 07  WLAN
++C 08  ATA
++C 09  Bluetooth Type-A AMP
+-- 
+2.25.1
+
