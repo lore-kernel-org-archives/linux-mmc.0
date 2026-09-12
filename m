@@ -1,37 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B489241B8CD;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DBA7F41D135;
 	Sat, 12 Sep 2026 08:39:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789202358; cv=none; b=URSMHHcHp6cRwdm9ytSz16lEI+TRmUtLuv0XPTo6xcvTux6/CBn8QGHc/oxiQVxY0u2OOpbBV4l7TaaYUlm73z67sOETtfUuIDkGfcDYbqxI37gEIUOWcM+DSqtBn1dfKOYDSwHfNbSAjP1tERH44Y2EOVFv4OZ7hr+E6Y7WdWk=
+	t=1789202358; cv=none; b=ERcwSKa5v5VZzyZD/wudOSvZJg3colgUVYFLB1o+sgV1QjqPnyTCzfRKqEQzmz8GpUI6AzmlJu1YVw0Kdlc+JsQ+xoVR/IfdXuG5JPhzJsDdWf0GK7FYEwfflZuTFzbdVnlrqKCdAbXX9jh8a5XT8tbW3nYxo1+lcCmRF1qjBz8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1789202358; c=relaxed/simple;
-	bh=6aztPucHhwcfvtH05KLuWDZknFBinjt+ASMvoTJAUkM=;
+	bh=Y2tYpAAcz6nz7Pdv5HgsCC9rwT95/7ljDoBRHQCON3s=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=An8RhrkvmlHK9Xuql7kUajNMHsbkna1/PAIMdkimn2Cy2PFJo7alSsUX0Tk4toueRg7ehClbEaFFK+hCWfgksCyki8eEGeL7SFZ6oeO8tYK6T3veU9h8JehfUxKevA3wEyKncY3+N89/xhZ36SknsKbBcOlqWD/BeoaeEyA9l8c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lXczFAQz; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=HjAScdD2Ca6ZNEAEBZgsQDExrxH2UdPVdZGSMRQmCzVsf6Jyhy3hM3WxGeJwIqkrJcqJsqLI4nuJfOWO2zojjSISN0nHjb9IzWudOvObTe+WdKJO1wLLBt9cBal+mJIE2/TdWZEl4+MpMjq6gu0CLMQdLmqKoc/6ONOIwlnzNRg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RrP3E5Qe; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lXczFAQz"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 3D353C4DDE4;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RrP3E5Qe"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 61F55C2BCF4;
 	Sat, 12 Sep 2026 08:39:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1789202358;
-	bh=6aztPucHhwcfvtH05KLuWDZknFBinjt+ASMvoTJAUkM=;
+	bh=Y2tYpAAcz6nz7Pdv5HgsCC9rwT95/7ljDoBRHQCON3s=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=lXczFAQzzArIIxIdFVmrzdQnBgfrhXhQ4M7zUP1N2uZkVth/gPkXGf1LQSDL10OrO
-	 zLpLXnLS5b/w8fAcK+cx/u/Jto0/5+jN0mm2uBSmSGEjhuCNmfPd4XMRrqxOSOFlaJ
-	 algO7oov0sL0GyMmOMmJiy12TXYOro/Z+Nf64Lh/VrEF/lpdnuBv/0Xa0xKaPded03
-	 Y4o/52c2f1TeFoPWw8nhTO53Kdzo4MmYviIs5CkMlnBy9AKtxyHBinB1txAfYnb6M6
-	 hrwyYjpjbCABWXTGmyyjPXXnFcizBFXKRtR1s3ANhSjgQt7eSlHouVudutQ6krG4MJ
-	 pp8a1Cm6yBxPw==
+	b=RrP3E5Qe+mIh+TW3RNi1DPrd2NFS9gsO65yrHAwNu9JZSBXjGGJAU2K+ezZf75J2V
+	 sygQiS7VPAmtoqdWXrqAeqXAjmTjcZTEhEQqhXh7l6v/X9/jWqXcuRAJJLMhOIgQxX
+	 oYh2f43BdBCXrxw/rMdaXipXbJ00XRLmoRtSC4ImjsO3a/A8fppJPdugrG3rGj4X6C
+	 voh49xdGNbw7HUEgHUP9v6twf0jQnZ6d/NB6U57uiKdo4d5d9/umJgzY0s3QRW/9KU
+	 /Y/VoMlllRpeHPKFDoxI4twzG3KspnE0dSyVqgjLPYDZ4nR62460hm2YmEP19NMB1h
+	 l29+IJWCg3mEw==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25014C79FB6;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DB6EC88E5C;
 	Sat, 12 Sep 2026 08:39:18 +0000 (UTC)
 From: Muzaffer Kadir via B4 Relay <devnull+muzafferkadir.mainlining.org@kernel.org>
-Date: Sat, 12 Sep 2026 11:39:15 +0300
-Subject: [PATCH RFC 06/20] dt-bindings: vendor-prefixes: Add General Mobile
+Date: Sat, 12 Sep 2026 11:39:17 +0300
+Subject: [PATCH RFC 08/20] dt-bindings: iommu: qcom,iommu: Add MSM8952
+ IOMMU to SMMUv2 compatibles
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,7 +41,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260912-msm8952-initial-support-v1-6-0e742578b524@mainlining.org>
+Message-Id: <20260912-msm8952-initial-support-v1-8-0e742578b524@mainlining.org>
 References: <20260912-msm8952-initial-support-v1-0-0e742578b524@mainlining.org>
 In-Reply-To: <20260912-msm8952-initial-support-v1-0-0e742578b524@mainlining.org>
 To: Bjorn Andersson <andersson@kernel.org>, Abel Vesa <abelvesa@kernel.org>, 
@@ -76,11 +77,11 @@ Cc: David Heidelberg <david@ixit.cz>, Dang Huynh <danct12@riseup.net>,
  linux-pm@vger.kernel.org, linux-input@vger.kernel.org, 
  Muzaffer Kadir <muzafferkadir@mainlining.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1789202354; l=851;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1789202354; l=899;
  i=muzafferkadir@mainlining.org; s=20260816; h=from:subject:message-id;
- bh=r3ZLJrtM9n2VHMSFrmIfF7hLeBB7OX3rKnjug6/4v2s=;
- b=HjCW1YfrhClV6QDEqd2tMP79zA2T3UvNy9/heINjnpQPnPG7PQc2eI2U55+9ASYNYWq4IOEeJ
- LSKyO0FajxVDp2KCf3ltIwZ+8Kt4jK55TaAd8XZ0d0yyGzrlScJmi3l
+ bh=nfAz99So67UR0eyTBCJCXrrz8ldqx9jhB2u8iWLdXd0=;
+ b=Z9hBQwW3JsQ/kODJPQLSBFfYBWzo5BSslJ1ZlFBgCfDDIIvFSV6QYaiyA8hAixG4n8CEQ0H97
+ lu8pLX6n+dIAYy8WRvqKolnULsJ2gwy3uzmOfmCipsoIk4FyamxGpNQ
 X-Developer-Key: i=muzafferkadir@mainlining.org; a=ed25519;
  pk=4zkv4suQ3cYcO4Z7CrV8JSSjEGLBGepUtvQCFjgnYIU=
 X-Endpoint-Received: by B4 Relay for muzafferkadir@mainlining.org/20260816
@@ -90,27 +91,27 @@ Reply-To: muzafferkadir@mainlining.org
 
 From: Muzaffer Kadir <muzafferkadir@mainlining.org>
 
-Add vendor prefix for General Mobile.
-Link: https://www.generalmobile.com
+Add MSM8952 compatible string with "qcom,msm-iommu-v2" as fallback
+for the MSM8952 IOMMU which is compatible with Qualcomm's secure
+fw "SMMU v2" implementation.
 
 Signed-off-by: Muzaffer Kadir <muzafferkadir@mainlining.org>
 ---
- Documentation/devicetree/bindings/vendor-prefixes.yaml | 2 ++
- 1 file changed, 2 insertions(+)
+ Documentation/devicetree/bindings/iommu/qcom,iommu.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-index ba2002969373..37f991d9352c 100644
---- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
-+++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-@@ -662,6 +662,8 @@ patternProperties:
-     description: Gemei Digital Technology Co., Ltd.
-   "^gemtek,.*":
-     description: Gemtek Technology Co., Ltd.
-+  "^generalmobile,.*":
-+    description: General Mobile Fzc.
-   "^genesys,.*":
-     description: Genesys Logic, Inc.
-   "^genexis,.*":
+diff --git a/Documentation/devicetree/bindings/iommu/qcom,iommu.yaml b/Documentation/devicetree/bindings/iommu/qcom,iommu.yaml
+index 93a489025317..9952b9da9a6a 100644
+--- a/Documentation/devicetree/bindings/iommu/qcom,iommu.yaml
++++ b/Documentation/devicetree/bindings/iommu/qcom,iommu.yaml
+@@ -27,6 +27,7 @@ properties:
+           - const: qcom,msm-iommu-v1
+       - items:
+           - enum:
++              - qcom,msm8952-iommu
+               - qcom,msm8953-iommu
+               - qcom,msm8976-iommu
+           - const: qcom,msm-iommu-v2
 
 -- 
 2.54.0
