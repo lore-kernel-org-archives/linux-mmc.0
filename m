@@ -1,140 +1,123 @@
-Received: from mail-m49223.qiye.163.com (mail-m49223.qiye.163.com [45.254.49.223])
+Received: from SHSQR01.spreadtrum.com (mx1.unisoc.com [222.66.158.135])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C37C31E7660
-	for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 01:24:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.223
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDDA01E7660;
+	Mon, 14 Sep 2026 02:50:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=222.66.158.135
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789349079; cv=none; b=DvGssGgiCsJCaenFfd3JzQVez4oEFEUKxyrfMJ0222uMA46A45TFiQOLPa7Ge9vmLaobveawlGTH4AFqDVTXRNjeFDoh6Nj4PTx02KWxsVuxMcXyPmLCTcbVGnk7JI1NWYtkqnIgLFEKWotzVWzUk8SPLkZyM5si0i6/0W6i+U0=
+	t=1789354246; cv=none; b=aOQHjfRbH3dHsDTSAoUTVMWZoYmpThr2SRMuTyasU5haBxdNwaERWR4EmASpOVFWVxcfm96625HXZbDmrieKK3JlUoldtB0RWjMAiNoKPByp6fBJuhFQFR+RKVYAuSaHT038GcLGGLstlD9uXNALpnLJ/jQgz/aAITDTP9T+J9A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789349079; c=relaxed/simple;
-	bh=kLXTvgrF5vfec7V7RDM4+/Zwe2tro3WOh0aIKGzw+oo=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=einVf7+0jbFVfQHvTAXv1pb7ND3CUMl7vdlqGdWhxroI/jt6nZmtYepMjHbn85JnWno50QWfdhrfcmMPayzNfjB/tYgtKn8BRMZhRsTvQAWa0kZxHSDk1P1rNA6f4gK1mzDD+cQ9+jnQY/KmPVuLdcPqAkDoW+wPGWYdag9A76k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=BIo8a+i+; arc=none smtp.client-ip=45.254.49.223
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1789354246; c=relaxed/simple;
+	bh=yqdUUqr89aI+R3momdS13awxkaIkK8le4awmFVKTrw8=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=TxXHOLaV+K7SU9yDbWG6vQGXn4Gyizcq9aEOqiRGB3NIcCnPhVB8TbI8WA6dkN2AQIYlUTu73/hLK82bCvrAE8noPAIJAkSacVGZJ1v62FFDikIGCZUVTwS9eGI3rR2WJ7yU3lEsYScgtrNcAhqcF50M7dGMae+3mT8XxMoHZA4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=unisoc.com; spf=pass smtp.mailfrom=unisoc.com; dkim=pass (2048-bit key) header.d=unisoc.com header.i=@unisoc.com header.b=wcqFNbxc; arc=none smtp.client-ip=222.66.158.135
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=unisoc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=unisoc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="BIo8a+i+"
-Received: from [172.16.12.48] (unknown [61.154.14.86])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 4d991246a;
-	Mon, 14 Sep 2026 09:19:19 +0800 (GMT+08:00)
-Message-ID: <0e773d95-eaf4-4408-bd20-42821c38e634@rock-chips.com>
-Date: Mon, 14 Sep 2026 09:19:15 +0800
+	dkim=pass (2048-bit key) header.d=unisoc.com header.i=@unisoc.com header.b="wcqFNbxc"
+Received: from dlp.unisoc.com ([10.29.3.86])
+	by SHSQR01.spreadtrum.com with ESMTPS id 68E2ntOV052713
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO);
+	Mon, 14 Sep 2026 10:49:55 +0800 (+08)
+	(envelope-from xiaojie.li2@unisoc.com)
+Received: from SHDLP.spreadtrum.com (unknown [10.0.1.210])
+	by dlp.unisoc.com (SkyGuard) with ESMTPS id 4hjqLq37s6z2NFXKg;
+	Mon, 14 Sep 2026 10:47:31 +0800 (CST)
+Received: from zeshmbx09.spreadtrum.com (10.29.3.107) by
+ zeshmbx02.spreadtrum.com (10.0.1.210) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.48; Mon, 14 Sep 2026 10:49:54 +0800
+Received: from zeshmbx09.spreadtrum.com ([fe80::7981:d4bc:3eee:c0be]) by
+ zeshmbx09.spreadtrum.com ([fe80::7981:d4bc:3eee:c0be%17]) with mapi id
+ 15.00.1497.048; Mon, 14 Sep 2026 10:49:54 +0800
+From: =?utf-8?B?5p2O5pmT5rSBIChYaWFvamllIExpLzEzMjMzKQ==?=
+	<xiaojie.li2@unisoc.com>
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+CC: Ulf Hansson <ulfh@kernel.org>,
+        "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>,
+        =?utf-8?B?6ZmI5paH6LaFIChXZW5jaGFvIENoZW4p?=
+	<Wenchao.Chen@unisoc.com>,
+        =?utf-8?B?5byg5aaC5rOJIChSYWluIFpoYW5nKQ==?=
+	<Rain.Zhang@unisoc.com>,
+        =?utf-8?B?5ZSQ5pyI5p6XIChZdWVsaW4gVGFuZyk=?=
+	<yuelin.tang@unisoc.com>,
+        "cixi.geng@linux.dev" <cixi.geng@linux.dev>
+Subject: [PATCH] mmc: core: Modify the CMD1 transmission interval
+Thread-Topic: [PATCH] mmc: core: Modify the CMD1 transmission interval
+Thread-Index: AQHdNgR8DmoNOL7mLUCpmwUb62wN6bbHVn+AgAFmtuCAAFoWgIAETeuw
+Date: Mon, 14 Sep 2026 02:49:53 +0000
+Message-ID: <e92f094cbb354956aa0bf78060bd82cc@zeshmbx09.spreadtrum.com>
+References: <20260827091436.1339716-1-xiaojie.li2@unisoc.com>
+ <CAPx+jO8Lc3iNNBVjBB33aJYUfdr2EJqpL8mS8weKnZcBaDf0vA@mail.gmail.com>
+ <e69a63062a43456097939c622395cc7b@zeshmbx09.spreadtrum.com>
+ <CAPx+jO9Sw=pTq-925h0S7Urw2moANp=n+aScfwRxV9Dn642g3Q@mail.gmail.com>
+In-Reply-To: <CAPx+jO9Sw=pTq-925h0S7Urw2moANp=n+aScfwRxV9Dn642g3Q@mail.gmail.com>
+Accept-Language: zh-CN, en-US
+Content-Language: zh-CN
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-exchange-transport-fromentityheader: Hosted
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- Shawn Lin <shawn.lin@linux.dev>, Johannes Berg <johannes@sipsolutions.net>
-Subject: Re: [RFC PATCH 0/4] Add SDIO userspace passthrough support (kernel
- cdev + mmc-utils)
-To: Avri Altman <Avri.Altman@sandisk.com>, Ulf Hansson <ulfh@kernel.org>
-References: <1789109096-196082-1-git-send-email-shawn.lin@rock-chips.com>
- <BL3PR16MB44734321BBE9FC4EB9EC91C7E5BC2@BL3PR16MB4473.namprd16.prod.outlook.com>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <BL3PR16MB44734321BBE9FC4EB9EC91C7E5BC2@BL3PR16MB4473.namprd16.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0aa09d7f469203a4kunm618c520676879e
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVkZQk9IVklKSRlNQkpDSE4eTVYVFA
-	kWGhdVEwETFhoSFyQUDg9ZV1kYEgtZQVlNSlVKTk9VSk9VQ01ZV1kWGg8SFR0UWUFZT0tIVUJCSU
-	5LVUpLS1VKQktCWQY+
-DKIM-Signature: a=rsa-sha256;
-	b=BIo8a+i+Ckk3bUo7qPnhqbFnKs2EUs5/zOX1ERmZkuzM8tKeApnQmR+0pNKRLKLHMs8QIF58sTKVt+RgVwP1hFh1byqs4GgWZX8ebLoiQ+zeLTF1OI9rKmTsoVDg91OFQOe0WA5xgDtO6h57aC9t5+zsOzCzN8fCWGz/VmMoN9o=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=stYqBpmePClCUQcyVfrekvRaLCUFXFZJPdYXnUyUx54=;
-	h=date:mime-version:subject:message-id:from;
+X-MAIL:SHSQR01.spreadtrum.com 68E2ntOV052713
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=unisoc.com;
+	s=default; t=1789354205;
+	bh=yqdUUqr89aI+R3momdS13awxkaIkK8le4awmFVKTrw8=;
+	h=From:To:CC:Subject:Date:References:In-Reply-To;
+	b=wcqFNbxc742CA5zizbJmUekG+jDq1Do/4UOb/HMmwEquLTo4CdyTFr2zlgaATzxbA
+	 qyp/GRqQMq5/9rO6tjiBe+11jvsdvF0OeElmOTU0EKprWqH6EPa9ip7WS+iFUpYPr4
+	 9kTFis52BM+2pQxEpQU3vVKmcGXS/PZriljIj89WCE+xy9OmFt2WT04+X96q/o0K5Z
+	 RrtgOstvLUre4PXj5YzTo7jDA1yyvFSjIHR/VOtcEslDi4UjDZGR21WYKnyrfYyO9l
+	 eVAu/RzGFagaIDSL4LJi9FgaTpIDl1TY243wllz7aNwlDJdm8NosA8wNXf/9GVFOpG
+	 FDEMYk/NVYUkg==
 
-在 2026/09/13 星期日 15:24, Avri Altman 写道:
->> From: Shawn Lin <shawn.lin@linux.dev>
->>
->> Hi Ulf
->>
->> This RFC series adds raw userspace access to the SDIO register space, spanning
->> two projects and therefore threaded into a single series:
->>
->>    - Patch 1 (kernel tree): a passthrough character device exposing
->>      CMD52/CMD53 to userspace for every SDIO function.
->>
->>    - Patches 2-4 (mmc-utils tree): SDIO enumeration in 'mmc list'
->>      plus 'mmc sdio' commands using the new interface, i.e. the first
->>      userspace consumer of the kernel patch.
->>
->> They are sent together so the kernel UAPI and its user can be reviewed as a
->> whole. If you prefer, I am happy to split them into independent threads per
->> project.
->>
->> === Motivation ===
->>
->> SDIO cards are normally driven by function drivers (brcmfmac, mwifiex,
->> rtw88_8723bs, ...), but bring-up, debugging and factory test frequently need
->> to poke the SDIO register space directly:
->> CCCR/FBR in function 0, or vendor registers before any function driver is
->> bound, and some deployments, notably lightweight IoT boards, want to
->> handle the SDIO function entirely from userspace.
->> Today the only way is to write a tiny kernel driver per device.
->>
->> eMMC and SD already have userspace tooling in mmc-utils; SDIO is
->> conspicuously absent from it.
->>
->> === Why not lssdio? ===
->>
->> Standalone SDIO enumeration tooling already exists: the lssdio script of the
->> sdioutils project [1], and the sdio.ids database proposed here comes from
->> that very project. Still, I would rather grow mmc-utils than use lssdio, for two
->> reasons:
->>
->>    - Userspace tooling of a subsystem is conventionally unified:
->>      USB has lsusb, PCI has lspci, and MMC/SD cards are already
->>      enumerated by 'mmc' from mmc-utils. SDIO devices live on the
->>      same subsystem, so extending 'mmc list' is their natural home:
->>      one tool, one consistent output format, one place to maintain.
->>
->>    - lssdio is a standalone perl script, and SDIO devices are mass
->>      deployed in lightweight IoT/embedded systems where a perl
->>      runtime costs 10-20MB of storage - a non-starter there. mmc-utils
->>      is a tiny C binary already present on most boards shipping eMMC
->>      or SD, so SDIO support comes essentially for free, and the
->>      sdio.ids database it needs is a few KB.
-> +Johannes , who might be interested to comment on this as well
-> 
-> The kernel UAPI may need a small reference/debug client,
-> but that does not require making mmc-utils the home of SDIO userspace tooling.
-> The fact that SDIO shares the Linux MMC core and SD physical interface is not sufficient:
-> mmc-utils is a storage-management utility, not a generic enumerator or control plane for every device function carried over that bus.
-> 
-> My main concern is the long-term scope boundary.
-> eMMC is a JEDEC storage specification with a relatively stable, finite management surface,
-> whereas SD and SDIO are part of the actively evolving SDA specification family and extend beyond storage into device-function domains.
-> 
-> Once mmc-utils starts carrying SDIO function enumeration and its own sdio.ids database,
-> it establishes itself as the home for SDA SDIO userspace support.
-> That is a substantially broader commitment than a small reference client for a kernel UAPI,
-> and it invites further non-storage functionality as the SDA specifications and SDIO use cases evolve.
-> 
-
-Hi Avri,
-
-Thanks for the quick review.
-
-I agree with the scope concern and am happy to keep sdio support in 
-mmc-utils out of this series, so we could still discuss this later but
-focusing on the UAPI design itself now. Your suggestion of a small
-reference/debug client seems the right shape, so I plan to rework the
-series.
-
-
-Ulf, any objection to tools/sdio/ as the home of the reference client?
-And I'd appreciate comments on the UAPI design in patch 1 itself.
-
-
-> Thanks,
-> Avri
-> 
-
+DQo+IE9uIEZyaSwgU2VwIDExLCAyMDI2IGF0IDQ6NDXigK9BTSDmnY7mmZPmtIEgKFhpYW9qaWUg
+TGkvMTMyMzMpIDx4aWFvamllLmxpMkB1bmlzb2MuY29tPiB3cm90ZToNCj4NCj4JTm8sIHRoYXQn
+cyB0aGUgd2hvbGUgcG9pbnQuIFdlIGRvbid0IHdhbnQgb3BlbiBjb2RlZCBwb2xsaW5nIGxvb3Bz
+LCBpdCdzIGp1c3QgYSBuaWdodG1hcmUgdG8gbWFpbnRhaW4uIFBsZWFzZSB0cnkgdG8gZXh0ZW5k
+IHRoZSBleGlzdGluZw0KPl9fbW1jX3BvbGxfZm9yX2J1c3koKSBpbnN0ZWFkLg0KDQpVbmRlcnN0
+b29kLiBJIHdpbGwgc3RvcCBsb29raW5nIGludG8gYSBkZWRpY2F0ZWQgZnVuY3Rpb24gYW5kIGZv
+Y3VzIG9uIGV4dGVuZGluZyB0aGUgZXhpc3RpbmcgX19tbWNfcG9sbF9mb3JfYnVzeSgpIHRvIHN1
+cHBvcnQgQ01EMSdzIHNwZWNpZmljIHJlcXVpcmVtZW50cy4NCg0KSSB3aWxsIGZvbGxvdyB1cCB3
+aXRoIGFuIHVwZGF0ZSBvbmNlIHRoZSBjb2RlIGlzIGRlYnVnZ2VkLg0KDQpUaGFuayB5b3UgZm9y
+IHlvdXIgYWR2aWNlIGFuZCByZXBseS4NCg0KQmVzdCByZWdhcmRzLA0KWGlhb2ppZS5MaQ0KDQot
+LS0tLemCruS7tuWOn+S7ti0tLS0tDQrlj5Hku7bkuro6IFVsZiBIYW5zc29uIDx1bGYuaGFuc3Nv
+bkBvc3MucXVhbGNvbW0uY29tPiANCuWPkemAgeaXtumXtDogMjAyNuW5tDnmnIgxMeaXpSAyMzo0
+Nw0K5pS25Lu25Lq6OiDmnY7mmZPmtIEgKFhpYW9qaWUgTGkvMTMyMzMpIDx4aWFvamllLmxpMkB1
+bmlzb2MuY29tPg0K5oqE6YCBOiBVbGYgSGFuc3NvbiA8dWxmaEBrZXJuZWwub3JnPjsgbGludXgt
+bW1jQHZnZXIua2VybmVsLm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsg6ZmI5paH
+6LaFIChXZW5jaGFvIENoZW4pIDxXZW5jaGFvLkNoZW5AdW5pc29jLmNvbT47IOW8oOWmguaziSAo
+UmFpbiBaaGFuZykgPFJhaW4uWmhhbmdAdW5pc29jLmNvbT47IOWUkOaciOaelyAoWXVlbGluIFRh
+bmcpIDx5dWVsaW4udGFuZ0B1bmlzb2MuY29tPjsgY2l4aS5nZW5nQGxpbnV4LmRldg0K5Li76aKY
+OiBSZTogW1BBVENIXSBtbWM6IGNvcmU6IE1vZGlmeSB0aGUgQ01EMSB0cmFuc21pc3Npb24gaW50
+ZXJ2YWwNCg0KDQrms6jmhI86IOi/meWwgemCruS7tuadpeiHquS6juWklumDqOOAgumZpOmdnuS9
+oOehruWumumCruS7tuWGheWuueWuieWFqO+8jOWQpuWImeS4jeimgeeCueWHu+S7u+S9lemTvuaO
+peWSjOmZhOS7tuOAgg0KQ0FVVElPTjogVGhpcyBlbWFpbCBvcmlnaW5hdGVkIGZyb20gb3V0c2lk
+ZSBvZiB0aGUgb3JnYW5pemF0aW9uLiBEbyBub3QgY2xpY2sgbGlua3Mgb3Igb3BlbiBhdHRhY2ht
+ZW50cyB1bmxlc3MgeW91IHJlY29nbml6ZSB0aGUgc2VuZGVyIGFuZCBrbm93IHRoZSBjb250ZW50
+IGlzIHNhZmUuDQoNCg0KDQpPbiBGcmksIFNlcCAxMSwgMjAyNiBhdCA0OjQ14oCvQU0g5p2O5pmT
+5rSBIChYaWFvamllIExpLzEzMjMzKSA8eGlhb2ppZS5saTJAdW5pc29jLmNvbT4gd3JvdGU6DQo+
+DQo+IEhpIFVmZmU6DQo+ICAgICAgICAgVGhhbmsgeW91IGZvciB5b3VyIHJlcGx5Lg0KPiAgICAg
+ICAgIEhvd2V2ZXIsIEkgbm90aWNlZCB0aGF0IF9fbW1jX3BvbGxfZm9yX2J1c3koKSBhbmQgbW1j
+X3BvbGxfZm9yX2J1c3koKSBhcmUgaW52b2tlZCBlaXRoZXIgZGlyZWN0bHkgb3IgaW5kaXJlY3Rs
+eSBieSBtYW55IG90aGVyIGZ1bmN0aW9ucyB3aXRoaW4gdGhlIE1NQyBkcml2ZXIuDQo+IE1vZGlm
+eWluZyB0aGVtIGRpcmVjdGx5IGNvdWxkIHBvdGVudGlhbGx5IGludHJvZHVjZSB1bmludGVuZGVk
+IHNpZGUgZWZmZWN0cy4NCj4NCj4gICAgICAgICBXb3VsZCBpdCBiZSBhY2NlcHRhYmxlIHRvIGlt
+cGxlbWVudCBhIGRlZGljYXRlZCBmdW5jdGlvbiBzcGVjaWZpY2FsbHkgZm9yIENNRDE/IFdlIGNv
+dWxkIGNyZWF0ZSBhIENNRDEtc3BlY2lmaWMgdmFyaWFudCBiYXNlZCBvbiB0aGUgZXhpc3Rpbmcg
+X19tbWNfcG9sbF9mb3JfYnVzeSgpLg0KPiBUaGlzIGFwcHJvYWNoIHdvdWxkIHNpZ25pZmljYW50
+bHkgbWluaW1pemUgdGhlIHBvdGVudGlhbCBpbXBhY3Qgb24gdGhlIHJlc3Qgb2YgdGhlIGNvZGVi
+YXNlLg0KDQpObywgdGhhdCdzIHRoZSB3aG9sZSBwb2ludC4gV2UgZG9uJ3Qgd2FudCBvcGVuIGNv
+ZGVkIHBvbGxpbmcgbG9vcHMsIGl0J3MganVzdCBhIG5pZ2h0bWFyZSB0byBtYWludGFpbi4gUGxl
+YXNlIHRyeSB0byBleHRlbmQgdGhlIGV4aXN0aW5nDQpfX21tY19wb2xsX2Zvcl9idXN5KCkgaW5z
+dGVhZC4NCg0KQW5kIG5leHQgdGltZSwgcGxlYXNlIGRvbid0IHRvcCBwb3N0Lg0KDQpbLi4uXQ0K
+DQpLaW5kIHJlZ2FyZHMNClVmZmUNCg==
