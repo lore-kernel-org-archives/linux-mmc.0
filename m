@@ -1,162 +1,133 @@
-Received: from mail-pj2-f13.google.com (mail-pj2-f13.google.com [74.125.227.141])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0326472527
-	for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 13:56:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.141
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C5B743A7F2;
+	Mon, 14 Sep 2026 14:15:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789394214; cv=none; b=OeCbS2AkyCAVNyJJ0Qt+CL/GjS99ldl27gSb+Ug+ze/N26IXhjruVQXIgsrS9L6/nvN/W6Oo7z9VPsvvCIMMwsWNUnuakMlvCPCKsHdaUW0MdK122lbmcvGPQoTEJdyeiE/sS8zImyYe3hZ/cqMhVqVbwMwGeeZmmCP2E/9cIMw=
+	t=1789395326; cv=none; b=JufxhXhQXZjLQMDcgiw34+xlEOLzCs9Rw1o4br2pcVgdc1rdwNPFkbXY1bXW9uUfAi8GxEN5zSbkniBL2q1/29MaTJlpAb99wj5Yd1pg6VFYtXJP+t0/ZFo+5M71gO0uUx2kNGu89ndsHWftyzTTolqBm+ttVJk7sfWT28aDE7o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789394214; c=relaxed/simple;
-	bh=jTXdhOWHb+tc8C306czNkIrV9+xG+lE9QUA2R7XrZmw=;
-	h=Content-Type:Date:Message-Id:Subject:From:To:Cc:Mime-Version:
-	 References:In-Reply-To; b=Kjkfm7wFI3tqVjPL57B9uPz7QwjZUovPKk4ZbvmJLfvgTbd0gbX7Vr4glTxlyBLDbpqYYMuUPLjXzi8xNDlDtvL+rZbkBBBy4/C6HBj/ubV7DfCSDX/66gDJGapkXBvD/SnVaeuC4xaDnHlis5RpysQwjA3uiVtWFDV8eRdM/NE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kko+DJ26; arc=none smtp.client-ip=74.125.227.141
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1789395326; c=relaxed/simple;
+	bh=LLp7SRJCJil3jKQyBrx5kqLbpNRcXwIPNhCIaK9/AqQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=hZsOfZpGRgwITL6xZPOTkdybstMeYWB5BMmAn89Wi9WHva3I46ATRfTFjDn7aJKYoqgly24QDhDH8Vg2tBQaAEoijCPRaaDT7TA1ZZWIgGL/rUa4yZed8lsjQOGxUlx7yYaLsMMQu5SiPLk5WM/QTRYc6oQ5v74evpxOYAuIZtw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cfsEWMQD; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kko+DJ26"
-Received: by mail-pj2-f13.google.com with SMTP id 98e67ed59e1d1-39dacf053eeso1245329a91.2
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 06:56:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1789394212; x=1789999012; darn=vger.kernel.org;
-        h=in-reply-to:references:content-transfer-encoding:mime-version:cc:to
-         :from:subject:message-id:date:content-type:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=czQcbmKAQjpPrrgr487KiVX0zj39eEVICUIzqR7EEkY=;
-        b=kko+DJ26ujlfKwfe3QrU7w9Eq62zp0WlHMn2i3D7DIOrMLyO702mhZCDPt/0oGgCtL
-         V0cLwOc9zewDYvYkmyZ/8igXHHi2dtqyk6ttyNeCvZNU+PgxP/BFxqCaH+nPUlkfdBvy
-         HlUuP0wPypTZOlPYXqH2ikjbXdOIw50KVugsiJHXeMFuNFKtJk4QQIqqOaHKC9tvhjMH
-         Bbl70JCPIfcocT1/jWmaxKp/KurfOxThLWp4gh7GqZ5U06DGBo0Np8r2UOdxEmLLhO49
-         ETh9Nw3X3zZ4GGpnBDGY5or4bzXdm9CC8OUHAKLsvQUdaJmj5+XrPqoGjaD6dSmxINp2
-         n0kA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1789394212; x=1789999012;
-        h=in-reply-to:references:content-transfer-encoding:mime-version:cc:to
-         :from:subject:message-id:date:content-type:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=czQcbmKAQjpPrrgr487KiVX0zj39eEVICUIzqR7EEkY=;
-        b=M7Iqs1SOYzeEobNdShAFPTxU2hNbNyQz2vzsP7CriOC8lTnEAcKrAGLXpmhy3jdbZq
-         ONYtzeVQtOS9gclN+BtrHj+OWXj/Le0xgu39LGaZ5nb3gleX2wPAtnXD8QMJkSuR+byg
-         /8pzJHUWcdUbYjArf61iAUBEyfc8CpfYswcdXkihH65uUYIPVlYa4WWm0FsTZArGMQTb
-         Q+AM0Z1X6aj4xN+BY8wTGWhIHRAys5NxXbASkXU+kcIDWVB8ra+6Jyf+IejGxJvTfu2y
-         8WTbwwQrR4Ufa2P+ZSElqlTv9+goAKx6qdNhOcCsc+U0ZnU+1bOoTIDb+8hgYjnmnhCv
-         mqFA==
-X-Gm-Message-State: AFuF++kHlp3L+Ehsp9Lvxg3lliN9PwK9Ug6M3go/xdn2XDCPyjd+QKn/
-	47m1eS62v3aAX+qB2cLsxkT4A8J18baNWSYvlrz2gNkV0L+sY8qXLzO1
-X-Gm-Gg: AYBFou1XvnaJfVJfa/HOja+KzZEaqX02QrXxIaEGMIz1Lh4bHed/9Nvq9Fiqk1Dm52B
-	3nUXPfNIfMlyGWnmmXvjZkQsNgONoz4OTOaNbVxM6gU1w3Z0QwYW847LtIAJSKr6b20O8ZjnaaR
-	OGoAlpSA616nEg6bzJqoYH0cYnVjnVq7yb/c54xYu75mHmL2eMJnosgJv64KkhSQoRAiheBae1z
-	+x7SW8zKJOtf4aovwjRYdOaPsbdbCfwWFgWsl0NRdEmQcb9fpfV+CP4d3HBtKOMSha/CaZNRLmZ
-	xU2fx7fuSpJ3FKvMl1qy0QzwbZvJilXScqKjLns26Bjd9oFX2FCvc1ofhCT2YkKRcnJuH8E3s6C
-	AuA3bL9fm4lYUwc04vdI6UdTL3Y8nE3oKEnZzsy51j994/i1CRL3XXMLB69zNrp5l8fE4SgO16F
-	/Wb5JqHI0yXNGuHSvFas0zkutAqKF1RSuw+25CP0nQvlAXpbVcih7R940fLYsSic1gHQZZJpv6Z
-	g+Dnhnsslr28j1tw8kDW4V+zNvofoYJJ0L0CkoG
-X-Received: by 2002:a17:90b:3c4b:b0:39d:f2a1:2f with SMTP id 98e67ed59e1d1-39df2a1040fmr3533075a91.17.1789394212037;
-        Mon, 14 Sep 2026 06:56:52 -0700 (PDT)
-Received: from localhost ([2401:7400:c804:63d1:a611:b433:d4e7:c402])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-39dfb6ea4c4sm155391a91.0.2026.09.14.06.56.49
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 14 Sep 2026 06:56:51 -0700 (PDT)
-Content-Type: text/plain; charset=UTF-8
-Date: Mon, 14 Sep 2026 21:56:47 +0800
-Message-Id: <DLF3B2I7WMSD.1VDVZ0BB6HE4H@gmail.com>
-Subject: Re: [RFC PATCH] memstick: Add Broadcom BCM57765/BCM57785 host
- driver
-From: "Ho Jie Feng" <hjf3108@gmail.com>
-To: "Ulf Hansson" <ulf.hansson@oss.qualcomm.com>, "Ho Jie Feng"
- <hjf3108@gmail.com>
-Cc: <linux-mmc@vger.kernel.org>, "Maxim Levitsky" <maximlevitsky@gmail.com>,
- "Alex Dubov" <oakad@yahoo.com>, "Ulf Hansson" <ulfh@kernel.org>,
- <linux-kernel@vger.kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cfsEWMQD"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B40FD1F000FF;
+	Mon, 14 Sep 2026 14:15:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1789395324;
+	bh=NKqcjGct+eUYDqDO+z5tPRvHdSbBaPD9daayrfidjpI=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=cfsEWMQDZmt9/TaeWAwAvlJc2N8UhUGXWjB2MqRq5a02Y1zqJOTbdJtIXLpbfBjLr
+	 EbD0eJtCPuytMu3rE5xMhLFYo3CrOoEENR+j43PR5Z751Qbf2me44reBICcHe6co8G
+	 op5xnCMqzUSHr0as8quDCLy+ayH88qYzSgQui7fQloN+OeqKKE97XniCGpe9KtyvO8
+	 WV6Dmvt1tSAcP4QUCh647X695Gyi3UyS6DkgpHytTPPBGoAGrMWa+tgaxO02N6ePim
+	 HEaO4+08lVMqhE8VPXLpI2oc+/YzZB2xhErRXhBhCKLwaULDfL8J2R5GBFCsFu1enL
+	 FJiJpAbhvZ9Jw==
+Message-ID: <85e04f9e-e326-4fcc-90ad-3b23c988c6b6@kernel.org>
+Date: Mon, 14 Sep 2026 09:15:22 -0500
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-X-Mailer: aerc 0.21.0-0-g5549850facc2
-References: <20260912163810.848989-1-hjf3108@gmail.com>
- <CAPx+jO8MSY8P1R6ZbRF8C7Vb0zhmePhaDDzgi+BmC3uUdKqMfA@mail.gmail.com>
-In-Reply-To: <CAPx+jO8MSY8P1R6ZbRF8C7Vb0zhmePhaDDzgi+BmC3uUdKqMfA@mail.gmail.com>
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v7 0/9] mmc: sdhci-cadence: add SD6HC support and Agilex5
+ enablement
+Content-Language: en-US
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>,
+ Tanmay Kathpalia <tanmay.kathpalia@altera.com>
+Cc: linux-mmc@vger.kernel.org, ulfh@kernel.org, adrian.hunter@intel.com,
+ krzk+dt@kernel.org, robh@kernel.org, conor+dt@kernel.org,
+ p.zabel@pengutronix.de, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+References: <20260901184828.15653-1-tanmay.kathpalia@altera.com>
+ <CAPx+jO_6bH8i5BV=64i=dLdi2CVwiu1wceXcqWB14ux3FuX9Bw@mail.gmail.com>
+From: Dinh Nguyen <dinguyen@kernel.org>
+In-Reply-To: <CAPx+jO_6bH8i5BV=64i=dLdi2CVwiu1wceXcqWB14ux3FuX9Bw@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On Mon Sep 14, 2026 at 6:31 PM +08, Ulf Hansson wrote:
-> On Sat, Sep 12, 2026 at 6:38=E2=80=AFPM Ho Jie Feng <hjf3108@gmail.com> w=
-rote:
+
+
+On 9/11/26 10:40, Ulf Hansson wrote:
+> On Tue, Sep 1, 2026 at 8:49 PM Tanmay Kathpalia
+> <tanmay.kathpalia@altera.com> wrote:
 >>
->> Add support for the MemoryStick function of Broadcom BCM57765 and BCM577=
-85
->> PCI card readers (14e4:16be).
+>> This series adds support for the Cadence SD6HC (sixth-generation) SDHCI
+>> controller and enables it on Altera Agilex5 SoCs.
 >>
->> The driver is written by inspecting MMIO traces from the windows driver
->> and experimentally probing the device registers.
+>> The SD6HC PHY architecture differs substantially from the SD4HC: it
+>> requires dedicated per-speed-mode IO cell timing parameters and a
+>> DLL-based delay line to achieve correct signal margins across all speed
+>> grades from Default Speed through HS400. These are programmed through a
+>> new sdhci-cadence-phy-v6.c file; shared driver infrastructure lives in
+>> sdhci-cadence-core.c.
 >>
->> It was found that the controller exposes an SDHCI-like interface with
->> TPC command handling. DMA mode was then inferred using the positions
->> of the bits in sdhci.h.
+>> Note: this series depends on commit ab45ecfab540 ("dt-bindings: reset:
+>> altr: add COMBOPHY_RESET for Agilex5"), which is already in mainline via
+>> the reset tree. It is not yet in mmc/next; apply or merge that commit
+>> when building/testing this series on top of mmc/next. The previous v1/v2
+>> reset binding patch is therefore omitted from this series.
 >>
->> Signed-off-by: Ho Jie Feng <hjf3108@gmail.com>
->
-> Wow! It's been a while since we received new drivers from memstick contro=
-llers!
-Yep I wrote this quite a while back and only go around to upstreaming it re=
-cently.
-
->> +module_param(enable_dma, int, 0444);
->> +MODULE_PARM_DESC(enable_dma,
->> +                "Enable usage of the DMA (0 =3D no, 1 =3D yes, 2 =3D au=
-to,default)");
->
-> I assume this is useful because the DMA functionality is a bit flaky, no?
->
-> In any case, I would rather not use a module parameter for this, can
-> you please drop this. If needed at all, can we perhaps use a debugfs
-> file instead to switch dynamically?
->
-
-The traces from the Windows drivers doesn't use DMA at all, at least only t=
-he nice
-ones which call the kernel APIs to do MMIO operations, unlike some newer dr=
-ivers which
-do the MMIO within the driver. The machine doesn't have VT-d so that is not=
- usable.
-Due to this, I inferred DMA operation from the bits from sdhci.h and doing =
-some
-experimentation on the device. The flag is only there because I may have mi=
-ssed
-something and the DMA path isn't reliable.
-
-I will look into the debugfs stuff, thanks.
-
->> +
->> +static const struct pci_device_id bcm577x5_pci_id_tbl[] =3D {
->> +       {
->> +               PCI_VDEVICE(BROADCOM, 0x16be),
->> +       },
->> +       {},
->> +};
->
+>> Board DTS files do not enable the SMMU; that is provided by commit
+>> 10cf797f3f8a ("arm64: dts: socfpga: agilex5: Enable the SMMU") in the
+>> SoC DT tree. It is not yet in mmc/next. Apply or merge that commit when
+>> building/testing this series on top of mmc/next, otherwise the SMMU
+>> stays disabled in socfpga_agilex5.dtsi.
+>>
+>> Patch 1: DT binding
+>>    Adds a dedicated cdns,sd6hc.yaml binding with SD6HC compatible strings,
+>>    clock/reset/IOMMU constraints, and PHY timing properties.
+>>
+>> Patches 2-5: Device tree
+>>    Patch 2 adds the SD6HC controller node to the Agilex5 SoC DTSI as
+>>    sdmmc, left disabled.
+>>    Patch 3 enables SD card operation (4-bit, SDR104, 200 MHz) on the
+>>    SOCDK OOBE board with GPIO-switched IO-voltage regulation.
+>>    Patch 4 registers the intel,socfpga-agilex5-socdk-emmc board variant
+>>    in the arm/altera binding.
+>>    Patch 5 adds socfpga_agilex5_socdk_emmc.dts for eMMC-only operation
+>>    (8-bit, HS200/HS400, 1.8 V IO, 200 MHz).
+>>
+>> Patches 6-9: Driver
+>>    Patch 6 renames SD4HC-specific functions and structures with a "cdns4"
+>>    prefix to separate them from shared driver paths.
+>>    Patch 7 encapsulates SD4HC PHY probing in sdhci_cdns4_phy_probe() and
+>>    makes every of_device_id entry carry explicit platform data, removing
+>>    the silent fallback.
+>>    Patch 8 introduces the SD6HC PHY driver (sdhci-cadence-phy-v6.c): DLL
+>>    lock/bypass, per-speed-mode IO cell timing, tuning, and HW reset. The
+>>    common driver core selects between v4 and v6 PHY operations based on
+>>    the SDHCI specification version reported by the controller, and
+>>    reprograms the PHY from set_clock and set_uhs_signaling. SD6HC clocks
+>>    are requested by name ("ciu" and "biu").
+>>    Patch 9 adds the Agilex5 platform overlay under altr,agilex5-sd6hc:
+>>    40-bit DMA mask for the SMMU address space, quirks for
+>>    CAP_CLOCK_BASE_BROKEN, PRESET_VALUE_BROKEN, ACMD23_BROKEN and
+>>    MULTIBLOCK_READ_ACMD12, .get_max_clock set to
+>>    sdhci_pltfm_clk_get_max_clock, and an init hook that asserts and
+>>    deasserts the three named resets together, keeping exclusive ownership
+>>    via devm so they stay deasserted for the life of the device.
+>>
+>> Tested on Agilex5 SOCDK:
+>>    - SD card: Default Speed, High Speed, SDR25, SDR50, SDR104
+>>    - eMMC daughter board: HS200, HS400
+>>
+>> Signed-off-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
+>>
+>> ---
+>> Changes in v7:
+>>
+> 
 > [...]
->
->> +
->> +static int bcm577x5_reg_waitb(struct bcm577x5_device *dev, int address,=
- u8 mask,
->> +                             u8 value, int timeout)
->> +{
->> +       unsigned long wait_time =3D jiffies + msecs_to_jiffies(timeout);
->> +       u8 reg;
->> +
->> +       do {
->> +               reg =3D bcm577x5_reg_readb(dev, address);
->> +               if ((reg & mask) =3D=3D value)
->> +                       return 0;
->> +
->> +               cpu_relax();
->> +
->> +       } while (time_before(jiffies, wait_time));
->
-> Please avoid the open coding and convert to the io polling helpers
-> instead (iopoll.h).
-Will fix in v2.
+> 
+> Patch 1 and 6-9 from the v7 series, applied for next, thanks!
+> 
+Patch 2,3,4,5 appled for next.
+
+Thanks,
+Dinh
