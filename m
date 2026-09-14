@@ -1,80 +1,67 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 709BF35DA79
-	for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 12:09:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 00588352017;
+	Mon, 14 Sep 2026 12:26:48 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789387785; cv=none; b=H+SwDUjRxsoGGu4k2ROeX2WhmpNrZmZZQVrSLEuLkRfP+9c0V71MLjO+EwKs5AxcCT0gBLbSAOJLZYr7FBZX+f2pVlN3tNqLlxYmTw8D4l9k65ZXkdMp9CFtjTSX/WE0VlPAt2BfbBY49dvHl1kmlE5Cm5nQL2ht5TYYZKgtric=
+	t=1789388810; cv=none; b=GyX9AshAjaf+cslR2jOq2/1GT6ux8reWjm5WV58dT40bUXe/tXkLHCwyohvFJS+jTUZOu3mcnbx2wY2W+x24OXy3UONZ0x4tkopyhOHIiW69yoBXYalZATEpO3g66ZK8vGOUVo2EnXqxjH78AMHP+28EtcOypYtHnbuVlRckJGs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789387785; c=relaxed/simple;
-	bh=oEGonrOZlzy2M5jFRShHiryuRufZxR9C/svj2ihcOLQ=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=rEuQEU+WrdmccNL6l4z8o42fK7sF+je/C02HxdfHoFZKChBhPVC9VW69JZifzh+jxEafOJwBNEsnl7NF3QOjyjBhR1ZoXrU6k3Tg/wnGC8n5nLMttUXQpJ6wS3HERIsvlFMWOf7OOOQ3rCA2mAzbjdIXmjup+VPrsuJvELGoPZ4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Smy5MATd; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789388810; c=relaxed/simple;
+	bh=emtcRfKafAv/TOF84LPDh6ctNyV501zeDE0RAvj2NuM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=qOivx8CZDJHp/gyZ4fSvHUNqZ8sUyO6lzJOKomXQmWNmP7a5ZLb5AeyaBgbNe1z7t80GS0hNqLlzE/Okb4SDF4fmlQr3Nal+uIWun/g8Z2BOhe+hxv3W6Whz4v5+c/FtWIplLs81aFIfPfIt+upsWq53fjXMYEo254lDjjcAlM0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NNorBkNX; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Smy5MATd"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F067B1F00898
-	for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 12:09:43 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NNorBkNX"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C34C81F0089D;
+	Mon, 14 Sep 2026 12:26:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789387784;
-	bh=oEGonrOZlzy2M5jFRShHiryuRufZxR9C/svj2ihcOLQ=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=Smy5MATdH0hdm95yi6FiXZU6dp3pCLMs+VPTVe5rxWQzA7RapfSmNvplbGotg1Lfs
-	 AD/AIeB8E/A3NSQlOzg4bVVkHaFqEr5EMSGQOt4ndWnk+x+9fm/6qBoi6ytuE9SiT2
-	 jQuDByF3kn5gwK4rLLmHoG8CXiNv9XuWIWL0ojXES0WyQELY7/kP29RgF3wzlEwxgL
-	 PcbPEefs/sOEuYhdYRBEJ2cbqkk39Mn4pLHiwRfh3mY/LYboKC+0hYfTO3wlydGW/L
-	 IqsqJj/QEK2E+pHOpSblHuaUcrYhoEyOxOO/zrdMWAqUxAh1goxAPuwJkSyUWkgO4D
-	 YJP4mFsz40MIg==
-Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-5b5e907853eso3316705e87.2
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 05:09:43 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AKwUvBwMWirLHpelKJbk1whO+dvqZvuqzM+3wzYh0GeCtNfCpm75YmlOyZ80TF/IUfq197ljv4+yxh/k6Mw=@vger.kernel.org
-X-Gm-Message-State: AFuF++lQLRyxdI/+m4SBHyFMVfuXp8WwbkE1qT2+T0GXGkddH58dVXwI
-	1MvoRqRYGLPhgwxAcVGTFS8fX7kOkquD5x/Xm7gYl2r4PXzeA4tjKcyUgeh1A2CPmc12CNuAMzU
-	HxDIr0FR4ylQOc58Z7RXkfi1sVcxlKEw=
-X-Received: by 2002:a05:6512:251f:b0:5b6:1a7c:59cb with SMTP id
- 2adb3069b0e04-5b8ae69c7efmr615614e87.37.1789387782673; Mon, 14 Sep 2026
- 05:09:42 -0700 (PDT)
+	s=k20260515; t=1789388807;
+	bh=xST1Tb/dx3nJmgTQfutJVEnulduFhsjDg2d9IGkl2jA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=NNorBkNXvVSeUD97uBQ0FYq7kJIqNNhe3e8/+KXbW0T+h5NfqgfYNgTHTLoRNrHf4
+	 FfdLmamPN99ATF1BDUvPPYEydAhaVIbvxaMx7af2Troh7h9tcMsxtWwvCbMsNnAaio
+	 PcY507bEhBKJ3RUd2LPlpz5Jx3NNqZFKqyUe/fWVQ8nEkzEqeuKWz6FN4caRuc1Vx5
+	 dQE+6uWoTV/g/4Ww/9VtKF69I2hT79bR6wHuHzbTXNquQOwCqy3u+8mWz00kIGYom2
+	 cYVTCmbFox/jwsGCbqQ0Vrowl+0Fq8ulJHlZWFjL8V7PZPs1jnxKGsNZwy8Jvg7H6r
+	 9w090PxeeSb1A==
+Received: from johan by xi.lan with local (Exim 4.99.4)
+	(envelope-from <johan@kernel.org>)
+	id 1x65ll-00000004IYv-0sBX;
+	Mon, 14 Sep 2026 14:26:45 +0200
+Date: Mon, 14 Sep 2026 14:26:45 +0200
+From: Johan Hovold <johan@kernel.org>
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>,
+	linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH] mmc: vub300: Remove the driver for the obsolete HW
+Message-ID: <aqfoBfYmJX2XUA2N@hovoldconsulting.com>
+References: <20260914111642.169707-1-ulf.hansson@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260911-mmc-credit-ossman-v1-1-9e914bf2a57a@kernel.org> <CAPx+jO86_1EUwp6MHtJpykEDH-jby_owub6-QcYRGjew6BkSJQ@mail.gmail.com>
-In-Reply-To: <CAPx+jO86_1EUwp6MHtJpykEDH-jby_owub6-QcYRGjew6BkSJQ@mail.gmail.com>
-From: Linus Walleij <linusw@kernel.org>
-Date: Mon, 14 Sep 2026 14:09:29 +0200
-X-Gmail-Original-Message-ID: <CAD++jLnxb91oBCcpQuHE4hQP6Fc_DVKQvEfGjwm7k7OQeV0PkQ@mail.gmail.com>
-X-Gm-Features: AcwNN1Xi-1VTM3Jq-GP2V5slsuy_4hTT8wgSCnBVg3f3dlnVpWLa6ldefEk0fy8
-Message-ID: <CAD++jLnxb91oBCcpQuHE4hQP6Fc_DVKQvEfGjwm7k7OQeV0PkQ@mail.gmail.com>
-Subject: Re: [PATCH] CREDITS: Add Pierre Ossman
-To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260914111642.169707-1-ulf.hansson@oss.qualcomm.com>
 
-On Mon, Sep 14, 2026 at 12:09=E2=80=AFPM Ulf Hansson
-<ulf.hansson@oss.qualcomm.com> wrote:
-> On Fri, Sep 11, 2026 at 10:09=E2=80=AFPM Linus Walleij <linusw@kernel.org=
-> wrote:
-> >
-> > Now I have a bad conscience for removing Pierre's name from
-> > every dmesg without properly adding him to the CREDITS. OK,
-> > it's an easy fix.
-> >
-> > Fixes: 366b5941566c ("mmc: sdhci: Stop advertising the driver in dmesg"=
-)
->
-> Not sure this deserves a fixes tag or does it?
+On Mon, Sep 14, 2026 at 01:16:42PM +0200, Ulf Hansson wrote:
+> From: Ulf Hansson <ulfh@kernel.org>
+> 
+> The Hw is obsolete since many years and its corresponding driver has not
+> been actively maintained for a very long time.
+> 
+> In this regards we are lately receiving a lot of AI generated bug fixes as
+> the driver is a real mess. Rather than continue this path, with small fixes
+> instead of making a proper rework of the driver, let's just remove the
+> driver altogether.
+> 
+> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Cc: Johan Hovold <johan@kernel.org>
+> Signed-off-by: Ulf Hansson <ulfh@kernel.org>
 
-Your pick, no big deal.
-
-> > Signed-off-by: Linus Walleij <linusw@kernel.org>
->
-> Applied for next, thanks!
-
-Thanks!
-
-Yours,
-Linus Walleij
+Acked-by: Johan Hovold <johan@kernel.org>
