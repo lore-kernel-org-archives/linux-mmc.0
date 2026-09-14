@@ -1,197 +1,162 @@
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj2-f13.google.com (mail-pj2-f13.google.com [74.125.227.141])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 678DC47534E;
-	Mon, 14 Sep 2026 13:47:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.153.233
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0326472527
+	for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 13:56:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789393626; cv=none; b=mp+DK9daEn4xCnGVJLVVPhD4Br23UinzNNvvC0NHRoRbZk2VgYm3T1YjiQnFXmPTglxCglaSIhC9OukXuZYf9KRAQ2pK/VqiV2bW5lZfNETw0JtcDkTtpL5jDMTFmciBATaCQKmn1ZEkRpvrCllVC/Hf7HVYvGng2ItDxgRs3CE=
+	t=1789394214; cv=none; b=OeCbS2AkyCAVNyJJ0Qt+CL/GjS99ldl27gSb+Ug+ze/N26IXhjruVQXIgsrS9L6/nvN/W6Oo7z9VPsvvCIMMwsWNUnuakMlvCPCKsHdaUW0MdK122lbmcvGPQoTEJdyeiE/sS8zImyYe3hZ/cqMhVqVbwMwGeeZmmCP2E/9cIMw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789393626; c=relaxed/simple;
-	bh=AUWd5f1BsfZwB1Pj4UBNwd8TrTwhAsm3rwAnyxw+nsc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=PHKyL2ETawid8jJHfzl9T4+Or/i+n9KRs9wpgEeBUKhVK49MpQdZ1pOoZn1/S9wzyK9WwhPs/L2bQhXPqr1OTAe+jbNYdLKREPyXmTu6eNyivfLexSMUZgXuQCPC/eYE+1WYUm9D5mNxzwFSHYzv26Gdr+My7UhekDLEPRAlPYc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=12kVEqZO; arc=none smtp.client-ip=68.232.153.233
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
+	s=arc-20240116; t=1789394214; c=relaxed/simple;
+	bh=jTXdhOWHb+tc8C306czNkIrV9+xG+lE9QUA2R7XrZmw=;
+	h=Content-Type:Date:Message-Id:Subject:From:To:Cc:Mime-Version:
+	 References:In-Reply-To; b=Kjkfm7wFI3tqVjPL57B9uPz7QwjZUovPKk4ZbvmJLfvgTbd0gbX7Vr4glTxlyBLDbpqYYMuUPLjXzi8xNDlDtvL+rZbkBBBy4/C6HBj/ubV7DfCSDX/66gDJGapkXBvD/SnVaeuC4xaDnHlis5RpysQwjA3uiVtWFDV8eRdM/NE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kko+DJ26; arc=none smtp.client-ip=74.125.227.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="12kVEqZO"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1789393625; x=1820929625;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=AUWd5f1BsfZwB1Pj4UBNwd8TrTwhAsm3rwAnyxw+nsc=;
-  b=12kVEqZOfUOIDy8kCcn5O4V0z0Ni7rllCJFE4oiO/KRPOH4D0boWFHk5
-   Sr7M4MORO+MywH5hF5u4NC0MWocbZK7amymqpDqjX3dkz01ZMr66TqWLU
-   K3xy2F63sWHRnK7NE6WZxISE9SaKolS5C1Zvd5Oam/wfEZ2UDpVcCrkKU
-   q7M8u2sDHldPZzLQZGwsOvyH8st8VwWH14dyYTY6achFuo2Qf6+92ILCP
-   BMviwJCO6E7rmin5dlS1sLCxjfLn90peA39Bj32/U/iskx8Hcs+pJlSdt
-   b7TaZvCRQSz5nDH7SquuwreXC1cVWyNQDTDdxeFk1+L83TBcONJY++u8j
-   A==;
-X-CSE-ConnectionGUID: 1o03+rbMSC+xGV5OYnDwfA==
-X-CSE-MsgGUID: NH+UKW30SL+1hGVvF2+r9w==
-X-IronPort-AV: E=Sophos;i="6.27,102,1787036400"; 
-   d="scan'208";a="63566881"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa3.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 14 Sep 2026 06:46:59 -0700
-Received: from chn-vm-ex01.mchp-main.com (10.10.85.143) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.58; Mon, 14 Sep 2026 06:46:57 -0700
-Received: from [10.159.227.146] (10.10.85.11) by chn-vm-ex01.mchp-main.com
- (10.10.85.143) with Microsoft SMTP Server id 15.1.2507.58 via Frontend
- Transport; Mon, 14 Sep 2026 06:46:55 -0700
-Message-ID: <bfcd57f8-ffca-4a44-a84f-12c46cb9fe76@microchip.com>
-Date: Mon, 14 Sep 2026 15:46:56 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kko+DJ26"
+Received: by mail-pj2-f13.google.com with SMTP id 98e67ed59e1d1-39dacf053eeso1245329a91.2
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 06:56:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1789394212; x=1789999012; darn=vger.kernel.org;
+        h=in-reply-to:references:content-transfer-encoding:mime-version:cc:to
+         :from:subject:message-id:date:content-type:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=czQcbmKAQjpPrrgr487KiVX0zj39eEVICUIzqR7EEkY=;
+        b=kko+DJ26ujlfKwfe3QrU7w9Eq62zp0WlHMn2i3D7DIOrMLyO702mhZCDPt/0oGgCtL
+         V0cLwOc9zewDYvYkmyZ/8igXHHi2dtqyk6ttyNeCvZNU+PgxP/BFxqCaH+nPUlkfdBvy
+         HlUuP0wPypTZOlPYXqH2ikjbXdOIw50KVugsiJHXeMFuNFKtJk4QQIqqOaHKC9tvhjMH
+         Bbl70JCPIfcocT1/jWmaxKp/KurfOxThLWp4gh7GqZ5U06DGBo0Np8r2UOdxEmLLhO49
+         ETh9Nw3X3zZ4GGpnBDGY5or4bzXdm9CC8OUHAKLsvQUdaJmj5+XrPqoGjaD6dSmxINp2
+         n0kA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1789394212; x=1789999012;
+        h=in-reply-to:references:content-transfer-encoding:mime-version:cc:to
+         :from:subject:message-id:date:content-type:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=czQcbmKAQjpPrrgr487KiVX0zj39eEVICUIzqR7EEkY=;
+        b=M7Iqs1SOYzeEobNdShAFPTxU2hNbNyQz2vzsP7CriOC8lTnEAcKrAGLXpmhy3jdbZq
+         ONYtzeVQtOS9gclN+BtrHj+OWXj/Le0xgu39LGaZ5nb3gleX2wPAtnXD8QMJkSuR+byg
+         /8pzJHUWcdUbYjArf61iAUBEyfc8CpfYswcdXkihH65uUYIPVlYa4WWm0FsTZArGMQTb
+         Q+AM0Z1X6aj4xN+BY8wTGWhIHRAys5NxXbASkXU+kcIDWVB8ra+6Jyf+IejGxJvTfu2y
+         8WTbwwQrR4Ufa2P+ZSElqlTv9+goAKx6qdNhOcCsc+U0ZnU+1bOoTIDb+8hgYjnmnhCv
+         mqFA==
+X-Gm-Message-State: AFuF++kHlp3L+Ehsp9Lvxg3lliN9PwK9Ug6M3go/xdn2XDCPyjd+QKn/
+	47m1eS62v3aAX+qB2cLsxkT4A8J18baNWSYvlrz2gNkV0L+sY8qXLzO1
+X-Gm-Gg: AYBFou1XvnaJfVJfa/HOja+KzZEaqX02QrXxIaEGMIz1Lh4bHed/9Nvq9Fiqk1Dm52B
+	3nUXPfNIfMlyGWnmmXvjZkQsNgONoz4OTOaNbVxM6gU1w3Z0QwYW847LtIAJSKr6b20O8ZjnaaR
+	OGoAlpSA616nEg6bzJqoYH0cYnVjnVq7yb/c54xYu75mHmL2eMJnosgJv64KkhSQoRAiheBae1z
+	+x7SW8zKJOtf4aovwjRYdOaPsbdbCfwWFgWsl0NRdEmQcb9fpfV+CP4d3HBtKOMSha/CaZNRLmZ
+	xU2fx7fuSpJ3FKvMl1qy0QzwbZvJilXScqKjLns26Bjd9oFX2FCvc1ofhCT2YkKRcnJuH8E3s6C
+	AuA3bL9fm4lYUwc04vdI6UdTL3Y8nE3oKEnZzsy51j994/i1CRL3XXMLB69zNrp5l8fE4SgO16F
+	/Wb5JqHI0yXNGuHSvFas0zkutAqKF1RSuw+25CP0nQvlAXpbVcih7R940fLYsSic1gHQZZJpv6Z
+	g+Dnhnsslr28j1tw8kDW4V+zNvofoYJJ0L0CkoG
+X-Received: by 2002:a17:90b:3c4b:b0:39d:f2a1:2f with SMTP id 98e67ed59e1d1-39df2a1040fmr3533075a91.17.1789394212037;
+        Mon, 14 Sep 2026 06:56:52 -0700 (PDT)
+Received: from localhost ([2401:7400:c804:63d1:a611:b433:d4e7:c402])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-39dfb6ea4c4sm155391a91.0.2026.09.14.06.56.49
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 14 Sep 2026 06:56:51 -0700 (PDT)
+Content-Type: text/plain; charset=UTF-8
+Date: Mon, 14 Sep 2026 21:56:47 +0800
+Message-Id: <DLF3B2I7WMSD.1VDVZ0BB6HE4H@gmail.com>
+Subject: Re: [RFC PATCH] memstick: Add Broadcom BCM57765/BCM57785 host
+ driver
+From: "Ho Jie Feng" <hjf3108@gmail.com>
+To: "Ulf Hansson" <ulf.hansson@oss.qualcomm.com>, "Ho Jie Feng"
+ <hjf3108@gmail.com>
+Cc: <linux-mmc@vger.kernel.org>, "Maxim Levitsky" <maximlevitsky@gmail.com>,
+ "Alex Dubov" <oakad@yahoo.com>, "Ulf Hansson" <ulfh@kernel.org>,
+ <linux-kernel@vger.kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/6] mmc: sdhci-of-at91: add option to keep clocks
- enabled
-To: Robert Marko <robert.marko@sartura.hr>, <ulfh@kernel.org>,
-	<robh@kernel.org>, <krzk+dt@kernel.org>, <conor+dt@kernel.org>,
-	<nicolas.ferre@microchip.com>, <alexandre.belloni@bootlin.com>,
-	<claudiu.beznea@tuxon.dev>, <adrian.hunter@intel.com>, <ehristev@kernel.org>,
-	<linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>
-CC: <luka.perkov@sartura.hr>
-References: <20260907132617.1198548-1-robert.marko@sartura.hr>
- <20260907132617.1198548-3-robert.marko@sartura.hr>
-Content-Language: en-US, fr
-From: Aubin Constans <aubin.constans@microchip.com>
-In-Reply-To: <20260907132617.1198548-3-robert.marko@sartura.hr>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+X-Mailer: aerc 0.21.0-0-g5549850facc2
+References: <20260912163810.848989-1-hjf3108@gmail.com>
+ <CAPx+jO8MSY8P1R6ZbRF8C7Vb0zhmePhaDDzgi+BmC3uUdKqMfA@mail.gmail.com>
+In-Reply-To: <CAPx+jO8MSY8P1R6ZbRF8C7Vb0zhmePhaDDzgi+BmC3uUdKqMfA@mail.gmail.com>
 
-Hi Robert,
+On Mon Sep 14, 2026 at 6:31 PM +08, Ulf Hansson wrote:
+> On Sat, Sep 12, 2026 at 6:38=E2=80=AFPM Ho Jie Feng <hjf3108@gmail.com> w=
+rote:
+>>
+>> Add support for the MemoryStick function of Broadcom BCM57765 and BCM577=
+85
+>> PCI card readers (14e4:16be).
+>>
+>> The driver is written by inspecting MMIO traces from the windows driver
+>> and experimentally probing the device registers.
+>>
+>> It was found that the controller exposes an SDHCI-like interface with
+>> TPC command handling. DMA mode was then inferred using the positions
+>> of the bits in sdhci.h.
+>>
+>> Signed-off-by: Ho Jie Feng <hjf3108@gmail.com>
+>
+> Wow! It's been a while since we received new drivers from memstick contro=
+llers!
+Yep I wrote this quite a while back and only go around to upstreaming it re=
+cently.
 
-On 07/09/2026 15:25, Robert Marko wrote:
-> sdhci_at91_set_clks_presets() both enables the controller clocks and
-> programs its capabilities and preset registers. This prevents callers from
-> restoring the registers without changing the clock enable counts.
-> 
-> Move clock enablement to callers and add a SoC data flag for controllers
-> that must keep their clocks enabled. Use it in the runtime PM paths while
-> keeping register restoration separate from clock enablement.
+>> +module_param(enable_dma, int, 0444);
+>> +MODULE_PARM_DESC(enable_dma,
+>> +                "Enable usage of the DMA (0 =3D no, 1 =3D yes, 2 =3D au=
+to,default)");
+>
+> I assume this is useful because the DMA functionality is a bit flaky, no?
+>
+> In any case, I would rather not use a module parameter for this, can
+> you please drop this. If needed at all, can we perhaps use a debugfs
+> file instead to switch dynamically?
+>
 
-This change has been required for the SAMA7G54 MPU already, and implemented by
-two complementary commits:
+The traces from the Windows drivers doesn't use DMA at all, at least only t=
+he nice
+ones which call the kernel APIs to do MMIO operations, unlike some newer dr=
+ivers which
+do the MMIO within the driver. The machine doesn't have VT-d so that is not=
+ usable.
+Due to this, I inferred DMA operation from the bits from sdhci.h and doing =
+some
+experimentation on the device. The flag is only there because I may have mi=
+ssed
+something and the DMA path isn't reliable.
 
-https://github.com/linux4microchip/linux/commit/763a3c05c8f9d0feb279c6f308fa5d48d14e07d3
-https://github.com/linux4microchip/linux/commit/b5bbc888fb39471d46fe0a4ff28f69533c265dd0
+I will look into the debugfs stuff, thanks.
 
-At least they have been validated by test campaigns.
-If that existing work seemed OK for you and the LAN969x, then I could squash
-these two commits and submit the result.
-> 
-> Signed-off-by: Robert Marko <robert.marko@sartura.hr>
-> 
->   drivers/mmc/host/sdhci-of-at91.c | 39 +++++++++++++++++++-------------
->   1 file changed, 23 insertions(+), 16 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index 7c4ac65f247d..b7e2a89da348 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -38,6 +38,7 @@
->   struct sdhci_at91_soc_data {
->          const struct sdhci_pltfm_data *pdata;
->          bool baseclk_is_generated_internally;
-> +       bool keep_clks_on;
->          unsigned int divider_for_baseclk;
->   };
-> 
-> @@ -164,7 +165,7 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
->   };
->   MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
-> 
-> -static int sdhci_at91_set_clks_presets(struct device *dev)
-> +static void sdhci_at91_set_clks_presets(struct device *dev)
->   {
->          struct sdhci_host *host = dev_get_drvdata(dev);
->          struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -174,7 +175,6 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->          unsigned int                    gck_rate, clk_base_rate;
->          unsigned int                    preset_div;
-> 
-> -       clk_prepare_enable(priv->hclock);
->          caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
->          caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
-> 
-> @@ -222,11 +222,6 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->          preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
->          writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->                 host->ioaddr + SDHCI_PRESET_FOR_DDR50);
-> -
-> -       clk_prepare_enable(priv->mainck);
-> -       clk_prepare_enable(priv->gck);
-> -
-> -       return 0;
->   }
-> 
->   static int sdhci_at91_suspend(struct device *dev)
-> @@ -254,9 +249,11 @@ static int sdhci_at91_runtime_suspend(struct device *dev)
->          if (host->tuning_mode != SDHCI_TUNING_MODE_3)
->                  mmc_retune_needed(host->mmc);
-> 
-> -       clk_disable_unprepare(priv->gck);
-> -       clk_disable_unprepare(priv->hclock);
-> -       clk_disable_unprepare(priv->mainck);
-> +       if (!priv->soc_data->keep_clks_on) {
-> +               clk_disable_unprepare(priv->gck);
-> +               clk_disable_unprepare(priv->hclock);
-> +               clk_disable_unprepare(priv->mainck);
-> +       }
-> 
->          return 0;
->   }
-> @@ -269,14 +266,23 @@ static int sdhci_at91_runtime_resume(struct device *dev)
->          int ret;
-> 
->          if (priv->restore_needed) {
-> -               ret = sdhci_at91_set_clks_presets(dev);
-> -               if (ret)
-> -                       return ret;
-> +               if (!priv->soc_data->keep_clks_on)
-> +                       clk_prepare_enable(priv->hclock);
-> +
-> +               sdhci_at91_set_clks_presets(dev);
-> +
-> +               if (!priv->soc_data->keep_clks_on) {
-> +                       clk_prepare_enable(priv->mainck);
-> +                       clk_prepare_enable(priv->gck);
-> +               }
-> 
->                  priv->restore_needed = false;
->                  goto out;
->          }
-> 
-> +       if (priv->soc_data->keep_clks_on)
-> +               goto out;
-> +
->          ret = clk_prepare_enable(priv->mainck);
->          if (ret) {
->                  dev_err(dev, "can't enable mainck\n");
-> @@ -344,9 +350,10 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->                  return dev_err_probe(&pdev->dev, PTR_ERR(priv->gck),
->                                       "failed to get multclk\n");
-> 
-> -       ret = sdhci_at91_set_clks_presets(&pdev->dev);
-> -       if (ret)
-> -               return ret;
-> +       clk_prepare_enable(priv->hclock);
-> +       sdhci_at91_set_clks_presets(&pdev->dev);
-> +       clk_prepare_enable(priv->mainck);
-> +       clk_prepare_enable(priv->gck);
-> 
->          priv->restore_needed = false;
-> 
-> --
-> 2.55.0
-
+>> +
+>> +static const struct pci_device_id bcm577x5_pci_id_tbl[] =3D {
+>> +       {
+>> +               PCI_VDEVICE(BROADCOM, 0x16be),
+>> +       },
+>> +       {},
+>> +};
+>
+> [...]
+>
+>> +
+>> +static int bcm577x5_reg_waitb(struct bcm577x5_device *dev, int address,=
+ u8 mask,
+>> +                             u8 value, int timeout)
+>> +{
+>> +       unsigned long wait_time =3D jiffies + msecs_to_jiffies(timeout);
+>> +       u8 reg;
+>> +
+>> +       do {
+>> +               reg =3D bcm577x5_reg_readb(dev, address);
+>> +               if ((reg & mask) =3D=3D value)
+>> +                       return 0;
+>> +
+>> +               cpu_relax();
+>> +
+>> +       } while (time_before(jiffies, wait_time));
+>
+> Please avoid the open coding and convert to the io polling helpers
+> instead (iopoll.h).
+Will fix in v2.
