@@ -1,174 +1,2698 @@
-Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11010033.outbound.protection.outlook.com [52.101.228.33])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4921142C4F8;
-	Mon, 14 Sep 2026 10:37:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.33
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789382281; cv=fail; b=QzbDhB24J8gSC22TP9bzPOltetuawx/7CXOsurAttdkK6YeZTGIw3axuYzocadZZg3DgYZA2SkItCW1GxVZBCIxudu+Q8jvBVesuVBTStKkimD7cexMeX/aoLTYZyAC/ST4Md0+lGkoig1XJv3wAwOrK/rslPusW7cuNxCEzqQo=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789382281; c=relaxed/simple;
-	bh=AkR4LYEN3U5UxxjI3ZT0pSliq/9MT8Qpk5MFFiEMWGU=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=DV9dRcs0fG1LIAL+RA0DPVdcYtBaaTKMcZuzwXnpxjjeC8Y8Uwe2Aa62Ef4vEAK+1j//rZbQ8yGJXRwk5RtXTLMhXgBAe92v7tDoSqHyN7icpPdyLc3+hT8bQONKkdmJOYCJ0JRaFrf9RuBylyB3JmkRIoZ1med4YcjatwdjL7s=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=Bns6nJa/; arc=fail smtp.client-ip=52.101.228.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03D07394EB0
+	for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 11:16:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789384622; cv=none; b=OhwdAScqV5HPKAJgvvRkZa8xHxLw2CzrXTZfsKmXEXWJkA6dtvqDyCkIfT0O4oJtNhBQrQAYJBthNtjFj8eb/PW8mo/rN+2nj8OdMe9DTfzQyh6hopCzCUGnk1eNccbt0+59GVcNrzRXu3A1dNTxG9/m0UYdpo7U51oHLtTjIo0=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789384622; c=relaxed/simple;
+	bh=Ii+vszTj3fr4A4FPb9XjLEQDnkRq0YDtCfXKDibL8Jw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=VXOZjwvWv2Gr4oEH6SpTC8lkXgPTrxKrJ5l2lisvCHI/0y5jFLiWHOzZ2zFayqkq1q2RrvG+3fmZ1kJ5+LPlzbob1tHdCA8eeCuXyk3MG0E3DpF5JrQrgLVN6zmMRuRWXjNu6hsDqOf80G80Wtj8Fh7z/GNkbK2qRX/cabW/hAs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=NmzfRbxB; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=aT8ySZE0; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="Bns6nJa/"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=xSBKYoyUysZ2tGjK9GQwZlCYPetKtdU+8Xd5Pa4L4TcgvjH0ilez4EkvYkxCxAtGob6gBqvCvYuqVT7Ab8yEHq5/wlHH8CNbCxFA9hDE1FjSzCQFmu9ZxtS1zRZ1J0PAxDGfZCwpPWQirf4gwM/c8/s4OTgzzxXXrOA8X7AS/T3LwzSGJs0f3cMliA54gLUHRjeO9Ls4eH9xAv0+t2Km7PA22Im+jQooVrnqxwGrXE50WJ2Y3B/T1W9TJ7jjf/HqmKbIrCENh9lrvFTF5pce4qHgSxv5fupQ4duyN8zIvMG5qUw2czdn/8DtOzuOgJ2wdt3z3BahpyZh8XYguz38Xg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=pocjzCrCcsP/7bkunm1R1zaiSYAh2+MirLkWFl8qm7Q=;
- b=K0TOJhactahzf+ri14UA4Hw9nvRU5mE9xHdrIjMDItGJzuU24wXYBiUHKYW7VsstcLbBsXnKGPlFLxQUNLfdTE3eyUm4r3AH0D+8+8oNT8JOD0gbJVJNWkqiQ+d15SQKCv3yJZLR6c+DGs/UPJskcbZnJ93pdjcN+T1T4iOE1bKn7CR3Bgphd1jjwGmnUsCJcgMEq09xXt3iljeHENH69FswClxp9eXfrCMFvCyiiMSiLjQ83utLFgQ8l4W5yeAdXI5xTmuh304gXFzHFez7cfrfdO2kYdl/Np3rFSJJ7FWss6cQrA3mOyAjUdUUGFt8V5qOin90O3rC5I7CJiVoOA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
- header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=pocjzCrCcsP/7bkunm1R1zaiSYAh2+MirLkWFl8qm7Q=;
- b=Bns6nJa/Jm86yKMSxeAsufFAU6w/Jf+Jjf6ICptNSXgSPqkpKbTC14c47vKk/eNr+HvGN775ZuMD9gQzuQTPqrsXpwvBQDQuPpK3p6Thl0K4DvP+/uMib6atIyvaxXLyzszdu4EosNJu4e/R/cbSv7iiUBDFK/h/+TH/8mbYpS8=
-Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
- by OS9PR01MB14306.jpnprd01.prod.outlook.com (2603:1096:604:361::6) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.406.12; Mon, 14 Sep
- 2026 10:37:52 +0000
-Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
- ([fe80::87d1:4928:d55:97de]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
- ([fe80::87d1:4928:d55:97de%4]) with mapi id 15.21.0406.007; Mon, 14 Sep 2026
- 10:37:51 +0000
-From: Biju Das <biju.das.jz@bp.renesas.com>
-To: wsa+renesas <wsa+renesas@sang-engineering.com>
-CC: "biju.das.au" <biju.das.au@gmail.com>, Ulf Hansson <ulfh@kernel.org>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Geert
- Uytterhoeven <geert+renesas@glider.be>, Prabhakar Mahadev Lad
-	<prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: RE: [PATCH v24 04/15] mmc: renesas_sdhi: Add max_divider field to
- support SoC-specific clock ranges
-Thread-Topic: [PATCH v24 04/15] mmc: renesas_sdhi: Add max_divider field to
- support SoC-specific clock ranges
-Thread-Index: AQHdMMe7RxxJrlR3AEiECnq/qqkha7a7NF8AgAM8VaCACgxIAIAFiypg
-Date: Mon, 14 Sep 2026 10:37:50 +0000
-Message-ID:
- <TY3PR01MB11346199A020E8F9345B8418186BB2@TY3PR01MB11346.jpnprd01.prod.outlook.com>
-References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
- <20260820171657.62815-5-biju.das.jz@bp.renesas.com>
- <apgC-m7SrDNU9YmQ@shikoro>
- <TY3PR01MB11346696A5DF407A8E25150F186B52@TY3PR01MB11346.jpnprd01.prod.outlook.com>
- <aqMnnjs_9tzfuPem@shikoro>
-In-Reply-To: <aqMnnjs_9tzfuPem@shikoro>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=bp.renesas.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|OS9PR01MB14306:EE_
-x-ms-office365-filtering-correlation-id: b66d391c-bdad-42d6-3d17-08df124c3a8e
-x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|366016|1800799024|23010399003|376014|10067099003|4143699003|22082099003|18002099003|56012099006|11063799006|38070700021;
-x-microsoft-antispam-message-info:
- QHqlaP2Zrk1xgxJyRQbrTa+UbYrwI9a6MBkSFRCqNssKvJwLDhDualkjwVthxdV6RXOe3z18al2c2PPZzEC1b00Qo454BvPQpJNZTYk7OZv7EvHsiO7vUcNC5JiKDmjq56hZ8ySyXOnMVQZzehU5bfx4d5OHrgYDQxrQp/+e54+JQd1fYjh0aCZMiB9Sono5B5PYvcklGk/zqOi8BP8Evh4uUGbZ9OMSvTTMWy39+SqbT5d+f0zrSa5SDwifUEd5sx/MM4O75c9kai056ZwRK3giOAf+5NNQNaXnwBiWGpQU4REc8k+IslQkLCOYGRnk/Q0htulTRLJJdRr58SynURmBINoljI2L71igK3LqMURwGBk0S591KtdCdkPH6iGa2REemWiQ8G+akdJR2/hhxImpbJopDE8dadCyHdA+gEJETteWdThC2xQha9wEl4WAfTD0wbXd5zwQJXmGxMuKstf0N24PhetYTFneONjUWgQUhgw3W4RIyZbYFPpBlsB9z8IrgNlefpvGdA8d1l2S8TzJw9kJICyq60ZHfFJpTksEKxoEjnJMZxUKu/ojqfeQsIGSeKyEKkWDKafsJZKyycv4aNq22j1kjFWWh3WjWrFRYOeP50ZTJFjIvrtte3YBx/NHYdW46BgE0GbMvZIKrWFpgD6XENlzS8kK/2gOzoI84qcLICCj5Hl+xZO3IIb+yeGCS9MlLZLvstsAmON84F8wWe1t/drLyiwB8cUY30I=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(23010399003)(376014)(10067099003)(4143699003)(22082099003)(18002099003)(56012099006)(11063799006)(38070700021);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?Dlj9d6BMHhUbdbY3Txlmi8FZZGtTlNMxqgB140yYmFRJd5jEpXVkNkxiK3qY?=
- =?us-ascii?Q?cNj4B/GBXqdiJFX1lp/D4EJxjurRDhgo1uHpOkqO+ifWzfBCCMwyduknleyq?=
- =?us-ascii?Q?4ezqdSJqeraL1KAfVDF2eAIPAGvxJsmOXEhP/4U2g2wX5D0JkvHQG8iU2ADt?=
- =?us-ascii?Q?rqkeuvGDMypxZaHkEMfUqLFWvMAhaKjdI6VPB2YNn2SiBLzzI1VB2Yghh9ic?=
- =?us-ascii?Q?Wu1/nCLRv1uHBYUipFDHIgz7FovRDbrXfNueZNknehk3NK93fUBSZadu4KVD?=
- =?us-ascii?Q?+bAFTvaqlCtEBtCKPeBU2uNYk+wnsS9gzVffCXs6Una8cJMzzN4xDORXqwn9?=
- =?us-ascii?Q?C9+0d1OnV8+EB8t0zVsb5z+QRQNxdaA0kaACSBZDwKg4I62CwmJr0OwKIaJA?=
- =?us-ascii?Q?oaZ8w6rmhAoInBUMChRxfu3sA+u10wEUEyRccdvsJWSeCgp+OlA0Y5cgiu0y?=
- =?us-ascii?Q?hjX405AhYSjytbXxym6D1MBVNb99pjP8cCtePU6uHqlNuh/DmDMfISN+5qhe?=
- =?us-ascii?Q?szUBAtgjaOFMSmok3IRTJdtvgu7HcSnom3fVAsYTcktQYicL+JCePtJXHOrd?=
- =?us-ascii?Q?xUNxuI/xskije1M5hWEm+vE2O8Z9EpNeOCztfOfql5bxC2JVPTIDihEcGmBr?=
- =?us-ascii?Q?nSss0bk8pxWH3dr25MlUoj9jTix2JXRMd/rnWNbFsqFYL/7Imu6w2U1X6lQ0?=
- =?us-ascii?Q?Wy5paMQcRdLstnYm80UcpBrtxCPCmE8j0v2KGomUPFH6i0KsBEwtZWfETlb2?=
- =?us-ascii?Q?JhUsfCQAJ8a+atr3VLX41cc+38brV4xLDQiB5UdkECaSz9DPLZ3V/SsfYfF5?=
- =?us-ascii?Q?Z/SPbJMCZtPx3GmCfcJi858pbtspCWjA7tgkAs3QK/upDmS9vIrxnQeK5fUX?=
- =?us-ascii?Q?oCbybKw1pNsyqrJyzucMQZ6BTBqmMXw6fV9sHNinwl1rdwOvVgmywfnN3BEI?=
- =?us-ascii?Q?aKfUzTcHbwT94n/HxYLdRER7FaBsqVg0YPbjalhMeveAvjacAsiZNbGBYQVJ?=
- =?us-ascii?Q?72PJHclxwVQNg5ZBs533cco0nlMqAWRNWlR6GDjrJ9fqw3+AMcL+3UGbSjS6?=
- =?us-ascii?Q?eKwV9ILo85kYGk8jWrL8RvZkqcrqZ3BZnlQr3WU1RuO0AwUga55W6H9EMw/w?=
- =?us-ascii?Q?jdIU+wLms9aAWVEqO8D4x1Z3W7QiGdKOxM4vkvlWXZFf79tfoVHtsJwNRCjw?=
- =?us-ascii?Q?xu1tSj9oMq860YX1UQaooXMrH9fDoPTxCZEuvGuFwDi/lM8OtZmYbnIVPqrB?=
- =?us-ascii?Q?LmvQ1a0IoesNUpkqUZi93xgmB7jN3nXnq22JkaAIUk67D2085391sdAY9rWR?=
- =?us-ascii?Q?unhb+VC54Lal4gNaxAjDycVcJTdA62Wva4G8q5Q28OK/X5q4nxQJY/5c8Jox?=
- =?us-ascii?Q?7uKwAIEEzeWRbaEv45kMXU9Qqtu5QLNQdn0K01FkH5teNnpYDT+gR6Zygb7v?=
- =?us-ascii?Q?aNIcx6IlYdyolzOtMAy/yftKCVGwxkUoGpz12DAklLtSbzv7S3v32w8afPTI?=
- =?us-ascii?Q?1OoNkNs9nHZDD+dbWf9USr2Y2WFSSetFABf/z1DBcNEERTAnCTVEYenfd0yw?=
- =?us-ascii?Q?xsYHdnOBEjqb4ZS9p4VOmSwW7CpgE0urvNntJTcCH0lCtD66knH/wTjdAV9i?=
- =?us-ascii?Q?1fj0FpPgscuAeEKSgl+HCghoW+Lik5GlpJbbHC0xn9fNM6HDqRXPFriucwb3?=
- =?us-ascii?Q?aialhHs70yBLdWWAsL7ZLxS8hHsqy5FEhAVRNF0ad5wuc7El9EIPM7+hVPOx?=
- =?us-ascii?Q?TU4R77HxAQ=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="NmzfRbxB";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="aT8ySZE0"
+Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68EAmhk1216149
+	for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 11:16:57 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=Eq0qTNSS9tDBYOKiiGraKJ3k15rypHoDRTN
+	e4y1EVGQ=; b=NmzfRbxBc8PTxRnCSmuMruZnpLlk3x0Hl81sGoSK0rvFfJuohOw
+	YZKGYQ4o6XaEUuvYozAL78KaprivMiwufkdyi2e8nfnMqAQ37NEWzOEEfFMs30Zq
+	1Ik6j45cXIZE0W36mdAro9624OUTAirkH9dyuPH0Lhu2TUkeae11RKWjOgEtNFpF
+	tnhx/K+KDUaO7V8KAFUWQP8BsoozWbBAMIxxp6mgJWXDy01u2SiIhxvDrekW9XPe
+	MK6sO4cB2ez3+5rmcErSCykErMZRSQXo2IQXHRDdlNEWVXJAXGteiTP3/xLERQQX
+	H7hfyPZeY8GREbJOcbJ/Hf8LokCiORqbE5A==
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com [209.85.219.70])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gmy9decd3-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 11:16:56 +0000 (GMT)
+Received: by mail-qv1-f70.google.com with SMTP id 6a1803df08f44-9106fce784dso79329566d6.2
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2026 04:16:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1789384616; x=1789989416; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=Eq0qTNSS9tDBYOKiiGraKJ3k15rypHoDRTNe4y1EVGQ=;
+        b=aT8ySZE0GaNI/1txPmHE/Hn3gl0WzQFdjb708glvHV+U+HTGqodC4FOuZh8QD963Yk
+         CXqys8E4ap21+W1DIQWPLMb66NvdK4cLXjfxuUiPxrb1ep1iltlONGXLkcsaGuwC0kJg
+         o0YRD6/Bcma2EgNQZriymXLqTwnaF6I5NRcSMqUlQzGFu7rm65/WXpOhUWdTk0Rn4hRM
+         HKRyIYA/fnr/WA8IwAeD2Zfda6kl0rzbr8t2u7iARaUC1U+xcROVkry0c7oFxMusFHrc
+         4jnruKKtsV1fPFcVl/mKHUeHWamcLFDi2FOqMcWZ1RiinBt/SaUnZgh18rclFw+Pu5Fa
+         KE6w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1789384616; x=1789989416;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=Eq0qTNSS9tDBYOKiiGraKJ3k15rypHoDRTNe4y1EVGQ=;
+        b=g6PiGQ5SK5/OyYRwzQDNCS2Ej2gw9opAcP0DldO+4XHNX4isu0HpQD/CjPX6hOnN1p
+         e6HHZcdI7Y7cL7og4d5F9CiAmPiZZEb9x8P3fAZFMQoBLrH5z6Xq7j3fg/cNiVsb2iLC
+         +Gl4foM/T9RhVkS/QyHM5wIjBeGoabI708bOOhigozpN63mWek7bhPFtwrMnjGu2vxyc
+         GfcjzbukiGqNcEXbe1TLbk8UN88+wyW728xPb/03AIj2nRMEuiLKFwMOaYNsW35xz/dj
+         i3ngUV4MpajrGyorfWi9YbvzVPEhAdZcnommRnW+NeN3KrocHUrJ7Zbvf4GjpGTOJlgg
+         cblw==
+X-Gm-Message-State: AFuF++k+PHj8/KyEjYE+5y1HL1oPLSdyxj0Z+rA68RIIGQhT2bU5URzA
+	r+ngCZ8o9ceWn3ksxw4GPit5SpkdqQxcJJq9Rg6VMgIzQNCRrzv002sFW96C2TQQ9c9WR7P8BTU
+	S61mFIO0vNKx0hBFomBqlPjMlfzv6xh04rmOtw67dZgYFS4bT+i9tv0dVyl4g1t6PH4LKWBs=
+X-Gm-Gg: AYBFou3mJ3Qhns0MDD/0OSEbqcjrcPqgneiU6LxpHeoFX6zHYWSg+O9qpcCyrUvl5EM
+	3s42gZ8EWba5T/9ou2sacfi+oeWt/xkRJAWpDji7Ot8wk37VoDY61Uw23lO11ghwFtFGE9ecNHO
+	Lr4uqELPI4q7mMZ52+uYBjc0WcvYu4OMtq7fuhc91sOd93qcEcv6IAwGYEMjr8P8m/Mr57sfif8
+	DwnzQDS30ew5XBAd9nhpG6XpL3a5Q+hMoF897qLmrQuCZKVbnKAoowXKdoqRXKJQ4KlrToT0+CC
+	Cejmse5mnkNGZP52aTsvqMBOwEthEIG/p8GibFvZLc7QkEqnh38SvpGwIem0szOkxFCbaddOWrH
+	CuGzVdbcnR4kkgYtathOSaysc/Rzm+ixZ23TJMAwM8FZxW3LCFSxMFIEEww==
+X-Received: by 2002:a05:620a:444c:b0:939:bd4e:b2fd with SMTP id af79cd13be357-93a29a14399mr274017985a.43.1789384614602;
+        Mon, 14 Sep 2026 04:16:54 -0700 (PDT)
+X-Received: by 2002:a05:620a:444c:b0:939:bd4e:b2fd with SMTP id af79cd13be357-93a29a14399mr274003585a.43.1789384613040;
+        Mon, 14 Sep 2026 04:16:53 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6a9b593d7dbsm4142326a12.22.2026.09.14.04.16.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 14 Sep 2026 04:16:51 -0700 (PDT)
+From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>
+Cc: linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
+        Ulf Hansson <ulf.hansson@oss.qualcomm.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Johan Hovold <johan@kernel.org>
+Subject: [PATCH] mmc: vub300: Remove the driver for the obsolete HW
+Date: Mon, 14 Sep 2026 13:16:42 +0200
+Message-ID: <20260914111642.169707-1-ulf.hansson@oss.qualcomm.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: bp.renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b66d391c-bdad-42d6-3d17-08df124c3a8e
-X-MS-Exchange-CrossTenant-originalarrivaltime: 14 Sep 2026 10:37:50.2228
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: L89hNp8sDJpUpz8qV2a2CenPvBPdoe/f2pJOib/rcG862lpTvGYSAvkhAA3cQ5wHDFamG2CsLv2Bs2frwAmoaKC+pd0FmVURYNVBMJ4yXAY=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS9PR01MB14306
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTE0MDE2MCBTYWx0ZWRfXyhgibqWSMl3p
+ cKARPhmUzE8E46hpGVOxkingpPOOBX2WGDobjIQpbIgx+tmyoqZYJObyuvHaK3dGLJKg6DARvU5
+ +ZMOARVkv4XO11o6ykPpWPNwA0iuLDtQbHQsJE12lVCxm296JnLV1IH4Q+jmusvkoSo4wc09R63
+ fYu+svIW2ss3UG2Yo8LBXZppWeByZGTPjLBE4lmNtF1Cnubl6W31+fYibqUxBAIG2bS+LjxBVXz
+ dvg6XyT6N6ydh4H+kr22fsncyvlp0/A+fySr2NJqAK/GlqzjfRjyzRUpPtPk+VjZA92zQNmzrlF
+ 8Tkhp17j2ohtSyUEN/KdpbsmxgIIxkxSR5d62tETZru+dc30Dt8MPOf6x00absXfm4bjD93X+To
+ w+e2b5U2E1TLVFxITCLGEtuPJbrmciFJBSWRax92PmlWFp5iCITM9xZlvNV0wfZwMZTAhbJQwUv
+ e4Pcts8gth4sR9Pmjvw==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTE0MDE2MCBTYWx0ZWRfX8EiDnoOfc85Q
+ au2ta00hlWaAdwe2AShUleH2nxe7vosaWb/Ouh4jrwt+VBExSKztnJhEkjTJSH3IgaoCz+TE0a6
+ f1O3BVxoUf0Ge7UXC7yQIUd2thwMA34=
+X-Proofpoint-GUID: qURpu_iDh5KwZizl1gNgFxU4BSMG3H7r
+X-Authority-Analysis: v=2.4 cv=OeUNnRTY c=1 sm=1 tr=0 ts=6aa7d7a8 cx=c_pps
+ a=oc9J++0uMp73DTRD5QyR2A==:117 a=h7aNHqOhPKB91FvYUefsSA==:17
+ a=VdqzKS8jKosA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=u7WPNUs3qKkmUXheDGA7:22 a=ZpdpYltYx_vBUK5n70dp:22 a=n9-sXBzXAAAA:8
+ a=VwQbUJbxAAAA:8 a=ag1SF4gXAAAA:8 a=2C6YHBdLAAAA:8 a=zly-A8Dgp6A6n6Xy3r4A:9
+ a=iYH6xdkBrDN1Jqds4HTS:22 a=H_WVUQ5euzlKcvMdOhyK:22 a=Yupwre4RP9_Eg_Bd0iYG:22
+ a=yxGMNg53M24zlVSZdvMH:22
+X-Proofpoint-ORIG-GUID: qURpu_iDh5KwZizl1gNgFxU4BSMG3H7r
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-09-14_03,2026-09-13_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ lowpriorityscore=0 malwarescore=0 phishscore=0 bulkscore=0 spamscore=0
+ priorityscore=1501 suspectscore=0 impostorscore=0 adultscore=0 clxscore=1015
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609140160
 
-Hi Wolfram,
+From: Ulf Hansson <ulfh@kernel.org>
 
-Thanks for the feedback.
+The Hw is obsolete since many years and its corresponding driver has not
+been actively maintained for a very long time.
 
-> -----Original Message-----
-> From: wsa+renesas <wsa+renesas@sang-engineering.com>
-> Sent: 10 September 2026 22:57
-> Subject: Re: [PATCH v24 04/15] mmc: renesas_sdhi: Add max_divider field t=
-o support SoC-specific clock
-> ranges
->=20
->=20
-> > > > -	mmc->f_min =3D max(clk_round_rate(priv->clk, 1) / 512, 1L);
-> > > > +	mmc->f_min =3D max(clk_round_rate(priv->clk, 1) /
-> > > > +host->pdata->max_divider, 1L);
-> > >
-> > > ... because the existing code is just too subtle / fragile and hard t=
-o understand. I think we should
-> move
-> > > clk_round_rate() out of max() and handle it seperatly before. What do=
- you think?
-> >
-> > You mean use, max(clk_get_rate(priv->clk) / 512, 1);
-> >
-> > clk_get_rate() returns unsigned long compared to clk_round_rate() which=
- return long??
->=20
-> I mean
->=20
-> 	rate =3D clk_round_rate(priv->clk, 1);
-> 	if (rate < 0)
-> 		...
-> 	mmc->f_min =3D max(rate / host->pdata->max_divider, 1L);
->=20
-> Makes sense?
+In this regards we are lately receiving a lot of AI generated bug fixes as
+the driver is a real mess. Rather than continue this path, with small fixes
+instead of making a proper rework of the driver, let's just remove the
+driver altogether.
 
-Yes, it make sense.
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Johan Hovold <johan@kernel.org>
+Signed-off-by: Ulf Hansson <ulfh@kernel.org>
+---
+ drivers/mmc/host/Kconfig  |   31 -
+ drivers/mmc/host/Makefile |    1 -
+ drivers/mmc/host/vub300.c | 2493 -------------------------------------
+ 3 files changed, 2525 deletions(-)
+ delete mode 100644 drivers/mmc/host/vub300.c
 
-Cheers,
-Biju
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 4f060d3e5636..79bfc425e7c7 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -917,37 +917,6 @@ config MMC_JZ4740
+ 	  If you have a board based on such a SoC and with a SD/MMC slot,
+ 	  say Y or M here.
+ 
+-config MMC_VUB300
+-	tristate "VUB300 USB to SDIO/SD/MMC Host Controller support"
+-	depends on USB
+-	help
+-	  This selects support for Elan Digital Systems' VUB300 chip.
+-
+-	  The VUB300 is a USB-SDIO Host Controller Interface chip
+-	  that enables the host computer to use SDIO/SD/MMC cards
+-	  via a USB 2.0 or USB 1.1 host.
+-
+-	  The VUB300 chip will be found in both physically separate
+-	  USB to SDIO/SD/MMC adapters and embedded on some motherboards.
+-
+-	  The VUB300 chip supports SD and MMC memory cards in addition
+-	  to single and multifunction SDIO cards.
+-
+-	  Some SDIO cards will need a firmware file to be loaded and
+-	  sent to VUB300 chip in order to achieve better data throughput.
+-	  Download these "Offload Pseudocode" from Elan Digital Systems'
+-	  web-site http://www.elandigitalsystems.com/support/downloads.php
+-	  and put them in /lib/firmware. Note that without these additional
+-	  firmware files the VUB300 chip will still function, but not at
+-	  the best obtainable data rate.
+-
+-	  To compile this mmc host controller driver as a module,
+-	  choose M here: the module will be called vub300.
+-
+-	  If you have a computer with an embedded VUB300 chip
+-	  or if you intend connecting a USB adapter based on a
+-	  VUB300 chip say Y or M here.
+-
+ config MMC_USHC
+ 	tristate "USB SD Host Controller (USHC) support"
+ 	depends on USB
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 799ce7ad43d5..fd043afab57e 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -60,7 +60,6 @@ obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
+ obj-$(CONFIG_MMC_DW_STARFIVE)	+= dw_mmc-starfive.o
+ obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
+ obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
+-obj-$(CONFIG_MMC_VUB300)	+= vub300.o
+ obj-$(CONFIG_MMC_USHC)		+= ushc.o
+ obj-$(CONFIG_MMC_WMT)		+= wmt-sdmmc.o
+ obj-$(CONFIG_MMC_MESON_GX)	+= meson-gx-mmc.o
+diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+deleted file mode 100644
+index 2dae474dcd06..000000000000
+--- a/drivers/mmc/host/vub300.c
++++ /dev/null
+@@ -1,2493 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0-only
+-/*
+- * Remote VUB300 SDIO/SDmem Host Controller Driver
+- *
+- * Copyright (C) 2010 Elan Digital Systems Limited
+- *
+- * based on USB Skeleton driver - 2.2
+- *
+- * Copyright (C) 2001-2004 Greg Kroah-Hartman (greg@kroah.com)
+- *
+- * VUB300: is a USB 2.0 client device with a single SDIO/SDmem/MMC slot
+- *         Any SDIO/SDmem/MMC device plugged into the VUB300 will appear,
+- *         by virtue of this driver, to have been plugged into a local
+- *         SDIO host controller, similar to, say, a PCI Ricoh controller
+- *         This is because this kernel device driver is both a USB 2.0
+- *         client device driver AND an MMC host controller driver. Thus
+- *         if there is an existing driver for the inserted SDIO/SDmem/MMC
+- *         device then that driver will be used by the kernel to manage
+- *         the device in exactly the same fashion as if it had been
+- *         directly plugged into, say, a local pci bus Ricoh controller
+- *
+- * RANT: this driver was written using a display 128x48 - converting it
+- *       to a line width of 80 makes it very difficult to support. In
+- *       particular functions have been broken down into sub functions
+- *       and the original meaningful names have been shortened into
+- *       cryptic ones.
+- *       The problem is that executing a fragment of code subject to
+- *       two conditions means an indentation of 24, thus leaving only
+- *       56 characters for a C statement. And that is quite ridiculous!
+- *
+- * Data types: data passed to/from the VUB300 is fixed to a number of
+- *             bits and driver data fields reflect that limit by using
+- *             u8, u16, u32
+- */
+-#include <linux/kernel.h>
+-#include <linux/errno.h>
+-#include <linux/init.h>
+-#include <linux/slab.h>
+-#include <linux/module.h>
+-#include <linux/kref.h>
+-#include <linux/uaccess.h>
+-#include <linux/usb.h>
+-#include <linux/mutex.h>
+-#include <linux/mmc/host.h>
+-#include <linux/mmc/card.h>
+-#include <linux/mmc/sdio_func.h>
+-#include <linux/mmc/sdio_ids.h>
+-#include <linux/workqueue.h>
+-#include <linux/ctype.h>
+-#include <linux/firmware.h>
+-#include <linux/scatterlist.h>
+-
+-struct host_controller_info {
+-	u8 info_size;
+-	u16 firmware_version;
+-	u8 number_of_ports;
+-} __packed;
+-
+-#define FIRMWARE_BLOCK_BOUNDARY 1024
+-struct sd_command_header {
+-	u8 header_size;
+-	u8 header_type;
+-	u8 port_number;
+-	u8 command_type; /* Bit7 - Rd/Wr */
+-	u8 command_index;
+-	u8 transfer_size[4]; /* ReadSize + ReadSize */
+-	u8 response_type;
+-	u8 arguments[4];
+-	u8 block_count[2];
+-	u8 block_size[2];
+-	u8 block_boundary[2];
+-	u8 reserved[44]; /* to pad out to 64 bytes */
+-} __packed;
+-
+-struct sd_irqpoll_header {
+-	u8 header_size;
+-	u8 header_type;
+-	u8 port_number;
+-	u8 command_type; /* Bit7 - Rd/Wr */
+-	u8 padding[16]; /* don't ask why !! */
+-	u8 poll_timeout_msb;
+-	u8 poll_timeout_lsb;
+-	u8 reserved[42]; /* to pad out to 64 bytes */
+-} __packed;
+-
+-struct sd_common_header {
+-	u8 header_size;
+-	u8 header_type;
+-	u8 port_number;
+-} __packed;
+-
+-struct sd_response_header {
+-	u8 header_size;
+-	u8 header_type;
+-	u8 port_number;
+-	u8 command_type;
+-	u8 command_index;
+-	u8 command_response[];
+-} __packed;
+-
+-struct sd_status_header {
+-	u8 header_size;
+-	u8 header_type;
+-	u8 port_number;
+-	u16 port_flags;
+-	u32 sdio_clock;
+-	u16 host_header_size;
+-	u16 func_header_size;
+-	u16 ctrl_header_size;
+-} __packed;
+-
+-struct sd_error_header {
+-	u8 header_size;
+-	u8 header_type;
+-	u8 port_number;
+-	u8 error_code;
+-} __packed;
+-
+-struct sd_interrupt_header {
+-	u8 header_size;
+-	u8 header_type;
+-	u8 port_number;
+-} __packed;
+-
+-struct offload_registers_access {
+-	u8 command_byte[4];
+-	u8 Respond_Byte[4];
+-} __packed;
+-
+-#define INTERRUPT_REGISTER_ACCESSES 15
+-struct sd_offloaded_interrupt {
+-	u8 header_size;
+-	u8 header_type;
+-	u8 port_number;
+-	struct offload_registers_access reg[INTERRUPT_REGISTER_ACCESSES];
+-} __packed;
+-
+-struct sd_register_header {
+-	u8 header_size;
+-	u8 header_type;
+-	u8 port_number;
+-	u8 command_type;
+-	u8 command_index;
+-	u8 command_response[6];
+-} __packed;
+-
+-#define PIGGYBACK_REGISTER_ACCESSES 14
+-struct sd_offloaded_piggyback {
+-	struct sd_register_header sdio;
+-	struct offload_registers_access reg[PIGGYBACK_REGISTER_ACCESSES];
+-} __packed;
+-
+-union sd_response {
+-	struct sd_common_header common;
+-	struct sd_status_header status;
+-	struct sd_error_header error;
+-	struct sd_interrupt_header interrupt;
+-	struct sd_response_header response;
+-	struct sd_offloaded_interrupt irq;
+-	struct sd_offloaded_piggyback pig;
+-} __packed;
+-
+-union sd_command {
+-	struct sd_command_header head;
+-	struct sd_irqpoll_header poll;
+-} __packed;
+-
+-enum SD_RESPONSE_TYPE {
+-	SDRT_UNSPECIFIED = 0,
+-	SDRT_NONE,
+-	SDRT_1,
+-	SDRT_1B,
+-	SDRT_2,
+-	SDRT_3,
+-	SDRT_4,
+-	SDRT_5,
+-	SDRT_5B,
+-	SDRT_6,
+-	SDRT_7,
+-};
+-
+-#define RESPONSE_INTERRUPT			0x01
+-#define RESPONSE_ERROR				0x02
+-#define RESPONSE_STATUS				0x03
+-#define RESPONSE_IRQ_DISABLED			0x05
+-#define RESPONSE_IRQ_ENABLED			0x06
+-#define RESPONSE_PIGGYBACKED			0x07
+-#define RESPONSE_NO_INTERRUPT			0x08
+-#define RESPONSE_PIG_DISABLED			0x09
+-#define RESPONSE_PIG_ENABLED			0x0A
+-#define SD_ERROR_1BIT_TIMEOUT			0x01
+-#define SD_ERROR_4BIT_TIMEOUT			0x02
+-#define SD_ERROR_1BIT_CRC_WRONG			0x03
+-#define SD_ERROR_4BIT_CRC_WRONG			0x04
+-#define SD_ERROR_1BIT_CRC_ERROR			0x05
+-#define SD_ERROR_4BIT_CRC_ERROR			0x06
+-#define SD_ERROR_NO_CMD_ENDBIT			0x07
+-#define SD_ERROR_NO_1BIT_DATEND			0x08
+-#define SD_ERROR_NO_4BIT_DATEND			0x09
+-#define SD_ERROR_1BIT_UNEXPECTED_TIMEOUT	0x0A
+-#define SD_ERROR_4BIT_UNEXPECTED_TIMEOUT	0x0B
+-#define SD_ERROR_ILLEGAL_COMMAND		0x0C
+-#define SD_ERROR_NO_DEVICE			0x0D
+-#define SD_ERROR_TRANSFER_LENGTH		0x0E
+-#define SD_ERROR_1BIT_DATA_TIMEOUT		0x0F
+-#define SD_ERROR_4BIT_DATA_TIMEOUT		0x10
+-#define SD_ERROR_ILLEGAL_STATE			0x11
+-#define SD_ERROR_UNKNOWN_ERROR			0x12
+-#define SD_ERROR_RESERVED_ERROR			0x13
+-#define SD_ERROR_INVALID_FUNCTION		0x14
+-#define SD_ERROR_OUT_OF_RANGE			0x15
+-#define SD_ERROR_STAT_CMD			0x16
+-#define SD_ERROR_STAT_DATA			0x17
+-#define SD_ERROR_STAT_CMD_TIMEOUT		0x18
+-#define SD_ERROR_SDCRDY_STUCK			0x19
+-#define SD_ERROR_UNHANDLED			0x1A
+-#define SD_ERROR_OVERRUN			0x1B
+-#define SD_ERROR_PIO_TIMEOUT			0x1C
+-
+-#define FUN(c) (0x000007 & (c->arg>>28))
+-#define REG(c) (0x01FFFF & (c->arg>>9))
+-
+-static bool limit_speed_to_24_MHz;
+-module_param(limit_speed_to_24_MHz, bool, 0644);
+-MODULE_PARM_DESC(limit_speed_to_24_MHz, "Limit Max SDIO Clock Speed to 24 MHz");
+-
+-static bool pad_input_to_usb_pkt;
+-module_param(pad_input_to_usb_pkt, bool, 0644);
+-MODULE_PARM_DESC(pad_input_to_usb_pkt,
+-		 "Pad USB data input transfers to whole USB Packet");
+-
+-static bool disable_offload_processing;
+-module_param(disable_offload_processing, bool, 0644);
+-MODULE_PARM_DESC(disable_offload_processing, "Disable Offload Processing");
+-
+-static bool force_1_bit_data_xfers;
+-module_param(force_1_bit_data_xfers, bool, 0644);
+-MODULE_PARM_DESC(force_1_bit_data_xfers,
+-		 "Force SDIO Data Transfers to 1-bit Mode");
+-
+-static bool force_polling_for_irqs;
+-module_param(force_polling_for_irqs, bool, 0644);
+-MODULE_PARM_DESC(force_polling_for_irqs, "Force Polling for SDIO interrupts");
+-
+-static int firmware_irqpoll_timeout = 1024;
+-module_param(firmware_irqpoll_timeout, int, 0644);
+-MODULE_PARM_DESC(firmware_irqpoll_timeout, "VUB300 firmware irqpoll timeout");
+-
+-static int force_max_req_size = 128;
+-module_param(force_max_req_size, int, 0644);
+-MODULE_PARM_DESC(force_max_req_size, "set max request size in kBytes");
+-
+-#ifdef SMSC_DEVELOPMENT_BOARD
+-static int firmware_rom_wait_states = 0x04;
+-#else
+-static int firmware_rom_wait_states = 0x1C;
+-#endif
+-
+-module_param(firmware_rom_wait_states, int, 0644);
+-MODULE_PARM_DESC(firmware_rom_wait_states,
+-		 "ROM wait states byte=RRRIIEEE (Reserved Internal External)");
+-
+-#define ELAN_VENDOR_ID		0x2201
+-#define VUB300_VENDOR_ID	0x0424
+-#define VUB300_PRODUCT_ID	0x012C
+-static const struct usb_device_id vub300_table[] = {
+-	{USB_DEVICE(ELAN_VENDOR_ID, VUB300_PRODUCT_ID)},
+-	{USB_DEVICE(VUB300_VENDOR_ID, VUB300_PRODUCT_ID)},
+-	{} /* Terminating entry */
+-};
+-MODULE_DEVICE_TABLE(usb, vub300_table);
+-
+-static struct workqueue_struct *cmndworkqueue;
+-static struct workqueue_struct *pollworkqueue;
+-static struct workqueue_struct *deadworkqueue;
+-
+-static inline int interface_to_InterfaceNumber(struct usb_interface *interface)
+-{
+-	if (!interface)
+-		return -1;
+-	if (!interface->cur_altsetting)
+-		return -1;
+-	return interface->cur_altsetting->desc.bInterfaceNumber;
+-}
+-
+-struct sdio_register {
+-	unsigned func_num:3;
+-	unsigned sdio_reg:17;
+-	unsigned activate:1;
+-	unsigned prepared:1;
+-	unsigned regvalue:8;
+-	unsigned response:8;
+-	unsigned sparebit:26;
+-};
+-
+-struct vub300_mmc_host {
+-	struct usb_device *udev;
+-	struct usb_interface *interface;
+-	struct kref kref;
+-	struct mutex cmd_mutex;
+-	struct mutex irq_mutex;
+-	char vub_name[3 + (9 * 8) + 4 + 1]; /* max of 7 sdio fn's */
+-	u8 cmnd_out_ep; /* EndPoint for commands */
+-	u8 cmnd_res_ep; /* EndPoint for responses */
+-	u8 data_out_ep; /* EndPoint for out data */
+-	u8 data_inp_ep; /* EndPoint for inp data */
+-	bool card_powered;
+-	bool card_present;
+-	bool read_only;
+-	bool large_usb_packets;
+-	bool app_spec; /* ApplicationSpecific */
+-	bool irq_enabled; /* by the MMC CORE */
+-	bool irq_disabled; /* in the firmware */
+-	unsigned bus_width:4;
+-	u8 total_offload_count;
+-	u8 dynamic_register_count;
+-	u8 resp_len;
+-	u32 datasize;
+-	int errors;
+-	int usb_transport_fail;
+-	int usb_timed_out;
+-	int irqs_queued;
+-	struct sdio_register sdio_register[16];
+-	struct offload_interrupt_function_register {
+-#define MAXREGBITS 4
+-#define MAXREGS (1<<MAXREGBITS)
+-#define MAXREGMASK (MAXREGS-1)
+-		u8 offload_count;
+-		u32 offload_point;
+-		struct offload_registers_access reg[MAXREGS];
+-	} fn[8];
+-	u16 fbs[8]; /* Function Block Size */
+-	struct mmc_command *cmd;
+-	struct mmc_request *req;
+-	struct mmc_data *data;
+-	struct mmc_host *mmc;
+-	struct urb *urb;
+-	struct urb *command_out_urb;
+-	struct urb *command_res_urb;
+-	struct completion command_complete;
+-	struct completion irqpoll_complete;
+-	union sd_command cmnd;
+-	union sd_response resp;
+-	struct timer_list sg_transfer_timer;
+-	struct usb_sg_request sg_request;
+-	struct timer_list inactivity_timer;
+-	struct work_struct deadwork;
+-	struct work_struct cmndwork;
+-	struct delayed_work pollwork;
+-	struct host_controller_info hc_info;
+-	struct sd_status_header system_port_status;
+-	u8 padded_buffer[64];
+-};
+-
+-#define kref_to_vub300_mmc_host(d) container_of(d, struct vub300_mmc_host, kref)
+-#define SET_TRANSFER_PSEUDOCODE		21
+-#define SET_INTERRUPT_PSEUDOCODE	20
+-#define SET_FAILURE_MODE		18
+-#define SET_ROM_WAIT_STATES		16
+-#define SET_IRQ_ENABLE			13
+-#define SET_CLOCK_SPEED			11
+-#define SET_FUNCTION_BLOCK_SIZE		9
+-#define SET_SD_DATA_MODE		6
+-#define SET_SD_POWER			4
+-#define ENTER_DFU_MODE			3
+-#define GET_HC_INF0			1
+-#define GET_SYSTEM_PORT_STATUS		0
+-
+-static void vub300_delete(struct kref *kref)
+-{				/* kref callback - softirq */
+-	struct vub300_mmc_host *vub300 = kref_to_vub300_mmc_host(kref);
+-	struct mmc_host *mmc = vub300->mmc;
+-
+-	usb_free_urb(vub300->command_out_urb);
+-	vub300->command_out_urb = NULL;
+-	usb_free_urb(vub300->command_res_urb);
+-	vub300->command_res_urb = NULL;
+-	usb_put_dev(vub300->udev);
+-	mmc_free_host(mmc);
+-	/*
+-	 * and hence also frees vub300
+-	 * which is contained at the end of struct mmc
+-	 */
+-}
+-
+-static void vub300_queue_cmnd_work(struct vub300_mmc_host *vub300)
+-{
+-	kref_get(&vub300->kref);
+-	if (queue_work(cmndworkqueue, &vub300->cmndwork)) {
+-		/*
+-		 * then the cmndworkqueue was not previously
+-		 * running and the above get ref is obvious
+-		 * required and will be put when the thread
+-		 * terminates by a specific call
+-		 */
+-	} else {
+-		/*
+-		 * the cmndworkqueue was already running from
+-		 * a previous invocation and thus to keep the
+-		 * kref counts correct we must undo the get
+-		 */
+-		kref_put(&vub300->kref, vub300_delete);
+-	}
+-}
+-
+-static void vub300_queue_poll_work(struct vub300_mmc_host *vub300, int delay)
+-{
+-	kref_get(&vub300->kref);
+-	if (queue_delayed_work(pollworkqueue, &vub300->pollwork, delay)) {
+-		/*
+-		 * then the pollworkqueue was not previously
+-		 * running and the above get ref is obvious
+-		 * required and will be put when the thread
+-		 * terminates by a specific call
+-		 */
+-	} else {
+-		/*
+-		 * the pollworkqueue was already running from
+-		 * a previous invocation and thus to keep the
+-		 * kref counts correct we must undo the get
+-		 */
+-		kref_put(&vub300->kref, vub300_delete);
+-	}
+-}
+-
+-static void vub300_queue_dead_work(struct vub300_mmc_host *vub300)
+-{
+-	kref_get(&vub300->kref);
+-	if (queue_work(deadworkqueue, &vub300->deadwork)) {
+-		/*
+-		 * then the deadworkqueue was not previously
+-		 * running and the above get ref is obvious
+-		 * required and will be put when the thread
+-		 * terminates by a specific call
+-		 */
+-	} else {
+-		/*
+-		 * the deadworkqueue was already running from
+-		 * a previous invocation and thus to keep the
+-		 * kref counts correct we must undo the get
+-		 */
+-		kref_put(&vub300->kref, vub300_delete);
+-	}
+-}
+-
+-static void irqpoll_res_completed(struct urb *urb)
+-{				/* urb completion handler - hardirq */
+-	struct vub300_mmc_host *vub300 = (struct vub300_mmc_host *)urb->context;
+-	if (urb->status)
+-		vub300->usb_transport_fail = urb->status;
+-	complete(&vub300->irqpoll_complete);
+-}
+-
+-static void irqpoll_out_completed(struct urb *urb)
+-{				/* urb completion handler - hardirq */
+-	struct vub300_mmc_host *vub300 = (struct vub300_mmc_host *)urb->context;
+-	if (urb->status) {
+-		vub300->usb_transport_fail = urb->status;
+-		complete(&vub300->irqpoll_complete);
+-		return;
+-	} else {
+-		int ret;
+-		unsigned int pipe =
+-			usb_rcvbulkpipe(vub300->udev, vub300->cmnd_res_ep);
+-		usb_fill_bulk_urb(vub300->command_res_urb, vub300->udev, pipe,
+-				  &vub300->resp, sizeof(vub300->resp),
+-				  irqpoll_res_completed, vub300);
+-		vub300->command_res_urb->actual_length = 0;
+-		ret = usb_submit_urb(vub300->command_res_urb, GFP_ATOMIC);
+-		if (ret) {
+-			vub300->usb_transport_fail = ret;
+-			complete(&vub300->irqpoll_complete);
+-		}
+-		return;
+-	}
+-}
+-
+-static void send_irqpoll(struct vub300_mmc_host *vub300)
+-{
+-	/* cmd_mutex is held by vub300_pollwork_thread */
+-	int retval;
+-	int timeout = 0xFFFF & (0x0001FFFF - firmware_irqpoll_timeout);
+-	vub300->cmnd.poll.header_size = 22;
+-	vub300->cmnd.poll.header_type = 1;
+-	vub300->cmnd.poll.port_number = 0;
+-	vub300->cmnd.poll.command_type = 2;
+-	vub300->cmnd.poll.poll_timeout_lsb = 0xFF & (unsigned)timeout;
+-	vub300->cmnd.poll.poll_timeout_msb = 0xFF & (unsigned)(timeout >> 8);
+-	usb_fill_bulk_urb(vub300->command_out_urb, vub300->udev,
+-			  usb_sndbulkpipe(vub300->udev, vub300->cmnd_out_ep)
+-			  , &vub300->cmnd, sizeof(vub300->cmnd)
+-			  , irqpoll_out_completed, vub300);
+-	retval = usb_submit_urb(vub300->command_out_urb, GFP_KERNEL);
+-	if (0 > retval) {
+-		vub300->usb_transport_fail = retval;
+-		vub300_queue_poll_work(vub300, 1);
+-		complete(&vub300->irqpoll_complete);
+-		return;
+-	} else {
+-		return;
+-	}
+-}
+-
+-static void new_system_port_status(struct vub300_mmc_host *vub300)
+-{
+-	int old_card_present = vub300->card_present;
+-	int new_card_present =
+-		(0x0001 & vub300->system_port_status.port_flags) ? 1 : 0;
+-	vub300->read_only =
+-		(0x0010 & vub300->system_port_status.port_flags) ? 1 : 0;
+-	if (new_card_present && !old_card_present) {
+-		dev_info(&vub300->udev->dev, "card just inserted\n");
+-		vub300->card_present = 1;
+-		vub300->bus_width = 0;
+-		if (disable_offload_processing)
+-			strscpy(vub300->vub_name, "EMPTY Processing Disabled",
+-				sizeof(vub300->vub_name));
+-		else
+-			vub300->vub_name[0] = 0;
+-		mmc_detect_change(vub300->mmc, 1);
+-	} else if (!new_card_present && old_card_present) {
+-		dev_info(&vub300->udev->dev, "card just ejected\n");
+-		vub300->card_present = 0;
+-		mmc_detect_change(vub300->mmc, 0);
+-	} else {
+-		/* no change */
+-	}
+-}
+-
+-static void __add_offloaded_reg_to_fifo(struct vub300_mmc_host *vub300,
+-					struct offload_registers_access
+-					*register_access, u8 func)
+-{
+-	u8 r = vub300->fn[func].offload_point + vub300->fn[func].offload_count;
+-	memcpy(&vub300->fn[func].reg[MAXREGMASK & r], register_access,
+-	       sizeof(struct offload_registers_access));
+-	vub300->fn[func].offload_count += 1;
+-	vub300->total_offload_count += 1;
+-}
+-
+-static void add_offloaded_reg(struct vub300_mmc_host *vub300,
+-			      struct offload_registers_access *register_access)
+-{
+-	u32 Register = ((0x03 & register_access->command_byte[0]) << 15)
+-			| ((0xFF & register_access->command_byte[1]) << 7)
+-			| ((0xFE & register_access->command_byte[2]) >> 1);
+-	u8 func = ((0x70 & register_access->command_byte[0]) >> 4);
+-	u8 regs = vub300->dynamic_register_count;
+-	u8 i = 0;
+-	while (0 < regs-- && 1 == vub300->sdio_register[i].activate) {
+-		if (vub300->sdio_register[i].func_num == func &&
+-		    vub300->sdio_register[i].sdio_reg == Register) {
+-			if (vub300->sdio_register[i].prepared == 0)
+-				vub300->sdio_register[i].prepared = 1;
+-			vub300->sdio_register[i].response =
+-				register_access->Respond_Byte[2];
+-			vub300->sdio_register[i].regvalue =
+-				register_access->Respond_Byte[3];
+-			return;
+-		} else {
+-			i += 1;
+-			continue;
+-		}
+-	}
+-	__add_offloaded_reg_to_fifo(vub300, register_access, func);
+-}
+-
+-static void check_vub300_port_status(struct vub300_mmc_host *vub300)
+-{
+-	/*
+-	 * cmd_mutex is held by vub300_pollwork_thread,
+-	 * vub300_deadwork_thread or vub300_cmndwork_thread
+-	 */
+-	int retval;
+-	retval =
+-		usb_control_msg(vub300->udev, usb_rcvctrlpipe(vub300->udev, 0),
+-				GET_SYSTEM_PORT_STATUS,
+-				USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+-				0x0000, 0x0000, &vub300->system_port_status,
+-				sizeof(vub300->system_port_status), 1000);
+-	if (sizeof(vub300->system_port_status) == retval)
+-		new_system_port_status(vub300);
+-}
+-
+-static void __vub300_irqpoll_response(struct vub300_mmc_host *vub300)
+-{
+-	/* cmd_mutex is held by vub300_pollwork_thread */
+-	if (vub300->command_res_urb->actual_length == 0)
+-		return;
+-
+-	switch (vub300->resp.common.header_type) {
+-	case RESPONSE_INTERRUPT:
+-		mutex_lock(&vub300->irq_mutex);
+-		if (vub300->irq_enabled)
+-			mmc_signal_sdio_irq(vub300->mmc);
+-		else
+-			vub300->irqs_queued += 1;
+-		vub300->irq_disabled = 1;
+-		mutex_unlock(&vub300->irq_mutex);
+-		break;
+-	case RESPONSE_ERROR:
+-		if (vub300->resp.error.error_code == SD_ERROR_NO_DEVICE)
+-			check_vub300_port_status(vub300);
+-		break;
+-	case RESPONSE_STATUS:
+-		vub300->system_port_status = vub300->resp.status;
+-		new_system_port_status(vub300);
+-		if (!vub300->card_present)
+-			vub300_queue_poll_work(vub300, HZ / 5);
+-		break;
+-	case RESPONSE_IRQ_DISABLED:
+-	{
+-		int offloaded_data_length = vub300->resp.common.header_size - 3;
+-		int register_count = offloaded_data_length >> 3;
+-		int ri = 0;
+-		while (register_count--) {
+-			add_offloaded_reg(vub300, &vub300->resp.irq.reg[ri]);
+-			ri += 1;
+-		}
+-		mutex_lock(&vub300->irq_mutex);
+-		if (vub300->irq_enabled)
+-			mmc_signal_sdio_irq(vub300->mmc);
+-		else
+-			vub300->irqs_queued += 1;
+-		vub300->irq_disabled = 1;
+-		mutex_unlock(&vub300->irq_mutex);
+-		break;
+-	}
+-	case RESPONSE_IRQ_ENABLED:
+-	{
+-		int offloaded_data_length = vub300->resp.common.header_size - 3;
+-		int register_count = offloaded_data_length >> 3;
+-		int ri = 0;
+-		while (register_count--) {
+-			add_offloaded_reg(vub300, &vub300->resp.irq.reg[ri]);
+-			ri += 1;
+-		}
+-		mutex_lock(&vub300->irq_mutex);
+-		if (vub300->irq_enabled)
+-			mmc_signal_sdio_irq(vub300->mmc);
+-		else
+-			vub300->irqs_queued += 1;
+-		vub300->irq_disabled = 0;
+-		mutex_unlock(&vub300->irq_mutex);
+-		break;
+-	}
+-	case RESPONSE_NO_INTERRUPT:
+-		vub300_queue_poll_work(vub300, 1);
+-		break;
+-	default:
+-		break;
+-	}
+-}
+-
+-static void __do_poll(struct vub300_mmc_host *vub300)
+-{
+-	/* cmd_mutex is held by vub300_pollwork_thread */
+-	unsigned long commretval;
+-	mod_timer(&vub300->inactivity_timer, jiffies + HZ);
+-	init_completion(&vub300->irqpoll_complete);
+-	send_irqpoll(vub300);
+-	commretval = wait_for_completion_timeout(&vub300->irqpoll_complete,
+-						 msecs_to_jiffies(500));
+-	if (vub300->usb_transport_fail) {
+-		/* no need to do anything */
+-	} else if (commretval == 0) {
+-		vub300->usb_timed_out = 1;
+-		usb_kill_urb(vub300->command_out_urb);
+-		usb_kill_urb(vub300->command_res_urb);
+-	} else { /* commretval > 0 */
+-		__vub300_irqpoll_response(vub300);
+-	}
+-}
+-
+-/* this thread runs only when the driver
+- * is trying to poll the device for an IRQ
+- */
+-static void vub300_pollwork_thread(struct work_struct *work)
+-{				/* NOT irq */
+-	struct vub300_mmc_host *vub300 = container_of(work,
+-			      struct vub300_mmc_host, pollwork.work);
+-	if (!vub300->interface) {
+-		kref_put(&vub300->kref, vub300_delete);
+-		return;
+-	}
+-	mutex_lock(&vub300->cmd_mutex);
+-	if (vub300->cmd) {
+-		vub300_queue_poll_work(vub300, 1);
+-	} else if (!vub300->card_present) {
+-		/* no need to do anything */
+-	} else { /* vub300->card_present */
+-		mutex_lock(&vub300->irq_mutex);
+-		if (!vub300->irq_enabled) {
+-			mutex_unlock(&vub300->irq_mutex);
+-		} else if (vub300->irqs_queued) {
+-			vub300->irqs_queued -= 1;
+-			mmc_signal_sdio_irq(vub300->mmc);
+-			mod_timer(&vub300->inactivity_timer, jiffies + HZ);
+-			mutex_unlock(&vub300->irq_mutex);
+-		} else { /* NOT vub300->irqs_queued */
+-			mutex_unlock(&vub300->irq_mutex);
+-			__do_poll(vub300);
+-		}
+-	}
+-	mutex_unlock(&vub300->cmd_mutex);
+-	kref_put(&vub300->kref, vub300_delete);
+-}
+-
+-static void vub300_deadwork_thread(struct work_struct *work)
+-{				/* NOT irq */
+-	struct vub300_mmc_host *vub300 =
+-		container_of(work, struct vub300_mmc_host, deadwork);
+-	if (!vub300->interface) {
+-		kref_put(&vub300->kref, vub300_delete);
+-		return;
+-	}
+-	mutex_lock(&vub300->cmd_mutex);
+-	if (vub300->cmd) {
+-		/*
+-		 * a command got in as the inactivity
+-		 * timer expired - so we just let the
+-		 * processing of the command show if
+-		 * the device is dead
+-		 */
+-	} else if (vub300->card_present) {
+-		check_vub300_port_status(vub300);
+-	} else if (vub300->mmc && vub300->mmc->card) {
+-		/*
+-		 * the MMC core must not have responded
+-		 * to the previous indication - lets
+-		 * hope that it eventually does so we
+-		 * will just ignore this for now
+-		 */
+-	} else {
+-		check_vub300_port_status(vub300);
+-	}
+-	mod_timer(&vub300->inactivity_timer, jiffies + HZ);
+-	mutex_unlock(&vub300->cmd_mutex);
+-	kref_put(&vub300->kref, vub300_delete);
+-}
+-
+-static void vub300_inactivity_timer_expired(struct timer_list *t)
+-{				/* softirq */
+-	struct vub300_mmc_host *vub300 = timer_container_of(vub300, t,
+-							    inactivity_timer);
+-	if (!vub300->interface) {
+-		kref_put(&vub300->kref, vub300_delete);
+-	} else if (vub300->cmd) {
+-		mod_timer(&vub300->inactivity_timer, jiffies + HZ);
+-	} else {
+-		vub300_queue_dead_work(vub300);
+-		mod_timer(&vub300->inactivity_timer, jiffies + HZ);
+-	}
+-}
+-
+-static int vub300_response_error(u8 error_code)
+-{
+-	switch (error_code) {
+-	case SD_ERROR_PIO_TIMEOUT:
+-	case SD_ERROR_1BIT_TIMEOUT:
+-	case SD_ERROR_4BIT_TIMEOUT:
+-		return -ETIMEDOUT;
+-	case SD_ERROR_STAT_DATA:
+-	case SD_ERROR_OVERRUN:
+-	case SD_ERROR_STAT_CMD:
+-	case SD_ERROR_STAT_CMD_TIMEOUT:
+-	case SD_ERROR_SDCRDY_STUCK:
+-	case SD_ERROR_UNHANDLED:
+-	case SD_ERROR_1BIT_CRC_WRONG:
+-	case SD_ERROR_4BIT_CRC_WRONG:
+-	case SD_ERROR_1BIT_CRC_ERROR:
+-	case SD_ERROR_4BIT_CRC_ERROR:
+-	case SD_ERROR_NO_CMD_ENDBIT:
+-	case SD_ERROR_NO_1BIT_DATEND:
+-	case SD_ERROR_NO_4BIT_DATEND:
+-	case SD_ERROR_1BIT_DATA_TIMEOUT:
+-	case SD_ERROR_4BIT_DATA_TIMEOUT:
+-	case SD_ERROR_1BIT_UNEXPECTED_TIMEOUT:
+-	case SD_ERROR_4BIT_UNEXPECTED_TIMEOUT:
+-		return -EILSEQ;
+-	case 33:
+-		return -EILSEQ;
+-	case SD_ERROR_ILLEGAL_COMMAND:
+-		return -EINVAL;
+-	case SD_ERROR_NO_DEVICE:
+-		return -ENOMEDIUM;
+-	default:
+-		return -ENODEV;
+-	}
+-}
+-
+-static void command_res_completed(struct urb *urb)
+-{				/* urb completion handler - hardirq */
+-	struct vub300_mmc_host *vub300 = (struct vub300_mmc_host *)urb->context;
+-	if (urb->status) {
+-		/* we have to let the initiator handle the error */
+-	} else if (vub300->command_res_urb->actual_length == 0) {
+-		/*
+-		 * we have seen this happen once or twice and
+-		 * we suspect a buggy USB host controller
+-		 */
+-	} else if (!vub300->data) {
+-		/* this means that the command (typically CMD52) succeeded */
+-	} else if (vub300->resp.common.header_type != 0x02) {
+-		/*
+-		 * this is an error response from the VUB300 chip
+-		 * and we let the initiator handle it
+-		 */
+-	} else if (vub300->urb) {
+-		vub300->cmd->error =
+-			vub300_response_error(vub300->resp.error.error_code);
+-		usb_unlink_urb(vub300->urb);
+-	} else {
+-		vub300->cmd->error =
+-			vub300_response_error(vub300->resp.error.error_code);
+-		usb_sg_cancel(&vub300->sg_request);
+-	}
+-	complete(&vub300->command_complete);	/* got_response_in */
+-}
+-
+-static void command_out_completed(struct urb *urb)
+-{				/* urb completion handler - hardirq */
+-	struct vub300_mmc_host *vub300 = (struct vub300_mmc_host *)urb->context;
+-	if (urb->status) {
+-		complete(&vub300->command_complete);
+-	} else {
+-		int ret;
+-		unsigned int pipe =
+-			usb_rcvbulkpipe(vub300->udev, vub300->cmnd_res_ep);
+-		usb_fill_bulk_urb(vub300->command_res_urb, vub300->udev, pipe,
+-				  &vub300->resp, sizeof(vub300->resp),
+-				  command_res_completed, vub300);
+-		vub300->command_res_urb->actual_length = 0;
+-		ret = usb_submit_urb(vub300->command_res_urb, GFP_ATOMIC);
+-		if (ret == 0) {
+-			/*
+-			 * the urb completion handler will call
+-			 * our completion handler
+-			 */
+-		} else {
+-			/*
+-			 * and thus we only call it directly
+-			 * when it will not be called
+-			 */
+-			complete(&vub300->command_complete);
+-		}
+-	}
+-}
+-
+-/*
+- * the STUFF bits are masked out for the comparisons
+- */
+-static void snoop_block_size_and_bus_width(struct vub300_mmc_host *vub300,
+-					   u32 cmd_arg)
+-{
+-	if ((0xFBFFFE00 & cmd_arg) == 0x80022200)
+-		vub300->fbs[1] = (cmd_arg << 8) | (0x00FF & vub300->fbs[1]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x80022000)
+-		vub300->fbs[1] = (0xFF & cmd_arg) | (0xFF00 & vub300->fbs[1]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x80042200)
+-		vub300->fbs[2] = (cmd_arg << 8) | (0x00FF & vub300->fbs[2]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x80042000)
+-		vub300->fbs[2] = (0xFF & cmd_arg) | (0xFF00 & vub300->fbs[2]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x80062200)
+-		vub300->fbs[3] = (cmd_arg << 8) | (0x00FF & vub300->fbs[3]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x80062000)
+-		vub300->fbs[3] = (0xFF & cmd_arg) | (0xFF00 & vub300->fbs[3]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x80082200)
+-		vub300->fbs[4] = (cmd_arg << 8) | (0x00FF & vub300->fbs[4]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x80082000)
+-		vub300->fbs[4] = (0xFF & cmd_arg) | (0xFF00 & vub300->fbs[4]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x800A2200)
+-		vub300->fbs[5] = (cmd_arg << 8) | (0x00FF & vub300->fbs[5]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x800A2000)
+-		vub300->fbs[5] = (0xFF & cmd_arg) | (0xFF00 & vub300->fbs[5]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x800C2200)
+-		vub300->fbs[6] = (cmd_arg << 8) | (0x00FF & vub300->fbs[6]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x800C2000)
+-		vub300->fbs[6] = (0xFF & cmd_arg) | (0xFF00 & vub300->fbs[6]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x800E2200)
+-		vub300->fbs[7] = (cmd_arg << 8) | (0x00FF & vub300->fbs[7]);
+-	else if ((0xFBFFFE00 & cmd_arg) == 0x800E2000)
+-		vub300->fbs[7] = (0xFF & cmd_arg) | (0xFF00 & vub300->fbs[7]);
+-	else if ((0xFBFFFE03 & cmd_arg) == 0x80000E00)
+-		vub300->bus_width = 1;
+-	else if ((0xFBFFFE03 & cmd_arg) == 0x80000E02)
+-		vub300->bus_width = 4;
+-}
+-
+-static void send_command(struct vub300_mmc_host *vub300)
+-{
+-	/* cmd_mutex is held by vub300_cmndwork_thread */
+-	struct mmc_command *cmd = vub300->cmd;
+-	struct mmc_data *data = vub300->data;
+-	int retval;
+-	int i;
+-	u8 response_type;
+-	if (vub300->app_spec) {
+-		switch (cmd->opcode) {
+-		case 6:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			if (0x00000000 == (0x00000003 & cmd->arg))
+-				vub300->bus_width = 1;
+-			else if (0x00000002 == (0x00000003 & cmd->arg))
+-				vub300->bus_width = 4;
+-			else
+-				dev_err(&vub300->udev->dev,
+-					"unexpected ACMD6 bus_width=%d\n",
+-					0x00000003 & cmd->arg);
+-			break;
+-		case 13:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		case 22:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		case 23:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		case 41:
+-			response_type = SDRT_3;
+-			vub300->resp_len = 6;
+-			break;
+-		case 42:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		case 51:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		case 55:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		default:
+-			vub300->resp_len = 0;
+-			cmd->error = -EINVAL;
+-			complete(&vub300->command_complete);
+-			return;
+-		}
+-		vub300->app_spec = 0;
+-	} else {
+-		switch (cmd->opcode) {
+-		case 0:
+-			response_type = SDRT_NONE;
+-			vub300->resp_len = 0;
+-			break;
+-		case 1:
+-			response_type = SDRT_3;
+-			vub300->resp_len = 6;
+-			break;
+-		case 2:
+-			response_type = SDRT_2;
+-			vub300->resp_len = 17;
+-			break;
+-		case 3:
+-			response_type = SDRT_6;
+-			vub300->resp_len = 6;
+-			break;
+-		case 4:
+-			response_type = SDRT_NONE;
+-			vub300->resp_len = 0;
+-			break;
+-		case 5:
+-			response_type = SDRT_4;
+-			vub300->resp_len = 6;
+-			break;
+-		case 6:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		case 7:
+-			response_type = SDRT_1B;
+-			vub300->resp_len = 6;
+-			break;
+-		case 8:
+-			response_type = SDRT_7;
+-			vub300->resp_len = 6;
+-			break;
+-		case 9:
+-			response_type = SDRT_2;
+-			vub300->resp_len = 17;
+-			break;
+-		case 10:
+-			response_type = SDRT_2;
+-			vub300->resp_len = 17;
+-			break;
+-		case 12:
+-			response_type = SDRT_1B;
+-			vub300->resp_len = 6;
+-			break;
+-		case 13:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		case 15:
+-			response_type = SDRT_NONE;
+-			vub300->resp_len = 0;
+-			break;
+-		case 16:
+-			for (i = 0; i < ARRAY_SIZE(vub300->fbs); i++)
+-				vub300->fbs[i] = 0xFFFF & cmd->arg;
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		case 17:
+-		case 18:
+-		case 24:
+-		case 25:
+-		case 27:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		case 28:
+-		case 29:
+-			response_type = SDRT_1B;
+-			vub300->resp_len = 6;
+-			break;
+-		case 30:
+-		case 32:
+-		case 33:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		case 38:
+-			response_type = SDRT_1B;
+-			vub300->resp_len = 6;
+-			break;
+-		case 42:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		case 52:
+-			response_type = SDRT_5;
+-			vub300->resp_len = 6;
+-			snoop_block_size_and_bus_width(vub300, cmd->arg);
+-			break;
+-		case 53:
+-			response_type = SDRT_5;
+-			vub300->resp_len = 6;
+-			break;
+-		case 55:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			vub300->app_spec = 1;
+-			break;
+-		case 56:
+-			response_type = SDRT_1;
+-			vub300->resp_len = 6;
+-			break;
+-		default:
+-			vub300->resp_len = 0;
+-			cmd->error = -EINVAL;
+-			complete(&vub300->command_complete);
+-			return;
+-		}
+-	}
+-	/*
+-	 * it is a shame that we can not use "sizeof(struct sd_command_header)"
+-	 * this is because the packet _must_ be padded to 64 bytes
+-	 */
+-	vub300->cmnd.head.header_size = 20;
+-	vub300->cmnd.head.header_type = 0x00;
+-	vub300->cmnd.head.port_number = 0; /* "0" means port 1 */
+-	vub300->cmnd.head.command_type = 0x00; /* standard read command */
+-	vub300->cmnd.head.response_type = response_type;
+-	vub300->cmnd.head.command_index = cmd->opcode;
+-	vub300->cmnd.head.arguments[0] = cmd->arg >> 24;
+-	vub300->cmnd.head.arguments[1] = cmd->arg >> 16;
+-	vub300->cmnd.head.arguments[2] = cmd->arg >> 8;
+-	vub300->cmnd.head.arguments[3] = cmd->arg >> 0;
+-	if (cmd->opcode == 52) {
+-		int fn = 0x7 & (cmd->arg >> 28);
+-		vub300->cmnd.head.block_count[0] = 0;
+-		vub300->cmnd.head.block_count[1] = 0;
+-		vub300->cmnd.head.block_size[0] = (vub300->fbs[fn] >> 8) & 0xFF;
+-		vub300->cmnd.head.block_size[1] = (vub300->fbs[fn] >> 0) & 0xFF;
+-		vub300->cmnd.head.command_type = 0x00;
+-		vub300->cmnd.head.transfer_size[0] = 0;
+-		vub300->cmnd.head.transfer_size[1] = 0;
+-		vub300->cmnd.head.transfer_size[2] = 0;
+-		vub300->cmnd.head.transfer_size[3] = 0;
+-	} else if (!data) {
+-		vub300->cmnd.head.block_count[0] = 0;
+-		vub300->cmnd.head.block_count[1] = 0;
+-		vub300->cmnd.head.block_size[0] = (vub300->fbs[0] >> 8) & 0xFF;
+-		vub300->cmnd.head.block_size[1] = (vub300->fbs[0] >> 0) & 0xFF;
+-		vub300->cmnd.head.command_type = 0x00;
+-		vub300->cmnd.head.transfer_size[0] = 0;
+-		vub300->cmnd.head.transfer_size[1] = 0;
+-		vub300->cmnd.head.transfer_size[2] = 0;
+-		vub300->cmnd.head.transfer_size[3] = 0;
+-	} else if (cmd->opcode == 53) {
+-		int fn = 0x7 & (cmd->arg >> 28);
+-		if (0x08 & vub300->cmnd.head.arguments[0]) { /* BLOCK MODE */
+-			vub300->cmnd.head.block_count[0] =
+-				(data->blocks >> 8) & 0xFF;
+-			vub300->cmnd.head.block_count[1] =
+-				(data->blocks >> 0) & 0xFF;
+-			vub300->cmnd.head.block_size[0] =
+-				(data->blksz >> 8) & 0xFF;
+-			vub300->cmnd.head.block_size[1] =
+-				(data->blksz >> 0) & 0xFF;
+-		} else {	/* BYTE MODE */
+-			vub300->cmnd.head.block_count[0] = 0;
+-			vub300->cmnd.head.block_count[1] = 0;
+-			vub300->cmnd.head.block_size[0] =
+-				(vub300->datasize >> 8) & 0xFF;
+-			vub300->cmnd.head.block_size[1] =
+-				(vub300->datasize >> 0) & 0xFF;
+-		}
+-		vub300->cmnd.head.command_type =
+-			(MMC_DATA_READ & data->flags) ? 0x00 : 0x80;
+-		vub300->cmnd.head.transfer_size[0] =
+-			(vub300->datasize >> 24) & 0xFF;
+-		vub300->cmnd.head.transfer_size[1] =
+-			(vub300->datasize >> 16) & 0xFF;
+-		vub300->cmnd.head.transfer_size[2] =
+-			(vub300->datasize >> 8) & 0xFF;
+-		vub300->cmnd.head.transfer_size[3] =
+-			(vub300->datasize >> 0) & 0xFF;
+-		if (vub300->datasize < vub300->fbs[fn]) {
+-			vub300->cmnd.head.block_count[0] = 0;
+-			vub300->cmnd.head.block_count[1] = 0;
+-		}
+-	} else {
+-		vub300->cmnd.head.block_count[0] = (data->blocks >> 8) & 0xFF;
+-		vub300->cmnd.head.block_count[1] = (data->blocks >> 0) & 0xFF;
+-		vub300->cmnd.head.block_size[0] = (data->blksz >> 8) & 0xFF;
+-		vub300->cmnd.head.block_size[1] = (data->blksz >> 0) & 0xFF;
+-		vub300->cmnd.head.command_type =
+-			(MMC_DATA_READ & data->flags) ? 0x00 : 0x80;
+-		vub300->cmnd.head.transfer_size[0] =
+-			(vub300->datasize >> 24) & 0xFF;
+-		vub300->cmnd.head.transfer_size[1] =
+-			(vub300->datasize >> 16) & 0xFF;
+-		vub300->cmnd.head.transfer_size[2] =
+-			(vub300->datasize >> 8) & 0xFF;
+-		vub300->cmnd.head.transfer_size[3] =
+-			(vub300->datasize >> 0) & 0xFF;
+-		if (vub300->datasize < vub300->fbs[0]) {
+-			vub300->cmnd.head.block_count[0] = 0;
+-			vub300->cmnd.head.block_count[1] = 0;
+-		}
+-	}
+-	if (vub300->cmnd.head.block_size[0] || vub300->cmnd.head.block_size[1]) {
+-		u16 block_size = vub300->cmnd.head.block_size[1] |
+-			(vub300->cmnd.head.block_size[0] << 8);
+-		u16 block_boundary = FIRMWARE_BLOCK_BOUNDARY -
+-			(FIRMWARE_BLOCK_BOUNDARY % block_size);
+-		vub300->cmnd.head.block_boundary[0] =
+-			(block_boundary >> 8) & 0xFF;
+-		vub300->cmnd.head.block_boundary[1] =
+-			(block_boundary >> 0) & 0xFF;
+-	} else {
+-		vub300->cmnd.head.block_boundary[0] = 0;
+-		vub300->cmnd.head.block_boundary[1] = 0;
+-	}
+-	usb_fill_bulk_urb(vub300->command_out_urb, vub300->udev,
+-			  usb_sndbulkpipe(vub300->udev, vub300->cmnd_out_ep),
+-			  &vub300->cmnd, sizeof(vub300->cmnd),
+-			  command_out_completed, vub300);
+-	retval = usb_submit_urb(vub300->command_out_urb, GFP_KERNEL);
+-	if (retval < 0) {
+-		cmd->error = retval;
+-		complete(&vub300->command_complete);
+-		return;
+-	} else {
+-		return;
+-	}
+-}
+-
+-/*
+- * timer callback runs in atomic mode
+- *       so it cannot call usb_kill_urb()
+- */
+-static void vub300_sg_timed_out(struct timer_list *t)
+-{
+-	struct vub300_mmc_host *vub300 = timer_container_of(vub300, t,
+-							    sg_transfer_timer);
+-	vub300->usb_timed_out = 1;
+-	usb_sg_cancel(&vub300->sg_request);
+-	usb_unlink_urb(vub300->command_out_urb);
+-	usb_unlink_urb(vub300->command_res_urb);
+-}
+-
+-static u16 roundup_to_multiple_of_64(u16 number)
+-{
+-	return 0xFFC0 & (0x3F + number);
+-}
+-
+-/*
+- * this is a separate function to solve the 80 column width restriction
+- */
+-static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+-					  const struct firmware *fw)
+-{
+-	u8 register_count = 0;
+-	u16 ts = 0;
+-	u16 interrupt_size = 0;
+-	const u8 *data = fw->data;
+-	int size = fw->size;
+-	u8 c;
+-	dev_info(&vub300->udev->dev, "using %s for SDIO offload processing\n",
+-		 vub300->vub_name);
+-	do {
+-		c = *data++;
+-	} while (size-- && c); /* skip comment */
+-	dev_info(&vub300->udev->dev, "using offload firmware %s %s\n", fw->data,
+-		 vub300->vub_name);
+-	if (size < 4) {
+-		dev_err(&vub300->udev->dev,
+-			"corrupt offload pseudocode in firmware %s\n",
+-			vub300->vub_name);
+-		strscpy(vub300->vub_name, "corrupt offload pseudocode",
+-			sizeof(vub300->vub_name));
+-		return;
+-	}
+-	interrupt_size += *data++;
+-	size -= 1;
+-	interrupt_size <<= 8;
+-	interrupt_size += *data++;
+-	size -= 1;
+-	if (interrupt_size < size) {
+-		u16 xfer_length = roundup_to_multiple_of_64(interrupt_size);
+-		u8 *xfer_buffer = kmalloc(xfer_length, GFP_KERNEL);
+-		if (xfer_buffer) {
+-			int retval;
+-			memcpy(xfer_buffer, data, interrupt_size);
+-			memset(xfer_buffer + interrupt_size, 0,
+-			       xfer_length - interrupt_size);
+-			size -= interrupt_size;
+-			data += interrupt_size;
+-			retval =
+-				usb_control_msg(vub300->udev,
+-						usb_sndctrlpipe(vub300->udev, 0),
+-						SET_INTERRUPT_PSEUDOCODE,
+-						USB_DIR_OUT | USB_TYPE_VENDOR |
+-						USB_RECIP_DEVICE, 0x0000, 0x0000,
+-						xfer_buffer, xfer_length, 1000);
+-			kfree(xfer_buffer);
+-			if (retval < 0)
+-				goto copy_error_message;
+-		} else {
+-			dev_err(&vub300->udev->dev,
+-				"not enough memory for xfer buffer to send"
+-				" INTERRUPT_PSEUDOCODE for %s %s\n", fw->data,
+-				vub300->vub_name);
+-			strscpy(vub300->vub_name,
+-				"SDIO interrupt pseudocode download failed",
+-				sizeof(vub300->vub_name));
+-			return;
+-		}
+-	} else {
+-		dev_err(&vub300->udev->dev,
+-			"corrupt interrupt pseudocode in firmware %s %s\n",
+-			fw->data, vub300->vub_name);
+-		strscpy(vub300->vub_name, "corrupt interrupt pseudocode",
+-			sizeof(vub300->vub_name));
+-		return;
+-	}
+-	ts += *data++;
+-	size -= 1;
+-	ts <<= 8;
+-	ts += *data++;
+-	size -= 1;
+-	if (ts < size) {
+-		u16 xfer_length = roundup_to_multiple_of_64(ts);
+-		u8 *xfer_buffer = kmalloc(xfer_length, GFP_KERNEL);
+-		if (xfer_buffer) {
+-			int retval;
+-			memcpy(xfer_buffer, data, ts);
+-			memset(xfer_buffer + ts, 0,
+-			       xfer_length - ts);
+-			size -= ts;
+-			data += ts;
+-			retval =
+-				usb_control_msg(vub300->udev,
+-						usb_sndctrlpipe(vub300->udev, 0),
+-						SET_TRANSFER_PSEUDOCODE,
+-						USB_DIR_OUT | USB_TYPE_VENDOR |
+-						USB_RECIP_DEVICE, 0x0000, 0x0000,
+-						xfer_buffer, xfer_length, 1000);
+-			kfree(xfer_buffer);
+-			if (retval < 0)
+-				goto copy_error_message;
+-		} else {
+-			dev_err(&vub300->udev->dev,
+-				"not enough memory for xfer buffer to send"
+-				" TRANSFER_PSEUDOCODE for %s %s\n", fw->data,
+-				vub300->vub_name);
+-			strscpy(vub300->vub_name,
+-				"SDIO transfer pseudocode download failed",
+-				sizeof(vub300->vub_name));
+-			return;
+-		}
+-	} else {
+-		dev_err(&vub300->udev->dev,
+-			"corrupt transfer pseudocode in firmware %s %s\n",
+-			fw->data, vub300->vub_name);
+-		strscpy(vub300->vub_name, "corrupt transfer pseudocode",
+-			sizeof(vub300->vub_name));
+-		return;
+-	}
+-	register_count += *data++;
+-	size -= 1;
+-	if (register_count * 4 == size) {
+-		int I = vub300->dynamic_register_count = register_count;
+-		int i = 0;
+-		while (I--) {
+-			unsigned int func_num = 0;
+-			vub300->sdio_register[i].func_num = *data++;
+-			size -= 1;
+-			func_num += *data++;
+-			size -= 1;
+-			func_num <<= 8;
+-			func_num += *data++;
+-			size -= 1;
+-			func_num <<= 8;
+-			func_num += *data++;
+-			size -= 1;
+-			vub300->sdio_register[i].sdio_reg = func_num;
+-			vub300->sdio_register[i].activate = 1;
+-			vub300->sdio_register[i].prepared = 0;
+-			i += 1;
+-		}
+-		dev_info(&vub300->udev->dev,
+-			 "initialized %d dynamic pseudocode registers\n",
+-			 vub300->dynamic_register_count);
+-		return;
+-	} else {
+-		dev_err(&vub300->udev->dev,
+-			"corrupt dynamic registers in firmware %s\n",
+-			vub300->vub_name);
+-		strscpy(vub300->vub_name, "corrupt dynamic registers",
+-			sizeof(vub300->vub_name));
+-		return;
+-	}
+-
+-copy_error_message:
+-	strscpy(vub300->vub_name, "SDIO pseudocode download failed",
+-		sizeof(vub300->vub_name));
+-}
+-
+-/*
+- * if the binary containing the EMPTY PseudoCode can not be found
+- * vub300->vub_name is set anyway in order to prevent an automatic retry
+- */
+-static void download_offload_pseudocode(struct vub300_mmc_host *vub300)
+-{
+-	struct mmc_card *card = vub300->mmc->card;
+-	int sdio_funcs = card->sdio_funcs;
+-	const struct firmware *fw = NULL;
+-	int l = snprintf(vub300->vub_name, sizeof(vub300->vub_name),
+-			 "vub_%04X%04X", card->cis.vendor, card->cis.device);
+-	int n = 0;
+-	int retval;
+-	for (n = 0; n < sdio_funcs; n++) {
+-		struct sdio_func *sf = card->sdio_func[n];
+-		l += scnprintf(vub300->vub_name + l,
+-			      sizeof(vub300->vub_name) - l, "_%04X%04X",
+-			      sf->vendor, sf->device);
+-	}
+-	snprintf(vub300->vub_name + l, sizeof(vub300->vub_name) - l, ".bin");
+-	dev_info(&vub300->udev->dev, "requesting offload firmware %s\n",
+-		 vub300->vub_name);
+-	retval = request_firmware(&fw, vub300->vub_name, &card->dev);
+-	if (retval < 0) {
+-		strscpy(vub300->vub_name, "vub_default.bin",
+-			sizeof(vub300->vub_name));
+-		retval = request_firmware(&fw, vub300->vub_name, &card->dev);
+-		if (retval < 0) {
+-			strscpy(vub300->vub_name,
+-				"no SDIO offload firmware found",
+-				sizeof(vub300->vub_name));
+-		} else {
+-			__download_offload_pseudocode(vub300, fw);
+-			release_firmware(fw);
+-		}
+-	} else {
+-		__download_offload_pseudocode(vub300, fw);
+-		release_firmware(fw);
+-	}
+-}
+-
+-static void vub300_usb_bulk_msg_completion(struct urb *urb)
+-{				/* urb completion handler - hardirq */
+-	complete((struct completion *)urb->context);
+-}
+-
+-static int vub300_usb_bulk_msg(struct vub300_mmc_host *vub300,
+-			       unsigned int pipe, void *data, int len,
+-			       int *actual_length, int timeout_msecs)
+-{
+-	/* cmd_mutex is held by vub300_cmndwork_thread */
+-	struct usb_device *usb_dev = vub300->udev;
+-	struct completion done;
+-	int retval;
+-	vub300->urb = usb_alloc_urb(0, GFP_KERNEL);
+-	if (!vub300->urb)
+-		return -ENOMEM;
+-	usb_fill_bulk_urb(vub300->urb, usb_dev, pipe, data, len,
+-			  vub300_usb_bulk_msg_completion, NULL);
+-	init_completion(&done);
+-	vub300->urb->context = &done;
+-	vub300->urb->actual_length = 0;
+-	retval = usb_submit_urb(vub300->urb, GFP_KERNEL);
+-	if (unlikely(retval))
+-		goto out;
+-	if (!wait_for_completion_timeout
+-	    (&done, msecs_to_jiffies(timeout_msecs))) {
+-		retval = -ETIMEDOUT;
+-		usb_kill_urb(vub300->urb);
+-	} else {
+-		retval = vub300->urb->status;
+-	}
+-out:
+-	*actual_length = vub300->urb->actual_length;
+-	usb_free_urb(vub300->urb);
+-	vub300->urb = NULL;
+-	return retval;
+-}
+-
+-static int __command_read_data(struct vub300_mmc_host *vub300,
+-			       struct mmc_command *cmd, struct mmc_data *data)
+-{
+-	/* cmd_mutex is held by vub300_cmndwork_thread */
+-	int linear_length = vub300->datasize;
+-	int padded_length = vub300->large_usb_packets ?
+-		((511 + linear_length) >> 9) << 9 :
+-		((63 + linear_length) >> 6) << 6;
+-	if ((padded_length == linear_length) || !pad_input_to_usb_pkt) {
+-		int result;
+-		unsigned pipe;
+-		pipe = usb_rcvbulkpipe(vub300->udev, vub300->data_inp_ep);
+-		result = usb_sg_init(&vub300->sg_request, vub300->udev,
+-				     pipe, 0, data->sg,
+-				     data->sg_len, 0, GFP_KERNEL);
+-		if (result < 0) {
+-			usb_unlink_urb(vub300->command_out_urb);
+-			usb_unlink_urb(vub300->command_res_urb);
+-			cmd->error = result;
+-			data->bytes_xfered = 0;
+-			return 0;
+-		} else {
+-			vub300->sg_transfer_timer.expires =
+-				jiffies + msecs_to_jiffies(2000 +
+-						  (linear_length / 16384));
+-			add_timer(&vub300->sg_transfer_timer);
+-			usb_sg_wait(&vub300->sg_request);
+-			timer_delete(&vub300->sg_transfer_timer);
+-			if (vub300->sg_request.status < 0) {
+-				cmd->error = vub300->sg_request.status;
+-				data->bytes_xfered = 0;
+-				return 0;
+-			} else {
+-				data->bytes_xfered = vub300->datasize;
+-				return linear_length;
+-			}
+-		}
+-	} else {
+-		u8 *buf = kmalloc(padded_length, GFP_KERNEL);
+-		if (buf) {
+-			int result;
+-			unsigned pipe = usb_rcvbulkpipe(vub300->udev,
+-							vub300->data_inp_ep);
+-			int actual_length = 0;
+-			result = vub300_usb_bulk_msg(vub300, pipe, buf,
+-					     padded_length, &actual_length,
+-					     2000 + (padded_length / 16384));
+-			if (result < 0) {
+-				cmd->error = result;
+-				data->bytes_xfered = 0;
+-				kfree(buf);
+-				return 0;
+-			} else if (actual_length < linear_length) {
+-				cmd->error = -EREMOTEIO;
+-				data->bytes_xfered = 0;
+-				kfree(buf);
+-				return 0;
+-			} else {
+-				sg_copy_from_buffer(data->sg, data->sg_len, buf,
+-						    linear_length);
+-				kfree(buf);
+-				data->bytes_xfered = vub300->datasize;
+-				return linear_length;
+-			}
+-		} else {
+-			cmd->error = -ENOMEM;
+-			data->bytes_xfered = 0;
+-			return 0;
+-		}
+-	}
+-}
+-
+-static int __command_write_data(struct vub300_mmc_host *vub300,
+-				struct mmc_command *cmd, struct mmc_data *data)
+-{
+-	/* cmd_mutex is held by vub300_cmndwork_thread */
+-	unsigned pipe = usb_sndbulkpipe(vub300->udev, vub300->data_out_ep);
+-	int linear_length = vub300->datasize;
+-	int modulo_64_length = linear_length & 0x003F;
+-	int modulo_512_length = linear_length & 0x01FF;
+-	if (linear_length < 64) {
+-		int result;
+-		int actual_length;
+-		sg_copy_to_buffer(data->sg, data->sg_len,
+-				  vub300->padded_buffer,
+-				  sizeof(vub300->padded_buffer));
+-		memset(vub300->padded_buffer + linear_length, 0,
+-		       sizeof(vub300->padded_buffer) - linear_length);
+-		result = vub300_usb_bulk_msg(vub300, pipe, vub300->padded_buffer,
+-					     sizeof(vub300->padded_buffer),
+-					     &actual_length, 2000 +
+-					     (sizeof(vub300->padded_buffer) /
+-					      16384));
+-		if (result < 0) {
+-			cmd->error = result;
+-			data->bytes_xfered = 0;
+-		} else {
+-			data->bytes_xfered = vub300->datasize;
+-		}
+-	} else if ((!vub300->large_usb_packets && (0 < modulo_64_length)) ||
+-		    (vub300->large_usb_packets && (64 > modulo_512_length))
+-		) {		/* don't you just love these work-rounds */
+-		int padded_length = ((63 + linear_length) >> 6) << 6;
+-		u8 *buf = kmalloc(padded_length, GFP_KERNEL);
+-		if (buf) {
+-			int result;
+-			int actual_length;
+-			sg_copy_to_buffer(data->sg, data->sg_len, buf,
+-					  padded_length);
+-			memset(buf + linear_length, 0,
+-			       padded_length - linear_length);
+-			result =
+-				vub300_usb_bulk_msg(vub300, pipe, buf,
+-						    padded_length, &actual_length,
+-						    2000 + padded_length / 16384);
+-			kfree(buf);
+-			if (result < 0) {
+-				cmd->error = result;
+-				data->bytes_xfered = 0;
+-			} else {
+-				data->bytes_xfered = vub300->datasize;
+-			}
+-		} else {
+-			cmd->error = -ENOMEM;
+-			data->bytes_xfered = 0;
+-		}
+-	} else {		/* no data padding required */
+-		int result;
+-		unsigned char buf[64 * 4];
+-		sg_copy_to_buffer(data->sg, data->sg_len, buf, sizeof(buf));
+-		result = usb_sg_init(&vub300->sg_request, vub300->udev,
+-				     pipe, 0, data->sg,
+-				     data->sg_len, 0, GFP_KERNEL);
+-		if (result < 0) {
+-			usb_unlink_urb(vub300->command_out_urb);
+-			usb_unlink_urb(vub300->command_res_urb);
+-			cmd->error = result;
+-			data->bytes_xfered = 0;
+-		} else {
+-			vub300->sg_transfer_timer.expires =
+-				jiffies + msecs_to_jiffies(2000 +
+-							   linear_length / 16384);
+-			add_timer(&vub300->sg_transfer_timer);
+-			usb_sg_wait(&vub300->sg_request);
+-			if (cmd->error) {
+-				data->bytes_xfered = 0;
+-			} else {
+-				timer_delete(&vub300->sg_transfer_timer);
+-				if (vub300->sg_request.status < 0) {
+-					cmd->error = vub300->sg_request.status;
+-					data->bytes_xfered = 0;
+-				} else {
+-					data->bytes_xfered = vub300->datasize;
+-				}
+-			}
+-		}
+-	}
+-	return linear_length;
+-}
+-
+-static bool __vub300_command_response(struct vub300_mmc_host *vub300,
+-				      struct mmc_command *cmd,
+-				      struct mmc_data *data, int data_length)
+-{
+-	/* cmd_mutex is held by vub300_cmndwork_thread */
+-	long respretval;
+-	int msec_timeout = 1000 + data_length / 4;
+-	respretval =
+-		wait_for_completion_timeout(&vub300->command_complete,
+-					    msecs_to_jiffies(msec_timeout));
+-	if (respretval == 0) { /* TIMED OUT */
+-		/* we don't know which of "out" and "res" if any failed */
+-		vub300->usb_timed_out = 1;
+-		usb_kill_urb(vub300->command_out_urb);
+-		usb_kill_urb(vub300->command_res_urb);
+-		cmd->error = -ETIMEDOUT;
+-		return true;
+-	} else if (respretval < 0) {
+-		/* we don't know which of "out" and "res" if any failed */
+-		usb_kill_urb(vub300->command_out_urb);
+-		usb_kill_urb(vub300->command_res_urb);
+-		cmd->error = respretval;
+-	} else if (cmd->error) {
+-		/*
+-		 * the error occurred sending the command
+-		 * or receiving the response
+-		 */
+-	} else if (vub300->command_out_urb->status) {
+-		vub300->usb_transport_fail = vub300->command_out_urb->status;
+-		cmd->error = -EPROTO == vub300->command_out_urb->status ?
+-			-ESHUTDOWN : vub300->command_out_urb->status;
+-	} else if (vub300->command_res_urb->status) {
+-		vub300->usb_transport_fail = vub300->command_res_urb->status;
+-		cmd->error = -EPROTO == vub300->command_res_urb->status ?
+-			-ESHUTDOWN : vub300->command_res_urb->status;
+-	} else if (vub300->resp.common.header_type == 0x00) {
+-		/*
+-		 * the command completed successfully
+-		 * and there was no piggybacked data
+-		 */
+-	} else if (vub300->resp.common.header_type == RESPONSE_ERROR) {
+-		cmd->error =
+-			vub300_response_error(vub300->resp.error.error_code);
+-		if (vub300->data)
+-			usb_sg_cancel(&vub300->sg_request);
+-	} else if (vub300->resp.common.header_type == RESPONSE_PIGGYBACKED) {
+-		int offloaded_data_length =
+-			vub300->resp.common.header_size -
+-			sizeof(struct sd_register_header);
+-		int register_count = offloaded_data_length >> 3;
+-		int ri = 0;
+-		while (register_count--) {
+-			add_offloaded_reg(vub300, &vub300->resp.pig.reg[ri]);
+-			ri += 1;
+-		}
+-		vub300->resp.common.header_size =
+-			sizeof(struct sd_register_header);
+-		vub300->resp.common.header_type = 0x00;
+-		cmd->error = 0;
+-	} else if (vub300->resp.common.header_type == RESPONSE_PIG_DISABLED) {
+-		int offloaded_data_length =
+-			vub300->resp.common.header_size -
+-			sizeof(struct sd_register_header);
+-		int register_count = offloaded_data_length >> 3;
+-		int ri = 0;
+-		while (register_count--) {
+-			add_offloaded_reg(vub300, &vub300->resp.pig.reg[ri]);
+-			ri += 1;
+-		}
+-		mutex_lock(&vub300->irq_mutex);
+-		if (vub300->irqs_queued) {
+-			vub300->irqs_queued += 1;
+-		} else if (vub300->irq_enabled) {
+-			vub300->irqs_queued += 1;
+-			vub300_queue_poll_work(vub300, 0);
+-		} else {
+-			vub300->irqs_queued += 1;
+-		}
+-		vub300->irq_disabled = 1;
+-		mutex_unlock(&vub300->irq_mutex);
+-		vub300->resp.common.header_size =
+-			sizeof(struct sd_register_header);
+-		vub300->resp.common.header_type = 0x00;
+-		cmd->error = 0;
+-	} else if (vub300->resp.common.header_type == RESPONSE_PIG_ENABLED) {
+-		int offloaded_data_length =
+-			vub300->resp.common.header_size -
+-			sizeof(struct sd_register_header);
+-		int register_count = offloaded_data_length >> 3;
+-		int ri = 0;
+-		while (register_count--) {
+-			add_offloaded_reg(vub300, &vub300->resp.pig.reg[ri]);
+-			ri += 1;
+-		}
+-		mutex_lock(&vub300->irq_mutex);
+-		if (vub300->irqs_queued) {
+-			vub300->irqs_queued += 1;
+-		} else if (vub300->irq_enabled) {
+-			vub300->irqs_queued += 1;
+-			vub300_queue_poll_work(vub300, 0);
+-		} else {
+-			vub300->irqs_queued += 1;
+-		}
+-		vub300->irq_disabled = 0;
+-		mutex_unlock(&vub300->irq_mutex);
+-		vub300->resp.common.header_size =
+-			sizeof(struct sd_register_header);
+-		vub300->resp.common.header_type = 0x00;
+-		cmd->error = 0;
+-	} else {
+-		cmd->error = -EINVAL;
+-	}
+-
+-	return false;
+-}
+-
+-static void construct_request_response(struct vub300_mmc_host *vub300,
+-				       struct mmc_command *cmd)
+-{
+-	int resp_len = vub300->resp_len;
+-	int less_cmd = (17 == resp_len) ? resp_len : resp_len - 1;
+-	int bytes = 3 & less_cmd;
+-	int words = less_cmd >> 2;
+-	u8 *r = vub300->resp.response.command_response;
+-
+-	if (!resp_len)
+-		return;
+-	if (bytes == 3) {
+-		cmd->resp[words] = (r[1 + (words << 2)] << 24)
+-			| (r[2 + (words << 2)] << 16)
+-			| (r[3 + (words << 2)] << 8);
+-	} else if (bytes == 2) {
+-		cmd->resp[words] = (r[1 + (words << 2)] << 24)
+-			| (r[2 + (words << 2)] << 16);
+-	} else if (bytes == 1) {
+-		cmd->resp[words] = (r[1 + (words << 2)] << 24);
+-	}
+-	while (words-- > 0) {
+-		cmd->resp[words] = (r[1 + (words << 2)] << 24)
+-			| (r[2 + (words << 2)] << 16)
+-			| (r[3 + (words << 2)] << 8)
+-			| (r[4 + (words << 2)] << 0);
+-	}
+-	if ((cmd->opcode == 53) && (0x000000FF & cmd->resp[0]))
+-		cmd->resp[0] &= 0xFFFFFF00;
+-}
+-
+-/* this thread runs only when there is an upper level command req outstanding */
+-static void vub300_cmndwork_thread(struct work_struct *work)
+-{
+-	struct vub300_mmc_host *vub300 =
+-		container_of(work, struct vub300_mmc_host, cmndwork);
+-	if (!vub300->interface) {
+-		kref_put(&vub300->kref, vub300_delete);
+-		return;
+-	} else {
+-		struct mmc_request *req = vub300->req;
+-		struct mmc_command *cmd = vub300->cmd;
+-		struct mmc_data *data = vub300->data;
+-		bool reset_device;
+-		int data_length;
+-		mutex_lock(&vub300->cmd_mutex);
+-		init_completion(&vub300->command_complete);
+-		if (likely(vub300->vub_name[0]) || !vub300->mmc->card) {
+-			/*
+-			 * the name of the EMPTY Pseudo firmware file
+-			 * is used as a flag to indicate that the file
+-			 * has been already downloaded to the VUB300 chip
+-			 */
+-		} else if (0 == vub300->mmc->card->sdio_funcs) {
+-			strscpy(vub300->vub_name, "SD memory device",
+-				sizeof(vub300->vub_name));
+-		} else {
+-			download_offload_pseudocode(vub300);
+-		}
+-		send_command(vub300);
+-		if (!data)
+-			data_length = 0;
+-		else if (MMC_DATA_READ & data->flags)
+-			data_length = __command_read_data(vub300, cmd, data);
+-		else
+-			data_length = __command_write_data(vub300, cmd, data);
+-		reset_device = __vub300_command_response(vub300, cmd,
+-							 data, data_length);
+-		vub300->req = NULL;
+-		vub300->cmd = NULL;
+-		vub300->data = NULL;
+-		if (cmd->error) {
+-			if (cmd->error == -ENOMEDIUM)
+-				check_vub300_port_status(vub300);
+-			mutex_unlock(&vub300->cmd_mutex);
+-			if (reset_device) {
+-				int result;
+-
+-				result = usb_lock_device_for_reset(vub300->udev,
+-								   vub300->interface);
+-				if (result == 0) {
+-					result = usb_reset_device(vub300->udev);
+-					usb_unlock_device(vub300->udev);
+-				}
+-			}
+-			mmc_request_done(vub300->mmc, req);
+-			kref_put(&vub300->kref, vub300_delete);
+-			return;
+-		} else {
+-			construct_request_response(vub300, cmd);
+-			vub300->resp_len = 0;
+-			mutex_unlock(&vub300->cmd_mutex);
+-			kref_put(&vub300->kref, vub300_delete);
+-			mmc_request_done(vub300->mmc, req);
+-			return;
+-		}
+-	}
+-}
+-
+-static int examine_cyclic_buffer(struct vub300_mmc_host *vub300,
+-				 struct mmc_command *cmd, u8 Function)
+-{
+-	/* cmd_mutex is held by vub300_mmc_request */
+-	u8 cmd0 = 0xFF & (cmd->arg >> 24);
+-	u8 cmd1 = 0xFF & (cmd->arg >> 16);
+-	u8 cmd2 = 0xFF & (cmd->arg >> 8);
+-	u8 cmd3 = 0xFF & (cmd->arg >> 0);
+-	int first = MAXREGMASK & vub300->fn[Function].offload_point;
+-	struct offload_registers_access *rf = &vub300->fn[Function].reg[first];
+-	if (cmd0 == rf->command_byte[0] &&
+-	    cmd1 == rf->command_byte[1] &&
+-	    cmd2 == rf->command_byte[2] &&
+-	    cmd3 == rf->command_byte[3]) {
+-		u8 checksum = 0x00;
+-		cmd->resp[1] = checksum << 24;
+-		cmd->resp[0] = (rf->Respond_Byte[0] << 24)
+-			| (rf->Respond_Byte[1] << 16)
+-			| (rf->Respond_Byte[2] << 8)
+-			| (rf->Respond_Byte[3] << 0);
+-		vub300->fn[Function].offload_point += 1;
+-		vub300->fn[Function].offload_count -= 1;
+-		vub300->total_offload_count -= 1;
+-		return 1;
+-	} else {
+-		int delta = 1;	/* because it does not match the first one */
+-		u8 register_count = vub300->fn[Function].offload_count - 1;
+-		u32 register_point = vub300->fn[Function].offload_point + 1;
+-		while (0 < register_count) {
+-			int point = MAXREGMASK & register_point;
+-			struct offload_registers_access *r =
+-				&vub300->fn[Function].reg[point];
+-			if (cmd0 == r->command_byte[0] &&
+-			    cmd1 == r->command_byte[1] &&
+-			    cmd2 == r->command_byte[2] &&
+-			    cmd3 == r->command_byte[3]) {
+-				u8 checksum = 0x00;
+-				cmd->resp[1] = checksum << 24;
+-				cmd->resp[0] = (r->Respond_Byte[0] << 24)
+-					| (r->Respond_Byte[1] << 16)
+-					| (r->Respond_Byte[2] << 8)
+-					| (r->Respond_Byte[3] << 0);
+-				vub300->fn[Function].offload_point += delta;
+-				vub300->fn[Function].offload_count -= delta;
+-				vub300->total_offload_count -= delta;
+-				return 1;
+-			} else {
+-				register_point += 1;
+-				register_count -= 1;
+-				delta += 1;
+-				continue;
+-			}
+-		}
+-		return 0;
+-	}
+-}
+-
+-static int satisfy_request_from_offloaded_data(struct vub300_mmc_host *vub300,
+-					       struct mmc_command *cmd)
+-{
+-	/* cmd_mutex is held by vub300_mmc_request */
+-	u8 regs = vub300->dynamic_register_count;
+-	u8 i = 0;
+-	u8 func = FUN(cmd);
+-	u32 reg = REG(cmd);
+-	while (0 < regs--) {
+-		if ((vub300->sdio_register[i].func_num == func) &&
+-		    (vub300->sdio_register[i].sdio_reg == reg)) {
+-			if (!vub300->sdio_register[i].prepared) {
+-				return 0;
+-			} else if ((0x80000000 & cmd->arg) == 0x80000000) {
+-				/*
+-				 * a write to a dynamic register
+-				 * nullifies our offloaded value
+-				 */
+-				vub300->sdio_register[i].prepared = 0;
+-				return 0;
+-			} else {
+-				u8 checksum = 0x00;
+-				u8 rsp0 = 0x00;
+-				u8 rsp1 = 0x00;
+-				u8 rsp2 = vub300->sdio_register[i].response;
+-				u8 rsp3 = vub300->sdio_register[i].regvalue;
+-				vub300->sdio_register[i].prepared = 0;
+-				cmd->resp[1] = checksum << 24;
+-				cmd->resp[0] = (rsp0 << 24)
+-					| (rsp1 << 16)
+-					| (rsp2 << 8)
+-					| (rsp3 << 0);
+-				return 1;
+-			}
+-		} else {
+-			i += 1;
+-			continue;
+-		}
+-	}
+-	if (vub300->total_offload_count == 0)
+-		return 0;
+-	else if (vub300->fn[func].offload_count == 0)
+-		return 0;
+-	else
+-		return examine_cyclic_buffer(vub300, cmd, func);
+-}
+-
+-static void vub300_mmc_request(struct mmc_host *mmc, struct mmc_request *req)
+-{				/* NOT irq */
+-	struct mmc_command *cmd = req->cmd;
+-	struct vub300_mmc_host *vub300 = mmc_priv(mmc);
+-	if (!vub300->interface) {
+-		cmd->error = -ESHUTDOWN;
+-		mmc_request_done(mmc, req);
+-		return;
+-	} else {
+-		struct mmc_data *data = req->data;
+-		if (!vub300->card_powered) {
+-			cmd->error = -ENOMEDIUM;
+-			mmc_request_done(mmc, req);
+-			return;
+-		}
+-		if (!vub300->card_present) {
+-			cmd->error = -ENOMEDIUM;
+-			mmc_request_done(mmc, req);
+-			return;
+-		}
+-		if (vub300->usb_transport_fail) {
+-			cmd->error = vub300->usb_transport_fail;
+-			mmc_request_done(mmc, req);
+-			return;
+-		}
+-		if (!vub300->interface) {
+-			cmd->error = -ENODEV;
+-			mmc_request_done(mmc, req);
+-			return;
+-		}
+-		kref_get(&vub300->kref);
+-		mutex_lock(&vub300->cmd_mutex);
+-		mod_timer(&vub300->inactivity_timer, jiffies + HZ);
+-		/*
+-		 * for performance we have to return immediately
+-		 * if the requested data has been offloaded
+-		 */
+-		if (cmd->opcode == 52 &&
+-		    satisfy_request_from_offloaded_data(vub300, cmd)) {
+-			cmd->error = 0;
+-			mutex_unlock(&vub300->cmd_mutex);
+-			kref_put(&vub300->kref, vub300_delete);
+-			mmc_request_done(mmc, req);
+-			return;
+-		} else {
+-			vub300->cmd = cmd;
+-			vub300->req = req;
+-			vub300->data = data;
+-			if (data)
+-				vub300->datasize = data->blksz * data->blocks;
+-			else
+-				vub300->datasize = 0;
+-			vub300_queue_cmnd_work(vub300);
+-			mutex_unlock(&vub300->cmd_mutex);
+-			kref_put(&vub300->kref, vub300_delete);
+-			/*
+-			 * the kernel lock diagnostics complain
+-			 * if the cmd_mutex * is "passed on"
+-			 * to the cmndwork thread,
+-			 * so we must release it now
+-			 * and re-acquire it in the cmndwork thread
+-			 */
+-		}
+-	}
+-}
+-
+-static void __set_clock_speed(struct vub300_mmc_host *vub300, u8 buf[8],
+-			      struct mmc_ios *ios)
+-{
+-	int buf_array_size = 8; /* ARRAY_SIZE(buf) does not work !!! */
+-	int retval;
+-	u32 kHzClock;
+-	if (ios->clock >= 48000000)
+-		kHzClock = 48000;
+-	else if (ios->clock >= 24000000)
+-		kHzClock = 24000;
+-	else if (ios->clock >= 20000000)
+-		kHzClock = 20000;
+-	else if (ios->clock >= 15000000)
+-		kHzClock = 15000;
+-	else if (ios->clock >= 200000)
+-		kHzClock = 200;
+-	else
+-		kHzClock = 0;
+-	{
+-		int i;
+-		u64 c = kHzClock;
+-		for (i = 0; i < buf_array_size; i++) {
+-			buf[i] = c;
+-			c >>= 8;
+-		}
+-	}
+-	retval =
+-		usb_control_msg(vub300->udev, usb_sndctrlpipe(vub300->udev, 0),
+-				SET_CLOCK_SPEED,
+-				USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+-				0x00, 0x00, buf, buf_array_size, 1000);
+-	if (retval != 8) {
+-		dev_err(&vub300->udev->dev, "SET_CLOCK_SPEED"
+-			" %dkHz failed with retval=%d\n", kHzClock, retval);
+-	} else {
+-		dev_dbg(&vub300->udev->dev, "SET_CLOCK_SPEED"
+-			" %dkHz\n", kHzClock);
+-	}
+-}
+-
+-static void vub300_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+-{				/* NOT irq */
+-	struct vub300_mmc_host *vub300 = mmc_priv(mmc);
+-	if (!vub300->interface)
+-		return;
+-	kref_get(&vub300->kref);
+-	mutex_lock(&vub300->cmd_mutex);
+-	if ((ios->power_mode == MMC_POWER_OFF) && vub300->card_powered) {
+-		vub300->card_powered = 0;
+-		usb_control_msg(vub300->udev, usb_sndctrlpipe(vub300->udev, 0),
+-				SET_SD_POWER,
+-				USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+-				0x0000, 0x0000, NULL, 0, 1000);
+-		/* must wait for the VUB300 u-proc to boot up */
+-		msleep(600);
+-	} else if ((ios->power_mode == MMC_POWER_UP) && !vub300->card_powered) {
+-		usb_control_msg(vub300->udev, usb_sndctrlpipe(vub300->udev, 0),
+-				SET_SD_POWER,
+-				USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+-				0x0001, 0x0000, NULL, 0, 1000);
+-		msleep(600);
+-		vub300->card_powered = 1;
+-	} else if (ios->power_mode == MMC_POWER_ON) {
+-		u8 *buf = kmalloc(8, GFP_KERNEL);
+-		if (buf) {
+-			__set_clock_speed(vub300, buf, ios);
+-			kfree(buf);
+-		}
+-	} else {
+-		/* this should mean no change of state */
+-	}
+-	mutex_unlock(&vub300->cmd_mutex);
+-	kref_put(&vub300->kref, vub300_delete);
+-}
+-
+-static int vub300_mmc_get_ro(struct mmc_host *mmc)
+-{
+-	struct vub300_mmc_host *vub300 = mmc_priv(mmc);
+-	return vub300->read_only;
+-}
+-
+-static void vub300_enable_sdio_irq(struct mmc_host *mmc, int enable)
+-{				/* NOT irq */
+-	struct vub300_mmc_host *vub300 = mmc_priv(mmc);
+-	if (!vub300->interface)
+-		return;
+-	kref_get(&vub300->kref);
+-	if (enable) {
+-		set_current_state(TASK_RUNNING);
+-		mutex_lock(&vub300->irq_mutex);
+-		if (vub300->irqs_queued) {
+-			vub300->irqs_queued -= 1;
+-			mmc_signal_sdio_irq(vub300->mmc);
+-		} else if (vub300->irq_disabled) {
+-			vub300->irq_disabled = 0;
+-			vub300->irq_enabled = 1;
+-			vub300_queue_poll_work(vub300, 0);
+-		} else if (vub300->irq_enabled) {
+-			/* this should not happen, so we will just ignore it */
+-		} else {
+-			vub300->irq_enabled = 1;
+-			vub300_queue_poll_work(vub300, 0);
+-		}
+-		mutex_unlock(&vub300->irq_mutex);
+-		set_current_state(TASK_INTERRUPTIBLE);
+-	} else {
+-		vub300->irq_enabled = 0;
+-	}
+-	kref_put(&vub300->kref, vub300_delete);
+-}
+-
+-static const struct mmc_host_ops vub300_mmc_ops = {
+-	.request = vub300_mmc_request,
+-	.set_ios = vub300_mmc_set_ios,
+-	.get_ro = vub300_mmc_get_ro,
+-	.enable_sdio_irq = vub300_enable_sdio_irq,
+-};
+-
+-static int vub300_probe(struct usb_interface *interface,
+-			const struct usb_device_id *id)
+-{				/* NOT irq */
+-	struct vub300_mmc_host *vub300;
+-	struct usb_host_interface *iface_desc;
+-	struct usb_device *udev = usb_get_dev(interface_to_usbdev(interface));
+-	int i;
+-	int retval = -ENOMEM;
+-	struct urb *command_out_urb;
+-	struct urb *command_res_urb;
+-	struct mmc_host *mmc;
+-	char manufacturer[48];
+-	char product[32];
+-	char serial_number[32];
+-	usb_string(udev, udev->descriptor.iManufacturer, manufacturer,
+-		   sizeof(manufacturer));
+-	usb_string(udev, udev->descriptor.iProduct, product, sizeof(product));
+-	usb_string(udev, udev->descriptor.iSerialNumber, serial_number,
+-		   sizeof(serial_number));
+-	dev_info(&udev->dev, "probing VID:PID(%04X:%04X) %s %s %s\n",
+-		 le16_to_cpu(udev->descriptor.idVendor),
+-		 le16_to_cpu(udev->descriptor.idProduct),
+-		 manufacturer, product, serial_number);
+-	command_out_urb = usb_alloc_urb(0, GFP_KERNEL);
+-	if (!command_out_urb) {
+-		retval = -ENOMEM;
+-		goto err_put_udev;
+-	}
+-	command_res_urb = usb_alloc_urb(0, GFP_KERNEL);
+-	if (!command_res_urb) {
+-		retval = -ENOMEM;
+-		goto err_free_out_urb;
+-	}
+-	/* this also allocates memory for our VUB300 mmc host device */
+-	mmc = mmc_alloc_host(sizeof(*vub300), &udev->dev);
+-	if (!mmc) {
+-		retval = -ENOMEM;
+-		dev_err(&udev->dev, "not enough memory for the mmc_host\n");
+-		goto err_free_res_urb;
+-	}
+-	/* MMC core transfer sizes tunable parameters */
+-	mmc->caps = 0;
+-	if (!force_1_bit_data_xfers)
+-		mmc->caps |= MMC_CAP_4_BIT_DATA;
+-	if (!force_polling_for_irqs)
+-		mmc->caps |= MMC_CAP_SDIO_IRQ;
+-	mmc->caps &= ~MMC_CAP_NEEDS_POLL;
+-	/*
+-	 * MMC_CAP_NEEDS_POLL causes core.c:mmc_rescan() to poll
+-	 * for devices which results in spurious CMD7's being
+-	 * issued which stops some SDIO cards from working
+-	 */
+-	if (limit_speed_to_24_MHz) {
+-		mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
+-		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
+-		mmc->f_max = 24000000;
+-		dev_info(&udev->dev, "limiting SDIO speed to 24_MHz\n");
+-	} else {
+-		mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
+-		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
+-		mmc->f_max = 48000000;
+-	}
+-	mmc->f_min = 200000;
+-	mmc->max_blk_count = 511;
+-	mmc->max_blk_size = 512;
+-	mmc->max_segs = 128;
+-	if (force_max_req_size)
+-		mmc->max_req_size = force_max_req_size * 1024;
+-	else
+-		mmc->max_req_size = 64 * 1024;
+-	mmc->max_seg_size = mmc->max_req_size;
+-	mmc->ocr_avail = 0;
+-	mmc->ocr_avail |= MMC_VDD_165_195;
+-	mmc->ocr_avail |= MMC_VDD_20_21;
+-	mmc->ocr_avail |= MMC_VDD_21_22;
+-	mmc->ocr_avail |= MMC_VDD_22_23;
+-	mmc->ocr_avail |= MMC_VDD_23_24;
+-	mmc->ocr_avail |= MMC_VDD_24_25;
+-	mmc->ocr_avail |= MMC_VDD_25_26;
+-	mmc->ocr_avail |= MMC_VDD_26_27;
+-	mmc->ocr_avail |= MMC_VDD_27_28;
+-	mmc->ocr_avail |= MMC_VDD_28_29;
+-	mmc->ocr_avail |= MMC_VDD_29_30;
+-	mmc->ocr_avail |= MMC_VDD_30_31;
+-	mmc->ocr_avail |= MMC_VDD_31_32;
+-	mmc->ocr_avail |= MMC_VDD_32_33;
+-	mmc->ocr_avail |= MMC_VDD_33_34;
+-	mmc->ocr_avail |= MMC_VDD_34_35;
+-	mmc->ocr_avail |= MMC_VDD_35_36;
+-	mmc->ops = &vub300_mmc_ops;
+-	vub300 = mmc_priv(mmc);
+-	vub300->mmc = mmc;
+-	vub300->card_powered = 0;
+-	vub300->bus_width = 0;
+-	vub300->cmnd.head.block_size[0] = 0x00;
+-	vub300->cmnd.head.block_size[1] = 0x00;
+-	vub300->app_spec = 0;
+-	mutex_init(&vub300->cmd_mutex);
+-	mutex_init(&vub300->irq_mutex);
+-	vub300->command_out_urb = command_out_urb;
+-	vub300->command_res_urb = command_res_urb;
+-	vub300->usb_timed_out = 0;
+-	vub300->dynamic_register_count = 0;
+-
+-	for (i = 0; i < ARRAY_SIZE(vub300->fn); i++) {
+-		vub300->fn[i].offload_point = 0;
+-		vub300->fn[i].offload_count = 0;
+-	}
+-
+-	vub300->total_offload_count = 0;
+-	vub300->irq_enabled = 0;
+-	vub300->irq_disabled = 0;
+-	vub300->irqs_queued = 0;
+-
+-	for (i = 0; i < ARRAY_SIZE(vub300->sdio_register); i++)
+-		vub300->sdio_register[i++].activate = 0;
+-
+-	vub300->udev = udev;
+-	vub300->interface = interface;
+-	vub300->cmnd_res_ep = 0;
+-	vub300->cmnd_out_ep = 0;
+-	vub300->data_inp_ep = 0;
+-	vub300->data_out_ep = 0;
+-
+-	for (i = 0; i < ARRAY_SIZE(vub300->fbs); i++)
+-		vub300->fbs[i] = 512;
+-
+-	/*
+-	 *      set up the endpoint information
+-	 *
+-	 * use the first pair of bulk-in and bulk-out
+-	 *     endpoints for Command/Response+Interrupt
+-	 *
+-	 * use the second pair of bulk-in and bulk-out
+-	 *     endpoints for Data In/Out
+-	 */
+-	vub300->large_usb_packets = 0;
+-	iface_desc = interface->cur_altsetting;
+-	for (i = 0; i < iface_desc->desc.bNumEndpoints; ++i) {
+-		struct usb_endpoint_descriptor *endpoint =
+-			&iface_desc->endpoint[i].desc;
+-		dev_info(&vub300->udev->dev,
+-			 "vub300 testing %s EndPoint(%d) %02X\n",
+-			 usb_endpoint_is_bulk_in(endpoint) ? "BULK IN" :
+-			 usb_endpoint_is_bulk_out(endpoint) ? "BULK OUT" :
+-			 "UNKNOWN", i, endpoint->bEndpointAddress);
+-		if (endpoint->wMaxPacketSize > 64)
+-			vub300->large_usb_packets = 1;
+-		if (usb_endpoint_is_bulk_in(endpoint)) {
+-			if (!vub300->cmnd_res_ep) {
+-				vub300->cmnd_res_ep =
+-					endpoint->bEndpointAddress;
+-			} else if (!vub300->data_inp_ep) {
+-				vub300->data_inp_ep =
+-					endpoint->bEndpointAddress;
+-			} else {
+-				dev_warn(&vub300->udev->dev,
+-					 "ignoring"
+-					 " unexpected bulk_in endpoint");
+-			}
+-		} else if (usb_endpoint_is_bulk_out(endpoint)) {
+-			if (!vub300->cmnd_out_ep) {
+-				vub300->cmnd_out_ep =
+-					endpoint->bEndpointAddress;
+-			} else if (!vub300->data_out_ep) {
+-				vub300->data_out_ep =
+-					endpoint->bEndpointAddress;
+-			} else {
+-				dev_warn(&vub300->udev->dev,
+-					 "ignoring"
+-					 " unexpected bulk_out endpoint");
+-			}
+-		} else {
+-			dev_warn(&vub300->udev->dev,
+-				 "vub300 ignoring EndPoint(%d) %02X", i,
+-				 endpoint->bEndpointAddress);
+-		}
+-	}
+-	if (vub300->cmnd_res_ep && vub300->cmnd_out_ep &&
+-	    vub300->data_inp_ep && vub300->data_out_ep) {
+-		dev_info(&vub300->udev->dev,
+-			 "vub300 %s packets"
+-			 " using EndPoints %02X %02X %02X %02X\n",
+-			 vub300->large_usb_packets ? "LARGE" : "SMALL",
+-			 vub300->cmnd_out_ep, vub300->cmnd_res_ep,
+-			 vub300->data_out_ep, vub300->data_inp_ep);
+-		/* we have the expected EndPoints */
+-	} else {
+-		dev_err(&vub300->udev->dev,
+-		    "Could not find two sets of bulk-in/out endpoint pairs\n");
+-		retval = -EINVAL;
+-		goto err_free_host;
+-	}
+-	retval =
+-		usb_control_msg(vub300->udev, usb_rcvctrlpipe(vub300->udev, 0),
+-				GET_HC_INF0,
+-				USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+-				0x0000, 0x0000, &vub300->hc_info,
+-				sizeof(vub300->hc_info), 1000);
+-	if (retval < 0)
+-		goto err_free_host;
+-	retval =
+-		usb_control_msg(vub300->udev, usb_sndctrlpipe(vub300->udev, 0),
+-				SET_ROM_WAIT_STATES,
+-				USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+-				firmware_rom_wait_states, 0x0000, NULL, 0, 1000);
+-	if (retval < 0)
+-		goto err_free_host;
+-	dev_info(&vub300->udev->dev,
+-		 "operating_mode = %s %s %d MHz %s %d byte USB packets\n",
+-		 (mmc->caps & MMC_CAP_SDIO_IRQ) ? "IRQs" : "POLL",
+-		 (mmc->caps & MMC_CAP_4_BIT_DATA) ? "4-bit" : "1-bit",
+-		 mmc->f_max / 1000000,
+-		 pad_input_to_usb_pkt ? "padding input data to" : "with",
+-		 vub300->large_usb_packets ? 512 : 64);
+-	retval =
+-		usb_control_msg(vub300->udev, usb_rcvctrlpipe(vub300->udev, 0),
+-				GET_SYSTEM_PORT_STATUS,
+-				USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+-				0x0000, 0x0000, &vub300->system_port_status,
+-				sizeof(vub300->system_port_status), 1000);
+-	if (retval < 0) {
+-		goto err_free_host;
+-	} else if (sizeof(vub300->system_port_status) == retval) {
+-		vub300->card_present =
+-			(0x0001 & vub300->system_port_status.port_flags) ? 1 : 0;
+-		vub300->read_only =
+-			(0x0010 & vub300->system_port_status.port_flags) ? 1 : 0;
+-	} else {
+-		retval = -EINVAL;
+-		goto err_free_host;
+-	}
+-	usb_set_intfdata(interface, vub300);
+-	INIT_DELAYED_WORK(&vub300->pollwork, vub300_pollwork_thread);
+-	INIT_WORK(&vub300->cmndwork, vub300_cmndwork_thread);
+-	INIT_WORK(&vub300->deadwork, vub300_deadwork_thread);
+-	kref_init(&vub300->kref);
+-	timer_setup(&vub300->sg_transfer_timer, vub300_sg_timed_out, 0);
+-	kref_get(&vub300->kref);
+-	timer_setup(&vub300->inactivity_timer,
+-		    vub300_inactivity_timer_expired, 0);
+-	vub300->inactivity_timer.expires = jiffies + HZ;
+-	add_timer(&vub300->inactivity_timer);
+-	if (vub300->card_present)
+-		dev_info(&vub300->udev->dev,
+-			 "USB vub300 remote SDIO host controller[%d]"
+-			 "connected with SD/SDIO card inserted\n",
+-			 interface_to_InterfaceNumber(interface));
+-	else
+-		dev_info(&vub300->udev->dev,
+-			 "USB vub300 remote SDIO host controller[%d]"
+-			 "connected with no SD/SDIO card inserted\n",
+-			 interface_to_InterfaceNumber(interface));
+-	retval = mmc_add_host(mmc);
+-	if (retval)
+-		goto err_stop_io;
+-
+-	return 0;
+-
+-err_stop_io:
+-	vub300->interface = NULL;
+-	kref_put(&vub300->kref, vub300_delete);
+-
+-	return retval;
+-
+-err_free_host:
+-	mmc_free_host(mmc);
+-	/*
+-	 * and hence also frees vub300
+-	 * which is contained at the end of struct mmc
+-	 */
+-err_free_res_urb:
+-	usb_free_urb(command_res_urb);
+-err_free_out_urb:
+-	usb_free_urb(command_out_urb);
+-err_put_udev:
+-	usb_put_dev(udev);
+-
+-	return retval;
+-}
+-
+-static void vub300_disconnect(struct usb_interface *interface)
+-{				/* NOT irq */
+-	struct vub300_mmc_host *vub300 = usb_get_intfdata(interface);
+-	if (!vub300 || !vub300->mmc) {
+-		return;
+-	} else {
+-		struct mmc_host *mmc = vub300->mmc;
+-		if (!vub300->mmc) {
+-			return;
+-		} else {
+-			int ifnum = interface_to_InterfaceNumber(interface);
+-			usb_set_intfdata(interface, NULL);
+-			/* prevent more I/O from starting */
+-			vub300->interface = NULL;
+-			mmc_remove_host(mmc);
+-			kref_put(&vub300->kref, vub300_delete);
+-			pr_info("USB vub300 remote SDIO host controller[%d]"
+-				" now disconnected", ifnum);
+-			return;
+-		}
+-	}
+-}
+-
+-#ifdef CONFIG_PM
+-static int vub300_suspend(struct usb_interface *intf, pm_message_t message)
+-{
+-	return 0;
+-}
+-
+-static int vub300_resume(struct usb_interface *intf)
+-{
+-	return 0;
+-}
+-#else
+-#define vub300_suspend NULL
+-#define vub300_resume NULL
+-#endif
+-static int vub300_pre_reset(struct usb_interface *intf)
+-{				/* NOT irq */
+-	struct vub300_mmc_host *vub300 = usb_get_intfdata(intf);
+-	mutex_lock(&vub300->cmd_mutex);
+-	return 0;
+-}
+-
+-static int vub300_post_reset(struct usb_interface *intf)
+-{				/* NOT irq */
+-	struct vub300_mmc_host *vub300 = usb_get_intfdata(intf);
+-	/* we are sure no URBs are active - no locking needed */
+-	vub300->errors = -EPIPE;
+-	mutex_unlock(&vub300->cmd_mutex);
+-	return 0;
+-}
+-
+-static struct usb_driver vub300_driver = {
+-	.name = "vub300",
+-	.probe = vub300_probe,
+-	.disconnect = vub300_disconnect,
+-	.suspend = vub300_suspend,
+-	.resume = vub300_resume,
+-	.pre_reset = vub300_pre_reset,
+-	.post_reset = vub300_post_reset,
+-	.id_table = vub300_table,
+-	.supports_autosuspend = 1,
+-};
+-
+-static int __init vub300_init(void)
+-{				/* NOT irq */
+-	int result;
+-
+-	pr_info("VUB300 Driver rom wait states = %02X irqpoll timeout = %04X",
+-		firmware_rom_wait_states, 0x0FFFF & firmware_irqpoll_timeout);
+-
+-	cmndworkqueue = create_singlethread_workqueue("kvub300c");
+-	if (!cmndworkqueue)
+-		return -ENOMEM;
+-
+-	pollworkqueue = create_singlethread_workqueue("kvub300p");
+-	if (!pollworkqueue) {
+-		result = -ENOMEM;
+-		goto err_destroy_cmdwq;
+-	}
+-
+-	deadworkqueue = create_singlethread_workqueue("kvub300d");
+-	if (!deadworkqueue) {
+-		result = -ENOMEM;
+-		goto err_destroy_pollwq;
+-	}
+-
+-	result = usb_register(&vub300_driver);
+-	if (result)
+-		goto err_destroy_deadwq;
+-
+-	return 0;
+-
+-err_destroy_deadwq:
+-	destroy_workqueue(deadworkqueue);
+-err_destroy_pollwq:
+-	destroy_workqueue(pollworkqueue);
+-err_destroy_cmdwq:
+-	destroy_workqueue(cmndworkqueue);
+-
+-	return result;
+-}
+-
+-static void __exit vub300_exit(void)
+-{
+-	usb_deregister(&vub300_driver);
+-	flush_workqueue(cmndworkqueue);
+-	flush_workqueue(pollworkqueue);
+-	flush_workqueue(deadworkqueue);
+-	destroy_workqueue(cmndworkqueue);
+-	destroy_workqueue(pollworkqueue);
+-	destroy_workqueue(deadworkqueue);
+-}
+-
+-module_init(vub300_init);
+-module_exit(vub300_exit);
+-
+-MODULE_AUTHOR("Tony Olech <tony.olech@elandigitalsystems.com>");
+-MODULE_DESCRIPTION("VUB300 USB to SD/MMC/SDIO adapter driver");
+-MODULE_LICENSE("GPL");
+-- 
+2.43.0
+
