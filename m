@@ -1,221 +1,159 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm2-f12.google.com (mail-wm2-f12.google.com [74.125.225.140])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2FF27476CD2
-	for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2026 13:21:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC0193F39D8
+	for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2026 13:47:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.225.140
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789478472; cv=none; b=P/z5vcXjMv7hCxJUnzyM6ob8+lONnDPOe9AGYLy00NUZ5FVtW7QlAWEPtxPZbt79kAfbrtGLgjjtCs0lhZ1DZqOZgc5+nhCYCjpWFCZbg4FBoSAhzP/jRAhvePJagqjLWzQdCRPlPqvcAsYpscX8WjEaMDTTC2slawS4i1KPNsY=
+	t=1789480057; cv=none; b=FuevMzynPvgeep/BE2FdXSvxDUwgjQq6n/BINFz0o8LwOqNGjV9eSyy+FDzK5Ew4NBfTWxGBfhr682BdC7fb2/OHfF8PJZ6n03opovVzRA5fg0KR/Zf0bys6d4tt4s1CpqurNKJfhlTlJaQcybZfhUK5+8e4Zd+8VtFoItBtgRY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789478472; c=relaxed/simple;
-	bh=5uxg7Tq62X7t4ONo1Iw+PVq8T9wcgeIrqkC2J/jYYlo=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=jWLWCbKfsxMODyylpFWXvmA9+P4OwONDC0L8DUxYx3rszo2iA2Vx2cRreyQTa65uATOWO1nkTsgIvOECRaw1Pi98qS/jJeq6YAFRNFRr3QITU7RwTH7yHE3UPh33XPXvTKKjFvVG6UeCfnYBsQdKu/BUM9uEHExXPEVRcOV2Dgg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=nKy2/iNC; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=YIhFC7IJ; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1789480057; c=relaxed/simple;
+	bh=av0lgor5Cg046CEuwDXRsvCISYUzls8C5RMRjdAXTEM=;
+	h=From:Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:To:
+	 References:In-Reply-To; b=F6lpkRze3DMDfSyMLtC2SjXc9Xs5lgIjSMKtI8bEJNcQWfVTyFyGbmPOS2r579nkm2IGT5jpDgNgeiDzbUAmY4j+YKzY3LwMHposlR+9OvRCgJu3OkD6UAMC0zuZTqICIuwffnQB9JwKX1wlOtvRig51fKj1Mzpx+IbwcedzeDM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=NioF6exv; arc=none smtp.client-ip=74.125.225.140
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="nKy2/iNC";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="YIhFC7IJ"
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68FCxwAg711917
-	for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2026 13:21:10 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:date:from:in-reply-to:message-id
-	:mime-version:references:subject:to; s=qcppdkim1; bh=9lglF8Jy2Eg
-	aqPwPCoZsJG+/E9siJbnm0STAQ8lMENc=; b=nKy2/iNCtyVNJTfFPp/v9rqUG7c
-	USeoeGQqik+ltzttwSNI5Swk2T8aXhSUTe4UW+aOXlOUThgBnXbhLLSWk8IqIiCB
-	vi7NrrrVgf53fQ4hUtA2FthOLJu6t6ciyELUtMZ1V9raOdaS0B2YUp/kpoXzXEbB
-	qh8I6Cf0r1qXktxqrr2/zB0DlAE14NAeEyIFROBiG+ec7KfLePj+8VaiSgJuZDKo
-	H083AnKrTyuHhAXg2ELGIV90vGMvhjqAeEFZvTMJfmdjVtgVqSIsptpml8Tia2jE
-	nvv1zavYGj1v9YshMvu1TzPs8vbXJopBG54z7crOn79o8KwbI5bn3TqWwDg==
-Received: from mail-vs1-f71.google.com (mail-vs1-f71.google.com [209.85.217.71])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gpyea2178-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2026 13:21:10 +0000 (GMT)
-Received: by mail-vs1-f71.google.com with SMTP id ada2fe7eead31-785827e6073so977745137.1
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2026 06:21:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="NioF6exv"
+Received: by mail-wm2-f12.google.com with SMTP id 5b1f17b1804b1-49b91369d18so2365475e9.0
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2026 06:47:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1789478469; x=1790083269; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=linaro.org; s=google; t=1789480054; x=1790084854; darn=vger.kernel.org;
+        h=in-reply-to:references:to:subject:cc:message-id:date:content-type
+         :content-transfer-encoding:mime-version:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=9lglF8Jy2EgaqPwPCoZsJG+/E9siJbnm0STAQ8lMENc=;
-        b=YIhFC7IJZGbdcs+D1CTU3NavCDmbz6hsOnI+whBpqaY7vyal44LOzmRes08EyMLqLd
-         b28IJGXMR4KvzshD4IhLRtBUyFO+JjCuS9ecWZxtsR/kmLOIpXENaA1HeGUz3z1gXqAz
-         Hs4EEXCLMOm8w/lKU8do4kgN1KrMcJarZq+r6YlIxf49BpQ1o+Wy03G/E8tv8nNi6yTD
-         esD/KXmR9eI7dr5fFpgz12FVcHMyd0Cto3KxfBN1ILq1T0KcH2Uupbs/mSIMUh1BCP0T
-         hqu6Dbcra41X7d4YCU/mmjOFVKbslZrQRjEBNI37qc61wVzuomOpERSrOlZZYhIz8Oax
-         T5tA==
+        bh=LnO/RFtPTLTuh551bJsP9vEYVlo8+tuse5zqKBb/5X4=;
+        b=NioF6exvopxGsojoMEm0OlrZOqzF6ZfDNNCXhzp709UAdQHWIhKYSS0Uw66OD7mQEL
+         nZaJ5Qxa1c92k1ty/VTCdMQzC/RXq6qHp2GkrcVK7OqtsGNUWLaeRaX9FuRB8ShpY5hP
+         TJARwo7RvSrxM6FBFAq+ZkfiIgkKuot8pKhOrhHKwJyFVya67sprobbWIkl3xDtac6Ca
+         6Nywz5SntDU92Paoec4OPtSXrL0/vdcyLz3gIrrAM0QcGTDNF3Qy1yw/koYPE0mgn8gJ
+         hOITYS3pd3T3BvrW8tKqkxEWui3lSPuOm3O6HYp2i7CUk++8QlBKXUhdOOV3U6OKb5yy
+         x8yg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789478469; x=1790083269;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=9lglF8Jy2EgaqPwPCoZsJG+/E9siJbnm0STAQ8lMENc=;
-        b=zdRW3M3UnEgUGi1TMoFx84Usu/2hPUz1xI1Q3lUha+Ms3cGZmDsd58W5c6cW+Ep6ke
-         8VyM7pI27d7WEniLA5ssKntfmsUUJZBeip+/YnU3Th47Q1b636qK2WhuRYElt9SQEP/j
-         h5vjY/hCnWOJrLUJDzUow8vmUuZ7xrkFgbL4pU6/7IZaU04MNzflc6tWoNNnYQ16ht7d
-         ZR/dKWnL/+xDZ8cG/ekFpfHeMWak7w4S4Grvhn/45oBNFJ9RzJTcah5J3vJnmjVwnnut
-         S7wzszP92PWJv+usiIwCqjGufKdiLnrLP6g9Q4AVHCzIIWN49X/Zcx0n+dbWHwMSbIbM
-         Ocgg==
-X-Gm-Message-State: AFuF++kgFipAR278ATtWBdxEWeEVhDYYHRnIchYbCkk/lVEjWl0hCRyf
-	arRgJueAp7FEvLCHJcINxF14K4s0rPAKPU/n6d1jDvd1fUypnE3pMUsn6EQAIOrzZRax2uf5L+v
-	150dTGqhsOHIF18gmv4sF1JSVWJmh8ddG/bJ/0hV1ug9QnT37MfWzDII2R2J95HgN0J+/Sg8=
-X-Gm-Gg: AYBFou20YDhOoiZhJfHgmBZvXDbPdrMAxAyJX47gVRFQcmcNaitsSF/vhB/jJPVsGDD
-	wT4VeyHM3AuONdGkH4ycU9OXrbkUuv+Vmdm3VYzRoIghw3jC4LYcbUXZ0+wd7YjeHocHk3+JnKf
-	I0u9PKuogzjycWS9OZkfrhzFWwPzrC1nfLuE4SxvS/8DQEvI1BKpsgoMwG1NlHuJx6uo+QGdS/x
-	kdMuTAEwz0MFT7b3EUmxCPjHGghoQ2+jgngAmR+UGrkQlDCyPI9++0UEi5sgfGfkm24TZ00nCOq
-	3AhOSVDWv9kNNRIIUkTKRVfJl/DgmxM7n3MHcXSrwL/4DG/8IPtv+28v3FscVIfYoV3FP8EkwGi
-	0mx9DacaeHOK+M15t+6IcTdKGXUPFRmOKAtk8SNDPM0itNrXPEyUvUb+5Bw==
-X-Received: by 2002:a05:6102:510b:b0:778:5369:763d with SMTP id ada2fe7eead31-79b56aec243mr6728954137.1.1789478468760;
-        Tue, 15 Sep 2026 06:21:08 -0700 (PDT)
-X-Received: by 2002:a05:6102:510b:b0:778:5369:763d with SMTP id ada2fe7eead31-79b56aec243mr6728842137.1.1789478468218;
-        Tue, 15 Sep 2026 06:21:08 -0700 (PDT)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c296613c3ebsm582885466b.57.2026.09.15.06.21.05
+        d=1e100.net; s=20260707; t=1789480054; x=1790084854;
+        h=in-reply-to:references:to:subject:cc:message-id:date:content-type
+         :content-transfer-encoding:mime-version:from:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=LnO/RFtPTLTuh551bJsP9vEYVlo8+tuse5zqKBb/5X4=;
+        b=zu9cMI6xGpRJVwcd+ehvRCg4B6A0OwpIt7bKQugnhLZgRBFiLy1z1Qpib0n4xm5Evu
+         gbj1q/L+B1+2AAXuRWtG89mPh4dBUTokPQ1llaODEsrNvjh2/FgvJ9OlkEEs1awzw96R
+         OPPJdCO+D2rP7N1LMGViQzedM64oLX9rHIkpetV7Z4kTP+mWfj+236ySF6+ATDcQJeey
+         hJXFaQAuOrNS+z0cb4DbXpgHneRSW/Nw3A783CudDX7UVd1KFCcCVMUBGfv4PG3K5QkY
+         jjWBByv+zxGbXZASeCMEOFEPbrKSI7JhZfEGYuzZ4EKbuf3XA6vW34mHXwfP7vNstYJS
+         Iniw==
+X-Forwarded-Encrypted: i=1; AKwUvBwAjZFwT+fRkBHueSjXvUPrgZN79IlBN0IRm1KLd0Tag+jNuXuwbET+mbfGb+ZypZNKBc1/4EM+eAk=@vger.kernel.org
+X-Gm-Message-State: AFuF++kzRo9vf9ZyKbjW9XNeVnzxTuIlKtEq0ZZ3Z4LTH1rf2gYCgSVt
+	2UfOdy4yV0ezRcJ1G221FxOL53mWulmv6cFyif0LlCjOf4OS2j/jKv42dgLMqDTdt9g=
+X-Gm-Gg: AYBFou2Pfi+zE7R02253yB1vVzQAiQibp1zMgyioD8jRmYurEOeAQXKK87hiKm9Ee22
+	DkNcsySe1k87kM3kD5/gBK9O0VlNOWGUahwAugDZ3bFCTprjK65/E51d7biEjTZy+xfXlTADTCY
+	LXaSn1dAdzUVum5B4YH8gOeh7TFbDBdApwO3/6g2dDSp3E8JpWFW/n34qlNUO8O9zpW2dsmlgIc
+	SFbS7D1Hm1unbVcmHA7up6kSf4Q/JsvlAS9MODMMOQZ2Mq3vebQFsAbmHJGj1q2Or8hZA9qzxmN
+	O+IkX13yJ+tvB3gAspflJbxT40HYa7Ktqdfqqk8+5a+r4u4T8dpUfB7YzzmU3lagAd/kh4aLDVP
+	c/ATQg+WkK+1H13wa5wR6AEnnqwrkxlOHR8TeuJXV09x4Z5EDf17aeUhBcnNgyhkogZQnPF2wOs
+	Datr84N9hbfB0OiqjUums9+EacZBBSJDMdKdnlmDFE6zxG44hd4rdmHfDZd298UomySFZrxgJDR
+	lp5UAxCEw==
+X-Received: by 2002:a05:600c:b85:b0:49e:6bce:b0f9 with SMTP id 5b1f17b1804b1-49e8228f49fmr15817015e9.16.1789480053858;
+        Tue, 15 Sep 2026 06:47:33 -0700 (PDT)
+Received: from localhost ([2a01:11:8f11:bb70:17d2:d825:e2b8:2e8f])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49e7ef6bc50sm67382035e9.3.2026.09.15.06.47.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 15 Sep 2026 06:21:06 -0700 (PDT)
-From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>
-Cc: Rui Miguel Silva <rmfrfs@gmail.com>, Johan Hovold <johan@kernel.org>,
-        Alex Elder <elder@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        greybus-dev@lists.linaro.org, linux-staging@lists.linux.dev,
-        linux-kernel@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Subject: [PATCH 2/2] mmc: core: Turn mmc_alloc|free_host() into static functions
-Date: Tue, 15 Sep 2026 15:20:46 +0200
-Message-ID: <20260915132052.273212-3-ulf.hansson@oss.qualcomm.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260915132052.273212-1-ulf.hansson@oss.qualcomm.com>
-References: <20260915132052.273212-1-ulf.hansson@oss.qualcomm.com>
+        Tue, 15 Sep 2026 06:47:32 -0700 (PDT)
+From: Rui Miguel Silva <rui.silva@linaro.org>
+X-Google-Original-From: "Rui Miguel Silva" <rui.silva@linaro.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-ORIG-GUID: A2sUV9QsuFVhN_qzbGvUVECKrqZTWauS
-X-Authority-Analysis: v=2.4 cv=cehHPXDM c=1 sm=1 tr=0 ts=6aa94646 cx=c_pps
- a=P2rfLEam3zuxRRdjJWA2cw==:117 a=h7aNHqOhPKB91FvYUefsSA==:17
- a=VdqzKS8jKosA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=u7WPNUs3qKkmUXheDGA7:22 a=eoimf2acIAo5FJnRuUoq:22 a=VwQbUJbxAAAA:8
- a=ZspSQYoVYSdymiOi6Z0A:9 a=ODZdjJIeia2B_SHc_B0f:22
-X-Proofpoint-GUID: A2sUV9QsuFVhN_qzbGvUVECKrqZTWauS
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTE1MDE5NCBTYWx0ZWRfXx3wdoKVadChx
- JBfFZp097UhgXfwoqBr2KC43C5BzDwX32FJx6v9BooWE3HYbfAYXdhxn+SQGWbJ8gYLkn8njNFx
- hHDBQlqYAR5VEqbwhKggEYJv0OMcFqc=
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTE1MDE5NCBTYWx0ZWRfX79mfzI398USB
- aDXPpDnWhY0lLryLAvNxA2xSXgKGcQToeOLHBAhRQU7eT/truuCWhS9MylENbkHbdFXQ/wcQw3g
- fprFkVCVKyhmV3dSquqcM760mKky+WtedIvVhg2HO1Htn4DCU4A2pgqYhYLXzkTUjkGc8IJ/P6p
- oGSKNKaXCr1Fq/rNgn04mShjRRJvo7W0TtO3YdjqQlOEEjvbXCHqj0asPkXC/wdeRxU2XtZnqbt
- VeVHzExFGVq1V6xkTKCaYLBIpwgn0DoCHiFcQjTaZtF7Hb1CWr6uFC2qsKVS7gF2E/0qjUX3nNg
- g6157T4cHX9ZA882EfksxUawpLmHeqzH1JunKzVPY5u6YgEurJlKQjE7NoU8zWWsGspDFTkt9kQ
- e2etfNdcaJBYcIKNu7S7EC/Si/RL7RzjN3PW0OWePn68Ye+Lj4kKNEy258mR2sD3qZsECPKFv1k
- GCdRs3cpYOMey7hi8bA==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-09-15_04,2026-09-14_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- suspectscore=0 adultscore=0 lowpriorityscore=0 bulkscore=0 clxscore=1015
- impostorscore=0 spamscore=0 phishscore=0 malwarescore=0 priorityscore=1501
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609150194
+Mime-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Date: Tue, 15 Sep 2026 14:47:31 +0100
+Message-Id: <DLFXQIQX6Y6W.13CBS3NB0BTI4@linaro.com>
+Cc: "Rui Miguel Silva" <rmfrfs@gmail.com>, "Johan Hovold"
+ <johan@kernel.org>, "Alex Elder" <elder@kernel.org>, "Greg Kroah-Hartman"
+ <gregkh@linuxfoundation.org>, <greybus-dev@lists.linaro.org>,
+ <linux-staging@lists.linux.dev>, <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH 1/2] staging: greybus: sdio: Convert to
+ devm_mmc_alloc_host()
+To: "Ulf Hansson" <ulf.hansson@oss.qualcomm.com>,
+ <linux-mmc@vger.kernel.org>, "Ulf Hansson" <ulfh@kernel.org>
+References: <20260915132052.273212-1-ulf.hansson@oss.qualcomm.com>
+ <20260915132052.273212-2-ulf.hansson@oss.qualcomm.com>
+In-Reply-To: <20260915132052.273212-2-ulf.hansson@oss.qualcomm.com>
 
-From: Ulf Hansson <ulfh@kernel.org>
+Hey Ulf,
+Thanks for the patch.
 
-As there are no longer any users of these functions, let's make them
-internal to the mmc core. While at it, let's also flip the order of the
-in-parameters to mmc_alloc_host() to be consistent with devm_alloc_host().
+On Tue Sep 15, 2026 at 2:20 PM WEST, Ulf Hansson wrote:
 
-Signed-off-by: Ulf Hansson <ulfh@kernel.org>
----
- drivers/mmc/core/host.c  | 35 +++++++++--------------------------
- include/linux/mmc/host.h |  2 --
- 2 files changed, 9 insertions(+), 28 deletions(-)
+> From: Ulf Hansson <ulfh@kernel.org>
+>
+> Simplify the code by converting from mmc_alloc_host() to the resource
+> managed devm_mmc_alloc_host().
+>
+> Signed-off-by: Ulf Hansson <ulfh@kernel.org>
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 1bcf0e917b59..8e9e61839198 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -505,14 +505,7 @@ static int mmc_first_nonreserved_index(void)
- 	return max + 1;
- }
- 
--/**
-- *	mmc_alloc_host - initialise the per-host structure.
-- *	@extra: sizeof private data structure
-- *	@dev: pointer to host device model structure
-- *
-- *	Initialise the per-host structure.
-- */
--struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
-+static struct mmc_host *mmc_alloc_host(struct device *dev, int extra)
- {
- 	int index;
- 	struct mmc_host *host;
-@@ -583,7 +576,13 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	return host;
- }
- 
--EXPORT_SYMBOL(mmc_alloc_host);
-+static void mmc_free_host(struct mmc_host *host)
-+{
-+	cancel_delayed_work_sync(&host->detect);
-+	cancel_work_sync(&host->sdio_irq_work);
-+	mmc_pwrseq_free(host);
-+	put_device(&host->class_dev);
-+}
- 
- static void devm_mmc_host_release(struct device *dev, void *res)
- {
-@@ -598,7 +597,7 @@ struct mmc_host *devm_mmc_alloc_host(struct device *dev, int extra)
- 	if (!dr)
- 		return NULL;
- 
--	host = mmc_alloc_host(extra, dev);
-+	host = mmc_alloc_host(dev, extra);
- 	if (!host) {
- 		devres_free(dr);
- 		return NULL;
-@@ -692,19 +691,3 @@ void mmc_remove_host(struct mmc_host *host)
- }
- 
- EXPORT_SYMBOL(mmc_remove_host);
--
--/**
-- *	mmc_free_host - free the host structure
-- *	@host: mmc host
-- *
-- *	Free the host once all references to it have been dropped.
-- */
--void mmc_free_host(struct mmc_host *host)
--{
--	cancel_delayed_work_sync(&host->detect);
--	cancel_work_sync(&host->sdio_irq_work);
--	mmc_pwrseq_free(host);
--	put_device(&host->class_dev);
--}
--
--EXPORT_SYMBOL(mmc_free_host);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index ddb32bc2946f..198554e48346 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -585,11 +585,9 @@ struct mmc_host {
- 
- struct device_node;
- 
--struct mmc_host *mmc_alloc_host(int extra, struct device *);
- struct mmc_host *devm_mmc_alloc_host(struct device *dev, int extra);
- int mmc_add_host(struct mmc_host *);
- void mmc_remove_host(struct mmc_host *);
--void mmc_free_host(struct mmc_host *);
- void mmc_of_parse_clk_phase(struct device *dev,
- 			    struct mmc_clk_phase_map *map);
- int mmc_of_parse(struct mmc_host *host);
--- 
-2.43.0
+LGTM,
+
+Acked-by: Rui Miguel Silva <rui.silva@linaro.org>
+
+Cheers,
+    Rui
+> ---
+>  drivers/staging/greybus/sdio.c | 11 +++--------
+>  1 file changed, 3 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/staging/greybus/sdio.c b/drivers/staging/greybus/sdi=
+o.c
+> index 3952f3d225db..642d785fe918 100644
+> --- a/drivers/staging/greybus/sdio.c
+> +++ b/drivers/staging/greybus/sdio.c
+> @@ -767,17 +767,15 @@ static int gb_sdio_probe(struct gbphy_device *gbphy=
+_dev,
+>  	struct gb_sdio_host *host;
+>  	int ret =3D 0;
+> =20
+> -	mmc =3D mmc_alloc_host(sizeof(*host), &gbphy_dev->dev);
+> +	mmc =3D devm_mmc_alloc_host(&gbphy_dev->dev, sizeof(*host));
+>  	if (!mmc)
+>  		return -ENOMEM;
+> =20
+>  	connection =3D gb_connection_create(gbphy_dev->bundle,
+>  					  le16_to_cpu(gbphy_dev->cport_desc->id),
+>  					  gb_sdio_request_handler);
+> -	if (IS_ERR(connection)) {
+> -		ret =3D PTR_ERR(connection);
+> -		goto exit_mmc_free;
+> -	}
+> +	if (IS_ERR(connection))
+> +		return PTR_ERR(connection);
+> =20
+>  	host =3D mmc_priv(mmc);
+>  	host->mmc =3D mmc;
+> @@ -835,8 +833,6 @@ static int gb_sdio_probe(struct gbphy_device *gbphy_d=
+ev,
+>  	gb_connection_disable(connection);
+>  exit_connection_destroy:
+>  	gb_connection_destroy(connection);
+> -exit_mmc_free:
+> -	mmc_free_host(mmc);
+> =20
+>  	return ret;
+>  }
+> @@ -863,7 +859,6 @@ static void gb_sdio_remove(struct gbphy_device *gbphy=
+_dev)
+>  	mmc_remove_host(mmc);
+>  	gb_connection_disable(connection);
+>  	gb_connection_destroy(connection);
+> -	mmc_free_host(mmc);
+>  }
+> =20
+>  static const struct gbphy_device_id gb_sdio_id_table[] =3D {
+> --=20
+> 2.43.0
+
+
 
