@@ -1,73 +1,74 @@
 Received: from mail-pz2-f12.google.com (mail-pz2-f12.google.com [74.125.228.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B2C040A938
-	for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2026 16:13:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A49A421224
+	for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2026 16:19:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.228.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789488804; cv=none; b=nkuKr4Vci6T4YwI6kNef6PocuDYUfJNGPUzLHGlaHbaCFVGiZdGUyr1DxPjZFI8oprcX9CRkjH1NAi9N8j6RujGWot3oI3VkjPc2VDAaJTXxYA6/tKmG5CpuD/poQMJEvJ5w1JdPe7qqNHKXxC5GQAs60qigjtBwY22K8edLk8E=
+	t=1789489198; cv=none; b=qPAKz9lR8tD0zGtTsY4+J9R7LY7LAI1Wke4Hz20n6EkALeLTJYopNkiJc3fWNtKivM7wM3JEwQrpIIvitfAt9DDJIUkgqNhyo9giDRAieJ2ubbkhx8pc7YIaQa/MAtlWM+wMtuRUhFktSsm2aZDETwm2SDljKreJzm7nAwYiyQM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789488804; c=relaxed/simple;
-	bh=L1vX6qasiMUjDTveY35hvrmewqSOHuZCD9Ih9SP+3Aw=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kitYcJjTfiTHeRh5iYeEX/3wFSyAnVyWq67+wB1oNsm04Nl0CbgHGDISF+cis7KXJkxmeFvrhWitxvu6k2Z/hoUf2soTBtiC9SocsECk5mKiWMQyOCaCNNBoP8Iwgp+8oSGdnHz9GhpUKDY1MDl45LExrcPYU064IsyZcgbCRbA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Esgwx/m+; arc=none smtp.client-ip=74.125.228.12
+	s=arc-20240116; t=1789489198; c=relaxed/simple;
+	bh=MdD/9MYz7M1wCbFAHiD7DEgcogkOmiRDU7stj2S7jz4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=KYvrfcWsEM1Rpe81aKm+OmFrc8gGAbzHXebSsUK1K0jSA9BNhhCHnmAqiyRR2qsxmODe7igjhnJ0q2IFwI4Dx9PjgT67NqXQFmXMd+MLbo0JCyXL6ROTGtHNKrWmjEQKRxyWR/wDm5s9kbu0Fhp8Ce2bC6SnS3Sc7OPk1BZQmZg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EluP/tf2; arc=none smtp.client-ip=74.125.228.12
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Esgwx/m+"
-Received: by mail-pz2-f12.google.com with SMTP id 41be03b00d2f7-cc1ceb47d53so513946a12.0
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2026 09:13:23 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EluP/tf2"
+Received: by mail-pz2-f12.google.com with SMTP id d2e1a72fcca58-85469f20513so405909b3a.0
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2026 09:19:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1789488803; x=1790093603; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1789489196; x=1790093996; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=fELIu1xKNH0ktGK2iyYSc9aLCgv+tvpxP2PwjS3qyLo=;
-        b=Esgwx/m+VtobjleMRxNL/xBhmk/Z1cCaoB+nxNVr14UY8i2662Y1i4A+/fSn6UzDNl
-         KtSgUL6QxV8b+NjCEbuqziSvMqVQHmdVvIRRgeT9oDBWMAmwlLjOaZbZgWrZ0nM0fOYk
-         VBATE3ca3Ddk/e9TFrLgPcxUve7u/9g3HB4P5cLvOV97tZQHL1qfJrSxsLq5Wq3vMYtE
-         5wNZdOVFWr0G61gIGJQLaXTQlRwKZyn9bCZG1BZFE1uMpZO0UnuNtuLpg9L1qsbBg0Lv
-         pX4QNfj+0nCo5BlzfnHxgBLa0Uv48ZEdLd67YiWlThVDgV+19Br9JJN2v9LqhUm0kkyr
-         NbyA==
+        bh=T+yVuHLs29GzY4fkqZIEiSlSvIN7JcAqD7l0flOonVQ=;
+        b=EluP/tf2hPRnIdpQMBMje/7WuKoGH9VF2LNmKp0WooFSfBLZBmTvJqsj3+wPnnZlHk
+         jF+St8/AFemJ1to3hDfWlg3twq3GhD8SIpQrVBXm8/eIOW8JXm8krkQY3lnmizex7DgP
+         1S5zGP5EI8YZIytShlTPyfec/CP3H655XxMOfpMh+PLtV8mxdMj5IbN71GpFbjZeFZlc
+         Bn4XOrFYQ+whdIrJh/Azgvf7EkQ1g2SSTbQXgZJypRRcR1/nOvJKxQ4M3Xng7hlpuac/
+         AOvukcELhNOsFWxMboDS2l8SxH3wOT03ostTVPRMehyJHarhgqvhmjx+Qx0gq6j57N0/
+         DjpQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789488803; x=1790093603;
+        d=1e100.net; s=20260707; t=1789489196; x=1790093996;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=fELIu1xKNH0ktGK2iyYSc9aLCgv+tvpxP2PwjS3qyLo=;
-        b=E/6ibaWm25LY2uACYx3+4Ns3ajbkI3r5KaW/sxbvagJWzcfd6RNgVZw7x/vbBUB8g4
-         ZgsVLZj7yWbUeI6CH3oJuivUcWa5l7p1wkq1qtnPxqT1/E4ADaCD6mAGwaZuumvh7t5E
-         pTvQL1Xnw3+J3JqhiXF8ttSBVOWz1NivKL9VHYNVheYjusMWP1gw9UHz4ZfOuS2JHr1J
-         b5HSHbWGD0avU9rZlZOmshw+4PDMH74KhQgjrRU/IRT9YNMDb2AJuG8No9ohevuvhj9y
-         PLozcyAgf+xOlZuKwnzeYNmg33dPzKux0+Q6YpyuHR42oga0GzMiiW9O8A6HcAtdovZN
-         em/w==
-X-Forwarded-Encrypted: i=1; AKwUvBxpThOUjpTEJtcQufiAsYSeVDwAmaNjFGWmWPhT7J1h3RQIcW4ivnpRo94g1B1OlJgvQbUpHnFWyig=@vger.kernel.org
-X-Gm-Message-State: AFuF++n0yymFUdFccRtM9RiL8AjQ6OnGaGxOK3pkm08j3Gk43nf9nZYE
-	LpdGJtsO+xpGj8S/7HG+8RBRuStvv5qq7ID2Pl8a1XSLTfwHDqwxacID
-X-Gm-Gg: AYBFou2f1e+x5Fkie/cvP64QmRjiX7QYxCjRIML4IDSdljWmLTzVfZJyeojI3UgpEgo
-	Bl8CPkGJTYbKeKwLcvFQJ8qakj2ll2gqBCjsqWkoxjsja5dHyp20g35Rzc1GpgncrdD1rnEQ/ME
-	8qfeI7O3cVDsQw6oYksNGUygFOu0SdemsswNEmIMdOlVZQ5nJ4Qfw2dvw2DwL9LORlccRDawjjJ
-	rwMRqFPbw1peVv6UewobiTSmZ4S13hKC8WjiVirI5gHWtcswpfL6c9kzJWo+pY4js0MO5toAUvF
-	jT/XpnDVxBzrPOMa8s39QjjFel2XT/vnthAbtjYDGQg81rD8sGHJD0i7CBy/BfwdxUomuPwN73m
-	THmI1nNWzEo59jTqXAQGoKvQtYYl5aJHJmcetf0WnF1uG1S9LpCiPOGAkzQyoHedTxcv9MOqsnA
-	sGqibaIP+t3vXJeqHcMkogvsdpPJu0JJZNIETAWvGGRHCsdCFix/blyA==
-X-Received: by 2002:a17:90b:3842:b0:39e:b0d:d274 with SMTP id 98e67ed59e1d1-39e0b0dd4c1mr2366721a91.10.1789488802775;
-        Tue, 15 Sep 2026 09:13:22 -0700 (PDT)
+        bh=T+yVuHLs29GzY4fkqZIEiSlSvIN7JcAqD7l0flOonVQ=;
+        b=eUpUd0SwygsKXIdku1nA6EaFXqH2E7rIqCGydInbNoxdvr/Fh5jz6RlPgHDYDLv30L
+         mITbdBFI/WxHgUA253TecKWihM6n/1lfjLXnno7g2r7g9xbpzKB4HHT9HpC7yZXgCXl0
+         /fhLP/2x2wAC4xPKhvWBmqStRED7tEFUDNv6UBwraetBEXQ8G58b6Go/jy1gzK1jsrGy
+         pe6DTm7WQKgt3eHmfnuwVWO8D8CiNtXzI7u++J3lIVN+3XsQ+W+HHCjtXfCS+b1upV0A
+         5nA306+bjjl0v3atTozWjPfAVBeWO8wGPGPsnPGDlDD+BIPSXe18D2hnXsS5qkV2jfeO
+         8TuQ==
+X-Forwarded-Encrypted: i=1; AKwUvBypeurOwYPO1kXDo4yj+Z+JY4FZerBrHq0qhgzuK5w5ASHNUFkbIqYuHm7ZhuLxd6z9M8hdHOgUDt8=@vger.kernel.org
+X-Gm-Message-State: AFuF++mVfskcCYNlxWsgc6mIEZdmhe4Vyoo0/Hdl/UqURNrze2YOCJ7H
+	O9nbCPmDTTRyamZEafuK63Ob5YwYJgZnwv8ZiYWj4a3Q+AshxJlwARLn
+X-Gm-Gg: AYBFou3fuB4jcvd43Lz+lBLrqdzBGE5W0i2OaD/2XSb64y4XldNSnHcLp6pMbAcwQFY
+	zx41gruUQISbdCIpaw4+7Q+My/9xhLYaOtGklXW5gv/lLeWt2H45SvhL3+Ryy2P52biUnwI3kHn
+	kMT+NzHglX17Ctu/PnGTPvuLKXtmK4YyuVYO8ApLn3AUyK1fn+mTSiZjdmLcuKjVWwd50CjeqpC
+	St4S4V9tEwsaIlK8aAWDbEY4PcF/ddd7XnyijfXpYikPBxqtomSWzoeXVys1X3tSgPB7IgeF8pR
+	881+qHXZxdnTL5+JdHHSTOlM+9VMgUCggaIkOmqprxVEnAIDR0Myq0WFJcGSMkjHbS2k2+FBVXW
+	PxiCQnSVF/TTFft2tT/drijZRoz6/CSJmI0sPRRFyp3+VdlWBtGRUTzuJORtC0p7dSMUiU2Qbn1
+	Zvowp3p/1Xsx7q8029LDRpUiFnpx5ASBxHM7NYtR8l4HZALsaK7yJ0JQ==
+X-Received: by 2002:a05:6a00:1da1:b0:871:13f7:9c41 with SMTP id d2e1a72fcca58-8717efc888amr3300275b3a.14.1789489195671;
+        Tue, 15 Sep 2026 09:19:55 -0700 (PDT)
 Received: from lgs.. ([2001:250:5800:1002::de93])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-39dfbac254bsm2139196a91.3.2026.09.15.09.13.18
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-86b29dc09d4sm6446021b3a.47.2026.09.15.09.19.52
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 15 Sep 2026 09:13:22 -0700 (PDT)
+        Tue, 15 Sep 2026 09:19:55 -0700 (PDT)
 From: Guangshuo Li <lgs201920130244@gmail.com>
-To: Robert Richter <rric@kernel.org>,
+To: Adrian Hunter <adrian.hunter@intel.com>,
 	Ulf Hansson <ulfh@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>,
-	Guangshuo Li <lgs201920130244@gmail.com>,
-	Jan Glauber <jan.glauber@gmail.com>,
+	Orson Zhai <orsonzhai@gmail.com>,
+	Baolin Wang <baolin.wang@linux.alibaba.com>,
+	Chunyan Zhang <zhang.lyra@gmail.com>,
 	linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Cc: stable@vger.kernel.org
-Subject: [PATCH] mmc: cavium: destroy slot platform devices on remove
-Date: Wed, 16 Sep 2026 00:13:10 +0800
-Message-ID: <20260915161310.2477406-1-lgs201920130244@gmail.com>
+Cc: Guangshuo Li <lgs201920130244@gmail.com>,
+	stable@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-sprd: disable runtime PM on remove
+Date: Wed, 16 Sep 2026 00:19:47 +0800
+Message-ID: <20260915161947.2479111-1-lgs201920130244@gmail.com>
 X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -77,50 +78,41 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-thunder_mmc_probe() creates host->slot_pdev[i] with
-of_platform_device_create(), while thunder_mmc_remove() does not destroy
-the child platform devices.
+sdhci_sprd_probe() enables runtime PM, while sdhci_sprd_remove() does
+not perform the corresponding runtime PM cleanup.
 
-The probe failure path removes each MMC slot and destroys its associated
-platform device, but the normal remove path only removes the MMC slot.
-As a result, the child platform devices remain registered after the
-ThunderX MMC controller is removed.
+The probe failure path disables runtime PM before disabling the clocks,
+but the normal remove path directly disables clocks that are also
+managed by the runtime PM callbacks. If the device is runtime
+suspended, those clocks may already be disabled.
 
-Destroy each slot platform device during removal after cleaning up the
-corresponding MMC slot, matching the probe failure cleanup path. Keep an
-extra device reference around of_platform_device_destroy() as done in
-the existing error path.
+Resume the device before removal, disable runtime PM and drop the
+temporary runtime PM reference before disabling the clocks.
 
 This issue was found by manual code inspection.
 
-Fixes: 166bac38c3c56 ("mmc: cavium: Add MMC PCI driver for ThunderX SOCs")
+Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
 Cc: stable@vger.kernel.org
 Signed-off-by: Guangshuo Li <lgs201920130244@gmail.com>
 ---
- drivers/mmc/host/cavium-thunderx.c | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-sprd.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
-index 84ff6d82ae3c..c80907aaf51b 100644
---- a/drivers/mmc/host/cavium-thunderx.c
-+++ b/drivers/mmc/host/cavium-thunderx.c
-@@ -173,9 +173,15 @@ static void thunder_mmc_remove(struct pci_dev *pdev)
- 	u64 dma_cfg;
- 	int i;
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 3584a2b314a9..0c8f389fe584 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -890,6 +890,10 @@ static void sdhci_sprd_remove(struct platform_device *pdev)
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
+ 	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
  
--	for (i = 0; i < CAVIUM_MAX_MMC; i++)
-+	for (i = 0; i < CAVIUM_MAX_MMC; i++) {
- 		if (host->slot[i])
- 			cvm_mmc_of_slot_remove(host->slot[i]);
-+		if (host->slot_pdev[i]) {
-+			get_device(&host->slot_pdev[i]->dev);
-+			of_platform_device_destroy(&host->slot_pdev[i]->dev, NULL);
-+			put_device(&host->slot_pdev[i]->dev);
-+		}
-+	}
++	pm_runtime_get_sync(&pdev->dev);
++	pm_runtime_disable(&pdev->dev);
++	pm_runtime_put_noidle(&pdev->dev);
++
+ 	sdhci_remove_host(host, 0);
  
- 	dma_cfg = readq(host->dma_base + MIO_EMM_DMA_CFG(host));
- 	dma_cfg &= ~MIO_EMM_DMA_CFG_EN;
+ 	clk_disable_unprepare(sprd_host->clk_sdio);
 -- 
 2.43.0
 
