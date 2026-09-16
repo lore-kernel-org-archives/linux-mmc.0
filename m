@@ -1,38 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B5871513574;
-	Wed, 16 Sep 2026 14:23:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6453C51A73C;
+	Wed, 16 Sep 2026 14:23:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789568583; cv=none; b=KMbBftS2xInwwqA9yc3h5S2OJOItgmoRrvokNDCBsVaIjCyDyoxX/UeKYtqw7eTV3cABgLIkFTr58+66kuvPan9SQsR5U+QtVl3Z1q5CHHpstLFRSPvjMZDJRfLBluUSfv8bYDL8VQT1CvfAMWOnZ3jD1bjOK+qk2ie2hjtrXsA=
+	t=1789568584; cv=none; b=dzVgQ7dS7bD6JVCzoBITL7maUrLhn25urKg4WpJf2UhsypsfV/bEKWzcUF7ZU1gf51zoCw7r5G0b7GP8EB0r3EkF5g/COqWpFnNkb1nTYyT6Ui5+yy7mN1rOjxV14jWOYJX9Onp41wnAa2I6PmjcVP/VORxLt5b6W35p5yYTFH0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789568583; c=relaxed/simple;
-	bh=68xt0rCfMk3htQ+CNQtRlu7SHWfHYk23uy9xMNYUavE=;
+	s=arc-20240116; t=1789568584; c=relaxed/simple;
+	bh=vAFIOZywJ3Cf6QH20r/UhBzUAEPsdRIi9SW9imqskR8=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=NNCyzfWjElTG+CX1qifVuADPkF6EaQq5GxIF0uBpZTmyIbhixSSZZtNkPjRSvGoyC5NnNiajIIMPjHIFIFKZB4skeFOahKcAKMGlR8JIRbEnSukJ/hThoql2uj+st5buY51FRWW//YhY78xqmBuKhqMkgoj6bt+wbquBWObB+EE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZdUQ5q7g; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=OdcJRf4+Lg8Spfxzyj9KHemv0k/y19YWvPW1Ak1RORQlqKzwa1+D2qd0ZUR3xRbwlDCmuQMbzup0T1s95f/52SK9BDxet3BgjNPy9l9i98ihq86IPm9wPX+V33CcV70LK2B7sVCFIAo30GNnXKN/WMKOc7+PX5wj8gDZsJV1wXw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=G2Voys4r; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZdUQ5q7g"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 9BA13C2BCB9;
-	Wed, 16 Sep 2026 14:23:03 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="G2Voys4r"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 45742C2BCC7;
+	Wed, 16 Sep 2026 14:23:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1789568583;
-	bh=68xt0rCfMk3htQ+CNQtRlu7SHWfHYk23uy9xMNYUavE=;
+	s=k20201202; t=1789568584;
+	bh=vAFIOZywJ3Cf6QH20r/UhBzUAEPsdRIi9SW9imqskR8=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=ZdUQ5q7g+6VJixBAP2wzqsp4xZThg9LNCib9S0Y8CKOFMdD9+H7B1ll2XdemGHU6L
-	 aqrqNgIxbM6y07I1kDY4l79ytFwI+XjMTNeoCO+yi/Tqqq1ZGH+tfP/ZdwA7OXjnyi
-	 1cNR4SzzbKj/8RDqHjIAMQe34MfTzudT17+JR3/HrRBKj1CDE/7ofoe6WAn7sAQVCE
-	 ZSSiSvDCwcZuWPUmrtA4xUKvGMefP4UmEhneEDj+qYfwVfwwmRK6amo4zkgDd3ZplM
-	 91g4bLfIp6CwdmP+f3fMvEAIDg0tDRXtDJurucRMIBv5Q3TxJaFrY3bOv5iuYeEdBa
-	 JBPJnFa8if7hg==
+	b=G2Voys4rJhKU5J3XzVzbJ4e022V1NbbJH4LJzJAb/Btr9qBEwwV5kDizlVdDF2mjP
+	 86EYBBBkoLlxYLDAzcqrQ7H+cFhCdrL9V6Ng1r1Rp53GHdJ9Ai2nGU8W1jwBwC5HaQ
+	 1/rgZUassqN+6M9BY1nkaEkeBlDqMCg3ShKAbA9ld7bvuntaiTiGzZSe1HQDq1/52s
+	 T/Z85elAJwphe13qitQrwU7mNi7P97Z4z9pEE0plDlXGhZ46/wS8TixeVmv4Vwbv7b
+	 V0FWZ5uM+o2NkKrI/781gACUe39FTAQv9Gqz/wVpu3R4oPCKbnA+S6XHFFePwTnfX5
+	 4ibXKxLWsmaQg==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 833E9C88E77;
-	Wed, 16 Sep 2026 14:23:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 291F5C982C4;
+	Wed, 16 Sep 2026 14:23:04 +0000 (UTC)
 From: Muzaffer Kadir via B4 Relay <devnull+muzafferkadir.mainlining.org@kernel.org>
-Date: Wed, 16 Sep 2026 17:22:18 +0300
-Subject: [PATCH v2 13/19] drm: msm: mdp5: Add MDP5 configuration for
- MSM8952
+Date: Wed, 16 Sep 2026 17:22:23 +0300
+Subject: [PATCH v2 18/19] dt-bindings: input: touchscreen: goodix: Add
+ binding for GT970
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -41,7 +41,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260916-msm8952-initial-support-v2-13-798c2602dde1@mainlining.org>
+Message-Id: <20260916-msm8952-initial-support-v2-18-798c2602dde1@mainlining.org>
 References: <20260916-msm8952-initial-support-v2-0-798c2602dde1@mainlining.org>
 In-Reply-To: <20260916-msm8952-initial-support-v2-0-798c2602dde1@mainlining.org>
 To: Bjorn Andersson <andersson@kernel.org>, Abel Vesa <abelvesa@kernel.org>, 
@@ -77,11 +77,11 @@ Cc: David Heidelberg <david@ixit.cz>, Dang Huynh <danct12@riseup.net>,
  linux-pm@vger.kernel.org, linux-input@vger.kernel.org, 
  Muzaffer Kadir <muzafferkadir@mainlining.org>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1789568579; l=2908;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1789568579; l=1586;
  i=muzafferkadir@mainlining.org; s=20260816; h=from:subject:message-id;
- bh=iJr3V7WxoPjZJBrBl5G8abT5fWMjrLqAWAzBrQzyHX8=;
- b=K6cMt2RzCyLTcNfNqQpFwSE97LtWUMtFbd+1vhHKt0SMEKwr64JQjm2aa/l3hLO13iuQw1Ezs
- 2DDPYIFwNLeAYxaIHN0iF8IYhcIESviwBogVCfp8KTJbo9K3kud4JxX
+ bh=7Oq7rS5EzM26Gux3h9WgKT4CbZy8lSOyKUpp4zcOUuY=;
+ b=Aen8yDs06Tn7noNOlLxLuP49Uf46jO9Zot2IqdsXB+Hd/ixi0+1rYdTdgcz6nwNrS+wlRzTbY
+ rxlolij9v4xBdzlB9rAWgsdNZdwTOlAdMwGARte35k+eIpHYDT8hrYj
 X-Developer-Key: i=muzafferkadir@mainlining.org; a=ed25519;
  pk=4zkv4suQ3cYcO4Z7CrV8JSSjEGLBGepUtvQCFjgnYIU=
 X-Endpoint-Received: by B4 Relay for muzafferkadir@mainlining.org/20260816
@@ -91,112 +91,60 @@ Reply-To: muzafferkadir@mainlining.org
 
 From: Muzaffer Kadir <muzafferkadir@mainlining.org>
 
-Add the mdp5_cfg_hw entry for MDP5 version v1.12 found on MSM8952.
+GT970 works with GT911 driver, document it to be
+used with GT911 compatible.
 
 Signed-off-by: Muzaffer Kadir <muzafferkadir@mainlining.org>
 ---
- drivers/gpu/drm/msm/disp/mdp5/mdp5_cfg.c | 81 ++++++++++++++++++++++++++++++++
- 1 file changed, 81 insertions(+)
+ .../bindings/input/touchscreen/goodix.yaml         | 35 ++++++++++++----------
+ 1 file changed, 20 insertions(+), 15 deletions(-)
 
-diff --git a/drivers/gpu/drm/msm/disp/mdp5/mdp5_cfg.c b/drivers/gpu/drm/msm/disp/mdp5/mdp5_cfg.c
-index 7c91fc1915f3..d34c94d6f7e2 100644
---- a/drivers/gpu/drm/msm/disp/mdp5/mdp5_cfg.c
-+++ b/drivers/gpu/drm/msm/disp/mdp5/mdp5_cfg.c
-@@ -744,6 +744,86 @@ static const struct mdp5_cfg_hw msm8x76_config = {
- 	.max_clk = 360000000,
- };
+diff --git a/Documentation/devicetree/bindings/input/touchscreen/goodix.yaml b/Documentation/devicetree/bindings/input/touchscreen/goodix.yaml
+index a26a54d63a1c..4be2c137abd7 100644
+--- a/Documentation/devicetree/bindings/input/touchscreen/goodix.yaml
++++ b/Documentation/devicetree/bindings/input/touchscreen/goodix.yaml
+@@ -14,21 +14,26 @@ allOf:
  
-+static const struct mdp5_cfg_hw msm8952_config = {
-+	.name = "msm8952",
-+	.mdp = {
-+		.count = 1,
-+		.base = { 0x0 },
-+		.caps = MDP_CAP_SMP |
-+			0,
-+	},
-+	.smp = {
-+		.mmb_count = 8,
-+		.mmb_size = 8192,
-+		.clients = {
-+			[SSPP_VIG0] = 1, [SSPP_DMA0] = 4,
-+			[SSPP_RGB0] = 7, [SSPP_RGB1] = 8,
-+		},
-+	},
-+	.ctl = {
-+		.count = 3,
-+		.base = { 0x01000, 0x01200, 0x01400 },
-+		.flush_hw_mask = 0xffffffff,
-+	},
-+	.pipe_vig = {
-+		.count = 1,
-+		.base = { 0x04000 },
-+		.caps = MDP_PIPE_CAP_HFLIP | MDP_PIPE_CAP_VFLIP |
-+				MDP_PIPE_CAP_SCALE | MDP_PIPE_CAP_CSC |
-+				MDP_PIPE_CAP_DECIMATION,
-+	},
-+	.pipe_rgb = {
-+		.count = 2,
-+		.base = { 0x14000, 0x16000 },
-+		.caps = MDP_PIPE_CAP_HFLIP | MDP_PIPE_CAP_VFLIP |
-+				MDP_PIPE_CAP_DECIMATION,
-+	},
-+	.pipe_dma = {
-+		.count = 1,
-+		.base = { 0x24000 },
-+		.caps = MDP_PIPE_CAP_HFLIP | MDP_PIPE_CAP_VFLIP,
-+	},
-+	.pipe_cursor = {
-+		.count = 1,
-+		.base = { 0x440DC },
-+		.caps = MDP_PIPE_CAP_HFLIP	|
-+			MDP_PIPE_CAP_VFLIP	|
-+			MDP_PIPE_CAP_SW_PIX_EXT	|
-+			MDP_PIPE_CAP_CURSOR	|
-+			0,
-+	},
-+	.lm = {
-+		.count = 2,
-+		.base = { 0x44000, 0x47000 },
-+		.instances = {
-+				{ .id = 0, .pp = 0, .dspp = 0,
-+				  .caps = MDP_LM_CAP_DISPLAY, },
-+				{ .id = 3, .pp = -1, .dspp = -1,
-+				  .caps = MDP_LM_CAP_WB },
-+			     },
-+		.nb_stages = 8,
-+		.max_width = 2048,
-+		.max_height = 0xFFFF,
-+	},
-+	.dspp = {
-+		.count = 1,
-+		.base = { 0x54000 },
-+
-+	},
-+	.pp = {
-+		.count = 3,
-+		.base = { 0x70000, 0x70800, 0x72000 },
-+	},
-+	.intf = {
-+		.base = { 0x00000, 0x6a800 },
-+		.connect = {
-+			[0] = INTF_DISABLED,
-+			[1] = INTF_DSI,
-+		},
-+	},
-+	.max_clk = 320000000,
-+};
-+
- static const struct mdp5_cfg_hw msm8x53_config = {
- 	.name = "msm8x53",
- 	.mdp = {
-@@ -1017,6 +1097,7 @@ static const struct mdp5_cfg_handler cfg_handlers_v1[] = {
- 	{ .revision = 9, .config = { .hw = &msm8x94_config } },
- 	{ .revision = 7, .config = { .hw = &msm8x96_config } },
- 	{ .revision = 11, .config = { .hw = &msm8x76_config } },
-+	{ .revision = 12, .config = { .hw = &msm8952_config } },
- 	{ .revision = 14, .config = { .hw = &msm8937_config } },
- 	{ .revision = 15, .config = { .hw = &msm8917_config } },
- 	{ .revision = 16, .config = { .hw = &msm8x53_config } },
+ properties:
+   compatible:
+-    enum:
+-      - goodix,gt1151
+-      - goodix,gt1158
+-      - goodix,gt5663
+-      - goodix,gt5688
+-      - goodix,gt911
+-      - goodix,gt9110
+-      - goodix,gt912
+-      - goodix,gt9147
+-      - goodix,gt917s
+-      - goodix,gt927
+-      - goodix,gt9271
+-      - goodix,gt928
+-      - goodix,gt9286
+-      - goodix,gt967
++    oneOf:
++      - enum:
++          - goodix,gt1151
++          - goodix,gt1158
++          - goodix,gt5663
++          - goodix,gt5688
++          - goodix,gt911
++          - goodix,gt9110
++          - goodix,gt912
++          - goodix,gt9147
++          - goodix,gt917s
++          - goodix,gt927
++          - goodix,gt9271
++          - goodix,gt928
++          - goodix,gt9286
++          - goodix,gt967
++      - items:
++          - enum:
++              - goodix,gt970
++          - const: goodix,gt911
+ 
+   reg:
+     enum: [ 0x5d, 0x14 ]
 
 -- 
 2.55.0
