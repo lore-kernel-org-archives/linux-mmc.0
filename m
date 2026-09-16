@@ -1,116 +1,134 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm2-f13.google.com (mail-wm2-f13.google.com [74.125.225.141])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 736194BA1CB;
-	Wed, 16 Sep 2026 10:00:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F19894B5144
+	for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2026 10:04:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.225.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789552841; cv=none; b=umwdq07mbCcsfaJ8b9XtHlrVRo2sMfvflp+nf2bTJlwySVNgjhCm8qLfVFiNbfCPv0L+JPPnUX0ZPzSXZVBQDNKpZ4ujLZTIWq+hv/JGimCBJhuR16mn9nQo64/mYFs9tqcvrSm+Sex00A7Md1yV4v4MHCAlXONOeJQ+QKzvxoU=
+	t=1789553079; cv=none; b=QGOb4O77y2mW2pPqFGONq2X28BJ2PWlyR/9ClZrMOs7hfE2/bOnAE95nVojFNXjwMoDyRu6slENVug20ktgz6sjX7QiEFIMVBVHBSi87laYj/amT5lT6f3VzKzVS2Ll2ceHyzsOvS0O0jrdvbc6/MHsA1jJ+8++kBoBtSI3aipE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789552841; c=relaxed/simple;
-	bh=+nK4k+1goCBNjpzTIg7o/ztLdauBhMZrhU2wAOgEQgI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FXPkZxmdxU/x357sjh2m+52jRmJF33vqs8dt0xjHQwezQIx+LRzoDxuN8PxWfVkP4kaejWAxYC0i8/GodY/afng+9MZgMgS4nQT2FFUagYceDXNhTArYbGPTa1f17Dpi+0Gq9MqKnNV7nXF1NRGfnGtyI/MnEoxngSzFiWmB+RU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aRot0Cv2; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789553079; c=relaxed/simple;
+	bh=0xWacLHVFg8yDFBVQgT0xxVbDKKkqpluoE/q6wHsbhg=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=hNC61XBYaQhdabmOONjnDIccm3ouLLz9h7HL++Bh6hTJAlRtJUTNVTu0PqsX6XM8eMjEBaPfrIqV+hK97zvNpna7hXko1bpu0l26zClsd416scsDabk2sM/d9FR0LWksBgQHzuqQLD/XhUlYdl6VLkEzWPqXFVZACcsScgfO6pI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=jXAzjpbn; arc=none smtp.client-ip=74.125.225.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aRot0Cv2"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ACBF11F000FF;
-	Wed, 16 Sep 2026 10:00:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789552832;
-	bh=XpZeO+osP/whGnfGamFG3+0s00oTS61O1oLg2UFOI1Q=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=aRot0Cv23tFEIWyS81ZU1wq0DVWBgUQzl5zSU0RpNdAGfRV3ZSX/hM59incusCxaI
-	 0v7slX5dJsLGdW+DeQjTaahNoUUBKW/NBIZgMdQv1+rH9f68v07oSpt38pIEqURQD4
-	 aOV7/PCeufbdqkkGeqAWmIymrMauOxtkQXUgqzKz6B+fyeK5adx80OzNq273WAYFAx
-	 OEJu5GcbXTXKqHet8n71WViRsNfEJxldKRHLwtvIlKbdg0WPOABmGdN6FqiVBMhm1w
-	 kq6l4ZAOFmbRSgj0PHgWeeVQ2kc04z1wRGMI9bpVCG3PQ5crNujfrSBa4GXnP3ieYF
-	 9fCuvJykuTODw==
-Received: from johan by xi.lan with local (Exim 4.99.5)
-	(envelope-from <johan@kernel.org>)
-	id 1x6mRK-00000005yOD-1h4Q;
-	Wed, 16 Sep 2026 12:00:30 +0200
-Date: Wed, 16 Sep 2026 12:00:30 +0200
-From: Johan Hovold <johan@kernel.org>
-To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>,
-	Rui Miguel Silva <rmfrfs@gmail.com>, Alex Elder <elder@kernel.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	greybus-dev@lists.linaro.org, linux-staging@lists.linux.dev,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/2] mmc: core: Turn mmc_alloc|free_host() into static
- functions
-Message-ID: <aqpovla0rTDnmwRh@hovoldconsulting.com>
-References: <20260915132052.273212-1-ulf.hansson@oss.qualcomm.com>
- <20260915132052.273212-3-ulf.hansson@oss.qualcomm.com>
- <aqpIl5NWCFiuKy9b@hovoldconsulting.com>
- <CAPx+jO86Sy+of41dw3Gi5CNfyc5+iOyDU4CZypz4YGzG27QW0A@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jXAzjpbn"
+Received: by mail-wm2-f13.google.com with SMTP id 5b1f17b1804b1-49e8185e037so3958285e9.3
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2026 03:04:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1789553058; x=1790157858; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:date:message-id
+         :subject:references:in-reply-to:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=1+LP4xptQa+2C+BD1oGDKA67ZCLFNM3ainCw+VzoD2s=;
+        b=jXAzjpbn2UlEDALJFMvz9mjxq561naPRSEqqCZISeov/EP/NcBrw0I4C/LA7c5PJ0Z
+         G/8Il8TPEqCAUnSIOfeW4HCVyRC03hnCxErbZDl/KxLmaaOdjJo0w2NfGCeWij3mAnt0
+         U66KXZq8NMJQ4wfo8XXvqzSfp1WlZ5gt6BLJN4pOTdi6meIj8AdVcF6F7GzRwDTlHGB2
+         Y7n6HhFgsDWpq+Z9bz+0Z4Jma5lf8DH47z7fQsQt98Oc08BEuw821WSgCiZ7+2K2ebqe
+         hIyc4kUR6qjTc3FqtQGuBdLE/gimDaKfTr4pH9XURpyUaRtRpsMV7OeVyIRBVTkL2UQ7
+         LOrg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1789553058; x=1790157858;
+        h=content-transfer-encoding:content-type:mime-version:date:message-id
+         :subject:references:in-reply-to:cc:to:from:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=1+LP4xptQa+2C+BD1oGDKA67ZCLFNM3ainCw+VzoD2s=;
+        b=CetDQo45GNHGqoMlpKXI2MinsnTGfhXThygAclB3dOvT0uCYjfj8XziYlP6X7ACXlq
+         vTFGhqQbqh7FhI1TnUtecrnhRRiQa2l7iSSExki9WBd5lJPZ7vbPJ+rwt3I1F/Du2U/W
+         XlZ7LN3ohullYi46pa2uqBA0LDsXaIlt6/O5NdPbvJDfOgQ41N0YBEE0605P18KrRF/j
+         3qC3b2H5hAo8DtWJaCQyU1cRv5xGydl1DTm0oegqqekHjZpzDjZbM3MyJiNkBNH+JIW4
+         /4EU9DLQxd7QBKypaOQmWFsGm1y/2QOlN4DiiQhwBTs/T2klqKkhSSn7tOnvuc/iUfiK
+         UYxQ==
+X-Forwarded-Encrypted: i=1; AKwUvBy+w3uDKJomEqoAxWiL9B2o4xSRLFU9LzQj1XgQ3B7VcI6j0X0ZQE/VhwM+co5oEeTDAouWMaQJyDY=@vger.kernel.org
+X-Gm-Message-State: AFuF++kJ9nIAsy9S3eRwWD/HPluXf71pXwm+cNz6F8ziSV7W32o24eKw
+	WyJxWl4xvfaTlq+bvXs0TfUu/LyGlAfzBXmQ0Yn/HGjUwKyjLlO77WgfCK7AM6JlXqw=
+X-Gm-Gg: AYBFou1wW1zTMsjv3ICmuHRqrvOx2hmFGbt5Srl+dhYloROg9GN2VdNJUkjDamh1YqY
+	6mzEBv+TOgaig1Rd3Vg/Le0ydNy8wkGxH+gg1RfGQLJe0vXMFX8xdgDRJ6NZwSg/NsRWHu9luiW
+	DGIWufAP4V1HhPg/UC4lex6BQNQ2cj+PVsmPoWBsDvzQF+TqN5ApiVWkKh6vpsFQ2m6SFAImMzi
+	5RCYhUkWO+0gj4ur2oXnADqvYZJPJJuHPFiTiIGFUbthbsPpgmherzJ0GyhqhhEVCoFaEkg3niZ
+	BCDeTVtkv32/EyGUzIuafyZBiD+H973bIPSj4SE1KO61B8THppjjOBxddPmmyCR9S3Zq69nk1+V
+	pEWokBWlgJlkYlCoZvR9b0g0vGg79/O4RsSXkiMXWycunSGcjEh69cgJH0kmN6Pw1Fpox6u4/vh
+	5NQJNfOAjB/ay3zeLZf0lzS5eyB9+lBrbsbj1S4G5kOSuLnPH3EX0+SyixHSUg4qq0KIvxv3P6a
+	VjvjgaUy+mf
+X-Received: by 2002:a05:600c:3584:b0:49c:ee36:10fc with SMTP id 5b1f17b1804b1-49eac4678b6mr26145655e9.8.1789553057754;
+        Wed, 16 Sep 2026 03:04:17 -0700 (PDT)
+Received: from arrakeen-2.home ([2a01:e0a:106d:1080:52eb:f6ff:feb3:451a])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49e84805db6sm35844635e9.3.2026.09.16.03.04.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 16 Sep 2026 03:04:17 -0700 (PDT)
+From: Neil Armstrong <neil.armstrong@linaro.org>
+To: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Jerome Brunet <jbrunet@baylibre.com>, 
+ Kevin Hilman <khilman@baylibre.com>, 
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
+ Stephen Boyd <sboyd@kernel.org>, Lucas Tanure <tanure@linux.com>
+Cc: Brian Masney <bmasney+clk@redhat.com>, 
+ Chuan Liu <chuan.liu@amlogic.com>, Jian Hu <jian.hu@amlogic.com>, 
+ Ronald Claveau <linux-kernel-dev@aliel.fr>, linux-mmc@vger.kernel.org, 
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ linux-amlogic@lists.infradead.org, linux-clk@vger.kernel.org, 
+ linux-kernel@vger.kernel.org
+In-Reply-To: <20260905153234.133217-1-tanure@linux.com>
+References: <20260905153234.133217-1-tanure@linux.com>
+Subject: Re: (subset) [PATCH v2 0/4] amlogic: t7: give the MMC bus pipeline
+ clock real consumers
+Message-Id: <178955305678.2918771.10810230842213506975.b4-ty@b4>
+Date: Wed, 16 Sep 2026 12:04:16 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAPx+jO86Sy+of41dw3Gi5CNfyc5+iOyDU4CZypz4YGzG27QW0A@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.15.1
 
-On Wed, Sep 16, 2026 at 11:36:25AM +0200, Ulf Hansson wrote:
-> On Wed, Sep 16, 2026 at 9:43 AM Johan Hovold <johan@kernel.org> wrote:
-> >
-> > On Tue, Sep 15, 2026 at 03:20:46PM +0200, Ulf Hansson wrote:
-> > > From: Ulf Hansson <ulfh@kernel.org>
-> > >
-> > > As there are no longer any users of these functions, let's make them
-> > > internal to the mmc core.
-> >
-> > Why would you want to do that? The devres helpers should just be simple
-> > wrappers around these and sometimes devres just isn't a good fit.
+Hi,
+
+On Sat, 05 Sep 2026 16:32:30 +0100, Lucas Tanure wrote:
+> The previous series for the intermittent boot hangs on the VIM4
+> marked sys_ampipe_nand as critical. But as Chuan Liu from Amlogic
+> explained, sys_ampipe_nand clocks a pipeline stage that the
+> hardware design inserts in the bus path between the SD/eMMC
+> controllers and the NIC_MATRIX fabric to help timing closure.
 > 
-> At the moment there seems to be no need for them. I would rather keep
-> API/interfaces as simple as possible, so I prefer to remove them at
-> this point.
+> So the clock has real consumers: reference it from the three MMC
+> controller nodes and drop CLK_IS_CRITICAL instead.
 > 
-> If we see a need for them, we can always add them back.
+> [...]
 
-Devres generally only works when all resources are device managed.
-Therefore you should always provide the underlying non-devres manages
-interface as well so that you don't force devres on drivers where it
-could cause trouble.
- 
-> > Especially with the work cancellations present in mmc_free_host() (which
-> > I have pointed out elsewhere should not be there), a driver may need to
-> > free the host before tearing down other non-devres managed resources
-> > during unbind.
-> 
-> Can you please point me to such an example so I can try to understand better?
+Thanks, Applied to https://git.kernel.org/pub/scm/linux/kernel/git/amlogic/linux.git (v7.4/arm64-dt)
 
-We just discussed the renesas driver which can schedule rescan work
-before registering the host controller. [1]
+[3/4] arm64: dts: amlogic: t7: add the pipeline clock to the MMC controllers
+      https://git.kernel.org/amlogic/c/065957517880dc7053e0723cc9532b6e78c8855c
 
-If such a driver also has non-devres managed resources that are freed
-before the work is cancelled you have a use-after-free.
+These changes has been applied on the intermediate git tree [1].
 
-> > This may even be needed for greybus which currently destroys the
-> > connection before freeing the host.
-> 
-> I looked closer at gb_sdio_remove() (the greybus sdio driver's
-> ->remove() callback) and I think the problem isn't about freeing the
-> host.
-> 
-> Instead it seems like the call to mmc_remove_host() is done too late.
-> To me it looks like when the mmc core tries to power off the card
-> gracefully, through mmc_remove_host() the driver has already moved
-> into a state where it no longer accepts any requests.
+The v7.4/arm64-dt branch will then be sent via a formal Pull Request to the Linux SoC maintainers
+for inclusion in their intermediate git branches in order to be sent to Linus during
+the next merge window, or sooner if it's a set of fixes.
 
-Yes, that looks wrong, but that's a separate issue.
+In the cases of fixes, those will be merged in the current release candidate
+kernel and as soon they appear on the Linux master branch they will be
+backported to the previous Stable and Long-Stable kernels [2].
 
-I only pointed at greybus as an example of a driver which has non-devres
-managed resources. If there is (rescan) work still scheduled after
-probe() or remove() returns, there's a potential use-after-free.
+The intermediate git branches are merged daily in the linux-next tree [3],
+people are encouraged testing these pre-release kernels and report issues on the
+relevant mailing-lists.
 
-Johan
+If problems are discovered on those changes, please submit a signed-off-by revert
+patch followed by a corrective changeset.
 
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/amlogic/linux.git
+[2] https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+[3] https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
 
-[1] https://lore.kernel.org/lkml/ap7CaVj82BJZgjf6@hovoldconsulting.com/
+-- 
+Neil
+
