@@ -1,37 +1,37 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3F725111AE;
-	Wed, 16 Sep 2026 14:23:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D67D511E60;
+	Wed, 16 Sep 2026 14:23:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789568583; cv=none; b=oREb3kIEhaJwD5F5es31/2CRxIKgomAO0TirQl+krI9fPn0W/YibRqFDEOk9w7w1Zy9awa1q20S1qme9KuHXl2GvLScnyGI5FZDqbICKBjJph3j65Fg8GjspmJdeNeyhrFxVW+eFAhxd/9uWbraRtG5nwA0HkVFuxxXe3oak3U8=
+	t=1789568583; cv=none; b=jqqOu+LMzlsv3xXDTU36Sqyp+67VyaCrNPRSFdzcocdtm/gvhQo/Q/P+PmE2nl91tXTABONwrIhaAVVKv7MlkWhMq9nXv9ddHn5JfkPk2P28/547BfUSuNsrsW0c2fysaQxmQKik6LEmAbQL3bHkBSYeOIRp9dZOC8Vn3O2qxWc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1789568583; c=relaxed/simple;
-	bh=ADWyIfwE6XuJB72wx5ZNO3lUTF7XQSRGu+OYhU10h+o=;
+	bh=kL7kpIG3qA+4AejsWI3BHXBQrYH/6KaVhM51d9C5+XE=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=EimqK3KtFWOoRABZtrNCrEstTlTA5/WxyMhGa+odsx+REHzrQ5FyUrCyI7d8nmkkGQQZLZwBnVk3zB2Ht4GE7bKLhK7E90PBRUEwPHYtG9RZsXYQraWHT1yJybPPVAjutBHrnJzz57Hdi8UAef1h4vye8JiprpVPpr/QSxaA59s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MA7aynPf; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=TD2PxWLc6jfi35QqlsDbAMHG+Nx4oiPdmWBMFUWificU4agievQITRr61dbi4zgal5A05k+5T0a3t7BhB+Z5o0P7ALdwtUbpWxeOwX9pHcPRIVlkKhni5mh+U3/AbSCLo04165iBz85Y7YNMZgjQsDkRuv8AfNey6IuIRA5OFoc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iN4XZ0Xb; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MA7aynPf"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id A915CC4AF55;
-	Wed, 16 Sep 2026 14:23:02 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iN4XZ0Xb"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 2F354C2BD00;
+	Wed, 16 Sep 2026 14:23:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1789568582;
-	bh=ADWyIfwE6XuJB72wx5ZNO3lUTF7XQSRGu+OYhU10h+o=;
+	s=k20201202; t=1789568583;
+	bh=kL7kpIG3qA+4AejsWI3BHXBQrYH/6KaVhM51d9C5+XE=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=MA7aynPfjZ7Sh0gdKu6NLA2gt5MV0COb7GgOva2ho7zAGNVlKpdPR1ItcfulaCOr1
-	 kB8/WWIvIMaz578oVas69qMT2SHWrNxvbpCnzp13DY/WYWERFy23WhZMN01sPvxThc
-	 If1u00ISA6Sejy4LISyV7B/oe7mnzwrABznxE427dCgsZw/fHtaGfyieVVDzoz+pUY
-	 HF/Jj/bCDxo3hvmknklNO/6iWRKV1cLpGT5KzBjAvhuYDhxzS0joFlmPk0fI0/3Dlz
-	 A87ZicJYwidHe5WEM5SGk+Zd7PgE71JU7CddrlEp0DC+QeuRnEqXHn2hSdAo0cR9tB
-	 g8I/yvpBnLg+A==
+	b=iN4XZ0XbH7ZSY5939J76DcOjxQd40aWBMdxb1yLM+X3ruSQRps3dTMB9VbJVxg8OW
+	 C5nH9t+vkXxZD9HlpX9spThfWpNfXfXDgjkuGHVu6wVMRulRN1JsWUwlc6zLjCA0jG
+	 nWw69bsWGt9psGSiyryMAOAfeI7oBUT8B4ymsPI9jYQjV4sepCpGjSTdWui5NiDrks
+	 kOYiCP2DvcPQpTgAAEJZLTWaSMGxuEzne692qhd+yjpciI1+buce1TIG3Xp2hAVhTA
+	 B5H86kztNYwWocdFd97ZJI4MT4l0Si8Lq0bAboKq2+5vcrfad0tp9ublM8gg3Kjqlw
+	 jNFmQk7lRMUkw==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 827F4C982C4;
-	Wed, 16 Sep 2026 14:23:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19091C982C3;
+	Wed, 16 Sep 2026 14:23:03 +0000 (UTC)
 From: Muzaffer Kadir via B4 Relay <devnull+muzafferkadir.mainlining.org@kernel.org>
-Date: Wed, 16 Sep 2026 17:22:10 +0300
-Subject: [PATCH v2 05/19] dt-bindings: mmc: sdhci-msm: Add MSM8952
+Date: Wed, 16 Sep 2026 17:22:15 +0300
+Subject: [PATCH v2 10/19] dt-bindings: display/msm: qcom, mdp5: Add MSM8952
  compatible
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -41,7 +41,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260916-msm8952-initial-support-v2-5-798c2602dde1@mainlining.org>
+Message-Id: <20260916-msm8952-initial-support-v2-10-798c2602dde1@mainlining.org>
 References: <20260916-msm8952-initial-support-v2-0-798c2602dde1@mainlining.org>
 In-Reply-To: <20260916-msm8952-initial-support-v2-0-798c2602dde1@mainlining.org>
 To: Bjorn Andersson <andersson@kernel.org>, Abel Vesa <abelvesa@kernel.org>, 
@@ -77,11 +77,11 @@ Cc: David Heidelberg <david@ixit.cz>, Dang Huynh <danct12@riseup.net>,
  linux-pm@vger.kernel.org, linux-input@vger.kernel.org, 
  Muzaffer Kadir <muzafferkadir@mainlining.org>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1789568579; l=861;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1789568579; l=837;
  i=muzafferkadir@mainlining.org; s=20260816; h=from:subject:message-id;
- bh=VEXyO75VAF+/9sYwg1Lpbpy6HMe2dubE2oLqqBz7xuw=;
- b=70uWfb9JjA1sdyX0YTQ8rD0SsQLsXi/4Fn/zmirZHVh1eYxxPSFrOCpMyd4XjUITDMsttEKHM
- WwswHYY3A0xAF2ZrQfMlLP/dx6tY2Sz8GCHI7GF6nPEkAtJrQHJagIJ
+ bh=j1cyFUrA8K2mGnvaltP8lasGm8e1/N+retm6o6lMinU=;
+ b=Sd9tzlC4Xu7TGLcWPZSbxF86KgcgyzvvPzeBb0XmLLia8ok8x+YRMBOuc+MkIw6ZdW/DgUnx2
+ G+qU3ERkFWRCw3Jz57IG09IrV5ZbH30BPOxo/j/eDslCfWwEk4LsBgD
 X-Developer-Key: i=muzafferkadir@mainlining.org; a=ed25519;
  pk=4zkv4suQ3cYcO4Z7CrV8JSSjEGLBGepUtvQCFjgnYIU=
 X-Endpoint-Received: by B4 Relay for muzafferkadir@mainlining.org/20260816
@@ -91,26 +91,25 @@ Reply-To: muzafferkadir@mainlining.org
 
 From: Muzaffer Kadir <muzafferkadir@mainlining.org>
 
-Document the compatible string for the SDHCI controller on the
-msm8952 platform.
+Add the compatible for the MDP5 found on MSM8952.
 
 Signed-off-by: Muzaffer Kadir <muzafferkadir@mainlining.org>
 ---
- Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml | 1 +
+ Documentation/devicetree/bindings/display/msm/qcom,mdp5.yaml | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml
-index 69bd44e65ad7..9d4409c958fa 100644
---- a/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml
-+++ b/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml
+diff --git a/Documentation/devicetree/bindings/display/msm/qcom,mdp5.yaml b/Documentation/devicetree/bindings/display/msm/qcom,mdp5.yaml
+index 2735c78b0b67..2f0a32a3f586 100644
+--- a/Documentation/devicetree/bindings/display/msm/qcom,mdp5.yaml
++++ b/Documentation/devicetree/bindings/display/msm/qcom,mdp5.yaml
 @@ -26,6 +26,7 @@ properties:
-               - qcom,ipq4019-sdhci
-               - qcom,ipq8074-sdhci
-               - qcom,msm8226-sdhci
-+              - qcom,msm8952-sdhci
-               - qcom,msm8953-sdhci
-               - qcom,msm8974-sdhci
-               - qcom,msm8976-sdhci
+               - qcom,msm8916-mdp5
+               - qcom,msm8917-mdp5
+               - qcom,msm8937-mdp5
++              - qcom,msm8952-mdp5
+               - qcom,msm8953-mdp5
+               - qcom,msm8974-mdp5
+               - qcom,msm8976-mdp5
 
 -- 
 2.55.0
