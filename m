@@ -1,71 +1,60 @@
-Received: from out30-131.freemail.mail.aliyun.com (out30-131.freemail.mail.aliyun.com [115.124.30.131])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFBE63BAD81;
-	Wed, 16 Sep 2026 03:13:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.30.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFC3A45DF42;
+	Wed, 16 Sep 2026 07:39:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789528413; cv=none; b=hFzYABaloLo0ofxXOYKHO8/AP79lcH3UyiBjIFq0Zs12VZWzZohqgBD3JqiBx8VwnOLdwsaxbblzz8xZzuQafk9gBK7SOLdgT3ljby6QvIZfjvjoQOSmKveHTkDkKvHBUBcMKWrjpZmco8rqPjLWCe1jJN9DPLxORqq2xGd6E+0=
+	t=1789544397; cv=none; b=OZkKQ+KbiX6zlEgGmfARm4taMFBMVF7UIs74G6eQgS1FuKMJihLu35tUBv547b/OqONWuRXf3tW+688d0LjBrhXKr2xGna9A7aV/De1MWlff1JOh52vWHWjbKbiSh0KPzJxD+llGZK2TsWeX2XtTgIlWAYkZod2uaye81r618Yg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789528413; c=relaxed/simple;
-	bh=SHtokfXkoOPsNYuAqxARc+a8ImsontnaUMSedjeFkL0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=GYdBKzeWOe4Zvyw/3LMhylJy5DzaBw6BaWUip2uMJUSJmQyhrhwXWF/C9VVvyngSPzq6b9Oyg6FYdCD/JGbUFIDRr4D9RdChFgoyezSmJDhTmoXx58Cs+67ew3e5oSAa6o9G4U1c0lwd2ObYFWwSireQrELULF3dkAGhkeKrRCo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com; spf=pass smtp.mailfrom=linux.alibaba.com; dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b=YUHkG+03; arc=none smtp.client-ip=115.124.30.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.alibaba.com
+	s=arc-20240116; t=1789544397; c=relaxed/simple;
+	bh=lxu9Ou0bZy932xJS7yPyNLopQ5ChUdeYBAlUXA8Z9O4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=k9+z7sPmbIcY4yCM+4tgMpnRKPtt8QEsQTPqn7gL1lEp1JDmMiR6dJdLUhaur4EXWzXHJokMxcF8SM7ltBoVoELigP6GS/RZxVUX4BsmaompC1JfMjA8DCYUEsXTnuBC04YmzdUIlh9RuD6zpYPzSYGmPY8+VgMPMSq5/gxaejw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=oJWJh5xh; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b="YUHkG+03"
-DKIM-Signature:v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=linux.alibaba.com; s=default;
-	t=1789528407; h=Message-ID:Date:MIME-Version:Subject:To:From:Content-Type;
-	bh=3Ad7r9PzlVendAKi3/AUcl8n3hD7fuMAK5N9uhTGEmc=;
-	b=YUHkG+03kDjd5isu28js3754eBsdBLNFi9XHwJOklcqCVMFvxubPgbciMXdCPO4P1TXbkfg6M4pbsCqNuQt+XkRTlsdHDlDtkQiU2H9Ck3cuqmMIydZgwhdZGpybXhYF1ZoVgL8E/BVZN//HplQN8lI0JBpMkkpQKrNjzI5lfuA=
-X-Alimail-AntiSpam:AC=PASS;BC=-1|-1;BR=01201311R601e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=maildocker-contentspam033032089153;MF=baolin.wang@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0XB3apYv_1789528406;
-Received: from 30.74.144.115(mailfrom:baolin.wang@linux.alibaba.com fp:SMTPD_---0XB3apYv_1789528406 cluster:ay36)
-          by smtp.aliyun-inc.com;
-          Wed, 16 Sep 2026 11:13:26 +0800
-Message-ID: <8c67c48d-d950-4a63-9444-0f9c2e1e2b87@linux.alibaba.com>
-Date: Wed, 16 Sep 2026 11:13:25 +0800
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="oJWJh5xh"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 50F041F000FF;
+	Wed, 16 Sep 2026 07:39:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linuxfoundation.org;
+	s=korg; t=1789544374;
+	bh=u+XkQxt2u0WvRGPFfPUiOTOwsR11da5RzJPTX5eroTU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=oJWJh5xhSLLQz27/6XHNQ66B2I8GYLl4B0zT3QWbEs440kNXKYObiJh+bW4mf8hi3
+	 PSap+9LOC99YFGRrvfYx/SZkSAHMu/UmBXXBhm9OAIwxpWRdJfvQr7A6eCUM9YdkTP
+	 BKApEqjvynbTJKWMR3ZP4430EzDicEt3SvckM19U=
+Date: Wed, 16 Sep 2026 08:37:41 +0100
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>,
+	Rui Miguel Silva <rmfrfs@gmail.com>,
+	Johan Hovold <johan@kernel.org>, Alex Elder <elder@kernel.org>,
+	greybus-dev@lists.linaro.org, linux-staging@lists.linux.dev,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 1/2] staging: greybus: sdio: Convert to
+ devm_mmc_alloc_host()
+Message-ID: <2026091633-viscous-cinnamon-7688@gregkh>
+References: <20260915132052.273212-1-ulf.hansson@oss.qualcomm.com>
+ <20260915132052.273212-2-ulf.hansson@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: sdhci-sprd: disable runtime PM on remove
-To: Guangshuo Li <lgs201920130244@gmail.com>,
- Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
- Orson Zhai <orsonzhai@gmail.com>, Chunyan Zhang <zhang.lyra@gmail.com>,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: stable@vger.kernel.org
-References: <20260915161947.2479111-1-lgs201920130244@gmail.com>
-From: Baolin Wang <baolin.wang@linux.alibaba.com>
-In-Reply-To: <20260915161947.2479111-1-lgs201920130244@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260915132052.273212-2-ulf.hansson@oss.qualcomm.com>
 
-
-
-On 9/16/26 12:19 AM, Guangshuo Li wrote:
-> sdhci_sprd_probe() enables runtime PM, while sdhci_sprd_remove() does
-> not perform the corresponding runtime PM cleanup.
+On Tue, Sep 15, 2026 at 03:20:45PM +0200, Ulf Hansson wrote:
+> From: Ulf Hansson <ulfh@kernel.org>
 > 
-> The probe failure path disables runtime PM before disabling the clocks,
-> but the normal remove path directly disables clocks that are also
-> managed by the runtime PM callbacks. If the device is runtime
-> suspended, those clocks may already be disabled.
+> Simplify the code by converting from mmc_alloc_host() to the resource
+> managed devm_mmc_alloc_host().
 > 
-> Resume the device before removal, disable runtime PM and drop the
-> temporary runtime PM reference before disabling the clocks.
-> 
-> This issue was found by manual code inspection.
-> 
-> Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Guangshuo Li <lgs201920130244@gmail.com>
+> Signed-off-by: Ulf Hansson <ulfh@kernel.org>
 > ---
+>  drivers/staging/greybus/sdio.c | 11 +++--------
+>  1 file changed, 3 insertions(+), 8 deletions(-)
 
-Make sense to me. Thanks.
-Reviewed-by: Baolin Wang <baolin.wang@linux.alibaba.com>
+Acked-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
