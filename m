@@ -1,36 +1,32 @@
-Received: from mta0.migadu.com (out-91.mta0.migadu.com [91.218.175.91])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from out30-131.freemail.mail.aliyun.com (out30-131.freemail.mail.aliyun.com [115.124.30.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 909E71FD4
-	for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2026 00:33:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.91
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFBE63BAD81;
+	Wed, 16 Sep 2026 03:13:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.30.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789518840; cv=none; b=MxwpIO9yiPPfIZ0NI880ic9Cw6IqDW43WNmOgePTiZ4SRReb7xR9Nlcb3tQ/5OMugz3mSshrrtLhzR6u6OqKCPAa9F7yvFjXv0s8hXHIdidY2CiVqwiHxURZJGVjSdc3/nAKbNig037T1LFVUxFqfCrDLJS0Mzy9bpPet0FWszQ=
+	t=1789528413; cv=none; b=hFzYABaloLo0ofxXOYKHO8/AP79lcH3UyiBjIFq0Zs12VZWzZohqgBD3JqiBx8VwnOLdwsaxbblzz8xZzuQafk9gBK7SOLdgT3ljby6QvIZfjvjoQOSmKveHTkDkKvHBUBcMKWrjpZmco8rqPjLWCe1jJN9DPLxORqq2xGd6E+0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789518840; c=relaxed/simple;
-	bh=71YSysbM73J8M4gTfdyWpUgg7TRPpNjqYLUW3z1uREc=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=EEqvAwRKP3AYEnfr1OYR/cgFotghty37B5b4JP8jFJswgwa0xSpPrEsuyV+UJYwKnhhp4te6uctVbPwSUsX+9ElT9FgzqU9xfrcqQPSoe3qaPdLFPEpW7VauTItUgXJWzDro0rb+zIvVUdDO1kIYDL8mnxHTNvMTCnVlMfRVWfM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=UWMZ57Dr; arc=none smtp.client-ip=91.218.175.91
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1789528413; c=relaxed/simple;
+	bh=SHtokfXkoOPsNYuAqxARc+a8ImsontnaUMSedjeFkL0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=GYdBKzeWOe4Zvyw/3LMhylJy5DzaBw6BaWUip2uMJUSJmQyhrhwXWF/C9VVvyngSPzq6b9Oyg6FYdCD/JGbUFIDRr4D9RdChFgoyezSmJDhTmoXx58Cs+67ew3e5oSAa6o9G4U1c0lwd2ObYFWwSireQrELULF3dkAGhkeKrRCo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com; spf=pass smtp.mailfrom=linux.alibaba.com; dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b=YUHkG+03; arc=none smtp.client-ip=115.124.30.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.alibaba.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="UWMZ57Dr"
-X-Envelope-To: linux-mmc@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=71YSysbM73J8M4gTfdyWpUgg7TRPpNjqYLUW3z1uREc=;
- c=simple/simple; d=linux.dev;
- h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1789518835; v=1; x=1790123635;
- b=UWMZ57Dr6WCQK55AQDUe4CZdJTlukCH4PijfgOfNkX/1Dke+ZbOfmJKRubGDQ83HSenTVVVy
- Wdr+GizsMh3t6v3E2l/HwzKrnCjPe2i195+eIokN9D2n/tWprtJWH8EjgxXH3CViGL7PKlNBamZ
- P9/jfG9GYqicVEz/JRH2qcq4=
-X-Envelope-To: linux-mmc@vger.kernel.org
-Received: by smtp.migadu.com with ESMTPS id 361132ff8be2991e;
-	Wed, 16 Sep 2026 00:33:55 +0000
-X-Mizu-Trace-ID: 361132ff8be2991e
-X-Migadu-Flow: FLOW_OUT
-Message-ID: <95955dcd-98ae-4130-91d7-a334818662cc@linux.dev>
-Date: Wed, 16 Sep 2026 08:33:46 +0800
+	dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b="YUHkG+03"
+DKIM-Signature:v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=linux.alibaba.com; s=default;
+	t=1789528407; h=Message-ID:Date:MIME-Version:Subject:To:From:Content-Type;
+	bh=3Ad7r9PzlVendAKi3/AUcl8n3hD7fuMAK5N9uhTGEmc=;
+	b=YUHkG+03kDjd5isu28js3754eBsdBLNFi9XHwJOklcqCVMFvxubPgbciMXdCPO4P1TXbkfg6M4pbsCqNuQt+XkRTlsdHDlDtkQiU2H9Ck3cuqmMIydZgwhdZGpybXhYF1ZoVgL8E/BVZN//HplQN8lI0JBpMkkpQKrNjzI5lfuA=
+X-Alimail-AntiSpam:AC=PASS;BC=-1|-1;BR=01201311R601e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=maildocker-contentspam033032089153;MF=baolin.wang@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0XB3apYv_1789528406;
+Received: from 30.74.144.115(mailfrom:baolin.wang@linux.alibaba.com fp:SMTPD_---0XB3apYv_1789528406 cluster:ay36)
+          by smtp.aliyun-inc.com;
+          Wed, 16 Sep 2026 11:13:26 +0800
+Message-ID: <8c67c48d-d950-4a63-9444-0f9c2e1e2b87@linux.alibaba.com>
+Date: Wed, 16 Sep 2026 11:13:25 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -38,118 +34,38 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@linux.dev, Rui Miguel Silva <rmfrfs@gmail.com>,
- Johan Hovold <johan@kernel.org>, Alex Elder <elder@kernel.org>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- greybus-dev@lists.linaro.org, linux-staging@lists.linux.dev,
- linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/2] mmc: core: Turn mmc_alloc|free_host() into static
- functions
-To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>, linux-mmc@vger.kernel.org,
- Ulf Hansson <ulfh@kernel.org>
-References: <20260915132052.273212-1-ulf.hansson@oss.qualcomm.com>
- <20260915132052.273212-3-ulf.hansson@oss.qualcomm.com>
-From: Shawn Lin <shawn.lin@linux.dev>
-In-Reply-To: <20260915132052.273212-3-ulf.hansson@oss.qualcomm.com>
+Subject: Re: [PATCH] mmc: sdhci-sprd: disable runtime PM on remove
+To: Guangshuo Li <lgs201920130244@gmail.com>,
+ Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
+ Orson Zhai <orsonzhai@gmail.com>, Chunyan Zhang <zhang.lyra@gmail.com>,
+ linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: stable@vger.kernel.org
+References: <20260915161947.2479111-1-lgs201920130244@gmail.com>
+From: Baolin Wang <baolin.wang@linux.alibaba.com>
+In-Reply-To: <20260915161947.2479111-1-lgs201920130244@gmail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 
-在 2026/09/15 星期二 21:20, Ulf Hansson 写道:
-> From: Ulf Hansson <ulfh@kernel.org>
+
+
+On 9/16/26 12:19 AM, Guangshuo Li wrote:
+> sdhci_sprd_probe() enables runtime PM, while sdhci_sprd_remove() does
+> not perform the corresponding runtime PM cleanup.
 > 
-> As there are no longer any users of these functions, let's make them
-> internal to the mmc core. While at it, let's also flip the order of the
-> in-parameters to mmc_alloc_host() to be consistent with devm_alloc_host().
+> The probe failure path disables runtime PM before disabling the clocks,
+> but the normal remove path directly disables clocks that are also
+> managed by the runtime PM callbacks. If the device is runtime
+> suspended, those clocks may already be disabled.
 > 
-
-Nice move when vub300 was gone,
-
-Reviewed-by: Shawn Lin <shawn.lin@linux.dev>
-
-> Signed-off-by: Ulf Hansson <ulfh@kernel.org>
+> Resume the device before removal, disable runtime PM and drop the
+> temporary runtime PM reference before disabling the clocks.
+> 
+> This issue was found by manual code inspection.
+> 
+> Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Guangshuo Li <lgs201920130244@gmail.com>
 > ---
->   drivers/mmc/core/host.c  | 35 +++++++++--------------------------
->   include/linux/mmc/host.h |  2 --
->   2 files changed, 9 insertions(+), 28 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 1bcf0e917b59..8e9e61839198 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -505,14 +505,7 @@ static int mmc_first_nonreserved_index(void)
->   	return max + 1;
->   }
->   
-> -/**
-> - *	mmc_alloc_host - initialise the per-host structure.
-> - *	@extra: sizeof private data structure
-> - *	@dev: pointer to host device model structure
-> - *
-> - *	Initialise the per-host structure.
-> - */
-> -struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
-> +static struct mmc_host *mmc_alloc_host(struct device *dev, int extra)
->   {
->   	int index;
->   	struct mmc_host *host;
-> @@ -583,7 +576,13 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
->   	return host;
->   }
->   
-> -EXPORT_SYMBOL(mmc_alloc_host);
-> +static void mmc_free_host(struct mmc_host *host)
-> +{
-> +	cancel_delayed_work_sync(&host->detect);
-> +	cancel_work_sync(&host->sdio_irq_work);
-> +	mmc_pwrseq_free(host);
-> +	put_device(&host->class_dev);
-> +}
->   
->   static void devm_mmc_host_release(struct device *dev, void *res)
->   {
-> @@ -598,7 +597,7 @@ struct mmc_host *devm_mmc_alloc_host(struct device *dev, int extra)
->   	if (!dr)
->   		return NULL;
->   
-> -	host = mmc_alloc_host(extra, dev);
-> +	host = mmc_alloc_host(dev, extra);
->   	if (!host) {
->   		devres_free(dr);
->   		return NULL;
-> @@ -692,19 +691,3 @@ void mmc_remove_host(struct mmc_host *host)
->   }
->   
->   EXPORT_SYMBOL(mmc_remove_host);
-> -
-> -/**
-> - *	mmc_free_host - free the host structure
-> - *	@host: mmc host
-> - *
-> - *	Free the host once all references to it have been dropped.
-> - */
-> -void mmc_free_host(struct mmc_host *host)
-> -{
-> -	cancel_delayed_work_sync(&host->detect);
-> -	cancel_work_sync(&host->sdio_irq_work);
-> -	mmc_pwrseq_free(host);
-> -	put_device(&host->class_dev);
-> -}
-> -
-> -EXPORT_SYMBOL(mmc_free_host);
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index ddb32bc2946f..198554e48346 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -585,11 +585,9 @@ struct mmc_host {
->   
->   struct device_node;
->   
-> -struct mmc_host *mmc_alloc_host(int extra, struct device *);
->   struct mmc_host *devm_mmc_alloc_host(struct device *dev, int extra);
->   int mmc_add_host(struct mmc_host *);
->   void mmc_remove_host(struct mmc_host *);
-> -void mmc_free_host(struct mmc_host *);
->   void mmc_of_parse_clk_phase(struct device *dev,
->   			    struct mmc_clk_phase_map *map);
->   int mmc_of_parse(struct mmc_host *host);
 
+Make sense to me. Thanks.
+Reviewed-by: Baolin Wang <baolin.wang@linux.alibaba.com>
