@@ -1,168 +1,93 @@
-Received: from mail-m49239.qiye.163.com (mail-m49239.qiye.163.com [45.254.49.239])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from cstnet.cn (smtp25.cstnet.cn [159.226.251.25])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB79A4BA9F2;
-	Thu, 17 Sep 2026 10:04:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.239
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A455245005;
+	Thu, 17 Sep 2026 10:17:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.25
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789639504; cv=none; b=rAaYBUNWDB7d/ZLXF0jjyXe5eA86bGvwPS5m5bWoxuBl7WDSx74szl1xLZ6YxkRKcN6DGDVNu1dMztJRUqLzolNmvJLLvIFOR+ZbfmKfwIi5jyc+2PrHbsoO1plC4n70U4kxNlZ46ad9+7hg7z0LFza1H20l6oESQOpqSWZ1jsM=
+	t=1789640275; cv=none; b=TnW1v97JJ7UUl+hQfe5lVWBboOPVK4Bo5gxz/MvuUSCJr6kv/q2ze3732tt11gxRbx9JMuKbbkyIiFkVWyuCwCxNfcGWAabM6c0kG9MW61x2L1jBAOuwCH0yxLdQZJDuDlb4jKJaU9+bo/i8Np+omGzm6iWw9HxOnPSxcRflw6o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789639504; c=relaxed/simple;
-	bh=XN48dGpTYdwidGnJPBmKoAFR+QOJxwtxfRmPsyJBTi4=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=OrFtuf3NBOlCebNutDZ+pO/uQWcoovr6UbY5E9mSI45PRhW+iXmXrqZW9FKNsw+0TDDmY+kmLrJKv+xg5QkgE+OqWVFnTzv3qhl/BchmvjdOZn2vjoY/KDbsrPSQ9KFpA8UmolntpDPOWszFn8cksbM222geJNy0qiZrU5o74+4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=fKyMcQn2; arc=none smtp.client-ip=45.254.49.239
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="fKyMcQn2"
-Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 4e203484a;
-	Thu, 17 Sep 2026 16:48:59 +0800 (GMT+08:00)
-From: Shawn Lin <shawn.lin@rock-chips.com>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Shawn Lin <shawn.lin@linux.dev>
-Subject: [PATCH 2/3] docs: mmc: fix stale async request documentation
-Date: Thu, 17 Sep 2026 16:48:36 +0800
-Message-Id: <1789634917-143165-3-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1789634917-143165-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1789634917-143165-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0aa0ae8e091003a4kunm476cf0c8983b4
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1kYFggdWUFKV1ktWUFJV1kPCRoVCBIfWUFZGRodTVZLTElLTk1PQk
-	kYH09WFRQJFhoXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0
-	tIVUpLSU9PT0hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=fKyMcQn2a1i8eSBRL8iadsMOe058dmz/CjwIAPtZRS3ADpHyZtDolBmEUq3rfX31tqeq3O8cH6Iwya6aaDzTGbYbSouYESTOw+kuxLBrAPPTbMc6Z6AoTDVoyY/EJbWWIJcU6wyrdPCQplwImmQLDSFlQ8x1kI8UigJ7YYkwOV4=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=loyEuDZ5PGTOg02RYKxKU5VNnLeScMXNhADO2TWHIGA=;
-	h=date:mime-version:subject:message-id:from;
+	s=arc-20240116; t=1789640275; c=relaxed/simple;
+	bh=vtRekRg8P98A4qQ208H3oAEDpTCMbBdy41kPqohf+8o=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=DxojtoKSV2ETls91YY/TbsGfa3ZFLJSGSBsrMfx7RSe8Wr9Xk6MlNcthp82s2ngxBMhdkQBkYCnR3Jp8s1AICXqbI+3JCp+uta1CcAVm/c7qhIUw4HMfjySYD4iru3W5sCT4ATDPa8v8k2HD8LT8PAcK3KR3HEyBZAckf+ptY/M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn; spf=pass smtp.mailfrom=iscas.ac.cn; arc=none smtp.client-ip=159.226.251.25
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
+Received: from dfae2b116770.home.arpa (unknown [36.110.52.2])
+	by APP-05 (Coremail) with SMTP id zQCowADnVD9OvqtqInV+CA--.454S2;
+	Thu, 17 Sep 2026 18:17:50 +0800 (CST)
+From: Wentao Liang <vulab@iscas.ac.cn>
+To: hansg@kernel.org
+Cc: linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	s.hauer@pengutronix.de,
+	ulfh@kernel.org,
+	Wentao Liang <vulab@iscas.ac.cn>,
+	stable@vger.kernel.org
+Subject: [PATCH] mmc: core: Fix OF node leak in mmc_add_card()
+Date: Thu, 17 Sep 2026 10:17:50 +0000
+Message-Id: <20260917101750.2146473-1-vulab@iscas.ac.cn>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:zQCowADnVD9OvqtqInV+CA--.454S2
+X-Coremail-Antispam: 1UD129KBjvdXoW7Xw47WFyrKw13XF1rZry5Arb_yoWktwc_Gw
+	15uF9rXw1xWFZ2kw4agF45Z393KF4v93s3KF4FvFWSgrWaqFy7X34aqr98Z347ZrW8CFy5
+	GrZrZFnxXrW7ZjkaLaAFLSUrUUUUjb8apTn2vfkv8UJUUUU8Yxn0WfASr-VFAUDa7-sFnT
+	9fnUUIcSsGvfJTRUUUbS8YjsxI4VWDJwAYFVCjjxCrM7CY07I20VC2zVCF04k26cxKx2IY
+	s7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48ve4
+	kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Xr0_Ar1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI0_
+	Cr0_Gr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v26r
+	xl6s0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj
+	6xIIjxv20xvE14v26r126r1DMcIj6I8E87Iv67AKxVW8Jr0_Cr1UMcvjeVCFs4IE7xkEbV
+	WUJVW8JwACjcxG0xvY0x0EwIxGrwACjI8F5VAI37AI020EjII2zVCS5cI20VAGYxC7MxkF
+	7I0En4kS14v26r126r1DMxAIw28IcxkI7VAKI48JMxAIw28IcVCjz48v1sIEY20_Gr43Wr
+	1UJr1l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8G
+	jcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r126r1DMIIYrxkI7VAKI48JMIIF0xvE2I
+	x0cI8IcVAFwI0_JFI_Gr1lIxAIcVC0I7IYx2IY6xkF7I0E14v26F4j6r4UJwCI42IY6xAI
+	w20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Gr1j6F4UJwCI42IY6I8E87Iv6x
+	kF7I0E14v26rxl6s0DYxBIdaVFxhVjvjDU0xZFpf9x07j0wZcUUUUU=
+X-CM-SenderInfo: pyxotu46lvutnvoduhdfq/1tbiBwUNA2qrrRk-TgAAsI
 
-From: Shawn Lin <shawn.lin@linux.dev>
+mmc_add_card() stores the OF node returned by
+mmc_of_find_child_device() in card->dev.of_node before calling
+device_add().  That node carries a reference which is normally
+released in mmc_remove_card(), but only when the card has been
+marked present.  If device_add() fails, mmc_card_set_present() is
+never reached and the cleanup of the failed attach cannot release
+the node, so the reference is leaked.
 
-mmc-async-req.rst still documents interfaces that no longer exist:
+Release the reference on the device_add() failure path.
 
- - mmc_start_req() was renamed to mmc_start_areq() by commit c3399ef55d8e
-  ("mmc: core: rename mmc_start_req() to *areq()") and then removed together
-  with the rest of the asynchronous request machinery when the block driver
-  switched to blk-mq, by commits 81196976ed94 ("mmc: block: Add blk-mq support")
-  and 126b62700386 ("mmc: core: Remove code no longer needed after the switch to blk-mq").
-
- - mmc_blk_issue_rw_rq() was removed by commit 0fbfd1251830
-   ("mmc: block: Remove code no longer needed after the switch to blk-mq"),
-   and was replaced by mmc_blk_mq_issue_rw_rq().
-
- - The is_first_req argument of the ->pre_req() callback was dropped by
-   commit d3c6aac3bdfe ("mmc: delete is_first_req parameter from pre-request callback"),
-   so the "Optimize for the first request" section is obsolete as well.
-
- - The Linaro wiki page holding the IOZone/mmc_test measurements no longer exists.
-
-Update the document to describe the current request lifecycle: mmc_pre_req(),
-mmc_start_request(), mmc_wait_for_req() and mmc_post_req()), and drop the sections
-describing the long-gone interfaces and the dead link.
-
-Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
+Fixes: 25185f3f31c9 ("mmc: Add SDIO function devicetree subnode parsing")
+Cc: stable@vger.kernel.org
+Signed-off-by: Wentao Liang <vulab@iscas.ac.cn>
 ---
+ drivers/mmc/core/bus.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
- Documentation/driver-api/mmc/mmc-async-req.rst | 64 ++++++--------------------
- 1 file changed, 13 insertions(+), 51 deletions(-)
-
-diff --git a/Documentation/driver-api/mmc/mmc-async-req.rst b/Documentation/driver-api/mmc/mmc-async-req.rst
-index 0f7197c..d9d4ac7 100644
---- a/Documentation/driver-api/mmc/mmc-async-req.rst
-+++ b/Documentation/driver-api/mmc/mmc-async-req.rst
-@@ -23,7 +23,7 @@ MMC request.
- MMC block driver
- ================
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index be5cf338bdeb..4d862d9bab23 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -379,8 +379,11 @@ int mmc_add_card(struct mmc_card *card)
+ 	device_enable_async_suspend(&card->dev);
  
--The mmc_blk_issue_rw_rq() in the MMC block driver is made non-blocking.
-+The mmc_blk_mq_issue_rw_rq() in the MMC block driver is made non-blocking.
+ 	ret = device_add(&card->dev);
+-	if (ret)
++	if (ret) {
++		of_node_put(card->dev.of_node);
++		card->dev.of_node = NULL;
+ 		return ret;
++	}
  
- The increase in throughput is proportional to the time it takes to
- prepare (major part of preparations are dma_map_sg() and dma_unmap_sg())
-@@ -34,21 +34,20 @@ platform. In power save mode, when clocks run on a lower frequency, the DMA
- preparation may cost even more. As long as these slower preparations are run
- in parallel with the transfer performance won't be affected.
+ 	mmc_card_set_present(card);
  
--Details on measurements from IOZone and mmc_test
--================================================
-+MMC core API
-+============
- 
--https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async-req
-+The preparation of a request is separated from starting the transfer, so
-+that a host can prepare a request while another one is still in progress:
- 
--MMC core API extension
--======================
--
--There is one new public function mmc_start_req().
--
--It starts a new MMC command request for a host. The function isn't
--truly non-blocking. If there is an ongoing async request it waits
--for completion of that request and starts the new one and returns. It
--doesn't wait for the new request to complete. If there is no ongoing
--request it starts the new request and returns immediately.
-+ * mmc_pre_req() prepares a request before it is started. It may be called
-+   while another request is running on the host.
-+ * mmc_start_request() starts a prepared request without waiting for it to
-+   complete. mmc_wait_for_req() starts a request and waits for it to
-+   complete as well.
-+ * mmc_post_req() releases the resources allocated by mmc_pre_req() after
-+   the request has completed. It may likewise run while another request is
-+   active.
- 
- MMC host extensions
- ===================
-@@ -59,40 +58,3 @@ to before and after the actual mmc_host_ops.request() function is called.
- 
- In the DMA case pre_req() may do dma_map_sg() and prepare the DMA
- descriptor, and post_req() runs the dma_unmap_sg().
--
--Optimize for the first request
--==============================
--
--The first request in a series of requests can't be prepared in parallel
--with the previous transfer, since there is no previous request.
--
--The argument is_first_req in pre_req() indicates that there is no previous
--request. The host driver may optimize for this scenario to minimize
--the performance loss. A way to optimize for this is to split the current
--request in two chunks, prepare the first chunk and start the request,
--and finally prepare the second chunk and start the transfer.
--
--Pseudocode to handle is_first_req scenario with minimal prepare overhead::
--
--  if (is_first_req && req->size > threshold)
--     /* start MMC transfer for the complete transfer size */
--     mmc_start_command(MMC_CMD_TRANSFER_FULL_SIZE);
--
--     /*
--      * Begin to prepare DMA while cmd is being processed by MMC.
--      * The first chunk of the request should take the same time
--      * to prepare as the "MMC process command time".
--      * If prepare time exceeds MMC cmd time
--      * the transfer is delayed, guesstimate max 4k as first chunk size.
--      */
--      prepare_1st_chunk_for_dma(req);
--      /* flush pending desc to the DMAC (dmaengine.h) */
--      dma_issue_pending(req->dma_desc);
--
--      prepare_2nd_chunk_for_dma(req);
--      /*
--       * The second issue_pending should be called before MMC runs out
--       * of the first chunk. If the MMC runs out of the first data chunk
--       * before this call, the transfer is delayed.
--       */
--      dma_issue_pending(req->dma_desc);
 -- 
-2.7.4
+2.34.1
 
