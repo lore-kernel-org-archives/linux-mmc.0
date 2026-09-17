@@ -1,98 +1,93 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mail-aws33103.qiye.163.com (mail-aws33103.qiye.163.com [54.168.33.103])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CE131B4257
-	for <linux-mmc@vger.kernel.org>; Thu, 17 Sep 2026 15:17:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C7693DAACE;
+	Thu, 17 Sep 2026 16:45:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=54.168.33.103
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789658243; cv=none; b=DAx3tD7R226wQEybRLTQMDc1TIJ2I1yjujWSVgJKdChCI8D/dWYJw2QFShfIcSR2ZeimOMBKlT0UuqvkYn2Zw2V1Un12KG0yq5p2tYp7oxOBAZKi1I6hEklx9J9Y5EXbFbteeaLebV9ogZzd0LeIEIDlXLxlxCpQc85LfKgxxXI=
+	t=1789663550; cv=none; b=Bd54GmC+vHdtMBAp52LvEDgNX+dAxVTXXy/3/VMZNQLWQrRiEDp2sz+3gyi/6zcLPGlYyW3pelomVvqAH8msAeJ+kEhAG0ITw+fdPa1cFqSA+3bF9b7qrr6sgUINg0pt7dgH9RR8QnGYFjyZtD7c5PGLaeIFLf3Mjuhx1Niqa3w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789658243; c=relaxed/simple;
-	bh=yokcjFoYaQjb2AXJXwiS2CgA9icNw4hd0m3OmDjYLh0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=TcdnW/6NY/OJJOIcFbO6zaRrqP8BTihLEXXTFueXqyaMm0OBxOpWNInwaWr90WBrVyspms4huflFBDYrfnCvbBO61aLNESj/m+ahhSKkc2nZkQXR+xcTkARgLlDrMy3CNnxre3+vGUNpPeW+Vs/uxygqjUvTPdKp8w6LgBaNRg0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=baYHiQhL; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789663550; c=relaxed/simple;
+	bh=ybUw/VAHJ34uriUZtpn0bT3L0WPyk0v+DTnIOENRITc=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=cDXC0RwQC9s572fbrPs9eXGlNYUOcV9V4iZmEB2Ce0egls0V7yGjGl5Au8AMYX/coFOgXXuaxU5xC6IAHMgQRpcz50u4kTuKUADyQ9iU4deqaJiETISr/V7QCcRhotIaN4AbkXb8xRv5TF5weJpzRDmJ9WfQEZrjQQt5qUSEYCI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=AJBIpqTB; arc=none smtp.client-ip=54.168.33.103
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="baYHiQhL"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 37B661F008A7
-	for <linux-mmc@vger.kernel.org>; Thu, 17 Sep 2026 15:17:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789658230;
-	bh=yokcjFoYaQjb2AXJXwiS2CgA9icNw4hd0m3OmDjYLh0=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=baYHiQhLKHIXv5JcbsYM8h8jWAIdy60s6NhCh0ZGU54W95BOiAuC94Ol2AcpHo47g
-	 xOJkjhXStRdOshTWhG385se+mN0mwxSalEgzP9JG2PQIOLJ/oHEIVw0zHQeJ6cCyxv
-	 qfvHypAZ4Aa+PBTDs1xGLwk8gxllOPs9TBclUTaLcaptPXVE/nH6o6dNw9fmKr/Ga+
-	 euX0r0XKcn50B8jtWh1/A5rkcHzzpSCbjKD97mWUlLgkoyhoofyCpgqfsFLMmV7xqx
-	 ARc5Jnmu7agtqFNmn3zlh9R+1V4XybdteMzm34GCd9fCbp5oeKdHFvfY4O6Spsy5NH
-	 56pQ+Rtftr60g==
-Received: by mail-ed2-f12.google.com with SMTP id 4fb4d7f45d1cf-6a996c8adf3so1647091a12.1
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Sep 2026 08:17:10 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AKwUvBzNWKpA2zV8HMMzP/ktQZauewYhFzIKpc9tmlDrqRJaFrT3NFTDsDSskrP0QUfs+C07e3RSTGzozHY=@vger.kernel.org
-X-Gm-Message-State: AFuF++nG6LD9w5reiX92fSEU7IUbJ4g3ke33TcmHqERzpgqGvvg0BVHO
-	aPCrqNwLFXPEtIL1VOV8HTsruO7POI81IzaMhzIRY/uT476cMcL2xr/HAyHnEGSIUWWZHZAxMQN
-	W1kQ9gS9e9goPeCfh9VkZBTztjh5Y7A==
-X-Received: by 2002:a05:6402:460c:b0:6a6:8dd:c76b with SMTP id
- 4fb4d7f45d1cf-6aa22247992mr11552271a12.1.1789658228391; Thu, 17 Sep 2026
- 08:17:08 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="AJBIpqTB"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 4e203485e;
+	Thu, 17 Sep 2026 16:49:01 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Shawn Lin <shawn.lin@linux.dev>
+Subject: [PATCH 3/3] mmc: core: fix stale mmc_start_req() references in comments
+Date: Thu, 17 Sep 2026 16:48:37 +0800
+Message-Id: <1789634917-143165-4-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1789634917-143165-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1789634917-143165-1-git-send-email-shawn.lin@rock-chips.com>
+X-HM-Tid: 0aa0ae8e123003a4kunm476cf0c8983d6
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1kYFggdWUFKV1ktWUFJV1kPCRoVCBIfWUFZQhoeSFZDQkNMGEMaGk
+	xPHk5WFRQJFhoXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0
+	tIVUpLSU9PT0hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=AJBIpqTB66BmBkvQGDaS6nhAmkGwXURz4jekSHHbDQAOcxRTSzXCcTZXkQcCWBLmhg2lsVTmBFOwnVAHPqwy/WRq0QrsOgRK+gqL3NTeEQsOeelbHPLRKXm5IEZpR1JCbXoxJRoDljZjP0w7d1UBtrwflykP9DMGvVwvQGJYd0Y=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=/k6J3dxPvPltz/ZMrbyXh8Ewz7+GFZJ0zTlamg5BQ3Q=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-References: <20260917144134.459819-1-matyasdaniel006@gmail.com>
-In-Reply-To: <20260917144134.459819-1-matyasdaniel006@gmail.com>
-From: Rob Herring <robh@kernel.org>
-Date: Thu, 17 Sep 2026 10:16:56 -0500
-X-Gmail-Original-Message-ID: <CAL_JsqLyPK2rJVAyzCtGtrBSTwOKRZ_EAmE1Xd++9DFaxrrmDw@mail.gmail.com>
-X-Gm-Features: AcwNN1WrkKsI-hJClnXnbb72poP7rLqVHTc23ccK3T-HSnvYyjsVzuH4L2tWH2Y
-Message-ID: <CAL_JsqLyPK2rJVAyzCtGtrBSTwOKRZ_EAmE1Xd++9DFaxrrmDw@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: Expand flow lists to block lists
-To: Daniel Matyas <matyasdaniel006@gmail.com>
-Cc: Shenghao Ding <shenghao-ding@ti.com>, Kevin Lu <kevin-lu@ti.com>, Baojun Xu <baojun.xu@ti.com>, 
-	Sen Wang <sen@ti.com>, Peter Huewe <peterhuewe@gmx.de>, Jarkko Sakkinen <jarkko@kernel.org>, 
-	Jason Gunthorpe <jgg@ziepe.ca>, Chunfeng Yun <chunfeng.yun@mediatek.com>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Matthias Brugger <matthias.bgg@gmail.com>, 
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, 
-	Wim Van Sebroeck <wim@linux-watchdog.org>, Dharma Balasubiramani <dharma.b@microchip.com>, 
-	Jeff LaBundy <jeff@labundy.com>, Simon Glass <sjg@chromium.org>, Linus Walleij <linusw@kernel.org>, 
-	Alexandre Torgue <alexandre.torgue@foss.st.com>, Giuseppe Cavallaro <peppe.cavallaro@st.com>, 
-	Jose Abreu <joabreu@synopsys.com>, Atish Patra <atishp@rivosinc.com>, 
-	Shawn Guo <shawn.guo@linaro.org>, Dmitry Osipenko <digetx@gmail.com>, 
-	Ibrahim Tilki <Ibrahim.Tilki@analog.com>, Okan Sahin <Okan.Sahin@analog.com>, 
-	devicetree@vger.kernel.org, linux-rtc@vger.kernel.org, 
-	Ricard Wanderlof <ricardw@axis.com>, patches@opensource.cirrus.com, 
-	Lukas Wunner <lukas@wunner.de>, Eugen Hristev <ehristev@kernel.org>, mfd@lists.linux.dev, 
-	linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-mtd@lists.infradead.org, linux-amlogic@lists.infradead.org, 
-	netdev@vger.kernel.org, linux-pci@vger.kernel.org, 
-	linux-perf-users@vger.kernel.org, linux-phy@lists.infradead.org, 
-	linux-tegra@vger.kernel.org, linux-sound@vger.kernel.org, 
-	linux-integrity@vger.kernel.org, linux-usb@vger.kernel.org, 
-	linux-mediatek@lists.infradead.org, linux-watchdog@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Thu, Sep 17, 2026 at 9:41=E2=80=AFAM Daniel Matyas <matyasdaniel006@gmai=
-l.com> wrote:
->
-> Running dt_bindings_check returned:
-> [error] string value is redundantly quoted with any quotes (quoted-string=
-s)
->
+From: Shawn Lin <shawn.lin@linux.dev>
 
-That false positive is fixed in newer versions of yamllint since at
-least a year and a half ago. There's also some other quoting checks
-I'd like to turn on, but that bumps the minimum version since unknown
-checks are an error in yamllint.
+Two comments still refer to mmc_start_req(). That function was renamed
+to mmc_start_areq() then removed.
 
-> The files used quotation marks in flow lists because the strings had
-> commas and these commas were interpreted as separators. Convert flow
-> style lists to block style lists, so that there is no problems with the
-> commas.
+So, let's update the mmc_is_req_done() and mmc_pre_req() comments to refer
+to the current APIs: mmc_start_request() and mmc_wait_for_req().
 
-If we wanted to fix like this, we should probably just require block
-style everywhere, but I don't think we should do that.
+Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
+---
 
-Rob
+ drivers/mmc/core/core.c | 4 ++--
+ drivers/mmc/core/core.h | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 59430bc..920e4b1 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -588,8 +588,8 @@ EXPORT_SYMBOL(mmc_cqe_recovery);
+  *	mmc_is_req_done() is used with requests that have
+  *	mrq->cap_cmd_during_tfr = true. mmc_is_req_done() must be called after
+  *	starting a request and before waiting for it to complete. That is,
+- *	either in between calls to mmc_start_req(), or after mmc_wait_for_req()
+- *	and before mmc_wait_for_req_done(). If it is called at other times the
++ *	after mmc_start_request() or mmc_wait_for_req() and before
++ *	mmc_wait_for_req_done(). If it is called at other times the
+  *	result is not meaningful.
+  */
+ bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq)
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 601c737..9be2875 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -170,7 +170,7 @@ int mmc_cqe_recovery(struct mmc_host *host);
+  *	@host: MMC host to prepare command
+  *	@mrq: MMC request to prepare for
+  *
+- *	mmc_pre_req() is called in prior to mmc_start_req() to let
++ *	mmc_pre_req() is called in prior to mmc_start_request() to let
+  *	host prepare for the new request. Preparation of a request may be
+  *	performed while another request is running on the host.
+  */
+-- 
+2.7.4
+
