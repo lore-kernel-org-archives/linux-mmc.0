@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 230ED43636B;
-	Fri, 18 Sep 2026 10:02:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C7D646A61A;
+	Fri, 18 Sep 2026 10:02:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789725727; cv=none; b=mkOZA0NN0doPFp6xRQG6UnP37CzO4K5XfEmoUzby4KswsDg+23IDf0zymXRPsCWijdv2IsCf4uLmx8pkbzYosyAdRZU0zsM23oHA9LoeVfDP5m8jB5SH0YrNAATosbXeVFcZ8SJHKbM9/+mXj/IIfFJv5gz4rQwOLODCtQsexGs=
+	t=1789725768; cv=none; b=rT9zNGvLxbl4YpvPiGfYn9EHNiD7VnoGphg+Y023ZaBvd4VDO3p6egytt0XORIVWRNps9J813YKMZ583RBm3YIfivad/UGU2uXXtGCk3hF1rBz5AWuV2+Tbd5efskEeAw4LPcQqRhWx7okIjb4oEI2fz/ROYQnOqksKnGoP6PUU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789725727; c=relaxed/simple;
-	bh=MjTIy/1+ETtO0uZOFMBhngVP/dUp5evvwxVHEIrK9qM=;
+	s=arc-20240116; t=1789725768; c=relaxed/simple;
+	bh=/KGwPvpew6zK1r9I2Hy+yoDFpoK+0WyGm0dzp8j+meo=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=NGLW1p6KU/r6OCeTAuiJyLlJjbdZz+mOKMY3x2Qk0rvU0s21Jce+Y3/bCORHCLyQpauVM/EAb6oHPesrszDh044xg8U0c6WNOUI+QiHdt9xww9Wqe4Pz3wRYzYTNBKCYRr6VQEdNNkHge8AO1ozFQfZL7AglnRFsWcXnNI1lu2I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Hr2R9JGF; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=N1/5snfGaC2ULXMhng8jEqE5aY9HZEFOQNBD577iGLlCfJCKfoys4dpjH7QGfyy/GhLONC24UPRbio7kE2ZIdJzeDC6tpBnG3zfCuhZ/PifhsUFq+xTtnTzhQrHE74W8QiJYoegJpSb1QXCAAhJrh/L2vn2oJ8F87EGLeS97gT0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UHt7uv2c; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Hr2R9JGF"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 978421F000FF;
-	Fri, 18 Sep 2026 10:02:04 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UHt7uv2c"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8BE991F000FF;
+	Fri, 18 Sep 2026 10:02:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789725725;
-	bh=TuKf+se4/WQhc7yjH9EKqYLRLWGTVuMIsQ21THLKRXk=;
+	s=k20260515; t=1789725764;
+	bh=nZVoCiKuI8Au9ID4VyOKfBtItjLpyaq4XhcSOZgOVBM=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=Hr2R9JGF/xDMykb6xXJ/HY2vNaL30WQN270YcxZWsFioZ+5jNX5otawhZ4HtttciR
-	 foJIpz69Ij082Xs1NJZ34AUBeedRwe3iOb+knGoCJHkfWJRFbVtZK7V9FzuqzV/kpR
-	 Zs9tRpThIWo7B2Ywo+nGT37X/h5Qe6+qhJ9DsRG0WYuV8qfgosMzceChbch8Xt5mRz
-	 TFYW5ygTEEzs/JkYfRvRL/iR9Mo16+wyVBi11KB4rifB4Kv1kHU1R9Mg/NGrz3uwvd
-	 UK9Ybbyf9woUgYX0HpulpVpHQCROT1hQ66BlEUPSEKD48YiMruzGl+uhlWOdvmum8P
-	 UNeJMPdCVKuhA==
-Date: Fri, 18 Sep 2026 12:02:02 +0200
+	b=UHt7uv2crwGnia/V1dyUtk+6qsQDTMv69oFPPAUPArwNudEAE5lBcQNiHFwjEprpS
+	 EmxddNgmK/ySBD7SBUsK2GvM5OdQkApyi0u0LY717w57xUwo5qd5qti7kHoV92a1W/
+	 bGD2paGlpju7f8kY42DOwqUmfaaOtRyyO/7H+wp5tGPQ8DoT330UsY1HqW5HkWmARo
+	 4H6rnWZNnu9e3ZHRCH0x+BHMzGyz3ToDzmsJ5bdYL+ZXBYZjurHrf63G6giEfR0CtK
+	 5Vt28Jfwm5/VPJcTK31W9ACzjk/Ztzbcb2zMq7S18jAW3P76WYoP/KwEeSAG4+TViW
+	 3IfYAYr7UBSZQ==
+Date: Fri, 18 Sep 2026 12:02:41 +0200
 From: Krzysztof Kozlowski <krzk@kernel.org>
 To: Muzaffer Kadir <muzafferkadir@mainlining.org>
 Cc: Bjorn Andersson <andersson@kernel.org>, 
@@ -53,11 +53,10 @@ Cc: Bjorn Andersson <andersson@kernel.org>,
 	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, iommu@lists.linux.dev, 
 	mfd@lists.linux.dev, dri-devel@lists.freedesktop.org, freedreno@lists.freedesktop.org, 
 	linux-pm@vger.kernel.org, linux-input@vger.kernel.org
-Subject: Re: [PATCH v2 01/19] dt-bindings: clock: qcom: Add MSM8952 global
- clock controller
-Message-ID: <20260918-liberal-significant-crow-f1e66f@quoll>
+Subject: Re: [PATCH v2 06/19] dt-bindings: vendor-prefixes: Add General Mobile
+Message-ID: <20260918-amphibian-overjoyed-fulmar-c04cd4@quoll>
 References: <20260916-msm8952-initial-support-v2-0-798c2602dde1@mainlining.org>
- <20260916-msm8952-initial-support-v2-1-798c2602dde1@mainlining.org>
+ <20260916-msm8952-initial-support-v2-6-798c2602dde1@mainlining.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -66,57 +65,18 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260916-msm8952-initial-support-v2-1-798c2602dde1@mainlining.org>
+In-Reply-To: <20260916-msm8952-initial-support-v2-6-798c2602dde1@mainlining.org>
 
-On Wed, Sep 16, 2026 at 05:22:06PM +0300, Muzaffer Kadir wrote:
-> Add a device tree binding to describe clocks, resets and power domains
-> provided by the global clock controller on MSM8952 SoC.
+On Wed, Sep 16, 2026 at 05:22:11PM +0300, Muzaffer Kadir wrote:
+> Add vendor prefix for General Mobile.
+> Link: https://www.generalmobile.com
 > 
 > Signed-off-by: Muzaffer Kadir <muzafferkadir@mainlining.org>
-
-Please run scripts/checkpatch.pl on the patches and fix reported
-warnings. After that, run also 'scripts/checkpatch.pl --strict' on the
-patches and (probably) fix more warnings. Some warnings can be ignored,
-especially from --strict run, but the code here looks like it needs a
-fix. Feel free to get in touch if the warning is not clear.
-
 > ---
->  .../bindings/clock/qcom,gcc-msm8952.yaml           |  56 ++++++
->  include/dt-bindings/clock/qcom,gcc-msm8952.h       | 217 +++++++++++++++++++++
->  2 files changed, 273 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/clock/qcom,gcc-msm8952.yaml b/Documentation/devicetree/bindings/clock/qcom,gcc-msm8952.yaml
-> new file mode 100644
-> index 000000000000..274dde633e17
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/clock/qcom,gcc-msm8952.yaml
-> @@ -0,0 +1,56 @@
-> +# SPDX-License-Identifier: GPL-2.0-only
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/clock/qcom,gcc-msm8952.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Qualcomm Global Clock & Reset Controller on MSM8952
-> +
-> +maintainers:
-> +  - Muzaffer Kadir <muzafferkadir@mainlining.org>
-> +
-> +description: |
-> +  Qualcomm global clock control module provides the clocks, resets and power
-> +  domains on MSM8952.
-> +
-> +  See also::
+>  Documentation/devicetree/bindings/vendor-prefixes.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
 
-git grep "also::" -- Documentation/devicetree/bindings/clock/
-
-I asked you month ago here:
-<e3fb3794-ca7a-4794-8036-b69e563aaa57@kernel.org>
-to not work on old forks.
-
-Old fork which you should not use is postmarketos, lineageos, whatever
-Android fork kernel, and whatever other tree which is not upstream from
-kernel.org.
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
 Best regards,
 Krzysztof
