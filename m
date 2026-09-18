@@ -1,122 +1,92 @@
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BFE9D47F2CC;
-	Fri, 18 Sep 2026 18:22:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.153.233
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 712604915AF
+	for <linux-mmc@vger.kernel.org>; Fri, 18 Sep 2026 19:04:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789755780; cv=none; b=jwlF1+IuxHqNtnPtunR1kDOgZsxbwFfXrVCrttQnE186fiqcegcpma/dtPotldPMAfC1wUxcAeN0rabi8apoAhLoqSOiY/EbZCccj9LZ/ctUBK4PjN4xTXR2ZqBldvjwWReKA3u7Y15c6daf+3j4AuPQYo+lzhfnztRY13uFzEw=
+	t=1789758247; cv=none; b=K87fPnQB/v4rqYPkfIG9wz+Pm/Uon2PQcXyuJx5T0gGzEJUeoIFQy24PLSGLYl9wKuZAzAOnJDAGkXRaeJwZiatjmRqxMnLkqr/LI6PZXYATUaOxcTHgQQGaH8fMYQKHRlZ4S+LsbukoDnDaFYH9HNlqjjhGuMo+2gM7i2cTkQs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789755780; c=relaxed/simple;
-	bh=DQ11aT6chxj+is/hy9hP1fiwgbDJw2XvIWlCzvNSbts=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=O5RC3Dbs0eckEahp8bTvRX36/wJlDFtiPnveExAg2RFpu++7ZO7QMNwQFIuq9z26zD19ZQNlDq2DuQ7oiV6ERIdxdQppKvkz6iwNQYmeo0VFLhn6pZwxNQm2lPx0Zk4qmwTrCOGPm+EPUBLnziqDmTHCzhQXOpG56l/CvAuUpsk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=Goiz7D5Y; arc=none smtp.client-ip=68.232.153.233
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
+	s=arc-20240116; t=1789758247; c=relaxed/simple;
+	bh=UzAcr4zFNpEWR8QoTd198zq5n4ye3nqQ50yJoiCIYaY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=nqcRzt/JEYwK1cws1e9cmQp6H4fJjjbkP3DdEp+zoClCXgqevUik/rRzp7HaQdMt1rL06vQaao8TER8lJzIFn8DhBnCkHggmPXcQXNGkc0jYVJOhohlORVe5MDyNAFE4WeWbmuNibJTCwJ18vQ9Qh2tlwbAn4Ejy/9QdGcCzLSA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=PtVookg5; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="Goiz7D5Y"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1789755778; x=1821291778;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=DQ11aT6chxj+is/hy9hP1fiwgbDJw2XvIWlCzvNSbts=;
-  b=Goiz7D5YCakOnpMdIsnQ5jaGlw1mKVEzFBws+ASbkDepwSCFYZIynLZY
-   0+CKB6JNSk2dtSovHZ2oqZ4ABtJZjFDDiy/IYW0/bL6x8TIcVIv2Et1DQ
-   yvDu8e7DABN26Apkkzc/B/h/GbQjTCHceRAvkgL8SXz5yk4jiOa8sgr4S
-   Z+BNo8KyDIGfYMK7KJp8rhk2IIZqu9AtbF0pZzNOm+/Q9MKJ+AJg7mw+X
-   L7ZpbJOgTvAcR7fZ7lCjrxHcFrKyRVX8u0rCXytkYEdmfU49SW5akR3s9
-   oNbw0arUy1jQc1iR1rhiiroXvHbo1tqXAAYz/k8HZoo0ElELD0dqaPgAJ
-   w==;
-X-CSE-ConnectionGUID: 5WHnhQZqR6u+GIxmC7mKRA==
-X-CSE-MsgGUID: Ee0zJLNUQYqD92MmQl47ag==
-X-IronPort-AV: E=Sophos;i="6.27,109,1787036400"; 
-   d="scan'208";a="73905459"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa1.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 18 Sep 2026 11:22:57 -0700
-Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
- chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.58; Fri, 18 Sep 2026 11:22:57 -0700
-Received: from [10.171.248.88] (10.10.85.11) by chn-vm-ex04.mchp-main.com
- (10.10.85.152) with Microsoft SMTP Server id 15.1.2507.58 via Frontend
- Transport; Fri, 18 Sep 2026 11:22:55 -0700
-Message-ID: <70fd2e40-ddc1-4e80-9c4b-cf2fa9c3929e@microchip.com>
-Date: Fri, 18 Sep 2026 20:22:54 +0200
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="PtVookg5"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=x4+D
+	9upuaenjWjZ0/dtM41htolecou62jNr6QYJiyhE=; b=PtVookg5iQKTKvaqLg/V
+	le9n4Ya6+P6oMAJIDLz7bwQHYOWPNA+2BRkNCTXsIkSwGLgpNiBURb38I31E11/v
+	wyApEEHsdo1fn8cJKwT3btI/SLa9ITzwA+nuo3Wnpm2lp1XdBgpsiwQAenbKBIrM
+	QG8Xc6p4pZ8059h82svBVX81BzDkOzmualYyeh1bukez1x+Lj8oR+hNVvnetHebd
+	qm5aXERfgaHfZGipLKRi7Mzmpmd1dPZmUL6XhA3fWHbO3QPjSnRsKui0Phql/nit
+	S6c5I0LjoAkrm47LrwHgp2QV5H/Ux0w6/9+KzOexRguOi8dpJZQEf8n8IpxP89o9
+	WA==
+Received: (qmail 2660367 invoked from network); 18 Sep 2026 21:03:46 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 18 Sep 2026 21:03:46 +0200
+X-UD-Smtp-Session: l3s3148p1@raRWj8ZbuqC57tsJ
+Date: Fri, 18 Sep 2026 21:03:46 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Frank.Li@oss.nxp.com
+Cc: Aubin Constans <aubin.constans@microchip.com>,
+	Ulf Hansson <ulfh@kernel.org>,
+	Nicolas Ferre <nicolas.ferre@microchip.com>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
+	Paul Cercueil <paul@crapouillou.net>,
+	Russell King <linux@armlinux.org.uk>, Frank Li <Frank.Li@nxp.com>,
+	Sascha Hauer <s.hauer@pengutronix.de>,
+	Pengutronix Kernel Team <kernel@pengutronix.de>,
+	Fabio Estevam <festevam@gmail.com>,
+	Andreas =?utf-8?Q?F=C3=A4rber?= <afaerber@suse.de>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Jesper Nilsson <jesper.nilsson@axis.com>,
+	Lars Persson <lars.persson@axis.com>,
+	Linus Walleij <linusw@kernel.org>, Fan Wu <fanwu01@zju.edu.cn>,
+	Rosen Penev <rosenp@gmail.com>, Pengpeng Hou <pengpeng@iscas.ac.cn>,
+	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
+	Zhan Xusheng <zhanxusheng1024@gmail.com>,
+	Pan Chuang <panchuang@vivo.com>,
+	Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>,
+	Rakuram Eswaran <rakuram.e96@gmail.com>,
+	Ethan Nelson-Moore <enelsonmoore@gmail.com>,
+	Runyu Xiao <runyu.xiao@seu.edu.cn>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	"Matthew Wilcox (Oracle)" <willy@infradead.org>,
+	"open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>,
+	"moderated list:ARM/Microchip (AT91) SoC support" <linux-arm-kernel@lists.infradead.org>,
+	open list <linux-kernel@vger.kernel.org>,
+	"open list:INGENIC JZ47xx SoCs" <linux-mips@vger.kernel.org>,
+	"open list:ARM/FREESCALE IMX / MXC / LAYERSCAPE ARM ARCHIT..." <imx@lists.linux.dev>,
+	"open list:OMAP HS MMC SUPPORT" <linux-omap@vger.kernel.org>,
+	"moderated list:ARM/ACTIONS SEMI ARCHITECTURE" <linux-actions@lists.infradead.org>,
+	"open list:TMIO/SDHI MMC DRIVER" <linux-renesas-soc@vger.kernel.org>,
+	"open list:ARM/ARTPEC MACHINE SUPPORT" <linux-arm-kernel@axis.com>,
+	vkoul@kernel.org
+Subject: Re: [PATCH v2 1/1] mmc: use dmaengine_get_dma_device() instead of
+ chan->device->dev
+Message-ID: <aq2LEtdAVJ58mpMr@shikoro>
+References: <20260918152349.2101305-1-Frank.Li@oss.nxp.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: use assign_bit() where applicable
-To: "Peng Fan (OSS)" <peng.fan@oss.nxp.com>, Ulf Hansson <ulfh@kernel.org>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni
-	<alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-	Kees Cook <kees@kernel.org>, Peng Fan <peng.fan@nxp.com>
-CC: <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>
-References: <20260918141810.3023069-1-peng.fan@oss.nxp.com>
-Content-Language: en-US, fr
-From: Aubin Constans <aubin.constans@microchip.com>
-In-Reply-To: <20260918141810.3023069-1-peng.fan@oss.nxp.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260918152349.2101305-1-Frank.Li@oss.nxp.com>
 
-On 18/09/2026 16:18, Peng Fan (OSS) wrote:
-> From: Peng Fan <peng.fan@nxp.com>
-> 
-> Convert open-coded if/else with set_bit/clear_bit and their
-> non-atomic __set_bit/__clear_bit variants to the assign_bit/__assign_bit
-> API.
-> 
-> Done with Coccinelle semantic patch and manual fixups.
-> 
-> Signed-off-by: Peng Fan <peng.fan@nxp.com>
-> ---
->   drivers/mmc/host/atmel-mci.c | 5 +----
 
-Acked-by: Aubin Constans <aubin.constans@microchip.com>
+>  drivers/mmc/host/renesas_sdhi_sys_dmac.c |  8 ++++----
+>  drivers/mmc/host/sh_mmcif.c              |  8 ++++----
+>  drivers/mmc/host/usdhi6rol0.c            |  6 +++---
 
->   drivers/mmc/host/ushc.c      | 5 +----
->   2 files changed, 2 insertions(+), 8 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 8f4df250a77a..98933be5f174 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -1677,10 +1677,7 @@ static void atmci_detect_change(struct timer_list *t)
-> 
->                  spin_lock(&host->lock);
-> 
-> -               if (!present)
-> -                       clear_bit(ATMCI_CARD_PRESENT, &slot->flags);
-> -               else
-> -                       set_bit(ATMCI_CARD_PRESENT, &slot->flags);
-> +               assign_bit(ATMCI_CARD_PRESENT, &slot->flags, present);
-> 
->                  /* Clean up queue if present */
->                  mrq = slot->mrq;
-> diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
-> index 7e8af5a06ac9..410e5bb62752 100644
-> --- a/drivers/mmc/host/ushc.c
-> +++ b/drivers/mmc/host/ushc.c
-> @@ -388,10 +388,7 @@ static void ushc_enable_sdio_irq(struct mmc_host *mmc, int enable)
->   {
->          struct ushc_data *ushc = mmc_priv(mmc);
-> 
-> -       if (enable)
-> -               set_bit(INT_EN, &ushc->flags);
-> -       else
-> -               clear_bit(INT_EN, &ushc->flags);
-> +       assign_bit(INT_EN, &ushc->flags, enable);
->   }
-> 
->   static void ushc_clean_up(struct ushc_data *ushc)
-> --
-> 2.51.0
-> 
+For these Renesas drivers:
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
