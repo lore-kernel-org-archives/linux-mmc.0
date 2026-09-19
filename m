@@ -1,214 +1,130 @@
-Received: from mail-pj2-f12.google.com (mail-pj2-f12.google.com [74.125.227.140])
+Received: from mail-oi2-f26.google.com (mail-oi2-f26.google.com [74.125.231.218])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93A0443C047
-	for <linux-mmc@vger.kernel.org>; Sat, 19 Sep 2026 10:04:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.140
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789812272; cv=none; b=EsrA8h1Vu9TeCu1OkqHyuNOmeJroULLPAZEH/ZeL+YqGql6eB49V/rvBTHX7aTcZU06gcCYPJufsjhhw0im9yX5k8OaUNhHx7hDVD0ESrWSKo/HwFVadH1stm443wYS/g/nsYKeVjzkDZlq0T935ks2cLYdR8oSwBtY9hQvKc9U=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789812272; c=relaxed/simple;
-	bh=0EHaYA31AKMkwGKZxxnGPfk5inRyKwHFRdZ52h6KFJc=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=mAk8ehpi3FV9MvqpQjdgpA/DpKAS6fh1vXV8WCbGEyQA6M1o3iK//lQC82Hvb3y2mQivkdfSUx5pBcgoLNzDDu1Qnhb02EYNjPMdPMd4vTVnzIq9J1Widyc0UECWUW8gKcfZiAq3mrHdPs+UYFhVrMJBkuydez9MqMV7sSOslNA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ht7+6nHx; arc=none smtp.client-ip=74.125.227.140
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44D04391E77
+	for <linux-mmc@vger.kernel.org>; Sat, 19 Sep 2026 11:58:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.231.218
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789819099; cv=pass; b=g2+6Y6rFzTRyHK0DmKT2zK8HDKJVreCs6SDrmwioOZkE/A0o0Kg6a7CKjt9HJDVAiKsgCpw+YeVuqVBFlcYa/1LgGsf9l4GvNv+g2zwbQn4ABw45lb0+txepTolqlCngSu4ccOOKxzDcSNeI04OBi6ejW2TmwvYJHhNeGDlbaEY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789819099; c=relaxed/simple;
+	bh=XbtXTzRAYW02KXholcw2ASApYBFb0BJqI8KGXi9eFzE=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Z+HBYFno19slXiQH6RdZrPbC442jXSI9LS/E/F6bwxVvx3CP6CdUH0D4jQ1QsO6ciT1uf56uAG0ATMYCO092U7RQrj3gEPdG755Y3nksjFNg28jDNDDuZ6GlMqHmmN/lQevMK0pDiOPOcvyFFoQLorQeV3VSEzpez4OEAML6py4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=qUUEP0MT; arc=pass smtp.client-ip=74.125.231.218
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ht7+6nHx"
-Received: by mail-pj2-f12.google.com with SMTP id 98e67ed59e1d1-396ccd5cf02so1164775a91.3
-        for <linux-mmc@vger.kernel.org>; Sat, 19 Sep 2026 03:04:19 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qUUEP0MT"
+Received: by mail-oi2-f26.google.com with SMTP id 46e09a7af769-80a18990c76so1185237a34.2
+        for <linux-mmc@vger.kernel.org>; Sat, 19 Sep 2026 04:58:18 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1789819097; cv=none;
+        d=google.com; s=arc-20260327;
+        b=MOAxh2pt3FY91UmGSAZNW6Pmv8wkLoR9RXKR52DV9HFF7VLyt+O4cQX1Y4Htnwzcb7
+         V6bLaiAS04bAWPDdl+fpsPOcLBtaUMlKHKgbGun2GR/+t5QBuxjROBqR8T5zGtJpXZ7u
+         XVlaBBu9NdhGqxZha0FVG8ppeQ/Fo2CriZi4Dch7ntwmnq+Xrdm/HoUvuw8+HZiQOyAE
+         PvmU99a+JsfvJugn6olKqH0dzS8RQL+Gyxe8FfHyVVpx6afxfv2d9LWpMurqQgREChg2
+         aoW7pACuJl50dqTNJ7Qf5RSUGH28bI0rVkIUJTcysk1QgiJDwb65qTYrxD2sNYy+zlHO
+         BVvw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=ud3FeOiOvyS8WWg6t16DeAqz++YfSh94BtVybhYysAU=;
+        fh=gH1q6WTXIrxc3qVe283u0rzvXvcln1jY9x7fdHrPmYE=;
+        b=g39rXW4398iCQk+6MJpRrEP56B1soWtX7bkYY5rlSAiA/INVZ0fn9Elbw0JDC8JQ3d
+         zYcCDUSwk/imiV0ZQ5C7guq/fjXc30junyVVAu+IlkrsyI7F/zIfXtI+f3tiSaT/8MxC
+         RiwifmePQaCxSmwIp+TWbAjoKNuh9LgP130nlKgvnHsAJP+mdXBQImdjPKuQzRSFM0Zq
+         82pksvZvCUW+f6XO59J4LpkIe2+uD+Un6TTt8cWHoPyWDceqsz+o63ncivS295qM1S5X
+         veJLH6IJKLvwdPvKGq9HkGd2La1Pa22vxN6uhRAS+Y8IIft+MTyXUCDCyKwZkltBxRzd
+         TdMw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1789812256; x=1790417056; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=oQH2rf6Bzcf6E6BADc6NPp0Qmbe39wDm40LygUzO/Os=;
-        b=ht7+6nHxEVp78xrB0wgCKi3OhuSe+YeGfdWr6KpaGg9J9n7ZdXQGT7kW1JtAeu4UqH
-         0Tuei5JETBDdlMaBF/rEwA0k3mpMSgtkoQKZJC7yCyrDqRDSiJnY5lszQvNiwq0uLIIy
-         YWXcCSUMecRVs2tgf1bOS40bjm0yV7fB8bRz9oJgiTzOJKUnnPnaP7Apcn7d7CRWri0X
-         ZWNg4Od3AQpx5USfwWK4p3CEf/RZEmHQtVD+S3UwVFTRD/XB6L3bkYBpKKdwCLZoe6JG
-         inWFAYwUB1tzmYkbS0EeVu9IkPqI1PZJn8NqsMTU29rD5HJOJ65ZoP8UiKtGIev4TYLp
-         Cs0w==
+        d=gmail.com; s=20251104; t=1789819097; x=1790423897; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=ud3FeOiOvyS8WWg6t16DeAqz++YfSh94BtVybhYysAU=;
+        b=qUUEP0MTwrU7oXS/DiUBaJTuIiyvZQEpf1ND3OTFPviB12MxddCifYrLA3LrjS13Y7
+         LwMcP+alakVZqZE9s6p0xb1IidKBj+yfanTrh8nwWhX7hbOlpxvC3bFD0ityurVfvmVN
+         OivAjYJPCbobJhlq28NsvsFRRWGcgxLRRgYYP/JlgbxqpNHK+YWCia3fAxZiGfHxePyL
+         jLYlzSTmu2D6XKng+OJMA2L1nvXZoI7ctuU1N0M+YdzKrFY+8dGvBYSDDKjUksZzzdtw
+         mZBBRBCe2w6Dx8VDM/uXzuE53ueL1Mt7+VI37vU38C7SDHKdSOuwZPZI14CzMuAwLR8A
+         OGXA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789812256; x=1790417056;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=oQH2rf6Bzcf6E6BADc6NPp0Qmbe39wDm40LygUzO/Os=;
-        b=YBSWKyOMLeNxCab4mx5gRPmZOPGsAxQ+tdTMhL0FfEUep8Zv4zrn3DIN6JF076n1An
-         GEj443yGh1wSYPpTmMLloNcH+nArhYCLQ5ezTiOygjpXYxH0gJ/CvhDFffLsFgqlwcXb
-         NQCbYHVPC7qfvvBMePkUdgketCUYF4pYnKZ5+q9aBxFZCnWxYIJRkJJZiA/0vMU94TNH
-         wQ17cpmBRaYxoWC/47uT1e3xJTwzoiNIKt9+H9/LjYUwRgN+fqTMQL+uiU23KkGWdT6d
-         W4G3JKflqXpJ3hShyjxtA6d1frwTXOjk+Zspeiw/lRqoU+M+JtJkmCfJq8x2SZRSPV6h
-         sBwA==
-X-Gm-Message-State: AFuF++mi75jbFhBJo+50vjs5aymAYMMHtFpzudK7UFYpa+yjgnReIOOR
-	P3zRHAfmG3aJqFuwgvEulYX2iWWPBk3zTM7Hl5GY9Bi0Q6csDianGv1V
-X-Gm-Gg: AYBFou2e8Z9AEn/IDJ+evUC9I48Bow09JixmxmmIs6kpq+wW11D2LrrKqlzwao9Ezop
-	3L0tq6712DY5GsZQNgbmK4geKb6HQ9RYY+GksFmrQvO26vWH3mxmpLcWheY7AFzLrjgDR03TDjf
-	N4ULL+MqKNF2XCTXcG+yUm5Ch3paTiTOxtwO7Y55AW3xqSzDbd0nXjOf8fmL6bSCDEPwhK/J9hj
-	1ftSx/w3SWn7O0tzetxuY0pBKGwL3/7PX79ytCOek+xLkUiTNRgIKOlB04KSv4AuBaDo8RelhhT
-	OjzbRuOxSBe3N33XupRSCjGirrhWRcM+yMCJMVmDg1Ud0s4DgrqgJwP6bxWJoNM3MP/LH7019y2
-	b5JjL2GlqqD+vlu+sHmpbaRIXrz4pTJZNnKN9z5Upi7ggtuK1CJFOw0Ub42pOtDUmv3DCT+RgW9
-	wM01xLu9zdnOw5YzgP0Ls5KYIJArWxyTgbcephLg4Q/YR5B23AV3MEYwUWDU5hLgOCFUkJBHfN0
-	9rTDfLvAhBC1EQCn5N3OFL1A80=
-X-Received: by 2002:a17:90b:574f:b0:39e:6a81:f34f with SMTP id 98e67ed59e1d1-39e6a81fd3cmr4027760a91.41.1789812255651;
-        Sat, 19 Sep 2026 03:04:15 -0700 (PDT)
-Received: from thangnn-ASUS.. ([2405:4802:1d4a:e90:814e:e9d3:767e:9a2a])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-39e6c3145dasm3843697a91.4.2026.09.19.03.04.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 19 Sep 2026 03:04:14 -0700 (PDT)
-From: Nguyen Ngoc Thang <ngocthang2710.1999@gmail.com>
-To: Ulf Hansson <ulfh@kernel.org>,
-	Maxim Levitsky <maximlevitsky@gmail.com>,
-	Alex Dubov <oakad@yahoo.com>
-Cc: linux-mmc@vger.kernel.org,
-	linux-usb@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] memstick: core: reclaim the request before freeing a timed-out card
-Date: Sat, 19 Sep 2026 17:04:08 +0700
-Message-ID: <20260919100408.113979-1-ngocthang2710.1999@gmail.com>
-X-Mailer: git-send-email 2.43.0
+        d=1e100.net; s=20260707; t=1789819097; x=1790423897;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=ud3FeOiOvyS8WWg6t16DeAqz++YfSh94BtVybhYysAU=;
+        b=s+o8eB1cYn0FRUCtIEC7rWgeBIctZDehg3Xc2tuf0458hDviPJIAPiQXlAFgDMQpjD
+         W6LRv2Pqp8I0EV3EFg8HBdf6c0NEgxBhJ87hSx6b7xc1+BUb/S+uJ09LBremB8x2fKrT
+         s0+yFcOMn1VXphEP6SnV3Ff+0i6vvoI/rLXatL74lASYbiV/ecetZsEbMR21TezXa4eF
+         IT2rajLe24m1T2X9cwJ9VryCk2jLRqA3AnGd8HPQ3qNSmI1doeRetEzIV32zPByVsHNk
+         cy8sHw9ywhwiCr0amxN8tlaRY84n51VEpMv6I+C/bUUuArry6LktLAi+87DNEn3FugTC
+         wLDA==
+X-Forwarded-Encrypted: i=1; AKwUvBzqmfheFjJxdp/Hq0Lkwp4vrXXOT6fEj1c6jKXZvf9URDSgTfxcvoNxsT1SuheQLt1KoHSc9Vz6lss=@vger.kernel.org
+X-Gm-Message-State: AFuF++nXweVvKJhUM3xcXxBplEBokiD4M/A5yGVulzYQxdRIc6WFsr30
+	fH2cA3l6ZcY7qiZnfC20grGhwvu8Vs/SdEOQ4Gb/c/R04hxrLT+6bt65Jcav1zQr6RPVwYBe0Ow
+	GcHD+wLJgPyV48LVFtOmFBQok9YO3BC8=
+X-Gm-Gg: AYBFou2ktYFpyu3UO/XnCsuhyDBC20gzJKG/6iMMuyGGLBoKLmGZ17TVJKrpC1/MjwX
+	5RwzGdaJ5eEE9GcSg/g0K1+kiX9eEhuvoRQmZCSjitljoN46Oh1DNPACCa0xdZMU9/etzdCPpsX
+	m58vPdf/VV3AUKAfp6W5m7J2X832oRNEbhA5ITbAF1RrssF21CtDn9cVV0gEn+FezIl+/rHJZHQ
+	1n5jrMgyLOVQc+fNeebQaBcXr+vL3J0I+c2kPjzM7gljzGX1nxzNtEmGd/OQubYpArZa3VAB1my
+	poQCjtM9/uNheml96I/TP3p2mhyGn/QsCS6s/jB7hi7yYWU/6REON+NzG6QYxOMFA0+gmu0Dq1U
+	VyyD69MhjaXdgcJqKJrrok2oLtMLyg+QFb64rvQ==
+X-Received: by 2002:a05:6830:442b:b0:806:1728:aed9 with SMTP id
+ 46e09a7af769-80ddff5b5e3mr6811507a34.5.1789819097212; Sat, 19 Sep 2026
+ 04:58:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20260902-07-k3-sdhci-fix-v1-6-b15c5d0f64fd@kernel.org>
+ <20260907155300.1411173-1-alan.tseng.cs@gmail.com> <CABdCQ=Mi3M8vGCYjURicNWy-Bh22qN199jOdHA5rEfTzui2b_A@mail.gmail.com>
+In-Reply-To: <CABdCQ=Mi3M8vGCYjURicNWy-Bh22qN199jOdHA5rEfTzui2b_A@mail.gmail.com>
+From: alan <alan.tseng.cs@gmail.com>
+Date: Sat, 19 Sep 2026 19:58:05 +0800
+X-Gm-Features: AcwNN1UZXEwsL9Pov5f9xi5w8glGlreCvMt_9qTwCiXunjbXeU4yHhZxeZNHtl4
+Message-ID: <CACwt7EYh9+MZHC7Qn910iOxvnjd42u_NoSX3+YpjQCxCxtY=6Q@mail.gmail.com>
+Subject: Re: [PATCH 6/7] mmc: sdhci-of-k1: Improve RX tuning window
+To: Iker Pedrosa <ikerpedrosam@gmail.com>
+Cc: dlan@kernel.org, adrian.hunter@intel.com, ulfh@kernel.org, 
+	long.wan@linux.spacemit.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org, 
+	spacemit@lists.linux.dev
+Content-Type: text/plain; charset="UTF-8"
 
-memstick_alloc_card() hands card->current_mrq to the host and waits 500 ms
-for it. If the host is still busy, the wait times out, the card is freed,
-but the host keeps its pointer to the freed request.
+On Tue, Sep 15, 2026, Iker Pedrosa wrote:
+> A jump from a minimum window size of 3 to 50 delay codes is quite dramatic.
+> Could you clarify how 50 was chosen? Is there a specific hardware specification,
+> phy datasheet recommendation, or test dataset across multiple boards that
+> justifies this exact number?
 
-rtsx_usb_ms hits this easily: its handle_req work can block in USB
-transfers for seconds. When it returns, it reads and writes the freed
-request, including the retry path in memstick_next_req():
+50 is not my number; Yixun would need to answer where it comes from. What
+I can add is what the vendor driver does. In SpacemiT's sdhci-of-k1x.c
+(bianbu linux-6.6), the defaults when DT says nothing are:
 
-  BUG: KASAN: slab-use-after-free in rtsx_usb_ms_handle_req+0x17ff/0x1a00
-  Read of size 1 by task kworker/1:3
-  Workqueue: events rtsx_usb_ms_handle_req
-  Allocated by task 1656:
-   memstick_alloc_card
-   memstick_check
-  Freed by task 1656:
-   memstick_alloc_card
-   memstick_check
+  #define RX_TUNING_WINDOW_THRESHOLD 80
+  #define RX_TUNING_DLINE_REG 0x09
 
-Add an optional host->cancel() hook that stops the host from using the
-current request, and call it from a common wait helper on timeout, before
-the request's owner can go away. rtsx_usb_ms implements it by draining its
-work item. The helper also covers memstick_set_rw_addr() and both waits in
-memstick_alloc_card().
+The Jupiter DT overrides both together: spacemit,rx_dline_reg = <0> and
+spacemit,rx_tuning_limit = <50>. So 50 is what the vendor pairs with the
+finer delay-line step, not a standalone default. That makes the 5/7 ->
+6/7 dependency concrete rather than theoretical.
 
-Reported-by: syzbot+3ee5da0319ca17ef1f4e@syzkaller.appspotmail.com
-Closes: https://syzkaller.appspot.com/bug?extid=3ee5da0319ca17ef1f4e
-Fixes: 99451dceeb5f ("memstick: Add realtek USB memstick host driver")
-Signed-off-by: Nguyen Ngoc Thang <ngocthang2710.1999@gmail.com>
----
-Testing: no hardware. A raw-gadget emulation of an RTS5129 (0bda:0129) on
-dummy_hcd delays every bulk-IN reply by 550 ms (above the core's 500 ms wait,
-below the driver's 600 ms USB timeout). On a KASAN kernel the unpatched tree
-reproduces the report (same offset and alloc/free stacks); the patched tree
-takes the timeout+cancel path (~0.6 s) with no KASAN.
+I also need to correct what I said earlier. The current driver already
+centres on the widest passing window; the "< 3" check only decides when
+to give up with -EIO. Raising it to 50 does not change which window is
+selected, only whether tuning fails. The 1- and 5-code windows I reported
+were never the widest in their boot (the widest was 74 or more each
+time), so they do not show the old threshold picking a bad window.
 
-I first considered a second unbounded wait_for_completion() instead of a hook,
-but rtsx_usb_ms_request() skips scheduling once host->eject is set and
-memstick_remove_host() flushes the workqueue, so that can deadlock.
+On the form: spacemit,sdhci.yaml has no such property, so a DT knob
+would need a binding change. A compile-time default, with DT override
+if the binding maintainers accept it, still seems the lower-risk option.
 
-Known limit: cancel waits for the worker's remaining retries (a few seconds
-with a device that never answers) while memstick_check() holds host->lock.
-Other hosts leave ->cancel NULL, so their behaviour is unchanged.
-
- drivers/memstick/core/memstick.c    | 22 ++++++++++++++++------
- drivers/memstick/host/rtsx_usb_ms.c |  8 ++++++++
- include/linux/memstick.h            |  2 ++
- 3 files changed, 26 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
-index e03989c4e99e..ea09a63286bb 100644
---- a/drivers/memstick/core/memstick.c
-+++ b/drivers/memstick/core/memstick.c
-@@ -359,6 +359,20 @@ static int h_memstick_set_rw_addr(struct memstick_dev *card,
- 	}
- }
- 
-+/* On timeout the host may still hold current_mrq; make it let go first. */
-+static void memstick_wait_req(struct memstick_dev *card)
-+{
-+	struct memstick_host *host = card->host;
-+
-+	if (wait_for_completion_timeout(&card->mrq_complete,
-+					msecs_to_jiffies(500)))
-+		return;
-+
-+	if (host->cancel)
-+		host->cancel(host);
-+	card->current_mrq.error = -ETIMEDOUT;
-+}
-+
- /**
-  * memstick_set_rw_addr - issue SET_RW_REG_ADDR request and wait for it to
-  *                        complete
-@@ -370,9 +384,7 @@ int memstick_set_rw_addr(struct memstick_dev *card)
- {
- 	card->next_request = h_memstick_set_rw_addr;
- 	memstick_new_req(card->host);
--	if (!wait_for_completion_timeout(&card->mrq_complete,
--			msecs_to_jiffies(500)))
--		card->current_mrq.error = -ETIMEDOUT;
-+	memstick_wait_req(card);
- 
- 	return card->current_mrq.error;
- }
-@@ -405,9 +417,7 @@ static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
- 
- 		card->next_request = h_memstick_read_dev_id;
- 		memstick_new_req(host);
--		if (!wait_for_completion_timeout(&card->mrq_complete,
--				msecs_to_jiffies(500)))
--			card->current_mrq.error = -ETIMEDOUT;
-+		memstick_wait_req(card);
- 
- 		if (card->current_mrq.error)
- 			goto err_out;
-diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
-index beadc389f15f..403144a39a53 100644
---- a/drivers/memstick/host/rtsx_usb_ms.c
-+++ b/drivers/memstick/host/rtsx_usb_ms.c
-@@ -551,6 +551,13 @@ static void rtsx_usb_ms_request(struct memstick_host *msh)
- 		schedule_work(&host->handle_req);
- }
- 
-+static void rtsx_usb_ms_cancel(struct memstick_host *msh)
-+{
-+	struct rtsx_usb_ms *host = memstick_priv(msh);
-+
-+	cancel_work_sync(&host->handle_req);
-+}
-+
- static int rtsx_usb_ms_set_param(struct memstick_host *msh,
- 		enum memstick_param param, int value)
- {
-@@ -787,6 +794,7 @@ static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
- 	INIT_DELAYED_WORK(&host->poll_card, rtsx_usb_ms_poll_card);
- 
- 	msh->request = rtsx_usb_ms_request;
-+	msh->cancel = rtsx_usb_ms_cancel;
- 	msh->set_param = rtsx_usb_ms_set_param;
- 	msh->caps = MEMSTICK_CAP_PAR4;
- 
-diff --git a/include/linux/memstick.h b/include/linux/memstick.h
-index 107bdcbedf79..e86f7f6e3e4b 100644
---- a/include/linux/memstick.h
-+++ b/include/linux/memstick.h
-@@ -285,6 +285,8 @@ struct memstick_host {
- 
- 	/* Notify the host that some requests are pending. */
- 	void                (*request)(struct memstick_host *host);
-+	/* Stop using the current request; may sleep until the host is idle. */
-+	void                (*cancel)(struct memstick_host *host);
- 	/* Set host IO parameters (power, clock, etc).     */
- 	int                 (*set_param)(struct memstick_host *host,
- 					 enum memstick_param param,
--- 
-2.43.0
-
+Thanks,
+Hung-Chun
