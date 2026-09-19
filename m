@@ -1,270 +1,214 @@
-Received: from CHN02-SH0-obe.outbound.protection.partner.outlook.cn (mail-sh0chn02on2094.outbound.protection.partner.outlook.cn [139.219.146.94])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj2-f12.google.com (mail-pj2-f12.google.com [74.125.227.140])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 602CB3FD14F;
-	Sat, 19 Sep 2026 09:45:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=139.219.146.94
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789811112; cv=fail; b=HD9SLQm3z5nDH9tUOa065g/REivvsu+1ognTYZsmlvNCBYAVkTYKwxZ6RhH0GNmi9A5a4iE7fH+t/dNkgRkUPyxTXSZ3rW6NrZI/YNF6NZmZIOW+qs5udSan/KqUARfrwYDmRz+JT6jG4S/PdgSZJa6sK/PCB4+HN9WR9rNYE0g=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789811112; c=relaxed/simple;
-	bh=pqbeVQgdmIegu3AhNQyulWn7f/fpNIxB6SvdinppIuE=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=EYIGNJIlYNXCgdx5HndynL0Cpy4/D811BAIgkBnMwLlvEjaabf06azHnIBoScW3zW6iZ5jTxpSNK6BzfP5EjA8X1dGLU45PIsiuhafxQzSByvbGPPdmhdV4rrIKG4l9WyyOwFX2AGQGo23czWEdA7IX0TiG7zbulRrHHfaYS6cE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=starfivetech.com; spf=pass smtp.mailfrom=starfivetech.com; arc=fail smtp.client-ip=139.219.146.94
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=starfivetech.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starfivetech.com
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=ODTLv2gvf2u3XEJkAPfEjA1Anf2d6ftZF6x9bMJPcfbudePrmRFlo7IYwmqH0zcIjRac2Eh1PsMOLEEeeDUGy+DSK5YKOs3con96EGs0x/fA4qlFh64ClpJgtKiz1X+Lu9GrvlZ/IQfo2W2D9P+L8Qm6FpbZQFvJImyzzwCBZ36SThG/80pQ8wKYQAmcFvdop4i+oLbobQ1wZUALNRRrDOFjmZcwMfkaCJ3pgGzuCMzc+7d712954xZNfudvKNYgfzms16sN0azZ3ufG1URdoERHePk6eazgf+otlLINiMYXCSCT/o1hkDEKn9CRs1BWZRjwE8sDz5Bl8MJLYxIIYQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=Yd/4saM6D2s+jFmENbOiWpIceYIitRhsilMcmaqyooo=;
- b=c4PLfAJ6GqECkK7u7wrw71J/7EB/Ip6Z4vICfVJd7aBhcFF/wagwXPT6AAJZvoViZfkVKp32wAqxMRLX3hKYxtf3FkchkNUMbcRPeYaig9VCjz25dRbT/DvLNsF/hQINrqxRAYTM5bALCnUAVYKMKD7e6tMiiXxIxUA0DMuRMTNDpdwCNEW0/1/ECrBpF6a09VE653kem29+YVRwXScfs7YUAEM/GEW33KOuxi9CcAUk5YyYtBMgeaqRQes/WknnAi8PXADR0CiJDyiTMaSXOGa5aprtS+vIpRUd0yBCkH+7mCWiYNGrAtuSKkSDttbY7yPt21Muzzifvc/OTSAnWQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=starfivetech.com; dmarc=pass action=none
- header.from=starfivetech.com; dkim=pass header.d=starfivetech.com; arc=none
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=starfivetech.com;
-Received: from ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn
- (2406:e500:c550:17::6) by ZQ4PR01MB1155.CHNPR01.prod.partner.outlook.cn
- (2406:e500:c550:15::13) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.428.14; Sat, 19 Sep
- 2026 09:30:00 +0000
-Received: from ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn
- ([fe80::e7d4:256c:b066:850d]) by
- ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn ([fe80::e7d4:256c:b066:850d%4])
- with mapi id 15.21.0428.014; Sat, 19 Sep 2026 09:30:00 +0000
-From: Changhuang Liang <changhuang.liang@starfivetech.com>
-To: Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Ulf Hansson <ulfh@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Inochi Amaoto <inochiama@gmail.com>,
-	Chen Wang <chen.wang@linux.dev>,
-	Jisheng Zhang <jszhang@kernel.org>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93A0443C047
+	for <linux-mmc@vger.kernel.org>; Sat, 19 Sep 2026 10:04:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.140
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789812272; cv=none; b=EsrA8h1Vu9TeCu1OkqHyuNOmeJroULLPAZEH/ZeL+YqGql6eB49V/rvBTHX7aTcZU06gcCYPJufsjhhw0im9yX5k8OaUNhHx7hDVD0ESrWSKo/HwFVadH1stm443wYS/g/nsYKeVjzkDZlq0T935ks2cLYdR8oSwBtY9hQvKc9U=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789812272; c=relaxed/simple;
+	bh=0EHaYA31AKMkwGKZxxnGPfk5inRyKwHFRdZ52h6KFJc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=mAk8ehpi3FV9MvqpQjdgpA/DpKAS6fh1vXV8WCbGEyQA6M1o3iK//lQC82Hvb3y2mQivkdfSUx5pBcgoLNzDDu1Qnhb02EYNjPMdPMd4vTVnzIq9J1Widyc0UECWUW8gKcfZiAq3mrHdPs+UYFhVrMJBkuydez9MqMV7sSOslNA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ht7+6nHx; arc=none smtp.client-ip=74.125.227.140
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ht7+6nHx"
+Received: by mail-pj2-f12.google.com with SMTP id 98e67ed59e1d1-396ccd5cf02so1164775a91.3
+        for <linux-mmc@vger.kernel.org>; Sat, 19 Sep 2026 03:04:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1789812256; x=1790417056; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=oQH2rf6Bzcf6E6BADc6NPp0Qmbe39wDm40LygUzO/Os=;
+        b=ht7+6nHxEVp78xrB0wgCKi3OhuSe+YeGfdWr6KpaGg9J9n7ZdXQGT7kW1JtAeu4UqH
+         0Tuei5JETBDdlMaBF/rEwA0k3mpMSgtkoQKZJC7yCyrDqRDSiJnY5lszQvNiwq0uLIIy
+         YWXcCSUMecRVs2tgf1bOS40bjm0yV7fB8bRz9oJgiTzOJKUnnPnaP7Apcn7d7CRWri0X
+         ZWNg4Od3AQpx5USfwWK4p3CEf/RZEmHQtVD+S3UwVFTRD/XB6L3bkYBpKKdwCLZoe6JG
+         inWFAYwUB1tzmYkbS0EeVu9IkPqI1PZJn8NqsMTU29rD5HJOJ65ZoP8UiKtGIev4TYLp
+         Cs0w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1789812256; x=1790417056;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=oQH2rf6Bzcf6E6BADc6NPp0Qmbe39wDm40LygUzO/Os=;
+        b=YBSWKyOMLeNxCab4mx5gRPmZOPGsAxQ+tdTMhL0FfEUep8Zv4zrn3DIN6JF076n1An
+         GEj443yGh1wSYPpTmMLloNcH+nArhYCLQ5ezTiOygjpXYxH0gJ/CvhDFffLsFgqlwcXb
+         NQCbYHVPC7qfvvBMePkUdgketCUYF4pYnKZ5+q9aBxFZCnWxYIJRkJJZiA/0vMU94TNH
+         wQ17cpmBRaYxoWC/47uT1e3xJTwzoiNIKt9+H9/LjYUwRgN+fqTMQL+uiU23KkGWdT6d
+         W4G3JKflqXpJ3hShyjxtA6d1frwTXOjk+Zspeiw/lRqoU+M+JtJkmCfJq8x2SZRSPV6h
+         sBwA==
+X-Gm-Message-State: AFuF++mi75jbFhBJo+50vjs5aymAYMMHtFpzudK7UFYpa+yjgnReIOOR
+	P3zRHAfmG3aJqFuwgvEulYX2iWWPBk3zTM7Hl5GY9Bi0Q6csDianGv1V
+X-Gm-Gg: AYBFou2e8Z9AEn/IDJ+evUC9I48Bow09JixmxmmIs6kpq+wW11D2LrrKqlzwao9Ezop
+	3L0tq6712DY5GsZQNgbmK4geKb6HQ9RYY+GksFmrQvO26vWH3mxmpLcWheY7AFzLrjgDR03TDjf
+	N4ULL+MqKNF2XCTXcG+yUm5Ch3paTiTOxtwO7Y55AW3xqSzDbd0nXjOf8fmL6bSCDEPwhK/J9hj
+	1ftSx/w3SWn7O0tzetxuY0pBKGwL3/7PX79ytCOek+xLkUiTNRgIKOlB04KSv4AuBaDo8RelhhT
+	OjzbRuOxSBe3N33XupRSCjGirrhWRcM+yMCJMVmDg1Ud0s4DgrqgJwP6bxWJoNM3MP/LH7019y2
+	b5JjL2GlqqD+vlu+sHmpbaRIXrz4pTJZNnKN9z5Upi7ggtuK1CJFOw0Ub42pOtDUmv3DCT+RgW9
+	wM01xLu9zdnOw5YzgP0Ls5KYIJArWxyTgbcephLg4Q/YR5B23AV3MEYwUWDU5hLgOCFUkJBHfN0
+	9rTDfLvAhBC1EQCn5N3OFL1A80=
+X-Received: by 2002:a17:90b:574f:b0:39e:6a81:f34f with SMTP id 98e67ed59e1d1-39e6a81fd3cmr4027760a91.41.1789812255651;
+        Sat, 19 Sep 2026 03:04:15 -0700 (PDT)
+Received: from thangnn-ASUS.. ([2405:4802:1d4a:e90:814e:e9d3:767e:9a2a])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-39e6c3145dasm3843697a91.4.2026.09.19.03.04.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 19 Sep 2026 03:04:14 -0700 (PDT)
+From: Nguyen Ngoc Thang <ngocthang2710.1999@gmail.com>
+To: Ulf Hansson <ulfh@kernel.org>,
+	Maxim Levitsky <maximlevitsky@gmail.com>,
+	Alex Dubov <oakad@yahoo.com>
 Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	sophgo@lists.linux.dev,
-	Philipp Zabel <p.zabel@pengutronix.de>,
-	Changhuang Liang <changhuang.liang@starfivetech.com>
-Subject: [PATCH v1 1/2] dt-bindings: mmc: snps,dwcmshc-sdhci: Add starfive,jhb100-dwcmshc
-Date: Sat, 19 Sep 2026 02:29:49 -0700
-Message-Id: <20260919092950.178617-2-changhuang.liang@starfivetech.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20260919092950.178617-1-changhuang.liang@starfivetech.com>
-References: <20260919092950.178617-1-changhuang.liang@starfivetech.com>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: NT0PR01CA0001.CHNPR01.prod.partner.outlook.cn
- (2406:e500:c510::12) To ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn
- (2406:e500:c550:17::6)
+	linux-usb@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] memstick: core: reclaim the request before freeing a timed-out card
+Date: Sat, 19 Sep 2026 17:04:08 +0700
+Message-ID: <20260919100408.113979-1-ngocthang2710.1999@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: ZQ4PR01MB1202:EE_|ZQ4PR01MB1155:EE_
-X-MS-Office365-Filtering-Correlation-Id: 1e1ac098-e054-4ccb-265d-08df16309387
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|52116014|7416014|23010399003|1800799024|366016|56012099006|10067099003|3023799007|38350700014|22082099003|18002099003;
-X-Microsoft-Antispam-Message-Info:
-	HbYeGSoicEXbU0ojLILTlWVQJGWMJi6/sDnUFf4gEqOxFfeZwRayaF+AdeO2sJ8/tI0KRMk+h5/eJHWqFa8shQP16zsWtLdxqvgCCt8L+RsV3x2zgLFDpKEqDIo0NohOfib8Q58FAa+2N4zjZMEcqwAAiIB1UnoJcY0k/q5nzDMaeFTIkLyXzQIEXKnXRWWGOFXCEXKAvS1qkVglk0Ygrh2d+XB0+pFpZK91o0enuG8SWT6XQTfIJ54KCl8y2Z5a3frBja+vxM59WY+3xlqVtb4nmv8+xzw4bPxGPkinkJ+Szvfle+ln1Ke4SSkNqTJczzcc8DlmSzlBHQxP0RLOG8nzgbTdvHj/YuOp9OHAJ0qAuo0O8jCcooDT6aZ59Fbyj8ZNd8VHo4q9he8BUM4/EUecPrH6jDJUoBdEg5B/QluexPTRDwHPDXT/L3Mh3pwzUVLfHwXzSn1Kbq4ddb/4cCXC4XLqRPaMgE+Yfw/2uKmo/TyhRPcaqNVKzRCBMh2FB/OkwhA1qIlZIclf3fQKQYmsik0BDIJyiX2eEBiLTd/QIpCcGFpvjurBXq3lJwRs
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn;PTR:;CAT:NONE;SFS:(13230040)(376014)(52116014)(7416014)(23010399003)(1800799024)(366016)(56012099006)(10067099003)(3023799007)(38350700014)(22082099003)(18002099003);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?nRAF3hLGFjNFFGvBzsAx/r48kSl6Ej5d+KXAqY4+9ZDhd+lJgN/8wDxLy70a?=
- =?us-ascii?Q?7oo8DyS84AuKqYuTIEUE2ROe0gfqwX31P8kWoSTWFhrbrXqmylOwRkz3A+d2?=
- =?us-ascii?Q?zUwgCw+GOxA5uemIzenlSdGeeIxQpwkrm39lT49GiXbNGGaep9TDUKjZnRhA?=
- =?us-ascii?Q?fH4QjcF0aLz4TqLIq4yIAwUSP6ok2Fk22WGDGsgug/eHBwnxaE2QgIN377/+?=
- =?us-ascii?Q?rcm/c70zC0L7EvlDIIcDEeldWHnCJs8tE0sSKLXKieYW3G5wsqalUM2j0oEi?=
- =?us-ascii?Q?XSzIY+pwoZD93bcZEti1USe99UU5F4uAD5OExAQDDzHv0DpzGcIKzloHglMK?=
- =?us-ascii?Q?WhJfYeOzD5Fvv6nEq5ag8GAjm3KnmWyAwibMvqhkh51cUms95Lu6EOltqrAE?=
- =?us-ascii?Q?NLJZkv7WCUYAKtVCGbP5XFdF1gJSm/HxpsIvzDv9Md+pgbLA/9PHVuBRri5i?=
- =?us-ascii?Q?hN0ENmsz761Y19kh6oJ51C+qUEOMPMhIeJclFJpDc8mjMSVmdlwloF52H8wF?=
- =?us-ascii?Q?XGJHvboFKwueLC9T7Jzjr0M/eSuLK1i8+DgMzrbSPVQ6g+tTiO+QPXpw3B4g?=
- =?us-ascii?Q?BStjpP2c3w2JtHjS3a/NTW7w3NY1IuZNthj4mPpwEihXbVbwEhoeEXtyKcmr?=
- =?us-ascii?Q?CboDGicqDX2tSidGj9YeOPGzBk3wliNzQEsoGZwoxzUSrWUdjrpY07QHluBu?=
- =?us-ascii?Q?4lfPLFdIro1DXJJovFbFmRC2hrSVqvG+sUwbUMWoc0ICjT5pcddHID48oB89?=
- =?us-ascii?Q?4ZMYwEh0jV23ATokcm/5BAFUhvpr3hZRM8oqyBeowh6t7vx15pLUb8SNZd/9?=
- =?us-ascii?Q?v9W9ZjvxU/2eT7gpq6pUKJniXX+JLbCDzPD1vJLIPoU4ghsQmkYHw3Nz7dcm?=
- =?us-ascii?Q?zLIRkSovE1syi1904dE7fETYklz36nsCNxOMsNvn4LInVuTLpAdh4p1CybgS?=
- =?us-ascii?Q?l85G8FHu/buFmOzXgBVRSZnji5bw49ZrRC1He+vRJWNM7UsAjIQl3lszuNTY?=
- =?us-ascii?Q?QK50Xx5NeQ8Unl0D5mefU7Ew3pF+2yoNm6c/lNigykoAEXSsTnJvhDG22sym?=
- =?us-ascii?Q?JrApc8BZSdQdrm61GASB7ghLvSdZBqmMamszh/O/DN2jQD6mfX8lwOo5zbe5?=
- =?us-ascii?Q?lZ61iN6I6xiiyvk7AXY7NsY9E9JL/Sq2bOBoxWLj5+6KYCepGxEuqgBpY6SP?=
- =?us-ascii?Q?jSn7NvLLoTZy8EI8rURNIQ2Sg7awUUPFta5hTdgKunTM6qi7+pZ1uvPXbwxp?=
- =?us-ascii?Q?beAaYlvPdpIhQ+FSlcVKLeO9bhbSg/8Zbo4SeZOM6Cul25IbE0iMQvoFAdxf?=
- =?us-ascii?Q?uAps8U5gPdl1RaODGeEldO4J/CGr2m+M8HKrdbjnJhJNkmvUkDo0SNheabvM?=
- =?us-ascii?Q?vJVp5g0IvnUmSwGYAiP35bxONi66WY80h6Sh/ZB54nCLF5a7K2tES1pBNT5Z?=
- =?us-ascii?Q?0R3yCxzux40GgnqoAnYCczgUP2zPDzZp2wpSPHQwIIzXeBHDNif5TByeu8y6?=
- =?us-ascii?Q?dPV3j+VXJn0bn90pG8+F7wi73WEvfrg/MWlf6+O4sPmijf5SGOr+ajYArVsV?=
- =?us-ascii?Q?NIQYzhwWoPJaJ04sdAkxSrh8DwdyfgFkSVQTXpD/ndM8LOq5AytjR8Z1p+qo?=
- =?us-ascii?Q?nMcQKCK6lJaAEGxYKnH8J9LQSN7VRlxVcKkFVDJJT/v6cOVDkCHuyg5v+6Lx?=
- =?us-ascii?Q?2lp9A3wfh/zqo0KpOJcHyJtyx24vEafvGKNQyZHCLs6JSul5ma1A/fpk03fE?=
- =?us-ascii?Q?yUPvPSLsf0/Qv3PMKqZjXXPnoQeEu7nTzCx7gYASANpZn+wVY9hj?=
-X-OriginatorOrg: starfivetech.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1e1ac098-e054-4ccb-265d-08df16309387
-X-MS-Exchange-CrossTenant-AuthSource: ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Sep 2026 09:30:00.0370
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 06fe3fa3-1221-43d3-861b-5a4ee687a85c
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: PyvCAit8iMkNNNYr6FSEVnIIPhm8OeANR+YyWo4o2CCGzoDL/244tQmI8765QdbVpr/bcibFtL62W54TloCEiOBHLTs9upC72mFfaDp1lUffVyRGLkyX8jVcXc0sxTBP
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: ZQ4PR01MB1155
+Content-Transfer-Encoding: 8bit
 
-Add compatible string "starfive,jhb100-dwcmshc" for the StarFive
-JHB100 SoC.
+memstick_alloc_card() hands card->current_mrq to the host and waits 500 ms
+for it. If the host is still busy, the wait times out, the card is freed,
+but the host keeps its pointer to the freed request.
 
-The JHB100 controller uses three clocks (core, bus and cclk_tx) and a
-single reset, so relax the common resets/reset-names minItems from 4
-to 1 and add a dedicated conditional schema for the JHB100 compatible
-that constrains the clocks, clock-names, resets, reset-names and the
-required starfive,jhb100-per1-syscon property. The property describes
-the phandle to the PER1 SYSCON and the offset of the register holding
-the upper DMA address bits [35:32] of the eMMC DMA address, used to
-extend the default 32-bit DMA capability to 36-bit.
+rtsx_usb_ms hits this easily: its handle_req work can block in USB
+transfers for seconds. When it returns, it reads and writes the freed
+request, including the retry path in memstick_next_req():
 
-Also rework the existing if/else blocks so that the JHB100 compatible
-is excluded from the branch that requires the extra resets, while
-keeping the same constraints for the other SoCs.
+  BUG: KASAN: slab-use-after-free in rtsx_usb_ms_handle_req+0x17ff/0x1a00
+  Read of size 1 by task kworker/1:3
+  Workqueue: events rtsx_usb_ms_handle_req
+  Allocated by task 1656:
+   memstick_alloc_card
+   memstick_check
+  Freed by task 1656:
+   memstick_alloc_card
+   memstick_check
 
-Signed-off-by: Changhuang Liang <changhuang.liang@starfivetech.com>
+Add an optional host->cancel() hook that stops the host from using the
+current request, and call it from a common wait helper on timeout, before
+the request's owner can go away. rtsx_usb_ms implements it by draining its
+work item. The helper also covers memstick_set_rw_addr() and both waits in
+memstick_alloc_card().
+
+Reported-by: syzbot+3ee5da0319ca17ef1f4e@syzkaller.appspotmail.com
+Closes: https://syzkaller.appspot.com/bug?extid=3ee5da0319ca17ef1f4e
+Fixes: 99451dceeb5f ("memstick: Add realtek USB memstick host driver")
+Signed-off-by: Nguyen Ngoc Thang <ngocthang2710.1999@gmail.com>
 ---
- .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 74 ++++++++++++++++++-
- 1 file changed, 70 insertions(+), 4 deletions(-)
+Testing: no hardware. A raw-gadget emulation of an RTS5129 (0bda:0129) on
+dummy_hcd delays every bulk-IN reply by 550 ms (above the core's 500 ms wait,
+below the driver's 600 ms USB timeout). On a KASAN kernel the unpatched tree
+reproduces the report (same offset and alloc/free stacks); the patched tree
+takes the timeout+cancel path (~0.6 s) with no KASAN.
 
-diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-index cd823a3ef213..b5cdcc6e8f38 100644
---- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-@@ -32,6 +32,7 @@ properties:
-           - sophgo,cv1800b-dwcmshc
-           - sophgo,sg2002-dwcmshc
-           - sophgo,sg2042-dwcmshc
-+          - starfive,jhb100-dwcmshc
-           - thead,th1520-dwcmshc
-           - eswin,eic7700-dwcmshc
+I first considered a second unbounded wait_for_completion() instead of a hook,
+but rtsx_usb_ms_request() skips scheduling once host->eject is set and
+memstick_remove_host() flushes the workqueue, so that can deadlock.
+
+Known limit: cancel waits for the worker's remaining retries (a few seconds
+with a device that never answers) while memstick_check() holds host->lock.
+Other hosts leave ->cancel NULL, so their behaviour is unchanged.
+
+ drivers/memstick/core/memstick.c    | 22 ++++++++++++++++------
+ drivers/memstick/host/rtsx_usb_ms.c |  8 ++++++++
+ include/linux/memstick.h            |  2 ++
+ 3 files changed, 26 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
+index e03989c4e99e..ea09a63286bb 100644
+--- a/drivers/memstick/core/memstick.c
++++ b/drivers/memstick/core/memstick.c
+@@ -359,6 +359,20 @@ static int h_memstick_set_rw_addr(struct memstick_dev *card,
+ 	}
+ }
  
-@@ -53,11 +54,11 @@ properties:
-     maxItems: 1
- 
-   resets:
--    minItems: 4
-+    minItems: 1
-     maxItems: 5
- 
-   reset-names:
--    minItems: 4
-+    minItems: 1
-     maxItems: 5
- 
-   canaan,usb-phy:
-@@ -98,6 +99,22 @@ properties:
-       offset of the MSHCCS register used to configure clock
-       synchronisation for HS200 tuning.
- 
-+  starfive,jhb100-per1-syscon:
-+    $ref: /schemas/types.yaml#/definitions/phandle-array
-+    items:
-+      - items:
-+          - description: Phandle to StarFive JHB100 SoC Peripheral-1 syscon
-+                         register block.
-+          - description: Offset of the register used to configure the
-+                         upper DMA address bits [35:32] of the eMMC DMA
-+                         address.
-+    description:
-+      Phandle to the StarFive JHB100 SoC Peripheral-1 syscon register
-+      block, and the offset of the register that holds the upper DMA
-+      address bits [35:32] of the eMMC DMA address. This is used to
-+      extend the default 32-bit DMA capability of the CMSHC controller
-+      up to 36-bit.
++/* On timeout the host may still hold current_mrq; make it let go first. */
++static void memstick_wait_req(struct memstick_dev *card)
++{
++	struct memstick_host *host = card->host;
 +
- required:
-   - compatible
-   - reg
-@@ -167,7 +184,16 @@ allOf:
-             - const: core
-             - const: bus
-             - const: timer
--    else:
++	if (wait_for_completion_timeout(&card->mrq_complete,
++					msecs_to_jiffies(500)))
++		return;
 +
-+  - if:
-+      not:
-+        properties:
-+          compatible:
-+            contains:
-+              enum:
-+                - sophgo,sg2042-dwcmshc
-+                - starfive,jhb100-dwcmshc
-+    then:
-       properties:
-         clocks:
-           minItems: 1
-@@ -205,7 +231,16 @@ allOf:
-       required:
-         - eswin,hsp-sp-csr
-         - eswin,drive-impedance-ohms
--    else:
++	if (host->cancel)
++		host->cancel(host);
++	card->current_mrq.error = -ETIMEDOUT;
++}
 +
-+  - if:
-+      not:
-+        properties:
-+          compatible:
-+            contains:
-+              enum:
-+                - eswin,eic7700-dwcmshc
-+                - starfive,jhb100-dwcmshc
-+    then:
-       properties:
-         resets:
-           minItems: 5
-@@ -228,6 +263,37 @@ allOf:
-       required:
-         - power-domains
+ /**
+  * memstick_set_rw_addr - issue SET_RW_REG_ADDR request and wait for it to
+  *                        complete
+@@ -370,9 +384,7 @@ int memstick_set_rw_addr(struct memstick_dev *card)
+ {
+ 	card->next_request = h_memstick_set_rw_addr;
+ 	memstick_new_req(card->host);
+-	if (!wait_for_completion_timeout(&card->mrq_complete,
+-			msecs_to_jiffies(500)))
+-		card->current_mrq.error = -ETIMEDOUT;
++	memstick_wait_req(card);
  
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: starfive,jhb100-dwcmshc
-+    then:
-+      properties:
-+        clocks:
-+          items:
-+            - description: core clock
-+            - description: bus clock
-+            - description: card transmit clock
-+        clock-names:
-+          items:
-+            - const: core
-+            - const: bus
-+            - const: cclk_tx
-+        resets:
-+          maxItems: 1
-+        reset-names:
-+          items:
-+            - const: core
-+        starfive,jhb100-per1-syscon: true
-+      required:
-+        - resets
-+        - reset-names
-+        - starfive,jhb100-per1-syscon
-+    else:
-+      properties:
-+        starfive,jhb100-per1-syscon: false
-+
- unevaluatedProperties: false
+ 	return card->current_mrq.error;
+ }
+@@ -405,9 +417,7 @@ static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
  
- examples:
+ 		card->next_request = h_memstick_read_dev_id;
+ 		memstick_new_req(host);
+-		if (!wait_for_completion_timeout(&card->mrq_complete,
+-				msecs_to_jiffies(500)))
+-			card->current_mrq.error = -ETIMEDOUT;
++		memstick_wait_req(card);
+ 
+ 		if (card->current_mrq.error)
+ 			goto err_out;
+diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
+index beadc389f15f..403144a39a53 100644
+--- a/drivers/memstick/host/rtsx_usb_ms.c
++++ b/drivers/memstick/host/rtsx_usb_ms.c
+@@ -551,6 +551,13 @@ static void rtsx_usb_ms_request(struct memstick_host *msh)
+ 		schedule_work(&host->handle_req);
+ }
+ 
++static void rtsx_usb_ms_cancel(struct memstick_host *msh)
++{
++	struct rtsx_usb_ms *host = memstick_priv(msh);
++
++	cancel_work_sync(&host->handle_req);
++}
++
+ static int rtsx_usb_ms_set_param(struct memstick_host *msh,
+ 		enum memstick_param param, int value)
+ {
+@@ -787,6 +794,7 @@ static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
+ 	INIT_DELAYED_WORK(&host->poll_card, rtsx_usb_ms_poll_card);
+ 
+ 	msh->request = rtsx_usb_ms_request;
++	msh->cancel = rtsx_usb_ms_cancel;
+ 	msh->set_param = rtsx_usb_ms_set_param;
+ 	msh->caps = MEMSTICK_CAP_PAR4;
+ 
+diff --git a/include/linux/memstick.h b/include/linux/memstick.h
+index 107bdcbedf79..e86f7f6e3e4b 100644
+--- a/include/linux/memstick.h
++++ b/include/linux/memstick.h
+@@ -285,6 +285,8 @@ struct memstick_host {
+ 
+ 	/* Notify the host that some requests are pending. */
+ 	void                (*request)(struct memstick_host *host);
++	/* Stop using the current request; may sleep until the host is idle. */
++	void                (*cancel)(struct memstick_host *host);
+ 	/* Set host IO parameters (power, clock, etc).     */
+ 	int                 (*set_param)(struct memstick_host *host,
+ 					 enum memstick_param param,
 -- 
-2.25.1
+2.43.0
 
