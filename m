@@ -1,68 +1,68 @@
-Received: from mail-wm2-f12.google.com (mail-wm2-f12.google.com [74.125.225.140])
+Received: from mail-wr2-f12.google.com (mail-wr2-f12.google.com [74.125.225.76])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9BB54342151
-	for <linux-mmc@vger.kernel.org>; Sat, 19 Sep 2026 14:14:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.225.140
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BE51322A1C
+	for <linux-mmc@vger.kernel.org>; Sat, 19 Sep 2026 14:18:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.225.76
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789827267; cv=none; b=L9xV6jA26bUwp9iW9uVAqRAq9wR3JcvwmatiRrl+FP8JZeM9CsSyfGLxdOMGQpwJnRL7VE1zBMq+iTt8QSxkNYtOfPlj3d3cqaH/EhrhNgAO2e0XM/uXJUoSxA/T0rM+2tqF1173m3UVmrXuCozLzXp3nmHvuArXmzPRx5XM5ug=
+	t=1789827502; cv=none; b=lhG4GtNs+e59d2MullBpdtDKF9VjhXfTNcYCGnPy+Tho7LRiuxOlYZx1bt62hi6xFIaLg7j+ooXc+V/lUsmn/E3Lbh092Rn3OW5lZSIZEWMGHr8Fo+HQJZcUGhm3z4VhkQrzS13LztRENemZY7Cm3D+6+NZP9PuFWi8j73R/bWo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789827267; c=relaxed/simple;
-	bh=WRSgkDBY5tNM3yui/Kxcf6xHhw9r2/E8S3QTsi7mNCE=;
+	s=arc-20240116; t=1789827502; c=relaxed/simple;
+	bh=PpslIjtfqdnivMU4+zxZKe2uCZBrq5qLNofJ1sx/HeU=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=lwy62v/lxPZqHgj/xJECkM0p71NWmU5N1X+aYjJeYjOy5MtdFtEH9PKZL6KeDtT/bTa8sHlkdKOwDb/ndQbgaLhfqYryuD1BXx00qJMwwhTG9sgaB9jWVdF4D0EMU6b1n5hmAZDyrhU2NzAcBOJSrptiMkSAaoBV3Ivx/O3GhI0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=N3aLYUGW; arc=none smtp.client-ip=74.125.225.140
+	 In-Reply-To:Content-Type; b=VNPQW5K7hBAAlyrRcEo8lMkdlawlkpi0SNOSc+rq4HkwbvtkZw2+lErAx4AVp5xJIluaKJ8r3I+t+EUsieBApO2br1AMSAFlytPzXJD+GjBdxiqM7kSIDTn2w7JKY8ILGX3qXw8/KWB1VDUxHS8kG7fMSznpn51Mgqo7gbFcYt0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=oGR+jQPf; arc=none smtp.client-ip=74.125.225.76
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="N3aLYUGW"
-Received: by mail-wm2-f12.google.com with SMTP id 5b1f17b1804b1-49cd38e0f79so9598145e9.3
-        for <linux-mmc@vger.kernel.org>; Sat, 19 Sep 2026 07:14:24 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="oGR+jQPf"
+Received: by mail-wr2-f12.google.com with SMTP id ffacd0b85a97d-482f633ecdeso1548126f8f.2
+        for <linux-mmc@vger.kernel.org>; Sat, 19 Sep 2026 07:18:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1789827262; x=1790432062; darn=vger.kernel.org;
+        d=tuxon.dev; s=google; t=1789827499; x=1790432299; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:in-reply-to:from
          :content-language:references:cc:to:subject:user-agent:mime-version
          :date:message-id:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=HJXc10uVHArrgWQfirQzw4xfu+i+JBRRlfN/XUL1Ils=;
-        b=N3aLYUGWG+ZBzslmo9NV7uQrfldnC5ieq+ODz2/aLQjkbybklidpv0eJFxQu5CAkLK
-         WsrfTF3owFQXuHDHvPdzpaGgSemo+MGalvYy+o9/EMlU7QRz6Os8JANmP0oivVVF+Uav
-         /flOaO8pyVrC0HCKDZMXMPNGHFFRaRYeQMAa1LlEueLiCXqSGCKnqLShyqahmH1OYbMi
-         +SAWFLWHEiYvdAhO31IsfvCRx4wIPX1N7qgAKZvrNmQTddby0bEtiJ1UPmXgL8kDkO+d
-         WYa45q2Yrb5wYbjQ1mY7mV2Q68V/4kbZ/3AJQltk4xrp3TgSa53iRGQeOnuw+FqqiaTJ
-         r43Q==
+        bh=3WVdtse4utFqdGo5H8fnCG1N9VsS3ll8DP5z6tgaWzw=;
+        b=oGR+jQPfiTfptyCXAWBXQe9Cit7QtF8B6k3YHixtP+Pk9Z0zRWvKbPghLXi/Xg+yxQ
+         OIbTKkOC9DJDl7ETC3kbR+2ZHFY5VN3wXDrQ7iUPfrVXr5Mhyg2O56nt5h/C85uL19Rh
+         WQCAcDSG5pLi+NWCXKFNoewm+9p7UsAmOH1AmerEd+NIc4lNRHQe4MBIK5iJITHBzU3+
+         Qj+ax8iVagCST2amDdNio1XJkCK3f9W/q6vPI3CAcBrC7ppXr/8xziCK7THezbyu1GY3
+         8EcYV4BFWgCQy5R2YnzUSL0ChDxSTtKXkAxOuDtg9q6CstE9OueLX+ON8ZU746a24yKP
+         lFMQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789827262; x=1790432062;
+        d=1e100.net; s=20260707; t=1789827499; x=1790432299;
         h=content-transfer-encoding:content-type:in-reply-to:from
          :content-language:references:cc:to:subject:user-agent:mime-version
          :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=HJXc10uVHArrgWQfirQzw4xfu+i+JBRRlfN/XUL1Ils=;
-        b=FtQQjKqUk9nlCuK8HI82oWGdv8CWMbqzw6ZRAuqZ/dmi+ntpXkb1rIZnix/u7/eGbI
-         u8+r3hX0jlvgVG62Wtse7YvdIiipS8tT4Iuiw7eymagyx4EByvpPUavat8LqU+c/S8p8
-         qelzHzS4RX/2W58WgEvRf4dqeaK86E+VrA0tzPpXflUOSjTJmBpFt0O1/QP8zpuOOdVE
-         rvfOUd5GM34JgfX+ApA3thx/wq0mknX/ssvOhKU5DLH/tJofTSfmSRG++eU9Y268o+fL
-         MtQ3/v3h1bUv+/Xh0Jmy8Hu2+sSlQDFzyTsj42TjPA8F6GA/5Rpw5IETtTM5jiRlxe8E
-         Bs2g==
-X-Forwarded-Encrypted: i=1; AKwUvBz0OUZxxOwK/Y4Ppba2l3xPBWlXH4neMQ7YVp0gAbzMFW7IIRze4DC6jh+/RI21pmK9GzTTsBzYc8Y=@vger.kernel.org
-X-Gm-Message-State: AFuF++l6TBve5HP71gD38SBKAItrsLuD+6jNDjGseCRTWG+Q+YIO3Mly
-	FkkkKOHb95bYeV4Fq5GC9CatuEPkF5J4sFD4CbZKyITiVnwdkbq6t+WN6Yx2U7cYxW4=
-X-Gm-Gg: AYBFou03VJQd1zJhOiP5HW/zsaZ9w8u/DP6xLaKR4gD/86tG/5YXzrBf8nN4SeE0+j1
-	ZSCkITrtdugg6es3HiOR2dGCyqMoo0YoqMVNArKvqZZOin5ir2X6HxLZ10LED1WW1lZYsmq8QW+
-	IyxJAuE6wG4q+9nTCwxMvxUwlcycIVHYW7a+tmAYKsVPtpST2XZMkXgH2E7/HRRyY/yFvJ2ICpD
-	kK7NSri35QD34eV2P7pTOEP8rLYf4mSF1P071gMSyBWfksOsTj9VGh5vYqKpBvTwMupFU/HbdRN
-	p7fvUCIt4MiC//T1F/4kMq9FlGX7eFPeqV4NrjY5XDJX/CMNYglbRjVJsRxLrrIm3y304H4qX7z
-	uNT+oRLhdJeCMh8FlNRrhWU5TSPTLfPAufUWPI4tPiWIbdmnucbUZT85dgbsD1zMVBDTrxx3U4+
-	3QzcH8W9YetIsBgqW9dMRM22Vlai1w50/tsPQJMdCVNj9b8fvTSIgOVDvyxBDwdm1pPEzF1ShUz
-	V0rVdaBxoHIWWGz91RXT9bCjCfVWmFlLH9pR1mgdh5bD4DBc2g7jynX
-X-Received: by 2002:a05:600c:19c8:b0:49f:ce78:3565 with SMTP id 5b1f17b1804b1-49fce7835f7mr20772865e9.22.1789827262336;
-        Sat, 19 Sep 2026 07:14:22 -0700 (PDT)
+        bh=3WVdtse4utFqdGo5H8fnCG1N9VsS3ll8DP5z6tgaWzw=;
+        b=XzjKpqtvypsTRla+ZUCawYHBpVNT6JYeLF5QXLYOpOTAki2T24R7Uel+u+qB2lUyLt
+         mHVL0vQiqGD9OtgDdVBvvDdMwkeamHiQsEA3OnfxQfsMPGM0urmC5+zrsH+T7UqM7aYb
+         fDBT+HT740LO3+Q+Ul8HuEArieFJ/CjH3uT+eHH+DmmUZ+o8sMmCN9SPKySl63/QZUrB
+         yxyACATraX3mzkNuOZQrSwJI0vtLHnGzH/oUhogn5LLDuIDWC2AEyvnZmlEJYBS/zvBi
+         OZO0Xkxx9clp7J66UGUk9uXvDkl3Jw4FbEs4s+mfc0iUTFOMMRveR5GkYcYnY9B87E9h
+         i6vg==
+X-Forwarded-Encrypted: i=1; AKwUvByn/80D8Bo1h8en09LK/OrT/4JvkdT3ze5k+0+tTbCUNpcUOekE73msrOLSJUmuPgWwUTYqg5lQcsA=@vger.kernel.org
+X-Gm-Message-State: AFuF++kYtrvcqUGz2S7T4m/l/pTqAP/yn3nEhBpD1bthFcHYDI6PMONm
+	9rOn7JNKTbWw2hZWg9Ig07Q89+BVvwsBjtS9xxGApQC2HRB5/jVxIDo9kcofDn6Qr1A=
+X-Gm-Gg: AYBFou0XOQh+GyMikHxytXwselJ05zUM/KDNaux8F4hraNSWmbzZxUtUiFu7Oj9ZvJX
+	PMaSclORF5MFgCdjAi91Vu5fYwGb7dn6v+8C2B1YWFUZ5Y6DOUx5qa6EOKy3U9jDagZCa98flxD
+	eB6uXqkYBDxRzZLU0NSBN3jUSemqdiVdZEHFYTaXyiMQEeq0XpwuHoDouiXaY+hUVoFqP/DKW/a
+	H8q3XAEvGO0Vu/mMllXmxzej82hVVCHLkz5rQrLmhzPR+2rEipU8VkRfLqWp+hOgM3kxZiIfs1R
+	rQ8WbfWYloJQsNc8SlD8Ui3ljrwcc+DK73ROozz+UfZlsbEruI7eRNpOJ1mh5JFmgJ5mxgtbzmh
+	rR1yx1B0Ph2GvIPtOEb7aA8ZWA+V8dreCNY7dyLnnS/i6r+LVKmA+y+CImC/ozJndMm/Xm55au4
+	xlvWnyDp5yGav9BtxCbowUEqtQKoH91HCysob5FycMIJFPELhmyL1A9cVPNF7hGja/d+awTKD4y
+	HPJh+G+L3H+MWvbtHJYWI8E0wh7bzVmDAnKhkusLyzX9pM0o2dCtiAs
+X-Received: by 2002:a05:600c:c493:b0:49e:74b6:740f with SMTP id 5b1f17b1804b1-49fc573603amr76055195e9.17.1789827499187;
+        Sat, 19 Sep 2026 07:18:19 -0700 (PDT)
 Received: from ?IPV6:2a02:2f05:1204:e000:2cf7:c250:64a9:ae77? ([2a02:2f05:1204:e000:2cf7:c250:64a9:ae77])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49fcd090f0csm106078635e9.15.2026.09.19.07.14.19
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49fcd090f0csm106407185e9.15.2026.09.19.07.18.16
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 19 Sep 2026 07:14:21 -0700 (PDT)
-Message-ID: <09c057fe-bcaa-4e57-bedc-40dc1fcc770c@tuxon.dev>
-Date: Sat, 19 Sep 2026 17:14:18 +0300
+        Sat, 19 Sep 2026 07:18:18 -0700 (PDT)
+Message-ID: <5d09e717-a478-4c9d-b5b1-9f309edc064d@tuxon.dev>
+Date: Sat, 19 Sep 2026 17:18:15 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -70,7 +70,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 4/6] arm64: dts: microchip: lan969x: add SDMMC nodes
+Subject: Re: [PATCH v2 6/6] arm64: dts: microchip: ev23x71a: enable eMMC
 To: Robert Marko <robert.marko@sartura.hr>, ulfh@kernel.org, robh@kernel.org,
  krzk+dt@kernel.org, conor+dt@kernel.org, nicolas.ferre@microchip.com,
  alexandre.belloni@bootlin.com, adrian.hunter@intel.com,
@@ -79,73 +79,19 @@ To: Robert Marko <robert.marko@sartura.hr>, ulfh@kernel.org, robh@kernel.org,
  linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 Cc: luka.perkov@sartura.hr
 References: <20260907132617.1198548-1-robert.marko@sartura.hr>
- <20260907132617.1198548-5-robert.marko@sartura.hr>
+ <20260907132617.1198548-7-robert.marko@sartura.hr>
 Content-Language: en-US
 From: claudiu beznea <claudiu.beznea@tuxon.dev>
-In-Reply-To: <20260907132617.1198548-5-robert.marko@sartura.hr>
+In-Reply-To: <20260907132617.1198548-7-robert.marko@sartura.hr>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
-Hi, Roberto,
+
 
 On 9/7/26 16:25, Robert Marko wrote:
-> Add nodes for both SDMMC controllers. Connect their bus interface clock to
-> the fabric clock and their core clock to the corresponding generated clock.
+> Enable the non-removable eMMC connected to SDMMC0. Configure its 8-bit bus
+> for 1.8 V DDR operation.
 > 
-> Configure SDMMC0 with a 100 MHz generated clock for 50 MHz eMMC DDR
-> operation. Configure SDMMC1 with an exact 50 MHz generated clock so the
-> integer base clock encoded in the SDHCI capabilities remains accurate and
-> the identification clock does not exceed 400 kHz.
-> 
-> Keep both nodes ordered by unit address.
-> 
-> Signed-off-by: Robert Marko <robert.marko@sartura.hr>
-> ---
-> Changes in v2:
-> * Use the fabric clock for the SDMMC bus interface clock.
-> * Configure SDMMC1 with an exact 50 MHz generated clock.
-> * Move the SDMMC1 node to preserve unit-address ordering.
-> * Explain the selected clock rates in the commit description.
-> 
->   arch/arm64/boot/dts/microchip/lan9691.dtsi | 24 ++++++++++++++++++++++
->   1 file changed, 24 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/microchip/lan9691.dtsi b/arch/arm64/boot/dts/microchip/lan9691.dtsi
-> index a8541c6a098d..5e330d5fab50 100644
-> --- a/arch/arm64/boot/dts/microchip/lan9691.dtsi
-> +++ b/arch/arm64/boot/dts/microchip/lan9691.dtsi
-> @@ -414,6 +414,18 @@ qspi0: spi@e0804000 {
->   			status = "disabled";
->   		};
->   
-> +		sdmmc0: mmc@e0830000 {
-> +			compatible = "microchip,lan9691-sdhci",
-> +				     "microchip,sam9x60-sdhci";
-> +			reg = <0xe0830000 0x00000300>;
+> Signed-off-by: Robert Marko<robert.marko@sartura.hr>
 
-s/0x00000300/0x300
-> +			interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
-> +			clocks = <&fabric_clk>, <&clks GCK_ID_SDMMC0>;
-> +			clock-names = "hclock", "multclk";
-> +			assigned-clocks = <&clks GCK_ID_SDMMC0>;
-> +			assigned-clock-rates = <100000000>;
-> +			status = "disabled";
-> +		};
-> +
->   		qspi2: spi@e0834000 {
->   			compatible = "microchip,lan9691-qspi";
->   			reg = <0xe0834000 0x00000100>,
-> @@ -429,6 +441,18 @@ qspi2: spi@e0834000 {
->   			status = "disabled";
->   		};
->   
-> +		sdmmc1: mmc@e0838000 {
-> +			compatible = "microchip,lan9691-sdhci",
-> +				     "microchip,sam9x60-sdhci";
-> +			reg = <0xe0838000 0x00000300>;
-
-Same here. I can adjust it while applying.
-
-With that addressed:
 Reviewed-by: Claudiu Beznea <claudiu.beznea@tuxon.dev>
-
