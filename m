@@ -1,370 +1,416 @@
-Received: from mail-oi2-f11.google.com (mail-oi2-f11.google.com [74.125.231.203])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from SHSQR01.spreadtrum.com (unknown [222.66.158.135])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 811BE370AF3
-	for <linux-mmc@vger.kernel.org>; Sun, 20 Sep 2026 03:20:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.231.203
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 730D2331EC3;
+	Sun, 20 Sep 2026 05:41:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=222.66.158.135
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789874442; cv=none; b=PDG0Bb/eG1h3Pw+xAthAJ/nFfpXyBhg5jaH90LF4RiW/r6PcWxR7VvW/Iiz669jKz78BR8gmeseGAvOlBZsmdpsVbVpEWi8bK+qTVrglZDx/VEeIGOVL3xlLdiS6RwVgsp3iNIiGbNQTF9TIgFGKO6p3286gDtCH4sdvajdeQWM=
+	t=1789882916; cv=none; b=BToPC+Sm3Fh5uA+yV5+QC54m2G0eCwktSPJfmiCbkZodU6ddoJkO9ybUiGf6SuhUTvcEW8oMIZYAR65MGyvWlxZvpYIzT7mB51oqjP3pIrCjRyyLJXGIalQUo6SWuP1FKm50WZOl5R1KCyTO6jBSIrwHkLaJoHv0RWsV1onUe3g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789874442; c=relaxed/simple;
-	bh=C915j3Iu+JufUXBkqezxsxaQnnUecz65DBiXkbcgACo=;
-	h=MIME-Version:Date:Message-ID:Subject:From:To:Content-Type; b=Iwxy9ZHF5VcNk6DuWWaAvoAK4vmGY3krli6RahLTe+foUrxh2n5DPaCaPThbIqnPB2jg2nqpC85qBfNRgPT7LdZRDWmy9LAXVQwHSq3uFOrYbM7Bb7kWc/ADe1xS1UPTgXvxUO56AWIPjYE/TAQkAiOzSVUVv5CM524mFoUqmJg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=74.125.231.203
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
-Received: by mail-oi2-f11.google.com with SMTP id 5614622812f47-4c6545d0f93so1096114b6e.0
-        for <linux-mmc@vger.kernel.org>; Sat, 19 Sep 2026 20:20:40 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789874439; x=1790479239;
-        h=content-type:to:from:subject:message-id:date:mime-version
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=cHMDZzTqVUC/XZjm5NrFYzE/EntiQCbVDWH/2tKCVWg=;
-        b=LRMqJRGTG1HXr5QWxIM/z1CvdyPmiCCz1gMx2h8vlxTINJ9pLh6BlDdU0vfSa6CBDE
-         JdCTj9G+QtQNtDZqjqaUqcqlMocRdjfBX40TwyDrnyr0JRnuHdf9N/YdgCP5ARR2dEMG
-         IXVWXAfxUGCiNu74CUhf1DnP7H3Y5Dxwei6Ayt6GRRafHkL0fOEYOB8eyzyo1rbeuDm4
-         Fki2YdIDaxXb0AlJe0cRFV/99WPBEyHina052FXLz0GP/9dkIyQ4N1tWhA9F6BkL4Etx
-         ClJdG0gDBw8op+9w0Ou2YAU7vU6RF25jZUw4yyQhd4QzZgPB5i2/MHG2DmRFfS5jIcR2
-         F/vg==
-X-Forwarded-Encrypted: i=1; AKwUvBzTz8vwfVk/BxNlhHg2V2AOcExM7O7VhZAtafALluriQbIRJ+Fq7G+Iz263qv/GPYtRflyoCz0iru8=@vger.kernel.org
-X-Gm-Message-State: AFuF++mVmvXCUviMa37yDEC4K2Mv5INT6Ku2Ppgahclheka/0marjp7U
-	AVhCTOSqacre78JHqcWwFdqt29WDFVRg5ifk1j06Bnwv5SDpZPsPLqwZfwsc5yh53/5RMfQ6P2F
-	lvR6swuceiEaxRVrviTWHg0KeZ4Yv/iT+O9DAMpCEH8LohFnKq9MJhxLuLxE=
+	s=arc-20240116; t=1789882916; c=relaxed/simple;
+	bh=BJCognTXxPv+VqB5pZJweWTXAHCgYedNNvpX3IJJgII=;
+	h=From:To:CC:Subject:Date:Message-ID:Content-Type:MIME-Version; b=uUoG/xeNQ7UY2+DmFFj62xG1xmAS2iTFme6vn5Dgp9fW4zcI29T2luvMdGJ7XsMhtFS+MdKVTzxC2mm3anmRuYP1rqdRre39Favm1wbTxFi8gyEYrchq7NDcCYqcasWLeb8OWOtr6TExKig8YCEGtzEwAFufhgGYd+176MpAQvQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=unisoc.com; spf=pass smtp.mailfrom=unisoc.com; dkim=pass (2048-bit key) header.d=unisoc.com header.i=@unisoc.com header.b=bmKNAYz/; arc=none smtp.client-ip=222.66.158.135
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=unisoc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=unisoc.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=unisoc.com header.i=@unisoc.com header.b="bmKNAYz/"
+Received: from dlp.unisoc.com ([10.29.3.86])
+	by SHSQR01.spreadtrum.com with ESMTPS id 68K5f0eW088928
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO);
+	Sun, 20 Sep 2026 13:41:00 +0800 (+08)
+	(envelope-from xiaojie.li2@unisoc.com)
+Received: from SHDLP.spreadtrum.com (unknown [10.29.3.67])
+	by dlp.unisoc.com (SkyGuard) with ESMTPS id 4hnZsC2z02z2NbwWQ;
+	Sun, 20 Sep 2026 13:38:23 +0800 (CST)
+Received: from zeshmbx09.spreadtrum.com (10.29.3.107) by
+ zeshmbx14.spreadtrum.com (10.29.3.67) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.48; Sun, 20 Sep 2026 13:40:58 +0800
+Received: from zeshmbx09.spreadtrum.com ([fe80::7981:d4bc:3eee:c0be]) by
+ zeshmbx09.spreadtrum.com ([fe80::7981:d4bc:3eee:c0be%17]) with mapi id
+ 15.00.1497.048; Sun, 20 Sep 2026 13:40:58 +0800
+From: =?utf-8?B?5p2O5pmT5rSBIChYaWFvamllIExpLzEzMjMzKQ==?=
+	<xiaojie.li2@unisoc.com>
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+CC: Ulf Hansson <ulfh@kernel.org>,
+        "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>,
+        =?utf-8?B?6ZmI5paH6LaFIChXZW5jaGFvIENoZW4p?=
+	<Wenchao.Chen@unisoc.com>,
+        =?utf-8?B?5byg5aaC5rOJIChSYWluIFpoYW5nKQ==?=
+	<Rain.Zhang@unisoc.com>,
+        =?utf-8?B?5ZSQ5pyI5p6XIChZdWVsaW4gVGFuZyk=?=
+	<yuelin.tang@unisoc.com>,
+        "cixi.geng@linux.dev" <cixi.geng@linux.dev>
+Subject: [PATCH v2] mmc: core: Optimize polling delay in __mmc_poll_for_busy()
+Thread-Topic: [PATCH v2] mmc: core: Optimize polling delay in
+ __mmc_poll_for_busy()
+Thread-Index: Ad1HY43cvbQfUQJESsGYbW2y2hdWxQ==
+Date: Sun, 20 Sep 2026 05:40:58 +0000
+Message-ID: <308e39324361468db136bb14a22f422b@zeshmbx09.spreadtrum.com>
+Accept-Language: zh-CN, en-US
+Content-Language: zh-CN
+X-MS-Has-Attach: yes
+X-MS-TNEF-Correlator:
+x-ms-exchange-transport-fromentityheader: Hosted
+Content-Type: multipart/mixed;
+	boundary="_002_308e39324361468db136bb14a22f422bzeshmbx09spreadtrumcom_"
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Received: by 2002:a05:6808:17a0:b0:4c4:aaaf:fdfa with SMTP id
- 5614622812f47-4ccf6e7682cmr8965378b6e.18.1789874439442; Sat, 19 Sep 2026
- 20:20:39 -0700 (PDT)
-Date: Sat, 19 Sep 2026 20:20:39 -0700
-X-Google-Appengine-App-Id: s~syzkaller
-X-Google-Appengine-App-Id-Alias: syzkaller
-Message-ID: <6aaf5107.a6af0033.177e91.000a.GAE@google.com>
-Subject: [syzbot] [mmc?] INFO: task hung in mmc_send_io_op_cond
-From: syzbot <syzbot+15adedb55f72fa957b00@syzkaller.appspotmail.com>
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	syzkaller-bugs@googlegroups.com, ulf.hansson@linaro.org, ulfh@kernel.org
-Content-Type: text/plain; charset="UTF-8"
+X-MAIL:SHSQR01.spreadtrum.com 68K5f0eW088928
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=unisoc.com;
+	s=default; t=1789882873;
+	bh=ihCj0xiMEl09UIwLFEdaEMirT1Rqep3I+z5KPX+R24Y=;
+	h=From:To:CC:Subject:Date;
+	b=bmKNAYz//4iMHvg8XX4S8I+mLpslXZJ3XVTskdG4NDe/9Ys+zsW4oYkxTgY9W6LB1
+	 VYroR51GohGHcu6qEfsSR5FHgOJTQg++wIqgcGDBBG7DYhrdHMb8QhDitvZzD67Trr
+	 Us/kQDR+pUbUQQPjSE6HngbUWp9QLPCLWd07jz56t3EZa0KaDkqaDiR9wfI/kvvFEc
+	 tY8glTiV52lugdP3jDOFCviKs8VGXVXHnoWOcMxVqBLv3UAc8EYbJVDkreo0eBGwqo
+	 G2pi/wKBOoFpcxNC0hTK7RvFevNrvCBiEoi38Fe3uC9MV2MmN1Bn+fjndFOS+YLAx/
+	 kzCcmEC6gQiCw==
 
-Hello,
+--_002_308e39324361468db136bb14a22f422bzeshmbx09spreadtrumcom_
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 
-syzbot found the following issue on:
+Pk5vLCB0aGF0J3MgdGhlIHdob2xlIHBvaW50LiBXZSBkb24ndCB3YW50IG9wZW4gY29kZWQgcG9s
+bGluZyBsb29wcywgaXQncyBqdXN0IGEgbmlnaHRtYXJlIHRvIG1haW50YWluLiBQbGVhc2UgdHJ5
+IHRvIGV4dGVuZCB0aGUgZXhpc3RpbmcNCj5fX21tY19wb2xsX2Zvcl9idXN5KCkgaW5zdGVhZC4N
+Cg0KSGkgVWZmZSwNCg0KRm9sbG93aW5nIHlvdXIgc3VnZ2VzdGlvbiB0byBleHRlbmQgX19tbWNf
+cG9sbF9mb3JfYnVzeSgpIGluc3RlYWQgb2YgdXNpbmcgb3Blbi1jb2RlZCBwb2xsaW5nIGxvb3Bz
+LCBoZXJlIGlzIHRoZSBwcm9wb3NlZCBvcHRpbWl6YXRpb24uDQoNCkluIG91ciBhY3R1YWwgdGVz
+dGluZywgd2UgZm91bmQgdGhhdCBzZXR0aW5nIHVkZWxheV9tYXggPSA4MDAwICg4bXMpIGlzIG1v
+cmUgdGltZS1lZmZpY2llbnQgdGhhbiB1ZGVsYXlfbWF4ID0gMTAwMDAgKDEwbXMpLiANCkZvciBD
+TUQxIChTRU5EX09QX0NPTkQpLCB0aGUgcG9sbGluZyBpbnRlcnZhbHMgYXJlIDRtcywgNm1zLCBh
+bmQgOG1zLCBjYXBwZWQgYXQgYSBtYXhpbXVtIG9mIDhtcy4NCkF0dGFjaGVkIGFyZSB0aGUgcmVj
+b3JkZWQgcGVyLWJvb3QgcGhhc2UgbGF0ZW5jaWVzIGZvciB1ZGVsYXlfbWF4PTgwMDAgKDhtcykg
+YW5kIHVkZWxheV9tYXg9MTAwMDAgKDEwbXMpLCB3aXRoIHRpbWVzdGFtcHMgaW4gc2Vjb25kcy4N
+ClBsZWFzZSBsZXQgbWUga25vdyBpZiB5b3UgY2Fubm90IG9wZW4gdGhlIGF0dGFjaG1lbnQsIGFu
+ZCBJIHdpbGwgcmVzZW5kIGl0Lg0KDQpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWNf
+b3BzLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tY19vcHMuYw0KaW5kZXggYTk1MmNjOC4uOWM0NzYy
+YyAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jX29wcy5jDQorKysgYi9kcml2ZXJz
+L21tYy9jb3JlL21tY19vcHMuYw0KQEAgLTUzOSw5ICs1MzksMjMgQEANCiANCiAJCS8qIFRocm90
+dGxlIHRoZSBwb2xsaW5nIHJhdGUgdG8gYXZvaWQgaG9nZ2luZyB0aGUgQ1BVLiAqLw0KIAkJaWYg
+KGJ1c3kpIHsNCi0JCQl1c2xlZXBfcmFuZ2UodWRlbGF5LCB1ZGVsYXkgKiAyKTsNCi0JCQlpZiAo
+dWRlbGF5IDwgdWRlbGF5X21heCkNCi0JCQkJdWRlbGF5ICo9IDI7DQorCQkJLyoNCisJCQkgKiBT
+cGVjaWFsIGRlbGF5IGhhbmRsaW5nIGlzIHJlcXVpcmVkIGZvciBtbWNfc2VuZF9vcF9jb25kOw0K
+KwkJCSAqIG90aGVyd2lzZSwgZm9yIHNsb3dlciBtZW1vcnkgcGFydGljbGVzLCB0aGUgdGltZSBy
+ZXF1aXJlZCB0bw0KKwkJCSAqIHdhaXQgZm9yIHRoZSBzdGF0dXMgY2hhbmdlIHdpbGwgaW5jcmVh
+c2UuDQorCQkJICovDQorCQkJaWYgKGJ1c3lfY2IgPT0gX19tbWNfc2VuZF9vcF9jb25kX2NiKSB7
+DQorCQkJCXVkZWxheV9tYXggPSA4MDAwOw0KKwkJCQl1c2xlZXBfcmFuZ2UodWRlbGF5LCB1ZGVs
+YXkgKyAyMDAwKTsNCisJCQkJaWYgKHVkZWxheSA8IHVkZWxheV9tYXgpDQorCQkJCQl1ZGVsYXkg
+Kz0gMjAwMDsNCisJCQkJZWxzZQ0KKwkJCQkJdWRlbGF5ID0gdWRlbGF5X21heDsNCisJCQl9IGVs
+c2Ugew0KKwkJCQl1c2xlZXBfcmFuZ2UodWRlbGF5LCB1ZGVsYXkgKiAyKTsNCisJCQkJaWYgKHVk
+ZWxheSA8IHVkZWxheV9tYXgpDQorCQkJCQl1ZGVsYXkgKj0gMjsNCisJCQl9DQogCQl9DQogCX0g
+d2hpbGUgKGJ1c3kpOw0KDQoNCkJlc3QgcmVnYXJkcywNClhpYW9qaWUuTGkNCg0KLS0tLS3pgq7k
+u7bljp/ku7YtLS0tLQ0K5Y+R5Lu25Lq6OiBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25Ab3NzLnF1
+YWxjb21tLmNvbT4gDQrlj5HpgIHml7bpl7Q6IDIwMjblubQ55pyIMTHml6UgMjM6NDcNCuaUtuS7
+tuS6ujog5p2O5pmT5rSBIChYaWFvamllIExpLzEzMjMzKSA8eGlhb2ppZS5saTJAdW5pc29jLmNv
+bT4NCuaKhOmAgTogVWxmIEhhbnNzb24gPHVsZmhAa2VybmVsLm9yZz47IGxpbnV4LW1tY0B2Z2Vy
+Lmtlcm5lbC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IOmZiOaWh+i2hSAoV2Vu
+Y2hhbyBDaGVuKSA8V2VuY2hhby5DaGVuQHVuaXNvYy5jb20+OyDlvKDlpoLms4kgKFJhaW4gWmhh
+bmcpIDxSYWluLlpoYW5nQHVuaXNvYy5jb20+OyDllJDmnIjmnpcgKFl1ZWxpbiBUYW5nKSA8eXVl
+bGluLnRhbmdAdW5pc29jLmNvbT47IGNpeGkuZ2VuZ0BsaW51eC5kZXYNCuS4u+mimDogUmU6IFtQ
+QVRDSF0gbW1jOiBjb3JlOiBNb2RpZnkgdGhlIENNRDEgdHJhbnNtaXNzaW9uIGludGVydmFsDQoN
+Cg0K5rOo5oSPOiDov5nlsIHpgq7ku7bmnaXoh6rkuo7lpJbpg6jjgILpmaTpnZ7kvaDnoa7lrprp
+gq7ku7blhoXlrrnlronlhajvvIzlkKbliJnkuI3opoHngrnlh7vku7vkvZXpk77mjqXlkozpmYTk
+u7bjgIINCkNBVVRJT046IFRoaXMgZW1haWwgb3JpZ2luYXRlZCBmcm9tIG91dHNpZGUgb2YgdGhl
+IG9yZ2FuaXphdGlvbi4gRG8gbm90IGNsaWNrIGxpbmtzIG9yIG9wZW4gYXR0YWNobWVudHMgdW5s
+ZXNzIHlvdSByZWNvZ25pemUgdGhlIHNlbmRlciBhbmQga25vdyB0aGUgY29udGVudCBpcyBzYWZl
+Lg0KDQoNCg0KT24gRnJpLCBTZXAgMTEsIDIwMjYgYXQgNDo0NeKAr0FNIOadjuaZk+a0gSAoWGlh
+b2ppZSBMaS8xMzIzMykgPHhpYW9qaWUubGkyQHVuaXNvYy5jb20+IHdyb3RlOg0KPg0KPiBIaSBV
+ZmZlOg0KPiAgICAgICAgIFRoYW5rIHlvdSBmb3IgeW91ciByZXBseS4NCj4gICAgICAgICBIb3dl
+dmVyLCBJIG5vdGljZWQgdGhhdCBfX21tY19wb2xsX2Zvcl9idXN5KCkgYW5kIG1tY19wb2xsX2Zv
+cl9idXN5KCkgYXJlIGludm9rZWQgZWl0aGVyIGRpcmVjdGx5IG9yIGluZGlyZWN0bHkgYnkgbWFu
+eSBvdGhlciBmdW5jdGlvbnMgd2l0aGluIHRoZSBNTUMgZHJpdmVyLg0KPiBNb2RpZnlpbmcgdGhl
+bSBkaXJlY3RseSBjb3VsZCBwb3RlbnRpYWxseSBpbnRyb2R1Y2UgdW5pbnRlbmRlZCBzaWRlIGVm
+ZmVjdHMuDQo+DQo+ICAgICAgICAgV291bGQgaXQgYmUgYWNjZXB0YWJsZSB0byBpbXBsZW1lbnQg
+YSBkZWRpY2F0ZWQgZnVuY3Rpb24gc3BlY2lmaWNhbGx5IGZvciBDTUQxPyBXZSBjb3VsZCBjcmVh
+dGUgYSBDTUQxLXNwZWNpZmljIHZhcmlhbnQgYmFzZWQgb24gdGhlIGV4aXN0aW5nIF9fbW1jX3Bv
+bGxfZm9yX2J1c3koKS4NCj4gVGhpcyBhcHByb2FjaCB3b3VsZCBzaWduaWZpY2FudGx5IG1pbmlt
+aXplIHRoZSBwb3RlbnRpYWwgaW1wYWN0IG9uIHRoZSByZXN0IG9mIHRoZSBjb2RlYmFzZS4NCg0K
+Tm8sIHRoYXQncyB0aGUgd2hvbGUgcG9pbnQuIFdlIGRvbid0IHdhbnQgb3BlbiBjb2RlZCBwb2xs
+aW5nIGxvb3BzLCBpdCdzIGp1c3QgYSBuaWdodG1hcmUgdG8gbWFpbnRhaW4uIFBsZWFzZSB0cnkg
+dG8gZXh0ZW5kIHRoZSBleGlzdGluZw0KX19tbWNfcG9sbF9mb3JfYnVzeSgpIGluc3RlYWQuDQoN
+CkFuZCBuZXh0IHRpbWUsIHBsZWFzZSBkb24ndCB0b3AgcG9zdC4NCg0KWy4uLl0NCg0KS2luZCBy
+ZWdhcmRzDQpVZmZlDQo=
 
-HEAD commit:    28924df2a08f Merge tag 'perf-tools-fixes-for-v7.3-2026-09-..
-git tree:       upstream
-console output: https://syzkaller.appspot.com/x/log.txt?x=16991af9580000
-kernel config:  https://syzkaller.appspot.com/x/.config?x=5e4e3a0e188a497e
-dashboard link: https://syzkaller.appspot.com/bug?extid=15adedb55f72fa957b00
-compiler:       Debian clang version 22.1.8 (++20260613092233+e80beda6e255-1~exp1~20260613092250.77), Debian LLD 22.1.8
+--_002_308e39324361468db136bb14a22f422bzeshmbx09spreadtrumcom_
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;
+	name="Optimize latency logging in __mmc_poll_for_busy.xlsx"
+Content-Description: Optimize latency logging in __mmc_poll_for_busy.xlsx
+Content-Disposition: attachment;
+	filename="Optimize latency logging in __mmc_poll_for_busy.xlsx"; size=14870;
+	creation-date="Fri, 18 Sep 2026 12:40:50 GMT";
+	modification-date="Sun, 20 Sep 2026 05:24:16 GMT"
+Content-Transfer-Encoding: base64
 
-Unfortunately, I don't have any reproducer for this issue yet.
+UEsDBBQABgAIAAAAIQB0NlqmegEAAIQFAAATAAgCW0NvbnRlbnRfVHlwZXNdLnhtbCCiBAIooAAC
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACs
+VM1OAjEQvpv4DpteDVvwYIxh4YB6VBLwAWo7sA3dtukMCG/vbEFiDEIIXLbZtvP9TGemP1w3rlhB
+Qht8JXplVxTgdTDWzyvxMX3tPIoCSXmjXPBQiQ2gGA5ub/rTTQQsONpjJWqi+CQl6hoahWWI4Plk
+FlKjiH/TXEalF2oO8r7bfZA6eAJPHWoxxKD/DDO1dFS8rHl7q+TTelGMtvdaqkqoGJ3VilioXHnz
+h6QTZjOrwQS9bBi6xJhAGawBqHFlTJYZ0wSI2BgKeZAzgcPzSHeuSo7MwrC2Ee/Y+j8M7cn/rnZx
+7/wcyRooxirRm2rYu1w7+RXS4jOERXkc5NzU5BSVjbL+R/cR/nwZZV56VxbS+svAJ3QQ1xjI/L1c
+QoY5QYi0cYDXTnsGPcVcqwRmQly986sL+I19QodWTo9qLpErJ2GPe4yfW3qcQkSeGgnOF/DTom10
+JzIQJLKwb9JDxb5n5JFzsWNoZ5oBc4Bb5hk6+AYAAP//AwBQSwMEFAAGAAgAAAAhALVVMCP0AAAA
+TAIAAAsACAJfcmVscy8ucmVscyCiBAIooAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACskk1PwzAMhu9I/IfI99XdkBBCS3dBSLshVH6ASdwP
+tY2jJBvdvyccEFQagwNHf71+/Mrb3TyN6sgh9uI0rIsSFDsjtnethpf6cXUHKiZylkZxrOHEEXbV
+9dX2mUdKeSh2vY8qq7iooUvJ3yNG0/FEsRDPLlcaCROlHIYWPZmBWsZNWd5i+K4B1UJT7a2GsLc3
+oOqTz5t/15am6Q0/iDlM7NKZFchzYmfZrnzIbCH1+RpVU2g5abBinnI6InlfZGzA80SbvxP9fC1O
+nMhSIjQS+DLPR8cloPV/WrQ08cudecQ3CcOryPDJgosfqN4BAAD//wMAUEsDBBQABgAIAAAAIQCS
+B5TsBAEAAD8DAAAaAAgBeGwvX3JlbHMvd29ya2Jvb2sueG1sLnJlbHMgogQBKKAAAQAAAAAAAAAA
+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
 
-Downloadable assets:
-disk image: https://storage.googleapis.com/syzbot-assets/dbb658780e3f/disk-28924df2.raw.xz
-vmlinux: https://storage.googleapis.com/syzbot-assets/ed954d86e83d/vmlinux-28924df2.xz
-kernel image: https://storage.googleapis.com/syzbot-assets/56cc5fdb5ce4/bzImage-28924df2.xz
-
-IMPORTANT: if you fix the issue, please add the following tag to the commit:
-Reported-by: syzbot+15adedb55f72fa957b00@syzkaller.appspotmail.com
-
-INFO: task kworker/0:1:10 blocked for more than 143 seconds.
-      Tainted: G             L      syzkaller #0
-"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-task:kworker/0:1     state:D stack:20768 pid:10    tgid:10    ppid:2      task_flags:0x4208060 flags:0x00080000
-Workqueue: events_freezable mmc_rescan
-Call Trace:
- <TASK>
- context_switch kernel/sched/core.c:5526 [inline]
- __schedule+0x17db/0x58f0 kernel/sched/core.c:7276
- __schedule_loop kernel/sched/core.c:7353 [inline]
- schedule+0x164/0x2b0 kernel/sched/core.c:7368
- schedule_timeout+0xc0/0x2c0 kernel/time/sleep_timeout.c:75
- do_wait_for_common kernel/sched/completion.c:100 [inline]
- __wait_for_common kernel/sched/completion.c:121 [inline]
- wait_for_common kernel/sched/completion.c:132 [inline]
- wait_for_completion+0x2ca/0x5e0 kernel/sched/completion.c:153
- mmc_wait_for_req_done+0x37/0x490 drivers/mmc/core/core.c:408
- mmc_wait_for_cmd+0x183/0x2a0 drivers/mmc/core/core.c:645
- mmc_send_io_op_cond+0xfd/0x300 drivers/mmc/core/sdio_ops.c:28
- mmc_attach_sdio+0xdb/0xc10 drivers/mmc/core/sdio.c:1220
- mmc_rescan_try_freq drivers/mmc/core/core.c:2134 [inline]
- mmc_rescan+0x7e9/0x1040 drivers/mmc/core/core.c:2316
- process_one_work kernel/workqueue.c:3396 [inline]
- process_scheduled_works+0xc3d/0x1630 kernel/workqueue.c:3479
- worker_thread+0xa47/0xfb0 kernel/workqueue.c:3560
- kthread+0x38b/0x480 kernel/kthread.c:436
- ret_from_fork+0x514/0xb70 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
- </TASK>
-INFO: task kworker/1:7:5689 blocked for more than 143 seconds.
-      Tainted: G             L      syzkaller #0
-"echo 0 >
-"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-task:kworker/1:7     state:D stack:23400 pid:5689  tgid:5689  ppid:2      task_flags:0x4288060 flags:0x00080000
-Workqueue: usb_hub_wq hub_event
-Call Trace:
- <TASK>
- context_switch kernel/sched/core.c:5526 [inline]
- __schedule+0x17db/0x58f0 kernel/sched/core.c:7276
- __schedule_loop kernel/sched/core.c:7353 [inline]
- schedule+0x164/0x2b0 kernel/sched/core.c:7368
- schedule_timeout+0xc0/0x2c0 kernel/time/sleep_timeout.c:75
- do_wait_for_common kernel/sched/completion.c:100 [inline]
- __wait_for_common kernel/sched/completion.c:121 [inline]
- wait_for_common kernel/sched/completion.c:132 [inline]
- wait_for_completion+0x2ca/0x5e0 kernel/sched/completion.c:153
- __flush_work+0xa63/0xca0 kernel/workqueue.c:4448
- __cancel_work_sync+0xbf/0x110 kernel/workqueue.c:4568
- __mmc_stop_host drivers/mmc/core/core.c:2368 [inline]
- mmc_stop_host+0xd9/0x460 drivers/mmc/core/core.c:2373
- mmc_remove_host+0x15/0x60 drivers/mmc/core/host.c:681
- vub300_disconnect+0x154/0x2f0 drivers/mmc/host/vub300.c:2387
- usb_unbind_interface+0x295/0x9f0 drivers/usb/core/driver.c:461
- device_remove drivers/base/dd.c:618 [inline]
- __device_release_driver drivers/base/dd.c:1349 [inline]
- device_release_driver_internal+0x4f5/0x880 drivers/base/dd.c:1372
- bus_remove_device+0x444/0x560 drivers/base/bus.c:664
- device_del+0x524/0x8f0 drivers/base/core.c:3965
- usb_disable_device+0x3d4/0x8d0 drivers/usb/core/message.c:1478
- usb_disconnect+0x346/0x9a0 drivers/usb/core/hub.c:2350
- hub_port_connect drivers/usb/core/hub.c:5420 [inline]
- hub_port_connect_change drivers/usb/core/hub.c:5720 [inline]
- port_event drivers/usb/core/hub.c:5884 [inline]
- hub_event+0x1bbb/0x4d30 drivers/usb/core/hub.c:5966
- process_one_work kernel/workqueue.c:3396 [inline]
- process_scheduled_works+0xc3d/0x1630 kernel/workqueue.c:3479
- worker_thread+0xa47/0xfb0 kernel/workqueue.c:3560
- kthread+0x38b/0x480 kernel/kthread.c:436
- ret_from_fork+0x514/0xb70 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
- </TASK>
-
-Showing all locks held in the system:
-locks held by kworker/0:1/10: 2, on CPU#0:
- #0: ffff88801b06a140 ((wq_completion)events_freezable){+.+.}-{0:0}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #0: ffff88801b06a140 ((wq_completion)events_freezable){+.+.}-{0:0}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #0: ffff88801b06a140 ((wq_completion)events_freezable){+.+.}-{0:0}, at: process_one_work kernel/workqueue.c:3361 [inline]
- #0: ffff88801b06a140 ((wq_completion)events_freezable){+.+.}-{0:0}, at: process_scheduled_works+0x97a/0x1630 kernel/workqueue.c:3479
- #1: ffffc900000f7c40 ((work_completion)(&(&host->detect)->work)){+.+.}-{0:0}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #1: ffffc900000f7c40 ((work_completion)(&(&host->detect)->work)){+.+.}-{0:0}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #1: ffffc900000f7c40 ((work_completion)(&(&host->detect)->work)){+.+.}-{0:0}, at: process_one_work kernel/workqueue.c:3361 [inline]
- #1: ffffc900000f7c40 ((work_completion)(&(&host->detect)->work)){+.+.}-{0:0}, at: process_scheduled_works+0x97a/0x1630 kernel/workqueue.c:3479
-locks held by pr/ttyS0/16: 2, last CPU#0:
- #0: ffffffff8ec36338 (console_srcu){....}-{0:0}, at: rcu_try_lock_acquire include/linux/rcupdate.h:314 [inline]
- #0: ffffffff8ec36338 (console_srcu){....}-{0:0}, at: srcu_read_lock_nmisafe include/linux/srcu.h:439 [inline]
- #0: ffffffff8ec36338 (console_srcu){....}-{0:0}, at: console_srcu_read_lock+0x30/0x60 kernel/printk/printk.c:291
- #1: ffffffff9ad35098 (&port_lock_key){-.-.}-{3:3}, at: __uart_port_lock_irqsave include/linux/serial_core.h:613 [inline]
- #1: ffffffff9ad35098 (&port_lock_key){-.-.}-{3:3}, at: univ8250_console_device_lock+0x67/0xc0 drivers/tty/serial/8250/8250_core.c:413
-locks held by khungtaskd/33: 1, last CPU#1:
- #0: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #0: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #0: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: debug_show_all_locks+0x2e/0x180 kernel/locking/lockdep.c:6871
-locks held by udevd/4984: 1, on CPU#1:
- #0: ffff88801c2d4a10 (&root->kernfs_iattr_rwsem){++++}-{4:4}, at: kernfs_iop_getattr+0x9e/0x450 fs/kernfs/inode.c:190
-locks held by getty/5375: 2, on CPU#1:
- #0: ffff888035f540a0 (&tty->ldisc_sem){++++}-{0:0}, at: tty_ldisc_ref_wait+0x25/0x70 drivers/tty/tty_ldisc.c:243
- #1: ffffc900032332e8 (&ldata->atomic_read_lock){+.+.}-{4:4}, at: n_tty_read+0x45a/0x1360 drivers/tty/n_tty.c:2211
-locks held by udevd/5638: 4, on CPU#1:
- #0: ffff8880358ac878 (&p->lock){+.+.}-{4:4}, at: seq_read_iter+0xa4/0xca0 fs/seq_file.c:183
- #1: ffff88805688cc80 (&of->mutex#2){+.+.}-{4:4}, at: kernfs_seq_start+0x5d/0x420 fs/kernfs/file.c:165
- #2: ffff888074ae7a58 (kn->active#30){.+.+}-{0:0}, at: kernfs_get_active_of fs/kernfs/file.c:73 [inline]
- #2: ffff888074ae7a58 (kn->active#30){.+.+}-{0:0}, at: kernfs_seq_start+0xb2/0x420 fs/kernfs/file.c:166
- #3: ffff8880778371d8 (&dev->mutex){....}-{4:4}, at: device_lock_interruptible include/linux/device.h:1109 [inline]
- #3: ffff8880778371d8 (&dev->mutex){....}-{4:4}, at: product_show+0x26/0xa0 drivers/usb/core/sysfs.c:141
-locks held by kworker/1:7/5689: 5, on CPU#1:
- #0: ffff8880222ea140 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #0: ffff8880222ea140 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #0: ffff8880222ea140 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: process_one_work kernel/workqueue.c:3361 [inline]
- #0: ffff8880222ea140 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: process_scheduled_works+0x97a/0x1630 kernel/workqueue.c:3479
- #1: ffffc9000430fc40 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #1: ffffc9000430fc40 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #1: ffffc9000430fc40 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: process_one_work kernel/workqueue.c:3361 [inline]
- #1: ffffc9000430fc40 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: process_scheduled_works+0x97a/0x1630 kernel/workqueue.c:3479
- #2: ffff88802a05c1d8 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
- #2: ffff88802a05c1d8 (&dev->mutex){....}-{4:4}, at: hub_event+0x184/0x4d30 drivers/usb/core/hub.c:5912
- #3: ffff8880490101d8 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
- #3: ffff8880490101d8 (&dev->mutex){....}-{4:4}, at: usb_disconnect+0xfc/0x9a0 drivers/usb/core/hub.c:2341
- #4: ffff888032ed51a0 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
- #4: ffff888032ed51a0 (&dev->mutex){....}-{4:4}, at: __device_driver_lock drivers/base/dd.c:1171 [inline]
- #4: ffff888032ed51a0 (&dev->mutex){....}-{4:4}, at: device_release_driver_internal+0xb9/0x880 drivers/base/dd.c:1369
-locks held by kworker/u8:19/5772: 5, last CPU#1:
- #0: ffff88801b0ac140 ((wq_completion)events_unbound){+.+.}-{0:0}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #0: ffff88801b0ac140 ((wq_completion)events_unbound){+.+.}-{0:0}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #0: ffff88801b0ac140 ((wq_completion)events_unbound){+.+.}-{0:0}, at: process_one_work kernel/workqueue.c:3361 [inline]
- #0: ffff88801b0ac140 ((wq_completion)events_unbound){+.+.}-{0:0}, at: process_scheduled_works+0x97a/0x1630 kernel/workqueue.c:3479
- #1: ffffc90004d27c40 ((work_completion)(&(&kfence_timer)->work)){+.+.}-{0:0}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #1: ffffc90004d27c40 ((work_completion)(&(&kfence_timer)->work)){+.+.}-{0:0}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #1: ffffc90004d27c40 ((work_completion)(&(&kfence_timer)->work)){+.+.}-{0:0}, at: process_one_work kernel/workqueue.c:3361 [inline]
- #1: ffffc90004d27c40 ((work_completion)(&(&kfence_timer)->work)){+.+.}-{0:0}, at: process_scheduled_works+0x97a/0x1630 kernel/workqueue.c:3479
- #2: ffffffff8ebe98f0 (cpu_hotplug_lock){++++}-{0:0}, at: static_key_enable+0x12/0x20 kernel/jump_label.c:222
- #3: ffffffff8ee386e0 (jump_label_mutex){+.+.}-{4:4}, at: jump_label_lock kernel/jump_label.c:27 [inline]
- #3: ffffffff8ee386e0 (jump_label_mutex){+.+.}-{4:4}, at: static_key_enable_cpuslocked+0xcb/0x240 kernel/jump_label.c:207
- #4: ffffffff8ebff620 (text_mutex){+.+.}-{4:4}, at: arch_jump_label_transform_apply+0x17/0x30 arch/x86/kernel/jump_label.c:145
-locks held by kworker/1:8/7614: 4, last CPU#1:
- #0: ffff8880222ea140 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #0: ffff8880222ea140 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #0: ffff8880222ea140 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: process_one_work kernel/workqueue.c:3361 [inline]
- #0: ffff8880222ea140 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: process_scheduled_works+0x97a/0x1630 kernel/workqueue.c:3479
- #1: ffffc900041dfc40 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #1: ffffc900041dfc40 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #1: ffffc900041dfc40 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: process_one_work kernel/workqueue.c:3361 [inline]
- #1: ffffc900041dfc40 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: process_scheduled_works+0x97a/0x1630 kernel/workqueue.c:3479
- #2: ffff88823be989d8 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
- #2: ffff88823be989d8 (&dev->mutex){....}-{4:4}, at: hub_event+0x184/0x4d30 drivers/usb/core/hub.c:5912
- #3: ffff8880778371d8 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
- #3: ffff8880778371d8 (&dev->mutex){....}-{4:4}, at: usb_disconnect+0xfc/0x9a0 drivers/usb/core/hub.c:2341
-locks held by kworker/1:9/7615: 4, last CPU#1:
- #0: ffff88801b06b140 ((wq_completion)events){+.+.}-{0:0}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #0: ffff88801b06b140 ((wq_completion)events){+.+.}-{0:0}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #0: ffff88801b06b140 ((wq_completion)events){+.+.}-{0:0}, at: process_one_work kernel/workqueue.c:3361 [inline]
- #0: ffff88801b06b140 ((wq_completion)events){+.+.}-{0:0}, at: process_scheduled_works+0x97a/0x1630 kernel/workqueue.c:3479
- #1: ffffc9000647fc40 (reg_work){+.+.}-{0:0}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #1: ffffc9000647fc40 (reg_work){+.+.}-{0:0}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #1: ffffc9000647fc40 (reg_work){+.+.}-{0:0}, at: process_one_work kernel/workqueue.c:3361 [inline]
- #1: ffffc9000647fc40 (reg_work){+.+.}-{0:0}, at: process_scheduled_works+0x97a/0x1630 kernel/workqueue.c:3479
- #2: ffffffff90251500 (rtnl_mutex){+.+.}-{4:4}, at: reg_todo+0x1c/0xa40 net/wireless/reg.c:3205
- #3: ffff888056be07a0 (&rdev->wiphy.mtx){+.+.}-{4:4}, at: class_wiphy_constructor include/net/cfg80211.h:6906 [inline]
- #3: ffff888056be07a0 (&rdev->wiphy.mtx){+.+.}-{4:4}, at: reg_process_self_managed_hints+0x8d/0x160 net/wireless/reg.c:3195
-locks held by syz.1.1008/9019: 2, last CPU#1:
- #0: ffff888035541078 (&mm->mmap_lock){++++}-{4:4}, at: mmap_write_lock_killable include/linux/mmap_lock.h:562 [inline]
- #0: ffff888035541078 (&mm->mmap_lock){++++}-{4:4}, at: vm_mmap_pgoff+0x1dd/0x4e0 mm/util.c:579
- #1: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #1: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #1: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x29/0x240 mm/pgtable-generic.c:290
-locks held by syz.4.1020/9051: 2, last CPU#1:
- #0: ffff88807904e9b8 (&mm->mmap_lock){++++}-{4:4}, at: mmap_read_lock include/linux/mmap_lock.h:600 [inline]
- #0: ffff88807904e9b8 (&mm->mmap_lock){++++}-{4:4}, at: exit_mmap+0x1a4/0x9f0 mm/mmap.c:1299
- #1: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #1: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #1: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x29/0x240 mm/pgtable-generic.c:290
-locks held by syz.0.1023/9063: 3, last CPU#1:
- #0: ffff888048842928 (&vcpu->mutex){+.+.}-{4:4}, at: kvm_vcpu_ioctl+0x27f/0xfd0 virt/kvm/kvm_main.c:4457
- #1: ffff88802992e310 (&kvm->srcu){.+.+}-{0:0}, at: srcu_lock_release include/linux/srcu.h:204 [inline]
- #1: ffff88802992e310 (&kvm->srcu){.+.+}-{0:0}, at: srcu_read_unlock include/linux/srcu.h:497 [inline]
- #1: ffff88802992e310 (&kvm->srcu){.+.+}-{0:0}, at: kvm_vcpu_srcu_read_unlock include/linux/kvm_host.h:969 [inline]
- #1: ffff88802992e310 (&kvm->srcu){.+.+}-{0:0}, at: vcpu_enter_guest arch/x86/kvm/x86.c:8270 [inline]
- #1: ffff88802992e310 (&kvm->srcu){.+.+}-{0:0}, at: vcpu_run+0x28fd/0x79b0 arch/x86/kvm/x86.c:8646
- #2: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- #2: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
- #2: ffffffff8ed5c760 (rcu_read_lock){....}-{1:3}, at: xa_load+0x60/0x210 lib/xarray.c:1620
-
-=============================================
-
-NMI backtrace for cpu 1
-CPU: 1 UID: 0 PID: 33 Comm: khungtaskd Tainted: G             L      syzkaller #0 PREEMPT(full) 
-Tainted: [L]=SOFTLOCKUP
-Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/24/2026
-Call Trace:
- <TASK>
- dump_stack_lvl+0xe8/0x150 lib/dump_stack.c:120
- nmi_cpu_backtrace+0x274/0x2d0 lib/nmi_backtrace.c:123
- nmi_trigger_cpumask_backtrace+0x17d/0x390 lib/nmi_backtrace.c:66
- trigger_all_cpu_backtrace include/linux/nmi.h:164 [inline]
- __sys_info lib/sys_info.c:157 [inline]
- sys_info+0x135/0x170 lib/sys_info.c:165
- check_hung_uninterruptible_tasks kernel/hung_task.c:353 [inline]
- watchdog+0xfd7/0x1030 kernel/hung_task.c:561
- kthread+0x38b/0x480 kernel/kthread.c:436
- ret_from_fork+0x514/0xb70 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
- </TASK>
-Sending NMI from CPU 1 to CPUs 0:
-NMI backtrace for cpu 0
-CPU: 0 UID: 0 PID: 4946 Comm: jbd2/sda1-8 Tainted: G             L      syzkaller #0 PREEMPT(full) 
-Tainted: [L]=SOFTLOCKUP
-Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/24/2026
-RIP: 0010:memcmp lib/string.c:676 [inline]
-RIP: 0010:bcmp+0x18e/0x230 lib/string.c:697
-Code: 48 89 ef 48 8b 34 24 4c 89 ea e9 0d ff ff ff 48 85 d2 0f 84 95 00 00 00 31 db 48 8d 04 1f 48 89 c1 48 c1 e9 03 42 0f b6 0c 39 <84> c9 75 2b 0f b6 04 1f 48 8d 0c 1e 49 89 c8 49 c1 e8 03 47 0f b6
-RSP: 0018:ffffc900000079c0 EFLAGS: 00000a02
-RAX: ffff888025f70040 RBX: 0000000000000000 RCX: 0000000000000000
-RDX: 0000000000000006 RSI: ffff88801df1b79a RDI: ffff888025f70040
-RBP: 1ffff1100ac14315 R08: 0000000000000100 R09: 000000000000000c
-R10: 000000000000000c R11: 8000000000000100 R12: ffff888025f70030
-R13: 0000000000000030 R14: 1ffff1100ac14315 R15: dffffc0000000000
-FS:  0000000000000000(0000) GS:ffff888124cd6000(0000) knlGS:0000000000000000
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 0000000000000000 CR3: 0000000021f32000 CR4: 00000000003526f0
-DR0: 0000000000000008 DR1: 0000000000000002 DR2: 0000000000000404
-DR3: ffffffffefffff14 DR6: 00000000ffff0ff0 DR7: 0000000000000400
-Call Trace:
- <IRQ>
- memcmp include/linux/fortify-string.h:677 [inline]
- rhashtable_compare include/linux/rhashtable.h:607 [inline]
- __rhashtable_lookup include/linux/rhashtable.h:635 [inline]
- rhltable_lookup include/linux/rhashtable.h:735 [inline]
- sta_info_hash_lookup+0x26e/0x610 net/mac80211/sta_info.c:199
- sta_info_get_bss+0xf9/0x390 net/mac80211/sta_info.c:236
- ieee80211_rx_for_interface+0x1ad/0x770 net/mac80211/rx.c:5338
- __ieee80211_rx_handle_packet net/mac80211/rx.c:5547 [inline]
- ieee80211_rx_list+0x2e84/0x3b00 net/mac80211/rx.c:5720
- ieee80211_rx_napi+0x1ad/0x3d0 net/mac80211/rx.c:5743
- ieee80211_rx include/net/mac80211.h:5449 [inline]
- ieee80211_handle_queued_frames+0xe4/0x1d0 net/mac80211/main.c:452
- tasklet_action_common+0x2d7/0x490 kernel/softirq.c:961
- handle_softirqs+0x226/0x860 kernel/softirq.c:645
- __do_softirq kernel/softirq.c:679 [inline]
- invoke_softirq kernel/softirq.c:519 [inline]
- __irq_exit_rcu+0xcb/0x220 kernel/softirq.c:758
- irq_exit_rcu+0x9/0x30 kernel/softirq.c:775
- instr_sysvec_apic_timer_interrupt arch/x86/kernel/apic/apic.c:1062 [inline]
- sysvec_apic_timer_interrupt+0xa6/0xc0 arch/x86/kernel/apic/apic.c:1062
- </IRQ>
- <TASK>
- asm_sysvec_apic_timer_interrupt+0x1a/0x20 arch/x86/include/asm/idtentry.h:674
-RIP: 0010:lock_acquire+0x232/0x350 kernel/locking/lockdep.c:5947
-Code: ff ff ff e8 70 7e 41 0a f7 44 24 10 00 02 00 00 0f 84 38 ff ff ff 65 48 8b 05 c2 79 f1 11 48 3b 44 24 50 75 33 fb 48 83 c4 58 <5b> 41 5c 41 5d 41 5e 41 5f 5d c3 cc cc cc cc cc 48 8d 3d 87 31 da
-RSP: 0018:ffffc9000f9af2c0 EFLAGS: 00000296
-RAX: 0d6c4687d2d69600 RBX: 0000000000000000 RCX: 0000000000000046
-RDX: 00000000105209fd RSI: ffffffff8e6fd6d4 RDI: ffffffff8c6d9480
-RBP: ffff888036333e80 R08: ffffffff8177f1df R09: 0000000000000000
-R10: ffffc9000f9af3f8 R11: ffffffff81b28090 R12: ffffffff8ed5c760
-R13: 0000000000000002 R14: 0000000000000000 R15: 0000000000000246
- rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
- rcu_read_lock include/linux/rcupdate.h:849 [inline]
- class_rcu_constructor include/linux/rcupdate.h:1216 [inline]
- unwind_next_frame+0xac/0x2550 arch/x86/kernel/unwind_orc.c:495
- arch_stack_walk+0x11b/0x150 arch/x86/kernel/stacktrace.c:25
- stack_trace_save+0xa9/0x100 kernel/stacktrace.c:122
- kasan_save_stack mm/kasan/common.c:57 [inline]
- kasan_save_track+0x3e/0x80 mm/kasan/common.c:78
- unpoison_slab_object mm/kasan/common.c:340 [inline]
- __kasan_slab_alloc+0x6c/0x80 mm/kasan/common.c:366
- kasan_slab_alloc include/linux/kasan.h:253 [inline]
- slab_post_alloc_hook mm/slub.c:4683 [inline]
- slab_alloc_node mm/slub.c:4996 [inline]
- kmem_cache_alloc_noprof+0x2b9/0x600 mm/slub.c:5010
- alloc_buffer_head+0x2a/0x280 fs/buffer.c:2872
- jbd2_journal_write_metadata_buffer+0xbe/0xd60 fs/jbd2/journal.c:347
- jbd2_journal_commit_transaction+0x155a/0x5b70 fs/jbd2/commit.c:689
- kjournald2+0x3bc/0x750 fs/jbd2/journal.c:200
- kthread+0x38b/0x480 kernel/kthread.c:436
- ret_from_fork+0x514/0xb70 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
- </TASK>
-
-
----
-This report is generated by a bot. It may contain errors.
-See https://goo.gl/tpsmEJ for more information about syzbot.
-syzbot engineers can be reached at syzkaller@googlegroups.com.
-
-syzbot will keep track of this issue. See:
-https://goo.gl/tpsmEJ#status for how to communicate with syzbot.
-
-If the report is already addressed, let syzbot know by replying with:
-#syz fix: exact-commit-title
-
-If you want to overwrite report's subsystems, reply with:
-#syz set subsystems: new-subsystem
-(See the list of subsystem names on the web dashboard)
-
-If the report is a duplicate of another one, reply with:
-#syz dup: exact-subject-of-another-report
-
-If you want to undo deduplication, reply with:
-#syz undup
+--_002_308e39324361468db136bb14a22f422bzeshmbx09spreadtrumcom_--
