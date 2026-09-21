@@ -1,169 +1,400 @@
-Received: from DB3PR0202CU003.outbound.protection.outlook.com (mail-northeuropeazon11010050.outbound.protection.outlook.com [52.101.84.50])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83D8C4BD34F;
-	Mon, 21 Sep 2026 16:08:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.84.50
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790006911; cv=fail; b=NBypjse5XdsL4drqgDjnabnl6RfkRhhhelVnv/IhoELAh7OqNC/80U9tka71DU6Jin955UlaEO9Rgy8InMEYOyB7Z3xVcOlFFbaH9Q8+N/v+nt5+xwM3qrt5uamCVh9HMGpAzXbLe30hXIsvivxnWFRVuTeuR7Oj/VRgSHqHrr0=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790006911; c=relaxed/simple;
-	bh=eeu5SElqmUMD6kBDALfXEwO/2IZJ13X0VeDHcgsVAts=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=jYCHi7wjeXGCohJ2F9t6yjQlBo/Bdzt4qYaA+DbNnnFwnGCxtSEoMbClQI4DuaEbRaZIYSlr9NFcCUzNhFv7h6qo/pT8zfhiOS2f3JlIa9OWUZ5DMJbeNYsoN33vVGk2bcwEfOIE9x7duV64W2CMQ43WsqWnfz8f+1lvO7Tf/28=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com; spf=pass smtp.mailfrom=oss.nxp.com; dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b=I9S5BAxk; arc=fail smtp.client-ip=52.101.84.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56F9A4E73D8;
+	Mon, 21 Sep 2026 18:19:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1790014752; cv=none; b=NuGo2sHt5fLPNS4DDvyAFBTGvQ2Ywjz624kkR13AqzMFTSg+lrjSVS44tAldNVc4ieG987GVLQb7yoq/uZSIxNfM22u77qGAZ/AwXVq02KTEGPmC51sfOVCvblycebuXixD5wEvRb6DdXytvPzCIEvzqbgMQIkNYdp8RPb9CWOU=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1790014752; c=relaxed/simple;
+	bh=z/SlYdPV3JRXBJJoCnExC5/YQjozcYeHEwt6sapibcc=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=R6K3/LTiTdF/rOtiI0uPCMno7SuNy5qd+xNzqaIOn6uXcUKXAfu+MvoHXfewGURvn7wF+MxYqAV54pogpPzeJ6KliYIfoJLvwvRmff21TU1iB0Xdhdazu2TgktgwzXS1DlW6aJd3nFK/5tWJRvOStwVDeq74rTuGVbChasKf0BQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=C8UP2HhT; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b="I9S5BAxk"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=bcwUXd5eghpl3OcBmQjtf59A4wzIaFOZThmRlJLTksXqP2CXvs3Qi1OJimUlLXezW3VOtLdURqys7fdyvTZ91VdIYuGqOVhKp2BYkPMgdJg6yh25zOULSl8boyL46Hds3YjmMffBagWDM0rQCxTObPlcvRQIWw34Ww/zgLw0vv3ZwFUlQi4eMgm/iUCBSEf+ZKxVT+vFtdrJAIK69zoRhbMql8Xy+3E1HYMarfWvPwnb/NqqXwNbJRHaXTSBE50orUrKukbQ9MLOmeidIifLpJ0YyFZRz3AJ01zxoouEAqxMULe9QxyW0lJYhAgXW9OXNgMa0bG5cHqOnTYUSmxIxQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=eeu5SElqmUMD6kBDALfXEwO/2IZJ13X0VeDHcgsVAts=;
- b=dp6lgFbXVH2zWNLtB4baREK5WEJCNCf8O8C90izuMFa59OiY/baJUWQgAf6sX2NShwDQIOidrxXRobsCzG4w2NiyKV975FcG9IgeIfr5atpHW11SvL/Mr8GYK+P9xdVJyeg/yN+6Tnj6B6NqRLcPRYqzgIeCbjn2cub0wxaXV9J6wP2Cqekt3cjCzrAcru3AEIY0e4FeBZFjIfbcprTB9DidbbdEHEgxq/X9mtGeLza9MTVL+y2yinqaakgYE3Fi4cY0YLV/26zPEzZXCf30SByVIwOJ1dkO7DbjhQt7IxOuDahYTe1PMxKh2T5UGp7viIKdRuo15Q9xkp1EndXeQQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
- dkim=pass header.d=oss.nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
- s=selector1-NXP1-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=eeu5SElqmUMD6kBDALfXEwO/2IZJ13X0VeDHcgsVAts=;
- b=I9S5BAxklhCqwSKuMJdi6x3zn5tGIfjHt3c6x9PsALoPeZMe3Q2ZOqmbWTBR9nZ+KKulNMhtDWOhW4R6ghOcUsdfeNFU2Svrq5CR9R3h+CjlwgDuZpBrMemdx8MPVDwiB4aY7yO+lmfkGWKvCk1ZFRqdx/UhNyOWexRAt975UansZirMrJkqzb8TMEhr7/gI7bM2oigPNh7d3s4Xzduepzc8u1mNboaVp8Ohjtq4ut7iOYwsCkgI+jGttiSS/EwLTaUZksfhCrFvCG8sdqg9xnQLdcXhPqpUCaJpjY3MMluw5s7bba/cMPEo4cB4bHUWsqen9LWGRTVgqmjhqsKypQ==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=oss.nxp.com;
-Received: from GV2PR04MB11799.eurprd04.prod.outlook.com (2603:10a6:150:2cf::9)
- by DUYPR04MB12668.eurprd04.prod.outlook.com (2603:10a6:10:660::22) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.428.16; Mon, 21 Sep
- 2026 16:08:27 +0000
-Received: from GV2PR04MB11799.eurprd04.prod.outlook.com
- ([fe80::2146:83a2:5329:b7c]) by GV2PR04MB11799.eurprd04.prod.outlook.com
- ([fe80::2146:83a2:5329:b7c%7]) with mapi id 15.21.0428.015; Mon, 21 Sep 2026
- 16:08:27 +0000
-Date: Mon, 21 Sep 2026 11:08:13 -0500
-From: Frank Li <Frank.li@oss.nxp.com>
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Aubin Constans <aubin.constans@microchip.com>,
-	Ulf Hansson <ulfh@kernel.org>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>,
-	Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-	Paul Cercueil <paul@crapouillou.net>,
-	Russell King <linux@armlinux.org.uk>, Frank Li <Frank.Li@nxp.com>,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>,
-	Fabio Estevam <festevam@gmail.com>,
-	Aaro Koskinen <aaro.koskinen@iki.fi>,
-	Andreas =?iso-8859-1?Q?F=E4rber?= <afaerber@suse.de>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Jesper Nilsson <jesper.nilsson@axis.com>,
-	Lars Persson <lars.persson@axis.com>,
-	Linus Walleij <linusw@kernel.org>, Fan Wu <fanwu01@zju.edu.cn>,
-	Vinod Koul <vkoul@kernel.org>, Pengpeng Hou <pengpeng@iscas.ac.cn>,
-	Rosen Penev <rosenp@gmail.com>,
-	Marco Crivellari <marco.crivellari@suse.com>,
-	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Zhan Xusheng <zhanxusheng1024@gmail.com>,
-	Pan Chuang <panchuang@vivo.com>, Khalid Aziz <khalid@kernel.org>,
-	Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@baylibre.com>,
-	Rakuram Eswaran <rakuram.e96@gmail.com>,
-	Ethan Nelson-Moore <enelsonmoore@gmail.com>,
-	Runyu Xiao <runyu.xiao@seu.edu.cn>,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	"Matthew Wilcox (Oracle)" <willy@infradead.org>,
-	"open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>,
-	"moderated list:ARM/Microchip (AT91) SoC support" <linux-arm-kernel@lists.infradead.org>,
-	open list <linux-kernel@vger.kernel.org>,
-	"open list:INGENIC JZ47xx SoCs" <linux-mips@vger.kernel.org>,
-	"open list:ARM/FREESCALE IMX / MXC / LAYERSCAPE ARM ARCHIT..." <imx@lists.linux.dev>,
-	"open list:OMAP MMC SUPPORT" <linux-omap@vger.kernel.org>,
-	"moderated list:ARM/ACTIONS SEMI ARCHITECTURE" <linux-actions@lists.infradead.org>,
-	"open list:TMIO/SDHI MMC DRIVER" <linux-renesas-soc@vger.kernel.org>,
-	"open list:ARM/ARTPEC MACHINE SUPPORT" <linux-arm-kernel@axis.com>
-Subject: Re: [PATCH v3 1/1] mmc: use dmaengine_get_dma_device() instead of
- chan->device->dev
-Message-ID: <arFWbWgzyigSLAEO@SMW015318>
-References: <20260921144426.1083196-1-Frank.Li@oss.nxp.com>
- <arFG6UHs3VRifkBq@shikoro>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <arFG6UHs3VRifkBq@shikoro>
-X-ClientProxiedBy: CY5PR19CA0070.namprd19.prod.outlook.com
- (2603:10b6:930:69::16) To GV2PR04MB11799.eurprd04.prod.outlook.com
- (2603:10a6:150:2cf::9)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="C8UP2HhT"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 15D7AC2BCFC;
+	Mon, 21 Sep 2026 18:19:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1790014752;
+	bh=z/SlYdPV3JRXBJJoCnExC5/YQjozcYeHEwt6sapibcc=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
+	b=C8UP2HhTUIPPU5beEpky3RUNEuSzbhAhwAa8X4IELtB+uE5M8H6NsrjKql9OjGdsm
+	 ATzgQUQKLLc/nkBIIBnKqNF8R7WH/F2oHqKGTmRIGlaWGjvVkFtGBSjIEuBhs/pWnS
+	 cenhSOYpoCXaF2hiH8yRIaHlsgN8Vbse9wpKWdo6on0/J96TBaoczMDpuZvZqrsKQ0
+	 MhoB3b318khLfbCNxqeksU6db1CkCmSIr0V8jvxSnqPaLh+VVFgg9q6+cCXo2eicFN
+	 Skcs+QDhV+16X87gOJrSVNr1HsbE179qNTRMQ18h8Y1CEFdro3+52Ny1EStsTE5Vif
+	 ug1fZhaujMmKA==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DBB72C982ED;
+	Mon, 21 Sep 2026 18:19:11 +0000 (UTC)
+From: Muzaffer Kadir via B4 Relay <devnull+muzafferkadir.mainlining.org@kernel.org>
+Date: Mon, 21 Sep 2026 21:18:52 +0300
+Subject: [PATCH v3 01/19] dt-bindings: clock: qcom: Add MSM8952 global
+ clock controller
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: GV2PR04MB11799:EE_|DUYPR04MB12668:EE_
-X-MS-Office365-Filtering-Correlation-Id: 9480c4db-0051-46f8-1a03-08df17fa91f7
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|19092799006|1800799024|23010399003|376014|7416014|366016|10067099003|56012099006|4143699003|11063799006|18002099003|22082099003;
-X-Microsoft-Antispam-Message-Info:
-	iph9a54kZb9L02c5d2bBHr07Kxg6W8ftoQctrnniEiZaEZZopw4Yjb5oSHWb5JaM0auNZj+5qLvP5M2EChZqSe1WCOe9nEAutV+EVxmekOZO2Iwbgr4eU0kfjoPy+BSklojh+qtFyNZ4n6uiKj+wporcvi71oGe1OekAFKApnjJoEoBuC1o211jJvDLgYxFarUvn70HiyncwpDbfNo+WmgrFQX9dIncUvPiCoSC/s8zIFXD7f2oylk7PWPSaZhf7AK2VCRfyBEO4ABxTYe7SqEYu4eIVOYkp85tIsqv0RHtWAYXnIOdN5LiGA6zNfJQGxvjkm6eOz+GUEsuDNRsM1JzwyyqAqyJn3OkK8kEydodJU4FLh9X3LmCUIMXEfxm7dZc0b0z+6dPSqd22P37VegDd8aukR+MswJQWe29hSZX0/FytmN6qLkecRazgev1dqkBU7NOtwYwo7MMAb6oxKOQ1/NlJXPLEoolECW+F9bZMN/gqxRz4MbOqoLyJUESIvF6MIESQNFq9C743qqylK7jb2xliDG2UFNRB8FQLHONjqAL4oxuZqVLT/hVIfMOrgzWOGL4ouRNUv8RvtOzrNx2GGMSGL4VLwwbEgonHZTxhgoY0QWQCOA5qy8JCPKcZvowsMDf130QsF68efYA1ww==
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GV2PR04MB11799.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(19092799006)(1800799024)(23010399003)(376014)(7416014)(366016)(10067099003)(56012099006)(4143699003)(11063799006)(18002099003)(22082099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?OO66PwKA2AeFc68YhvXiHKQL82jnBoPht8pwwz0VA6jjb/jPS1SnxZrf/4JS?=
- =?us-ascii?Q?sbHtcBu1d2OgEy1Q8cEXUdgj2bhNQedS3Xbh6y6IMe8sUO7EYNqVepIoRyp1?=
- =?us-ascii?Q?0fZ5JzFOZpvvFHa2xmwHK2COLOuJiffpvmP0mcuHh5Gg16fj3fcL1LKQTRt2?=
- =?us-ascii?Q?KBomaoDTNAlUoJPFozUUMQZEZiSSwXN3kKyj/Ts1pc1WaVdSREP1hTBBGGHp?=
- =?us-ascii?Q?/wrNDk+4Z+esvObni1pNL5zewDAgrkvMF2TdGyGPP0EzPIfQTgj2VG5flfui?=
- =?us-ascii?Q?YuLvF+IJah+fxa/qwbJ7RXeNzU4wz3pnLIX6RUkZhNuVPA1+CApNEVLUdnDi?=
- =?us-ascii?Q?/UANJX+5HEbIfcz1z7iAXwmRPFjl5xLKjlJ/DzcRcMjaqcKgPycr49gXr5a4?=
- =?us-ascii?Q?2cUqRJ2ZB2tvUUihqsuSX8aCuiRAN3k4ENRKXwqHjVCx/ay8U0s4/jrUOppM?=
- =?us-ascii?Q?CdRRP5yu+gLfvJdkKJ4uNk0FvnECuA/vJlKZDjlb+nY0iC2YdeMiW+6A0Szl?=
- =?us-ascii?Q?OsXnjCefLYRxSTxeJBkrFVeUQBCuqzm7MB9XJ8GvHQm3JPY3Wz6JwX96p/5/?=
- =?us-ascii?Q?eOaIHNCT4sGy3XnufJ5vSFffTGk0bdNIUIcLOL7B95iopM3MH+CGFPR2zmtx?=
- =?us-ascii?Q?CcG1G5NQxlMWJkam0fg7K1sK1+fhPMpfsQKAMQkAPzaIQdHPtyqtLTuwzwim?=
- =?us-ascii?Q?NFCrhVVuECJcmxLQwY0M12qSIsS6RzrN738MC76vVU6eDjEXxNyW1wKFLlHN?=
- =?us-ascii?Q?3X+Ea9k5l+lzWZHmLrstHhnUn24gytrxwS1/fDu9cdz8FoJgBEqlqDyEcRDT?=
- =?us-ascii?Q?73RqecegxP2lb7nMPFOOapDOJ4Njyxg6RUnwYCp0MQbC7JLwiq+Je9umBCLY?=
- =?us-ascii?Q?LnCVSpGsvKaZ67lxSqZrjNzufqVhy+8gTrcQpu3FmaiFyl9Cfh79TrKQM2kY?=
- =?us-ascii?Q?1tOMKLCa2gwDDCJYOIZ/G6HHBas6szJgqrxkXQA9q8vJHNJgKKa+uqjmFZ62?=
- =?us-ascii?Q?ttu7t5EJqfNKV8hmiTRZrmKEFK74rcfUSn30nNybcjMyJ8qmkeiNtKqPOWp3?=
- =?us-ascii?Q?Z0ohScZkXaD9s4Zk/0Vq+ajObqrH3pIyjCJBa1qkVlusC026EBi1AZ4YuNIp?=
- =?us-ascii?Q?4XHqZvLfSJ+ZLj2KUTt/RH4YkGuEVdnquPCPnQFm5NO9BvXUfc2siiM7KmJP?=
- =?us-ascii?Q?GTn8PXDw2Grbuobj8btwGXwRdwPdCKFcCBgQ3resj1YwWtIgkUXQjEnsy8fO?=
- =?us-ascii?Q?aPsIjJUUiKWEQD9UqOyjndAIfzmuby9n6nCHfLDpsSWks3pBYAoiJYWM1xQc?=
- =?us-ascii?Q?z55kK/Ak+nbtpVqBMRT3Vlp1y162jRvPsb4GObMLyR1q3qIq6ljlpX0CrCt0?=
- =?us-ascii?Q?ysvnhC3yqLQ8VQuq2msnhmTRhVH4+ohLec5BWSMWiuORwjFEgswf3VNBgdwx?=
- =?us-ascii?Q?z4JCMf/vfJmqJjTWXf1qhVAqgT14LCxvfkiGXHzVHzoq+nBp36Q+INNIU/ba?=
- =?us-ascii?Q?Eq+5GnP75j+fHebtmlSrFJtIdOwE/NDoyOrkHiXL9Az5SVm0cUCCuURu6D6O?=
- =?us-ascii?Q?16epfiC2pzxQ7Meyiq8b0j98u/MdBgPEO+FAMTOa6oTkUQPE7uUFn4PexS+Z?=
- =?us-ascii?Q?SfiY15VmvDIa5IDldTYVyExU4WEbtpNZZb4bXadd7ORqkTux3mbJQna6Zmf/?=
- =?us-ascii?Q?ZWJwUBuY8n2eYCRKCVXuSxHs4XtP86yqY0xYmlsUbVgpp/53BezlkNTsC/aD?=
- =?us-ascii?Q?GoKwbg0CJJCKndV5X1vG+V4sDyuxJFjpHvEWbOfizwhx3maxVaXh?=
-X-OriginatorOrg: oss.nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9480c4db-0051-46f8-1a03-08df17fa91f7
-X-MS-Exchange-CrossTenant-AuthSource: GV2PR04MB11799.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Sep 2026 16:08:26.9581
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: LFChKBo5HzPC8CRCNheL05TlR2RcrCLVLtIR1j+h/eU7pg3qTvhqj5DOYIsjaTskijZhGevXiR1yID4AClaWEGdd3/CoVuzE5Vkkv9cSZbY3YeXoXncZ6mvrVRjqzWN5
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DUYPR04MB12668
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260921-msm8952-initial-support-v3-1-b96fd3fe298b@mainlining.org>
+References: <20260921-msm8952-initial-support-v3-0-b96fd3fe298b@mainlining.org>
+In-Reply-To: <20260921-msm8952-initial-support-v3-0-b96fd3fe298b@mainlining.org>
+To: Bjorn Andersson <andersson@kernel.org>, Abel Vesa <abelvesa@kernel.org>, 
+ Stephen Boyd <sboyd@kernel.org>, Brian Masney <bmasney+clk@redhat.com>, 
+ Jerome Brunet <jbrunet+clk@baylibre.com>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Srinivas Kandagatla <srini@kernel.org>, 
+ Ulf Hansson <ulfh@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
+ "Joerg Roedel (AMD)" <joro@8bytes.org>, Will Deacon <will@kernel.org>, 
+ Robin Murphy <robin.murphy@arm.com>, Lee Jones <lee@kernel.org>, 
+ Rob Clark <robin.clark@oss.qualcomm.com>, 
+ Dmitry Baryshkov <lumag@kernel.org>, 
+ Abhinav Kumar <abhinav.kumar@linux.dev>, 
+ Jessica Zhang <jesszhan0024@gmail.com>, Sean Paul <sean@poorly.run>, 
+ Marijn Suijten <marijn.suijten@somainline.org>, 
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+ Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>, 
+ David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
+ Robert Marko <robimarko@gmail.com>, Guru Das Srinagesh <linux@gurudas.dev>, 
+ Amit Kucheria <amitk@kernel.org>, Thara Gopinath <thara.gopinath@gmail.com>, 
+ "Rafael J. Wysocki" <rafael@kernel.org>, 
+ Daniel Lezcano <daniel.lezcano@kernel.org>, Zhang Rui <rui.zhang@intel.com>, 
+ Lukasz Luba <lukasz.luba@arm.com>, Kees Cook <kees@kernel.org>, 
+ Tony Luck <tony.luck@intel.com>, 
+ "Guilherme G. Piccoli" <gpiccoli@igalia.com>, 
+ Dmitry Torokhov <dmitry.torokhov@gmail.com>
+Cc: David Heidelberg <david@ixit.cz>, phone-devel@vger.kernel.org, 
+ linux-arm-msm@vger.kernel.org, linux-clk@vger.kernel.org, 
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ linux-mmc@vger.kernel.org, iommu@lists.linux.dev, mfd@lists.linux.dev, 
+ dri-devel@lists.freedesktop.org, freedreno@lists.freedesktop.org, 
+ Krzysztof Kozlowski <krzk@kernel.org>, linux-pm@vger.kernel.org, 
+ linux-input@vger.kernel.org, Muzaffer Kadir <muzafferkadir@mainlining.org>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1790014748; l=10258;
+ i=muzafferkadir@mainlining.org; s=20260816; h=from:subject:message-id;
+ bh=6yamRkkc/1prVGfyRPwK42y2ZFPSTA+V8diWvp5gE08=;
+ b=9Wy1PQ//ghj2qdhC/NRmtQJMES4zkNB3t/Gwnodh2akLIraAO8rVLnRARGDpfhLL6g+1RscfI
+ tzCmh4g1xajCpuB4i+JL+82eeChu011C4ryQpelSHSWQG4GccnnTr0m
+X-Developer-Key: i=muzafferkadir@mainlining.org; a=ed25519;
+ pk=4zkv4suQ3cYcO4Z7CrV8JSSjEGLBGepUtvQCFjgnYIU=
+X-Endpoint-Received: by B4 Relay for muzafferkadir@mainlining.org/20260816
+ with auth_id=954
+X-Original-From: Muzaffer Kadir <muzafferkadir@mainlining.org>
+Reply-To: muzafferkadir@mainlining.org
 
-On Mon, Sep 21, 2026 at 05:02:01PM +0200, Wolfram Sang wrote:
->
-> > eviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
->
-> Missing 'R' at the beginning. checkpatch would have reported this,
-> please put it in your loop.
+From: Muzaffer Kadir <muzafferkadir@mainlining.org>
 
-Sorry, I missed run checkpatch before send.
+Add a device tree binding to describe clocks, resets and power domains
+provided by the global clock controller on MSM8952 SoC.
 
-Frank
+MSM8952 GCC driver is mainly based on MSM8939 GCC driver.
 
->
+Signed-off-by: Muzaffer Kadir <muzafferkadir@mainlining.org>
+---
+ .../bindings/clock/qcom,gcc-msm8952.yaml           |  65 +++++++
+ include/dt-bindings/clock/qcom,gcc-msm8952.h       | 215 +++++++++++++++++++++
+ 2 files changed, 280 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/clock/qcom,gcc-msm8952.yaml b/Documentation/devicetree/bindings/clock/qcom,gcc-msm8952.yaml
+new file mode 100644
+index 000000000000..035f2f7451cd
+--- /dev/null
++++ b/Documentation/devicetree/bindings/clock/qcom,gcc-msm8952.yaml
+@@ -0,0 +1,65 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/clock/qcom,gcc-msm8952.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Qualcomm Global Clock & Reset Controller on MSM8952
++
++maintainers:
++  - Muzaffer Kadir <muzafferkadir@mainlining.org>
++
++description: |
++  Qualcomm global clock control module provides the clocks, resets and power
++  domains on MSM8952.
++
++  See also:
++    include/dt-bindings/clock/qcom,gcc-msm8952.h
++
++properties:
++  compatible:
++    enum:
++      - qcom,gcc-msm8952
++
++  clocks:
++    items:
++      - description: XO source
++      - description: Always-on XO source
++      - description: DSI phy instance 0 dsi clock
++      - description: DSI phy instance 0 byte clock
++
++  power-domains:
++    items:
++      - description: CX power domain
++
++required:
++  - compatible
++  - clocks
++  - power-domains
++  - '#power-domain-cells'
++
++allOf:
++  - $ref: qcom,gcc.yaml#
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/clock/qcom,dsi-phy-28nm.h>
++    #include <dt-bindings/clock/qcom,gcc-msm8952.h>
++    #include <dt-bindings/clock/qcom,rpmcc.h>
++    #include <dt-bindings/power/qcom-rpmpd.h>
++
++    clock-controller@1800000 {
++        compatible = "qcom,gcc-msm8952";
++        reg = <0x01800000 0x80000>;
++        clocks = <&rpmcc RPM_SMD_XO_CLK_SRC>,
++                 <&rpmcc RPM_SMD_XO_A_CLK_SRC>,
++                 <&mdss_dsi0_phy DSI_PIXEL_PLL_CLK>,
++                 <&mdss_dsi0_phy DSI_BYTE_PLL_CLK>;
++        power-domains = <&rpmpd RPMPD_VDDCX>;
++        #clock-cells = <1>;
++        #reset-cells = <1>;
++        #power-domain-cells = <1>;
++    };
++...
+diff --git a/include/dt-bindings/clock/qcom,gcc-msm8952.h b/include/dt-bindings/clock/qcom,gcc-msm8952.h
+new file mode 100644
+index 000000000000..5b5c38a9f4dd
+--- /dev/null
++++ b/include/dt-bindings/clock/qcom,gcc-msm8952.h
+@@ -0,0 +1,215 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++/*
++ * Copyright 2020 Linaro Limited
++ * Copyright 2026 Muzaffer Kadir <muzafferkadir@mainlining.org>
++ */
++
++#ifndef _DT_BINDINGS_CLK_MSM_GCC_8952_H
++#define _DT_BINDINGS_CLK_MSM_GCC_8952_H
++
++#define GPLL0						0
++#define GPLL0_VOTE					1
++#define GPLL3						2
++#define GPLL3_EARLY					3
++#define GPLL4						4
++#define GPLL4_VOTE					5
++#define GPLL6						6
++#define GPLL6_VOTE					7
++#define CAMSS_TOP_AHB_CLK_SRC				8
++#define APSS_AHB_CLK_SRC				9
++#define CSI0_CLK_SRC					10
++#define CSI1_CLK_SRC					11
++#define GFX3D_CLK_SRC					12
++#define VFE0_CLK_SRC					13
++#define BLSP1_QUP1_I2C_APPS_CLK_SRC			14
++#define BLSP1_QUP1_SPI_APPS_CLK_SRC			15
++#define BLSP1_QUP2_I2C_APPS_CLK_SRC			16
++#define BLSP1_QUP2_SPI_APPS_CLK_SRC			17
++#define BLSP1_QUP3_I2C_APPS_CLK_SRC			18
++#define BLSP1_QUP3_SPI_APPS_CLK_SRC			19
++#define BLSP1_QUP4_I2C_APPS_CLK_SRC			20
++#define BLSP1_QUP4_SPI_APPS_CLK_SRC			21
++#define BLSP1_UART1_APPS_CLK_SRC			22
++#define BLSP1_UART2_APPS_CLK_SRC			23
++#define CCI_CLK_SRC					24
++#define CAMSS_GP0_CLK_SRC				25
++#define CAMSS_GP1_CLK_SRC				26
++#define JPEG0_CLK_SRC					27
++#define MCLK0_CLK_SRC					28
++#define MCLK1_CLK_SRC					29
++#define CSI0PHYTIMER_CLK_SRC				30
++#define CSI1PHYTIMER_CLK_SRC				31
++#define CPP_CLK_SRC					32
++#define CRYPTO_CLK_SRC					33
++#define GP1_CLK_SRC					34
++#define GP2_CLK_SRC					35
++#define GP3_CLK_SRC					36
++#define BYTE0_CLK_SRC					37
++#define ESC0_CLK_SRC					38
++#define MDP_CLK_SRC					39
++#define PCLK0_CLK_SRC					40
++#define VSYNC_CLK_SRC					41
++#define PDM2_CLK_SRC					42
++#define SDCC1_APPS_CLK_SRC				43
++#define SDCC2_APPS_CLK_SRC				44
++#define USB_HS_SYSTEM_CLK_SRC				45
++#define VCODEC0_CLK_SRC					46
++#define GCC_BLSP1_AHB_CLK				47
++#define GCC_BLSP1_QUP1_I2C_APPS_CLK			48
++#define GCC_BLSP1_QUP1_SPI_APPS_CLK			49
++#define GCC_BLSP1_QUP2_I2C_APPS_CLK			50
++#define GCC_BLSP1_QUP2_SPI_APPS_CLK			51
++#define GCC_BLSP1_QUP3_I2C_APPS_CLK			52
++#define GCC_BLSP1_QUP3_SPI_APPS_CLK			53
++#define GCC_BLSP1_QUP4_I2C_APPS_CLK			54
++#define GCC_BLSP1_QUP4_SPI_APPS_CLK			55
++#define GCC_BLSP1_UART1_APPS_CLK			56
++#define GCC_BLSP1_UART2_APPS_CLK			57
++#define GCC_BOOT_ROM_AHB_CLK				58
++#define GCC_CAMSS_CCI_AHB_CLK				59
++#define GCC_CAMSS_CCI_CLK				60
++#define GCC_CAMSS_CSI0_AHB_CLK				61
++#define GCC_CAMSS_CSI0_CLK				62
++#define GCC_CAMSS_CSI0PHY_CLK				63
++#define GCC_CAMSS_CSI0PIX_CLK				64
++#define GCC_CAMSS_CSI0RDI_CLK				65
++#define GCC_CAMSS_CSI1_AHB_CLK				66
++#define GCC_CAMSS_CSI1_CLK				67
++#define GCC_CAMSS_CSI1PHY_CLK				68
++#define GCC_CAMSS_CSI1PIX_CLK				69
++#define GCC_CAMSS_CSI1RDI_CLK				70
++#define GCC_CAMSS_CSI_VFE0_CLK				71
++#define GCC_CAMSS_GP0_CLK				72
++#define GCC_CAMSS_GP1_CLK				73
++#define GCC_CAMSS_ISPIF_AHB_CLK				74
++#define GCC_CAMSS_JPEG0_CLK				75
++#define GCC_CAMSS_JPEG_AHB_CLK				76
++#define GCC_CAMSS_JPEG_AXI_CLK				77
++#define GCC_CAMSS_MCLK0_CLK				78
++#define GCC_CAMSS_MCLK1_CLK				79
++#define GCC_CAMSS_MICRO_AHB_CLK				80
++#define GCC_CAMSS_CSI0PHYTIMER_CLK			81
++#define GCC_CAMSS_CSI1PHYTIMER_CLK			82
++#define GCC_CAMSS_AHB_CLK				83
++#define GCC_CAMSS_TOP_AHB_CLK				84
++#define GCC_CAMSS_CPP_AHB_CLK				85
++#define GCC_CAMSS_CPP_CLK				86
++#define GCC_CAMSS_VFE0_CLK				87
++#define GCC_CAMSS_VFE0_AHB_CLK				88
++#define GCC_CAMSS_VFE0_AXI_CLK				89
++#define GCC_CRYPTO_AHB_CLK				90
++#define GCC_CRYPTO_AXI_CLK				91
++#define GCC_CRYPTO_CLK					92
++#define GCC_OXILI_GMEM_CLK				93
++#define GCC_GP1_CLK					94
++#define GCC_GP2_CLK					95
++#define GCC_GP3_CLK					96
++#define GCC_MDSS_AHB_CLK				97
++#define GCC_MDSS_AXI_CLK				98
++#define GCC_MDSS_BYTE0_CLK				99
++#define GCC_MDSS_ESC0_CLK				100
++#define GCC_MDSS_MDP_CLK				101
++#define GCC_MDSS_PCLK0_CLK				102
++#define GCC_MDSS_VSYNC_CLK				103
++#define GCC_MSS_CFG_AHB_CLK				104
++#define GCC_OXILI_AHB_CLK				105
++#define GCC_OXILI_GFX3D_CLK				106
++#define GCC_PDM2_CLK					107
++#define GCC_PDM_AHB_CLK					108
++#define GCC_PRNG_AHB_CLK				109
++#define GCC_SDCC1_AHB_CLK				110
++#define GCC_SDCC1_APPS_CLK				111
++#define GCC_SDCC2_AHB_CLK				112
++#define GCC_SDCC2_APPS_CLK				113
++#define GCC_GTCU_AHB_CLK				114
++#define GCC_JPEG_TBU_CLK				115
++#define GCC_MDP_TBU_CLK					116
++#define GCC_SMMU_CFG_CLK				117
++#define GCC_VENUS_TBU_CLK				118
++#define GCC_VFE_TBU_CLK					119
++#define GCC_USB2A_PHY_SLEEP_CLK				120
++#define GCC_USB_HS_AHB_CLK				121
++#define GCC_USB_HS_SYSTEM_CLK				122
++#define GCC_VENUS0_AHB_CLK				123
++#define GCC_VENUS0_AXI_CLK				124
++#define GCC_VENUS0_VCODEC0_CLK				125
++#define GCC_APSS_TCU_CLK				126
++#define GCC_GFX_TCU_CLK					127
++#define GCC_BIMC_GFX_CLK				128
++#define GCC_BIMC_GPU_CLK				129
++#define GCC_MSS_Q6_BIMC_AXI_CLK				130
++#define GCC_GFX_TBU_CLK					131
++#define GCC_CPP_TBU_CLK					132
++#define USB_FS_SYSTEM_CLK_SRC				133
++#define USB_FS_IC_CLK_SRC				134
++#define GCC_USB_FS_AHB_CLK				135
++#define GCC_USB_FS_IC_CLK				136
++#define GCC_USB_FS_SYSTEM_CLK				137
++#define GCC_VENUS0_CORE0_VCODEC0_CLK			138
++#define GCC_VENUS0_CORE1_VCODEC0_CLK			139
++#define GCC_OXILI_TIMER_CLK				140
++#define GCC_USB_HS_PHY_CFG_AHB_CLK			141
++#define CSI2_CLK_SRC					142
++#define GCC_CAMSS_CSI2_AHB_CLK				143
++#define GCC_CAMSS_CSI2_CLK				144
++#define GCC_CAMSS_CSI2PHY_CLK				145
++#define GCC_CAMSS_CSI2PIX_CLK				146
++#define GCC_CAMSS_CSI2RDI_CLK				147
++#define SDCC1_ICE_CORE_CLK_SRC				148
++#define GCC_SDCC1_ICE_CORE_CLK				149
++#define BLSP2_QUP1_I2C_APPS_CLK_SRC			150
++#define BLSP2_QUP1_SPI_APPS_CLK_SRC			151
++#define BLSP2_QUP2_I2C_APPS_CLK_SRC			152
++#define BLSP2_QUP2_SPI_APPS_CLK_SRC			153
++#define BLSP2_QUP3_I2C_APPS_CLK_SRC			154
++#define BLSP2_QUP3_SPI_APPS_CLK_SRC			155
++#define BLSP2_QUP4_I2C_APPS_CLK_SRC			156
++#define BLSP2_QUP4_SPI_APPS_CLK_SRC			157
++#define BLSP2_UART1_APPS_CLK_SRC			158
++#define BLSP2_UART2_APPS_CLK_SRC			159
++#define GCC_BLSP2_AHB_CLK				160
++#define GCC_BLSP2_QUP1_I2C_APPS_CLK			161
++#define GCC_BLSP2_QUP1_SPI_APPS_CLK			162
++#define GCC_BLSP2_QUP2_I2C_APPS_CLK			163
++#define GCC_BLSP2_QUP2_SPI_APPS_CLK			164
++#define GCC_BLSP2_QUP3_I2C_APPS_CLK			165
++#define GCC_BLSP2_QUP3_SPI_APPS_CLK			166
++#define GCC_BLSP2_QUP4_I2C_APPS_CLK			167
++#define GCC_BLSP2_QUP4_SPI_APPS_CLK			168
++#define GCC_BLSP2_UART1_APPS_CLK			169
++#define GCC_BLSP2_UART2_APPS_CLK			170
++#define VFE1_CLK_SRC					171
++#define GCC_CAMSS_VFE1_CLK				172
++#define GCC_CAMSS_VFE1_AHB_CLK				173
++#define GCC_CAMSS_VFE1_AXI_CLK				174
++#define GCC_CAMSS_CSI_VFE1_CLK				175
++#define MCLK2_CLK_SRC					176
++#define GCC_CAMSS_MCLK2_CLK				177
++#define GCC_VFE1_TBU_CLK				178
++#define GCC_IPA_TBU_CLK					179
++#define GCC_CAMSS_CPP_AXI_CLK				180
++
++/* Indexes for GDSCs */
++#define VENUS_GDSC				0
++#define MDSS_GDSC				1
++#define JPEG_GDSC				2
++#define VFE0_GDSC				3
++#define VFE1_GDSC				4
++#define OXILI_GX_GDSC				5
++#define VENUS_CORE0_GDSC			6
++#define VENUS_CORE1_GDSC			7
++#define CPP_GDSC				8
++
++/* Indexes for Resets */
++#define GCC_CRYPTO_BCR				0
++#define GCC_USB_FS_BCR				1
++#define GCC_USB_HS_BCR				2
++#define GCC_QUSB2_PHY_BCR			3
++#define GCC_USB2_HS_PHY_ONLY_BCR		4
++#define GCC_SDCC1_BCR				5
++#define GCC_SDCC2_BCR				6
++#define GCC_MDSS_BCR				7
++#define GCC_CAMSS_MICRO_BCR			8
++#define GCC_MSS_BCR				9
++
++#endif
+
+-- 
+2.55.0
+
+
