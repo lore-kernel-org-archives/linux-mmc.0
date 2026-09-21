@@ -1,37 +1,37 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6EAA74FD27C;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C655D4F96B7;
 	Mon, 21 Sep 2026 18:19:13 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790014753; cv=none; b=YVULsyghEgCiCGaTrNXsubSwX3Ti7p7s5kK7WaIvIBXASHkcut/mED7eQXHH5WFrh3TfusHN3R5gddd67k5qGHFUSgJuGE8tEV0PZcDLfd1sBb7277ib23mkR21kChREQP3nmqlqrbyhQP4R76mAZzBCi4AvEXsnVengq7DHE78=
+	t=1790014753; cv=none; b=QL59/ct01AKOWYcNmUlDODoiBYwSK+F2lSWM5ztgA7O6UDNRgog+k4v4QHvHEA8BN6rpU/Yosp+b7t9IyFsDzAwPYgdmkW3CFHvEyGtW90OBoVUcBKFztNMKrSKKWf2QhMyGKCpEDVH1dKrnKQTqardG7zope0fS50fM14aNSm4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1790014753; c=relaxed/simple;
-	bh=kL7kpIG3qA+4AejsWI3BHXBQrYH/6KaVhM51d9C5+XE=;
+	bh=uQxBZuhyzSRvVDvx4PG5/I0odnbN9g2l43BKI3W/H7I=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=mdzd+FMrV63a/Vg1TtoUcknpXAl543Fr7zdRnqwciH1czCTX+tXiA9Diza+/oH/rG0xB2zyfeW3wxiY/M0ubxPkPyijiFiJ7f3lG6s6/Ff4kAeA5F0CYjgAapWzcQ8kqENP+DejbVPu7HoEXdFM1hsBaxWDey5MrEZNWx+evYwk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=E7pSdQwt; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=Op7ijjNyk2cyzC+4yaJ9GY/+8y8wULlFbTadw+zEIvvzXj3rBaUXLnsSyDfo1p59WH0EAHihCDhlH/Vdjll8qS/Q11EUKs0vAcs5XmPjpe8Vgoe9zoe/6cdxeM9jD+BB6Sn4s8S6tG2FBq6tpiQriuYemAaI4/3rI8On74TmdrE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QmWp52f7; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="E7pSdQwt"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 2C5BDC4AF68;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QmWp52f7"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 5FDABC4AF61;
 	Mon, 21 Sep 2026 18:19:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1790014753;
-	bh=kL7kpIG3qA+4AejsWI3BHXBQrYH/6KaVhM51d9C5+XE=;
+	bh=uQxBZuhyzSRvVDvx4PG5/I0odnbN9g2l43BKI3W/H7I=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=E7pSdQwtBN+vf5f/hhYLeG8xpE0N4+NCALq9uBD5VlncGsQMvh3af8JZr2rtF7Dyx
-	 ikd6eSWg6IwdgaL2UKXnlJU52qcsXZbVK9kC7MfnlueZNHsxRJ/Uj6FiR2VWYzEV7S
-	 TC12pgH/xVVQPar4Rud3Z6v+TaBRIPuyeWVrQoMNeWSWreW3e6vlzQyW+kou+mLcnV
-	 oReDWBMkrqGEHqbrU0AD8Xys1AgGgdO+nZkXnnKCfbt8Kl028ak2Bjbh219yzwPowQ
-	 EaWeRkcTKgfTf4NoxVQGL52nXQJZdhVdk148bzkteBWVmn83KZXFEGOhjRO6eYX+Ci
-	 +uqUNWgCL3Afg==
+	b=QmWp52f79J9r9i7HjwALgvUJBvBJzUUTNhnafqlpSTNK653PQHaoeV24sI725vUHB
+	 sQB8TIpxT1UXb5bvzYAr1WeKvxakBaYCg/qApgC+/y+doXqeoxsrrqMypHKoiBuQIS
+	 f1ANayemXiBWyGLXVyeE6Ro4Wce6BrE/ctExV+3n3Rw9PuuF2ibUJNTUW9/jNCEbvT
+	 zTBZDsyUVX4YQbM8WvDrrzdQxpL+3/XtFR1sywL7i0bY4D1JEfh/IJwWlQ9plc1olw
+	 ZxZbuKCKss2WWmLLS0XjsibKFLgnYUhW4KJ33ZCmWLR1PFXh/7rJ43HZC5/1K4Zkus
+	 cvN9pRkCFfDiA==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EA48C982FA;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 439E6C982FB;
 	Mon, 21 Sep 2026 18:19:13 +0000 (UTC)
 From: Muzaffer Kadir via B4 Relay <devnull+muzafferkadir.mainlining.org@kernel.org>
-Date: Mon, 21 Sep 2026 21:19:01 +0300
-Subject: [PATCH v3 10/19] dt-bindings: display/msm: qcom, mdp5: Add MSM8952
+Date: Mon, 21 Sep 2026 21:19:03 +0300
+Subject: [PATCH v3 12/19] dt-bindings: clock: qcom,rpmcc: Add MSM8952
  compatible
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -41,7 +41,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260921-msm8952-initial-support-v3-10-b96fd3fe298b@mainlining.org>
+Message-Id: <20260921-msm8952-initial-support-v3-12-b96fd3fe298b@mainlining.org>
 References: <20260921-msm8952-initial-support-v3-0-b96fd3fe298b@mainlining.org>
 In-Reply-To: <20260921-msm8952-initial-support-v3-0-b96fd3fe298b@mainlining.org>
 To: Bjorn Andersson <andersson@kernel.org>, Abel Vesa <abelvesa@kernel.org>, 
@@ -76,11 +76,11 @@ Cc: David Heidelberg <david@ixit.cz>, phone-devel@vger.kernel.org,
  Krzysztof Kozlowski <krzk@kernel.org>, linux-pm@vger.kernel.org, 
  linux-input@vger.kernel.org, Muzaffer Kadir <muzafferkadir@mainlining.org>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1790014748; l=837;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1790014748; l=845;
  i=muzafferkadir@mainlining.org; s=20260816; h=from:subject:message-id;
- bh=j1cyFUrA8K2mGnvaltP8lasGm8e1/N+retm6o6lMinU=;
- b=Oz1dz2ZWoRrkM/lfhYIwn4VuXlXdCrNE1OFmUAgmF8wpQEAerYbZSuqZHVhP2np2YFdFeO6HD
- 5osVLs6URJpDrK6+Y/vEPtnRtTZBqHeXZbh+19I+KrwRcYqfF1+xj01
+ bh=CHNYHQsphKuLRM8ear9uJQ14PqO0HMwJNgURPd6NrV8=;
+ b=PEp+BwfKYQUrAQIcgVk3NGd8VQhuG4/ZuLc1L3bk6bGK9kDA9TN5L9SKfaW7UpZgsCanXP/IY
+ HMP3UZ9sfQ1CdAX+ULyy+UkLjKCluSLqsyYjJbKuIc4elbdkOKHyUrt
 X-Developer-Key: i=muzafferkadir@mainlining.org; a=ed25519;
  pk=4zkv4suQ3cYcO4Z7CrV8JSSjEGLBGepUtvQCFjgnYIU=
 X-Endpoint-Received: by B4 Relay for muzafferkadir@mainlining.org/20260816
@@ -90,25 +90,29 @@ Reply-To: muzafferkadir@mainlining.org
 
 From: Muzaffer Kadir <muzafferkadir@mainlining.org>
 
-Add the compatible for the MDP5 found on MSM8952.
+Document the rpmcc found on MSM8952.
 
 Signed-off-by: Muzaffer Kadir <muzafferkadir@mainlining.org>
 ---
- Documentation/devicetree/bindings/display/msm/qcom,mdp5.yaml | 1 +
- 1 file changed, 1 insertion(+)
+ Documentation/devicetree/bindings/clock/qcom,rpmcc.yaml | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/display/msm/qcom,mdp5.yaml b/Documentation/devicetree/bindings/display/msm/qcom,mdp5.yaml
-index 2735c78b0b67..2f0a32a3f586 100644
---- a/Documentation/devicetree/bindings/display/msm/qcom,mdp5.yaml
-+++ b/Documentation/devicetree/bindings/display/msm/qcom,mdp5.yaml
-@@ -26,6 +26,7 @@ properties:
-               - qcom,msm8916-mdp5
-               - qcom,msm8917-mdp5
-               - qcom,msm8937-mdp5
-+              - qcom,msm8952-mdp5
-               - qcom,msm8953-mdp5
-               - qcom,msm8974-mdp5
-               - qcom,msm8976-mdp5
+diff --git a/Documentation/devicetree/bindings/clock/qcom,rpmcc.yaml b/Documentation/devicetree/bindings/clock/qcom,rpmcc.yaml
+index 17332aa55886..aa532f208f5a 100644
+--- a/Documentation/devicetree/bindings/clock/qcom,rpmcc.yaml
++++ b/Documentation/devicetree/bindings/clock/qcom,rpmcc.yaml
+@@ -56,6 +56,11 @@ properties:
+               - qcom,rpmcc-shikra
+           - const: qcom,rpmcc-qcm2290
+           - const: qcom,rpmcc
++      - items:
++          - enum:
++              - qcom,rpmcc-msm8952
++          - const: qcom,rpmcc-msm8976
++          - const: qcom,rpmcc
+ 
+   '#clock-cells':
+     const: 1
 
 -- 
 2.55.0
