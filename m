@@ -1,561 +1,149 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qv2-f12.google.com (mail-qv2-f12.google.com [74.125.230.140])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9300C50254A;
-	Mon, 21 Sep 2026 18:19:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77833511229
+	for <linux-mmc@vger.kernel.org>; Mon, 21 Sep 2026 19:13:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.230.140
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790014754; cv=none; b=aDUVisQf9elaSID/oCvZvlWZxfwVEfiG1v3+ePXTFTFVoBwlreUHO7LTHwcNC7eq8R3oZ7YRNxpMO7M1L0QK6ZHhueeTepHs+ACCu/bOmvdPQzLv+OYNEKQr2OJz5vqfTAO5zJI0haYjb26xaziTJAhGpSrQTaE2yv0lQppPGmw=
+	t=1790018021; cv=none; b=W3AZykqhzWqPndeWd3rMM4iN/PeWvo2f+AZvhWo8mCjK90hN8DISqeq32RAl3Xso6XhQqOyYO3flfFxZubmrJnqVkDYiHTUfnB6PB1MFqDhQPTDNj/SrFTY+fSBpBkAvoifPWHqXLbPFakiWMNUegvB/5N8Z+oy5nTypM5aHmaw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790014754; c=relaxed/simple;
-	bh=5cXE6uCU2V3eae7E0njrVJ4gN89dQf7mLXcJnNlcbR0=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=pKFS1wAzTUycph5AejUEdPoHFjYu9wAUQ3b/CaelDXN4HVWt/nRaAa9G3DvM9XAVMBc1Qv5HbtngbWvQOSTaLVQA6CKXZ0+Re0XICizFgrckzbObAgGm5BP3a3hMbzbWGiwjJElJwzWRPzuyxlg2JRHbxIO21RzK7TrbzypcPMo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MJsiOM7Q; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1790018021; c=relaxed/simple;
+	bh=BQed6cSp6vzZ+hQ7oZzppKqdBjTyFHm3lTjQIjKB3r8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=E9x3MCrFXW9593y34v//kDvKgAg1iPIXjhhw2jwGFJrCjPBNLhRSQvY4FJmPtpqYTDvBaPC2xirodCCZFudRZnfVziNkxpXHYhcnHFK2Zv+4+lZ80qbMjKeoVv8H6GFKl7bCRpEgKErEBTwF8AWsR6WOc4T1OOPsHSNEV9Pd1sw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=brivo.com; spf=pass smtp.mailfrom=brivo.com; dkim=pass (2048-bit key) header.d=brivo.com header.i=@brivo.com header.b=Kgsg4t1Z; arc=none smtp.client-ip=74.125.230.140
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=brivo.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=brivo.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MJsiOM7Q"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 274C0C4DDFB;
-	Mon, 21 Sep 2026 18:19:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1790014754;
-	bh=5cXE6uCU2V3eae7E0njrVJ4gN89dQf7mLXcJnNlcbR0=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=MJsiOM7QISXDgvkjS7oDOQ7I2QLIA4muXGeoDpBd0sNUEHgX2QATAfHVYphYQGAO0
-	 W/whggP4/Sb5xHI7OgDaLLajuHdDilAu4iXRmPyDRaWw8KIsDrayhBlRbHbXnLPCxR
-	 gDNBACrdirrjOQv/umrEkeucGlJcJdsxIQXOT1KGwQ9UcvG2U5EqeJRrBzEwtoue9Z
-	 fZiE4KdN+x6n2BWCaHffIVpb+EISGXTaef23Vo8IsA95sDrneWQO6rMjXQMcPUuAcT
-	 vcnE12dn1XP366wVakfeG5NXbmNCDoYiSJEotiNZcw8gcwMRBKvGdJp1m7VR0H1AFP
-	 KqayBPmi+XJlg==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C7E1C982FA;
-	Mon, 21 Sep 2026 18:19:14 +0000 (UTC)
-From: Muzaffer Kadir via B4 Relay <devnull+muzafferkadir.mainlining.org@kernel.org>
-Date: Mon, 21 Sep 2026 21:19:10 +0300
-Subject: [PATCH v3 19/19] arm64: dts: qcom: generalmobile-shamrock: new
- device
+	dkim=pass (2048-bit key) header.d=brivo.com header.i=@brivo.com header.b="Kgsg4t1Z"
+Received: by mail-qv2-f12.google.com with SMTP id 6a1803df08f44-91071ba92a8so18882216d6.0
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Sep 2026 12:13:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=brivo.com; s=google; t=1790018019; x=1790622819; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=rgouXHW55aIbAEz+yxgGnRtHE3IVMg92WaPFZm2OsIo=;
+        b=Kgsg4t1Zdkldb8+wEiTC0LBrIoUsPeYpYmPcEJBuB+C62al6TsPDqHrqTR/zABHqGl
+         Vegs3zkbxCmuhnwN+HQmnD3k9G2Rrmnxgli9jWX/m35wbcC11eVyGIVHWp2h4ToI8QtZ
+         5vwwaH1ioQPhozngNOsPB+i+wsNdlgVd5DJKD0vqVMEZCUnZENAUCmovoisCbIQLY0jP
+         ZM4cTLuco2l+1s1iRIQWgGmdD4poIwXv++T5UcCrkrPx4Z1uggeMNhOZ0Kz2g9DT1HWu
+         0ybE3sRPDvX/0+g74l2YhpxoRPMO42QX+kiv32fvFICQksKsWNwUY+MAgjHWqmVbJITV
+         Qz0A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1790018019; x=1790622819;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=rgouXHW55aIbAEz+yxgGnRtHE3IVMg92WaPFZm2OsIo=;
+        b=MMiuxNcALc1C8lYZAbfp3LaR6XxnRzDQSEl+F4WU4zTNnrES9NuLnkWjH3A8DwTRr2
+         VsGJ07VCClTbjM82xAHBQfzoLNhqyRBJdJqlmnHJF7ss6JxM9kZSgNrUMzq5fee/Hjxn
+         WPqvMzgGAXKKsh9H3jtHU3hwC8c9HUig2CE1PRy/abeEXXveSp2X8/EfR/xwWzzA64Bd
+         utzvxZY6gYlRys96Zn86q6T9mu+uikA06db4YFt4Vu9c8ROnIUuFOZkZhbDpTAXPWboP
+         k6rNlyXeg54qzYBr+8aWDP7pZOrmp+h9BlUWWXpeC2oO19hRCXWzjOaytfXaQToMyUIU
+         8QJg==
+X-Forwarded-Encrypted: i=1; AKwUvBxRmWGZ/2xIXTdMyc9l6bP/Ab7Xk57Dvpm0FhG36BI9IIBjn+IuhrSAuxRvo+5uDC+rSIuV8atYRL4=@vger.kernel.org
+X-Gm-Message-State: AFuF++kOWlL2LEESow6q7tu+1BwriyS7VscKzeFc+/pwzu16bo3Dcmv9
+	yhQD73E2nxp8Qkk3AN1zuYCPvhkEZvI6oN9AhXeRUBk4575diiEINm2Yg6HXFWy+fNhmz7eUPNM
+	1WmPpMdhfxJUV5FCGuSqzUDznD+pe2d9rWEp44UtfXGcY9bPDlsShABs=
+X-Gm-Gg: AYBFou0qIXobWp9xHwQDLueiv8MiAI0xJrb/oqToDTdIDQQ7Oo+TbIK1ZRAIwifqDRd
+	jaiPTbrHyJf/Ge3Y1xKsLwwi3jadspA97vKee4FUc5Gkhyw0Kg+sKsT/LzN878mtJ8p1jkGGWQv
+	2Aqty8S2QWPEjkHJkMB2pVcmMEY4mq8A3K6qe8HcHooA786K8QeKqseslgrkgsDSjdqbzYv6vio
+	kMVA6N9Zycre3yWB739aGJnjkfRLxVaLS3SzOg1GMR9Gv4+LdMUkvmpNHAputKaHLqbiyPua7PE
+	OGDeczz1mi/r5tpck28ERv8rwgfWVCDzev5g9YNdh/9Bl9MojQBgb8o+TRlpPr5Gg6YG3pvxC1Q
+	qzkZEnWgZ6IoyM2Vcq1ToZqANHHJta4RfYxWzVkRk2kxYu8MO4R59AJ+Cz3y+hOJyryX464Z5+u
+	uyb9XVy5QQdNnLFi28MeUUxM1F91bt4gc1RSHQczXC8z5PVilC5hhha3XVa4CofQ1KS6ZDkX3Vk
+	A==
+X-Received: by 2002:a05:6214:19cc:b0:912:12cf:f6b7 with SMTP id 6a1803df08f44-913fc8a23f8mr21513036d6.7.1790018019138;
+        Mon, 21 Sep 2026 12:13:39 -0700 (PDT)
+Received: from strozzi ([66.193.28.125])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-91260a61570sm75443526d6.23.2026.09.21.12.13.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 21 Sep 2026 12:13:38 -0700 (PDT)
+From: Sean Anderson <sanderson@brivo.com>
+To: Ulf Hansson <ulfh@kernel.org>,
+	linux-mmc@vger.kernel.org
+Cc: Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+	Neil Armstrong <neil.armstrong@linaro.org>,
+	Kevin Hilman <khilman@baylibre.com>,
+	Heiner Kallweit <hkallweit1@gmail.com>,
+	linux-arm-kernel@lists.infradead.org,
+	Jerome Brunet <jbrunet@baylibre.com>,
+	linux-kernel@vger.kernel.org,
+	linux-amlogic@lists.infradead.org,
+	Sean Anderson <sanderson@brivo.com>
+Subject: [PATCH] mmc: meson-gx: Convert host->lock to raw spinlock
+Date: Mon, 21 Sep 2026 15:13:08 -0400
+Message-ID: <20260921191326.2146363-1-sanderson@brivo.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260921-msm8952-initial-support-v3-19-b96fd3fe298b@mainlining.org>
-References: <20260921-msm8952-initial-support-v3-0-b96fd3fe298b@mainlining.org>
-In-Reply-To: <20260921-msm8952-initial-support-v3-0-b96fd3fe298b@mainlining.org>
-To: Bjorn Andersson <andersson@kernel.org>, Abel Vesa <abelvesa@kernel.org>, 
- Stephen Boyd <sboyd@kernel.org>, Brian Masney <bmasney+clk@redhat.com>, 
- Jerome Brunet <jbrunet+clk@baylibre.com>, Rob Herring <robh@kernel.org>, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, Srinivas Kandagatla <srini@kernel.org>, 
- Ulf Hansson <ulfh@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
- "Joerg Roedel (AMD)" <joro@8bytes.org>, Will Deacon <will@kernel.org>, 
- Robin Murphy <robin.murphy@arm.com>, Lee Jones <lee@kernel.org>, 
- Rob Clark <robin.clark@oss.qualcomm.com>, 
- Dmitry Baryshkov <lumag@kernel.org>, 
- Abhinav Kumar <abhinav.kumar@linux.dev>, 
- Jessica Zhang <jesszhan0024@gmail.com>, Sean Paul <sean@poorly.run>, 
- Marijn Suijten <marijn.suijten@somainline.org>, 
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
- Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>, 
- David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
- Robert Marko <robimarko@gmail.com>, Guru Das Srinagesh <linux@gurudas.dev>, 
- Amit Kucheria <amitk@kernel.org>, Thara Gopinath <thara.gopinath@gmail.com>, 
- "Rafael J. Wysocki" <rafael@kernel.org>, 
- Daniel Lezcano <daniel.lezcano@kernel.org>, Zhang Rui <rui.zhang@intel.com>, 
- Lukasz Luba <lukasz.luba@arm.com>, Kees Cook <kees@kernel.org>, 
- Tony Luck <tony.luck@intel.com>, 
- "Guilherme G. Piccoli" <gpiccoli@igalia.com>, 
- Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Cc: David Heidelberg <david@ixit.cz>, phone-devel@vger.kernel.org, 
- linux-arm-msm@vger.kernel.org, linux-clk@vger.kernel.org, 
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
- linux-mmc@vger.kernel.org, iommu@lists.linux.dev, mfd@lists.linux.dev, 
- dri-devel@lists.freedesktop.org, freedreno@lists.freedesktop.org, 
- Krzysztof Kozlowski <krzk@kernel.org>, linux-pm@vger.kernel.org, 
- linux-input@vger.kernel.org, Muzaffer Kadir <muzafferkadir@mainlining.org>
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1790014748; l=11254;
- i=muzafferkadir@mainlining.org; s=20260816; h=from:subject:message-id;
- bh=gxJWGZasJH0N7y1/tnmz0xZTEb+9bQ5AsajURmCeODc=;
- b=Zx+XEpGm7jWsY+IPPp4wws/rjBYZ7hJ7JOFM+6yQtbnyAlYHjs+YZkI69BqeYdmro9vNjEQEk
- WGAfwDKNOOuDWwhHfYVbt7uweKuN9KOtgqDn+bf50fx7esgew9dBPeg
-X-Developer-Key: i=muzafferkadir@mainlining.org; a=ed25519;
- pk=4zkv4suQ3cYcO4Z7CrV8JSSjEGLBGepUtvQCFjgnYIU=
-X-Endpoint-Received: by B4 Relay for muzafferkadir@mainlining.org/20260816
- with auth_id=954
-X-Original-From: Muzaffer Kadir <muzafferkadir@mainlining.org>
-Reply-To: muzafferkadir@mainlining.org
+Content-Transfer-Encoding: 8bit
 
-From: Muzaffer Kadir <muzafferkadir@mainlining.org>
+The primary handler for IRQF_ONESHOT interrupts is always run without
+threading, even on PREEMPT_RT. Therefore, we must use a raw spinlock,
+which will never sleep (even on PREEMPT_RT).
 
-Add General Mobile Shamrock (GM 5 Plus). Shamrock is designed
-similar to L9300. Downstream reference is [1].
-
-[1] https://github.com/Asderdd/android_kernel_generalmobile_shamrock/blob/cm-14.1/arch/arm/boot/dts/qcom/msm8952-l9300.dtsi
-
-Signed-off-by: Muzaffer Kadir <muzafferkadir@mainlining.org>
+Fixes: 066ecde6d826 ("mmc: meson-gx: add SDIO interrupt support")
+Signed-off-by: Sean Anderson <sanderson@brivo.com>
 ---
- arch/arm64/boot/dts/qcom/Makefile                  |   1 +
- .../dts/qcom/msm8952-generalmobile-shamrock.dts    | 435 +++++++++++++++++++++
- 2 files changed, 436 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
-index 5c19f945c785..7713dd4cdc06 100644
---- a/arch/arm64/boot/dts/qcom/Makefile
-+++ b/arch/arm64/boot/dts/qcom/Makefile
-@@ -126,6 +126,7 @@ dtb-$(CONFIG_ARCH_QCOM)	+= msm8939-samsung-a7.dtb
- dtb-$(CONFIG_ARCH_QCOM)	+= msm8939-sony-xperia-kanuti-tulip.dtb
- dtb-$(CONFIG_ARCH_QCOM)	+= msm8939-wingtech-wt82918.dtb
- dtb-$(CONFIG_ARCH_QCOM)	+= msm8939-wingtech-wt82918hd.dtb
-+dtb-$(CONFIG_ARCH_QCOM)	+= msm8952-generalmobile-shamrock.dtb
- dtb-$(CONFIG_ARCH_QCOM)	+= msm8953-flipkart-rimob.dtb
- dtb-$(CONFIG_ARCH_QCOM)	+= msm8953-motorola-potter.dtb
- dtb-$(CONFIG_ARCH_QCOM)	+= msm8953-xiaomi-daisy.dtb
-diff --git a/arch/arm64/boot/dts/qcom/msm8952-generalmobile-shamrock.dts b/arch/arm64/boot/dts/qcom/msm8952-generalmobile-shamrock.dts
-new file mode 100644
-index 000000000000..259c75fa4a48
---- /dev/null
-+++ b/arch/arm64/boot/dts/qcom/msm8952-generalmobile-shamrock.dts
-@@ -0,0 +1,435 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+
-+/dts-v1/;
-+
-+#include "msm8952.dtsi"
-+#include "pm8950.dtsi"
-+#include "pmi8950.dtsi"
-+#include <dt-bindings/gpio/gpio.h>
-+#include <dt-bindings/leds/common.h>
-+
-+/ {
-+	model = "General Mobile GM 5 Plus";
-+	compatible = "generalmobile,shamrock", "qcom,msm8952";
-+	chassis-type = "handset";
-+	qcom,msm-id = <QCOM_ID_MSM8952 0x0>;
-+	qcom,board-id = <QCOM_BOARD_ID_QRD 1>;
-+
-+	aliases {
-+		mmc0 = &sdhc_1; /* SDC1 eMMC slot */
-+		mmc1 = &sdhc_2; /* SDC2 SD card slot */
-+		serial0 = &blsp1_uart2;
-+	};
-+
-+	battery: battery {
-+		compatible = "simple-battery";
-+
-+		charge-term-current-microamp = <100000>;
-+		charge-full-design-microamp-hours = <3100000>;
-+		constant-charge-current-max-microamp = <3000000>;
-+		constant-charge-voltage-max-microvolt = <4400000>;
-+		voltage-min-design-microvolt = <3400000>;
-+		voltage-max-design-microvolt = <4400000>;
-+	};
-+
-+	chosen {
-+		stdout-path = "serial0:115200n8";
-+
-+		framebuffer {
-+			compatible = "simple-framebuffer";
-+			memory-region = <&cont_splash_mem>;
-+
-+			width = <1080>;
-+			height = <1920>;
-+			stride = <(1080 * 3)>;
-+			format = "r8g8b8";
-+
-+			power-domains = <&gcc MDSS_GDSC>;
-+
-+			clocks = <&gcc GCC_MDSS_AHB_CLK>,
-+				 <&gcc GCC_MDSS_AXI_CLK>,
-+				 <&gcc GCC_MDSS_VSYNC_CLK>,
-+				 <&gcc GCC_MDSS_MDP_CLK>,
-+				 <&gcc GCC_MDSS_BYTE0_CLK>,
-+				 <&gcc GCC_MDSS_PCLK0_CLK>,
-+				 <&gcc GCC_MDSS_ESC0_CLK>;
-+		};
-+	};
-+
-+	/* Front Flash */
-+	flash-led-controller {
-+		compatible = "sgmicro,sgm3140";
-+
-+		enable-gpios = <&tlmm 33 GPIO_ACTIVE_HIGH>;
-+		flash-gpios = <&tlmm 128 GPIO_ACTIVE_HIGH>;
-+
-+		pinctrl-0 = <&front_flash_default>;
-+		pinctrl-names = "default";
-+
-+		front_flash_led: led {
-+			function = LED_FUNCTION_FLASH;
-+			color = <LED_COLOR_ID_WHITE>;
-+			flash-max-microamp = <1000000>;
-+			led-max-microamp = <625000>;
-+			flash-max-timeout-us = <1280000>;
-+		};
-+	};
-+
-+	gpio-keys {
-+		compatible = "gpio-keys";
-+
-+		pinctrl-0 = <&gpio_hall_sensor_default>, <&gpio_keys_default>;
-+		pinctrl-names = "default";
-+
-+		button-volume-up {
-+			label = "Volume Up";
-+			gpios = <&tlmm 85 GPIO_ACTIVE_LOW>;
-+			debounce-interval = <15>;
-+			wakeup-source;
-+			linux,code = <KEY_VOLUMEUP>;
-+		};
-+
-+		event-hall-sensor {
-+			label = "Hall Effect Sensor";
-+			gpios = <&tlmm 46 GPIO_ACTIVE_LOW>;
-+			wakeup-source;
-+			linux,input-type = <EV_SW>;
-+			linux,code = <SW_LID>;
-+			linux,can-disable;
-+		};
-+	};
-+
-+	multi-led {
-+		compatible = "leds-group-multicolor";
-+		color = <LED_COLOR_ID_RGB>;
-+		function = LED_FUNCTION_INDICATOR;
-+		leds = <&red_status>, <&green_status>, <&blue_status>;
-+	};
-+
-+	reserved-memory {
-+		cont_splash_mem: cont-splash@83200000 {
-+			reg = <0x0 0x83200000 0x0 (1080 * 1920 * 3)>;
-+			no-map;
-+		};
-+	};
-+
-+	vph_pwr: regulator-vph-pwr {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vph-pwr";
-+		regulator-always-on;
-+		regulator-boot-on;
-+	};
-+};
-+
-+&adsp {
-+	status = "okay";
-+};
-+
-+&blsp1_i2c2 {
-+	status = "okay";
-+	/* SMB1351 @1d charger */
-+	/* wsa881x-i2c @e @44 @f @45 audio amplifier */
-+};
-+
-+&blsp1_i2c3 {
-+	status = "okay";
-+
-+	/* himax,852x@48 Touchscreen */
-+
-+	touchscreen@5d {
-+		compatible = "goodix,gt970", "goodix,gt911";
-+		reg = <0x5d>;
-+		interrupts-extended = <&tlmm 65 IRQ_TYPE_EDGE_FALLING>;
-+		irq-gpios = <&tlmm 65 GPIO_ACTIVE_HIGH>;
-+		reset-gpios = <&tlmm 64 GPIO_ACTIVE_HIGH>;
-+		AVDD28-supply = <&pm8950_l10>;
-+		VDDIO-supply = <&pm8950_l6>;
-+
-+		pinctrl-0 = <&touchscreen_default>;
-+		pinctrl-names = "default";
-+
-+		touchscreen-size-x = <1080>;
-+		touchscreen-size-y = <1920>;
-+	};
-+};
-+
-+&blsp2_i2c1 {
-+	status = "okay";
-+
-+	/* FUSB301 @25 USB-C Controller */
-+
-+	tpa6130a2: audio-controller@60 {
-+		compatible = "ti,tpa6130a2";
-+		reg = <0x60>;
-+		pinctrl-0 = <&tpa6130a2_default>;
-+		pinctrl-names = "default";
-+		power-gpio = <&tlmm 61 GPIO_ACTIVE_HIGH>;
-+		Vdd-supply = <&pm8950_l22>;
-+	};
-+
-+	tusb320: usb@67 {
-+		compatible = "ti,tusb320";
-+		reg = <0x67>;
-+		interrupts-extended = <&tlmm 45 IRQ_TYPE_EDGE_FALLING>;
-+	};
-+
-+	led-controller@68 {
-+		compatible = "si-en,sn3193";
-+		reg = <0x68>;
-+
-+		shutdown-gpios = <&tlmm 68 GPIO_ACTIVE_HIGH>;
-+
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+
-+		red_status: led@1 {
-+			reg = <1>;
-+			label = "red:status";
-+			led-max-microamp = <17500>;
-+		};
-+
-+		green_status: led@2 {
-+			reg = <2>;
-+			label = "green:status";
-+			led-max-microamp = <17500>;
-+		};
-+
-+		blue_status: led@3 {
-+			reg = <3>;
-+			label = "blue:status";
-+			led-max-microamp = <17500>;
-+		};
-+	};
-+};
-+
-+&pm8950_spmi_regulators {
-+	/* PM8950 S5 + S6 = VDD_APC supply */
-+	pm8950_s5: s5 {
-+		regulator-min-microvolt = <1050000>;
-+		regulator-max-microvolt = <1350000>;
-+		regulator-always-on;
-+		regulator-boot-on;
-+	};
-+};
-+
-+&pm8950_resin {
-+	linux,code = <KEY_VOLUMEDOWN>;
-+
-+	status = "okay";
-+};
-+
-+&pmi8950_wled {
-+	qcom,enabled-strings = <0 1>;
-+	qcom,current-limit-microamp = <30000>;
-+	qcom,ovp-millivolt = <29500>;
-+	qcom,external-pfet;
-+
-+	status = "okay";
-+};
-+
-+&ramoops_mem {
-+	status = "okay";
-+};
-+
-+&rpm_requests {
-+	pm8950_rpm_regulators: regulators {
-+		compatible = "qcom,rpm-pm8950-regulators";
-+		vdd_s1-supply = <&vph_pwr>;
-+		vdd_s2-supply = <&vph_pwr>;
-+		vdd_s3-supply = <&vph_pwr>;
-+		vdd_s4-supply = <&vph_pwr>;
-+		vdd_s6-supply = <&vph_pwr>;
-+		vdd_l1_l19-supply = <&pm8950_s3>;
-+		vdd_l2_l23-supply = <&pm8950_s3>;
-+		vdd_l3-supply = <&pm8950_s3>;
-+		vdd_l5_l6_l7_l16-supply = <&pm8950_s4>;
-+		vdd_l8_l11_l12_l17_l22-supply = <&vph_pwr>;
-+		vdd_l9_l10_l13_l14_l15_l18-supply = <&vph_pwr>;
-+
-+		pm8950_s1: s1 {
-+			regulator-min-microvolt = <1000000>;
-+			regulator-max-microvolt = <1225000>;
-+		};
-+
-+		pm8950_s3: s3 {
-+			regulator-min-microvolt = <1300000>;
-+			regulator-max-microvolt = <1300000>;
-+		};
-+
-+		pm8950_s4: s4 {
-+			regulator-min-microvolt = <2050000>;
-+			regulator-max-microvolt = <2050000>;
-+		};
-+
-+		pm8950_l2: l2 {
-+			regulator-min-microvolt = <1200000>;
-+			regulator-max-microvolt = <1200000>;
-+			regulator-always-on;
-+			regulator-boot-on;
-+		};
-+
-+		/* pm8950_l3 is managed by rpmpd (RPMPD_VDDMX) */
-+
-+		pm8950_l5: l5 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <1800000>;
-+		};
-+
-+		pm8950_l6: l6 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <1800000>;
-+		};
-+
-+		pm8950_l7: l7 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <1800000>;
-+		};
-+
-+		pm8950_l8: l8 {
-+			regulator-min-microvolt = <2850000>;
-+			regulator-max-microvolt = <2900000>;
-+		};
-+
-+		pm8950_l9: l9 {
-+			regulator-min-microvolt = <3000000>;
-+			regulator-max-microvolt = <3300000>;
-+		};
-+
-+		pm8950_l10: l10 {
-+			regulator-min-microvolt = <2800000>;
-+			regulator-max-microvolt = <2800000>;
-+		};
-+
-+		pm8950_l11: l11 {
-+			regulator-min-microvolt = <2950000>;
-+			regulator-max-microvolt = <2950000>;
-+			regulator-allow-set-load;
-+			regulator-system-load = <200000>;
-+		};
-+
-+		pm8950_l12: l12 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <2950000>;
-+		};
-+
-+		pm8950_l13: l13 {
-+			regulator-min-microvolt = <3075000>;
-+			regulator-max-microvolt = <3075000>;
-+		};
-+
-+		pm8950_l14: l14 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <3300000>;
-+		};
-+
-+		pm8950_l15: l15 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <3300000>;
-+		};
-+
-+		pm8950_l16: l16 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <1800000>;
-+		};
-+
-+		pm8950_l17: l17 {
-+			regulator-min-microvolt = <2850000>;
-+			regulator-max-microvolt = <2850000>;
-+		};
-+
-+		pm8950_l19: l19 {
-+			regulator-min-microvolt = <1225000>;
-+			regulator-max-microvolt = <1350000>;
-+		};
-+
-+		pm8950_l22: l22 {
-+			regulator-min-microvolt = <2800000>;
-+			regulator-max-microvolt = <2800000>;
-+		};
-+
-+		pm8950_l23: l23 {
-+			regulator-min-microvolt = <1200000>;
-+			regulator-max-microvolt = <1200000>;
-+		};
-+	};
-+};
-+
-+&sdhc_1 {
-+	vmmc-supply = <&pm8950_l8>;
-+	vqmmc-supply = <&pm8950_l5>;
-+
-+	status = "okay";
-+};
-+
-+&sdhc_2 {
-+	cd-gpios = <&tlmm 67 GPIO_ACTIVE_HIGH>;
-+	vmmc-supply = <&pm8950_l11>;
-+	vqmmc-supply = <&pm8950_l12>;
-+
-+	status = "okay";
-+};
-+
-+&sleep_clk {
-+	clock-frequency = <32768>;
-+};
-+
-+&tlmm {
-+	gpio-reserved-ranges = <20 4>; /* Unknown, TZ Protected */
-+
-+	gpio_hall_sensor_default: gpio-hall-sensor-default-state {
-+		pins = "gpio46";
-+		function = "gpio";
-+		drive-strength = <6>;
-+		bias-pull-up;
-+	};
-+
-+	tpa6130a2_default: tpa6130a2-default-state {
-+		pins = "gpio61";
-+		function = "gpio";
-+		drive-strength = <8>;
-+		bias-pull-down;
-+	};
-+
-+	touchscreen_default: touchscreen-default-state {
-+		ts-reset-pins {
-+			pins = "gpio64";
-+			function = "gpio";
-+			drive-strength = <2>;
-+			bias-disable;
-+		};
-+
-+		ts-irq-pins {
-+			pins = "gpio65";
-+			function = "gpio";
-+			drive-strength = <2>;
-+			bias-disable;
-+		};
-+	};
-+
-+	gpio_keys_default: gpio-keys-default-state {
-+		pins = "gpio85";
-+		function = "gpio";
-+		drive-strength = <2>;
-+		bias-pull-up;
-+	};
-+
-+	front_flash_default: front-flash-default-state {
-+		enable-pins {
-+			pins = "gpio33";
-+			function = "gpio";
-+			drive-strength = <2>;
-+			bias-pull-down;
-+		};
-+
-+		flash-pins {
-+			pins = "gpio128";
-+			function = "gpio";
-+			drive-strength = <2>;
-+			bias-pull-down;
-+		};
-+	};
-+};
-+
-+&xo_board {
-+	clock-frequency = <19200000>;
-+};
+ drivers/mmc/host/meson-gx-mmc.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 694bb443d5f3f..d5365c0404cb9 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -176,7 +176,7 @@ struct meson_host {
+ 
+ 	bool needs_pre_post_req;
+ 
+-	spinlock_t lock;
++	raw_spinlock_t lock;
+ };
+ 
+ #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
+@@ -953,10 +953,10 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ 	cmd = host->cmd;
+ 
+ 	if (status & IRQ_SDIO) {
+-		spin_lock(&host->lock);
++		raw_spin_lock(&host->lock);
+ 		__meson_mmc_enable_sdio_irq(host->mmc, 0);
+ 		sdio_signal_irq(host->mmc);
+-		spin_unlock(&host->lock);
++		raw_spin_unlock(&host->lock);
+ 		status &= ~IRQ_SDIO;
+ 		if (!status)
+ 			return IRQ_HANDLED;
+@@ -1112,9 +1112,9 @@ static void meson_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 	struct meson_host *host = mmc_priv(mmc);
+ 	unsigned long flags;
+ 
+-	spin_lock_irqsave(&host->lock, flags);
++	raw_spin_lock_irqsave(&host->lock, flags);
+ 	__meson_mmc_enable_sdio_irq(mmc, enable);
+-	spin_unlock_irqrestore(&host->lock, flags);
++	raw_spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
+ static void meson_mmc_ack_sdio_irq(struct mmc_host *mmc)
+@@ -1225,7 +1225,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto err_init_clk;
+ 
+-	spin_lock_init(&host->lock);
++	raw_spin_lock_init(&host->lock);
+ 
+ 	if (host->dram_access_quirk) {
+ 		/* Limit segments to 1 due to low available sram memory */
+---
+base-commit: 587858367581b9c55c3690f4e63382ad622719d4
+branch: meson_mmc_raw
 
 -- 
-2.55.0
-
+2.53.0
 
