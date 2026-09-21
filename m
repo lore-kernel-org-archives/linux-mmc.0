@@ -1,87 +1,36 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mta0.migadu.com (out-178.mta0.migadu.com [91.218.175.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E3C8457E59
-	for <linux-mmc@vger.kernel.org>; Mon, 21 Sep 2026 08:46:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7015B45FFB1
+	for <linux-mmc@vger.kernel.org>; Mon, 21 Sep 2026 09:04:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789980381; cv=none; b=RxM0er57VKYPeu1EDQcQRU1Qb9MI+6RVaxrbQoPwCaR4G6ET37e9Odh7+Jdbztc9EL5o5AGBpUs6syV7mIfcrDG6Xn/6muedokKecHb0g1kTFPib1NrRtiszSbmbSFUBwjiY9iQ85JdGaKPqPHJGKb/jdCGIzStRLfBHhRlmupc=
+	t=1789981478; cv=none; b=GfhYWuDQxTAlPHOyyHuYT8IvS5K33qHwp7DHlQvtFQjGBVi/AxSihdaM7q1VV2sYitDF0Lg7CsAceTkij6C60jz5kQmcXNdUBw+it1VMSgMb7KITFHJ1MXB8hBuPFRDtaifJnnRWYk7oXYFYraw7Vjtbaij7rPGLvD7SpxEZG4s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789980381; c=relaxed/simple;
-	bh=H/Oq7DCmmKlvAofUgjpQ4iEZ6GqCaDK/Q4LrOcGlYX8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=YMoBkSw8NWccxsPQkmSQgZECtte1TG4KcetjwyBdjo6L0fLjsU4OAqMDKmgLRbP95Nkl3rZ3C/GUjqwRtJrbgUs71bvJWvEwYoJ6LwC4TZgmuSP6WgWmFt9VyowOKyKdWVuAtjwbPzZJG99wO11jMqScv5Zf1kzqwVWYEmFwu64=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=kHtH7cie; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=cS+yi1VW; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1789981478; c=relaxed/simple;
+	bh=ep6c1TgkccXtFLmMwq1oS+x2Z4lk8WNkDOTBK1/h7/A=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=kz455QmgQVUyOLnlzcwEqTuQTI1Ot6ZxNxx4HRV8KGVplPIi5/IF97kEkvDRZ4D1IiRXdTDWvR+yTcz2zDSG3fHRHcXeMtH70IArU+eg0rcUNRREj0cT7BbjUF+b/tk35csQA1v33I+UY9b4rT0HRiZe74Ab3WQ4rgdYBU/oOJo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=R3bbAiKW; arc=none smtp.client-ip=91.218.175.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="kHtH7cie";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="cS+yi1VW"
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68L79rpr1624326
-	for <linux-mmc@vger.kernel.org>; Mon, 21 Sep 2026 08:46:18 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	qkBaXHoqMiFvjYL8zM/mOnKS4OOJMfb5HsorDcVrhUE=; b=kHtH7cieHkVvlPt4
-	amzlnKDl37IMwUn9NHB4e7xhpEeyJ293VQGD5i6HA24E12l+KpTEDyY8I/EFs0Dv
-	xYAvDI+A6eJMp0UEmRmYdW9WxPXs98Fcg8neSwBNeD2YYVqRRbqE7RQDzo8oW8ks
-	uUF0fK7SiLd0zv42+y9VlJgffgggRTzXWA8FBd2mndCIVNWbWMtNmRi1KQyEKZ8G
-	cuEv/0n3gWYUnzzbxXKxIworWDeYJOsuP28Sc+HQ+X1rPCdOseKB01QlXpTNOccW
-	n9o0/rjFtjf4xavMGQbrtO40u6HnMCgegUm3rde71VoOD5AsMMtLFBg+mdjFynV3
-	aKMkVg==
-Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com [209.85.222.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gtt3wsf81-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 21 Sep 2026 08:46:18 +0000 (GMT)
-Received: by mail-qk1-f200.google.com with SMTP id af79cd13be357-9392788b3f8so82578385a.2
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Sep 2026 01:46:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1789980377; x=1790585177; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=qkBaXHoqMiFvjYL8zM/mOnKS4OOJMfb5HsorDcVrhUE=;
-        b=cS+yi1VWCNWAefQ4zml/gM0cc1QgOA7mf0JWtvdgtTlbmAqwQW1g0uOwNU/cFWq0uM
-         2ameIwJ8RfH6+DSv100NLpgMBGlmNOx4JYRCJ2quGYi4aYKrRliq4fwYSCH2VwpqWPSO
-         qtMZ7icxscUCMJL8XdCVEkC3nuxo3IbGAaqB1zxIIc7LiEOvz3m5zpn0EKFLwUdHfb0D
-         0iWuyacxs+kvwbrDN0ChgDnY8YxrCyqofn5fWWusTciJWspNK7HhHIES2DgUUkZ6xeeJ
-         S6HXLLdB/RTjKyLwzi6flcv3YbSQuTkGm34dDOEwcSGx7nbLy+9SdGEbFtswE4IIgAAb
-         dwgQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789980377; x=1790585177;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=qkBaXHoqMiFvjYL8zM/mOnKS4OOJMfb5HsorDcVrhUE=;
-        b=RqbQG8Te2/LExKtKu87pPRpR9E+tGiViJJPaHG4nl8nPrCfdQHCmO1brbGjeRJ5pB8
-         WWHd6v188GtN4riBkK1hO9wIUug7YPOa2im+vxNlFjZM9vuHXDRuGQCIagZKwELzTLyZ
-         9lYS1CMDx808+jwlRwRwilDulBcRFgeAKYb6XTgWsJxLF53hRBWgwrdZ31LMYwszSa9v
-         A7W2zPjgnoKjGr3LNH0Hwkkkn9XDHDwzZqVv9WQeZJ5zIz9qPnZLocjmtVBYMdkURV8Z
-         53GIN0nynO5/8+eXm4csL7+ESGZufdKoJT/5+JNn5M1Qj6WfuEkJPc2LoabKn8KVDawt
-         ZDYA==
-X-Forwarded-Encrypted: i=1; AKwUvBxn3bUtvRGd+npxRULz7L1s/ObUNz2RRQObRHBrMkSW+NmGpVbKkGocKXLU0r5C2j+Ek6MCGvqePv4=@vger.kernel.org
-X-Gm-Message-State: AFuF++ksjYUxMALguAWVf/K+0Epcc624ppwERNXL/my1Q+N4JXO8bJHZ
-	ulMlZMVbzUrEjocGbG0hPwXFLWXXiSaJqaEx3xFuNxiUwC8C3W4skdsPEE66TuW8U1Ce7h6lirm
-	zjE3OpmszMw2P0JXKE2aYzRI+QhiEYp70WF2eBhkVmt2IC2AYgVTr0mawzdwNgWg=
-X-Gm-Gg: AYBFou1myae+aaPPLQciK7WPFJd6wTilrB2hDd2mQRjaTn4k3k+Y++bZvtaqLPXYowx
-	B4TuYBxfnrT2ol2bGSgzD7359HQL/WG9gLRO5+itVc6WJ/5NRbU25LtWV29/DepwDOua7GVeO6a
-	Xi1UrF6qQB8iLP8tFeW/wr3mo85ZSp1DUUUAiIWwo7qarAF0Tdqd8mVJlq7a9MPIicDnDjbr8we
-	67+ffw3gXkahu+vFSlUV29zXFl+FTS9WHqtCh7/g6MxinYhRZiMIiMZMMTf6Ixl/PexjREbTp78
-	hMua6RHo+MJfYYqSdEbqMUXLIN7Ov6Mojto99mMA44muvTElnHtQmFUl/UBE4WA0/WvwbRoEuI8
-	sRwYz4y56LYDlgS4ZcCJQWA==
-X-Received: by 2002:a05:620a:1729:b0:93b:c6ec:780d with SMTP id af79cd13be357-93bf57df974mr940253385a.5.1789980377379;
-        Mon, 21 Sep 2026 01:46:17 -0700 (PDT)
-X-Received: by 2002:a05:620a:1729:b0:93b:c6ec:780d with SMTP id af79cd13be357-93bf57df974mr940246585a.5.1789980376913;
-        Mon, 21 Sep 2026 01:46:16 -0700 (PDT)
-Received: from [192.168.202.12] ([178.235.128.140])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c2a358ade5asm270916366b.51.2026.09.21.01.46.09
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 21 Sep 2026 01:46:15 -0700 (PDT)
-Message-ID: <733a3b6c-4278-405a-be52-0bd22ad1584d@oss.qualcomm.com>
-Date: Mon, 21 Sep 2026 10:46:09 +0200
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="R3bbAiKW"
+X-Envelope-To: linux-mmc@vger.kernel.org
+DKIM-Signature: a=rsa-sha256; bh=ep6c1TgkccXtFLmMwq1oS+x2Z4lk8WNkDOTBK1/h7/A=;
+ c=simple/simple; d=linux.dev;
+ h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
+ t=1789981474; v=1; x=1790586274;
+ b=R3bbAiKW9SLmDhWT6JK3U1BlsP1jwbTn+hbMoU4RG/72cDWLvLvMAV3zIwtw/V95Du7qrKcn
+ d7wWYOB/4YXrhyXMQUCZoxNyczYHWz9DaRPLa5+2Oy7ohrbxqhLJdxZOA5zwfK8LXmjrJm542jh
+ j/TpVNE3IqyONg7tl/+fKMoM=
+X-Envelope-To: linux-mmc@vger.kernel.org
+Received: by smtp.migadu.com with ESMTPS id 2e8df5a5b37cd59a;
+	Mon, 21 Sep 2026 09:04:34 +0000
+X-Mizu-Trace-ID: 2e8df5a5b37cd59a
+X-Migadu-Flow: FLOW_OUT
+Message-ID: <35e76280-d956-4b85-a549-860e9de3e6a2@linux.dev>
+Date: Mon, 21 Sep 2026 17:04:26 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -89,112 +38,279 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 02/19] clk: qcom: Add global clock controller driver
- for MSM8952
-To: Muzaffer Kadir <muzafferkadir@mainlining.org>,
-        Taniya Das <taniya.das@oss.qualcomm.com>
-Cc: Bjorn Andersson <andersson@kernel.org>, Abel Vesa <abelvesa@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>, Brian Masney <bmasney+clk@redhat.com>,
-        Jerome Brunet <jbrunet+clk@baylibre.com>,
-        Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley
- <conor+dt@kernel.org>,
-        Srinivas Kandagatla <srini@kernel.org>, Ulf Hansson <ulfh@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        "Joerg Roedel (AMD)" <joro@8bytes.org>, Will Deacon <will@kernel.org>,
-        Robin Murphy <robin.murphy@arm.com>, Lee Jones <lee@kernel.org>,
-        Rob Clark <robin.clark@oss.qualcomm.com>,
-        Dmitry Baryshkov
- <lumag@kernel.org>,
-        Abhinav Kumar <abhinav.kumar@linux.dev>,
-        Jessica Zhang <jesszhan0024@gmail.com>, Sean Paul <sean@poorly.run>,
-        Marijn Suijten <marijn.suijten@somainline.org>,
-        Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-        Maxime Ripard <mripard@kernel.org>,
-        Thomas Zimmermann <tzimmermann@suse.de>,
-        David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-        Robert Marko <robimarko@gmail.com>,
-        Guru Das Srinagesh <linux@gurudas.dev>,
-        Amit Kucheria <amitk@kernel.org>,
-        Thara Gopinath <thara.gopinath@gmail.com>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>,
-        Kees Cook <kees@kernel.org>, Tony Luck <tony.luck@intel.com>,
-        "Guilherme G. Piccoli"
- <gpiccoli@igalia.com>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        David Heidelberg <david@ixit.cz>, Dang Huynh <danct12@riseup.net>,
-        phone-devel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        iommu@lists.linux.dev, mfd@lists.linux.dev,
-        dri-devel@lists.freedesktop.org, freedreno@lists.freedesktop.org,
-        Krzysztof Kozlowski <krzk@kernel.org>, linux-pm@vger.kernel.org,
-        linux-input@vger.kernel.org
-References: <20260916-msm8952-initial-support-v2-0-798c2602dde1@mainlining.org>
- <20260916-msm8952-initial-support-v2-2-798c2602dde1@mainlining.org>
- <af3f7261-e4b0-42fc-818d-80e760cddc2c@oss.qualcomm.com>
- <a47a1a0e-559b-410c-aa99-9230908c2fe6@mainlining.org>
-Content-Language: en-US
-From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-In-Reply-To: <a47a1a0e-559b-410c-aa99-9230908c2fe6@mainlining.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTIxMDEyNSBTYWx0ZWRfXyT/UQ1iZgzWw
- WpQe8AsXJ35UXrnr6Ce9WNNaGeJN60Nkh2GQs3Is2YdEC+hoqbMNW2ggiXIn6De/w0C1k35DUne
- cB3DMJK4i+ATuhFf+yq9ZbkU7nQmx75lMwzZT0xmbhbVK15pY1csWUZMTIhzktQYzADvwXg0MlZ
- FqmveKKMPJEBHpD3IQtv+NPa5keMKYdAqFDlQ4iD5PiyebCyxxS0/oYMCILTnb/bXyjrE/w5r73
- Y/poUpQvTGn6h1S5OGp/Wml08OxTkN9xawrT73pCaGbyCm6nARxcyLj8Mo+bt6eD1/+Up2SUIoB
- pLdsz+Rb8/nFEE/bAG337Bp97JQckpNmZ9Mr84J9MxCFbCcq73GyJWTATPwc0Y0CnD3zgouPa5K
- RP1C4S0lqePcP8f2yN9hFiL8KcLFtK02vrq3RA7TtFR7+Q7xxHVZ3MOSDOx+H20AHLB08es510d
- f6rOO92m+6l3XRuzHpA==
-X-Proofpoint-ORIG-GUID: X_IS7msjaajvgwG-QimCPtKm8k4geOiu
-X-Proofpoint-GUID: X_IS7msjaajvgwG-QimCPtKm8k4geOiu
-X-Authority-Analysis: v=2.4 cv=dakVTnXe c=1 sm=1 tr=0 ts=6ab0eeda cx=c_pps
- a=hnmNkyzTK/kJ09Xio7VxxA==:117 a=PRfkaYvzSr8QmIIGAkY2Sg==:17
- a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=eoimf2acIAo5FJnRuUoq:22
- a=IpRBMZr9S9mwpYgRR9UA:9 a=QEXdDO2ut3YA:10 a=PEH46H7Ffwr30OY-TuGO:22
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTIxMDEyNSBTYWx0ZWRfXxPlqrX2dTD01
- hfNj46g5khAgM64Dldha4KhecS8ZphNXlEnWRTjYMJdNAVwaLeeJ0uY3LnDmfxvJTPCYD4sfGeF
- c5u/8sUGXs51CoK3F8Eh7EWMVNf838w=
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-09-21_03,2026-09-16_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- clxscore=1015 lowpriorityscore=0 spamscore=0 adultscore=0 phishscore=0
- bulkscore=0 priorityscore=1501 impostorscore=0 suspectscore=0 malwarescore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609210125
+Cc: shawn.lin@linux.dev, Ulf Hansson <ulfh@kernel.org>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+ =?UTF-8?B?6ZmI5paH6LaFIChXZW5jaGFvIENoZW4p?= <Wenchao.Chen@unisoc.com>,
+ =?UTF-8?B?5byg5aaC5rOJIChSYWluIFpoYW5nKQ==?= <Rain.Zhang@unisoc.com>,
+ =?UTF-8?B?5ZSQ5pyI5p6XIChZdWVsaW4gVGFuZyk=?= <yuelin.tang@unisoc.com>,
+ "cixi.geng@linux.dev" <cixi.geng@linux.dev>,
+ Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Subject: Re: [PATCH v2] mmc: core: Optimize polling delay in
+ __mmc_poll_for_busy()
+To: =?UTF-8?B?5p2O5pmT5rSBIChYaWFvamllIExpLzEzMjMzKQ==?=
+ <xiaojie.li2@unisoc.com>
+References: <308e39324361468db136bb14a22f422b@zeshmbx09.spreadtrum.com>
+ <1d135368-6b2c-443c-a946-45f0be2040fb@linux.dev>
+ <837f123fb1aa4d8d90708c8e4f5cfb42@zeshmbx09.spreadtrum.com>
+From: Shawn Lin <shawn.lin@linux.dev>
+In-Reply-To: <837f123fb1aa4d8d90708c8e4f5cfb42@zeshmbx09.spreadtrum.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On 9/17/26 2:25 PM, Muzaffer Kadir wrote:
-> Hi Taniya,
+On 2026/09/21 Mon 16:31, 李晓洁 (Xiaojie Li/13233) wrote:
+>> I think the CMD1-specific branch can be avoided altogether. The reason CMD1's tail latency is high is that __mmc_poll_for_busy() limits udelay to a maximum of 32768 and, more importantly, the sleep upper bound is udelay * 2.
 > 
-> On Thu, 17 Sep 2026 09:49:07 +0530, Taniya Das wrote:
->>> diff --git a/drivers/clk/qcom/Makefile b/drivers/clk/qcom/Makefile
->>> index a6c676f68b79..3c3f27dcc68d 100644
+>> Would it be possible to parameterize the maximum delay instead? E.g.
+> 
+>   >  int __mmc_poll_for_busy(host, period_us, udelay_max_us, timeout_ms, cb, cb_data)
+> 
+> Hi shawn,
+> The __mmc_poll_for_busy function is invoked, either directly or indirectly, in numerous locations throughout the codebase.
+> That's why I used if (busy_cb == __mmc_send_op_cond_cb) to check for the special CMD1 handling.
+> As mentioned in my previous email, passing it directly as a function parameter would require modifying quite a few places.
+> The call sites identified so far are listed below:
 
-[...]
+On the "quite a few places" concern: it is smaller than it looks. Of
+the call sites you listed, 9 go through the mmc_poll_for_busy() wrapper
+(__mmc_switch, mmc_send_hpi_cmd, mmc_blk_fix_state, sd_flush_cache,
+sd_enable_cache, sd_poweroff_notify, mmc_cqe_recovery, mmc_do_erase),
+so they do not change at all - the wrapper keeps passing the current
+default. Only the ~6 direct callers of __mmc_poll_for_busy() need a
+one-line mechanical change (mmc_ops.c CMD1 and the wrapper itself,
+block.c x2, sd.c, mmc.c).
 
->>> +#include "common.h"
->>> +#include "clk-regmap.h"
->>> +#include "clk-pll.h"
->>> +#include "clk-alpha-pll.h"
->>> +#include "clk-rcg.h"
->>> +#include "clk-branch.h"
->>> +#include "reset.h"
->>> +#include "gdsc.h"
->>> +
+Also note that the hardcoded 32768 is itself a policy choice that only
+suits the long-running commands (CMD6, erase, ...). The OP_COND style
+polling wants a different maximum - CMD1 as you measured, and ACMD41
+in sd_ops.c starts at 10ms and has the same tail-latency issue - so
+making it an explicit parameter is exactly the point. The core helper
+should not know which caller it is serving, which is what the
+busy_cb pointer comparison effectively does.
+
+> （1）mmc_ops.c
+> （1.1）	238 err = __mmc_poll_for_busy(host, MMC_OP_COND_PERIOD_US, in mmc_send_op_cond()
+> （1.2）555 return __mmc_poll_for_busy(host, 0, timeout_ms, &mmc_busy_cb, &cb_data); in mmc_poll_for_busy()
+> （1.3）641 err = mmc_poll_for_busy(card, timeout_ms, retry_crc_err, MMC_BUSY_CMD6); in __mmc_switch()
+> （1.4）889 return mmc_poll_for_busy(card, busy_timeout_ms, false, MMC_BUSY_HPI); in mmc_send_hpi_cmd()
+> （2）block.c	
+> （2.1）649 err = __mmc_poll_for_busy(card->host, 0, busy_timeout_ms, in __mmc_blk_ioctl_cmd()
+> （2.2）err = __mmc_poll_for_busy(card->host, 0, MMC_BLK_TIMEOUT_MS, in mmc_blk_card_busy()
+> （2.3）1746 err = mmc_poll_for_busy(card, timeout, false, MMC_BUSY_IO); in mmc_blk_fix_state()
+> （3）sd.c
+> （3.1）1711 err = __mmc_poll_for_busy(card->host, 0, SD_POWEROFF_NOTIFY_TIMEOUT_MS, in sd_poweroff_notify()
+> （3.2）1358 err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false, in sd_flush_cache()
+> （3.3）1404 err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false, in sd_enable_cache()
+> （3.4）1704 err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false, in sd_poweroff_notify()
+> （4）mmc.c	
+> （4.1）2011 err = __mmc_poll_for_busy(host, 0, timeout_ms, &mmc_sleep_busy_cb, host); in mmc_sleep()
+> （5）core.c	
+> （5.1）556 mmc_poll_for_busy(host->card, MMC_CQE_RECOVERY_TIMEOUT, true, MMC_BUSY_IO); in mmc_cqe_recovery()
+> （5.2）1701 err = mmc_poll_for_busy(card, busy_timeout, false, MMC_BUSY_ERASE); in mmc_do_erase()
+> 
+> 
+>> and limit both the backoff step and the sleep upper bound to
+>> udelay_max_us:
+> 
+>>    unsigned int sleep_max = min(udelay * 2, udelay_max_us);
+>>     usleep_range(min(udelay, udelay_max_us), sleep_max);
+> 
+> I'm not entirely sure about your suggested changes here. Could you provide more detailed modifications?
+
+1) extend the prototype in mmc_ops.h:
+
+int __mmc_poll_for_busy(struct mmc_host *host, unsigned int period_us,
+                         unsigned int udelay_max_us, unsigned int 
+timeout_ms,
+                         int (*busy_cb)(void *cb_data, bool *busy),
+                         void *cb_data);
+
+2) in __mmc_poll_for_busy(), only the throttling changes:
+
+-       unsigned int udelay = period_us ? period_us : 32, udelay_max = 
+32768;
++       unsigned int udelay = period_us ? period_us : 32;
+...
+                 /* Throttle the polling rate to avoid hogging the CPU. */
+                 if (busy) {
+-                       usleep_range(udelay, udelay * 2);
+-                       if (udelay < udelay_max)
+-                               udelay *= 2;
++                       unsigned int sleep_max = min(udelay * 2, 
+udelay_max_us);
++
++                       usleep_range(min(udelay, udelay_max_us), sleep_max);
++                       if (udelay < udelay_max_us)
++                               udelay *= 2;
+                 }
+
+3) add the new value next to the existing ones in mmc_ops.c:
+
+#define MMC_OP_COND_MAX_DELAY_US        (8 * 1000) /* 8ms, justify with 
+data */
+
+4) in mmc_send_op_cond():
+
+         err = __mmc_poll_for_busy(host, MMC_OP_COND_PERIOD_US,
++                                 MMC_OP_COND_MAX_DELAY_US,
+                                   MMC_OP_COND_TIMEOUT_MS,
+                                   &__mmc_send_op_cond_cb, &cb_data);
+
+5) every other caller passes the current default, e.g. the wrapper in
+mmc_ops.c:
+
+-       return __mmc_poll_for_busy(host, 0, timeout_ms, &__mmc_busy_cb, 
+&cb_data);
++       return __mmc_poll_for_busy(host, 0, 32768, timeout_ms,
++                                  &__mmc_busy_cb, &cb_data);
+
+and the same one-line change for the direct callers in block.c
+(__mmc_blk_ioctl_cmd(), mmc_blk_card_busy()), sd.c
+(sd_poweroff_notify()) and mmc.c (mmc_sleep()). With period_us = 4ms and
+udelay_max_us = 8ms, the sleeps become 4-8ms, then 8ms, 8ms, ... so the
+tail bound is 8ms instead of today's 32-64ms, and no caller behaviour
+changes except CMD1.
+
+
+> 
+>> Then mmc_send_op_cond() passes its own maximum delay (8ms), while all other callers keep passing 32768 so their behaviour is unchanged. That is two lines of code, no busy_cb pointer comparison, and the tail bound
+>> (8ms) is actually tighter than the linear +2ms schedule (10ms).
+> 
+>> Could you try to see if the linear step is still needed once the sleep upper bound is limited to the maximum delay?
+> 
+> Do you mean that I should verify this by changing the original:
+> usleep_range(udelay, udelay * 2);
+> if (udelay < udelay_max)
+> udelay *= 2;
+> to:
+> usleep_range(min(udelay, udelay_max_us), sleep_max);?
+
+no, the backoff step stays doubling. What Imeant is: first try this
+bounded version for CMD1 (8ms maximum) and compare it against your
+linear +2ms schedule on the same slow cards. If the boot-time results
+are the same, the linear step is unnecessary and the change stays simple
+and generic.
+
+
+> 
+> Best regards,
+> Xiaojie.Li
+> -----邮件原件-----
+> 发件人: Shawn Lin <shawn.lin@linux.dev>
+> 发送时间: 2026年9月21日 15:53
+> 收件人: 李晓洁 (Xiaojie Li/13233) <xiaojie.li2@unisoc.com>
+> 抄送: shawn.lin@linux.dev; Ulf Hansson <ulfh@kernel.org>; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; 陈文超 (Wenchao Chen) <Wenchao.Chen@unisoc.com>; 张如泉 (Rain Zhang) <Rain.Zhang@unisoc.com>; 唐月林 (Yuelin Tang) <yuelin.tang@unisoc.com>; cixi.geng@linux.dev; Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+> 主题: Re: [PATCH v2] mmc: core: Optimize polling delay in __mmc_poll_for_busy()
+> 
+> 
+> 注意: 这封邮件来自于外部。除非你确定邮件内容安全，否则不要点击任何链接和附件。
+> CAUTION: This email originated from outside of the organization. Do not click links or open attachments unless you recognize the sender and know the content is safe.
+> 
+> 
+> 
+> On 2026/09/20 Sun 13:40, 李晓洁 (Xiaojie Li/13233) wrote:
+>>> No, that's the whole point. We don't want open coded polling loops,
+>>> it's just a nightmare to maintain. Please try to extend the existing
+>>> __mmc_poll_for_busy() instead.
 >>
->> Add DT_BI_TCXO enum.
+>> Hi Uffe,
+>>
+>> Following your suggestion to extend __mmc_poll_for_busy() instead of using open-coded polling loops, here is the proposed optimization.
+>>
+>> In our actual testing, we found that setting udelay_max = 8000 (8ms) is more time-efficient than udelay_max = 10000 (10ms).
+>> For CMD1 (SEND_OP_COND), the polling intervals are 4ms, 6ms, and 8ms, capped at a maximum of 8ms.
+>> Attached are the recorded per-boot phase latencies for udelay_max=8000 (8ms) and udelay_max=10000 (10ms), with timestamps in seconds.
+>> Please let me know if you cannot open the attachment, and I will resend it.
+>>
+>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
 > 
-> Should I rename the clock name to bi_tcxo?
-> Or should I use DT_XO for enum?
+> I think the CMD1-specific branch can be avoided altogether. The reason CMD1's tail latency is high is that __mmc_poll_for_busy() limits udelay to a maximum of 32768 and, more importantly, the sleep upper bound is udelay * 2.
+> 
+> Would it be possible to parameterize the maximum delay instead? E.g.
+> 
+>     int __mmc_poll_for_busy(host, period_us, udelay_max_us, timeout_ms, cb, cb_data)
+> 
+> and limit both the backoff step and the sleep upper bound to
+> udelay_max_us:
+> 
+>     unsigned int sleep_max = min(udelay * 2, udelay_max_us);
+>     usleep_range(min(udelay, udelay_max_us), sleep_max);
+> 
+> Then mmc_send_op_cond() passes its own maximum delay (8ms), while all other callers keep passing 32768 so their behaviour is unchanged. That is two lines of code, no busy_cb pointer comparison, and the tail bound
+> (8ms) is actually tighter than the linear +2ms schedule (10ms).
+> 
+> Could you try to see if the linear step is still needed once the sleep upper bound is limited to the maximum delay?
+> 
+> 
+>> index a952cc8..9c4762c 100644
+>> --- a/drivers/mmc/core/mmc_ops.c
+>> +++ b/drivers/mmc/core/mmc_ops.c
+>> @@ -539,9 +539,23 @@
+>>
+>>                /* Throttle the polling rate to avoid hogging the CPU. */
+>>                if (busy) {
+>> -                     usleep_range(udelay, udelay * 2);
+>> -                     if (udelay < udelay_max)
+>> -                             udelay *= 2;
+>> +                     /*
+>> +                      * Special delay handling is required for mmc_send_op_cond;
+>> +                      * otherwise, for slower memory particles, the time required to
+>> +                      * wait for the status change will increase.
+>> +                      */
+>> +                     if (busy_cb == __mmc_send_op_cond_cb) {
+>> +                             udelay_max = 8000;
+>> +                             usleep_range(udelay, udelay + 2000);
+>> +                             if (udelay < udelay_max)
+>> +                                     udelay += 2000;
+>> +                             else
+>> +                                     udelay = udelay_max;
+>> +                     } else {
+>> +                             usleep_range(udelay, udelay * 2);
+>> +                             if (udelay < udelay_max)
+>> +                                     udelay *= 2;
+>> +                     }
+>>                }
+>>        } while (busy);
+>>
+>>
+>> Best regards,
+>> Xiaojie.Li
+>>
+>> -----邮件原件-----
+>> 发件人: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+>> 发送时间: 2026年9月11日 23:47
+>> 收件人: 李晓洁 (Xiaojie Li/13233) <xiaojie.li2@unisoc.com>
+>> 抄送: Ulf Hansson <ulfh@kernel.org>; linux-mmc@vger.kernel.org;
+>> linux-kernel@vger.kernel.org; 陈文超 (Wenchao Chen)
+>> <Wenchao.Chen@unisoc.com>; 张如泉 (Rain Zhang) <Rain.Zhang@unisoc.com>;
+>> 唐月林 (Yuelin Tang) <yuelin.tang@unisoc.com>; cixi.geng@linux.dev
+>> 主题: Re: [PATCH] mmc: core: Modify the CMD1 transmission interval
+>>
+>>
+>> 注意: 这封邮件来自于外部。除非你确定邮件内容安全，否则不要点击任何链接和附件。
+>> CAUTION: This email originated from outside of the organization. Do not click links or open attachments unless you recognize the sender and know the content is safe.
+>>
+>>
+>>
+>> On Fri, Sep 11, 2026 at 4:45 AM 李晓洁 (Xiaojie Li/13233) <xiaojie.li2@unisoc.com> wrote:
+>>>
+>>> Hi Uffe:
+>>>           Thank you for your reply.
+>>>           However, I noticed that __mmc_poll_for_busy() and mmc_poll_for_busy() are invoked either directly or indirectly by many other functions within the MMC driver.
+>>> Modifying them directly could potentially introduce unintended side effects.
+>>>
+>>>           Would it be acceptable to implement a dedicated function specifically for CMD1? We could create a CMD1-specific variant based on the existing __mmc_poll_for_busy().
+>>> This approach would significantly minimize the potential impact on the rest of the codebase.
+>>
+>> No, that's the whole point. We don't want open coded polling loops,
+>> it's just a nightmare to maintain. Please try to extend the existing
+>> __mmc_poll_for_busy() instead.
+>>
+>> And next time, please don't top post.
+>>
+>> [...]
+>>
+>> Kind regards
+>> Uffe
+> 
 
-BI_TCXO is the Qualcomm-conventional name for the clock sourced
-from the crystal oscillator. I'm not sure about the BI_ prefix,
-but TCXO stands for "Temperature-Controlled Crystal Oscillator"
-
-Konrad
