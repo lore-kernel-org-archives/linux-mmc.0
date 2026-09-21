@@ -1,165 +1,447 @@
-Received: from mta0.migadu.com (out-173.mta0.migadu.com [91.218.175.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-m1973178.qiye.163.com (mail-m1973178.qiye.163.com [220.197.31.78])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6CF1F3559D6
-	for <linux-mmc@vger.kernel.org>; Mon, 21 Sep 2026 07:53:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D00803BBA0E;
+	Mon, 21 Sep 2026 07:54:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.78
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789977208; cv=none; b=SCihmRXVBZHeKouNNtc1kIzWsvha06xNmejohJytms+pTqHjgWrEkC3St1cl6/Q3bQqfWV6edS566u2h6WD2cDMfd9iz4WG03J8wCAfOE2hascF7u4WmiRhM0vZmelQ5BsnPaH24zXLmYVUQCvy7pQUh/XNPvkpAbUw3rd1rC+4=
+	t=1789977256; cv=none; b=C0p7JWFSLa1BSp9ITMhlHzI9KNHvcPauBNOkKozsUuCdH42UYZLjhgs17RebRkJH8Ygm0zoM9Sa7UddPRXP1nY0+j59o5bPv26uYtL/j/T6j01suvDRpKIRZKpVxVDm0lSaFTBVeodI8PlrdR3JJyTsvTA4WvVdIuGAuhad2Xuk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789977208; c=relaxed/simple;
-	bh=32NrmXH9Vsmw2N1F2SLSyk8oTsLvpCiP90z+KAgZXFM=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=NGN5aNEvJNUooxRSJa542/ujzV4VrBihwnQnb078TNbc6abM/cTsKvGxSYa92g98KVy0FHtYeY1DZxGyqbqU15po6ZfK9fNvtxLzR4PLuUodplcEfk9+umWvydX5Dr0DSbveQHpzKsFbVMYeCgkxY6AG7thB7QSk5HNSxt2WmVo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=oPekytlN; arc=none smtp.client-ip=91.218.175.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1789977256; c=relaxed/simple;
+	bh=um64cN9AuPQatfJGrRtfe+eWMczsnRIKXJR2SrRDIew=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=hUhIOpym1FXRjD8ywyWTCfKwqNpHblmm1ZtwG2TIvitwqnSUuRrmwJuwd/y+iU5P2GOW0MIuxla2QrfMFYCE63c9mePDUq5JYq8bq0rmnRcHSZ9SObrda3/U2qb3/1cg2iEK7KycBfzHlP9191JmFppazFAL9l5uINT5K5xjXUM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=UIB2VaTJ; arc=none smtp.client-ip=220.197.31.78
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="oPekytlN"
-X-Envelope-To: linux-mmc@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=32NrmXH9Vsmw2N1F2SLSyk8oTsLvpCiP90z+KAgZXFM=;
- c=simple/simple; d=linux.dev;
- h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1789977203; v=1; x=1790582003;
- b=oPekytlNXG9Z5ueRHgUmz25qKzIRQi1UU96C+Cr4dyinP6DSJzTEmocfyCThtf3skn8QUJ1V
- QTyf+uHvkg0Tf9dCYnGzaStdN16/1+da4x7zV4w/LKNJgCz8RVxmVnNvBVKo7/zhmAonteWWd+/
- sst/biBDnhyEw163f+5PabKA=
-X-Envelope-To: linux-mmc@vger.kernel.org
-Received: by smtp.migadu.com with ESMTPS id 00947d7dc7e59382;
-	Mon, 21 Sep 2026 07:53:13 +0000
-X-Mizu-Trace-ID: 00947d7dc7e59382
-X-Migadu-Flow: FLOW_OUT
-Message-ID: <1d135368-6b2c-443c-a946-45f0be2040fb@linux.dev>
-Date: Mon, 21 Sep 2026 15:53:08 +0800
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="UIB2VaTJ"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 4e89bec6b;
+	Mon, 21 Sep 2026 15:18:32 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Shawn Lin <shawn.lin@linux.dev>
+Subject: [PATCH v2 1/3] mmc: core: Add SDIO userspace passthrough character device
+Date: Mon, 21 Sep 2026 15:18:17 +0800
+Message-Id: <1789975099-157594-2-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1789975099-157594-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1789975099-157594-1-git-send-email-shawn.lin@rock-chips.com>
+X-HM-Tid: 0aa0c2d4acaa03a4kunm73dcdfcc310941
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1kYFggdWUFKV1ktWUFJV1kPCRoVCBIfWUFZQ0hNSlYaHU9DSx1CQh
+	4eGEtWFRQJFhoXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0
+	tIVUpLSU9PT0hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=UIB2VaTJ5SnKJZgw+jY/L703eIWR2PNRf6h61rcmcZFjvczpsdXeL2s6BabX/9hCnOWIopwZBSAWpNiC20V2A3yYpcggWE7I/F460bTJ22QG9p8ioNekz0DozvW7kjHM4Sa/jeI+slpDukL6W47ZhfbeJ72LpCdL9A0GFsXk1sU=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=KhnAGT/Dfq8pZkZgWXeHzWdSd+3LTAybCNYn2XO/n8w=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@linux.dev, Ulf Hansson <ulfh@kernel.org>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- =?UTF-8?B?6ZmI5paH6LaFIChXZW5jaGFvIENoZW4p?= <Wenchao.Chen@unisoc.com>,
- =?UTF-8?B?5byg5aaC5rOJIChSYWluIFpoYW5nKQ==?= <Rain.Zhang@unisoc.com>,
- =?UTF-8?B?5ZSQ5pyI5p6XIChZdWVsaW4gVGFuZyk=?= <yuelin.tang@unisoc.com>,
- "cixi.geng@linux.dev" <cixi.geng@linux.dev>,
- Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Subject: Re: [PATCH v2] mmc: core: Optimize polling delay in
- __mmc_poll_for_busy()
-To: =?UTF-8?B?5p2O5pmT5rSBIChYaWFvamllIExpLzEzMjMzKQ==?=
- <xiaojie.li2@unisoc.com>
-References: <308e39324361468db136bb14a22f422b@zeshmbx09.spreadtrum.com>
+
 From: Shawn Lin <shawn.lin@linux.dev>
-In-Reply-To: <308e39324361468db136bb14a22f422b@zeshmbx09.spreadtrum.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
 
-On 2026/09/20 Sun 13:40, 李晓洁 (Xiaojie Li/13233) wrote:
->> No, that's the whole point. We don't want open coded polling loops, it's just a nightmare to maintain. Please try to extend the existing
->> __mmc_poll_for_busy() instead.
-> 
-> Hi Uffe,
-> 
-> Following your suggestion to extend __mmc_poll_for_busy() instead of using open-coded polling loops, here is the proposed optimization.
-> 
-> In our actual testing, we found that setting udelay_max = 8000 (8ms) is more time-efficient than udelay_max = 10000 (10ms).
-> For CMD1 (SEND_OP_COND), the polling intervals are 4ms, 6ms, and 8ms, capped at a maximum of 8ms.
-> Attached are the recorded per-boot phase latencies for udelay_max=8000 (8ms) and udelay_max=10000 (10ms), with timestamps in seconds.
-> Please let me know if you cannot open the attachment, and I will resend it.
-> 
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+Expose a character device (/dev/mmcX:YYYY:FN) for every SDIO
+function, providing userspace access to the SDIO register space:
 
-I think the CMD1-specific branch can be avoided altogether. The reason
-CMD1's tail latency is high is that __mmc_poll_for_busy() limits udelay
-to a maximum of 32768 and, more importantly, the sleep upper bound is
-udelay * 2.
+  - SDIO_IOC_RW issues CMD52: single byte read/write. Function 0
+    addresses the card common area (CCCR/FBR); with the raw flag the
+    register is read back after being written.
+  - SDIO_IOC_RW_EXT issues CMD53 in byte mode for 1..512 bytes.
 
-Would it be possible to parameterize the maximum delay instead? E.g.
+Intended for debugging and factory test tools on systems without a
+function driver (the userspace counterpart is a new 'mmc sdio'
+command in mmc-utils). The ioctls require CAP_SYS_ADMIN, are gated
+behind CONFIG_MMC_SDIO_CDEV and take the host claim for the duration
+of each command, since raw access can disturb the state a bound
+function driver maintains.
 
-   int __mmc_poll_for_busy(host, period_us, udelay_max_us, timeout_ms, 
-cb, cb_data)
+Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
+---
 
-and limit both the backoff step and the sleep upper bound to
-udelay_max_us:
+ drivers/mmc/Kconfig                 |  11 +++
+ drivers/mmc/core/Makefile           |   1 +
+ drivers/mmc/core/sdio_bus.c         |  12 ++-
+ drivers/mmc/core/sdio_cdev.c        | 189 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/sdio_cdev.h        |  21 ++++
+ include/linux/mmc/sdio_func.h       |   4 +
+ include/uapi/linux/mmc/sdio_ioctl.h |  48 +++++++++
+ 7 files changed, 284 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/mmc/core/sdio_cdev.c
+ create mode 100644 drivers/mmc/core/sdio_cdev.h
+ create mode 100644 include/uapi/linux/mmc/sdio_ioctl.h
 
-   unsigned int sleep_max = min(udelay * 2, udelay_max_us);
-   usleep_range(min(udelay, udelay_max_us), sleep_max);
-
-Then mmc_send_op_cond() passes its own maximum delay (8ms), while all
-other callers keep passing 32768 so their behaviour is unchanged. That
-is two lines of code, no busy_cb pointer comparison, and the tail bound
-(8ms) is actually tighter than the linear +2ms schedule (10ms).
-
-Could you try to see if the linear step is still needed once the sleep
-upper bound is limited to the maximum delay?
-
-
-> index a952cc8..9c4762c 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -539,9 +539,23 @@
->   
->   		/* Throttle the polling rate to avoid hogging the CPU. */
->   		if (busy) {
-> -			usleep_range(udelay, udelay * 2);
-> -			if (udelay < udelay_max)
-> -				udelay *= 2;
-> +			/*
-> +			 * Special delay handling is required for mmc_send_op_cond;
-> +			 * otherwise, for slower memory particles, the time required to
-> +			 * wait for the status change will increase.
-> +			 */
-> +			if (busy_cb == __mmc_send_op_cond_cb) {
-> +				udelay_max = 8000;
-> +				usleep_range(udelay, udelay + 2000);
-> +				if (udelay < udelay_max)
-> +					udelay += 2000;
-> +				else
-> +					udelay = udelay_max;
-> +			} else {
-> +				usleep_range(udelay, udelay * 2);
-> +				if (udelay < udelay_max)
-> +					udelay *= 2;
-> +			}
->   		}
->   	} while (busy);
-> 
-> 
-> Best regards,
-> Xiaojie.Li
-> 
-> -----邮件原件-----
-> 发件人: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-> 发送时间: 2026年9月11日 23:47
-> 收件人: 李晓洁 (Xiaojie Li/13233) <xiaojie.li2@unisoc.com>
-> 抄送: Ulf Hansson <ulfh@kernel.org>; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; 陈文超 (Wenchao Chen) <Wenchao.Chen@unisoc.com>; 张如泉 (Rain Zhang) <Rain.Zhang@unisoc.com>; 唐月林 (Yuelin Tang) <yuelin.tang@unisoc.com>; cixi.geng@linux.dev
-> 主题: Re: [PATCH] mmc: core: Modify the CMD1 transmission interval
-> 
-> 
-> 注意: 这封邮件来自于外部。除非你确定邮件内容安全，否则不要点击任何链接和附件。
-> CAUTION: This email originated from outside of the organization. Do not click links or open attachments unless you recognize the sender and know the content is safe.
-> 
-> 
-> 
-> On Fri, Sep 11, 2026 at 4:45 AM 李晓洁 (Xiaojie Li/13233) <xiaojie.li2@unisoc.com> wrote:
->>
->> Hi Uffe:
->>          Thank you for your reply.
->>          However, I noticed that __mmc_poll_for_busy() and mmc_poll_for_busy() are invoked either directly or indirectly by many other functions within the MMC driver.
->> Modifying them directly could potentially introduce unintended side effects.
->>
->>          Would it be acceptable to implement a dedicated function specifically for CMD1? We could create a CMD1-specific variant based on the existing __mmc_poll_for_busy().
->> This approach would significantly minimize the potential impact on the rest of the codebase.
-> 
-> No, that's the whole point. We don't want open coded polling loops, it's just a nightmare to maintain. Please try to extend the existing
-> __mmc_poll_for_busy() instead.
-> 
-> And next time, please don't top post.
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
+diff --git a/drivers/mmc/Kconfig b/drivers/mmc/Kconfig
+index 2436eb4..5d0ddc5 100644
+--- a/drivers/mmc/Kconfig
++++ b/drivers/mmc/Kconfig
+@@ -13,6 +13,17 @@ menuconfig MMC
+ 	  If you want MMC/SD/SDIO support, you should say Y here and
+ 	  also to your specific host controller driver.
+ 
++config MMC_SDIO_CDEV
++	bool "SDIO userspace passthrough character device"
++	depends on MMC
++	default y
++	help
++	  Expose a character device (/dev/mmcX:YYYY:FN) for every SDIO
++	  function, providing CMD52/CMD53 register access to userspace
++	  via ioctl. Intended for debugging and factory test tools;
++	  raw access requires CAP_SYS_ADMIN and can disturb the state
++	  a bound function driver maintains.
++
+ if MMC
+ 
+ source "drivers/mmc/core/Kconfig"
+diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+index 15b067e..485b4f5 100644
+--- a/drivers/mmc/core/Makefile
++++ b/drivers/mmc/core/Makefile
+@@ -4,6 +4,7 @@
+ #
+ 
+ obj-$(CONFIG_MMC)		+= mmc_core.o
++obj-$(CONFIG_MMC_SDIO_CDEV)	+= sdio_cdev.o
+ mmc_core-y			:= core.o bus.o host.o \
+ 				   mmc.o mmc_ops.o sd.o sd_ops.o \
+ 				   sdio.o sdio_ops.o sdio_bus.o \
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 4b07098..06fc26cb 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -23,6 +23,7 @@
+ 
+ #include "core.h"
+ #include "card.h"
++#include "sdio_cdev.h"
+ #include "sdio_cis.h"
+ #include "sdio_bus.h"
+ 
+@@ -400,9 +401,12 @@ int sdio_add_func(struct sdio_func *func)
+ 	sdio_acpi_set_handle(func);
+ 	device_enable_async_suspend(&func->dev);
+ 	ret = device_add(&func->dev);
+-	if (ret == 0)
++	if (ret == 0) {
+ 		sdio_func_set_present(func);
+ 
++		sdio_cdev_create(func);
++	}
++
+ 	return ret;
+ }
+ 
+@@ -414,8 +418,12 @@ int sdio_add_func(struct sdio_func *func)
+  */
+ void sdio_remove_func(struct sdio_func *func)
+ {
+-	if (sdio_func_present(func))
++	if (sdio_func_present(func)) {
++		sdio_cdev_destroy(func);
++
+ 		device_del(&func->dev);
++	}
++
+ 
+ 	of_node_put(func->dev.of_node);
+ 	put_device(&func->dev);
+diff --git a/drivers/mmc/core/sdio_cdev.c b/drivers/mmc/core/sdio_cdev.c
+new file mode 100644
+index 0000000..aa2f4cf
+--- /dev/null
++++ b/drivers/mmc/core/sdio_cdev.c
+@@ -0,0 +1,189 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * SDIO userspace passthrough character device.
++ *
++ * Copyright (C) 2026 Shawn Lin <shawn.lin@linux.dev>
++ *
++ * Every SDIO function gets a /dev/<function name> node (e.g.
++ * /dev/mmc1:0001:1); ioctls on the node issue CMD52 (single register
++ * access, function 0 included for the CCCR/FBR) and CMD53 (extended
++ * multi-byte access) to the card.
++ *
++ * Raw access can disturb the state a bound function driver maintains,
++ * so the ioctls require CAP_SYS_ADMIN and take the host claim for the
++ * duration of each command.
++ */
++#include <linux/capability.h>
++#include <linux/fs.h>
++#include <linux/miscdevice.h>
++#include <linux/module.h>
++#include <linux/pm_runtime.h>
++#include <linux/slab.h>
++#include <linux/uaccess.h>
++
++#include <uapi/linux/mmc/sdio_ioctl.h>
++
++#include <linux/mmc/card.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/sdio_func.h>
++
++#include "sdio_cdev.h"
++#include "sdio_ops.h"
++
++static int sdio_cdev_rw(struct sdio_func *func,
++			struct sdio_ioc_rw __user *uarg)
++{
++	struct sdio_ioc_rw rw;
++	u8 data = 0;
++	int err, ret;
++
++	if (!capable(CAP_SYS_ADMIN))
++		return -EPERM;
++
++	if (copy_from_user(&rw, uarg, sizeof(rw)))
++		return -EFAULT;
++
++	if (rw.fn > 7)
++		return -EINVAL;
++
++	pm_runtime_get_sync(&func->dev);
++	sdio_claim_host(func);
++	if (rw.write && !rw.raw) {
++		/*
++		 * Plain write: pass a NULL out so the kernel does not set
++		 * the CMD52 RAW bit - out doubles as the RAW flag there.
++		 */
++		err = mmc_io_rw_direct(func->card, 1, rw.fn, rw.addr,
++				       rw.data, NULL);
++	} else {
++		err = mmc_io_rw_direct(func->card, rw.write, rw.fn, rw.addr,
++				       rw.write ? rw.data : 0, &data);
++	}
++	sdio_release_host(func);
++	pm_runtime_put_autosuspend(&func->dev);
++
++	if (err) {
++		dev_err(&func->dev, "CMD52 fn %u addr 0x%05x failed: %d\n",
++			rw.fn, rw.addr, err);
++		return err;
++	}
++
++	if (!rw.write || rw.raw)
++		rw.data = data;
++	ret = copy_to_user(uarg, &rw, sizeof(rw));
++
++	return ret ? -EFAULT : 0;
++}
++
++static int sdio_cdev_rw_ext(struct sdio_func *func,
++			    struct sdio_ioc_rw_ext __user *uarg)
++{
++	struct sdio_ioc_rw_ext rw;
++	u8 *buf;
++	int err;
++
++	if (!capable(CAP_SYS_ADMIN))
++		return -EPERM;
++
++	if (copy_from_user(&rw, uarg, sizeof(rw)))
++		return -EFAULT;
++
++	if (rw.fn == 0 || rw.fn > 7)
++		return -EINVAL;
++	if (!rw.count || rw.count > 512)
++		return -EINVAL;
++
++	pm_runtime_get_sync(&func->dev);
++
++	/*
++	 * Stage through a kmalloc'd buffer: rw.data lives on the ioctl
++	 * handler's stack, which is vmalloc'd with CONFIG_VMAP_STACK -
++	 * virt_to_page() on a vmalloc address is invalid, and the PIO
++	 * and DMA paths of the host drivers both derive struct pages
++	 * from the data buffer.
++	 */
++	buf = kmalloc(rw.count, GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
++
++	if (rw.write)
++		memcpy(buf, rw.data, rw.count);
++
++	sdio_claim_host(func);
++	err = mmc_io_rw_extended(func->card, rw.write, rw.fn, rw.addr,
++				 rw.incr_addr, buf, 0, rw.count);
++	sdio_release_host(func);
++	pm_runtime_put_autosuspend(&func->dev);
++
++	if (!err && !rw.write)
++		memcpy(rw.data, buf, rw.count);
++
++	kfree(buf);
++
++	if (err) {
++		dev_err(&func->dev, "CMD53 fn %u addr 0x%05x failed: %d\n",
++			rw.fn, rw.addr, err);
++		return err;
++	}
++
++	return 0;
++}
++
++static long sdio_cdev_ioctl(struct file *file, unsigned int cmd,
++			    unsigned long arg)
++{
++	struct miscdevice *misc = file->private_data;
++	struct sdio_func *func = container_of(misc->parent,
++					      struct sdio_func, dev);
++
++	switch (cmd) {
++	case SDIO_IOC_RW:
++		return sdio_cdev_rw(func, (struct sdio_ioc_rw __user *)arg);
++	case SDIO_IOC_RW_EXT:
++		return sdio_cdev_rw_ext(func,
++					(struct sdio_ioc_rw_ext __user *)arg);
++	default:
++		return -ENOTTY;
++	}
++}
++
++static const struct file_operations sdio_cdev_fops = {
++	.owner		= THIS_MODULE,
++	.unlocked_ioctl	= sdio_cdev_ioctl,
++};
++
++int sdio_cdev_create(struct sdio_func *func)
++{
++	struct miscdevice *misc;
++	int ret;
++
++	misc = kzalloc_obj(*misc);
++	if (!misc)
++		return -ENOMEM;
++
++	misc->minor = MISC_DYNAMIC_MINOR;
++	misc->name = dev_name(&func->dev);
++	misc->fops = &sdio_cdev_fops;
++	misc->parent = &func->dev;
++	func->miscdev = misc;
++
++	ret = misc_register(func->miscdev);
++	if (ret) {
++		dev_err(&func->dev, "failed to register /dev/%s: %d\n",
++			dev_name(&func->dev), ret);
++		kfree(misc);
++		func->miscdev = NULL;
++	}
++
++	return ret;
++}
++
++void sdio_cdev_destroy(struct sdio_func *func)
++{
++	if (!func->miscdev)
++		return;
++
++	misc_deregister(func->miscdev);
++	kfree(func->miscdev);
++	func->miscdev = NULL;
++}
+diff --git a/drivers/mmc/core/sdio_cdev.h b/drivers/mmc/core/sdio_cdev.h
+new file mode 100644
+index 0000000..93bac8c
+--- /dev/null
++++ b/drivers/mmc/core/sdio_cdev.h
+@@ -0,0 +1,21 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++#ifndef _MMC_CORE_SDIO_CDEV_H
++#define _MMC_CORE_SDIO_CDEV_H
++
++#include <linux/mmc/sdio_func.h>
++
++#ifdef CONFIG_MMC_SDIO_CDEV
++int sdio_cdev_create(struct sdio_func *func);
++void sdio_cdev_destroy(struct sdio_func *func);
++#else
++static inline int sdio_cdev_create(struct sdio_func *func)
++{
++	return 0;
++}
++
++static inline void sdio_cdev_destroy(struct sdio_func *func)
++{
++}
++#endif
++
++#endif /* _MMC_CORE_SDIO_CDEV_H */
+diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
+index 5d63a64..6d01579 100644
+--- a/include/linux/mmc/sdio_func.h
++++ b/include/linux/mmc/sdio_func.h
+@@ -57,6 +57,10 @@ struct sdio_func {
+ 	const char		**info;		/* info strings */
+ 
+ 	struct sdio_func_tuple *tuples;
++
++#ifdef CONFIG_MMC_SDIO_CDEV
++	struct miscdevice	*miscdev;	/* userspace passthrough node */
++#endif
+ };
+ 
+ #define sdio_func_present(f)	((f)->state & SDIO_STATE_PRESENT)
+diff --git a/include/uapi/linux/mmc/sdio_ioctl.h b/include/uapi/linux/mmc/sdio_ioctl.h
+new file mode 100644
+index 0000000..d099bec8
+--- /dev/null
++++ b/include/uapi/linux/mmc/sdio_ioctl.h
+@@ -0,0 +1,48 @@
++/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
++#ifndef _UAPI_LINUX_MMC_SDIO_IOCTL_H
++#define _UAPI_LINUX_MMC_SDIO_IOCTL_H
++
++#include <linux/ioctl.h>
++#include <linux/types.h>
++
++/*
++ * SDIO userspace passthrough interface, issued on the character device
++ * exposed by each SDIO function (/dev/mmcX:YYYY:FN). Requires
++ * CAP_SYS_ADMIN. Raw access while a function driver is bound can
++ * disturb the state the driver maintains.
++ */
++
++/*
++ * CMD52: single byte read/write. fn 0 addresses the card common area
++ * (CCCR/FBR), functions 1-7 address the per-function registers. With
++ * raw set, the register is read back after being written and data
++ * carries the value actually read.
++ */
++struct sdio_ioc_rw {
++	__u8 write;		/* 1 = write, 0 = read */
++	__u8 fn;		/* function number, 0..7 */
++	__u8 raw;		/* read back after write */
++	__u8 data;		/* byte to write / value read */
++	__u32 addr;		/* SDIO register address */
++};
++
++/*
++ * CMD53: extended (multiple byte) read/write in byte mode, 1..512
++ * bytes. Function 0 is not valid for CMD53.
++ */
++struct sdio_ioc_rw_ext {
++	__u8 write;		/* 1 = write, 0 = read */
++	__u8 fn;		/* function number, 1..7 */
++	__u8 incr_addr;		/* 1 = incrementing address, 0 = fixed */
++	__u8 reserved1;
++	__u32 addr;		/* SDIO register address */
++	__u16 count;		/* number of bytes, 1..512 */
++	__u16 reserved2;
++	__u8 data[512];		/* data to write / buffer for read */
++};
++
++#define SDIO_IOC_MAGIC		'S'
++#define SDIO_IOC_RW		_IOWR(SDIO_IOC_MAGIC, 0x52, struct sdio_ioc_rw)
++#define SDIO_IOC_RW_EXT		_IOWR(SDIO_IOC_MAGIC, 0x53, struct sdio_ioc_rw_ext)
++
++#endif /* _UAPI_LINUX_MMC_SDIO_IOCTL_H */
+-- 
+2.7.4
 
