@@ -1,149 +1,114 @@
-Received: from mail-qv2-f12.google.com (mail-qv2-f12.google.com [74.125.230.140])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-m19731118.qiye.163.com (mail-m19731118.qiye.163.com [220.197.31.118])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77833511229
-	for <linux-mmc@vger.kernel.org>; Mon, 21 Sep 2026 19:13:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.230.140
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B682448BA8;
+	Tue, 22 Sep 2026 09:55:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.118
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790018021; cv=none; b=W3AZykqhzWqPndeWd3rMM4iN/PeWvo2f+AZvhWo8mCjK90hN8DISqeq32RAl3Xso6XhQqOyYO3flfFxZubmrJnqVkDYiHTUfnB6PB1MFqDhQPTDNj/SrFTY+fSBpBkAvoifPWHqXLbPFakiWMNUegvB/5N8Z+oy5nTypM5aHmaw=
+	t=1790070943; cv=none; b=hu+wNlXt2eGJ1xMeHe+mhScuSdDo8hXGjoT53BokDwsaA26J2ina2et6FHn4y4dodgk6A5Q6ZddnsfJ+5CH2ZfMlQs33CEDV7uTuAknBn4/IMCRv29t0k7Y/E44KagLGvQqCvjFNeG/9ukyV/7nqkvaqdWu2edegxYUe4qGWtKM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790018021; c=relaxed/simple;
-	bh=BQed6cSp6vzZ+hQ7oZzppKqdBjTyFHm3lTjQIjKB3r8=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=E9x3MCrFXW9593y34v//kDvKgAg1iPIXjhhw2jwGFJrCjPBNLhRSQvY4FJmPtpqYTDvBaPC2xirodCCZFudRZnfVziNkxpXHYhcnHFK2Zv+4+lZ80qbMjKeoVv8H6GFKl7bCRpEgKErEBTwF8AWsR6WOc4T1OOPsHSNEV9Pd1sw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=brivo.com; spf=pass smtp.mailfrom=brivo.com; dkim=pass (2048-bit key) header.d=brivo.com header.i=@brivo.com header.b=Kgsg4t1Z; arc=none smtp.client-ip=74.125.230.140
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=brivo.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=brivo.com
+	s=arc-20240116; t=1790070943; c=relaxed/simple;
+	bh=oSR3RX6lW2WzBQ9wzxQ9L0dh2fh5A2soSY+c4RxAr3E=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=pxVHDQeX7/Apay0IxpiOuM/4b5zZkXMYV8RTFe2YQYiMQTzSabYCFE0Fdw4p9qy06laQK4Qsa3BevR8Ajb9MWUxuVL0JZRMjC7S/qqXJJHOIswC2CVkiNhwsl0ldjgpj3pFgzfCfW6FEm2eZqqc+d2oUzF6s3YCcJ8Dji40cN0k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=D+pgf7Qa; arc=none smtp.client-ip=220.197.31.118
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=brivo.com header.i=@brivo.com header.b="Kgsg4t1Z"
-Received: by mail-qv2-f12.google.com with SMTP id 6a1803df08f44-91071ba92a8so18882216d6.0
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Sep 2026 12:13:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=brivo.com; s=google; t=1790018019; x=1790622819; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=rgouXHW55aIbAEz+yxgGnRtHE3IVMg92WaPFZm2OsIo=;
-        b=Kgsg4t1Zdkldb8+wEiTC0LBrIoUsPeYpYmPcEJBuB+C62al6TsPDqHrqTR/zABHqGl
-         Vegs3zkbxCmuhnwN+HQmnD3k9G2Rrmnxgli9jWX/m35wbcC11eVyGIVHWp2h4ToI8QtZ
-         5vwwaH1ioQPhozngNOsPB+i+wsNdlgVd5DJKD0vqVMEZCUnZENAUCmovoisCbIQLY0jP
-         ZM4cTLuco2l+1s1iRIQWgGmdD4poIwXv++T5UcCrkrPx4Z1uggeMNhOZ0Kz2g9DT1HWu
-         0ybE3sRPDvX/0+g74l2YhpxoRPMO42QX+kiv32fvFICQksKsWNwUY+MAgjHWqmVbJITV
-         Qz0A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790018019; x=1790622819;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=rgouXHW55aIbAEz+yxgGnRtHE3IVMg92WaPFZm2OsIo=;
-        b=MMiuxNcALc1C8lYZAbfp3LaR6XxnRzDQSEl+F4WU4zTNnrES9NuLnkWjH3A8DwTRr2
-         VsGJ07VCClTbjM82xAHBQfzoLNhqyRBJdJqlmnHJF7ss6JxM9kZSgNrUMzq5fee/Hjxn
-         WPqvMzgGAXKKsh9H3jtHU3hwC8c9HUig2CE1PRy/abeEXXveSp2X8/EfR/xwWzzA64Bd
-         utzvxZY6gYlRys96Zn86q6T9mu+uikA06db4YFt4Vu9c8ROnIUuFOZkZhbDpTAXPWboP
-         k6rNlyXeg54qzYBr+8aWDP7pZOrmp+h9BlUWWXpeC2oO19hRCXWzjOaytfXaQToMyUIU
-         8QJg==
-X-Forwarded-Encrypted: i=1; AKwUvBxRmWGZ/2xIXTdMyc9l6bP/Ab7Xk57Dvpm0FhG36BI9IIBjn+IuhrSAuxRvo+5uDC+rSIuV8atYRL4=@vger.kernel.org
-X-Gm-Message-State: AFuF++kOWlL2LEESow6q7tu+1BwriyS7VscKzeFc+/pwzu16bo3Dcmv9
-	yhQD73E2nxp8Qkk3AN1zuYCPvhkEZvI6oN9AhXeRUBk4575diiEINm2Yg6HXFWy+fNhmz7eUPNM
-	1WmPpMdhfxJUV5FCGuSqzUDznD+pe2d9rWEp44UtfXGcY9bPDlsShABs=
-X-Gm-Gg: AYBFou0qIXobWp9xHwQDLueiv8MiAI0xJrb/oqToDTdIDQQ7Oo+TbIK1ZRAIwifqDRd
-	jaiPTbrHyJf/Ge3Y1xKsLwwi3jadspA97vKee4FUc5Gkhyw0Kg+sKsT/LzN878mtJ8p1jkGGWQv
-	2Aqty8S2QWPEjkHJkMB2pVcmMEY4mq8A3K6qe8HcHooA786K8QeKqseslgrkgsDSjdqbzYv6vio
-	kMVA6N9Zycre3yWB739aGJnjkfRLxVaLS3SzOg1GMR9Gv4+LdMUkvmpNHAputKaHLqbiyPua7PE
-	OGDeczz1mi/r5tpck28ERv8rwgfWVCDzev5g9YNdh/9Bl9MojQBgb8o+TRlpPr5Gg6YG3pvxC1Q
-	qzkZEnWgZ6IoyM2Vcq1ToZqANHHJta4RfYxWzVkRk2kxYu8MO4R59AJ+Cz3y+hOJyryX464Z5+u
-	uyb9XVy5QQdNnLFi28MeUUxM1F91bt4gc1RSHQczXC8z5PVilC5hhha3XVa4CofQ1KS6ZDkX3Vk
-	A==
-X-Received: by 2002:a05:6214:19cc:b0:912:12cf:f6b7 with SMTP id 6a1803df08f44-913fc8a23f8mr21513036d6.7.1790018019138;
-        Mon, 21 Sep 2026 12:13:39 -0700 (PDT)
-Received: from strozzi ([66.193.28.125])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-91260a61570sm75443526d6.23.2026.09.21.12.13.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 21 Sep 2026 12:13:38 -0700 (PDT)
-From: Sean Anderson <sanderson@brivo.com>
-To: Ulf Hansson <ulfh@kernel.org>,
-	linux-mmc@vger.kernel.org
-Cc: Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Heiner Kallweit <hkallweit1@gmail.com>,
-	linux-arm-kernel@lists.infradead.org,
-	Jerome Brunet <jbrunet@baylibre.com>,
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="D+pgf7Qa"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 4eb71259a;
+	Tue, 22 Sep 2026 17:40:11 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	Adrian Hunter <adrian.hunter@intel.com>,
 	linux-kernel@vger.kernel.org,
-	linux-amlogic@lists.infradead.org,
-	Sean Anderson <sanderson@brivo.com>
-Subject: [PATCH] mmc: meson-gx: Convert host->lock to raw spinlock
-Date: Mon, 21 Sep 2026 15:13:08 -0400
-Message-ID: <20260921191326.2146363-1-sanderson@brivo.com>
-X-Mailer: git-send-email 2.53.0
+	Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: sdhci-of-dwcmshc: Disable CQE error halt request for Rockchip
+Date: Tue, 22 Sep 2026 17:40:07 +0800
+Message-Id: <1790070007-11769-1-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+X-HM-Tid: 0aa0c87cb5f703a4kunm19317a9c3dd933
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1kYFggdWUFKV1ktWUFJV1kPCRoVCBIfWUFZGktLGVZLSUsdGkwfHh
+	1OGUNWFRQJFhoXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0
+	tIVUpLSU9PT0hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=D+pgf7QaJchbI6V0QzlalGg7A9cBibSDwBSd/jIc7xDfJIq82KPc5Llkg1loawvmPLOCx0+TLL4tFvTQaAqGn3NhVK8zulUcDk/K2kvrFynOs7lVqnZg3qG2yGrnshHdecFApnUJY3y11AAbruARPM9cZ2a1ZXXanW6gs996CSQ=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=omXEob1gsfEqKiAmnKblrTqqqrVd7A7fcEatHpMuRrE=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-The primary handler for IRQF_ONESHOT interrupts is always run without
-threading, even on PREEMPT_RT. Therefore, we must use a raw spinlock,
-which will never sleep (even on PREEMPT_RT).
+In CMDQ mode an I/O error in one task (data_crc_err, data_end_bit_err,
+etc.) makes the controller raise a halt request. While the halt request
+is pending, the controller rejects doorbell writes with a slave response
+error, which hangs the CPU (or raises SError on ARM) on Rockchip
+platforms.
 
-Fixes: 066ecde6d826 ("mmc: meson-gx: add SDIO interrupt support")
-Signed-off-by: Sean Anderson <sanderson@brivo.com>
+A software workaround[1] clears CQHCI_CTL right before ringing the
+doorbell to narrow down the window, but a race remains: an I/O error can
+still happen in another slot between the CQHCI_CTL write and the
+doorbell kick, so the hang is not fully solved.
+
+To fix this once and for all, newer silicon introduces
+SW_ERR_HALR_REQ_DISABLE (CQHCI_CTL[1]) which stops the controller from
+raising a halt request on I/O errors. Set the bit when the CQE is
+enabled, which is the last CQHCI_CTL write before any doorbell write.
+
+Older SoCs keep this bit reserved, so writing it is a no-op and nothing
+changes in the wild, thus no fixes tag is needed.
+
+[1] https://github.com/rockchip-linux/kernel/commit/4b7ea0500a1a5c186807b737fecfc6bb4d4e06f8
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+
 ---
 
- drivers/mmc/host/meson-gx-mmc.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 694bb443d5f3f..d5365c0404cb9 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -176,7 +176,7 @@ struct meson_host {
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 1baa237..0970202 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -239,6 +239,8 @@
+ 					 SDHCI_TRNS_BLK_CNT_EN | \
+ 					 SDHCI_TRNS_DMA)
  
- 	bool needs_pre_post_req;
++#define CQHCI_SW_ERR_HALT_REQ_DISABLE	BIT(1)
++
+ #define to_pltfm_data(priv, name) \
+ 	container_of((priv)->dwcmshc_pdata, struct name##_pltfm_data, dwcmshc_pdata)
  
--	spinlock_t lock;
-+	raw_spinlock_t lock;
- };
+@@ -702,6 +704,8 @@ static void rk35xx_sdhci_cqe_pre_enable(struct mmc_host *mmc)
+ static void rk35xx_sdhci_cqe_enable(struct mmc_host *mmc)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
+ 	u32 reg;
  
- #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
-@@ -953,10 +953,10 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- 	cmd = host->cmd;
+ 	reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
+@@ -712,6 +716,15 @@ static void rk35xx_sdhci_cqe_enable(struct mmc_host *mmc)
  
- 	if (status & IRQ_SDIO) {
--		spin_lock(&host->lock);
-+		raw_spin_lock(&host->lock);
- 		__meson_mmc_enable_sdio_irq(host->mmc, 0);
- 		sdio_signal_irq(host->mmc);
--		spin_unlock(&host->lock);
-+		raw_spin_unlock(&host->lock);
- 		status &= ~IRQ_SDIO;
- 		if (!status)
- 			return IRQ_HANDLED;
-@@ -1112,9 +1112,9 @@ static void meson_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	struct meson_host *host = mmc_priv(mmc);
- 	unsigned long flags;
+ 	sdhci_writew(host, DWCMSHC_SDHCI_CQE_TRNS_MODE, SDHCI_TRANSFER_MODE);
  
--	spin_lock_irqsave(&host->lock, flags);
-+	raw_spin_lock_irqsave(&host->lock, flags);
- 	__meson_mmc_enable_sdio_irq(mmc, enable);
--	spin_unlock_irqrestore(&host->lock, flags);
-+	raw_spin_unlock_irqrestore(&host->lock, flags);
++	/*
++	 * Disable the halt request raised on an I/O error, otherwise a
++	 * doorbell write gets a slave response error while the halt request
++	 * is pending and hangs the CPU. This bit is reserved on older SoCs,
++	 * so the write is a no-op there.
++	 */
++	sdhci_writel(host, CQHCI_SW_ERR_HALT_REQ_DISABLE,
++		     dwc_priv->vendor_specific_area2 + CQHCI_CTL);
++
+ 	sdhci_cqe_enable(mmc);
  }
  
- static void meson_mmc_ack_sdio_irq(struct mmc_host *mmc)
-@@ -1225,7 +1225,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto err_init_clk;
- 
--	spin_lock_init(&host->lock);
-+	raw_spin_lock_init(&host->lock);
- 
- 	if (host->dram_access_quirk) {
- 		/* Limit segments to 1 due to low available sram memory */
----
-base-commit: 587858367581b9c55c3690f4e63382ad622719d4
-branch: meson_mmc_raw
-
 -- 
-2.53.0
+2.7.4
 
