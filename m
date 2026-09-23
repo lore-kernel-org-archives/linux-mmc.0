@@ -1,213 +1,208 @@
-Received: from mail-oi1-f198.google.com (mail-oi1-f198.google.com [209.85.167.198])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BBB5435A393
-	for <linux-mmc@vger.kernel.org>; Wed, 23 Sep 2026 03:32:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.198
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 426C1463B6F;
+	Wed, 23 Sep 2026 08:42:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790134349; cv=none; b=j5SgdMDE8NhFh2ZtQmxqDXB1rcTI2EZZpKFzNsjOteD+yh6K1D8Kx57ZACJdLCdcrsI6yE9H18CEU3iGonPnKQ3jBHjvYPGvJzSPUSo8u18tmwwALq0wzUzGa2wwxySxPZjFB9ktKWbNgHk31+W1+9PcYm3v5nbPRovE2YaiXtE=
+	t=1790152931; cv=none; b=CmIxgykxpSWUPzHboWthPT5QHW3DxZHgOcowtvbKUhRGteHfk6LKfiaHcFMyKSvbMHstkped/SKPk7fcYRMLhz3Ntol9ulKwTKqxRHQPoVPq+Aysjh3v3plkkAzi63qyC8utwl5SAU4y/bknbdaEiqL43ScVMUtbGtgAjgzR+qA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790134349; c=relaxed/simple;
-	bh=LwPxSn6z8UiIL2XR/B/XxiBO7rUlTs9y3VQGDUoqfaE=;
-	h=MIME-Version:Date:In-Reply-To:Message-ID:Subject:From:To:
-	 Content-Type; b=YN4tFrxispFSHnwttmEnNjFpy2w52LeBPedGVRqOanQjlc/dCC7JXHAHe/9QjQBd83rbFMP/XgX3vLAl2tkb9hkEeVXNBQWUGXuVYMvPQEFmASQBcoOYiNsLKYSbj+4wYUOiD1fzG6OHXV00lOlWE3k+VxGCPdEgowklkhsE6aU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=209.85.167.198
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
-Received: by mail-oi1-f198.google.com with SMTP id 5614622812f47-4b1bc2e44e0so1026207b6e.0
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Sep 2026 20:32:27 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790134347; x=1790739147;
-        h=content-type:to:from:subject:message-id:in-reply-to:date
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to:content-type;
-        bh=ecdzmKoPOIWDjnigL6sfHg7MhoBwWGqxm5KzrWcgv4g=;
-        b=COc2UInuoUaNvzwrh0pcT6in14HJPI70lh/RQVc7Wc2L+SOzzUom5mxCkD8rqI/mQC
-         qcdAR1pnXINv9GiBSeHmW54QuhnKYVvYEi5pI2zepx5nMEpeBkjQANnZ5G1RbbejcXef
-         2U2YKHvUJuU69Y/EoqVqOCkid+RDRjWmRG2Y0T5vkpbcXA/5s16taKP07xkSvmPR+DfO
-         xyVNLgPozTyiPVwIafZ1cWmhxUIQWz97E1EVPDB928ley97tX1JT84YS3PU0qpixnj0y
-         nONHXWC8kqbEm7e+CwITGh0x3pDAq5N0axhteccPrQonWNNmXBglVIQbIDbhdfPi4Pv/
-         tJmA==
-X-Forwarded-Encrypted: i=1; AKwUvBwO0jI/Udnde+PfHZxiq4JuVyXMPlM47V2XRQmnQHE73si67GcwuIEKfmEGL6HxAWMCa+aYJta6Nds=@vger.kernel.org
-X-Gm-Message-State: AFuF++kHnuHvooT7EaiokIh/6VQZjvkVeFDt3QHJwNd0udp6na0UVCh6
-	MJPuxUgx8kxgnApHYI+iq7msFiUbcmiHUn1XGsyQq25sYKp33m0Agm+AFlsjTU3SOEpZCAn+Zfe
-	vhgj2V1+j5QG2yDcmw23VkndUVw+LXddMapPV70MtGw62dgl51ffMTK2ojB8=
+	s=arc-20240116; t=1790152931; c=relaxed/simple;
+	bh=SjnDyw2HoqxDvp4VpQpC7G8xibqPQKGBmuPcCak24rQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=MmvpzANa+sve9Ly/51ILvni+c+a2nskbv8NwkbMZIh8TlmscZcWhasxGm0bdPL78SyjE3WjowNx1ISWU3g94tVQw2S/TyLqZ5NHLZZKfWEaU/QiaMG2/Iy1g5BIoRfanqyI7EE85t0IFAZoAfUzN+JhGsvCuyZlA70LkAcKor5c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H8jS0hY4; arc=none smtp.client-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H8jS0hY4"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E169A1F000FF;
+	Wed, 23 Sep 2026 08:41:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1790152922;
+	bh=VJF4/vr5y5VcWETmgrbJDPEEq5BFKEqJfgmd5Y2tQcQ=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=H8jS0hY4lKcJBzeLTpK4BQQqUSaDV5pSY42s2J2J/9E/8UyXF8r39ELo8ION0kD0c
+	 Jhk50GZshpDQ10AQGyrLFVpcH76Z7mHe7nnynn3pNX2PyzAI/cMrILI/bBFkfNKLRl
+	 VTuxW/+ixSerK/Z3pSo57HhZvG/E9dtkHeCk4WB29ABXkbkp6iqQl8NQqE5HOCKmdl
+	 SulfDHaNWAfHDZtfd+9TLZA/nRjUuXZtWABwjsbXvBHWmmr227uZAm0FjiDORGMt++
+	 uBqcNBAHd3GiqOldPMfNugTZrIWuTZ4MGA67E/uCfLnxOeWhLNHWnh2bOwPA5Yhl7K
+	 xq2nOcnyciqBw==
+Message-ID: <ead48f50-5d37-406c-b51e-d754c2c512f8@kernel.org>
+Date: Wed, 23 Sep 2026 11:41:57 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Received: by 2002:a05:6820:168b:b0:6b1:6f3d:2068 with SMTP id
- 006d021491bc7-6d2cf849f68mr1292080eaf.12.1790134346778; Tue, 22 Sep 2026
- 20:32:26 -0700 (PDT)
-Date: Tue, 22 Sep 2026 20:32:26 -0700
-In-Reply-To: <6aac8d73.87c06881.1db2b3.001e.GAE@google.com>
-X-Google-Appengine-App-Id: s~syzkaller
-X-Google-Appengine-App-Id-Alias: syzkaller
-Message-ID: <6ab3484a.71f81b7d.15fa6d.0046.GAE@google.com>
-Subject: Re: [syzbot] [mmc?] [usb?] KASAN: slab-use-after-free Read in rtsx_usb_ms_handle_req
-From: syzbot <syzbot+3ee5da0319ca17ef1f4e@syzkaller.appspotmail.com>
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-usb@vger.kernel.org, maximlevitsky@gmail.com, oakad@yahoo.com, 
-	syzkaller-bugs@googlegroups.com, ulf.hansson@linaro.org, ulfh@kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: sdhci-of-at91: disable selectively clocks on pm
+ runtime
+To: Aubin Constans <aubin.constans@microchip.com>,
+ Ulf Hansson <ulfh@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
+ Eugen Hristev <ehristev@kernel.org>,
+ Romain Sioen <romain.sioen@microchip.com>,
+ Nicolas Ferre <nicolas.ferre@microchip.com>,
+ Ludovic Desroches <ludovic.desroches@microchip.com>,
+ Robert Marko <robert.marko@sartura.hr>
+Cc: Alexandre Belloni <alexandre.belloni@bootlin.com>,
+ Ryan Wanner <ryan.wanner@microchip.com>, linux-mmc@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20260918153414.909333-1-aubin.constans@microchip.com>
+Content-Language: en-US
+From: Claudiu Beznea <claudiu.beznea@kernel.org>
+In-Reply-To: <20260918153414.909333-1-aubin.constans@microchip.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-syzbot has found a reproducer for the following issue on:
+Hi, Aubin,
 
-HEAD commit:    c4e9f74da438 Merge tag 'v7.3-p5' of git://git.kernel.org/p..
-git tree:       git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-console output: https://syzkaller.appspot.com/x/log.txt?x=160ea515580000
-kernel config:  https://syzkaller.appspot.com/x/.config?x=7d012d9c67977ee4
-dashboard link: https://syzkaller.appspot.com/bug?extid=3ee5da0319ca17ef1f4e
-compiler:       gcc (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44
-C reproducer:   https://syzkaller.appspot.com/x/repro.c?x=15670d25580000
+On 9/18/26 18:34, Aubin Constans wrote:
+> From: Claudiu Beznea <claudiu.beznea@tuxon.dev>
+> 
+> SAMA7G5's SDMMC run-time clock disabling is not supported.
+> Add support to avoid this scenario for SAMA7G5.
+> 
+> [Amended with a fix from Romain Sioen below this line]
 
-IMPORTANT: if you fix the issue, please add the following tag to the commit:
-Reported-by: syzbot+3ee5da0319ca17ef1f4e@syzkaller.appspotmail.com
+This should go close to the Romain's SoB.
 
-usb 5-1: New USB device found, idVendor=0bda, idProduct=0129, bcdDevice= 1.00
-usb 5-1: New USB device strings: Mfr=0, Product=0, SerialNumber=0
-==================================================================
-BUG: KASAN: slab-use-after-free in rtsx_usb_ms_handle_req+0x173b/0x1a00 drivers/memstick/host/rtsx_usb_ms.c:528
-Write of size 4 at addr ffff88802dba2074 by task kworker/2:4/5905
+> 
+> Sama7 boards are impacted by an unbalanced prepare/unprepare
+> and enable/disable clock management in sdhci driver due to
+> the lack of support for SDMMC clock runtime disabling,
+> managed instead by the PMC driver.
+> 
+> Add conditions in the preset function to manage clock
+> depending on if the board support runtime clock disabling
+> and if we come from the probing or restoring procedure.
+> 
+> Add boolean start_clks variable to manage condition
+> in preset function.
+> 
+> Signed-off-by: Claudiu Beznea <claudiu.beznea@tuxon.dev>
 
-CPU: 2 UID: 0 PID: 5905 Comm: kworker/2:4 Not tainted syzkaller #0 PREEMPT(full) 
-Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
-Workqueue: events rtsx_usb_ms_handle_req
-Call Trace:
- <TASK>
- __dump_stack lib/dump_stack.c:94 [inline]
- dump_stack_lvl+0x100/0x190 lib/dump_stack.c:120
- print_address_description mm/kasan/report.c:378 [inline]
- print_report+0x13d/0x4b0 mm/kasan/report.c:482
- kasan_report+0xdf/0x1c0 mm/kasan/report.c:595
- rtsx_usb_ms_handle_req+0x173b/0x1a00 drivers/memstick/host/rtsx_usb_ms.c:528
- process_one_work+0xac7/0x1b10 kernel/workqueue.c:3396
- process_scheduled_works kernel/workqueue.c:3479 [inline]
- worker_thread+0x5ef/0xe50 kernel/workqueue.c:3560
- kthread+0x373/0x450 kernel/kthread.c:436
- ret_from_fork+0x730/0xd60 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
- </TASK>
+Maybe better use the @microchip.com emails, even though that is not available 
+anymore, to give Microchip credit for that and avoid any legal issues, if any. 
+There is a mailmap for claudiu.beznea@microchip.com available in the .mailmap 
+file, if any.
 
-Allocated by task 38:
- kasan_save_stack+0x30/0x50 mm/kasan/common.c:57
- kasan_save_track+0x14/0x30 mm/kasan/common.c:78
- poison_kmalloc_redzone mm/kasan/common.c:398 [inline]
- __kasan_kmalloc+0xaa/0xb0 mm/kasan/common.c:415
- kasan_kmalloc include/linux/kasan.h:263 [inline]
- __kmalloc_cache_noprof+0x2f8/0x6d0 mm/slub.c:5563
- _kmalloc_noprof include/linux/slab.h:991 [inline]
- _kzalloc_noprof include/linux/slab.h:1312 [inline]
- memstick_alloc_card drivers/memstick/core/memstick.c:383 [inline]
- memstick_check+0x2c1/0x10d0 drivers/memstick/core/memstick.c:452
- process_one_work+0xac7/0x1b10 kernel/workqueue.c:3396
- process_scheduled_works kernel/workqueue.c:3479 [inline]
- worker_thread+0x5ef/0xe50 kernel/workqueue.c:3560
- kthread+0x373/0x450 kernel/kthread.c:436
- ret_from_fork+0x730/0xd60 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+Thank you,
+Claudiu
 
-Freed by task 38:
- kasan_save_stack+0x30/0x50 mm/kasan/common.c:57
- kasan_save_track+0x14/0x30 mm/kasan/common.c:78
- kasan_save_free_info+0x3b/0x70 mm/kasan/generic.c:584
- poison_slab_object mm/kasan/common.c:253 [inline]
- __kasan_slab_free+0x5f/0x80 mm/kasan/common.c:285
- kasan_slab_free include/linux/kasan.h:235 [inline]
- slab_free_hook mm/slub.c:2748 [inline]
- slab_free mm/slub.c:6508 [inline]
- kfree+0x22b/0x6d0 mm/slub.c:6801
- memstick_alloc_card drivers/memstick/core/memstick.c:420 [inline]
- memstick_check+0x72b/0x10d0 drivers/memstick/core/memstick.c:452
- process_one_work+0xac7/0x1b10 kernel/workqueue.c:3396
- process_scheduled_works kernel/workqueue.c:3479 [inline]
- worker_thread+0x5ef/0xe50 kernel/workqueue.c:3560
- kthread+0x373/0x450 kernel/kthread.c:436
- ret_from_fork+0x730/0xd60 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+> Co-developed-by: Romain Sioen <romain.sioen@microchip.com>
+> Signed-off-by: Romain Sioen <romain.sioen@microchip.com>
+> Signed-off-by: Aubin Constans <aubin.constans@microchip.com>
+> ---
+>   drivers/mmc/host/sdhci-of-at91.c | 36 ++++++++++++++++++++++++--------
+>   1 file changed, 27 insertions(+), 9 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 7c4ac65f247d..399856643e57 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -39,6 +39,7 @@ struct sdhci_at91_soc_data {
+>   	const struct sdhci_pltfm_data *pdata;
+>   	bool baseclk_is_generated_internally;
+>   	unsigned int divider_for_baseclk;
+> +	bool pm_runtime_disable_clks;
+>   };
+>   
+>   struct sdhci_at91_priv {
+> @@ -149,12 +150,14 @@ static const struct sdhci_pltfm_data sdhci_sama5d2_pdata = {
+>   static const struct sdhci_at91_soc_data soc_data_sama5d2 = {
+>   	.pdata = &sdhci_sama5d2_pdata,
+>   	.baseclk_is_generated_internally = false,
+> +	.pm_runtime_disable_clks = true,
+>   };
+>   
+>   static const struct sdhci_at91_soc_data soc_data_sam9x60 = {
+>   	.pdata = &sdhci_sama5d2_pdata,
+>   	.baseclk_is_generated_internally = true,
+>   	.divider_for_baseclk = 2,
+> +	.pm_runtime_disable_clks = true,
+>   };
+>   
+>   static const struct of_device_id sdhci_at91_dt_match[] = {
+> @@ -164,7 +167,7 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
+>   };
+>   MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
+>   
+> -static int sdhci_at91_set_clks_presets(struct device *dev)
+> +static int sdhci_at91_set_clks_presets(struct device *dev, bool start_clks)
+>   {
+>   	struct sdhci_host *host = dev_get_drvdata(dev);
+>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -174,7 +177,14 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+>   	unsigned int			gck_rate, clk_base_rate;
+>   	unsigned int			preset_div;
+>   
+> -	clk_prepare_enable(priv->hclock);
+> +	/*
+> +	 * Manage clock prepare/enable procedure depending on if the board
+> +	 * support runtime clock disabling and if we come from the probing
+> +	 * or restoring procedure (for backup+self refresh).
+> +	 */
+> +	if (start_clks)
+> +		clk_prepare_enable(priv->hclock);
+> +
+>   	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
+>   	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
+>   
+> @@ -223,8 +233,11 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+>   	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+>   	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
+>   
+> -	clk_prepare_enable(priv->mainck);
+> -	clk_prepare_enable(priv->gck);
+> +	/* Same clock management as for hclock */
+> +	if (start_clks) {
+> +		clk_prepare_enable(priv->mainck);
+> +		clk_prepare_enable(priv->gck);
+> +	}
+>   
+>   	return 0;
+>   }
+> @@ -254,9 +267,11 @@ static int sdhci_at91_runtime_suspend(struct device *dev)
+>   	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+>   		mmc_retune_needed(host->mmc);
+>   
+> -	clk_disable_unprepare(priv->gck);
+> -	clk_disable_unprepare(priv->hclock);
+> -	clk_disable_unprepare(priv->mainck);
+> +	if (priv->soc_data->pm_runtime_disable_clks) {
+> +		clk_disable_unprepare(priv->gck);
+> +		clk_disable_unprepare(priv->hclock);
+> +		clk_disable_unprepare(priv->mainck);
+> +	}
+>   
+>   	return 0;
+>   }
+> @@ -269,7 +284,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+>   	int ret;
+>   
+>   	if (priv->restore_needed) {
+> -		ret = sdhci_at91_set_clks_presets(dev);
+> +		ret = sdhci_at91_set_clks_presets(dev, priv->soc_data->pm_runtime_disable_clks);
+>   		if (ret)
+>   			return ret;
+>   
+> @@ -277,6 +292,9 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+>   		goto out;
+>   	}
+>   
+> +	if (!priv->soc_data->pm_runtime_disable_clks)
+> +		goto out;
+> +
+>   	ret = clk_prepare_enable(priv->mainck);
+>   	if (ret) {
+>   		dev_err(dev, "can't enable mainck\n");
+> @@ -344,7 +362,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>   		return dev_err_probe(&pdev->dev, PTR_ERR(priv->gck),
+>   				     "failed to get multclk\n");
+>   
+> -	ret = sdhci_at91_set_clks_presets(&pdev->dev);
+> +	ret = sdhci_at91_set_clks_presets(&pdev->dev, true);
+>   	if (ret)
+>   		return ret;
+>   
 
-The buggy address belongs to the object at ffff88802dba2000
- which belongs to the cache kmalloc-2k of size 2048
-The buggy address is located 116 bytes inside of
- freed 2048-byte region [ffff88802dba2000, ffff88802dba2800)
-
-The buggy address belongs to the physical page:
-page: refcount:0 mapcount:0 mapping:0000000000000000 index:0xffff88802dba5000 pfn:0x2dba0
-head: order:3 mapcount:0 entire_mapcount:0 nr_pages_mapped:0 pincount:0
-flags: 0xfff00000000240(workingset|head|node=0|zone=1|lastcpupid=0x7ff)
-page_type: f5(slab)
-raw: 00fff00000000240 ffff88801c042f00 ffffea0000dda410 ffffea000074f410
-raw: ffff88802dba5000 0000000000080006 00000000f5000000 0000000000000000
-head: 00fff00000000240 ffff88801c042f00 ffffea0000dda410 ffffea000074f410
-head: ffff88802dba5000 0000000000080006 00000000f5000000 0000000000000000
-head: 00fff00000000003 fffffffffffffe01 00000000ffffffff 00000000ffffffff
-head: ffffffffffffffff 0000000000000000 00000000ffffffff 0000000000000008
-page dumped because: kasan: bad access detected
-page_owner tracks the page as allocated
-page last allocated via order 3, migratetype Unmovable, gfp_mask 0xd20c0(__GFP_IO|__GFP_FS|__GFP_NOWARN|__GFP_NORETRY|__GFP_COMP|__GFP_NOMEMALLOC), pid 5751, tgid 5751 (syz-executor), ts 52051381762
- set_page_owner include/linux/page_owner.h:33 [inline]
- post_alloc_hook+0xfd/0x120 mm/page_alloc.c:1871
- prep_new_page mm/page_alloc.c:1879 [inline]
- get_page_from_freelist+0x110d/0x35d0 mm/page_alloc.c:3943
- __alloc_frozen_pages_noprof+0x2eb/0x3300 mm/page_alloc.c:5436
- alloc_slab_page mm/slub.c:3347 [inline]
- allocate_slab mm/slub.c:3462 [inline]
- new_slab+0xa9/0x6e0 mm/slub.c:3513
- refill_objects+0xe3/0x410 mm/slub.c:7417
- refill_sheaf mm/slub.c:2885 [inline]
- __pcs_replace_empty_main+0x35e/0x650 mm/slub.c:4774
- alloc_from_pcs mm/slub.c:4850 [inline]
- slab_alloc_node mm/slub.c:4984 [inline]
- __do_kmalloc_node mm/slub.c:5413 [inline]
- __kmalloc_noprof+0x67c/0x840 mm/slub.c:5439
- _kmalloc_noprof include/linux/slab.h:995 [inline]
- _kzalloc_noprof include/linux/slab.h:1312 [inline]
- cache_create_net+0xa2/0x1f0 net/sunrpc/cache.c:1739
- unix_gid_cache_create+0x60/0x130 net/sunrpc/svcauth_unix.c:875
- sunrpc_init_net+0x71/0x1b0 net/sunrpc/sunrpc_syms.c:49
- ops_init+0x1e2/0x5f0 net/core/net_namespace.c:137
- setup_net+0x118/0x3a0 net/core/net_namespace.c:443
- copy_net_ns+0x345/0x7a0 net/core/net_namespace.c:582
- create_new_namespaces+0x3ea/0xac0 kernel/nsproxy.c:132
- unshare_nsproxy_namespaces+0xf2/0x220 kernel/nsproxy.c:234
- ksys_unshare+0x4a2/0xa70 kernel/fork.c:3295
-page last free pid 5718 tgid 5718 ts 42990443667 stack trace:
- reset_page_owner include/linux/page_owner.h:26 [inline]
- __free_pages_prepare mm/page_alloc.c:1418 [inline]
- __free_frozen_pages+0x79f/0x10f0 mm/page_alloc.c:2962
- qlink_free mm/kasan/quarantine.c:163 [inline]
- qlist_free_all+0x47/0xf0 mm/kasan/quarantine.c:179
- kasan_quarantine_reduce+0x1a0/0x1f0 mm/kasan/quarantine.c:286
- __kasan_slab_alloc+0x69/0x90 mm/kasan/common.c:350
- kasan_slab_alloc include/linux/kasan.h:253 [inline]
- slab_post_alloc_hook mm/slub.c:4683 [inline]
- slab_alloc_node mm/slub.c:4996 [inline]
- kmem_cache_alloc_noprof+0x269/0x6a0 mm/slub.c:5010
- alloc_filename fs/namei.c:147 [inline]
- do_getname+0x35/0x390 fs/namei.c:187
- class_filename_flags_constructor include/linux/fs.h:2586 [inline]
- do_sys_openat2+0xc7/0x1e0 fs/open.c:1416
- do_sys_open fs/open.c:1423 [inline]
- __do_sys_openat fs/open.c:1439 [inline]
- __se_sys_openat fs/open.c:1434 [inline]
- __x64_sys_openat+0x12d/0x210 fs/open.c:1434
- do_syscall_x64 arch/x86/entry/syscall_64.c:61 [inline]
- do_syscall_64+0x123/0x790 arch/x86/entry/syscall_64.c:84
- entry_SYSCALL_64_after_hwframe+0x77/0x7f
-
-Memory state around the buggy address:
- ffff88802dba1f00: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
- ffff88802dba1f80: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
->ffff88802dba2000: fa fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
-                                                             ^
- ffff88802dba2080: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
- ffff88802dba2100: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
-==================================================================
-
-
----
-If you want syzbot to run the reproducer, reply with:
-#syz test: git://repo/address.git branch-or-commit-hash
-If you attach or paste a git patch, syzbot will apply it before testing.
