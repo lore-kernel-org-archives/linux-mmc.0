@@ -1,179 +1,215 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oo2-f4.google.com (mail-oo2-f4.google.com [74.125.231.132])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B31C4C652B
-	for <linux-mmc@vger.kernel.org>; Tue, 22 Sep 2026 20:36:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECB732F7445
+	for <linux-mmc@vger.kernel.org>; Wed, 23 Sep 2026 00:33:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.231.132
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790109387; cv=none; b=XMNP1ffQyNHlHiieUv1vd5/n53X3GHHmoeC7osZW2/Pj8psVo1k3iEm6NvUT1HSU+AnYozZwecsI6eWKodln3vfgdKuIplLRcnbKIT8tYS7VBXiFxt2DRzXwWepto+n03C9iS+FaKnuNYtDFp4SKUfsfXTRhP9JEd762NUI8Nxs=
+	t=1790123606; cv=none; b=YH+TDL1hW3PZAzFdnkBxXAP+VLqk58SkgGqbCbeEbNI+oGB3obs+4RUKCwe5u0kvkBWIa3S6+mo0yDWSQD6PQjjGE1Xu8gxHwa0iccKsIk87pei5kvj5Tr1kmp1EY8GlFNm59uESG+sY15qyAYiF+LTpLLg/bkFlVPF5Vl8Pupg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790109387; c=relaxed/simple;
-	bh=F2Rmub3kqynxFCpMUaKCzbW3Wn9kxlczWQbB/Q64QTc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=V6C/zx4bAHe6s4O7HFJrJSFgc+BtQSPFbNykRKopsLC3czZBDOrqrAS/2jL+DGsHRMAcsd/IHizKCWP4f4UEocKCPTmGMvbJo+ka4Erv60HqGJCxgb8+zlm6300QOdzk1YMc3faiGDwQzhyoGglToLgXZOnD0OoFJQeVcYKKicQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=gq1bXgXF; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=ip0CgMha; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="gq1bXgXF";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="ip0CgMha"
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68MIXMEt268278
-	for <linux-mmc@vger.kernel.org>; Tue, 22 Sep 2026 20:36:12 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=qcppdkim1; bh=+hpos+oDMvB//kGlWtIFvFC8
-	JGuO25mX9RiSy0nVVWI=; b=gq1bXgXF3s8Ra4n02W3SuuXBHDj7XCY1aL1sxa9c
-	u2ix9mNTUjoYemXIUH9MUJBag6g96s+TaF3H4UV4X0Wwh4Jp4C+bT1bvRGIefFf/
-	evLcj9iy5K80G4tgUlTNm0+6PM8pnK+UlIK/rQHU6HORQq1dobQdsAQc0sOs2yVP
-	l6barOdQ00KSB1x/v5eVSy6TCD2xX5HcAR6wERBje5qrpc8jf9qzQK1pZrDDPGLL
-	RPaiXl66re5XrVB2T0JhfiWpX/Geoo/8x+tGZHhuAEDzeSmfJIODDBAb9vTknyUK
-	jnvkqMl1sq27dq08hW6w+a7KwE/1SdLH0GWY6i24Cmp4Cw==
-Received: from mail-vk1-f199.google.com (mail-vk1-f199.google.com [209.85.221.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4guy2c0n6v-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Tue, 22 Sep 2026 20:36:12 +0000 (GMT)
-Received: by mail-vk1-f199.google.com with SMTP id 71dfb90a1353d-5c8323b8464so353035e0c.3
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Sep 2026 13:36:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1790109372; x=1790714172; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=+hpos+oDMvB//kGlWtIFvFC8JGuO25mX9RiSy0nVVWI=;
-        b=ip0CgMhayu6gB3gsAPCS5yxYEqc+dwLSCbuGbOjh2Nt9Y3rNTHqxJlqJLI1dqE6NbV
-         ncP5LngzGNiDLFA3naKTHyvHv6Iu/GvW9y1PGJDMqB7+b2tucjY8gPjdNqTYBbS76voy
-         QOp8+2YEHvusbSCFsBMM4CzX49AjvJznet7YYf31awLcY3ANXNujhvHEBaMDxj3XKpaj
-         BoMKiO4ofIVyKfpcLME+sxcLsCROkKUA7ejBThgRV18Htx8z+jnEydvU89gCJbt8r05/
-         +H0O+z9Iah5AjZrYbi31pdjsQ/TJf9U95Uty2BCCwufdgLvZPVM1MYHUrhWuBd1xstNF
-         NLaA==
+	s=arc-20240116; t=1790123606; c=relaxed/simple;
+	bh=sUo0eeU9dqLm3x/b4GdwnnnVIPDwHP9vuivKkMgRwQM=;
+	h=MIME-Version:Date:Message-ID:Subject:From:To:Content-Type; b=DNPgG4mF3A5ipUX5JRW/hTYkTPoohIj+LmNzw4U2nyasSLfVxBdNxMNYx+mdTP7H36o6HDVtcRpics17p2rF1X3YN/RDwVvGMaxVuwB82+WpEqAlQQhzqRzBO0+ZDEkNx94ATTOsidOnnEVVq5zGbrqtAIQG6H6687J4aNNsAWk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=74.125.231.132
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
+Received: by mail-oo2-f4.google.com with SMTP id 006d021491bc7-6d26562298dso135130eaf.0
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Sep 2026 17:33:24 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790109372; x=1790714172;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:x-gm-gg
+        d=1e100.net; s=20260707; t=1790123604; x=1790728404;
+        h=content-type:to:from:subject:message-id:date:mime-version
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=+hpos+oDMvB//kGlWtIFvFC8JGuO25mX9RiSy0nVVWI=;
-        b=Fy3cC4Bc9uXuDDhUPIggfldmjZmqvmXq3zLxNbXMKd5Ea5gslurteruAIYBakInz9p
-         nFRfsZVJvoVBaa8TiITng0ajZv2I2x4l/iOVZO0l6PpyMyxLuvamg42yh0gOPosZAfUc
-         U/aw+Sst/6QlnnXGXRYjRzaLzkUIMuhRXsfeCTm4Dmw13i1cvKCKUYk7Tkpk5G1ys2i/
-         /UJv0tpHIZmO/eE0yfgY+rSfmzyw1zMp2a3Vq7pvyQanwD17wxnlzokNbruZncEgx/fx
-         WzuUXFg45ET+jgk18n8RqYzcnKZIJIVh5BB0YyXvHUE+A/QWyymiSc4Avhc27OBbsC7q
-         5QIw==
-X-Forwarded-Encrypted: i=1; AKwUvBwG9aHni3lTCyANAofdD9+cqAudIr4AbUSV2w21mD8tmCAuK5uwYlIXNry5mz4qDl7PByOqANYFDYI=@vger.kernel.org
-X-Gm-Message-State: AFuF++kPOqeeCw9VZ2mQw28UrC0zJwbLv+cIoPRXStmcUYFCTsTFdsGx
-	DgQd2egkRnqzvPfuZVrw8zR9RCKCMJWVYiKP2jW8t//wjNz/MkblsG7J7vwC7uhcK5Q5aiwPJ3x
-	pMjY+mwxrMTcr9R+6bZSWlr8EGr/BlvtocKdJsOjCs1M4JbOqWp9+yYCQ0wcjhns=
-X-Gm-Gg: AYBFou0nKufAmEMkTNkL/31gkNxmLCFSoyxTECK7LI79xQ9qO1pXJ1MGauWFvPiMOsE
-	IrWdK7ESx46O81RNipIjhyGJrqvkL+DfnDxa7GNZFcEyp5ZlD0X+x25kUMmzufqDsFkJuJsnNnE
-	arHZia7IRFg9HRziYxviogSuyiz+FipaPFcxXyOl7iiuvdIG2M1TRgt2nTFIx9X93tkWmMAiqMM
-	8RplNt54B5EVWW51GjjPmWnf/olWppuv2KKd2ggSVtgxHEUGUlPLlN7nfVdP+0leTBHG4KyL2lU
-	14oi+YrgTHY96XZQ0g/NcfdLEQOuj7q3H9PWHFK9HBMmh2QQz4L6G8nLYMBsCGEosk4paKXncKo
-	Ut9uddha4uLmx5Q==
-X-Received: by 2002:a05:6122:21a1:b0:5c9:a7af:8178 with SMTP id 71dfb90a1353d-5c9f1597c52mr1337329e0c.2.1790109371730;
-        Tue, 22 Sep 2026 13:36:11 -0700 (PDT)
-X-Received: by 2002:a05:6122:21a1:b0:5c9:a7af:8178 with SMTP id 71dfb90a1353d-5c9f1597c52mr1337277e0c.2.1790109371230;
-        Tue, 22 Sep 2026 13:36:11 -0700 (PDT)
-Received: from oss.qualcomm.com ([86.121.170.232])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4886876c267sm965996f8f.16.2026.09.22.13.36.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Sep 2026 13:36:10 -0700 (PDT)
-Date: Tue, 22 Sep 2026 23:36:06 +0300
-From: Abel Vesa <abel.vesa@oss.qualcomm.com>
-To: muzafferkadir@mainlining.org
-Cc: Bjorn Andersson <andersson@kernel.org>, Abel Vesa <abelvesa@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>, Brian Masney <bmasney+clk@redhat.com>,
-        Jerome Brunet <jbrunet+clk@baylibre.com>,
-        Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Srinivas Kandagatla <srini@kernel.org>, Ulf Hansson <ulfh@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        "Joerg Roedel (AMD)" <joro@8bytes.org>, Will Deacon <will@kernel.org>,
-        Robin Murphy <robin.murphy@arm.com>, Lee Jones <lee@kernel.org>,
-        Rob Clark <robin.clark@oss.qualcomm.com>,
-        Dmitry Baryshkov <lumag@kernel.org>,
-        Abhinav Kumar <abhinav.kumar@linux.dev>,
-        Jessica Zhang <jesszhan0024@gmail.com>, Sean Paul <sean@poorly.run>,
-        Marijn Suijten <marijn.suijten@somainline.org>,
-        Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-        Maxime Ripard <mripard@kernel.org>,
-        Thomas Zimmermann <tzimmermann@suse.de>,
-        David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-        Robert Marko <robimarko@gmail.com>,
-        Guru Das Srinagesh <linux@gurudas.dev>,
-        Amit Kucheria <amitk@kernel.org>,
-        Thara Gopinath <thara.gopinath@gmail.com>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>,
-        Kees Cook <kees@kernel.org>, Tony Luck <tony.luck@intel.com>,
-        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        David Heidelberg <david@ixit.cz>, phone-devel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, iommu@lists.linux.dev, mfd@lists.linux.dev,
-        dri-devel@lists.freedesktop.org, freedreno@lists.freedesktop.org,
-        Krzysztof Kozlowski <krzk@kernel.org>, linux-pm@vger.kernel.org,
-        linux-input@vger.kernel.org
-Subject: Re: [PATCH v3 02/19] clk: qcom: Add global clock controller driver
- for MSM8952
-Message-ID: <c2jt5rpbmys2fguk6ui7e4lwzp55vio3vf73akeiega2wqb5pf@ewp6wsvtxm3n>
-References: <20260921-msm8952-initial-support-v3-0-b96fd3fe298b@mainlining.org>
- <20260921-msm8952-initial-support-v3-2-b96fd3fe298b@mainlining.org>
+        bh=26acOs9A2D4oBmB7TKWMEDIcWIuf7VT+CiNnxN/eHn0=;
+        b=RTbGkqkaenSKqjwYgXVpaeGeeEESwqhuMOQjylvUWAeStcfLrVxKJ7SrZQU2QXegJ4
+         KZtFK0BYDtJ8VXU2gVU/7sgvQjJD/puH3JGKsJ0h56Ws3pufca5i4/GCQJgjqCnx17uf
+         OH55mLBHUTLwlh5vLlsY3PS97HrsljtrAy7yUM8ZXubch1ZxxprYXnu0lrdfdFuO4Hmu
+         pYWsAH+uOrjkI/U2sNzR0umlgo08ZZFGyeTHuw7TN0P0dPtbMsFhZjqGnj4FeLerU+cU
+         hg0eTl1pHxBWAl88HccyiZMTTvyi6em77mtaejz8LcqkY7kd0IqmVdWcTRf1AN6bjqAO
+         UuIA==
+X-Forwarded-Encrypted: i=1; AKwUvBy5Y4pNQ2PIogbfrrl6EYdydOuKz1y7Y1nHoFzu6P7TVWmkrjWqQzokUxmLK+tdoEIpNYcU1wsudhs=@vger.kernel.org
+X-Gm-Message-State: AFuF++k7svPtdD4z9ZdzjBpgYtorVNz6nWoIanl8s0HGojC0j3CWfGHQ
+	S1HpsbO+l3SSqWYesPnhsVLUy+s3FBFpkYzvfJzHa0ChQPXgPVW8cGEHfHGvt5smiSJ0TYUYVuH
+	GVQ50Lj5GmSTHOL7UWTN+aYlQueINJkUVMc4gCH4Cp1aH80+vPzMKkJTsSaE=
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260921-msm8952-initial-support-v3-2-b96fd3fe298b@mainlining.org>
-X-Proofpoint-GUID: smyivpGhLf1CkzxFnb49Av5Oonmd60e0
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTIyMDI5NSBTYWx0ZWRfX73jvo8vlvxdW
- WW/hdkiCPlJc2/XQQD/ZK7O29CCaaTIGQ+BuXsuq8b6OervF2S2krzYzrIjuiirQdBcrG1eUJxo
- ftVGGg5JqrTD/MCNybGk5itkjCxnz+E=
-X-Authority-Analysis: v=2.4 cv=Zsh4uN7G c=1 sm=1 tr=0 ts=6ab2e6bc cx=c_pps
- a=+D9SDfe9YZWTjADjLiQY5g==:117 a=po8fGBi+ks8MzcVQGuqtFQ==:17
- a=kj9zAlcOel0A:10 a=VdqzKS8jKosA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=yx91gb_oNiZeI1HMLzn7:22
- a=Oh2cFVv5AAAA:8 a=OuZLqq7tAAAA:8 a=EUspDBNiAAAA:8 a=n1RHFZ1giDiXVFLDIJ0A:9
- a=CjuIK1q_8ugA:10 a=vmgOmaN-Xu0dpDh8OwbV:22 a=7KeoIwV6GZqOttXkcoxL:22
- a=AKGiAy9iJ-JzxKVHQNES:22
-X-Proofpoint-ORIG-GUID: smyivpGhLf1CkzxFnb49Av5Oonmd60e0
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTIyMDI5NSBTYWx0ZWRfX9ULqOW+MkgDy
- ZxUSzAiYw7likg3mtKwuCxTwXN87z5b3y8XwF+lfHcovWzvlObQEPBRmMuEFxDD6xbw1ZeBz6/L
- RQ39CHGiYE0R1eCRiC3mOJqiiQWHEyGu42i3VODbCqqtrSTI+hMNRPX8H9X636z2U1tmY768Ow9
- lH/f0PPxsGJtIisrH+5AlUn7OQvOrKG1SnpzimxY2bmUXhzGEI5V0gRmFLyBiGa7SB5xgTI5Mcu
- U8toPgCTbEjJiNhMnh819ApJhmEvIUH9k/WBTNiUmyzUj/+9+xt62LLVb14Jhe4pHuZvPOzqcOE
- Z08/AZxH8oUB/7CiCLplnYy/ZtJ+XofyAltFuu/EkA7+1+uJ3XH6ICHx1joA5ihnRSrflNkXy3O
- 6HyWaZxzBoouxVfLCh+49FrQgM4klU4cboeEWZbMu6Lm9/V0zq+jLHk1Fhf4GcsaINMQKqZ9Dj5
- GYPrmSSuH2VdGS+G6Cw==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-09-22_03,2026-09-21_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 adultscore=0 clxscore=1015 priorityscore=1501 phishscore=0
- bulkscore=0 suspectscore=0 malwarescore=0 spamscore=0 lowpriorityscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609220295
+X-Received: by 2002:a05:6820:1524:b0:6cd:3fdb:fa65 with SMTP id
+ 006d021491bc7-6d2d3908806mr979955eaf.80.1790123603977; Tue, 22 Sep 2026
+ 17:33:23 -0700 (PDT)
+Date: Tue, 22 Sep 2026 17:33:23 -0700
+X-Google-Appengine-App-Id: s~syzkaller
+X-Google-Appengine-App-Id-Alias: syzkaller
+Message-ID: <6ab31e53.3179f8cd.1e36b2.002e.GAE@google.com>
+Subject: [syzbot] [mmc?] KASAN: slab-use-after-free Write in ms_read_bytes
+From: syzbot <syzbot+ccffdf05833ebdaeae70@syzkaller.appspotmail.com>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-usb@vger.kernel.org, maximlevitsky@gmail.com, oakad@yahoo.com, 
+	syzkaller-bugs@googlegroups.com, ulf.hansson@linaro.org, ulfh@kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On 26-09-21 21:18:53, Muzaffer Kadir via B4 Relay wrote:
-> From: Muzaffer Kadir <muzafferkadir@mainlining.org>
-> 
-> This driver provides clocks, resets and power domains needed for various
-> components of the MSM8952.
-> 
-> Some downstreams merge MSM8952 to MSM8917 and MSM8937. But upstreamed
-> GCC driver for 8917 series has different pll structure and ported from
-> different GCC driver.
-> 
-> MSM8952 GCC driver is mainly based on MSM8939 GCC driver, with
-> some parts added from existing other GCC drivers.
-> 
-> Link: https://android.googlesource.com/kernel/msm.git/+/refs/tags/android-wear-7.0.0_r0.3/drivers/clk/qcom/clock-gcc-8952.c
-> Signed-off-by: Muzaffer Kadir <muzafferkadir@mainlining.org>
+Hello,
 
-Reviewed-by: Abel Vesa <abel.vesa@oss.qualcomm.com>
+syzbot found the following issue on:
+
+HEAD commit:    d58dffe9ee2c USB: core: amend usb_get_from_anchor() kernel..
+git tree:       https://git.kernel.org/pub/scm/linux/kernel/git/gregkh/usb.git usb-testing
+console output: https://syzkaller.appspot.com/x/log.txt?x=112d0515580000
+kernel config:  https://syzkaller.appspot.com/x/.config?x=c451f9f64434b622
+dashboard link: https://syzkaller.appspot.com/bug?extid=ccffdf05833ebdaeae70
+compiler:       gcc (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44
+
+Unfortunately, I don't have any reproducer for this issue yet.
+
+Downloadable assets:
+disk image: https://storage.googleapis.com/syzbot-assets/424c61cbb872/disk-d58dffe9.raw.xz
+vmlinux: https://storage.googleapis.com/syzbot-assets/4124586dc97c/vmlinux-d58dffe9.xz
+kernel image: https://storage.googleapis.com/syzbot-assets/a07e8e384dc4/bzImage-d58dffe9.xz
+
+IMPORTANT: if you fix the issue, please add the following tag to the commit:
+Reported-by: syzbot+ccffdf05833ebdaeae70@syzkaller.appspotmail.com
+
+=========
+==================================================================
+BUG: KASAN: slab-use-after-free in ms_read_bytes+0x8fe/0x990 drivers/memstick/host/rtsx_usb_ms.c:450
+Write of size 1 at addr ffff88813c188079 by task kworker/1:5/5239
+
+CPU: 1 UID: 0 PID: 5239 Comm: kworker/1:5 Not tainted syzkaller #0 PREEMPT(lazy) 
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/24/2026
+Workqueue: events rtsx_usb_ms_handle_req
+Call Trace:
+ <TASK>
+ __dump_stack lib/dump_stack.c:94 [inline]
+ dump_stack_lvl+0x100/0x190 lib/dump_stack.c:120
+ print_address_description mm/kasan/report.c:378 [inline]
+ print_report+0x13d/0x4b0 mm/kasan/report.c:482
+ kasan_report+0xdf/0x1c0 mm/kasan/report.c:595
+ ms_read_bytes+0x8fe/0x990 drivers/memstick/host/rtsx_usb_ms.c:450
+ rtsx_usb_ms_issue_cmd drivers/memstick/host/rtsx_usb_ms.c:477 [inline]
+ rtsx_usb_ms_handle_req+0x557/0x1a00 drivers/memstick/host/rtsx_usb_ms.c:531
+ process_one_work+0xac7/0x1b10 kernel/workqueue.c:3396
+ process_scheduled_works kernel/workqueue.c:3479 [inline]
+ worker_thread+0x5ef/0xe50 kernel/workqueue.c:3560
+ kthread+0x373/0x450 kernel/kthread.c:436
+ ret_from_fork+0x69f/0xc90 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+ </TASK>
+
+Allocated by task 1662:
+ kasan_save_stack+0x30/0x50 mm/kasan/common.c:57
+ kasan_save_track+0x14/0x30 mm/kasan/common.c:78
+ poison_kmalloc_redzone mm/kasan/common.c:398 [inline]
+ __kasan_kmalloc+0x8f/0xa0 mm/kasan/common.c:415
+ kasan_kmalloc include/linux/kasan.h:263 [inline]
+ __kmalloc_cache_noprof+0x2d8/0x680 mm/slub.c:5563
+ _kmalloc_noprof include/linux/slab.h:991 [inline]
+ _kzalloc_noprof include/linux/slab.h:1312 [inline]
+ memstick_alloc_card drivers/memstick/core/memstick.c:383 [inline]
+ memstick_check+0x2c1/0x10d0 drivers/memstick/core/memstick.c:452
+ process_one_work+0xac7/0x1b10 kernel/workqueue.c:3396
+ process_scheduled_works kernel/workqueue.c:3479 [inline]
+ worker_thread+0x5ef/0xe50 kernel/workqueue.c:3560
+ kthread+0x373/0x450 kernel/kthread.c:436
+ ret_from_fork+0x69f/0xc90 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+
+Freed by task 1662:
+ kasan_save_stack+0x30/0x50 mm/kasan/common.c:57
+ kasan_save_track+0x14/0x30 mm/kasan/common.c:78
+ kasan_save_free_info+0x3b/0x70 mm/kasan/generic.c:584
+ poison_slab_object mm/kasan/common.c:253 [inline]
+ __kasan_slab_free+0x43/0x70 mm/kasan/common.c:285
+ kasan_slab_free include/linux/kasan.h:235 [inline]
+ slab_free_hook mm/slub.c:2748 [inline]
+ slab_free mm/slub.c:6499 [inline]
+ kfree+0x20c/0x650 mm/slub.c:6792
+ memstick_alloc_card drivers/memstick/core/memstick.c:420 [inline]
+ memstick_check+0x72b/0x10d0 drivers/memstick/core/memstick.c:452
+ process_one_work+0xac7/0x1b10 kernel/workqueue.c:3396
+ process_scheduled_works kernel/workqueue.c:3479 [inline]
+ worker_thread+0x5ef/0xe50 kernel/workqueue.c:3560
+ kthread+0x373/0x450 kernel/kthread.c:436
+ ret_from_fork+0x69f/0xc90 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+
+The buggy address belongs to the object at ffff88813c188000
+ which belongs to the cache kmalloc-2k of size 2048
+The buggy address is located 121 bytes inside of
+ freed 2048-byte region [ffff88813c188000, ffff88813c188800)
+
+The buggy address belongs to the physical page:
+page: refcount:0 mapcount:0 mapping:0000000000000000 index:0x0 pfn:0x13c188
+head: order:3 mapcount:0 entire_mapcount:0 nr_pages_mapped:0 pincount:0
+flags: 0x200000000000040(head|node=0|zone=2)
+page_type: f5(slab)
+raw: 0200000000000040 ffff888100042000 dead000000000100 dead000000000122
+raw: 0000000000000000 0000000000080008 00000000f5000000 0000000000000000
+head: 0200000000000040 ffff888100042000 dead000000000100 dead000000000122
+head: 0000000000000000 0000000000080008 00000000f5000000 0000000000000000
+head: 0200000000000003 fffffffffffffe01 00000000ffffffff 00000000ffffffff
+head: 0000000000000000 0000000000000000 00000000ffffffff 0000000000000008
+page dumped because: kasan: bad access detected
+page_owner tracks the page as allocated
+page last allocated via order 3, migratetype Unmovable, gfp_mask 0xd20c0(__GFP_IO|__GFP_FS|__GFP_NOWARN|__GFP_NORETRY|__GFP_COMP|__GFP_NOMEMALLOC), pid 24, tgid 24 (kworker/1:0), ts 137296809400
+ set_page_owner include/linux/page_owner.h:33 [inline]
+ post_alloc_hook+0xfd/0x120 mm/page_alloc.c:1871
+ prep_new_page mm/page_alloc.c:1879 [inline]
+ get_page_from_freelist+0xf4b/0x3440 mm/page_alloc.c:3943
+ __alloc_frozen_pages_noprof+0x2d7/0x2f70 mm/page_alloc.c:5436
+ alloc_slab_page mm/slub.c:3347 [inline]
+ allocate_slab mm/slub.c:3462 [inline]
+ new_slab+0xa9/0x6e0 mm/slub.c:3513
+ refill_objects+0xe3/0x410 mm/slub.c:7410
+ refill_sheaf mm/slub.c:2885 [inline]
+ __pcs_replace_empty_main+0x35e/0x650 mm/slub.c:4774
+ alloc_from_pcs mm/slub.c:4850 [inline]
+ slab_alloc_node mm/slub.c:4984 [inline]
+ __kmalloc_cache_noprof+0x4a1/0x680 mm/slub.c:5559
+ _kmalloc_noprof include/linux/slab.h:991 [inline]
+ _kzalloc_noprof include/linux/slab.h:1312 [inline]
+ usb_alloc_dev+0x55/0x1090 drivers/usb/core/usb.c:651
+ hub_port_connect drivers/usb/core/hub.c:5483 [inline]
+ hub_port_connect_change drivers/usb/core/hub.c:5720 [inline]
+ port_event drivers/usb/core/hub.c:5884 [inline]
+ hub_event+0x2c5d/0x4510 drivers/usb/core/hub.c:5966
+ process_one_work+0xac7/0x1b10 kernel/workqueue.c:3396
+ process_scheduled_works kernel/workqueue.c:3479 [inline]
+ worker_thread+0x5ef/0xe50 kernel/workqueue.c:3560
+ kthread+0x373/0x450 kernel/kthread.c:436
+ ret_from_fork+0x69f/0xc90 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+page_owner free stack trace missing
+
+Memory state around the buggy address:
+ ffff88813c187f00: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+ ffff88813c187f80: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+>ffff88813c188000: fa fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+                                                                ^
+ ffff88813c188080: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+ ffff88813c188100: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+==================================================================
+
+
+---
+This report is generated by a bot. It may contain errors.
+See https://goo.gl/tpsmEJ for more information about syzbot.
+syzbot engineers can be reached at syzkaller@googlegroups.com.
+
+syzbot will keep track of this issue. See:
+https://goo.gl/tpsmEJ#status for how to communicate with syzbot.
+
+If the report is already addressed, let syzbot know by replying with:
+#syz fix: exact-commit-title
+
+If you want to overwrite report's subsystems, reply with:
+#syz set subsystems: new-subsystem
+(See the list of subsystem names on the web dashboard)
+
+If the report is a duplicate of another one, reply with:
+#syz dup: exact-subject-of-another-report
+
+If you want to undo deduplication, reply with:
+#syz undup
