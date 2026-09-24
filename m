@@ -1,128 +1,86 @@
-Received: from mail-m127105.qiye.163.com (mail-m127105.qiye.163.com [115.236.127.105])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E5F0A2D876F
-	for <linux-mmc@vger.kernel.org>; Thu, 24 Sep 2026 09:06:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.236.127.105
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39A6947AF43;
+	Thu, 24 Sep 2026 12:01:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790240803; cv=none; b=iFxycZaHlvyzZUzy4J1kfCE7yjymDGSyiKlFQGOv2WKRUrQs/fACDTbUSr8RfGWvMrn4LsJt1CazAOG9E719hLWbsXJwhOZuGD5jhn/3eTz2EzJ6A5q980KBE3BpdcfldfHjlJrIQ7DPmaJ6LeWIJHZPLqEm2g6BlHnaMG+Vfqg=
+	t=1790251319; cv=none; b=mMGRzgPQyrqxlhGkWoq9BggmgpXhXx20kzvgPJQXWv/kctVeoWrz25bnZ/iPeesEnb90kDuFLBJfm3rEjFsrwjam+qCpMWH5WImSfnSZWfQe073FsxJLdwoBHXHZ0hY0HfaUA5pi32+bGqSn+ZbxWcHjs7Qq0Q/Ppx+JIAMVtPM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790240803; c=relaxed/simple;
-	bh=o6N4S7NPxO/Ut6Vh4Q6RoepPtPcwAxvlrKfQS/YNuQM=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=KTtDXCRDKjvlgdEZ6TOgd8A/Aoz9O4i7yxpspjkSOk0OCbwUDvHlg2opByVjYcjRo5ynm4H98j4tcN46gajlHk9TixCj41jTaJAy29QdICtIqxGzLHS5sRq8VrRMU06oaZNBHhqVn0bRuhruM1f/YP4iiql28kUkwiaCTVFKg0w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=BlSfYSf8; arc=none smtp.client-ip=115.236.127.105
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1790251319; c=relaxed/simple;
+	bh=jBOrgiMFEpstulATdM5kh+vQxQ2R3XKn97EH6342f2Q=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=kSkg6IpgY1evZAY231A5HYuDQeqlYTYKOnVqmL+PGu86j3CFjbt6uKTwynDgW2u265XJ39NHMEI23+IqGaOz34XpCtrXbVW0gtekj0n3u7C9WFaVmrcVXYISlbr7nkD/vfsC2uXK2nNbUfDRHez4byhAYtvKC1xdcROJ+p+h+o0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UcC8tR+D; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="BlSfYSf8"
-Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 4f01e1b87;
-	Thu, 24 Sep 2026 16:50:50 +0800 (GMT+08:00)
-From: Shawn Lin <shawn.lin@rock-chips.com>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>,
-	linux-mmc@vger.kernel.org,
-	linux-rockchip@lists.infradead.org,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 1/2] mmc: core: add mmc_send_tuning_timeout()
-Date: Thu, 24 Sep 2026 16:50:22 +0800
-Message-Id: <1790239823-139583-2-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1790239823-139583-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1790239823-139583-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0aa0d29c3f4503a4kunm11feacd55405de
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1kYFggdWUFKV1ktWUFJV1kPCRoVCBIfWUFZGUIeH1ZKHklISkJIQk
-	1LQ05WFRQJFhoXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0
-	tIVUpLSU9PT0hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=BlSfYSf8pl0lDDHELvsr++dVLOgOiS/TAnQ0+YMjRvy1ZQZDLyH1D5lXnDTpW/kdv+Jao2yr55g98FlfUQ/yb5tH9HnLPO6rdCtvblW3YmXqFChrPqZXYm28/3fIyAJS2hWXxatOvu621DHG2fXNa5v0LWJUbwTcnlXrVzUHj4k=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=sruEtLMqlbgePRm762lKIDdTMJN72z82oizqShLTvfM=;
-	h=date:mime-version:subject:message-id:from;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UcC8tR+D"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A3CC71F000FF;
+	Thu, 24 Sep 2026 12:01:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1790251317;
+	bh=ugFVTFUZKd5DVbiFq8MFmNC7p3Vw3V7eXLUNAr7Xrzw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=UcC8tR+Dnm8H+8AkV+jljM/p7Y7E18cp3wvRbeGfxEtru/jDq516lJFUhQAK2mWsr
+	 3J0oFeXSiP3tZl4SikYimTGqohXk4X/9VJ5PbtTBoeRh4Cpv1wk8UPflo3qFOk8czF
+	 ea91bH/UlQn5sh+CH6r5y+M7XN529diQVJqrjikLueU385jF3vb4sEZqFhmO3qSmkM
+	 9GCoRTwlh3UbVZz8chWUU/P4gNIGgRrNluRimNeAH7YDrvnlm7pbBykKSMK2qEAlyJ
+	 I6bPbCuZzveqV5INxddEBKTsw6Fwn8l1101mCN2XANaATnFPGBlEzUUmj/3xe66Neg
+	 /Y4bVcwkB4n8g==
+Date: Thu, 24 Sep 2026 14:01:53 +0200
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: Changhuang Liang <changhuang.liang@starfivetech.com>
+Cc: Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Ulf Hansson <ulfh@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Inochi Amaoto <inochiama@gmail.com>, Chen Wang <chen.wang@linux.dev>, 
+	Jisheng Zhang <jszhang@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	devicetree@vger.kernel.org, sophgo@lists.linux.dev, Philipp Zabel <p.zabel@pengutronix.de>
+Subject: Re: [PATCH v1 1/2] dt-bindings: mmc: snps,dwcmshc-sdhci: Add
+ starfive,jhb100-dwcmshc
+Message-ID: <20260924-truthful-uppish-porpoise-d3de6c@quoll>
+References: <20260919092950.178617-1-changhuang.liang@starfivetech.com>
+ <20260919092950.178617-2-changhuang.liang@starfivetech.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20260919092950.178617-2-changhuang.liang@starfivetech.com>
 
-Add mmc_send_tuning_timeout() which takes the data timeout in
-milliseconds, and turn mmc_send_tuning() into a thin wrapper keeping
-the current 150 ms, so there is no behaviour change for the existing
-callers.  This lets drivers pass a tighter timeout for software
-tuning, e.g. hosts which scan the tuning window phase by phase.
+On Sat, Sep 19, 2026 at 02:29:49AM -0700, Changhuang Liang wrote:
+> Add compatible string "starfive,jhb100-dwcmshc" for the StarFive
+> JHB100 SoC.
+> 
+> The JHB100 controller uses three clocks (core, bus and cclk_tx) and a
+> single reset, so relax the common resets/reset-names minItems from 4
+> to 1 and add a dedicated conditional schema for the JHB100 compatible
+> that constrains the clocks, clock-names, resets, reset-names and the
+> required starfive,jhb100-per1-syscon property. The property describes
+> the phandle to the PER1 SYSCON and the offset of the register holding
+> the upper DMA address bits [35:32] of the eMMC DMA address, used to
+> extend the default 32-bit DMA capability to 36-bit.
+> 
+> Also rework the existing if/else blocks so that the JHB100 compatible
+> is excluded from the branch that requires the extra resets, while
+> keeping the same constraints for the other SoCs.
+> 
+> Signed-off-by: Changhuang Liang <changhuang.liang@starfivetech.com>
+> ---
+>  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 74 ++++++++++++++++++-
+>  1 file changed, 70 insertions(+), 4 deletions(-)
+> 
 
-Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+We are probably on the verge of readability of this binding, with
+multiple if:then:else and quite some combinations.
 
-Changes in v2: None
+Code looks correct, though I think we should for the next variant split
+it per each device with some common binding.
 
- drivers/mmc/core/mmc_ops.c | 22 +++++++++++++++-------
- include/linux/mmc/host.h   |  2 ++
- 2 files changed, 17 insertions(+), 7 deletions(-)
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index a952cc8..d59ff82f 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -673,7 +673,8 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- }
- EXPORT_SYMBOL_GPL(mmc_switch);
- 
--int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error)
-+int mmc_send_tuning_timeout(struct mmc_host *host, u32 opcode, int *cmd_error,
-+			    u32 timeout_ms)
- {
- 	struct mmc_request mrq = {};
- 	struct mmc_command cmd = {};
-@@ -707,12 +708,7 @@ int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error)
- 	data.blocks = 1;
- 	data.flags = MMC_DATA_READ;
- 
--	/*
--	 * According to the tuning specs, Tuning process
--	 * is normally shorter 40 executions of CMD19,
--	 * and timeout value should be shorter than 150 ms
--	 */
--	data.timeout_ns = 150 * NSEC_PER_MSEC;
-+	data.timeout_ns = timeout_ms * NSEC_PER_MSEC;
- 
- 	data.sg = &sg;
- 	data.sg_len = 1;
-@@ -740,6 +736,18 @@ int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error)
- 	kfree(data_buf);
- 	return err;
- }
-+EXPORT_SYMBOL_GPL(mmc_send_tuning_timeout);
-+
-+int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error)
-+{
-+	/*
-+	 * The eMMC and SD specs give the tuning process an overall
-+	 * budget of 150 ms.  mmc_send_tuning() simply applies that as
-+	 * the timeout of every single tuning command.  Drivers which
-+	 * want a different timeout can use mmc_send_tuning_timeout().
-+	 */
-+	return mmc_send_tuning_timeout(host, opcode, cmd_error, 150);
-+}
- EXPORT_SYMBOL_GPL(mmc_send_tuning);
- 
- int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode)
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 198554e..032c018 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -753,6 +753,8 @@ static inline int mmc_card_uhs2_hd_mode(struct mmc_host *host)
- int mmc_sd_switch(struct mmc_card *card, bool mode, int group,
- 		u8 value, u8 *resp);
- int mmc_send_status(struct mmc_card *card, u32 *status);
-+int mmc_send_tuning_timeout(struct mmc_host *host, u32 opcode, int *cmd_error,
-+			    u32 timeout_ms);
- int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
- int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
- int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
--- 
-2.7.4
+Best regards,
+Krzysztof
 
