@@ -1,81 +1,83 @@
-Received: from vinatta.cz (vinatta.cz [37.205.8.231])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E51E475809;
-	Sun, 27 Sep 2026 17:28:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49B363438A1;
+	Sun, 27 Sep 2026 17:47:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790530102; cv=none; b=BAEru8V5xMVtmoQDDFrnBs3h+bNLZM69iphJKVYWfwn7c1T7oRDncbshOKayMHRkjCJq2U4mGgng12zDM6f7CzWJ/lRQt9eipaKxn4tgIlLFX4gsLl+LM8/TmQq8gYqNcXPE0CoXlukEOwk+CyeBXjJj/cfKYA5ID+0/IBPe1zY=
+	t=1790531245; cv=none; b=J4dqQLiRDi4dwaxHeHKdIGKxu/7zKoP5LYFGvGGKY+KnnfDgRUVtEvSJ4QUcNWC86iCCoyzOMKKgvVUbtuScODFyjXfSBSk/n0HGumG4EyFDvsTeRhg47L83ahR3+LhjtTIln3b5/wdae1OIqhxr4mDHNGU5PwvEOb7pOXw1RI0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790530102; c=relaxed/simple;
-	bh=7wFClM8+pAQczxdhJUJqKMlAR1HmGxjlTK3IxTJCg2g=;
-	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:To:From:
-	 References:In-Reply-To; b=aTTw7RkJslg1SXZVN2787Vp/0xYWCqIhs08aFX7Q9Vs8IirM4/MgQqWCT1AR5Hjn5Uf0HJg45+4ZYQs2gDku99gy4K3l22oFBrbG1b4kkOJfZmXuaZ5DFACwZdAMR3a8PNBNO7etS8ywe/pUYkq3Tt5HdNE14EQk+mF2Gxy60jo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=matfyz.cz; spf=pass smtp.mailfrom=vinatta.cz; dkim=pass (2048-bit key) header.d=vinatta.cz header.i=@vinatta.cz header.b=o/oOCS/A; arc=none smtp.client-ip=37.205.8.231
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=matfyz.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=vinatta.cz
+	s=arc-20240116; t=1790531245; c=relaxed/simple;
+	bh=XQa/0FGcbV4DJZxulZm8xi2VEhQ/ECB89X6MiDGzHF0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=NrCif4/SxZdAk4oBDG2XAFO7DTr4Jl+YiBan7H0ij+k3BANujtZQ/vEeI525XV6S2pl4tMgrBUlDUCpe0sMkTKL5sjMrSmKWzODRpk3prR6VezwUGS9pqKawDnDhYlYGdRMY8xdSyqxYVTt/wZCqLZ/Clcm8ZxgMXiQB7N/df+0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FTse6Bce; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=vinatta.cz header.i=@vinatta.cz header.b="o/oOCS/A"
-DKIM-Signature: a=rsa-sha256; bh=7wFClM8+pAQczxdhJUJqKMlAR1HmGxjlTK3IxTJCg2g=;
- c=relaxed/relaxed; d=vinatta.cz;
- h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
- i=@vinatta.cz; s=default; t=1790529144; v=1; x=1790961144;
- b=o/oOCS/AFc0OjfWcZe5MxNwXS6fDKe/EMD55e5ERTrXjHgqe6OUKdYWia3HW/I7e0okeLwKn
- ayhBroQ/58yk0do/jUapZ40tqgOdoU1OnLXZXNAVOiVYtGZ1w1KBxcoOiMhmt4XEbPV/O8J7BEF
- 606PN+T8JycaxJ2BKdTJeD38bsTnT3pFAeRXkB6PbjRA7eUhQpyGhjOnk/t5ppT6E2Q6vYj+hAu
- hopCkhFeh0InMztWieMVMG3RNKypEgxs497OW4zpHlwdTgk1Uegtn1TqZJl2fk0A+JGaRbSECKn
- xB8Y6wPms7petV9XW6NabhiQLirznwv9VJOB8nmitke0g==
-Received: by vinatta.cz (envelope-sender <karel@vinatta.cz>) with ESMTPS id
- 713fe9e7; Sun, 27 Sep 2026 19:12:24 +0200
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FTse6Bce"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 835891F000FF;
+	Sun, 27 Sep 2026 17:47:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1790531243;
+	bh=4UGSD6QOqsK7x7bW27DoVdhw8/6KXu6nNsPGwCg+XOM=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=FTse6BceAe8HDezxUlWZ/5EQyZhJCydrkGIETRwb+qZoDQdid4eUZiet1e/6LE3XY
+	 6CKwR/P9eRbDakEQpISJQc/muLW/BCSVfe4zjAVLXFGxOusx/kiSYwE5qIgI0fPQMe
+	 50lAZXN82q1RRUocay1M/xuqzW4oj6d8R6/EuIVoamW9hCric6QoglU1YSKn9l1Qdh
+	 Mc/7iKuoPES12gmICCMeolnpSPlEdQbw1tu7ur0q4A9eD04k+IX1T7QCXzcWN6pYZk
+	 pKdB/DBpdjwqYBL3J+evETgwqzESxou2Q9F+n4zeUizvN0HH4yIwiaodfwhsA/zSjL
+	 ybq1Rid6R5bmw==
+Date: Sun, 27 Sep 2026 19:47:20 +0200
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: Muzaffer Kadir <muzafferkadir@mainlining.org>
+Cc: Bjorn Andersson <andersson@kernel.org>, 
+	Abel Vesa <abelvesa@kernel.org>, Stephen Boyd <sboyd@kernel.org>, 
+	Brian Masney <bmasney+clk@redhat.com>, Jerome Brunet <jbrunet+clk@baylibre.com>, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Srinivas Kandagatla <srini@kernel.org>, 
+	Ulf Hansson <ulfh@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
+	"Joerg Roedel (AMD)" <joro@8bytes.org>, Will Deacon <will@kernel.org>, 
+	Robin Murphy <robin.murphy@arm.com>, Lee Jones <lee@kernel.org>, 
+	Rob Clark <robin.clark@oss.qualcomm.com>, Dmitry Baryshkov <lumag@kernel.org>, 
+	Abhinav Kumar <abhinav.kumar@linux.dev>, Jessica Zhang <jesszhan0024@gmail.com>, 
+	Sean Paul <sean@poorly.run>, Marijn Suijten <marijn.suijten@somainline.org>, 
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, 
+	Simona Vetter <simona@ffwll.ch>, Robert Marko <robimarko@gmail.com>, 
+	Guru Das Srinagesh <linux@gurudas.dev>, Amit Kucheria <amitk@kernel.org>, 
+	Thara Gopinath <thara.gopinath@gmail.com>, "Rafael J. Wysocki" <rafael@kernel.org>, 
+	Daniel Lezcano <daniel.lezcano@kernel.org>, Zhang Rui <rui.zhang@intel.com>, 
+	Lukasz Luba <lukasz.luba@arm.com>, Kees Cook <kees@kernel.org>, Tony Luck <tony.luck@intel.com>, 
+	"Guilherme G. Piccoli" <gpiccoli@igalia.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
+	David Heidelberg <david@ixit.cz>, phone-devel@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	linux-clk@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, iommu@lists.linux.dev, mfd@lists.linux.dev, 
+	dri-devel@lists.freedesktop.org, freedreno@lists.freedesktop.org, linux-pm@vger.kernel.org, 
+	linux-input@vger.kernel.org
+Subject: Re: [PATCH v3 04/19] dt-bindings: power: rpmpd: Add MSM8952 power
+ domains
+Message-ID: <20260927-tiny-electronic-toucan-bcbd21@quoll>
+References: <20260921-msm8952-initial-support-v3-0-b96fd3fe298b@mainlining.org>
+ <20260921-msm8952-initial-support-v3-4-b96fd3fe298b@mainlining.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
-Date: Sun, 27 Sep 2026 19:12:24 +0200
-Message-Id: <DLQ9LXDE2P29.248MPYCJMT0DL@matfyz.cz>
-Cc: "Francesco Dolcini" <francesco@dolcini.it>, "Johannes Berg"
- <johannes@sipsolutions.net>, "Rob Herring" <robh@kernel.org>, "Krzysztof
- Kozlowski" <krzk+dt@kernel.org>, "Conor Dooley" <conor+dt@kernel.org>,
- =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>, "Andrew Lunn"
- <andrew@lunn.ch>, "Gregory Clement" <gregory.clement@bootlin.com>,
- "Sebastian Hesselbarth" <sebastian.hesselbarth@gmail.com>, "Ulf Hansson"
- <ulf.hansson@linaro.org>, "Frank Li" <Frank.Li@nxp.com>,
- <linux-wireless@vger.kernel.org>, <devicetree@vger.kernel.org>,
- <linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
- <linux-mmc@vger.kernel.org>, <~postmarketos/upstreaming@lists.sr.ht>,
- <phone-devel@vger.kernel.org>, "Jeff Chen" <jeff.chen_1@nxp.com>, "Peng
- Fan" <peng.fan@nxp.com>, <david@ixit.cz>, "Johannes Berg"
- <johannes.berg@intel.com>
-Subject: Re: [DONOTAPPLY RFC PATCH v2 0/4] WiFi support for
- samsung,coreprimevelte
-To: "Brian Norris" <briannorris@chromium.org>
-From: "Karel Balej" <balejk@matfyz.cz>
-References: <20251026182602.26464-1-balejk@matfyz.cz>
- <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
- <aSnWYS2g5slVFaSk@gaggiata.pivistrello.it>
- <DI5L100Q1RKO.1A68EJIPWYSRC@matfyz.cz> <afI8y70U7wFT_07h@google.com>
-In-Reply-To: <afI8y70U7wFT_07h@google.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20260921-msm8952-initial-support-v3-4-b96fd3fe298b@mainlining.org>
 
-Brian,
+On Mon, Sep 21, 2026 at 09:18:55PM +0300, Muzaffer Kadir wrote:
+> Document the compatible for the rpmpd found on MSM8952.
+> 
+> Signed-off-by: Muzaffer Kadir <muzafferkadir@mainlining.org>
+> ---
+>  Documentation/devicetree/bindings/power/qcom,rpmpd.yaml | 1 +
+>  1 file changed, 1 insertion(+)
 
-Brian Norris, 2026-04-29T10:15:55-07:00:
->> Brian, what are the options here now? Would it be possible to make an
->> exception and accept the patches without the firmware being in
->> linux-firmware? This is an old device with no mainstream audience so I
->> expect everyone who will want to use it will be able to supply the
->> firmware themselves
-[...]
-> I suppose I'll leave it up to Johannes on this part, and may be willing
-> to retract my NAK [1].
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
-I have not been able to get a response from Johannes for these last five
-months, despite pinging twice =E2=80=93 is there any chance you might be ab=
-le to
-help with that in any way, please?
+Best regards,
+Krzysztof
 
-Kind regards,
-Karel
