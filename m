@@ -1,188 +1,190 @@
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1591C4EA38E
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2026 16:13:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C6724EB878
+	for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2026 16:14:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790612044; cv=pass; b=FsfN30axj3E5AoDOpmOJyrO6HndeGoco+0B5K1/r/jkPdPZUXxGUwUV3NRztfPRAqbQO44kh1fMLbTECnoJjg2M3kTahDo7zDjOAczVcObT5Ok1DpTu46p15Ubtwmnm4N67Fz9EziGRvr5ikTZwhAZGwBA+ulbPCAEAk43LMtBA=
+	t=1790612049; cv=pass; b=GaTvKu2QQHTPgoYnHW0fOtwQQ2UnZyKpnf1f9EpR0tmWXVLoQIUq2bhtn4hXMxb8L3d68pY+ySB5OWV8G6lOyVjZCSdf5mbIigOw5Wq3cQX3vsG67ayaKqGXXXtEhg9TprWfLxoN2Zg3aSyc9VzsGQhBf/KczSAe7N5Oft0e3mM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790612044; c=relaxed/simple;
-	bh=O2sFKAuF5fVE5ExBFOL5OtEIQbF/L5JdHgY1Jitui3k=;
+	s=arc-20240116; t=1790612049; c=relaxed/simple;
+	bh=laB01Nm6g2O5qjF28Y4NhRz2GOkRSZ1m6qBJQS5vSWE=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=fWFybpfVBj4/hX2TCdkGqvKjMT9cPqgl9639OXzVHta5fU38r8QipKdh/8SMxvvRANSx803fZpNb5+QG3rm/A6m+sLA7hptf12EWSF9r6nhxog8n4bDT+uqVbrsHf82zStNM5ZH6cvXbEctX06wRRNl/Y1Adbg2OmPvvIdvo0wc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=o19Zj+Wb; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=XyXfxTar; arc=pass smtp.client-ip=205.220.168.131
+	 To:Cc:Content-Type; b=C41zFy8GCLWL50kBwBST5ukt/xPnkUi3fhhYi6PJw2Q9F0hYGw+WsqFT/kOlRVR0Pq8G4FQGvRB7GEXT4+uFavfSJn1hbjyNUaHdFGKI8t5U9Z+SUlPSlFPkdneahGZmbIU9zaquI8DaydgDRmogGBY8NCDj5Y4vnhJSVTEXlQM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=dvOlzfBb; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=c5K4LTJn; arc=pass smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="o19Zj+Wb";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="XyXfxTar"
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68SEeADb1244057
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2026 16:13:53 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="dvOlzfBb";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="c5K4LTJn"
+Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68SEdsmF1895242
+	for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2026 16:13:59 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	jnfYONFNsW41daTLG7twN5DndyUQVqOidHbzZNq5TCU=; b=o19Zj+WboEj2hdUE
-	d11OpV//dI27/CZdeE5WhWtVeBRlIPaP9AklCVrSatIyXPIbdgAMOHpGme1MV9ck
-	QfemR7xpxU8mZMQgyESMyP61U4wjoinL/kqV/Bwn6iyDE8Mg2nbTaUynK2hpMfJq
-	tF9CrhTxa8HpV8I8Gr53sQZbcjuLGm0BF4aLcEA9Yl+GdKClq8nU8bk2lA0+pwL1
-	O2YGvlypV1p1pBJRVeN5LnW1M74nXlEQsXEfnYcr04xDYR5H5mS4tf1RGieN0OZH
-	j/EU2XUyEJ+987dGZ6S/sbKYRN7lf5AIgA7S4jW9wXn95GbzkeONt/dePyr8LQWd
-	h+v0Cg==
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com [209.85.216.69])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gyav4be5k-1
+	TLY8cueBZQsQi8RKd3F4kvLNmBHf3Rx9A20BdfszSZs=; b=dvOlzfBbD1FOz3as
+	MMRh5DzcwN35T1zsbfVo8Znr1wueSLn+HGG4LPCIZbBV2UeqT1fejqDA8W9QNzqu
+	g4w7BcVNNBsx6R+S6gvIN+z86hfueICiSJbM5LlBhWwW4MWQj8bM3BrfMczUpfrT
+	iEFSIrt1DHDV+W7N5dnKkT7UP6oy5X7Coru9m8gnnm5i/F8cXMq5HltKwuUfFQ24
+	s/YfNunJcghDb4UCWqBQl/0Q7+Z3DByg6iou7etk9Ei9qgyb5G6E8ewIFYQeAZ11
+	8LmtGEO7DUa/M46UtblTzCYJxAiSrgJk8SpLTDAEVTKoYB9rHK3flOhornNOcpPT
+	TEbLFQ==
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com [209.85.216.71])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gyj2s2ejr-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2026 16:13:53 +0000 (GMT)
-Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-3a0be20102fso2864026a91.0
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2026 09:13:53 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1790612033; cv=none;
+	for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2026 16:13:59 +0000 (GMT)
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-3823dcc1647so2448684a91.3
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2026 09:13:59 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1790612039; cv=none;
         d=google.com; s=arc-20260327;
-        b=miCbrOTwr7fraclJhwyoXFsfJOFHlVyGwpuu3D/opZ7P0MzwPwq1iAIvTgACZ0ilHj
-         oDxVAh7WnzU0pGuq0buQMpXwgPSE/d8n6BtoVAdcCzbDnrrvzrr3XJs96fpLWupjzraz
-         H+M7LOYLyiSAGnIXFj+dRAX+QZhZeRcxp+7EBs6tT8O4QksNhgq21cDqPHEJQqsY6nfO
-         tJJE+5Fo/wln3n2ub1EXA7b2lx1/vsKmkOhNgbMQFhCBPHyASwI1EdTjl6jA2aLGDorM
-         iRsA8aBLjHTix3Q99lMC2C+LpzaUDIMlsDCWnqoroKaYfpQt2uxtPz1+Kkv8GTPDRVNF
-         C5fA==
+        b=X/WwG684B1WH3CbuUzpx1RnsnXvBqiV0A9sQ1y/dJXeEMBoju6JojvArTKKXtcazu6
+         AawJqflpT2X6SdqVGlzwKmECa40cCFKVsyxYQGWHWCmN7crFTBPmO14M2S5JGM6RUEEJ
+         MO8XtaM+io5WIcQaDVm3RK2w9bTr7FHZm2CoW6I5p0Am9Uv6++fuR8GwLSZquruLzV5R
+         A4Oqceh4j5NIRBev66VdV4oWvpfLGszck0oE3O7jTMwLXV1a1yDVuJxUsERtPYqY+Lfl
+         bKca9ddhGhJ6yhy4MzDjV7EYUhFVIiLfGmVL+NugJxxPffXSq8C8f2pu26Ux7Xh52GAW
+         Y7VA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=jnfYONFNsW41daTLG7twN5DndyUQVqOidHbzZNq5TCU=;
-        fh=DeAY3PXf4ETHdnUvNY6JWlIci4LS2Z3brQk8i77vRIY=;
-        b=d3RlQAZDyGpxWxTYXWdUHKOiXDZZDxg6xWp7CwZjZXWlXv5ckxMeEoLfqguN0S8ToF
-         l/UPUeHddk+/QsDJ0EBQZtjGH9BwHljMlt9o8Jof+QhpuZNG2X5JM73D0kAQYFKB6Zpb
-         id45HJqiu048vdHataf0SCN8n3ld5lrHiRcLs6GBk2JfDzCnQ6Pk+jHt4n40Gw/P653s
-         fZi+g+DM4KFkQhhbFMqkjH1ho+Dya9n4Sm3Oo6rPW1M3YA/06f3VCypA0VEu1+y8Kzrm
-         96FQtkYaIMUITwT1v7moupBbpbkVaNUlXM+0vkVKHb0y9hl2x0k1kmTv2g2Nwrf8fUXX
-         AYWw==;
+        bh=TLY8cueBZQsQi8RKd3F4kvLNmBHf3Rx9A20BdfszSZs=;
+        fh=bVogBR3Gn9lsLL0Wp0rZrNsyh+AzAFra7we1U++qY+0=;
+        b=cutfLCzmxZhMDpI1fui2vHrZyJeohLIMqlQ5Zqi1S3Yh4herFUFaaWKGt2kjMHm1OS
+         c+TIbzhfnL41vVMFmv8hP0cFzbB0KvMAeFHlby3oec6Gqq8ba5kf6thfomPNZP3qPAM2
+         7BplNJ2vXgtS7xgsByy9EzIIJHr355+fW1qcACMJlQuqqmbZRQUVk+0U/5ba8HXYikg3
+         9/9AcBYQZz5pO3du2SXb4s6kCssATdeHLmJtAeukQztSn0RZQjzsLF1zo3AxPW6JfWrB
+         xG4UJ57554cEX1/CxeMV6ODuyZJWOSHA3sJJax1cczKJuvOkcWLxRkg0tfbq9v0gnxRd
+         40DA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1790612033; x=1791216833; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1790612039; x=1791216839; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=jnfYONFNsW41daTLG7twN5DndyUQVqOidHbzZNq5TCU=;
-        b=XyXfxTar+O6Ev4D2uWFEfqgfHKRMu40bvMNJOODprTY9b6kiF2JCXODKI8lr1ydDSa
-         IN+8H7hbCNyEZD71ZQYlk+gWkfN/qHqX8ONatYo8yvSBPMIR85UDDW+XCtGAK2WYeQYD
-         O1G++0Y2XtC//na9t+IcMzcS6svA8eUDV0a2nexCKl2hSSnw+H6SsF6c+61WEafbHSLK
-         MhdbqKrrF1N8xS0U5Sfjg9BCY+jV0knha58A5kyIpj52TuIQwSppwFNRW2xkXvJE7mvn
-         Yhw0X0FdvF5BeVDWpmXm3PxlziuwQQSnMP+ztU5ZxwW3vyOMA9M4riwwG295uJuCrbSr
-         Fceg==
+        bh=TLY8cueBZQsQi8RKd3F4kvLNmBHf3Rx9A20BdfszSZs=;
+        b=c5K4LTJnGD1DGPg0wwr11HGIM/9492ms21RHTQQFMFtggQBpOS3hNPnUKRWXgQ5x7G
+         Qg8o3Di3SOKeMrjTnBUAh/qNmRFe3ZL+TFH51l8iP5864zzOQKLeQRoFEnpfjv8/4YHZ
+         FLGA7+QO0uZOenh5sKUjLWe78h+jTcnjv/as7oJ36XnRtXHC5b0X3yxU1yG7N8Ts3KLa
+         0nkNYXntU/1m6nRqK2rp8dZnzbN4NUvf7uZNE/pspb64j4K8sZBr+MzFmiPvjM2jLgts
+         hoyLdDIsC6GXdxjm+lzmAeyXzns5dT6HRf3x18fHGuGl9mSQAnDCqCvkUWcEvoxj/o+X
+         PlwQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790612033; x=1791216833;
+        d=1e100.net; s=20260707; t=1790612039; x=1791216839;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=jnfYONFNsW41daTLG7twN5DndyUQVqOidHbzZNq5TCU=;
-        b=tQZqXs7V2IjN+ryc0Ac8r9vyrtfQW+1RpnlVl8JlHK7aFZKRSNfupYqIIf1GA+8Nbb
-         3KWqzfDeFwQPvmuNeNqp8AWElXNFI/b98nCozysLIwaJRlJERMs5BvMz+yJGg3M6jngT
-         YCwkH8ubLfPlDvy6/IAZlaMchYbujRN7KAaHxFsGMRMWAU2fes3PbkyDfIRm+4XPmi7d
-         6QVFjrlQC8eSogIl8E7r4pCxU36rywGNfr1NgLOi1pqtKzCGN+wswv298kmgPAw1gRjH
-         yejr8u9w7A94lW/hcFYTpJP/TOjMDX43hhgUlasZ/DyUAbdlwtU1ppEisRB/1vpFoiKp
-         w3Wg==
-X-Forwarded-Encrypted: i=1; AKwUvBys7KFthPDEtGL9n8wTPHH9a2T27zZBF1mFF0FIRpLb921Y6YLWuwti1GrWfgwQyzS1AuhDQ7Ww44c=@vger.kernel.org
-X-Gm-Message-State: AFq9FYIvOrUvwjlhR6D3KDX3bMrGr34tUhRICzYeCBOZ/weX90GR+qYn
-	a2oksYc+ZSfMNFs5Am4pOqqM6P6ELc2TcKzCTuaRUPFXi6YUJOoQY8Y2IzaJglb68UXJNEP9GIN
-	VbaJ8kdeK3uq1p9wnHSHmIFAwWQ5Z6d1diEZnlM6ZjI2bEOYVgWR2prnGKqnTq9S3xfgFem+8a/
-	qV45ITY3P6OklcS5EAbp6HR7A5c4AOkQOkdrl76A==
-X-Gm-Gg: AYBFou0xekt05Rfq/HvfSGV0voJvkE6gfWF/ktU9KhG2IcpyDeCRdMbRNUZ93p58bRG
-	3JdJEOe5XWbj1oVLUJ6cwwR/Xp3zIebIw21u093WZmHw2mRKiuTjkDrmnsOMOivOk6ncGBhaoJy
-	TboL9pU62g4hzo/usgNl9NmKgG4nw/57DHoAqK2/It+a6/LDjIId5c0AR+aA==
-X-Received: by 2002:a17:90b:3901:b0:3a0:80d1:28c7 with SMTP id 98e67ed59e1d1-3a098d508f7mr11230397a91.62.1790612032589;
-        Mon, 28 Sep 2026 09:13:52 -0700 (PDT)
-X-Received: by 2002:a17:90b:3901:b0:3a0:80d1:28c7 with SMTP id
- 98e67ed59e1d1-3a098d508f7mr11230361a91.62.1790612031984; Mon, 28 Sep 2026
- 09:13:51 -0700 (PDT)
+        bh=TLY8cueBZQsQi8RKd3F4kvLNmBHf3Rx9A20BdfszSZs=;
+        b=aUSoHRrsESz2T5f7qOhmNnbO0x+ohaK6NuPgMdXTPHhs2aYE6qH2n2wNspkQ4cR8or
+         uRjuzYqCSXYTicUFD6rb1LWlzFjnPVlLk43ciH9z9FCUy83zhqe8auuAJ75ApGoqeFBS
+         u5Yv1ioR4Ynr/ebbxsZXwp3Cz94YP5//nDl3reK74U/acqLeCXhtUHJdzpsRCO9lsPhA
+         wvVyDyOa3BTW1q/EhiWAtIW7xLw+/8sL5CwBYebVqazhOwOZRQslHOA/Bb7me+nz2p6u
+         29gKrPqPsykTpufj20DRPx8RDFAc+VNw+tebtgeCTLypBQ27hc66D106ck0nRn6Fe5Fc
+         tvyQ==
+X-Forwarded-Encrypted: i=1; AKwUvBxw/dX5Hw74QgvcK9YVXZb4vw2gdwsomOOyNSqhPKnY8uqDfl+9xbyPkohOOoQijUk1g0p7CAzxkq8=@vger.kernel.org
+X-Gm-Message-State: AFq9FYIomDqgikw/81a4ZeZOa/BQa1ZDzTK49T8VwYWzKtp2QwpCQq7g
+	dSBXzJsWXjv5gQ9fOWQZOzsob34MY16bQ8P0GcSSL3XrVe73f0VebP57Otp0ypZFhQy0WtCNKgi
+	nMQrYxlUTquYWUuiLRrrZUpqVXsKQ1vwrIpXJj+hWw7QZ7B7U0MkylEUMzDMw6cNXbakKobG83A
+	maxy4V0f/PVB88QYNW6rDodWzwxd4dLs9YR40RFg==
+X-Gm-Gg: AYBFou2bEyavf4hY6LbUBfEyK9zfKCt0rPUVZAm/d8vW/RFBLJQmdVAGVHh3a2PKBE9
+	SWA8/6MGZePSU+gnn12mBTG5Og/PfE9dnPC8p6j8D1DVg61sgBwJ8sHpgVypStHRSmVShxiS51O
+	Cio0OzYShanZyQSnJECwkgKO1knXq1zflcNWs0EyeErQcR05f28t5XwPgTTA==
+X-Received: by 2002:a17:90b:2807:b0:3a0:c621:74a with SMTP id 98e67ed59e1d1-3a0c62112dfmr7217609a91.35.1790612038765;
+        Mon, 28 Sep 2026 09:13:58 -0700 (PDT)
+X-Received: by 2002:a17:90b:2807:b0:3a0:c621:74a with SMTP id
+ 98e67ed59e1d1-3a0c62112dfmr7217589a91.35.1790612038206; Mon, 28 Sep 2026
+ 09:13:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260915161310.2477406-1-lgs201920130244@gmail.com>
-In-Reply-To: <20260915161310.2477406-1-lgs201920130244@gmail.com>
+References: <20260915155724.2468892-1-lgs201920130244@gmail.com>
+In-Reply-To: <20260915155724.2468892-1-lgs201920130244@gmail.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Mon, 28 Sep 2026 18:13:40 +0200
-X-Gm-Features: AclHuK_-RQJmDvLec1TfEk7xn7z5cIpkgIWKnhqPUSU3rlslCjBnluxRdv8jcNw
-Message-ID: <CAPx+jO9GY+35DSuRB1jTa7C4SQuAaoZTtJirFfykrDM-7bAmeA@mail.gmail.com>
+Date: Mon, 28 Sep 2026 18:13:45 +0200
+X-Gm-Features: AclHuK8NijbscYmEbRRTTVsCxytg6cYy0JdOJL7tcaZsXJf3cMG4wS2s8SQ8LSk
+Message-ID: <CAPx+jO9duanFSkuQJ9ZrhWAAPzG2zhaYUtXaXhTVyOKDVKrS8Q@mail.gmail.com>
 Subject: Re: [PATCH] mmc: cavium: destroy slot platform devices on remove
 To: Guangshuo Li <lgs201920130244@gmail.com>
 Cc: Robert Richter <rric@kernel.org>, Ulf Hansson <ulfh@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Pan Chuang <panchuang@vivo.com>,
         Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>,
-        Jan Glauber <jan.glauber@gmail.com>, linux-mmc@vger.kernel.org,
+        David Daney <david.daney@cavium.com>,
+        "Steven J. Hill" <Steven.Hill@cavium.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-GUID: 4Om46WEXw80cAvV0i8QGpTPwDhFLptC0
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTI4MDA2NCBTYWx0ZWRfX7iuohGNHDOZl
- 0Gl5CI0/ZEiWRHZTZkClR/WtQ3f1iHYKGyx4NtAiVZepIN5fTZiOEb+oLYCiczN8y2f7VIdOGv/
- O1SwKJySIBb5h/175bvAVppCLJeoDv9tFvZG15H6MLgPeKZu7BvP5V91gm9dr0xAN0m35y+QIOP
- SOyCiQs4LK1ckzS2bbLJGSNdO0g7fFR3QOK2UpcSEigTWah8kUPdWoW8VMauwLQOlLbV/VXH6Qw
- Ut38SQ5hD59h5VJ+5uwN//yC3grQEIFNxsTQGmWfVTFv+IaYSrIxDzGpefyRl6zzCCZSVsvs8+F
- AFn2CeRcuZKpKrKgYA7cxw+3/wQGKIzuko45E9HtSkCaOgW3Ylckk3E+5rrNIrxunNMQUv6krXF
- K2Eko4lzo/zHab0AIy0Ldd5xxtuL1WLIFvB85VlPeP/4Gxcvya2SfVM2wYZKu6Kpmz0AH9mAGoK
- D7SjTzEo+ui9Csq2TrA==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTI4MDA2NCBTYWx0ZWRfX4HZ0vlMCgonA
- 28uZLJpohTXSP7DueAbxLav/c9HIUa40uLGtupOVcMrMATbE62k3QD+7yVyUWWbXFb4/abmOCP6
- GKUi6v2tWoMQCktd5Gu/Vm2jObuLCds=
-X-Proofpoint-ORIG-GUID: 4Om46WEXw80cAvV0i8QGpTPwDhFLptC0
-X-Authority-Analysis: v=2.4 cv=MqLHeGae c=1 sm=1 tr=0 ts=6aba9241 cx=c_pps
- a=vVfyC5vLCtgYJKYeQD43oA==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTI4MDA2NCBTYWx0ZWRfX50QvlITzN3fn
+ fz0JjHknoXOLMs6uTrTgnaP5+4x02HUcVppkGj7W1dhxP1EzsuVKA2PvZXy83WyoQVPtDa94jTs
+ OyUOY9bkejQ6GltdU8m16DuWxFvMmPleDvcFoSNMc63/tQFkl5J1UHuqWK4hhY+ITPMb1PWriIm
+ vLRNXbJn+g4e4NstO9rhiO8hQkEAWILVW6EIGpMOivU2al66/PlOnimtKBPHbEXuCbKHfl823vH
+ IPxEsE3kMrT1uAH+OMBEpoekLukhRwG4adUrXqGeUaLWUPjwmCVXAcFIFSNUk5BHVAUWaM+OErq
+ jOkZFc1FqeX0rNj3sn7ChQfSqmwdbJEbINe0Tx0i+O6nE4t6GAPcVjlJY2UnhMGoeXTHEmSO6wY
+ lVXLNebQtTE0h/0awfjxlp/vG4TFhWPXF5cb2xQm2U6cu4/SfEuPW2UV0Pun3GPCLtc9EM1GRjA
+ jYTgvJhcrhLGpBG/rFQ==
+X-Proofpoint-ORIG-GUID: -g1qoSzxtr5ubwUAD3lnOGZaUUm9YmAc
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTI4MDA2NCBTYWx0ZWRfXw8QFqVcXMvkz
+ I1BZnEQ7s6vnX6xLMcDeOxS4Jxx+VmKhjILIjX+vTLZ4gavIHghCIsYdlZAEMNA9JPkfX/kqT0s
+ w725fYj5gH5IHRIuszVQDkIm0bKnPuQ=
+X-Proofpoint-GUID: -g1qoSzxtr5ubwUAD3lnOGZaUUm9YmAc
+X-Authority-Analysis: v=2.4 cv=TptzFzXh c=1 sm=1 tr=0 ts=6aba9247 cx=c_pps
+ a=UNFcQwm+pnOIJct1K4W+Mw==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=_K5XuSEh1TEqbUxoQ0s3:22 a=pGLkceISAAAA:8 a=VwQbUJbxAAAA:8
- a=OJTvEzr-pr90GyvokQgA:9 a=QEXdDO2ut3YA:10 a=rl5im9kqc5Lf4LNbBjHf:22
+ a=yOCtJkima9RkubShWh1s:22 a=pGLkceISAAAA:8 a=VwQbUJbxAAAA:8
+ a=2raNofmJN35FeuP7pWwA:9 a=QEXdDO2ut3YA:10 a=uKXjsCUrEbL0IQVhDsJ9:22
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-09-28_04,2026-09-21_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 lowpriorityscore=0 suspectscore=0 impostorscore=0 phishscore=0
- adultscore=0 clxscore=1015 priorityscore=1501 spamscore=0 bulkscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609280064
+ impostorscore=0 priorityscore=1501 adultscore=0 lowpriorityscore=0
+ bulkscore=0 phishscore=0 suspectscore=0 clxscore=1015 malwarescore=0
+ spamscore=0 classifier=typeunknown authscore=0 authtc= authcc= route=outbound
+ adjust=0 reason=mlx scancount=1 engine=8.22.0-2609040000
+ definitions=main-2609280064
 
-On Tue, Sep 15, 2026 at 6:29=E2=80=AFPM Guangshuo Li <lgs201920130244@gmail=
+On Tue, Sep 15, 2026 at 5:57=E2=80=AFPM Guangshuo Li <lgs201920130244@gmail=
 .com> wrote:
 >
-> thunder_mmc_probe() creates host->slot_pdev[i] with
-> of_platform_device_create(), while thunder_mmc_remove() does not destroy
+> octeon_mmc_probe() creates host->slot_pdev[i] with
+> of_platform_device_create(), while octeon_mmc_remove() does not destroy
 > the child platform devices.
 >
 > The probe failure path removes each MMC slot and destroys its associated
 > platform device, but the normal remove path only removes the MMC slot.
 > As a result, the child platform devices remain registered after the
-> ThunderX MMC controller is removed.
+> Octeon MMC controller is removed.
 >
 > Destroy each slot platform device during removal after cleaning up the
-> corresponding MMC slot, matching the probe failure cleanup path. Keep an
-> extra device reference around of_platform_device_destroy() as done in
-> the existing error path.
+> corresponding MMC slot, matching the probe failure cleanup path.
 >
 > This issue was found by manual code inspection.
 >
-> Fixes: 166bac38c3c56 ("mmc: cavium: Add MMC PCI driver for ThunderX SOCs"=
-)
+> Fixes: 01d95843335c ("mmc: cavium: Add MMC support for Octeon SOCs.")
 > Cc: stable@vger.kernel.org
 > Signed-off-by: Guangshuo Li <lgs201920130244@gmail.com>
 
-Applied for fixes, though by dropping the redundant calls to
-get|put_device(), thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
+
 > ---
->  drivers/mmc/host/cavium-thunderx.c | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/cavium-octeon.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium=
--thunderx.c
-> index 84ff6d82ae3c..c80907aaf51b 100644
-> --- a/drivers/mmc/host/cavium-thunderx.c
-> +++ b/drivers/mmc/host/cavium-thunderx.c
-> @@ -173,9 +173,15 @@ static void thunder_mmc_remove(struct pci_dev *pdev)
+> diff --git a/drivers/mmc/host/cavium-octeon.c b/drivers/mmc/host/cavium-o=
+cteon.c
+> index 1bfc1a4f9fe9..671dd1a36a74 100644
+> --- a/drivers/mmc/host/cavium-octeon.c
+> +++ b/drivers/mmc/host/cavium-octeon.c
+> @@ -295,9 +295,12 @@ static void octeon_mmc_remove(struct platform_device=
+ *pdev)
 >         u64 dma_cfg;
 >         int i;
 >
@@ -190,12 +192,9 @@ Uffe
 > +       for (i =3D 0; i < CAVIUM_MAX_MMC; i++) {
 >                 if (host->slot[i])
 >                         cvm_mmc_of_slot_remove(host->slot[i]);
-> +               if (host->slot_pdev[i]) {
-> +                       get_device(&host->slot_pdev[i]->dev);
+> +               if (host->slot_pdev[i])
 > +                       of_platform_device_destroy(&host->slot_pdev[i]->d=
 ev, NULL);
-> +                       put_device(&host->slot_pdev[i]->dev);
-> +               }
 > +       }
 >
 >         dma_cfg =3D readq(host->dma_base + MIO_EMM_DMA_CFG(host));
