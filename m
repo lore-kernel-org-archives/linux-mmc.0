@@ -1,280 +1,316 @@
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B12B439AD51
-	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 07:11:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790665899; cv=none; b=rjbL+HlMB3dawQ0ScvpCxsG9Rz4kwC82VdtWYVVg5iVafT6GRdy6h0zHO5nWPzakNNmzUF/7H2+GA4UmS1TlQJ+9UKymv8aV7g8tBIOP/PQtR3w7wi9iifl7V0vAQi/0ea2XiRILCLgJmmmwjF3EBj6yfwS4EoZ1KuBKhcbOskg=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790665899; c=relaxed/simple;
-	bh=oz5CN5RjjP95+hn3KIVzqIGYCeN2q+QJdx0EvADSitg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=DlIDehDqhFbcaxrpEeRpZa54be2VpITWX0uwJp1EgCqiMXqW2UWeTcbXuOktB1i8dswBGvoB8ELfIbbk5GEgz8x6zTdY1SRrDTfBRfshkbLqFfPJMn2NYWDqnkaXjs5gq4kPcwh6o2IxXmTkshDvxu+toQuQ2W3lM8HLcexZ2n4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=Pdxl5tYh; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=daOMATY8; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A97414FC8C4
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 10:25:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1790677516; cv=pass; b=LGNKy5ifw8BSAjzLfxpcHMEyH1D8DYcs+aYhgacezr3oCKl+GzSByDDuINJpSRoG4m6CwsRXlewxO5d4zwwZOH1xF+Id5pDm1+fHWikTRunPt6OkIEYxkR7QQNHMuDfAntTzsUl1CVT4bTpz0PzV7QzErjtsDOtWhn7deIps2yE=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1790677516; c=relaxed/simple;
+	bh=xgfkl4zyeC8RuLq+GN4w/BY563W6yJYYNI4/dPhH/BQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Q2MLWUColKU99qbPTFAj2bNbYc8JsDqEJYayUmO6Ka7XDkItxR++M5QffA9UfdsN//Ui8bc1LCMeGyro0yyDCtc52IUpbBGNf1/qIb2EhjMPyX7WU1vv3kjRo/xakRN8OJafuTUo5Hmn5xWqfRJBYIyFqkJTC+ulCwjqoSRmJq8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=LjblXC5W; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=a1LaOrfh; arc=pass smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="Pdxl5tYh";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="daOMATY8"
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68T47HQJ2774970
-	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 07:11:37 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="LjblXC5W";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="a1LaOrfh"
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68T8XRcx1004680
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 10:25:05 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	DGbSxQ+ordORojocaH0U5BkUwxizVp+6KhwnNAplOmM=; b=Pdxl5tYhEsfAnRXT
-	gev0v8DJT0KstEryTCVz3088i/nuuCAK1oRYjZilhwr4Age9XdTRoj8FMAqv1QbN
-	mhjZXBZ9DXbDjS6qDfqHdzOSKjYvO++wHZ2odV6sWLLaa3M07Libo7ldgLBeq9U1
-	/oIMNwFH5JZahpWHTA+uMzjXJVJ1SslEC719LpjkiHQdJDmec9XCWs0QmLDycbzc
-	NReNLfiAt+tkCeIsmJ+9+aEUpRaQ6VD81Pdn0nUkcWzWeCZj2g+NpY3CDdu9ADq2
-	R67FXj09Q1aG1SIdpDhH5VmnpXRH2rGpF/WWRmANT709B88sXCu5zkJpxeFLUw9g
-	UiP3pg==
-Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com [209.85.222.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gyvw22r7b-1
+	s4iTwSNVL2vSXyi0y8I31DfIwsKabNOEbE1ug4XUhBI=; b=LjblXC5Wq5spxTll
+	iV1cW0RqiNpWKU5ovTt1P4wkg4mmFgutgPxDhgPsNlWjxzipu6M0Zn+EqVXw3XP9
+	G1pztpNf8sRjoh3X72BkyrZFBzXZ5QLlCNYQpL/ABGILhUner7Q1p23AlV8P3d7t
+	XGDSeLTYnuoZSq/qOO1jozs81YJz26xsBakkz7gV/DQy31UqHl2cjCVM8r2aBuX+
+	8dx+92idnJnKH2Z6SN582mjqzMvsC8BTrIzFEG70vcYXSjIoIieoXp7+L/StU6AP
+	eQgf91qGhu64FlGPE5cZZTyaJEvk/segIU220R74zPst3eg0QKfQCKFWBBWcLGEt
+	L1lbFw==
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com [209.85.216.70])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4h09x4rehq-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 07:11:36 +0000 (GMT)
-Received: by mail-qk1-f200.google.com with SMTP id af79cd13be357-939f3426a7cso890817185a.0
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 00:11:35 -0700 (PDT)
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 10:25:04 +0000 (GMT)
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-39aee9b4cf2so6770055a91.0
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 03:25:04 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1790677504; cv=none;
+        d=google.com; s=arc-20260327;
+        b=bzJDsfce423B8TTpM1b/v3Tt2rBB4LZEVGa6kDPcEEUG0cdgYDQ5PfHyk2n7OMBpq0
+         eExlRsrRV5/Njz+oPsZw+HshkeZDjz/L0p/I3Sb8A4ToI5O6vaw757aSI23kzVAx4Cav
+         wcKc4EyZifaVJFlCcuzYa80Ei9m4MDvdpIBLSdr2P/3fcUvE79QCm5byAJ9AjmXn8hI+
+         hrjFGfFiqCwBO6QWt8zIaA5OcNbmBSeubKT8RF2GGVmBWAz7HiZmkIgegBYK5WeUwIag
+         3USEHhzVF5j5ZVrXgi/kDUWShA8HeayK5cC51vy0BuzQeiwOS+qYk37l+Wz9DT5cfFTb
+         qPww==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=s4iTwSNVL2vSXyi0y8I31DfIwsKabNOEbE1ug4XUhBI=;
+        fh=cOYSWv+wxZZ1iKqnWXzWIxCGNDZE4u2WzhsOacKSltA=;
+        b=b3VT+/MvqYQ1sKGyBQoopTlsvHaHyg7KOqREcmyNPEC5PmU0NbYMWl2dGgyQNwPWrZ
+         xIM18RSyzyTMr2XelrHQkL0ChGZGCPYfi4gtF9Fd92zdRZ902tAh1gedi+tcuuq63VeT
+         rzy4jnKGooCKNL61U8MJYYqiNBe3pKDQeJSKmdI2WeHiIZ5UPFw6meqXIbjjhjtxiZ3A
+         YUMf9jvTWuNGv4k5b97PRbIMwBI5ky9/GhG2muncpBTalpB/aWAwhTETTngAyBEZ+T+c
+         iQEXZn+BxB0wlNtfiBptJs/nCZCh4jEX8B2gV4tYDjY5URwgMqZay6383379t20RFsvO
+         LfbA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1790665895; x=1791270695; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=DGbSxQ+ordORojocaH0U5BkUwxizVp+6KhwnNAplOmM=;
-        b=daOMATY8OkyKLQzQ2Q0wFt+/ButrCKfGKvSHs4yWDwon+qkK20T7dTuqpUj5dHHzDz
-         KeU6ssolw6w/q/htfLQkQAXxpUbE+Z61VW+LecdGeqi5f5Wac5n/5kZ0n87JoX/XmhlW
-         RZPd5QbbEHjk/1DV+Z3raa9ZQ96Z2k+gutd15endBpyXr5Cb6Y/JnaTPXAxe+o8ADWUJ
-         sJE7KzlsIhOl+dYh6leHpWqGyu5Wys74KSNez7rVQXVB2ZVMoXAo4FIyVFATj/C9P38v
-         pjDtpQeCbOP32dAPYkN82LmUt8DuyuhF5CS2BBlXJYK8KTePrwoNIJirYP4zgc0Rd8vi
-         s+iQ==
+        d=oss.qualcomm.com; s=google; t=1790677504; x=1791282304; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=s4iTwSNVL2vSXyi0y8I31DfIwsKabNOEbE1ug4XUhBI=;
+        b=a1LaOrfhavWHzi8VXU804Mb4UTLS0VKwQFa+BW9AiuFLX3NzjjXMlRCIBkkju2w01X
+         CYnZCMkY6HK0DjSaazrA8W3JH7TAsRAGyNVHsgkFGgErisj7EEf8ervcmErEmmAmMo0A
+         O+QIfB6CqHhxjRSFQIxkUIff83UqD+GxYD20rBcnr8KhhvUfS35fvLsefUJ6OAxXyTiR
+         rdE1/6xSGD7UGktuY01YsNtqgHEgqxS977GTLEdgW45l8m7/Nv6+scf6U8WMDWznF7W/
+         gt0vVtssGwoBjMynkMtNqhGMzy6hc5iupvmKY/Y39TzCCZmJoSpV8PaCcKqzw2XPSU1q
+         J1jQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790665895; x=1791270695;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=DGbSxQ+ordORojocaH0U5BkUwxizVp+6KhwnNAplOmM=;
-        b=vXTr6PMCmMpLXR+mv9t1+z/e9k5ZxnsauwFjWxkQDMEjLfUO98OY0+7/JhAo6GfyX9
-         j8sN02//Kd4XPZ2wnNkuwDCEJz0bHLmdANIP6NsiekQZ5egtL0PBS+koNvcpsMCOza+0
-         3Wj2hfsIq+BuCp4mSBxM48kSjvO6MsJjSja6abSUUTylraout3CIw5m6MoP2hnCDBAuO
-         m4aC1FCvGYAQUP6ZxeKgX1MS/GKML65+2wp4imTID2Xq2oEJB9NYmOEsEKtHSRLyfUsZ
-         +6taN/upANxUuTmVdb75rnw2CeE4nOiEe9/mNVrkS26ZL18W/JuQvpM5/I3oK+WR4mBC
-         t0Mg==
-X-Forwarded-Encrypted: i=1; AKwUvBwK4ISljgMF5yfj/M82FQS9AFshLXX4p6/nlO3vk22015c899y+zU9xIDJeJpCwymUqYgqu/P8p+2A=@vger.kernel.org
-X-Gm-Message-State: AFuF++nQMx5WfpTtevWv705oJ8uRRHAmYSffKqn98sIibe3hxMXN97e3
-	yUfvajQS0tqjM+Lr6o/CF2ugho4hN06Bjox7QF2BlzxAlD8a3vIdDCvrF7l6D+ZiyRfVCLTssPg
-	AYR4mq7GzbGRUAbRFkqtY1OMv3s25rlAUUdsd03IqnSICpPyJo/wLJttWsbSjAYQ=
-X-Gm-Gg: AYBFou0i1Xs9w2pEEccQX7Uufwav9WzmFmyPKSEMnJsacHuXe1pE5qKa4FtXe/kgbkI
-	evCNk4Ibgst7+cpoMsA6MxC2XS9Od9vZqSy+QaQyOwLOa82SqOpW+NF4sdGu5w0Ga5dNotrNnFn
-	VNwZHn5q51ZXxOa8HuSKVs2x2qITJBode/C4zbkyB+f7EFnahoGD6a5soKcQ/MbTM765L4tFRpT
-	khLuExFUlVMX6eNpogKVdDnHMpIfrppdvlQaZin7edc1d8onezwrM2z0p42D7Dg4ECak9lbN6qv
-	q4AqTe3TN8LnwKBhlL+dvWAktHpp0SRwOET60kYJnf81ndLObgD3tO5P/OdgPvKF2oahfr5QU6H
-	4wvSV2qqBnc1xW4CueKuImc8zO80Q1dzAASxtMC1Vm18vEqx2HRB0sO+UUGN1DA==
-X-Received: by 2002:a05:620a:c41:b0:939:4b31:4669 with SMTP id af79cd13be357-93c43c1ea79mr2442107585a.29.1790665894712;
-        Tue, 29 Sep 2026 00:11:34 -0700 (PDT)
-X-Received: by 2002:a05:620a:c41:b0:939:4b31:4669 with SMTP id af79cd13be357-93c43c1ea79mr2442101785a.29.1790665894123;
-        Tue, 29 Sep 2026 00:11:34 -0700 (PDT)
-Received: from ?IPV6:2a05:6e02:1041:c10:7d20:e20f:a77f:4ef7? ([2a05:6e02:1041:c10:7d20:e20f:a77f:4ef7])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48af506fdc1sm1730213f8f.21.2026.09.29.00.11.30
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 29 Sep 2026 00:11:33 -0700 (PDT)
-Message-ID: <4de27200-3598-47b7-b0af-8f7acd037618@oss.qualcomm.com>
-Date: Tue, 29 Sep 2026 09:11:28 +0200
+        d=1e100.net; s=20260707; t=1790677504; x=1791282304;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=s4iTwSNVL2vSXyi0y8I31DfIwsKabNOEbE1ug4XUhBI=;
+        b=qOyVXvOPfwjTjWhIO8d3cmSEqJ8JsUWG01fcuKF/R751tSd13EcM8cav+DoYDo0y4r
+         h1SEESvnLyJu+fW1+BD38VBATJHUOUhsfu6bDKNooh83NH85MDguikh6s5AgqaiRboEm
+         hzpqxlRcB1sIsbtrdJ2FIKgMovScF1xFCxvs8niJhiFbjmdqwzrFOZc9RZDcyktLrG1J
+         90UiDHgfeQsJ6e0mITO3Uw0kIxH1bNu27yLABdYOqRzUx7bw3GW9coW/XtJOLUDcCPcd
+         NONppbFCKOW9yx1lTuTzNMDEfk/Sj1vFXzJBhMVI8EPG8kovohZnAmpQXQ2MObTtcgSS
+         zCfw==
+X-Forwarded-Encrypted: i=1; AKwUvBymMo/c2iX4LR+s5qADvvgTUEJF9+A9Yo7ON6GhIyBWrKRyUOvsBtkeIT6i4El22bjWqmcYBob94s0=@vger.kernel.org
+X-Gm-Message-State: AFq9FYITmqfwzK/l76as2Ly7hfH+lcjbwAbeU1M/594m7U9BenCN2AQA
+	LXUz3N5FG86FRm7m+YSekxOpD9yOXc1SA1Sa+ZTOrDzDHTRjFtuVpRAZqbm9mS3mkrk88QdISZS
+	gRoCSTV3L5zKTNi2RbIZ5bCmv2cY4uHTQa3cVNNYzrE/grkMyFv85Epk7TxiCD+k5RwN/lTRIu2
+	QCcqiXTM+6jdgbWF8vsth7re4e1D6+X46ROV+pBA==
+X-Gm-Gg: AYBFou17D/GSe8X1I4VjP6+lehahOe22Xi0n+uKMmMl2HXFYT798hVRc3NQRWT4RJa3
+	PIxAbMx2vhF45avchxJww6fKGUK145vXNnK8Wn/OZYAjbX+SZUv1wxjqmTe9wLJ0+8m8W7kMe6P
+	PXNLikm+8nbrPmn4jiWov7iJvSrp763MqlhnF3UmKnWNm5gHc6U6OiSRX0Dw==
+X-Received: by 2002:a17:90b:4c42:b0:39e:6c68:c787 with SMTP id 98e67ed59e1d1-3a098e5897amr14850065a91.61.1790677504032;
+        Tue, 29 Sep 2026 03:25:04 -0700 (PDT)
+X-Received: by 2002:a17:90b:4c42:b0:39e:6c68:c787 with SMTP id
+ 98e67ed59e1d1-3a098e5897amr14850040a91.61.1790677503429; Tue, 29 Sep 2026
+ 03:25:03 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 16/19] thermal: qcom: tsens: Add support for MSM8952
- tsens
-To: muzafferkadir@mainlining.org, Bjorn Andersson <andersson@kernel.org>,
-        Abel Vesa <abelvesa@kernel.org>, Stephen Boyd <sboyd@kernel.org>,
-        Brian Masney <bmasney+clk@redhat.com>,
-        Jerome Brunet <jbrunet+clk@baylibre.com>,
-        Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley
- <conor+dt@kernel.org>,
-        Srinivas Kandagatla <srini@kernel.org>, Ulf Hansson <ulfh@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        "Joerg Roedel (AMD)" <joro@8bytes.org>, Will Deacon <will@kernel.org>,
-        Robin Murphy <robin.murphy@arm.com>, Lee Jones <lee@kernel.org>,
-        Rob Clark <robin.clark@oss.qualcomm.com>,
-        Dmitry Baryshkov
- <lumag@kernel.org>,
-        Abhinav Kumar <abhinav.kumar@linux.dev>,
-        Jessica Zhang <jesszhan0024@gmail.com>, Sean Paul <sean@poorly.run>,
-        Marijn Suijten <marijn.suijten@somainline.org>,
-        Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-        Maxime Ripard <mripard@kernel.org>,
-        Thomas Zimmermann <tzimmermann@suse.de>,
-        David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-        Robert Marko <robimarko@gmail.com>,
-        Guru Das Srinagesh <linux@gurudas.dev>,
-        Amit Kucheria <amitk@kernel.org>,
-        Thara Gopinath <thara.gopinath@gmail.com>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>,
-        Kees Cook <kees@kernel.org>, Tony Luck <tony.luck@intel.com>,
-        "Guilherme G. Piccoli"
- <gpiccoli@igalia.com>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Cc: David Heidelberg <david@ixit.cz>, phone-devel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, iommu@lists.linux.dev, mfd@lists.linux.dev,
-        dri-devel@lists.freedesktop.org, freedreno@lists.freedesktop.org,
-        Krzysztof Kozlowski <krzk@kernel.org>, linux-pm@vger.kernel.org,
-        linux-input@vger.kernel.org
-References: <20260921-msm8952-initial-support-v3-0-b96fd3fe298b@mainlining.org>
- <20260921-msm8952-initial-support-v3-16-b96fd3fe298b@mainlining.org>
-Content-Language: en-US
-From: Daniel Lezcano <daniel.lezcano@oss.qualcomm.com>
-In-Reply-To: <20260921-msm8952-initial-support-v3-16-b96fd3fe298b@mainlining.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Authority-Analysis: v=2.4 cv=N6i8hG9B c=1 sm=1 tr=0 ts=6abb64a8 cx=c_pps
- a=hnmNkyzTK/kJ09Xio7VxxA==:117 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=VdqzKS8jKosA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=u7WPNUs3qKkmUXheDGA7:22 a=YMgV9FUhrdKAYTUUvYB2:22 a=Oh2cFVv5AAAA:8
- a=OuZLqq7tAAAA:8 a=uWCFXIfD3x_FUo0uTIQA:9 a=QEXdDO2ut3YA:10
- a=PEH46H7Ffwr30OY-TuGO:22 a=7KeoIwV6GZqOttXkcoxL:22 a=AKGiAy9iJ-JzxKVHQNES:22
-X-Proofpoint-ORIG-GUID: H8Q8sdtsBKZjNyoyJU2zynK1C84GWG2w
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTI5MDAyOCBTYWx0ZWRfXxhznFDlDF3+8
- /c5rSmwWyo7h5MWmVi7lHeah7OkcsRLqI81jfvsjsPn/SwnA/KcUkhUh8Q13Q8rsr+hYaWV6k1W
- 1HG+rxRvRMKENOpDAQ4+AfFGpmVWPUZ5+s/77n7cfEgzn7U87pGsV1n0oZNwPXZ2GUT8u+laBo3
- 3EX1O2qwgmFZDpYsSe8C/I3Mz4Vc+ZhzhrAJY8cKssshhSeh67qCjYX4MG8QpIeKzcJfiiKcYMV
- C+eEEfryIao1EO9vYKqiJfur0zdItirndt/IgHsheUQqmxUesQOorRBp0z9lSjsyGbxF1jZLTlc
- dGrHVHJu7M047I9gVW2j/fQt1DvK7uymSuQkNWVYYWIJoakR8+yd/0Tyv8Q79vwiVT/lBNCt8NO
- cmMcA0ckq3T2pKAAtuZP0qEW1tjWqGPomBGZ9kh89r7J4yN4IWrWTj4P0TFECdh/jIhWedIQlaA
- FRH+aq5V+VQaUwhGCdQ==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTI5MDAyOCBTYWx0ZWRfX4HuiKB+jTT9F
- y/4ziOKrHqFQ229YGTiWklyFnjW8GUEKYE0Xiv+nTiorxibk6wJtIWapbii2TYTaL/r7BHB2PAo
- s+YUdfa463EgkxONrOrEFVFPezCkqUI=
-X-Proofpoint-GUID: H8Q8sdtsBKZjNyoyJU2zynK1C84GWG2w
+References: <20260919100408.113979-1-ngocthang2710.1999@gmail.com>
+In-Reply-To: <20260919100408.113979-1-ngocthang2710.1999@gmail.com>
+From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Date: Tue, 29 Sep 2026 12:24:51 +0200
+X-Gm-Features: AclHuK-ioFY03K2yBE6RpDgYHkyETT-slCthEuTAZuN6jBDlBpFjIurlN2EUv9Q
+Message-ID: <CAPx+jO-JBBLNCUrnB0UaMSPu7ajwsrEQMPJ1SfH2PccCR5VnCA@mail.gmail.com>
+Subject: Re: [PATCH] memstick: core: reclaim the request before freeing a
+ timed-out card
+To: Nguyen Ngoc Thang <ngocthang2710.1999@gmail.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>, linux-mmc@vger.kernel.org,
+        linux-usb@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTI5MDA0MSBTYWx0ZWRfX/4/XmTeNZoZb
+ zbnkq7CG772ecQiq8p+4zLoly0vewgKvSrxtE9WMbH4FRof/++HiDk3V/TPX3k60WLGS4I3am0E
+ jWIiUciK2B5TtPo2d8P1SjNrq93FWqQ=
+X-Proofpoint-GUID: NDKa0Ky7Z4Ydo-PrEKjD8qqz5LsN1Yij
+X-Authority-Analysis: v=2.4 cv=I5Hw19gg c=1 sm=1 tr=0 ts=6abb9200 cx=c_pps
+ a=0uOsjrqzRL749jD1oC5vDA==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
+ a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
+ a=eoimf2acIAo5FJnRuUoq:22 a=edf1wS77AAAA:8 a=pGLkceISAAAA:8 a=hSkVLCK3AAAA:8
+ a=j9i9EbPp1eeP6bqsIwMA:9 a=QEXdDO2ut3YA:10 a=mQ_c8vxmzFEMiUWkPHU9:22
+ a=DcSpbTIhAlouE1Uv7lRv:22 a=cQPPKAXgyycSBL8etih5:22
+X-Proofpoint-ORIG-GUID: NDKa0Ky7Z4Ydo-PrEKjD8qqz5LsN1Yij
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTI5MDA0MSBTYWx0ZWRfX3WI4DZI5LPtw
+ OYs0e3SEo11CPpjPI+82p/D3FGSXPBFWFtz2+OD5Ka+zqH1zUQ1Q8XZqP3CYvs4w05bBbPlV1S6
+ BCdKJlG/8SOdRL6LItWIqhuE1zq6cvsxYjFudTpRSXrUl13aBFCx8yU7Jgj0kLK1aBxLqJEo/l+
+ gqXCK0Z+iGiYBFg5gswriZXsY6eWd8BTEsEo8eb73YGoYDU1+8BeBMTl66fJt6agEWN+v34P94t
+ AEJV/WN+B141LttkQ22sRJ1iIgfQP29apwDWcsEmmU6EFtjm6vt4zDJbPK3o4X+VuDyb4/liApT
+ xiD+NENupYTKdofTN02xfJsQ1ttwIVMJgxtnyO788x5rYOVRcR7cWt4YqENnor2jJaxHA9WH35u
+ Znplje+RFoBKHeX7ae6bOmIFCqFyw+C89Fav6irG66fS8izZfp7yBZqJCAFBOJqobKAAz7P5V7W
+ 8KsJ9DD1R2y/Kogh8ug==
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-09-29_02,2026-09-21_02,2025-10-01_01
+ definitions=2026-09-29_03,2026-09-21_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- clxscore=1015 bulkscore=0 spamscore=0 lowpriorityscore=0 phishscore=0
- adultscore=0 impostorscore=0 priorityscore=1501 suspectscore=0 malwarescore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609290028
+ priorityscore=1501 lowpriorityscore=0 bulkscore=0 clxscore=1015
+ impostorscore=0 suspectscore=0 adultscore=0 spamscore=0 malwarescore=0
+ phishscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2609040000
+ definitions=main-2609290041
 
-On 9/21/26 20:19, Muzaffer Kadir via B4 Relay wrote:
-> From: Muzaffer Kadir <muzafferkadir@mainlining.org>
-> 
-> Add MSM8952 support for tsens.
-> 
-> Downstream does a lot of advanced things with calculations.
-> But seems like using tsens-v1 directly works too.
-
-Can you elaborate a bit the changelog please ?
-
-Thanks
-
-
-> Link: https://android.googlesource.com/kernel/msm.git/+/refs/tags/android-wear-7.0.0_r0.3/drivers/thermal/msm-tsens.c#1621
-> Signed-off-by: Muzaffer Kadir <muzafferkadir@mainlining.org>
+On Sat, Sep 19, 2026 at 12:06=E2=80=AFPM Nguyen Ngoc Thang
+<ngocthang2710.1999@gmail.com> wrote:
+>
+> memstick_alloc_card() hands card->current_mrq to the host and waits 500 m=
+s
+> for it. If the host is still busy, the wait times out, the card is freed,
+> but the host keeps its pointer to the freed request.
+>
+> rtsx_usb_ms hits this easily: its handle_req work can block in USB
+> transfers for seconds. When it returns, it reads and writes the freed
+> request, including the retry path in memstick_next_req():
+>
+>   BUG: KASAN: slab-use-after-free in rtsx_usb_ms_handle_req+0x17ff/0x1a00
+>   Read of size 1 by task kworker/1:3
+>   Workqueue: events rtsx_usb_ms_handle_req
+>   Allocated by task 1656:
+>    memstick_alloc_card
+>    memstick_check
+>   Freed by task 1656:
+>    memstick_alloc_card
+>    memstick_check
+>
+> Add an optional host->cancel() hook that stops the host from using the
+> current request, and call it from a common wait helper on timeout, before
+> the request's owner can go away. rtsx_usb_ms implements it by draining it=
+s
+> work item. The helper also covers memstick_set_rw_addr() and both waits i=
+n
+> memstick_alloc_card().
+>
+> Reported-by: syzbot+3ee5da0319ca17ef1f4e@syzkaller.appspotmail.com
+> Closes: https://syzkaller.appspot.com/bug?extid=3D3ee5da0319ca17ef1f4e
+> Fixes: 99451dceeb5f ("memstick: Add realtek USB memstick host driver")
+> Signed-off-by: Nguyen Ngoc Thang <ngocthang2710.1999@gmail.com>
 > ---
->   drivers/thermal/qcom/tsens-v1.c | 44 +++++++++++++++++++++++++++++++++++++++++
->   drivers/thermal/qcom/tsens.c    |  3 +++
->   drivers/thermal/qcom/tsens.h    |  2 +-
->   3 files changed, 48 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/thermal/qcom/tsens-v1.c b/drivers/thermal/qcom/tsens-v1.c
-> index faa5d00788ca..f4201748ea29 100644
-> --- a/drivers/thermal/qcom/tsens-v1.c
-> +++ b/drivers/thermal/qcom/tsens-v1.c
-> @@ -145,6 +145,37 @@ static const struct reg_field tsens_v1_regfields[MAX_REGFIELDS] = {
->   	[TRDY] = REG_FIELD(TM_TRDY_OFF, 0, 0),
->   };
->   
-> +static int __init init_8952(struct tsens_priv *priv)
+> Testing: no hardware. A raw-gadget emulation of an RTS5129 (0bda:0129) on
+> dummy_hcd delays every bulk-IN reply by 550 ms (above the core's 500 ms w=
+ait,
+> below the driver's 600 ms USB timeout). On a KASAN kernel the unpatched t=
+ree
+> reproduces the report (same offset and alloc/free stacks); the patched tr=
+ee
+> takes the timeout+cancel path (~0.6 s) with no KASAN.
+>
+> I first considered a second unbounded wait_for_completion() instead of a =
+hook,
+> but rtsx_usb_ms_request() skips scheduling once host->eject is set and
+> memstick_remove_host() flushes the workqueue, so that can deadlock.
+>
+> Known limit: cancel waits for the worker's remaining retries (a few secon=
+ds
+> with a device that never answers) while memstick_check() holds host->lock=
+.
+> Other hosts leave ->cancel NULL, so their behaviour is unchanged.
+>
+>  drivers/memstick/core/memstick.c    | 22 ++++++++++++++++------
+>  drivers/memstick/host/rtsx_usb_ms.c |  8 ++++++++
+>  include/linux/memstick.h            |  2 ++
+>  3 files changed, 26 insertions(+), 6 deletions(-)
+
+May I suggest that you split this into separate patches. For the core
+and for the rtsx_usb driver. Other than that, this seems reasonable to
+me.
+
+In fact, we should probably have something similar for mmc, as
+currently it's the mmc host driver responsibility to manage this
+timeout itself.
+
+Kind regards
+Uffe
+
+>
+> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/mem=
+stick.c
+> index e03989c4e99e..ea09a63286bb 100644
+> --- a/drivers/memstick/core/memstick.c
+> +++ b/drivers/memstick/core/memstick.c
+> @@ -359,6 +359,20 @@ static int h_memstick_set_rw_addr(struct memstick_de=
+v *card,
+>         }
+>  }
+>
+> +/* On timeout the host may still hold current_mrq; make it let go first.=
+ */
+> +static void memstick_wait_req(struct memstick_dev *card)
 > +{
-> +	for (int i = 0; i < priv->num_sensors; ++i)
-> +		priv->sensor[i].slope = 3200;
+> +       struct memstick_host *host =3D card->host;
 > +
-> +	priv->sensor[0].p1_calib_offset = 2;
-> +	priv->sensor[0].p2_calib_offset = -1;
-> +	priv->sensor[1].p1_calib_offset = -4;
-> +	priv->sensor[1].p2_calib_offset = -4;
-> +	priv->sensor[2].p1_calib_offset = 4;
-> +	priv->sensor[2].p2_calib_offset = 5;
-> +	priv->sensor[3].p1_calib_offset = 1;
-> +	priv->sensor[3].p2_calib_offset = 1;
-> +	priv->sensor[4].p1_calib_offset = 2;
-> +	priv->sensor[4].p2_calib_offset = 3;
-> +	priv->sensor[5].p1_calib_offset = -1;
-> +	priv->sensor[5].p2_calib_offset = -1;
-> +	priv->sensor[6].p1_calib_offset = 0;
-> +	priv->sensor[6].p2_calib_offset = -1;
-> +	priv->sensor[7].p1_calib_offset = 3;
-> +	priv->sensor[7].p2_calib_offset = 4;
-> +	priv->sensor[8].p1_calib_offset = 2;
-> +	priv->sensor[8].p2_calib_offset = 4;
-> +	priv->sensor[9].p1_calib_offset = 0;
-> +	priv->sensor[9].p2_calib_offset = 0;
-> +	priv->sensor[10].p1_calib_offset = -3;
-> +	priv->sensor[10].p2_calib_offset = -2;
+> +       if (wait_for_completion_timeout(&card->mrq_complete,
+> +                                       msecs_to_jiffies(500)))
+> +               return;
 > +
-> +	return init_common(priv);
+> +       if (host->cancel)
+> +               host->cancel(host);
+> +       card->current_mrq.error =3D -ETIMEDOUT;
 > +}
 > +
->   static int __init init_8956(struct tsens_priv *priv) {
->   	priv->sensor[0].slope = 3313;
->   	priv->sensor[1].slope = 3275;
-> @@ -223,6 +254,19 @@ struct tsens_plat_data data_8937 = {
->   	.fields		= tsens_v1_regfields,
->   };
->   
-> +static const struct tsens_ops ops_8952 = {
-> +	.init		= init_8952,
-> +	.calibrate	= tsens_calibrate_common,
-> +	.get_temp	= get_temp_tsens_valid,
-> +};
+>  /**
+>   * memstick_set_rw_addr - issue SET_RW_REG_ADDR request and wait for it =
+to
+>   *                        complete
+> @@ -370,9 +384,7 @@ int memstick_set_rw_addr(struct memstick_dev *card)
+>  {
+>         card->next_request =3D h_memstick_set_rw_addr;
+>         memstick_new_req(card->host);
+> -       if (!wait_for_completion_timeout(&card->mrq_complete,
+> -                       msecs_to_jiffies(500)))
+> -               card->current_mrq.error =3D -ETIMEDOUT;
+> +       memstick_wait_req(card);
+>
+>         return card->current_mrq.error;
+>  }
+> @@ -405,9 +417,7 @@ static struct memstick_dev *memstick_alloc_card(struc=
+t memstick_host *host)
+>
+>                 card->next_request =3D h_memstick_read_dev_id;
+>                 memstick_new_req(host);
+> -               if (!wait_for_completion_timeout(&card->mrq_complete,
+> -                               msecs_to_jiffies(500)))
+> -                       card->current_mrq.error =3D -ETIMEDOUT;
+> +               memstick_wait_req(card);
+>
+>                 if (card->current_mrq.error)
+>                         goto err_out;
+> diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/=
+rtsx_usb_ms.c
+> index beadc389f15f..403144a39a53 100644
+> --- a/drivers/memstick/host/rtsx_usb_ms.c
+> +++ b/drivers/memstick/host/rtsx_usb_ms.c
+> @@ -551,6 +551,13 @@ static void rtsx_usb_ms_request(struct memstick_host=
+ *msh)
+>                 schedule_work(&host->handle_req);
+>  }
+>
+> +static void rtsx_usb_ms_cancel(struct memstick_host *msh)
+> +{
+> +       struct rtsx_usb_ms *host =3D memstick_priv(msh);
 > +
-> +struct tsens_plat_data data_8952 = {
-> +	.num_sensors	= 11,
-> +	.ops		= &ops_8952,
-> +	.feat		= &tsens_v1_feat,
-> +	.fields		= tsens_v1_regfields,
-> +};
+> +       cancel_work_sync(&host->handle_req);
+> +}
 > +
->   static const struct tsens_ops ops_8956 = {
->   	.init		= init_8956,
->   	.calibrate	= tsens_calibrate_common,
-> diff --git a/drivers/thermal/qcom/tsens.c b/drivers/thermal/qcom/tsens.c
-> index b5ec70201e2f..4d7013fc79d6 100644
-> --- a/drivers/thermal/qcom/tsens.c
-> +++ b/drivers/thermal/qcom/tsens.c
-> @@ -1191,6 +1191,9 @@ static const struct of_device_id tsens_table[] = {
->   	}, {
->   		.compatible = "qcom,msm8939-tsens",
->   		.data = &data_8939,
-> +	}, {
-> +		.compatible = "qcom,msm8952-tsens",
-> +		.data = &data_8952,
->   	}, {
->   		.compatible = "qcom,msm8956-tsens",
->   		.data = &data_8956,
-> diff --git a/drivers/thermal/qcom/tsens.h b/drivers/thermal/qcom/tsens.h
-> index e8376accdff3..a35b15312961 100644
-> --- a/drivers/thermal/qcom/tsens.h
-> +++ b/drivers/thermal/qcom/tsens.h
-> @@ -669,7 +669,7 @@ extern struct tsens_plat_data data_8960;
->   extern struct tsens_plat_data data_8226, data_8909, data_8916, data_8939, data_8974, data_9607;
->   
->   /* TSENS v1 targets */
-> -extern struct tsens_plat_data data_tsens_v1, data_8937, data_8976, data_8956;
-> +extern struct tsens_plat_data data_tsens_v1, data_8937, data_8952, data_8976, data_8956;
->   
->   /* TSENS v1 with no RPM targets */
->   extern const struct tsens_plat_data data_ipq5018;
-> 
-
+>  static int rtsx_usb_ms_set_param(struct memstick_host *msh,
+>                 enum memstick_param param, int value)
+>  {
+> @@ -787,6 +794,7 @@ static int rtsx_usb_ms_drv_probe(struct platform_devi=
+ce *pdev)
+>         INIT_DELAYED_WORK(&host->poll_card, rtsx_usb_ms_poll_card);
+>
+>         msh->request =3D rtsx_usb_ms_request;
+> +       msh->cancel =3D rtsx_usb_ms_cancel;
+>         msh->set_param =3D rtsx_usb_ms_set_param;
+>         msh->caps =3D MEMSTICK_CAP_PAR4;
+>
+> diff --git a/include/linux/memstick.h b/include/linux/memstick.h
+> index 107bdcbedf79..e86f7f6e3e4b 100644
+> --- a/include/linux/memstick.h
+> +++ b/include/linux/memstick.h
+> @@ -285,6 +285,8 @@ struct memstick_host {
+>
+>         /* Notify the host that some requests are pending. */
+>         void                (*request)(struct memstick_host *host);
+> +       /* Stop using the current request; may sleep until the host is id=
+le. */
+> +       void                (*cancel)(struct memstick_host *host);
+>         /* Set host IO parameters (power, clock, etc).     */
+>         int                 (*set_param)(struct memstick_host *host,
+>                                          enum memstick_param param,
+> --
+> 2.43.0
+>
