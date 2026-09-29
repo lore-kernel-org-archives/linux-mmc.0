@@ -1,243 +1,192 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C832527584
-	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 13:07:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A28043499F
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 13:34:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790687225; cv=pass; b=ANnRiBEVrktPWuFP41K3CCd4shMfF70KtRtrloBuP09uAS9ohEy79CU5h4pFnJPAUSd9ibpBggkfJd0B3Rnb/kHJjnztt882L7S+yhn9EesZALETfEBGtZ3BANnNn3vCDGV81//QvTuSIomVgd3SvoDeuGeMRRzxZ+ChvuWb40o=
+	t=1790688856; cv=pass; b=oii5KZ36KqFjo/FwlGARLsRS0eGpDefSYmULpGiOsH8mt8rA9/Px1o5lYbD9Pm671QJQ+Xh3o7HPQgfnLmqVVYhvwAtvIdjbmOLpZ2iITz9T5Ii0mPHSXy9EbinzHYH3fosZobDM86dgMwr/vEv2JdjCz+7gMtSs9vPyhuv06I0=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790687225; c=relaxed/simple;
-	bh=V1DsO2Pz3F72ju4dQ/Ux5BmxpF0TO0iwXoQe07SqAEg=;
+	s=arc-20240116; t=1790688856; c=relaxed/simple;
+	bh=YoGSaRaJTMcQ+m3/DeyAZMTO2MQHhdeZBfTnsQKrOxk=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BRds67qwdkLHmN8HKY/ySOepwmtzXKfy9J0WWpdV0XJ4J5i8VDDV41S379RCmRuKWES9Clpz2km7ap+MfvUMfQPOsBzzKCEE+yv1SlpMoZ8TuKUct8iwbSblLE3X7cgK0uUGYdEah8mBMdApHmuJCrUc1xBC9iZsIVt2cib2CYM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=onXVlIRs; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=e8r5+W/C; arc=pass smtp.client-ip=205.220.180.131
+	 To:Cc:Content-Type; b=WVhdlC8WonlsSDh+I3xzvbmxe+VOvJFuxi3gxLJ1KQBCEDJYM4IeFRBOSiC6buczPSJm5VdPEF2xXASvLDvE6FXVA0+HEaQlzTD0lJjAsniZBX5wGHgeDhBRaUa6ZH5FGKsGgFXdXlyW8Gd0Bb0G62zgSl+Gtl/4nxzwv0VjG6k=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=OgmStnqc; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=S3/o/zmH; arc=pass smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="onXVlIRs";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="e8r5+W/C"
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68TCqg99350050
-	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 13:07:03 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="OgmStnqc";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="S3/o/zmH"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68TCqhXD1477045
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 13:34:13 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	21a3Cev2ydeQp5RXTCpHt49B9WnKsUDXOpDi31j2ekE=; b=onXVlIRsP+NRcjVq
-	+6r37hTQkQdyY0A6qkTNSYocZjGSU5TsTuhOi5F1/9TFr+VNpE0pc7qe+ACPYGdb
-	M6Hcwh5IElWBjkPN3T3dOZ3HFqEXlhAk2LL1NwUFxFmqFq9tlF1rEdjwhIxxM6e7
-	y7DJo2szT9xbp7viJveBkMhX4dJ9A94z6PWskIGcbdbjgm5A1/msCLX3jldVmYT6
-	FPDlQ5fRW/FDdqRI1tO9VXo8xt0hc7A3wIXfS4Ze6KFMEl4i+7TQC1j/wRLkqzNe
-	PitcJ2KlV571B0SGtJOlogpIEkl3ryP8swKWGVbHOfNAL9cNXK6OXgHE0PM0FJQu
-	o+XiWQ==
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com [209.85.216.72])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4h01vkjx7q-1
+	PbimJkO6iOoejrUdihI8epYoUEux4ko+Bcbb9LWQp8Y=; b=OgmStnqc4h3SdKeb
+	MfTOJ4Rw7tSA9M7C6oAs96swDBny1ayH1ECRE8wqdeCLUMHB7CJyAzVEGcss+XUN
+	0uQW08oYq5MtsWcfGysDJBCAlnm1Al+Vw65es8dykz8lE5G+LRlwdzHIghaA93zc
+	kPlIXURVMJEK8LzNVEvLWSgEOxFZRK/COEzy9ZIyW6+aBG/EzpUkbix1ZSOns77T
+	6wyGlvMquhnf15BPFOeT208rQgfh6cPqhc/LtL7enO1tOrK0lLqBN9ny9VPwALT+
+	25n2v/Q52hMJc6yVu7l4P9arxoK+oHzne+GLCaT4dRtWOzurklN2ECWqPM3oCdYJ
+	9SdQNA==
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com [209.85.210.197])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gyw03ma1k-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 13:07:02 +0000 (GMT)
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-39b6416441eso7339582a91.1
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 06:07:02 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1790687221; cv=none;
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 13:34:13 +0000 (GMT)
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-86a2639398cso6014467b3a.3
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2026 06:34:13 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1790688853; cv=none;
         d=google.com; s=arc-20260327;
-        b=soTFIsVzUgUNWb+YiZtKH8dmquzeF0tclWJ8RYaGPGpFEqXDHXFBLe95LvHJmF+jMC
-         DCQvut4b2nVPKAezRHQypMiROMdh3SZAYHWn/54AiDw5N/dsDIcXnRBCO19rttv+Ojmm
-         NOpoUIr7eZelqCCxuNnvhwXNm7OL5/lr1g24Uj/RjXRTJL9kIZHaTRVDuAtF+L/WELor
-         zq9gHMZ3UcoYuzbjIJdUdhhIEpMJIib1G66IDaXvmuonA9JavODJeEyIbge1lUOv2xxp
-         rWW3HXHxKY3e9n9/Ls4eoes1h9lubqg90P24dbZGmY2HNDLCu9g5x/iZDeLM3Ou1Nv5a
-         prRA==
+        b=SEq3auGpM7VMdPeVNmNBp8eBow2YzoDdahw5+2ERAIMPh/HtW8X1J4eM9jLUs8dhfq
+         WEnUPslouqsbKTUxRKN1qEN80igwwCmEXdO7y8L3Lq4H/qRfeaj+GqVjUpzbLc6OvFdb
+         JlvmuYe5MIV8jM7F5QGdp2vAzer9ix0ue3fHliYf4hIH0Rl27UxEmpLQxkTmOzS4Z2Ik
+         HfKmCLrSwF4mnFCgYfK5oKW48tGWwVX2wOAdnUWslpGYltW8WPBbB0gB7RbjMPGbCNnx
+         e0vfNkbUJAQC/hGOpGZcNLGYrDs0ZLPKeVbZPZzVyGxtl1YHm8xvqxyTjJkwC3wge46N
+         J9LA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=21a3Cev2ydeQp5RXTCpHt49B9WnKsUDXOpDi31j2ekE=;
-        fh=Mbpi8NUhIcUG5R2AhipW0KG59IxNmOL+YivPCUaSUOw=;
-        b=mMnuEVA0ZZda/iwnXcjcEnGGict2u12bGrsQzje5ErrpwyHn5lIx5GG7a+aotcZVnq
-         AIDn7QunzK+h8dquMmwozNPF4e5nsR4Ikh0fL/kHHKmkIBkaN+ZdUJC7vVRgzKqz+EVt
-         R5yc+WzM+Vc/dveO6eEKV8vqeAvBULhHvDelTyGIfb0QEVwCTPWnzDziRnjkYBsy9y5f
-         SiPgS206CDWJIuXQDJVsXgIQKWSobIaX2+yR+CkT/duuvM8y8Iwsxts4XQt6XDv6Ayst
-         ufmZBLscUUElTVMWU1Su28u9HZP5VppsCWUdtn5RIInxbh+Axk5/qZW8I0GUmp+k6Oh6
-         UMyQ==;
+        bh=PbimJkO6iOoejrUdihI8epYoUEux4ko+Bcbb9LWQp8Y=;
+        fh=KY8+eQep3rNFQKydS+N/4uj8BxIBlI2zHyUJRhpQHYw=;
+        b=LukT6IqW2lxZQw6GwtXWcT6IgFVMCNS4lSUJbguFZqMU1ejdlHHegKVHyUbuG3Vlr/
+         tKl/IsBwMjOY+aTA3iwijdqxdfey8K5ur3C/d60yb2X4RwPfHRl6aitipljuSPp0krcZ
+         joU3HwOtHC24Br9Vhq9eupwpaEgIPPsqc615yFm3yXZrREBYLJOMNj6xfIIrFa5Q8wLu
+         wZUXotASQJLs6o6yCd/tjWsz2f0SU1YDSQEdxspTGKUJvCfWAKUICfRimq9WTA7XvmW4
+         Mxd/J+ZX1+Hvb5HSWsxb5MZVMMMNwvmgvc3E82iviUrdroErGQMNC8YaKKniP9lAYQsa
+         WpMA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1790687221; x=1791292021; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1790688853; x=1791293653; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=21a3Cev2ydeQp5RXTCpHt49B9WnKsUDXOpDi31j2ekE=;
-        b=e8r5+W/CcebgGf848IVTIFhQsstQPFdh/rNRcw+qpd3EtT6YoTMLNUOlIIO0c/mLEt
-         6rlVIVRRyVfPqrFaFpCSY9e2Fy0DlRIFcKUAK+xkA4ofXAlr5cB6DgbHRoU0HgWnNwYz
-         q8Y0NDQHKIPHGy/H6jJ3RZ0rzm608Q3v5NP0ecdmsvzmag4NdbLRCrv49fQqudCuuVXQ
-         h/1fQ6nRQJP4MqyRWux7jyO7bGZEt7z3qzYrwqCSne0pZSS2M3oKUHWcG+GM3egeyJdj
-         30/N1lHDh0hGbxzgrrd6eivSS5v7uqLSFrd8ifzIQ1+mq796ZMk3x9dgYGl5G8D7mlOE
-         zGtw==
+        bh=PbimJkO6iOoejrUdihI8epYoUEux4ko+Bcbb9LWQp8Y=;
+        b=S3/o/zmHvEQ3g9yO3OqQ0cDXQe88eqePoZqMS4UgqZcQorgn1A4gog7uXPkW1y6Qht
+         KZMm8dWf2Esg6/LqC8OKJ37+xGd7cy1QGxYylv9Psl/twjZAGh0nBSJ1eZJ2NscgU/Iy
+         3Z5clQJq5FMJI71eorVS0wHjXEqdWIJPc9+ieZuFsy+UAYqRhp7gC5lZGY/STOauEW9/
+         zO0M0KjbqaZZX0W145mAVAftra8cQgCH6u/mVhLK+3z0hTRCjdSlx0D81LRHmLhvJI7d
+         NUNnsVur+K7g5Q+OY6SbrZcQeICAAMlosBcGqU3Q5H+WW+pvcWFAV3O3+FgZqBDlr4m0
+         OJ5A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790687221; x=1791292021;
+        d=1e100.net; s=20260707; t=1790688853; x=1791293653;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=21a3Cev2ydeQp5RXTCpHt49B9WnKsUDXOpDi31j2ekE=;
-        b=Do+NXYiboAMJtonLCjSG/aOflQ9ix3Ep9tO7ZjQ5zhP3OyUgXOs2TRa0Uu6fvU/T+P
-         eqigBhqsfBH+M6stdmZGWfTY05Gh17E5Y6swSsW5NFYylWwosj+uuSPH3jW6OsJpfXEP
-         K53g+vq08TWUrID64CJf4MzdGl9BFtAXWJDTcYvvWDv4Mz01WCWK4Y9IdWWlFDBrHvFv
-         wE1DN0DBpZVH17sr0xMhQab4QHa7KEkGkwBlz5SatejT2E3xmLrr6Di8mTqe+BJFcDTI
-         KGGcs2wBCJm5bs3cfBmKXaWY716/IL29H05Ii93RroarpdELXkXvpmgOyty7VbmbzvTE
-         CtAQ==
-X-Forwarded-Encrypted: i=1; AKwUvBy1xBJcFTbkKTbHnIIbKE8KERgu50w+mupZn7rw/jpoujtDfu/+fKeDjzYckZtV1dA0ZBi+8TFOmOo=@vger.kernel.org
-X-Gm-Message-State: AFq9FYJ6E2OJgLtqWCKzsb7zNwKOBycVjudVhfmt3gutCfD1HlYsAIzq
-	XzZT2lGQfut6fmJJ0Gd7j2yrSUUey4+hMoTp//crIgHpORFpgtLpSL2Wt5AT4wkjp2LS3bik/In
-	CsNLN/isRI5u9otuV08rz7l28E/WxFG6jN7H0MlpmJ2lLgks5caTbVA+wv1kHikiG0hyumIFmLQ
-	CTUh6L/SzBllkJiz8JyEb7hLcGzRw+YdNxwNkVtQ==
-X-Gm-Gg: AYBFou07rWJxThz71eWUbjH1hivjMkxIeJzyvX7m6edgKrpyRWIAg7D4RbIc7ri3APE
-	xoiOhKaxOj0TIWIVKl4QvQembb2ba3ew6rqgvkdQQM8BUC9QMjiETG1BLOlrLw9WVfjtwVumYvq
-	PpUUvJHkJ5bcF7ovBqHG0Vpe/mS7ec5YYiWzLvV12W5txrpvVAjjtF9iwNgQ==
-X-Received: by 2002:a17:90b:1dc8:b0:3a0:a781:2c39 with SMTP id 98e67ed59e1d1-3a0a781310emr12666123a91.7.1790687220857;
-        Tue, 29 Sep 2026 06:07:00 -0700 (PDT)
-X-Received: by 2002:a17:90b:1dc8:b0:3a0:a781:2c39 with SMTP id
- 98e67ed59e1d1-3a0a781310emr12666092a91.7.1790687220319; Tue, 29 Sep 2026
- 06:07:00 -0700 (PDT)
+        bh=PbimJkO6iOoejrUdihI8epYoUEux4ko+Bcbb9LWQp8Y=;
+        b=gST3xMPAvvVRW4O7+4oe8d69jhMRzJSoyZUjFf/rEjf1oAd/WpBmw9yp1Iui238VcW
+         HpNHaVD4lu3iEistibXKyyOXu+xlp2asC+T9uf5KsW9GpdQx7TWPkDZ9OwqbnTDYcw1k
+         K9xRo4qBVdBjLJPjVZSDim7y6tInGJ8QMaGKrOs1lgeegvMhTPdDIoNDIXci4MPP2sD3
+         mLHCg7oHIa2OafpyGRAzjhqR7bm+I+i23hON5DjLVh7pGFfodHfMN8ib1YW6byb5G1Ro
+         FxL1rSbHf0ho2SGuV91Oo4gSGRSWrYAhZwVh2BtovkP8mntYV3UnmgDL+FtTeD1msyVK
+         /ywg==
+X-Gm-Message-State: AFuF++kMBISX/QIJE157WZS1sIUlT+R202mVTlVErEhQskLNQVqRV/cN
+	fShRB1Ecr480W/UUrZm7bFdYo1Nlu9U+sUnguWpcvyxeVacjsodp7uzQMkcJY83+3/xtv7QR9zt
+	vuq4ek0c7tOnQyMu1xPgHKpgru5woBTOtsb+p8kiFJFBVUx76KGqj1eQNOSWMzIpvImn+b9IO/N
+	oI4sasn9V5tgLhM2LrxP/ZMvckB5FYDk2AA9V9s5FWMqDaXQ==
+X-Gm-Gg: AYBFou0HC8EkhqLfanXTnMT3QXVZDcz9IR8PxQ7Ni7n4oca3dJADnP9FNCdiFmLFZOV
+	tvUFAe9RNthVpJo3NCkCY9MLv0V7SprUWVi+GYfb1ePsWlQC+6GIbpxlS5/2WJbkdcS8JPYaBlQ
+	j5RbMLq9dJ+y/8xOBekjlDsB1dSlEHLl7wXKMNpFRz0QBbIorIO2EM48wp2g==
+X-Received: by 2002:a05:6a00:a83:b0:878:34d7:697b with SMTP id d2e1a72fcca58-8802c46d6f6mr10122257b3a.41.1790688852684;
+        Tue, 29 Sep 2026 06:34:12 -0700 (PDT)
+X-Received: by 2002:a05:6a00:a83:b0:878:34d7:697b with SMTP id
+ d2e1a72fcca58-8802c46d6f6mr10122234b3a.41.1790688852178; Tue, 29 Sep 2026
+ 06:34:12 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260926122908.866-1-ian.ray@gehealthcare.com>
-In-Reply-To: <20260926122908.866-1-ian.ray@gehealthcare.com>
+References: <20260917104959.662433-1-ag@ffroot.co.za>
+In-Reply-To: <20260917104959.662433-1-ag@ffroot.co.za>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Tue, 29 Sep 2026 15:06:48 +0200
-X-Gm-Features: AclHuK8ohi6TIyO3G8ZsjJJvVIubQzRERp_6C1DA8_Wo8f5Uw_B-NFxG6PGshS4
-Message-ID: <CAPx+jO-59V8bg+DB4pOqEmdPZrfLi098YsyzkBRnf2Krb7ufVA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Don't program invalid host driver type for
- fixed eMMC type
-To: Ian Ray <ian.ray@gehealthcare.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>,
-        Kamal Dasu <kamal.dasu@broadcom.com>, stable@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Tue, 29 Sep 2026 15:34:00 +0200
+X-Gm-Features: AclHuK953rFaHLBDPLbS5eTN48EJNCBOQ393Rp1dm1u3loV7lLXW7Ib6OX9wUpY
+Message-ID: <CAPx+jO-pyXAPSvmZWEHiaWPnc3N=91qebdh636fD7g8rNBgaEA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sunplus: initialise rd_crc_dly=1 for DDR modes
+To: ag@ffroot.co.za
+Cc: linux-mmc@vger.kernel.org, ulfh@kernel.org, tonyhuang.sunplus@gmail.com,
+        lhjeff911@gmail.com
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTI5MDA1MiBTYWx0ZWRfX1g/qZp7e4RbZ
- bu+G0Mug7Fd9AhDtVuTVr0wUiDvcLJaiY0twLQcT3hMb9FEjAJkHLNNNz6xXO/ATQJpp9QFceV3
- PVC+Ym7XdAabml+oSbkow1tx8NhEVTH9PpkZuInQkNFGKcT+5pcvE/nDuIYbWiGhGU5E9VNaFJs
- hIRjS1YbIa7cgGWpgu0h1d43uUg7tYWuDafHgnt0iEbNq+izpe4tu/ouVJShoZClW/X0QLG8LGA
- 4q3jWl3QlUgg0XpFbMzBzcuDU5ykRBzky0875ul/4wEuCnIXVCmG825Y4J+Ry7RnIpkXlIf/ezu
- lrU8h0L3eNSVWSDnbabAuXmGpQVkNjpWvAaVJWjwqrqL8ql/awW+E/W5SzJNMqh9aYsDYgiIEap
- 2zSIClO0uMLDSOWEsYyLZC8FtY3KoXDshOJ0TVV7P2Q8b4p/9HiUH8qRI5/xcXpSx7NRKQGiOry
- t2v9hi3agcEdJXKWIPg==
-X-Proofpoint-GUID: 1kQdtbyEpLOCrW7de3CypKTvYnxKX671
-X-Authority-Analysis: v=2.4 cv=VcVir1p9 c=1 sm=1 tr=0 ts=6abbb7f6 cx=c_pps
- a=RP+M6JBNLl+fLTcSJhASfg==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTI5MDA1NCBTYWx0ZWRfX3Up7N/3C/bEq
+ 3HiZaA3gA7LAbqydDgfxKsQ6K/ZtUj2g/aX+zlOXlCx+zBfJd6DMSezU2vPzG27Dh9cQbSsqnCV
+ EQUHwGgK+EMkxuVtB334vrpwWVf8TY8=
+X-Authority-Analysis: v=2.4 cv=SIbXx+vH c=1 sm=1 tr=0 ts=6abbbe55 cx=c_pps
+ a=rEQLjTOiSrHUhVqRoksmgQ==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=rJkE3RaqiGZ5pbrm-msn:22 a=lb8OlhKpAAAA:8 a=VwQbUJbxAAAA:8
- a=ChPqmsTiKTP6iP7Wuk0A:9 a=QEXdDO2ut3YA:10 a=iS9zxrgQBfv6-_F4QbHw:22
- a=7GnFejQYy5TgUzHuXd-m:22
-X-Proofpoint-ORIG-GUID: 1kQdtbyEpLOCrW7de3CypKTvYnxKX671
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTI5MDA1MiBTYWx0ZWRfXzuyTXg5G13W4
- dX93hugdD3OVeO7Tl10OrdnqS6GoBTZyWPxo+pGAXV3MMookQubzE7J9gK2AjxHXdomcuGHCmmr
- gt4zU/hMfvqyRJs6kOGrVT8k1ebTaYY=
+ a=Um2Pa8k9VHT-vaBCBUpS:22 a=3pH3b8UoZ_SLFIxPbvIA:9 a=QEXdDO2ut3YA:10
+ a=2VI0MkxyNR6bbpdq8BZq:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTI5MDA1NCBTYWx0ZWRfX03MdGEZNsce9
+ 72OHicxTbkCmKW41jufPlgBIyOliaqwkAwVP1G4KBUmm6x1pNu7ut+rI4tQUAnQXvMTLv/CqLq1
+ +pMQUM0FcbmUkHDTMnRj9r2gxWI9JEXe6NwHgI3yoS963ITcPb0vl5x6SOivfTKmRtsTQG92xtR
+ TV7TAqeIRyDGn40f9XNUk+hcWboAdpNLPJeXV3s5jBs94SDC9qcttxG7s5ygikAGn+pBOq3wKCw
+ MnT+X1+kjF9dPYCrgnMxVR2aGnxPXxaYOBcnGp38kAqnPGlS24TyBrvfnqKrMK2IONIcnkpCAb/
+ vqgUiQOOMwUrQ9nGpSIDTVn7l/kfnYh34gjPSrSb2Qz9l4Ta+BZyOF/nZO1//xFfkcBVPjIfJ+T
+ K585ixMWSW+W51joqlrIwfdLmnJMIIR1irTzwZsWCOB40KOCvFnoqfXBT3cLctnHPqVm9pyQSrD
+ fO4dsrjucPHtjcRMzHw==
+X-Proofpoint-GUID: 0czyJMAOwUStV5aiM2CKIaJeWk98GmtH
+X-Proofpoint-ORIG-GUID: 0czyJMAOwUStV5aiM2CKIaJeWk98GmtH
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-09-29_04,2026-09-21_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 bulkscore=0 clxscore=1015 suspectscore=0
- lowpriorityscore=0 spamscore=0 phishscore=0 malwarescore=0 adultscore=0
- impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2609040000
- definitions=main-2609290052
+ phishscore=0 lowpriorityscore=0 clxscore=1015 suspectscore=0
+ priorityscore=1501 malwarescore=0 impostorscore=0 adultscore=0 bulkscore=0
+ spamscore=0 classifier=typeunknown authscore=0 authtc= authcc= route=outbound
+ adjust=0 reason=mlx scancount=1 engine=8.22.0-2609040000
+ definitions=main-2609290054
 
-+ Adrian
+On Thu, Sep 17, 2026 at 12:50=E2=80=AFPM Andrew Gaylard <ag@ffroot.co.za> w=
+rote:
+>
+> After spmmc_controller_init() resets the controller, all timing
+> fields are zero.  The hs_en path initialises the write timing
+> delays (wr_cmd_dly, wr_dat_dly) but leaves the read side at zero.
+>
+> In DDR52 mode, rd_crc_dly=3D0 causes the first write to fail with
+> CRC_TOKEN_CHECK_ERROR, triggering the auto-tuning retry loop and
+> causing a multi-second delay on the first cold-boot write.
+>
+> Set rd_crc_dly=3D1 when enabling DDR mode to avoid this.
+>
+> Tested on a LTPP3G2, booting via eMMC in DDR52 mode,
+> on linux-next-20260915.
+>
+> Signed-off-by: Andrew Gaylard <ag@ffroot.co.za>
 
-On Sat, Sep 26, 2026 at 2:29=E2=80=AFPM Ian Ray <ian.ray@gehealthcare.com> =
-wrote:
->
-> The host controller driver type value used by the MMC core [1] _mostly_
-> overlaps with the eMMC device I/O driver strength value [2] as shown in
-> the table below; however, there is _no_ host mapping for eMMC value 4.
-
-I think the mapping exists only because that is what the SD spec
-provided when this was introduced.
-
-We can certainly add something that corresponds to value 4 from the
-eMMC spec as well, to make this complete.
-
->
->   host value/type   | eMMC value | nominal impedance | strength
->   ------------------+------------+-------------------+---------
->   0 / Type B        | 0          | 50 Ohm            | x1
->   1 / Type A        | 1          | 33 Ohm            | x1.5
->   2 / Type C        | 2          | 66 Ohm            | x0.75
->   3 / Type D        | 3          | 100 Ohm           | x0.5
->   (none)            | 4          | 40 Ohm            | x1.2
->
-> [1] MMC_SET_DRIVER_TYPE_* in include/linux/mmc/host.h
->
-> [2] 'fixed-emmc-driver-type', see JESD84-B51 Table 206 and
->
->
-> Since commit 5a52c5701a67 ("mmc: core: Fix host controller programming
-> for fixed driver type"), the selected eMMC driver strength is passed
-> directly to mmc_set_driver_type().  For a fixed eMMC driver type of 4
-> this reaches sdhci_set_ios(), which only knows types 0..3 and therefore
-> complains on every ios update:
->
->   mmc2: invalid driver type, default to driver type B
-
-Perhaps the print above from sdhci_set_ios() is simply a bit
-misleading. For example, it looks like arasan_select_phy_clock()
-actually uses the value in ios.drv_type as is.
-
-To me, it looks like the problem is that mmc_select_drive_strength()
-doesn't really do its job correctly, as it should help us to figure
-out what is supported by the card *and* by the host, so we can request
-a proper driver type when calling the ->set_ios() callback.
-
->
-> The mmc card itself is still programmed correctly (the HS_TIMING driver
-> strength field is set from card->drive_strength independently), so this
-> is a spurious, repeated warning for a valid, documented configuration.
->
-> Change to only program the host when the eMMC driver type value maps to
-> a valid host driver type.
->
-> Tested on i.MX8MP (usdhc3, eMMC in HS400) with
-> `fixed-emmc-driver-type =3D <4>`: the warning is no longer logged and the
-> HS_TIMING register contains 0x43 as expected.
->
-> Fixes: 5a52c5701a67 ("mmc: core: Fix host controller programming for fixe=
-d driver type")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Ian Ray <ian.ray@gehealthcare.com>
-
-I have looped in Adrian, to get his opinion on this.
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/core/mmc.c | 8 +++++---
->  1 file changed, 5 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/sunplus-mmc.c | 5 +++++
+>  1 file changed, 5 insertions(+)
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 05444ecf3909..ff5d4b805998 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1371,9 +1371,11 @@ static void mmc_select_driver_type(struct mmc_card=
- *card)
->
->         card->drive_strength =3D drive_strength;
->
-> -       if (fixed_drv_type >=3D 0 && drive_strength)
-> -               mmc_set_driver_type(card->host, drive_strength);
-> -       else if (drv_type)
-> +       if (fixed_drv_type >=3D 0 && drive_strength) {
-> +               /* eMMC driver types >=3D 4 have no host controller equiv=
-alent. */
-> +               if (drive_strength <=3D MMC_SET_DRIVER_TYPE_D)
-> +                       mmc_set_driver_type(card->host, drive_strength);
-> +       } else if (drv_type)
->                 mmc_set_driver_type(card->host, drv_type);
->  }
->
+> diff --git a/drivers/mmc/host/sunplus-mmc.c b/drivers/mmc/host/sunplus-mm=
+c.c
+> index 63279760239c..e947c84eef94 100644
+> --- a/drivers/mmc/host/sunplus-mmc.c
+> +++ b/drivers/mmc/host/sunplus-mmc.c
+> @@ -294,6 +294,11 @@ static void spmmc_set_bus_timing(struct spmmc_host *=
+host, unsigned int timing)
+>                 value =3D readl(host->base + SPMMC_SD_CONFIG0_REG);
+>                 value |=3D SPMMC_SD_DDR_MODE;
+>                 writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+> +               /* DDR mode needs rd_crc_dly=3D1 */
+> +               value =3D readl(host->base + SPMMC_SD_TIMING_CONFIG0_REG)=
+;
+> +               value &=3D ~SPMMC_SD_READ_CRC_DELAY;
+> +               value |=3D FIELD_PREP(SPMMC_SD_READ_CRC_DELAY, 1);
+> +               writel(value, host->base + SPMMC_SD_TIMING_CONFIG0_REG);
+>         } else {
+>                 value =3D readl(host->base + SPMMC_SD_CONFIG0_REG);
+>                 value &=3D ~SPMMC_SD_DDR_MODE;
 > --
-> 2.49.0
+> 2.53.0
 >
