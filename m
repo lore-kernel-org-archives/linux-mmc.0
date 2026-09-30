@@ -1,293 +1,219 @@
-Received: from CO1PR03CU002.outbound.protection.outlook.com (mail-westus2azon11010069.outbound.protection.outlook.com [52.101.46.69])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f176.google.com (mail-pf1-f176.google.com [209.85.210.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CF1E4F0538;
-	Wed, 30 Sep 2026 13:24:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.46.69
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790774685; cv=fail; b=ouRJwrXmiNiMFRSw9eHrhFRxWw3AeZmpb6AlRpzdZeE+mhmSwU6pkoCF94MlpzNPT9Tuuf+GqhplREvn9fTaeo7921k1y0QU+gldORYDcIO+XxukzfMEADcja8Uwryd0PS3cOKQ9glPv9lX4UWP3rC09Gz5vFDEST3twtVSmg0w=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790774685; c=relaxed/simple;
-	bh=2hn08wvMSEcpGdIGDW8ExmWc2DuT5sLoI8Ys7rc3AUQ=;
-	h=Message-ID:Date:Subject:To:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=CfokfZicnCzl4969gbNuYWvL7Bv6uHFl+kfDXLGW5aypBK6QJJHWQ2sXuF1ZDPWdFmIf1vmwdUfvUss12PW45V/djwZkHRExF+FmqMRmaXIQu5RI/52P8L7uFfrB0RlTf2NcHCHj7L6kESqWTE8QC5H7YqH46Gvbs4xxDxyqPHY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=ReA5FgRw; arc=fail smtp.client-ip=52.101.46.69
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 589534D7D38
+	for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2026 14:08:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.176
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1790777293; cv=none; b=qqQOYJBdIvt9ovaFvTpRA0AIFWS4FT/8x/r8MY3ioodWk8dPNyWuyI1mKHw+tH92BU/dVsBgQ+ofN/bABvUpRECYnobE3GH2B6c3DoARjM5RAzGJOCY9BsM1XkEmCjMd7xozhMmBjBRyCoDUpHRu4yv9rTkSZn+Kv4j2Nhruxag=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1790777293; c=relaxed/simple;
+	bh=ugKqDuDWQZBm6u98nq28c/n7WFLNiK7Z+cZC9VQNwKY=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=Wdu0IIi2pr6VjDmG92Rm+sZgQukKrTPYZbu7wAldK8NPyguiFhustmocEUNCjCPWGU8PbvUF06nfAq9i9C8MFEGX/Rc9qjSEFw9z97ae61YVHcn1I9TnVyyHcJGdUn/NNVp/fcPjXhv9/TXP9qy49M8DMe38qMys33l287B1YPk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DaQBQnqv; arc=none smtp.client-ip=209.85.210.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="ReA5FgRw"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=u2h4BBdj38xhemsT4wvjzBEBTGD5qRm+sIA94Ks9od95LgVKPWdANGNwBp0Fl2auEOfrfypcwf5ZF1qI3eA4/osgtwkb9NKxs/Egfvo9TQchPF2XegdXHujo6reu7ACVT2YbVx/11Etwpqo1wqwb6NiM5PxWhzT/yxKlyq2hbSO9mNpo6oAFHGREK3kLJCvB75gTn8RaRgt3trFqfS4NsmdQA1ud1KR67TaCNJSJteTl439tcE7BsNUKnqMFGV/XnogmC7out6XtpJLQwqWxoGiByJiTemmvuAi9PGIGi3VQpPtXPoo4Qv2l7l/7/DncwzaJk1cbsn13RD1j1SzQkQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=J9yY2OblgFHFkqyTo7KB3eJnN0CLC/NHkFDgVvtMGSI=;
- b=xSYKeMFezrxgSUI1IBWvJrkbgCHB5Yyqp5n/+LXjsiWssDbwANgqkvqgawrkNsBuQqZmOh2Onv0UFPdemLMg1i8WqGOKO3LfuQ0PV6AaPYjhZ5crbz7GfbKui8PLo1G8EzYHNmFgWvzI3De5q3BFlInS5HrxOZrh4uj8xwpi6p14l048lxb++yqoolB5eXp3ZtnwCFRUViB0lvjN+LyZnXTUtnZ+L2u3AnT0MkosLcxoezn/IZcVqulRPOySzq9dffOU7yJAhxUV/sOxlhqidS8WOtd4dm9G3qSs3idIq7E/j0JaxOC+ok8QpYEiAJHir6d+QFC3Kg1k9Wy9ftTrWQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
- dkim=pass header.d=altera.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=J9yY2OblgFHFkqyTo7KB3eJnN0CLC/NHkFDgVvtMGSI=;
- b=ReA5FgRwm6Qb8ZY+exI6vM84jBV45YueRqtpoXMoCDPujP2ryns06x8lJSwEK64Fz0P3m2jlKgzrX4jkKJZ4Un1Z1YT6r69P3vTOznxOwkRYrLReQ06ftUc2JOnrGvDNDzJo7nV3SxSAcMVMsuqyZ7V+AczcmuoOJvLIehiMRZ641UV5dJxFh7Soqo6TDc8f1x/aUk398eJkSriGvvJ7MWgnIwxgQ/VyZT4Vb1OZe37i+s+Ouml2uYl2N7emsEgezjzBxNGXnJa2CCOMhTF5z8TwwhoXsyrwZ3ktXPL33NN4I20T+fopszzov+sjSPBZYIMXHjNTd5leEELg/C8f7Q==
-Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=altera.com;
-Received: from SJ0PR03MB5950.namprd03.prod.outlook.com (2603:10b6:a03:2d3::20)
- by BY5PR03MB4949.namprd03.prod.outlook.com (2603:10b6:a03:1e8::15) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.451.24; Wed, 30 Sep
- 2026 13:24:19 +0000
-Received: from SJ0PR03MB5950.namprd03.prod.outlook.com
- ([fe80::53a0:bf93:6b6b:de01]) by SJ0PR03MB5950.namprd03.prod.outlook.com
- ([fe80::53a0:bf93:6b6b:de01%5]) with mapi id 15.21.0472.015; Wed, 30 Sep 2026
- 13:24:19 +0000
-Message-ID: <6502547b-4f83-49c1-b622-9b6d7bf982de@altera.com>
-Date: Wed, 30 Sep 2026 21:24:13 +0800
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 4/4] mmc: sdhci-cadence: read SD6HC DDR50 tuning from
- device tree
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
- Tanmay Kathpalia <tanmay.kathpalia@altera.com>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, devicetree@vger.kernel.org
-References: <cover.1790074790.git.tze.yee.ng@altera.com>
- <9440b973966df50c9f6c79055ec83ef3b634335a.1790074790.git.tze.yee.ng@altera.com>
- <4aafce14-2be7-46a6-9d5b-8df35646dc0a@intel.com>
-Content-Language: en-US
-From: "NG, TZE YEE" <tze.yee.ng@altera.com>
-In-Reply-To: <4aafce14-2be7-46a6-9d5b-8df35646dc0a@intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: BY1P220CA0021.NAMP220.PROD.OUTLOOK.COM
- (2603:10b6:a03:5c3::16) To SJ0PR03MB5950.namprd03.prod.outlook.com
- (2603:10b6:a03:2d3::20)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DaQBQnqv"
+Received: by mail-pf1-f176.google.com with SMTP id d2e1a72fcca58-885cd98d226so618709b3a.1
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2026 07:08:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1790777274; x=1791382074; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=huHRNTGU5UMivKeQs9CaSmnnKBulMsdT40T8bBJxYVk=;
+        b=DaQBQnqvSJVkSIt4/TyVyzRb5XSDq00gtf3me/7iTr0wAsKxpwR7koglvxPaSfSQrd
+         5uqOEkamhRyllkEfBUTYpCVP03tuqDv7vl63I+TRkeTI99OUtl0QJYFmHi+19vMHoexq
+         UJE7dAbIFyISJ0CXJ+eAalWfr9Frsn7opHiRAonZV1mRkc60EUNY4jINCoytl0e+krgU
+         PwEVvWImjjwh952OJMP5Lv/x24CZo+RJPLs8aJhQlhwx7HAJ+irOt9duHRliGv29rzsd
+         Zu6oeBVAhniAhkaZW+IKwCtnn+5nGGCB9AneQTZPcqsoqIYI1tC6B07j1g7MPUz9+gyV
+         u8fg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1790777274; x=1791382074;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=huHRNTGU5UMivKeQs9CaSmnnKBulMsdT40T8bBJxYVk=;
+        b=g6PmuGivpakIQvs/QRto2F6cgJpteqjRCVh/UnQURIQBtvRGS7i053dSNboF6PUIGi
+         mAmHyS4M/Z/b3S35xykEJmosU5LzVx2T2qlhl/IBszpiIlaUMuL0dvovecxlNYEuIJcf
+         aeceVvRfBM5XT2zkxvrYAtOhMdkDvpbXjRwXwIOA+ZGOv1RXiBmIMe+pCnkmkmVUEMkd
+         ljl8YMmsocTm2asxCSxb5Wi8jr0nSCFDAR5oYTA6NGbViTvUmR9KR5kLK2hljkDhaC4s
+         5JOfZ14ET2dgkruGLvuBMQZdxQz669254eMrr6h4b9OOOz7mkV8VyOwcLimBJ/kkFVOu
+         JiIw==
+X-Forwarded-Encrypted: i=1; AKwUvBwzaFUXKCmwgAJDtr67oSptvBp29sRoFfavi+/cjr5DOpNMP+0v8jA0MRvcENT7hyahiuPgGQi/rfI=@vger.kernel.org
+X-Gm-Message-State: AFuF++nhm/5+AHgs8fYNdjlbr9O5/S5JHw7KvyM1oovHS7MyztWRUZXY
+	Uilwy7IQ8FaOQmrAnWB3GDy4dhZVGpen0ZFM/vweV4WoEpU2huWiSFeZ
+X-Gm-Gg: AYBFou1gkV12YWDdGbv6Jss2z/6RW9eThFeHF6EgSfUNmkmdg6IBBMEyyQqsiHJc1rE
+	IVHJnpFExafp0+/3k2sW6iA2ysFt7HhbLBFMhZ4CDqCHEH2OVd3OyDvnrUdldU7O9zZCMu+Ssy0
+	LHWJ6jIgTkzCfit39zHEiqNor5/tEYZCTZ2XyLMP7aR8wo1UzAp2HdZql7xvUio8luayK8pIqm8
+	6TJWxHBbvzZpJnmrwYYLOoCGJV7m/jXTnBAX/HS6G8jAWBIlgOA0/coAwG1Ks2C9Vv8F+D6csdr
+	K1CeTyedjAbwhUmnUguJEzBik96AnrvK8H6K4eJmlHobB+mgirVPS4EsLnM9gf5zBHM2Lx7cuBE
+	Wh0MiG89yNQ8Y1NOdBp+EJyHI5esCstjCgNncFb4vw+kMNo1KhUXCrAtrG1tDBiWJZgiPEjSFyF
+	D0igTQwemaGrLtK1Nxzsr1yJyKU3nY3VLsivMorn8fqLCppcvaYgwQuVuLcv4IBmQisN2G1d/Qx
+	0g=
+X-Received: by 2002:a05:6a00:22d4:b0:887:29b1:27f3 with SMTP id d2e1a72fcca58-8874e34619amr786945b3a.44.1790777273482;
+        Wed, 30 Sep 2026 07:07:53 -0700 (PDT)
+Received: from thangnn-ASUS.. ([2a09:bac5:d45e:16c8::245:115])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-88726c04931sm899517b3a.55.2026.09.30.07.07.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 30 Sep 2026 07:07:53 -0700 (PDT)
+From: Nguyen Ngoc Thang <ngocthang2710.1999@gmail.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@oss.qualcomm.com>,
+	Maxim Levitsky <maximlevitsky@gmail.com>,
+	Alex Dubov <oakad@yahoo.com>,
+	Raj Ojha <rajojha047@gmail.com>,
+	linux-mmc@vger.kernel.org,
+	linux-usb@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] memstick: rtsx_usb_ms: complete requests after eject instead of dropping them
+Date: Wed, 30 Sep 2026 21:07:48 +0700
+Message-ID: <20260930140748.15946-1-ngocthang2710.1999@gmail.com>
+X-Mailer: git-send-email 2.43.0
+In-Reply-To: <CAPx+jO-FBNsZFvfep-2SpqDFm3kYA=RpcF0CZx-kj0XH2juijQ@mail.gmail.com>
+References: <CAPx+jO-FBNsZFvfep-2SpqDFm3kYA=RpcF0CZx-kj0XH2juijQ@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SJ0PR03MB5950:EE_|BY5PR03MB4949:EE_
-X-MS-Office365-Filtering-Correlation-Id: 8e6e8731-26c6-44e7-47ef-08df1ef621ce
-X-MS-Exchange-AtpMessageProperties: SA
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|23010399003|1800799024|366016|4143699003|5023799004|10067099003|3023799007|11063799006|56012099006|18002099003|55112099003|22082099003;
-X-Microsoft-Antispam-Message-Info:
-	2dxB8u6NyJ7hjMaSjGYfb7eS6k1JHFckW2/eKyji7UXTLGjbF/TiwvNNm9XVpL+O3kwxUbbKvAE/ZJB5jmxnjhLe4wPt67aanc29moHr988LuVtabstC/w56bs5SulMju8DN46bJZQw9BMFYh5ADJD37AEGYbt2uVnyTOcdbpb693rYVFPWPA2/l0BkHMk+ZJz4LP8fBwX1PFeh4O8AOloi3ZUye164uBUw/Aq7h1y31dlfSF6V3/uASr9cj0oqSJQvHInOrp8GRqUUZMW24fUFbDzxDSKm1pa2De/dEbDr/V5JS1XFAyH/96cwWDI3rlth1ohZhNJxrJ7wtI1aO0js+cTVPf7xrFrCdMSt24GZ5NtCDZyCuhGY5JNOfAZcLVQAd/QeX8Dszgg2ZnDqI7HfU06tBvlbfJKZ4BFKogGOVzMn2Fej6L5BsNNUPYZOEDArgd7g1UYolZPYK2y5NPrphFi5uivFOsvvhOJTczAWYWKUxQjfS8OJ5O1HNQ3j+Q4j14IsXq05UE3tEr5ejGCsdx1yJR8TF7JnB3WxsApqOkI3g+vpGTltcgh13xTqsWJKnoed3guRUCvG06xdzbeglLiFVLCDkFUOOhFDCvr5AA+JfxJ+VMT8Vz/SMoVwoSJ/VztPX3odK+htwgvQ8IPWPFCVyQTAp1viKxelQZOE=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR03MB5950.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(23010399003)(1800799024)(366016)(4143699003)(5023799004)(10067099003)(3023799007)(11063799006)(56012099006)(18002099003)(55112099003)(22082099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?NGVpNUJxQlBqT0ZJNDQyWDlRLzNnbHBxcFlHQ0RjVWxtRnhLa1ovQ3gxTnRL?=
- =?utf-8?B?Q05lSVBJejV5Yzg3T09ZZ1ljQVVlanVZbjZsRklrZVRPLzJOeDBCdXhRZmh1?=
- =?utf-8?B?ZUNaQnJWNG5sMXc1VU0ybE82N2lwNHM4Y21ybURuMDQvRGYySEgrSm05UEI4?=
- =?utf-8?B?T2lacThiTCttcDA1dzlGWkJqMHJQdHY4eVRjYnJVTzdQOXNZWnEwRFZEUjV6?=
- =?utf-8?B?V3E3L3RHQ3RrVURRdzUvWENHQW5sVlJWR2cxQlpZQk9EbnVOUXFYc0RGalpD?=
- =?utf-8?B?VFBCQlFiUnZXajNKb0p3clZhU01vK01rYXJEVk1RWkI0S29rb3RVeG1BRmpZ?=
- =?utf-8?B?WlY1ajdrdGlGZTJKN09CVkJ2dlFMbFE5eGpGVlppQjRWSklqTTNYTFZNR0pt?=
- =?utf-8?B?dlNlTWtuK25yMG1uQ01aOWhwVGZ6ZEUzdmxhUmYvZllrWWc0ZklORlBzQ2Z4?=
- =?utf-8?B?RUhvSDB1cW5qRUVIaTRyd2c2Ry9OSjdjZkFYMnhSVkpOUW1ZMEJsckJ6VzVh?=
- =?utf-8?B?cWxOOW4zMnlIaTVTanZ0bUpPSWpYRnRwSUR0c1hIL21waUdqTWI3SU50SVY2?=
- =?utf-8?B?b1ZjaTltckQyRFRkeEJqckpLUVYzRzJaRjJIMGRUM2djdW5RcXE0TkV5M0R3?=
- =?utf-8?B?NlM3SjlhUlhNNi9EaUJXRjhVVXJBT0RpclVMWVY4dDFYbEVoLzMvMnRvWG1B?=
- =?utf-8?B?VmtxS2w5UWFaY2c1VkxFdnU5VTluZ1lza091ODF1MHFBbHdGc3lDS2hSNnBw?=
- =?utf-8?B?cWNHTExUTHYzTnRpNmhnMlhsR296dktkZWJMVjNTazhhSDBBTDdjWXNqT2M1?=
- =?utf-8?B?NG1kMk8za0dvNFZ0QXREWms4YXlWN3ZPZkZwcjN4RG5QclI0MnFLVFhDSjNy?=
- =?utf-8?B?L29zUm05SkpwTk5jM1gxa3lZRTh3Y1NNZDJZdndTYmcvUHM4Vm0zNlQyK1lX?=
- =?utf-8?B?bkVxN1NVSjBCVXc3WmxwdEhMcjdiNkltcFIvNDM3dUZQcldYalNFQVlXREJj?=
- =?utf-8?B?T2x4K2tRK3h6a1pYUmtqaDIydlVLSWVzajhSakRIMGtFZEw1K1QweXJPbEpT?=
- =?utf-8?B?bzJTUXM4ajJQanJBeVFLTzFDQVVQQ25jeG01aTRVcDFFYU1FTUNEMnhXQ09W?=
- =?utf-8?B?NDNCa0ZOdTFRNEE5bUdXZC9oQWcyR3VLYkR0cHpYcklMWHNJeGZ6MFlwTmV3?=
- =?utf-8?B?aUpXcm13RWFKYU5FcmNBMGxaRStnSldXa2pVYWFUMzBWekRMVG1jaTVKNTQ5?=
- =?utf-8?B?dFlMcHVaTmZxbnlGbDlOSi8yOWg4UVdrRndlU3RSMUJDY2Eydlp0bTFWRTRS?=
- =?utf-8?B?bkZnSFI1c0orYW1uMEE2UkJIYnEwaDlwbGMxNWtLc0laUzkxSmxFbWhURWsw?=
- =?utf-8?B?UTRiVkRXQnBONE10SEZjQmh4dVhRUjlKclVtdUJMaVB2VGJXRFdyK0JzbDdm?=
- =?utf-8?B?eDNLS0kwN2h6K25sOWNzZnpUSk5nNzg1WU9QaVhBTE4zZk9HVVBHejN0SkIz?=
- =?utf-8?B?T09EUkpGY1ZNdmNVaGVOamFYVUNhRnpEc05SYnZ0NDN4OExEMmNiQjR6NHJa?=
- =?utf-8?B?T0ZBUWRoU2Vpc3VsTm5RY3YxWGdMaG1oVXZnWlZld0R1M1JMcmNncXk5WUlG?=
- =?utf-8?B?NFZqeGtDOU13K1czK2cwdCtTOE9CQ3kzMCtLN3hBRWROOGNIRlNueFpnTVBj?=
- =?utf-8?B?aFJ0UFhHTFVtaE54V29NbHY4dUk5RXkwcEFwVUd2ekg3Y2xpTkY3SVhIVkRw?=
- =?utf-8?B?WTdjR2FvUDc4c2xBRHIxa1NIZ3l6Q2thVFJ6Ymt5R2lMYkxxWi9xaE1hUXdl?=
- =?utf-8?B?bnZPbFpIckkvTk9yY0g3TkRFRWhFNENINmtHQk9xZ3UzajJneWJkT1A2bmVK?=
- =?utf-8?B?T0dlRzZNNG9wV014bjJRaHViK2dYRWgrbXZGYllIRjFxaGN5TlJ6cGhXZ1hT?=
- =?utf-8?B?T0RIUllySEdqdFNCYjhmS2xseUV5R1duNU5DV0RSV2hBeDB4Q0NHSlBoMDJ6?=
- =?utf-8?B?NnVVRlhnWmxJdUl2OUVMMFlqSGIzZ2RqNW4rY2FBa2c2TjB0MkkyeFptcUNC?=
- =?utf-8?B?YVRySzBXU1lqUmZVMXlwYUNWNmNMVkF4eVcrbWZqN0U5TnpNb3dMY01QcFA3?=
- =?utf-8?B?K04rTkl5R2ozSmoxenZzb29NT1RUclZ5UWtyVHRxNjQvOXhmOXhjZW10VXdI?=
- =?utf-8?B?TldtWExHTTd3YnNHNUk5eXlrVWNINW9NNitjRDk1dDEwRENadGZrZHRVTVZu?=
- =?utf-8?B?K0lVR2RYcE5rSTNCRU9wQWtnSW1uRi9uQmwyWHJTYlZZREtsWms1eTdVVTFI?=
- =?utf-8?B?N0VLNEwxQUZkUVRXeThVNUFiV3cxV09kOEVtTXdZWGRwdEFyMXBlZz09?=
-X-OriginatorOrg: altera.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8e6e8731-26c6-44e7-47ef-08df1ef621ce
-X-MS-Exchange-CrossTenant-AuthSource: SJ0PR03MB5950.namprd03.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Sep 2026 13:24:18.9733
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: aPlSQrGl7EKlPBI1kfna1c4RzTwjGdGPQ7WpmvaWopM9Kb3cFY8HClsbTFHG94dv2UUR9JiFe9ZgxkexKwLUBw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR03MB4949
+Content-Transfer-Encoding: 8bit
 
+memstick_check() can pass its host->removing check just before
+rtsx_usb_ms_drv_remove() sets eject/removing. Its next request is then
+silently dropped: rtsx_usb_ms_request() skips schedule_work() once eject
+is set, and drv_remove's cancel_work_sync() can also cancel a queued
+handle_req before it picks the request up. Nobody completes
+card->mrq_complete.
 
+Once memstick core waits for requests without a timeout ("memstick: core:
+wait for request completion before freeing card"), this hangs removal:
+memstick_check() never returns and memstick_remove_host() blocks in
+flush_workqueue():
 
-On 24/9/2026 2:40 pm, Adrian Hunter wrote:
-> On 22/09/2026 14:12,tze.yee.ng@altera.com wrote:
->> From: Tze Yee Ng<tze.yee.ng@altera.com>
->>
->> DDR50 has no CMD19 tuning, so the SD6HC read path relies on static PHY
->> settings that need board/SoC characterisation. Read the read-DQS delay,
->> read-DQS source and phony DQS assertion timing from the new
->> cdns,ddr50-read-dqs-delay, cdns,ddr50-use-lpbk-dqs and
->> cdns,ddr50-phony-dqs-timing DT properties at PHY probe, range-check them,
-> Firmware values are expected to be correct, and so are not validated.
-> >> and apply them only in DDR50. When a property is absent the existing
->> driver default is kept - for the phony DQS timing, the derived
->> REBAR_PULSE_CYCLES-1.
->>
->> Signed-off-by: Tze Yee Ng<tze.yee.ng@altera.com>
->> ---
->>   drivers/mmc/host/sdhci-cadence-phy-v6.c | 72 ++++++++++++++++++++++++-
->>   1 file changed, 71 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-cadence-phy-v6.c b/drivers/mmc/host/sdhci-cadence-phy-v6.c
->> index 84592ae42762..0f47fa62d894 100644
->> --- a/drivers/mmc/host/sdhci-cadence-phy-v6.c
->> +++ b/drivers/mmc/host/sdhci-cadence-phy-v6.c
->> @@ -129,6 +129,11 @@ struct sdhci_cdns6_phy {
->>   	/* Active delay element (ps); doubled when one SDMCLK requires > 256 steps */
->>   	u32 delay_element;
->>   
->> +	/* DDR read-path overrides (SoC-specific) */
->> +	s32 ddr_read_dqs_delay;
->> +	s32 ddr_use_lpbk_dqs;
->> +	s32 ddr_phony_dqs_timing;
->> +
->>   	/* PHY_DLL_SLAVE_CTRL register fields */
->>   	u8 cp_read_dqs_cmd_delay;	/* bits [31:24] */
->>   	u8 cp_clk_wrdqs_delay;		/* bits [23:16] */
->> @@ -145,6 +150,7 @@ struct sdhci_cdns6_phy {
->>   	/* PHY_DQS_TIMING register fields */
->>   	bool cp_use_phony_dqs;		/* bit [20] */
->>   	bool cp_use_phony_dqs_cmd;	/* bit [19] */
->> +	bool cp_use_lpbk_dqs;		/* bit [21] */
->>   
->>   	/* PHY_CTRL register fields */
->>   	u32 cp_phony_dqs_timing;
->> @@ -523,6 +529,12 @@ static void sdhci_cdns6_phy_calc_dat_in(struct sdhci_cdns6_phy *phy)
->>   	if (phy->mode == MMC_TIMING_MMC_HS200)
->>   		phy->cp_read_dqs_delay = phy->hs200_tune_val;
->>   
->> +	if (phy->mode == MMC_TIMING_UHS_DDR50 && phy->ddr_read_dqs_delay >= 0)
->> +		phy->cp_read_dqs_delay = phy->ddr_read_dqs_delay &
->> +			SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_DELAY;
-> So here is unnecessarily assuming DT is providing a bad value.  It could just be:
-> 
-> 	if (phy->mode == MMC_TIMING_UHS_DDR50 && phy->ddr_read_dqs_delay >= 0)
-> 		phy->cp_read_dqs_delay = phy->ddr_read_dqs_delay;
-> 
->> +
->> +	phy->cp_use_lpbk_dqs = 1;
->> +
->>   	if (phy->sdhc_extended_rd_mode &&
->>   	    (phy->mode == MMC_TIMING_UHS_DDR50 ||
->>   	     phy->mode == MMC_TIMING_MMC_DDR52))
->> @@ -530,6 +542,18 @@ static void sdhci_cdns6_phy_calc_dat_in(struct sdhci_cdns6_phy *phy)
->>   	else
->>   		phy->cp_phony_dqs_timing = 0;
->>   
->> +	if (phy->mode == MMC_TIMING_UHS_DDR50 && phy->ddr_use_lpbk_dqs >= 0)
->> +		phy->cp_use_lpbk_dqs = phy->ddr_use_lpbk_dqs &
->> +			FIELD_MAX(SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS);
-> Ditto
-> 
->> +
->> +	/*
->> +	 * The phony DQS timing derived above depends on the board's SD flight
->> +	 * time, so allow a DT override to re-position the fabricated strobe.
->> +	 */
->> +	if (phy->mode == MMC_TIMING_UHS_DDR50 && phy->ddr_phony_dqs_timing >= 0)
->> +		phy->cp_phony_dqs_timing = phy->ddr_phony_dqs_timing &
->> +			FIELD_MAX(SDHCI_CDNS6_PHY_CTRL_PHONY_DQS_TIMING);
-> Ditto
-> 
->> +
->>   	if (strobe_dat) {
->>   		/* dqs loopback input via IO cell */
->>   		hcsdclkadj += phy->iocell_input_delay;
->> @@ -693,10 +717,11 @@ int sdhci_cdns6_phy_init(struct sdhci_cdns_priv *priv)
->>   	sdhci_cdns6_dll_reset(priv, true);
->>   
->>   	reg = sdhci_cdns6_read_phy_reg(priv, SDHCI_CDNS6_PHY_DQS_TIMING_REG);
->> +	reg &= ~SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS;
->>   	reg &= ~SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS;
->>   	reg &= ~SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS_CMD;
->>   	reg |= SDHCI_CDNS6_PHY_DQS_TIMING_USE_EXT_LPBK_DQS;
->> -	reg |= SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS;
->> +	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS, phy->cp_use_lpbk_dqs);
->>   	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS, phy->cp_use_phony_dqs);
->>   	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS_CMD, phy->cp_use_phony_dqs_cmd);
->>   	sdhci_cdns6_write_phy_reg(priv, SDHCI_CDNS6_PHY_DQS_TIMING_REG, reg);
->> @@ -881,6 +906,7 @@ int sdhci_cdns6_phy_probe(struct platform_device *pdev, struct sdhci_cdns_priv *
->>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>   	struct sdhci_cdns6_phy *phy;
->>   	unsigned long val;
->> +	u32 prop;
->>   	int ret;
->>   
->>   	phy = devm_kzalloc(dev, sizeof(*phy), GFP_KERNEL);
->> @@ -919,6 +945,50 @@ int sdhci_cdns6_phy_probe(struct platform_device *pdev, struct sdhci_cdns_priv *
->>   
->>   	phy->delay_element_org = phy->delay_element;
->>   
->> +	/*
->> +	 * Optional DDR50 read-path tuning. These are board/card-characterised
->> +	 * values with no CMD19 tuning in DDR50; absence keeps the driver
->> +	 * default (-1 => not overridden).
->> +	 */
->> +	phy->ddr_read_dqs_delay = -1;
->> +	if (!of_property_read_u32(dev->of_node, "cdns,ddr50-read-dqs-delay",
->> +				  &prop)) {
->> +		if (prop > SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_DELAY) {
->> +			dev_warn(dev,
->> +				 "cdns,ddr50-read-dqs-delay %u out of range, clamping to %lu\n",
->> +				 prop,
->> +				 (unsigned long)SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_DELAY);
->> +			prop = SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_DELAY;
->> +		}
->> +		phy->ddr_read_dqs_delay = prop;
->> +	}
-> If the unnecessary validation is dropped:
-> 
-> 	phy->ddr_read_dqs_delay = -1;
-> 	of_property_read_u32(dev->of_node, "cdns,ddr50-read-dqs-delay", &phy->ddr_read_dqs_delay);
-> 
-> etc
+  INFO: task kworker/u10:3:65 blocked for more than 20 seconds.
+  Workqueue: kmemstick memstick_check
+   __wait_for_common
+   memstick_check
 
-Agreed on all of them. I'll drop the range checks, the clamps and the
-& FIELD_MAX() masks. FIELD_PREP() already masks on write, so those masks 
-were redundant anyway.
+  INFO: task kworker/1:1:33 blocked for more than 20 seconds.
+  Workqueue: usb_hub_wq hub_event
+   __flush_workqueue
+   memstick_remove_host
+   rtsx_usb_ms_drv_remove
 
-Two of these also change form in v2 after Krzysztof's review, which 
-removes the validation naturally:
+Never drop a request. rtsx_usb_ms_request() always schedules handle_req,
+and handle_req fails requests with -ENOMEDIUM once eject is set, without
+touching the device. drv_remove flushes handle_req instead of cancelling
+it, and cancels it only after memstick_remove_host(), when no new
+request can arrive, so it cannot run on a freed host.
 
-- read-dqs-delay becomes ps (cdns,ddr-read-dqs-delay-ps): probe is just
-of_property_read_u32() into a u32 defaulting to 0; calc converts ps -> 
-delay elements. No clamp.
+The host_mutex drain in drv_remove is removed: handle_req always leaves
+host->req NULL when it finishes, so the drain never had anything to do,
+and it would now race with handle_req.
 
-- use-lpbk-dqs becomes a boolean (cdns,ddr-use-lpbk-dqs): 
-of_property_read_bool(), so there's nothing to validate.
+Fixes: 99451dceeb5f ("memstick: Add realtek USB memstick host driver")
+Cc: stable@vger.kernel.org
+Link: https://lore.kernel.org/all/20260924204142.607-1-rajojha047@gmail.com/
+Signed-off-by: Nguyen Ngoc Thang <ngocthang2710.1999@gmail.com>
+---
+This applies on top of Raj's patch:
+https://lore.kernel.org/all/20260924204142.607-1-rajojha047@gmail.com/
 
-- phony-dqs-timing stays a u32, and I'll drop its clamp/mask too.
+Tested in QEMU with dummy_hcd + raw-gadget emulating an RTS5129, with a
+debug msleep() after the host->removing check in memstick_check() and
+the device unplugged during it: with Raj's patch alone removal hangs as
+above; with this patch on top it completes, and the original UAF
+reproducer stays clean.
 
-I'll also reword the commit message to drop "range-check them".
+ drivers/memstick/host/rtsx_usb_ms.c | 31 ++++++++++-------------------
+ 1 file changed, 11 insertions(+), 20 deletions(-)
 
-Thanks,
-Tze Yee
-
+diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
+index beadc389f15f..d5b3a96fc609 100644
+--- a/drivers/memstick/host/rtsx_usb_ms.c
++++ b/drivers/memstick/host/rtsx_usb_ms.c
+@@ -27,7 +27,6 @@ struct rtsx_usb_ms {
+ 	struct memstick_host	*msh;
+ 	struct memstick_request	*req;
+ 
+-	struct mutex		host_mutex;
+ 	struct work_struct	handle_req;
+ 	struct delayed_work	poll_card;
+ 
+@@ -514,6 +513,13 @@ static void rtsx_usb_ms_handle_req(struct work_struct *work)
+ 	struct memstick_host *msh = host->msh;
+ 	int rc;
+ 
++	/* Fail requests after eject so their waiters are released. */
++	if (host->eject) {
++		while (!memstick_next_req(msh, &host->req))
++			host->req->error = -ENOMEDIUM;
++		return;
++	}
++
+ 	if (!host->req) {
+ 		pm_runtime_get_sync(ms_dev(host));
+ 		do {
+@@ -547,8 +553,7 @@ static void rtsx_usb_ms_request(struct memstick_host *msh)
+ 
+ 	dev_dbg(ms_dev(host), "--> %s\n", __func__);
+ 
+-	if (!host->eject)
+-		schedule_work(&host->handle_req);
++	schedule_work(&host->handle_req);
+ }
+ 
+ static int rtsx_usb_ms_set_param(struct memstick_host *msh,
+@@ -781,7 +786,6 @@ static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
+ 	host->power_mode = MEMSTICK_POWER_OFF;
+ 	platform_set_drvdata(pdev, host);
+ 
+-	mutex_init(&host->host_mutex);
+ 	INIT_WORK(&host->handle_req, rtsx_usb_ms_handle_req);
+ 
+ 	INIT_DELAYED_WORK(&host->poll_card, rtsx_usb_ms_poll_card);
+@@ -812,27 +816,12 @@ static void rtsx_usb_ms_drv_remove(struct platform_device *pdev)
+ {
+ 	struct rtsx_usb_ms *host = platform_get_drvdata(pdev);
+ 	struct memstick_host *msh = host->msh;
+-	int err;
+ 
+ 	host->eject = true;
+ 	msh->removing = true;
+-	cancel_work_sync(&host->handle_req);
++	flush_work(&host->handle_req);
+ 	cancel_delayed_work_sync(&host->poll_card);
+ 
+-	mutex_lock(&host->host_mutex);
+-	if (host->req) {
+-		dev_dbg(ms_dev(host),
+-			"%s: Controller removed during transfer\n",
+-			dev_name(&msh->dev));
+-		host->req->error = -ENOMEDIUM;
+-		do {
+-			err = memstick_next_req(msh, &host->req);
+-			if (!err)
+-				host->req->error = -ENOMEDIUM;
+-		} while (!err);
+-	}
+-	mutex_unlock(&host->host_mutex);
+-
+ 	/* Balance possible unbalanced usage count
+ 	 * e.g. unconditional module removal
+ 	 */
+@@ -841,6 +830,8 @@ static void rtsx_usb_ms_drv_remove(struct platform_device *pdev)
+ 
+ 	pm_runtime_disable(ms_dev(host));
+ 	memstick_remove_host(msh);
++	/* No card, no new requests; wait for the last failed one to finish. */
++	cancel_work_sync(&host->handle_req);
+ 	dev_dbg(ms_dev(host),
+ 		": Realtek USB Memstick controller has been removed\n");
+ 	memstick_free_host(msh);
+-- 
+2.43.0
 
