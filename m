@@ -1,98 +1,149 @@
-Received: from mail-m3273.qiye.163.com (mail-m3273.qiye.163.com [220.197.32.73])
+Received: from perceval.ideasonboard.com (perceval.ideasonboard.com [213.167.242.64])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2624B4F473F;
-	Wed, 30 Sep 2026 14:51:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B50924D1787;
+	Wed, 30 Sep 2026 15:58:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.167.242.64
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790779905; cv=none; b=ohQbtHivtpCmniyS1ODIctSuMNL0zIfGhDEUQ12vzesouuywugWPh0lb8Tchff9Vzr3KHiYQVaUnB4URryi+2xRcqoLgdNJLjX5SvwY4QYuwul3n8YFm56XitiG51iQvCQT75fzqNaH19cOU3PjYtLNU4LXZGDhEXEysCRi2TII=
+	t=1790783913; cv=none; b=FCX+nABzNWKSO2+2YQH2ZQikHMzBBQd7YMGvYTjVdjZsAT6QXP4uyUCK1SQJvxRzMptVsAaBc+YWK3AgYdhUK40cTkWcNzz2imYz05O6g+wt0aVjS1HdzK7R5jy1NtZnNtnnA00HRnhL2gJb8ni2rSIUk/2T/q0sJqleCD+NjzM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790779905; c=relaxed/simple;
-	bh=ibWPXe6d/WlCmvRQGKjbWLi44PvbZjjGK5ZLApJEXXY=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=EgSUvAwPT3TDpmGD4/ZITiS+XOKiCHdAWvFFipsVKwts5jFdmH4hdUH3oL+Oz78R+sa9jXFelUswYdhK7/GEDLXn+7mcw9QC2cFnb7fXG5DaR/LOllO1IqRtif7XrE5gmW6noQt0Lw6+YqpWLFf/fq/hBEt+EEBq+Y6JKUomlKk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=S3TDqI2m; arc=none smtp.client-ip=220.197.32.73
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1790783913; c=relaxed/simple;
+	bh=7+uOAdwvRA5Phs71HOWvHd2WnABdLy2EzB8eI2nyFFE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lqTI12H6q0H84KMyhlgT9gmEZn/iqjp61tDA5rFSJatvq8zU0nlK0U8uiX3Q5xqHh6PlSUnk8h6Yg1SDGRU91+5rrANOAeMjKSzexzdFe/2YegbpPcA8IjjdKnpkSeUCO9jwVR434AzJdX/lZ+enO2qW0fa6M9fnzZw9tD7hgak=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ideasonboard.com; spf=pass smtp.mailfrom=ideasonboard.com; dkim=pass (1024-bit key) header.d=ideasonboard.com header.i=@ideasonboard.com header.b=L2tfF9HC; arc=none smtp.client-ip=213.167.242.64
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ideasonboard.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ideasonboard.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="S3TDqI2m"
-Received: from [172.16.12.48] (unknown [61.154.14.86])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 4fa8f5751;
-	Wed, 30 Sep 2026 22:46:09 +0800 (GMT+08:00)
-Message-ID: <5874cbba-bf20-47c7-a29a-53ec7caa2c51@rock-chips.com>
-Date: Wed, 30 Sep 2026 22:46:06 +0800
+	dkim=pass (1024-bit key) header.d=ideasonboard.com header.i=@ideasonboard.com header.b="L2tfF9HC"
+Received: from ideasonboard.com (unknown [93.65.100.155])
+	by perceval.ideasonboard.com (Postfix) with ESMTPSA id 34D4C34;
+	Wed, 30 Sep 2026 17:56:26 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=ideasonboard.com;
+	s=mail; t=1790783786;
+	bh=7+uOAdwvRA5Phs71HOWvHd2WnABdLy2EzB8eI2nyFFE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=L2tfF9HC3qurjOKRXYDMqOKASmD+Fr11uViI6pruu4IK+X2gjb+Qrc0LPbo2ClC/i
+	 pQ50KvP2bVEDVqeebyd/BBPmVqkW68rD+oEjTdYgMuso89FKaU5zYqVN2gKEIaX8Kh
+	 049B+Gb1N/HvapsKch/NcZ4isnk/qWbGR2u6qN6Y=
+Date: Wed, 30 Sep 2026 17:58:14 +0200
+From: Jacopo Mondi <jacopo.mondi@ideasonboard.com>
+To: Mukesh Ojha <mukesh.ojha@oss.qualcomm.com>
+Cc: Bjorn Andersson <andersson@kernel.org>, 
+	Konrad Dybcio <konradybcio@kernel.org>, Liviu Dudau <liviu.dudau@arm.com>, 
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, 
+	Simona Vetter <simona@ffwll.ch>, Joel Stanley <joel@jms.id.au>, 
+	Andrew Jeffery <andrew@codeconstruct.com.au>, Paul Cercueil <paul@crapouillou.net>, 
+	Anitha Chrisanthus <anitha.chrisanthus@intel.com>, Paul Kocialkowski <paulk@sys-base.io>, 
+	Linus Walleij <linusw@kernel.org>, Chen-Yu Tsai <wens@kernel.org>, 
+	Jernej Skrabec <jernej.skrabec@gmail.com>, Samuel Holland <samuel@sholland.org>, 
+	Alexey Brodkin <abrodkin@synopsys.com>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, 
+	Tomi Valkeinen <tomi.valkeinen@ideasonboard.com>, Michal Simek <michal.simek@amd.com>, 
+	Daniel Scally <dan.scally@ideasonboard.com>, Jacopo Mondi <jacopo.mondi@ideasonboard.com>, 
+	Mauro Carvalho Chehab <mchehab@kernel.org>, Eddie James <eajames@linux.ibm.com>, 
+	Tiffany Lin <tiffany.lin@mediatek.com>, Andrew-CT Chen <andrew-ct.chen@mediatek.com>, 
+	Yunfei Dong <yunfei.dong@mediatek.com>, Minghsiu Tsai <minghsiu.tsai@mediatek.com>, 
+	Houlong Wei <houlong.wei@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, 
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, Joseph Liu <kwliu@nuvoton.com>, Marvin Lin <kflin@nuvoton.com>, 
+	Dmitry Osipenko <dmitry.osipenko@collabora.com>, Krzysztof Kozlowski <krzk@kernel.org>, 
+	Thierry Reding <thierry.reding@kernel.org>, Jonathan Hunter <jonathanh@nvidia.com>, 
+	Srinivas Kandagatla <srini@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ge Gordon <gordon.ge@bst.ai>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>, 
+	Saravana Kannan <saravanak@kernel.org>, Mathieu Poirier <mathieu.poirier@linaro.org>, 
+	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, 
+	Shengjiu Wang <shengjiu.wang@gmail.com>, Xiubo Li <Xiubo.Lee@gmail.com>, 
+	Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Frank Li <Frank.Li@nxp.com>, 
+	Sascha Hauer <s.hauer@pengutronix.de>, Peter Ujfalusi <peter.ujfalusi@linux.intel.com>, 
+	Bard Liao <yung-chuan.liao@linux.intel.com>, Daniel Baluta <daniel.baluta@nxp.com>, 
+	Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linux.alibaba.com>, 
+	Peter Chen <peter.chen@cixtech.com>, Fugang Duan <fugang.duan@cixtech.com>, 
+	Ekansh Gupta <ekansh.gupta@oss.qualcomm.com>, BST Linux Kernel Upstream Group <bst-upstream@bstai.top>, 
+	Fabio Estevam <festevam@gmail.com>, Nicolin Chen <nicoleotsuka@gmail.com>, 
+	Pengutronix Kernel Team <kernel@pengutronix.de>, Kai Vehmanen <kai.vehmanen@linux.intel.com>, 
+	Pierre-Louis Bossart <pierre-louis.bossart@linux.dev>, Vijendar Mukunda <Vijendar.Mukunda@amd.com>, 
+	Chunyan Zhang <zhang.lyra@gmail.com>, 
+	CIX Linux Kernel Upstream Group <cix-kernel-upstream@cixtech.com>, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	dri-devel@lists.freedesktop.org, linux-aspeed@lists.ozlabs.org, 
+	linux-arm-kernel@lists.infradead.org, linux-mips@vger.kernel.org, linux-sunxi@lists.linux.dev, 
+	linux-media@vger.kernel.org, openbmc@lists.ozlabs.org, linux-mediatek@lists.infradead.org, 
+	kernel@collabora.com, linux-tegra@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-remoteproc@vger.kernel.org, linux-staging@lists.linux.dev, 
+	linux-sound@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, imx@lists.linux.dev, 
+	sound-open-firmware@alsa-project.org
+Subject: Re: [PATCH 21/42] media: arm: mali-c55: Use
+ devm_of_reserved_mem_device_init()
+Message-ID: <ar0xb9md8E76G5VI@zed>
+References: <20260703193855.110619-1-mukesh.ojha@oss.qualcomm.com>
+ <20260703193855.110619-22-mukesh.ojha@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulfh@kernel.org>,
- linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
- linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 0/2] Let mmc_regulator_set_vqmmc() use ios->vdd to set
- vqmmc
-To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-References: <1790742751-245571-1-git-send-email-shawn.lin@rock-chips.com>
- <CAPx+jO-8tii2kFmVQUfcYN5YUGuOpX_8aPg=BndPurt6bff2vQ@mail.gmail.com>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <CAPx+jO-8tii2kFmVQUfcYN5YUGuOpX_8aPg=BndPurt6bff2vQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0aa0f2c7b4d803a4kunm6e9e3da7910ad7
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVlCT0JNVkJNGEJCHU8YQk9KH1YVFA
-	kWGhdVEwETFhoSFyQUDg9ZV1kYEgtZQVlNSlVKTk9VSk9VQ01ZV1kWGg8SFR0UWUFZT0tIVUJCSU
-	5LVUpLS1VKQktCWQY+
-DKIM-Signature: a=rsa-sha256;
-	b=S3TDqI2mOxKRZ6DAry0P+NUIv/YbiOBhHoEsnuLdctImtD7nYWLALfIZc3SY9WsTRKzUeSJb/kWN6yrnnZgLB3y9HL7Y0Xr8r8vtfOpPtFfQ0d53YYQVd0VmaoRE2CN8pauYoQB8QjtiIsG8NnqAMDKWLkNh4NpwbNZKI4wCrJk=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=uhUFsxwa/FWw097QSUw/r/xeF3St4fGa/bbFmILn6Lk=;
-	h=date:mime-version:subject:message-id:from;
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20260703193855.110619-22-mukesh.ojha@oss.qualcomm.com>
 
-Hi Ulf
+Hi Mukesh
 
-在 2026/09/30 星期三 17:40, Ulf Hansson 写道:
-> On Wed, Sep 30, 2026 at 6:33 AM Shawn Lin <shawn.lin@rock-chips.com> wrote:
->>
->>
->> mmc_regulator_set_vqmmc() derives the vqmmc voltage range from
->> mmc->ios.vdd, which can be stale with respect to the ios passed by the
->> caller. patch 2 uses ios->vdd instead; patch 1 prepares sdhci-msm,
->> which passes a local ios with an uninitialized vdd.
->>
->>
->>
->> Shawn Lin (2):
->>    mmc: sdhci-msm: Initialize the local ios in msm_toggle_vqmmc()
->>    mmc: core: Use the ios vdd when calculating vqmmc for 3.3V signaling
->>
->>   drivers/mmc/core/regulator.c | 2 +-
->>   drivers/mmc/host/sdhci-msm.c | 2 +-
->>   2 files changed, 2 insertions(+), 2 deletions(-)
->>
->> --
->> 2.7.4
->>
-> 
-> Not sure how you posted this, but it seems like patch1 didn't make it
-> to lore nor to patchwork.
-> 
-> Are you using b4?
+On Sat, Jul 04, 2026 at 01:08:34AM +0530, Mukesh Ojha wrote:
+> Use the devres-managed devm_of_reserved_mem_device_init() instead of
+> the manual of_reserved_mem_device_init()/of_reserved_mem_device_release()
+> pair, letting the device resource manager handle cleanup automatically.
+>
+> Signed-off-by: Mukesh Ojha <mukesh.ojha@oss.qualcomm.com>
 
-Yes, I was using b4.
+Reviewed-by: Jacopo Mondi <jacopo.mondi@ideasonboard.com>
 
-I'm not at all surprised that some patches take longer than others in
-the same series to hit the mailing list. I've run into it occasionally.
-My guess is that certain words in the email trigger the list's
-moderation filter.
+I'll collect this single patch for the Mali-C55 PR for v7.4
 
-But anyway, it reached lore finally:
-https://lore.kernel.org/linux-mmc/1790742751-245571-2-git-send-email-shawn.lin@rock-chips.com/T/#u
-
-> 
-> Kind regards
-> Uffe
-> 
-
+> ---
+>  drivers/media/platform/arm/mali-c55/mali-c55-core.c | 12 +++---------
+>  1 file changed, 3 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/media/platform/arm/mali-c55/mali-c55-core.c b/drivers/media/platform/arm/mali-c55/mali-c55-core.c
+> index 94a389b3f833..afbec11f69f8 100644
+> --- a/drivers/media/platform/arm/mali-c55/mali-c55-core.c
+> +++ b/drivers/media/platform/arm/mali-c55/mali-c55-core.c
+> @@ -801,14 +801,12 @@ static int mali_c55_probe(struct platform_device *pdev)
+>  	if (ret)
+>  		return dev_err_probe(dev, ret, "failed to acquire resets\n");
+>
+> -	of_reserved_mem_device_init(dev);
+> +	devm_of_reserved_mem_device_init(dev);
+>  	vb2_dma_contig_set_max_seg_size(dev, UINT_MAX);
+>
+>  	ret = __mali_c55_power_on(mali_c55);
+> -	if (ret) {
+> -		dev_err_probe(dev, ret, "failed to power on\n");
+> -		goto err_release_mem;
+> -	}
+> +	if (ret)
+> +		return dev_err_probe(dev, ret, "failed to power on\n");
+>
+>  	ret = mali_c55_check_hwcfg(mali_c55);
+>  	if (ret)
+> @@ -847,9 +845,6 @@ static int mali_c55_probe(struct platform_device *pdev)
+>  	kfree(mali_c55->context.registers);
+>  err_power_off:
+>  	__mali_c55_power_off(mali_c55);
+> -err_release_mem:
+> -	of_reserved_mem_device_release(dev);
+> -
+>  	return ret;
+>  }
+>
+> @@ -864,7 +859,6 @@ static void mali_c55_remove(struct platform_device *pdev)
+>  	}
+>  	pm_runtime_disable(&pdev->dev);
+>  	kfree(mali_c55->context.registers);
+> -	of_reserved_mem_device_release(&pdev->dev);
+>  }
+>
+>  static const struct of_device_id mali_c55_of_match[] = {
+> --
+> 2.53.0
+>
