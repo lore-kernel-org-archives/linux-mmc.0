@@ -1,39 +1,40 @@
-Received: from CHN02-SH0-obe.outbound.protection.partner.outlook.cn (mail-sh0chn02on2125.outbound.protection.partner.outlook.cn [139.219.146.125])
+Received: from CHN02-BJS-obe.outbound.protection.partner.outlook.cn (mail-bjschn02on2098.outbound.protection.partner.outlook.cn [139.219.17.98])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9A7A481FA5;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D2AEC3D3D1B;
 	Wed, 30 Sep 2026 10:33:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=139.219.146.125
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=139.219.17.98
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790764404; cv=fail; b=pyspYqvbXvRoAXk/8akcDOv4BbvMX5AYbrrMQYne3Od89iJF4WB390u+5OkPgp6AQgWH9EkKx5OTpq3/O8tedYrlstTBOK8VDQFMvv+VEJbbBZsyavEEwSb1AijvvqhlJad6QZzD+Yk9UKY1GkT4upGNwo0wGp/97GiOg5sOCl8=
+	t=1790764405; cv=fail; b=RLW6cRV6baF8Xy3QfAT0fzmwQzacZBojpOl2wR+mQ9N9n7w5/xjBPpKBwDvAHLlyYzzuBUAICXlsmlnnj1wbacKpovBUFsd8Q63+1byvzblzCnDn0LnTTVaQK4LTJoCagm4ngJSHPgsF07FnBgTqbWaINbpiUw7GvCAfrdNh+qk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790764404; c=relaxed/simple;
-	bh=M+xA3zjRAnOvZc/CtbidubSX+vw5NS4WupVR9dkN8+s=;
-	h=From:To:Cc:Subject:Date:Message-Id:Content-Type:MIME-Version; b=jxrTCWgNPUrIqzfaeaqnPxGY2r6u/BtZsqnUMNDX+rTbsIen66DDELN2+szcalZwSWiRV1elI4XM9s18t93YqSbE6gXaJz3yuXDhy17tSC5GVgzy8YFs1sArWZvxC49CWRwfvaKfXNZ4NJmBDeG4F94vKVs+lpQWJ0u/Wd+agB0=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=starfivetech.com; spf=pass smtp.mailfrom=starfivetech.com; arc=fail smtp.client-ip=139.219.146.125
+	s=arc-20240116; t=1790764405; c=relaxed/simple;
+	bh=KSOnjp1+ujUPGcFM4qsJiH+ChHVOIZfYBbnUc4zuKO0=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=gebKWplchHxnyH5qdf/3y79okCjZrdsiCReNAvhjRDLk7FJsFxWrFRqHMw1pTBU4dp7ULUxJOIVMAjIYb6k8w8LqKKjqfDgkIMCTGb+IQLKPbiCvQHhkyDto8NNrzx2hOh5aCmMG8FZpVTyPtqywcl1kNlLPJGOlo58vAiolZJ0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=starfivetech.com; spf=pass smtp.mailfrom=starfivetech.com; arc=fail smtp.client-ip=139.219.17.98
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=starfivetech.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starfivetech.com
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Gcxs2e3ikU9lwt4TwGIcsQ4uBkJfGApYu60s9Ck+oGJOGyMMt1z5V92b6qTQPwOoTh5hSWzCSDOiUmSn0c4z6CbH6HnQ6hut/WYtRAkZ/Hc1Xtwhda9kUR74K8eusq/0PJySgB4W76pih0MwdmF1ZzALJbPTv5Lpvw6kxBKf7tTosbzZevFgzUb3sSnhQVbEbGkjM5x1LyOozgqif7Vi/+uSB1HVlujK+t7dH6bmwtdCe6IcB54Gb1W9mmjk70T13XJkSsIGj33LsidI2DVatnwKMl0u72oQw0FzHlzR/i8ZQgW+k6nZr1R/eTGbxa4aoE4AGffamDnjYeNE+nLhNA==
+ b=fKpfO1llrx+UIZlyKZqm5R6A+mcQ1TRQVX7x4vUiXiI18JkyrJyQ8Z/FJG47m0KoyI6MFkQkrfp0pZ1g9XFRiR1ulvKMbJ3JtV75k1vdOlOEdmIUg8mEQoqPSU+LSjBfrdcwvsaxmN491y07J+YkEEDZjkObW6kUlyoACVOyQKbIb51nMzVt7Wlh4+uUjx2pcBQJ2RCiUUjKpcFwA9JPrH5RH/Ggv6RQcW/D4hyPm/7ffz7po49pRltSoFaNhqYALdVc/mYC7qAn2E9+l8BpQmxghHCoN/hw3oMAhOlwNvSThKdhhycIZouczA4XxYRzMbkobEIEpybDhX0+jElyIQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ZJ7PPSz6uO8tg4EgHKKCoVxsaW6fEuF/o++Ae8Hi7gU=;
- b=l1pOahKogPbs/4PHGYqC/zVdmQLq5MBseyqO2NoujiWlVdyGPBfXnWIt+SLfTXxF0YquNTPTMCi3htcE9HUzJs7QfN6lbBge0U0ws0T76zJ/i9qhITOwizx+LoX7ND/Bs0skBT5j6n/splvlb/fGkPR0xmx+VEsCK02ZW73PUx//kPDKPnX6gRUJxcLV8TnwVEXiNJB+x8KYgv7CgeyeOKEekWRQlIfc+Bzyw5pT9j7d4x6Gj39pbBzENtJlcZmvITxaeaYUoOHmQcWLentXY+rs87YEKOgS8piBUhLinJ9K2CECOGZX9o2uPwrRcQO/iQvAH6V0f9+KDS8vXXkCjQ==
+ bh=l244B2anpN6YzqWU6aUWh6V2Yy3/goN44xzSdZbFXU0=;
+ b=VEnCNNtT9ad+cW2WKSNm9qIPy2owQ3mOCqsjfpsMZxSWd9h4/WGw3NTAj8gqTvMzqn3+9vu4+DwEpg9h7qRvSc7cnA3ZLmEuu8qenU/9hEVYpJWQoMc+GGHCextdaY44/zTSHiSNKjSbF9wuPhj1T0dMRk91gi+N6r64BE/db0K/QGnAE1OQ8jxnzibLrf+YMjF2spRnpMAEGqTJbpuPEWVWrakOzWSiWT5CyErIY0GoBV8sWTS4p1DkKe9Icue7XnVNS4lzUbDcj9GL9YjKnKq7GH7piuKbz+jAaVxbx28EHluMosffgnr1LBiKtZe7GA0xFMlHT9Fkulg/k3V0AA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=starfivetech.com; dmarc=pass action=none
  header.from=starfivetech.com; dkim=pass header.d=starfivetech.com; arc=none
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=starfivetech.com;
 Received: from ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn
- (2406:e500:c550:17::6) by ZQ4PR01MB1265.CHNPR01.prod.partner.outlook.cn
- (2406:e500:c550:16::9) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.472.16; Wed, 30 Sep
- 2026 10:33:09 +0000
+ (2406:e500:c550:17::6) by ZQ4PR01MB1138.CHNPR01.prod.partner.outlook.cn
+ (2406:e500:c550:17::7) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.451.26; Wed, 30 Sep
+ 2026 10:33:10 +0000
 Received: from ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn
  ([fe80::e7d4:256c:b066:850d]) by
  ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn ([fe80::e7d4:256c:b066:850d%4])
- with mapi id 15.21.0451.026; Wed, 30 Sep 2026 10:33:09 +0000
+ with mapi id 15.21.0451.026; Wed, 30 Sep 2026 10:33:10 +0000
 From: Changhuang Liang <changhuang.liang@starfivetech.com>
 To: Rob Herring <robh@kernel.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
@@ -49,10 +50,12 @@ Cc: linux-mmc@vger.kernel.org,
 	sophgo@lists.linux.dev,
 	Philipp Zabel <p.zabel@pengutronix.de>,
 	Changhuang Liang <changhuang.liang@starfivetech.com>
-Subject: [PATCH v2 0/2] Add StarFive JHB100 DWCMSHC controller support
-Date: Wed, 30 Sep 2026 03:32:56 -0700
-Message-Id: <20260930103258.13375-1-changhuang.liang@starfivetech.com>
+Subject: [PATCH v2 1/2] dt-bindings: mmc: snps,dwcmshc-sdhci: Add starfive,jhb100-dwcmshc
+Date: Wed, 30 Sep 2026 03:32:57 -0700
+Message-Id: <20260930103258.13375-2-changhuang.liang@starfivetech.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20260930103258.13375-1-changhuang.liang@starfivetech.com>
+References: <20260930103258.13375-1-changhuang.liang@starfivetech.com>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 X-ClientProxiedBy: SHXPR01CA0020.CHNPR01.prod.partner.outlook.cn
@@ -65,103 +68,204 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: ZQ4PR01MB1202:EE_|ZQ4PR01MB1265:EE_
-X-MS-Office365-Filtering-Correlation-Id: c3c6ec40-9b61-4e1b-165d-08df1ede3892
+X-MS-TrafficTypeDiagnostic: ZQ4PR01MB1202:EE_|ZQ4PR01MB1138:EE_
+X-MS-Office365-Filtering-Correlation-Id: 253df7f3-b411-4225-9aa0-08df1ede393f
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|23010399003|52116014|7416014|1800799024|376014|366016|10067099003|56012099006|3023799007|18002099003|38350700014;
+	BCL:0;ARA:13230040|366016|1800799024|23010399003|7416014|376014|52116014|18002099003|22082099003|38350700014|3023799007|10067099003|56012099006;
 X-Microsoft-Antispam-Message-Info:
-	DOFts02G2TqfEBvX6NOd1JvuzmxWrc4H5BSFZHE47z0p95flwE4Loy6F9y5z25j4W5wLa6DWnEMbLo/WKJPe+lz7Wcdvjw/Vxyce9Qu0qwtS6Hdg0iMs+NB5eDNrbtE5YgVpFxXYdyzJ4G/dvWCPm7wfewom/pjPa3C1QQGcmHU4AMSznbqJFzr8RpyTRRhEotlIXj1r3KJSkPvDdhobVAWu6s1P02nW6zeeA6l7oEPqs66flWFOZSD/R8T4UwHXoSeJG3TXXTIaZrlmtUcES5SGJpXsmTSfuQD9AalCqXhCYUacXuKEk8iexAEsdr1WFmbssZ0J76SfD18MzJ8YoqKgka1qNXig9NKvfIxxEKzRAMQx+jU5AV8xnCloxSwaVpqDCo7t+h5AmZHmywjHtMP5KkOkF/Td/M41S/LqxPtPK4SOpXKjXfEHyPc27wWbwh1eZO5cHmvacZXdr49QzPElxTJj5vfRqqZt7fCwAMOt1xA8P1j4fUiq3de90K6tXRObRucvj/F31Mdkz51s9WNM0kTz8w2oT1gj8b2/TD0R61RSv8hfFzPIJ+aVFEjI
+	19WX3axjyszFIgr3lEZcoZHDCbKekXva5sgBCtPRvXNSHLN7f7d/5rsKy8VuCnU3r18lDVBxVrTV5c5iM0S9bogb4R1zoG/aZ7f3AVknVbKet5Oc+6gjm+hHMYf2NRyVdKxH4Xnu61O0gKl/tK5EDXJdZdND8v2AeKUrYmljrhxAg4zaeoHngI/E8rR8hssgAdtFma7WdQmjqkfPSUbiMAu6hku/l3/94q29BB/fH6Uj7daNrFLtWS6YcHfVZ2S/gWqJGvO+mY7SK0BuCWMO9jnfD1HELtEPEnhVQpa9094Z0eJAiGwrXTB18SIoTCgdCkbiU8G1sY7XrgVFI59QDGxCfENmRkD9+QOJBRh9z6A1WMAMW3TVxGMAU/RPxbzgTGGyhH74em+/VXUhi1Bw7Y4bGA2+TZSH8IMwDwDonkOLWxv7tYSJdNAjpUv23nlVypur4dLSQ8yZwf97ui8Lry9A58q4ZWqCOlmjFCT9ZZ60yL1NAy6itW+vF/OaswTJJCVPztNlThzWLmr+Y5LpUBuENdOGejisik9y4gKeL4Vf5x19gP5ZT1OE0+gKf+m0
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(52116014)(7416014)(1800799024)(376014)(366016)(10067099003)(56012099006)(3023799007)(18002099003)(38350700014);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(23010399003)(7416014)(376014)(52116014)(18002099003)(22082099003)(38350700014)(3023799007)(10067099003)(56012099006);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?g9e5UT31Ltd6j/i1b+0VfVFpEYSZtb2dAGg/Hx+C1nXWyhzYk5r49H1TLK5B?=
- =?us-ascii?Q?zEyduKL+E2r/LyjoeMAuqf4oGL5GMn5dIzwdZT63R9/HYFjXyznGxl0cMAW3?=
- =?us-ascii?Q?2QRO3k5BiXSxIORmoS5k9oSOv+sNKEKMMbqXStOUOMeSS7WWAvtvv3ncPGEN?=
- =?us-ascii?Q?11JYKoxOwRMvDi64Y/MJrkmfa8iecZbnIgLEmZVejpfkJ4sgvW64lweDRNYU?=
- =?us-ascii?Q?YW8SRhgs1+dJ7Ln6FbnK3Fis5cLO+yEFPMU1Mv8a8gYYIRUCZ7VED73mJb7L?=
- =?us-ascii?Q?/Nlg+ebCc5kHdi1suRQm99mfzkI2dQGp/VEjqsWU3MX1i7BWuy65/PgVv8bz?=
- =?us-ascii?Q?d4QD3D0vyXqRMSBFlR2sR8YBLcKLt3Lcbwjgen7eL2ufhEgZ+OWVezXMyBbc?=
- =?us-ascii?Q?ecN+ExBBG02ERzE5q2ACRv97PlWNMZkil2LVPtXAM3MSgItqfh+3u2zj4bnm?=
- =?us-ascii?Q?WgeGJXNav5LcNb/V0XZOZaSy0zSTZviAv2VzvUxFnczd5SRtYXdh6xtVyHa9?=
- =?us-ascii?Q?lAOPIpPV9bV9bbICY07eNl7RJzwUKo+9rsQkFHdISF4Ougifj6nGMKq31TWa?=
- =?us-ascii?Q?rHVRJzNbtMTdLpUBjT8OoPIq2KjB7CW3Kp5dw8GamTI0V5yG1XPfwfA/2Jgl?=
- =?us-ascii?Q?Yj+NjsvTiL25G3FEug1e4x+osEeDMyIbtmIEKBMIFXsUGmaQtYLS1J5s6Pnv?=
- =?us-ascii?Q?EoX+0uoqNt+b2UBgEI/RJOwVg6X5NUp3G0UoU4pccw/OytK0tdzu8faVG/cU?=
- =?us-ascii?Q?YKv6d9B8m1ELTNMX6q2RF5RmxZKAORRDx4oC7uyMWuMIw1XPbO1m9a1U7dCy?=
- =?us-ascii?Q?X1SLOmezobxlsp5nJsM14eIpztjTp9p0ywQkt2kmynF0HUwEjFQdTBiL5+0b?=
- =?us-ascii?Q?xaRQ+yJ5/avfJPcP8Jz+b0lG9lF85ej7URTs5T///dnMt42GtU1MYmmENkz3?=
- =?us-ascii?Q?a2PiHt1ILlFEpNEM0uQFfyvZP5UrvWSXr2FmQfR0M7ei5Ed6QdvIqOWy6QLz?=
- =?us-ascii?Q?Ay10IVoFIJLAvGdGB+3c/+0n9MKjyHXDdUXd8btn99MQt5KnKj43a31gbgCM?=
- =?us-ascii?Q?G7EdS9amjhMy5EO7mPRokVPF071kSs/BhH2Hd5mdgjGiuYHZySNMF/BTkdQI?=
- =?us-ascii?Q?5Deu22sbYPBMwdx4z6E9QbNRd/eX+nW4Hs/TQWs8fhM9YYMHkEb0l97A+vrO?=
- =?us-ascii?Q?w3bvjQz1TFowoc+V+COHlKWO52UVZwYgpsOADWQZQ9sWetfHgpDn1oc+Nh3d?=
- =?us-ascii?Q?to7mrargEM4c10GnQDALU0Pgi8OndXPkYJlnww12LLGKHFHQPwbffwnNIo55?=
- =?us-ascii?Q?3ujiuPmvnGlRc7/Pkgjr1EKHPU+ZoCRev11I52aO6MsEDqs6vZpl99Io8p+Q?=
- =?us-ascii?Q?6VsGv+ZCMAGhvLnT8VA/GBqxlPS/DWMnjPkGftOE92Fmy4sO0D4oJ/19nZSd?=
- =?us-ascii?Q?Int1oVsnYhzcZQDBZUI9ULOCWXI9uZ2obyDg4lRFynCBv0/XHK06C9zOTI8/?=
- =?us-ascii?Q?ktVT02/i2XFkAFTanyHJLdgCi2Dd7DYuIEs+tdcfIcEoIvk6rJIooMC/Foar?=
- =?us-ascii?Q?l/p3DOWKMSOEJl9NlM3tq3sEqkkJ2FrpqnPeSOorYkpQ4k39a5mjnCxH7mKF?=
- =?us-ascii?Q?eEoUPWPm7XBSBS4Jr8cdNzaphIGR2b/X7sUL+ZCJXtqDlgMeuw8GlQW8dZd5?=
- =?us-ascii?Q?DRRA+JX28w3oK8O4lsxAldhr1tTbGKY1O79WJh0RoBZ3PVPcf5BS+qKVeXt0?=
- =?us-ascii?Q?jFrH4W3cUZUP4Dcvphq62cMR8zFfSFncw0mcrjXtxyvDRHmVF3tN?=
+	=?us-ascii?Q?QUewYtiQDNIe88qbLg/ykqoqnw7/h0EwhBQ9bW4ea5ltp+XvThvyyltnHUYM?=
+ =?us-ascii?Q?i/IxHsN1ZacUN90SM0GiQc9XHCFFoMAXjkfaeQeFenj7mlyexkK8Lodx7xjG?=
+ =?us-ascii?Q?XWhtC7WZU/XGdD1nERmf7vdkvd0W3ibwg7qF2Z7gL1XxYphfOyid/VXiHiKL?=
+ =?us-ascii?Q?ljpx7YvhURG9kGjyVni2HCSz0m9xXw4By8aqAlBWid1VJlQjrDWpeuOKDApj?=
+ =?us-ascii?Q?YCcZCHrFAYWY/4ZNIxZI94EsSJAr0R7ktMc4KI7tot29V3V1CMZ0Uy1Eo/z2?=
+ =?us-ascii?Q?0mPtPZ0Z7nNEDzmEQC1SJ02i4FeawtlDC4rRVHwzySi7vw1q35M62yl0W6JA?=
+ =?us-ascii?Q?8P317+3L8e7T+diTfgIsix7MtqGqTEoYRCZitTNb2IBEq+GlYeVeYWy8HeN6?=
+ =?us-ascii?Q?KqLEk2vycuUF5IUnzWInGP6Dpm/zugjJrcyFXetzjidZF3gIu4zZwrYyX+3v?=
+ =?us-ascii?Q?V0dCw46ImRrmibnVcxlzBmMxPWv5DBtVvaKFTRjJ+W8NqO4JWZ8VCLV3DJPY?=
+ =?us-ascii?Q?34FN0d9uW6gO2IQGbdpAkKWEYgLHZfh+xlR6smxU8CdW40UA2hFAMGhpkEw5?=
+ =?us-ascii?Q?imFS4TC6AeSyCkgo4V7ILyjqPS8jivusN+uN0k8UyFjbiSKUEYqLz1KS/jms?=
+ =?us-ascii?Q?ehSmTHmlW1mK1GlFMcfjx5boJgWkCj1qFdRphpn1EL7+OOZZikVph2NN4LFW?=
+ =?us-ascii?Q?+G7PcQ1mPC1R5VBAj41mlJnsEB2/SKAm4CKopUkTKnkbu0dzjK54m7Sd2v3a?=
+ =?us-ascii?Q?mE5Khb/H81CVXJH2IpIcRpJlFtcqwsC3i0a+GRLT9pFpejjfXwjqsJEiXaqh?=
+ =?us-ascii?Q?uDqEnrMGzw0t+90mNn9wv2gQBflxIgClNI7LC4HRFvV72MdG29TPEhFTPS/2?=
+ =?us-ascii?Q?fgkr0QSoSNsJm1z0vOhuagkKVrwq2Oe9LaxPX2tINtGqZ23itzz3+aYwTqXB?=
+ =?us-ascii?Q?o3bWXMao7vRNhIuDsNo++ifOMlJyBjMtuKI9ElMTgibnIpp7NmXBjwutDevc?=
+ =?us-ascii?Q?bOBg1Ul6e1Dr+JkoEOYAFN6wtbSNcnlpcRrR4S403+iD6GMenNu7540PUhic?=
+ =?us-ascii?Q?n8NNUch8A1mK+aeyRRgvYFsG8mCQQSfaitpJfDhQNrzQE4ha8P9okSiULYDN?=
+ =?us-ascii?Q?0QJkLNn1Z9jAJpFv8qqNtsIvC9ScEaK6XRkW2+M4lH5uHAGYC9frSVxodBwM?=
+ =?us-ascii?Q?Ltz63n2ZB+uyHSBBoDXar30mYOelnVkxGM8N/0I+JZ9MgxkXgbwN4XcWc+I3?=
+ =?us-ascii?Q?YW1G2zJ/ceCEty4CW8SXgs/XnCMNZYwoGlhFspctcKOJXPGCQAHEjslTnUSu?=
+ =?us-ascii?Q?VYuZ0LJP1lu/o3wV3qmLoZdI/R4rpeOYjelDf757APlApv1AiciHOPFBxm7G?=
+ =?us-ascii?Q?s5ARogKxJFatOQcRiFEBaDwbZX2pW/FatkFKLxg618cRfpgRewXZwywslgC2?=
+ =?us-ascii?Q?8AsGNZ90mWFtAc/zudw2ql1EwMfcvvjMHY9tVeDAkaUkjiTamj+zwZ/Fpa9j?=
+ =?us-ascii?Q?HSvhrxrpN6MMO4UIePO1oBHAJV5NNzJ0ZX4JLHl33D+7RDCegrQELORfrRg9?=
+ =?us-ascii?Q?AC3S36n5yWSOys6mPMBerdP3U9wzBivqLYUyX16PjV/61bYDWJtSXP17YJLx?=
+ =?us-ascii?Q?oPtsQvb4BIEWcUjiRt1bOY3YZji8abSL4e6YbeqQ7pPueNoS5kjlX5jL5z8W?=
+ =?us-ascii?Q?0zMLtI42sHvCs74HhKx1siEIPRgyebR70CgY2SmW0h9defu27HSnqyJT0xAJ?=
+ =?us-ascii?Q?U/Ou0YiEc2cWN82Ot4mz9JMTQ33FjRX5hJ1sJrxwJwF+D2SuF3hf?=
 X-OriginatorOrg: starfivetech.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: c3c6ec40-9b61-4e1b-165d-08df1ede3892
+X-MS-Exchange-CrossTenant-Network-Message-Id: 253df7f3-b411-4225-9aa0-08df1ede393f
 X-MS-Exchange-CrossTenant-AuthSource: ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Sep 2026 10:33:09.1353
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Sep 2026 10:33:10.3105
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 06fe3fa3-1221-43d3-861b-5a4ee687a85c
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: QcJNCXNnbhmkoeFYwXOh7Wu+Wq8+i8hKCwqyYZEsjpH/tiTARFT7sZwQ101s0Q1vhoHUIvJQtFqVWG6DnI9GNIIjii2K3APRnZBkL9f1cf6zoKPapkYIcvC4LxQ3BGcj
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: ZQ4PR01MB1265
+X-MS-Exchange-CrossTenant-UserPrincipalName: cfuNT9h4OprybS2hGCaM6BIeg44q0wUEwwqehoV5Htg0bxfIekk+tH50+RcxMXr5MdXs2V25n7M3QCeJOpoAXoBF/vLAtSbyuFlhy3/KHfy31CPvhQ661JG2FMaGSb89
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: ZQ4PR01MB1138
 
-Add DWCMSHC controller driver for StarFive JHB100 SoC.
-This series has been tested on the JHB100 EVB1 board.
+Add compatible string "starfive,jhb100-dwcmshc" for the StarFive
+JHB100 SoC.
 
-Due to syscon limitations, it is necessary to use dma-ranges
-to restrict the DMA address space of the eMMC controller to:
-[0x400000000 - 0x4ffffffff]
+The JHB100 controller uses three clocks (core, bus and cclk_tx) and a
+single reset, so relax the common resets/reset-names minItems from 4
+to 1 and add a dedicated conditional schema for the JHB100 compatible
+that constrains the clocks, clock-names, resets, reset-names and the
+required starfive,jhb100-per1-syscon property. The property describes
+the phandle to the PER1 SYSCON and the offset of the register holding
+the upper DMA address bits [35:32] of the eMMC DMA address, used to
+extend the default 32-bit DMA capability to 36-bit.
 
-bus_nioc_4g: bus_nioc_4g {
-	compatible = "simple-bus";
-	#address-cells = <2>;
-	#size-cells = <2>;
-	dma-noncoherent;
-	ranges;
-	dma-ranges = <0x4 0x00000000 0x0 0x40000000 0x1 0x0>,
-		     <0x4 0x00000000 0x4 0x00000000 0x1 0x0>;
+Also rework the existing if/else blocks so that the JHB100 compatible
+is excluded from the branch that requires the extra resets, while
+keeping the same constraints for the other SoCs.
 
-	emmc0: mmc@11b00000 {
-		compatible = "starfive,jhb100-dwcmshc";
-		reg = <0x0 0x11b00000 0x0 0x10000>;
-	};
-};
+Signed-off-by: Changhuang Liang <changhuang.liang@starfivetech.com>
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+---
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 74 ++++++++++++++++++-
+ 1 file changed, 70 insertions(+), 4 deletions(-)
 
-Changes since v1:
-
-patch 1:
-- Add Krzysztof's Reviewed-by tag
-
-patch 2:
-- Fix the DMA address range error in the commit message
-- Clarify the 36-bit DMA capability and its constraints
-- Add a named macro for the JHB100 delay line value
-- Use dwcmshc_reset instead of sdhci_reset
-- Detect 1.8V capability from mmc->caps/caps2 instead of DT properties
-- In sdhci_jhb100_set_clock(), keep cclk_tx gated when clock is 0.
-
-v1: https://lore.kernel.org/all/20260919092950.178617-1-changhuang.liang@starfivetech.com/
-
-Changhuang Liang (2):
-  dt-bindings: mmc: snps,dwcmshc-sdhci: Add starfive,jhb100-dwcmshc
-  mmc: sdhci-of-dwcmshc: Add support for StarFive JHB100
-
- .../bindings/mmc/snps,dwcmshc-sdhci.yaml      |  74 +++++++-
- drivers/mmc/host/sdhci-of-dwcmshc.c           | 169 ++++++++++++++++++
- 2 files changed, 239 insertions(+), 4 deletions(-)
-
---
+diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+index cd823a3ef213..b5cdcc6e8f38 100644
+--- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+@@ -32,6 +32,7 @@ properties:
+           - sophgo,cv1800b-dwcmshc
+           - sophgo,sg2002-dwcmshc
+           - sophgo,sg2042-dwcmshc
++          - starfive,jhb100-dwcmshc
+           - thead,th1520-dwcmshc
+           - eswin,eic7700-dwcmshc
+ 
+@@ -53,11 +54,11 @@ properties:
+     maxItems: 1
+ 
+   resets:
+-    minItems: 4
++    minItems: 1
+     maxItems: 5
+ 
+   reset-names:
+-    minItems: 4
++    minItems: 1
+     maxItems: 5
+ 
+   canaan,usb-phy:
+@@ -98,6 +99,22 @@ properties:
+       offset of the MSHCCS register used to configure clock
+       synchronisation for HS200 tuning.
+ 
++  starfive,jhb100-per1-syscon:
++    $ref: /schemas/types.yaml#/definitions/phandle-array
++    items:
++      - items:
++          - description: Phandle to StarFive JHB100 SoC Peripheral-1 syscon
++                         register block.
++          - description: Offset of the register used to configure the
++                         upper DMA address bits [35:32] of the eMMC DMA
++                         address.
++    description:
++      Phandle to the StarFive JHB100 SoC Peripheral-1 syscon register
++      block, and the offset of the register that holds the upper DMA
++      address bits [35:32] of the eMMC DMA address. This is used to
++      extend the default 32-bit DMA capability of the CMSHC controller
++      up to 36-bit.
++
+ required:
+   - compatible
+   - reg
+@@ -167,7 +184,16 @@ allOf:
+             - const: core
+             - const: bus
+             - const: timer
+-    else:
++
++  - if:
++      not:
++        properties:
++          compatible:
++            contains:
++              enum:
++                - sophgo,sg2042-dwcmshc
++                - starfive,jhb100-dwcmshc
++    then:
+       properties:
+         clocks:
+           minItems: 1
+@@ -205,7 +231,16 @@ allOf:
+       required:
+         - eswin,hsp-sp-csr
+         - eswin,drive-impedance-ohms
+-    else:
++
++  - if:
++      not:
++        properties:
++          compatible:
++            contains:
++              enum:
++                - eswin,eic7700-dwcmshc
++                - starfive,jhb100-dwcmshc
++    then:
+       properties:
+         resets:
+           minItems: 5
+@@ -228,6 +263,37 @@ allOf:
+       required:
+         - power-domains
+ 
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: starfive,jhb100-dwcmshc
++    then:
++      properties:
++        clocks:
++          items:
++            - description: core clock
++            - description: bus clock
++            - description: card transmit clock
++        clock-names:
++          items:
++            - const: core
++            - const: bus
++            - const: cclk_tx
++        resets:
++          maxItems: 1
++        reset-names:
++          items:
++            - const: core
++        starfive,jhb100-per1-syscon: true
++      required:
++        - resets
++        - reset-names
++        - starfive,jhb100-per1-syscon
++    else:
++      properties:
++        starfive,jhb100-per1-syscon: false
++
+ unevaluatedProperties: false
+ 
+ examples:
+-- 
 2.25.1
+
