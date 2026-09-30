@@ -1,185 +1,732 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from PA4PR04CU001.outbound.protection.outlook.com (mail-francecentralazon11013004.outbound.protection.outlook.com [40.107.162.4])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8CA04F4CFB
-	for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2026 16:04:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 972E633DEF9;
+	Wed, 30 Sep 2026 18:28:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.162.4
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790784280; cv=pass; b=RfmzMoCnyfKSJrN572ttRP+zQFufa2hy2TA7Gru8IzCoIucP2vIM2ve/R3xYOAA10HgYLyVMUp134SHas9f113ukjIHpwyW9qKmyTLS4sHxKheO02/aT0ZRJBBoIe6WicMI60lxuaCddbyPVSmhGOidl3pADCWHRDj7ih/H74qg=
+	t=1790792923; cv=fail; b=Any6j9QxPxp9rf6BAHBhTef/sNN55AR1YjIpfZWmMCqEiNbTkR+u0RJg0+6I7LBtdz8VfkuX/ZTcDN9a+ZP/EBdElOU2h/y2K3JP80hwWgXKqRFTRwHtkpOEDGWoD3ym63mXwMDSgYnQgcy7mVRdpdSqgpv5RSVYLHTWuJ5fTlM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790784280; c=relaxed/simple;
-	bh=n9fFaAGplQpnkm7Vf05iAz9kVcqoT3sPQRPD8gh+bT0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=unYl64FtUHWNQfi/3BgbdosokSRNLafUhNLZg/Ec+1RcEu5E73yUEtW3w6pMlDRn+MoSxMJDE4Z2YsVLgZrjtHfFHNdqNtTcGvdXfHQjnoi9HOhj4HyMGTpyJqjOxcVmQwjdUe6M8RN+9AKI8d5sBKtSS4zkDjC45lnVuSSGubM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=L2APh1dR; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=RO2rSfXm; arc=pass smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1790792923; c=relaxed/simple;
+	bh=4XyLvHRTf1G/2f65m439BLibhmZr4fZsK+rxVhzxsHo=;
+	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=lK1RD6UalLzd0Jt62Ex2rwWbWzHr0ovopqIkegBuAFXTugv04cutr6j9Lzj1yQkQWnM7bweFg/j9BaNQ1ydWUzLTFvpLpc/Pu2xkYfChVtZxLZhYYxFeiDTeVMvKqcmrAXW5x/57ZW61SNM35q3oqVuKZDGdzXanL0SyeknbG6Q=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com; spf=pass smtp.mailfrom=oss.nxp.com; dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b=B/W/NcWa; arc=fail smtp.client-ip=40.107.162.4
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="L2APh1dR";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="RO2rSfXm"
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68UDxwdM3930157
-	for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2026 16:04:33 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	q3ippA8C7Iwe5nc7FGsk21TPZKf9tVMwe28Hxh6J4gs=; b=L2APh1dRJOerB4OL
-	P1t9c2Y59+gGCoUq2l/4h21nVCaB6uiOsOnQs84z5r2jb5dQA07xYsNnISKluWxn
-	7CFAtbAIXKXYSUxMLmfNC7azfgIe7g+Loec7Qk+0fFKu8dqZjJPFQWS4R9Prs2Ar
-	W7y8ul3qjh3icyQuf2mIhTzslSdyt9C2IrOvNeK3ShQP7oAccAQojUDmrSmFYkUh
-	iIcKFZJjrBKHkqaSn1j2Co2qBk6xUUK6nn6tKiwhEqSZuNSBPS+dQu9DelDXLWj+
-	cURjdM0r1AURAAS34VgIi5K6Tr5RQCw6vetpbGX+pRIbWhWMUUsmgJukfZCOm+sI
-	Ze7mBw==
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com [209.85.215.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4h0w142h1m-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2026 16:04:33 +0000 (GMT)
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-cc11b5dd54dso8555879a12.3
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2026 09:04:33 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1790784272; cv=none;
-        d=google.com; s=arc-20260327;
-        b=GaaCkdtrZEri+cyDsLOwyDHMY8fP2dzu3csw5z237GBoGGYnPGLGCrF5/Xa8DYf9TJ
-         dEoSsAFfq5dg8nFym3P10Bq6VX8aOAPQLpMYgGB3I4Vimx81fGn+TEg6CV7sFOWpkBmQ
-         g4kEJx40fMDd8axKcRe/8Pm+xCEuss8i/bkqOFrBjn/WCnD2xR5vnsFXAWAqU3BF9Wsb
-         per4HFsoZWxq7d8jxHcAF4NKlum5PT/KSdm1jc8vgybZtWP1b5q7aIwfa8kIlAsITgFn
-         53KvMqrprjkPSLUkFqziFhUpTjuegYpAUpVrbCt/KEgqB3du/8RGN3brZVESLAfjLHWV
-         ybHA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=q3ippA8C7Iwe5nc7FGsk21TPZKf9tVMwe28Hxh6J4gs=;
-        fh=ct6pF3D48UuOlozV8gZiobQutFMifMzuG/ulfZIJOUA=;
-        b=Mg7/p+pI70LIb6k2WhlZMa18ly3NrhP7V6tOkzfjUYYWX/f9AhM4YYD6te0sdUKS+5
-         nbqLpAWBj+NSIziu38Mph9J2xeGBPETyAZXaCDVtybYGfppHijCSbcuhxo85BKE+pQEG
-         49yBqw4JeanjdMgfVDZWJfuaR/PmjfmJ25hIy7C/W/hqmfemAscXkVTPp2mDf3KwoBdP
-         HGP+jdX8fTGp/XkDmFapJ2sVw9qYh4bUwefcdQKzhGc4TIcNso7k8n6SqizjPM35nHuA
-         HAOTR59EtSsDTFQlGUQBJdo0U0+SV0VF18EUjeKMC0X5m3HOY09CZaBTHGiZ3ycQhWv3
-         sUIA==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1790784272; x=1791389072; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=q3ippA8C7Iwe5nc7FGsk21TPZKf9tVMwe28Hxh6J4gs=;
-        b=RO2rSfXmsKWLs1sMhLdxwK8JkIH79EieW2q3q7ZeeFC58GAkgQaJQU4n+NJEUv3Fwi
-         Ep+xxeE0YDTkdJlifhishOsGWO/ke3PgxnX3bDHsSYlGfnUwVTRLANTtUNXB83oAuAJb
-         G9iiHBVCLkTU3Tt7yuWQ6nKj/F0+TQppHB1jNlmfQlr2v6CQGgLJZIwdwkC9lh0+78s1
-         wQ16ZRhbIviafyOZfxElkMLfuCK4Zz+rfQP4gmI+eRuvGFs3PuDk3U4gUVEkIjY/dSTP
-         uMyMV+WdyDpEdufrBlLqEqVnmoZs3gbjzX2ACBWVnceG7TBE4viUL5zlOBAhT9ybCmR4
-         d6Qg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790784272; x=1791389072;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=q3ippA8C7Iwe5nc7FGsk21TPZKf9tVMwe28Hxh6J4gs=;
-        b=1dRrp+nPnOp7ghJD9pQ3IebwBOfT0vlSEjvcR/LfVGEaTmPRPZXI3SnEPIGoekvt22
-         KWkzrJTbEu+yytazmdnLbf8GZ1t7A4g8MANvd7VUzTBuZnbA0utWof0nBhIJxieVa6l7
-         ErXvZqqIvxpngkj7Stbq8WVppx5riNw19Av1P0nscZ5UO+DQMokRVOFQPYJ0PBJvmOd1
-         HFijQZ3mDQyKzE8VGQtL6niIyDMkpNbjNjFCZigxu5x+IY1lLzlVzSONTYnlQ2rPd3so
-         V9dg6a8ux+ENoXvazCJSOb++U5gv6XrrZHbPAk40wCGPgtLx28V9DMRYQhme+bRIPWDp
-         6h9Q==
-X-Forwarded-Encrypted: i=1; AKwUvBxRh3XxrzfjY54dYpT+68g4ufMVoHLURvMNuttwFP6+SXhWTiPoCIX2xAA+yY8R/TYeh9rcBgQ49Ns=@vger.kernel.org
-X-Gm-Message-State: AFuF++lwQquw4UT1kFL7WPoIajhpTEfzHFZBt7JVk/0Ny7VinnFIsZTT
-	Ji8GufwjFdKY/Ft1Ppxji7fkIIcTASCF9E1Sx+b9kwd5tsjFji60N91sE8rnnckIGcCOHREIBC4
-	xdY4Pj63g+ekeFllifoNLafJ/eMS2HQSWuC3a3Hupw5AU0Oi6j6A5i6arOLRTUvCZLDvSin6+P2
-	JtEo6WWOVjVUyH+ZkO11cmONBnolF3oAn0EhupeA==
-X-Gm-Gg: AYBFou3WnMJPbU1kbUqcw9kYkMp2z7u3b0PMcwe303RFzGroot+2NoEjbp0DpcTaNiQ
-	/1j28LquHsUz/QTR3VsB9Wr/LUbGAxe060r3wANil+iVTOt4kFJykIJ3nK7wPO9nMMhqwBVvy1m
-	9SOgeAEXq2b5wtiF5jRiVy6ekQGkVKCgYVu1kROzO4VgEKOQ/1LJ3ihzw8aA==
-X-Received: by 2002:a05:6a21:4cca:b0:3dd:a197:edea with SMTP id adf61e73a8af0-3de9e8b7c77mr1829496637.57.1790784272529;
-        Wed, 30 Sep 2026 09:04:32 -0700 (PDT)
-X-Received: by 2002:a05:6a21:4cca:b0:3dd:a197:edea with SMTP id
- adf61e73a8af0-3de9e8b7c77mr1829465637.57.1790784272140; Wed, 30 Sep 2026
- 09:04:32 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b="B/W/NcWa"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=g6T5UmFfkNAyBzViSAANcXYyEAOjJ77b+eMf0Yli0GKps/0ghxNn1cxAnhX1fsF8g0AyGF+1nKeP9UfUbIVsg33X8gdrEIDC3oB86//kcZcPV4kUOocxF093zEy2flEvrlqM8LfccGjaH5D8jzYW39SYN/aQRioTH0YhkOP5TuEcTOmFMmV89YYp76nAXtvZhAGXhVBszBVfn3CGNQY1gTwIb5TlhVpB4uCUfNK3QwgFGYtb1T/GsU3ijoMHze2MkK58puSebbvZJo1UndUu7PFYtLFGwebtT+5y4z88rrjcIsbY/yTM+vK/lXh54KxAtopbfq11Xni7YFS31sUiIQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=DwEvgKuUzA+Yx8IZzPMT8ruMA7LUpMD6UjTWeClxBgs=;
+ b=WbNGfnKNln90huoiC8lP00WdGkakh4dPoXk2P995b0+/bUdQQKXqAL6RYs9JuRx6c9UZPBHYZLKIoUwxFOZRxWyhWUnavqomoRqeGM7W5KKo2IovwY3LoeiBSGJB7wLNH8BS0xK4JNuMxDjCliF8iCKmK+/iblBkyaJel0x02skpZmOY7eL41D4YUQ5PqRZ/GI/QAS6RPagxc8KVcgUtvU5SeUNctbxhipK20bZYaV6TVQcaO+VCNEftuuEFzdenUqv3y9BHd/lQtYRbKbK9UFTW3G5eEF+Zg/HJyoiJGzOjuQRAy6JrjOPvMcZcsxLPoKQFyugupGzrPN+VH9O0Zg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
+ dkim=pass header.d=oss.nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
+ s=selector1-NXP1-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=DwEvgKuUzA+Yx8IZzPMT8ruMA7LUpMD6UjTWeClxBgs=;
+ b=B/W/NcWaC5N4xX5bSuAweyUS6nV/7nRSTFDfre+rCrMr2DeMS+FR5/bJW80tooFcCzhpTdlpnlaCa4AE0jvABY0rUNU5W9ADFURP7acuPsCJ2enI4vO9ih6g4Jb8jBuqBBcF/Uh/RwuHCDFdCtMhywFu0LOemEWNBZ3nVhMfyyF9c9bmqt5VL8+4bRLlvBr7uPtUU7M8jJOnq1zI0yPNt7iqvrmQpWmVpm86ZqJs9ACHoVOaieCiyLKnGx31bzcy0LHhtCo8F/IRLG8PtTgrQkO7jel5QHZfiTmDF+3c+4Q6RVcRjELGzQEQsx6ShhcV4UIpjq8N1ahXaEYv4Zo7/g==
+Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=oss.nxp.com;
+Received: from GV2PR04MB11799.eurprd04.prod.outlook.com (2603:10a6:150:2cf::9)
+ by PA1PR04MB12223.eurprd04.prod.outlook.com (2603:10a6:102:55f::12) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.451.24; Wed, 30 Sep
+ 2026 18:28:35 +0000
+Received: from GV2PR04MB11799.eurprd04.prod.outlook.com
+ ([fe80::2146:83a2:5329:b7c]) by GV2PR04MB11799.eurprd04.prod.outlook.com
+ ([fe80::2146:83a2:5329:b7c%7]) with mapi id 15.21.0451.022; Wed, 30 Sep 2026
+ 18:28:35 +0000
+From: Frank.Li@oss.nxp.com
+To: Aubin Constans <aubin.constans@microchip.com>,
+	Ulf Hansson <ulfh@kernel.org>,
+	Nicolas Ferre <nicolas.ferre@microchip.com>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
+	Paul Cercueil <paul@crapouillou.net>,
+	Russell King <linux@armlinux.org.uk>,
+	Frank Li <Frank.Li@nxp.com>,
+	Sascha Hauer <s.hauer@pengutronix.de>,
+	Pengutronix Kernel Team <kernel@pengutronix.de>,
+	Fabio Estevam <festevam@gmail.com>,
+	Aaro Koskinen <aaro.koskinen@iki.fi>,
+	=?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Jesper Nilsson <jesper.nilsson@axis.com>,
+	Lars Persson <lars.persson@axis.com>,
+	Linus Walleij <linusw@kernel.org>,
+	Fan Wu <fanwu01@zju.edu.cn>,
+	Pengpeng Hou <pengpeng@iscas.ac.cn>,
+	Rosen Penev <rosenp@gmail.com>,
+	Vinod Koul <vkoul@kernel.org>,
+	Marco Crivellari <marco.crivellari@suse.com>,
+	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
+	Pan Chuang <panchuang@vivo.com>,
+	Zhan Xusheng <zhanxusheng1024@gmail.com>,
+	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>,
+	Rakuram Eswaran <rakuram.e96@gmail.com>,
+	Ethan Nelson-Moore <enelsonmoore@gmail.com>,
+	Runyu Xiao <runyu.xiao@seu.edu.cn>,
+	"Matthew Wilcox (Oracle)" <willy@infradead.org>,
+	linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND...),
+	linux-arm-kernel@lists.infradead.org (moderated list:ARM/Microchip (AT91) SoC support),
+	linux-kernel@vger.kernel.org (open list),
+	linux-mips@vger.kernel.org (open list:INGENIC JZ47xx SoCs),
+	imx@lists.linux.dev (open list:ARM/FREESCALE IMX / MXC / LAYERSCAPE ARM ARCHIT...),
+	linux-omap@vger.kernel.org (open list:OMAP MMC SUPPORT),
+	linux-actions@lists.infradead.org (moderated list:ARM/ACTIONS SEMI ARCHITECTURE),
+	linux-renesas-soc@vger.kernel.org (open list:TMIO/SDHI MMC DRIVER),
+	linux-arm-kernel@axis.com (open list:ARM/ARTPEC MACHINE SUPPORT)
+Cc: imx@lists.linux.dev
+Subject: [PATCH v5 1/1] mmc: use dmaengine_get_dma_device() instead of chan->device->dev
+Date: Wed, 30 Sep 2026 14:28:01 -0400
+Message-ID: <20260930182826.766224-1-Frank.Li@oss.nxp.com>
+X-Mailer: git-send-email 2.43.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: PH0PR07CA0074.namprd07.prod.outlook.com
+ (2603:10b6:510:f::19) To GV2PR04MB11799.eurprd04.prod.outlook.com
+ (2603:10a6:150:2cf::9)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260927151016.186493-1-pmazzini@gmail.com> <20260927151016.186493-9-pmazzini@gmail.com>
-In-Reply-To: <20260927151016.186493-9-pmazzini@gmail.com>
-From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Wed, 30 Sep 2026 18:04:19 +0200
-X-Gm-Features: AclHuK9W8iKpxeLaY0dvpEbGt-kGPjsZMSlSCjzDyfjFsqRteSj3h5zChvT9XB4
-Message-ID: <CAPx+jO9aML0ABRF=j36s1HfPu405L18X6VyzppyQv_N10JPf1A@mail.gmail.com>
-Subject: Re: [PATCH v2 08/11] dt-bindings: mmc: sun4i-a10-mmc: add Allwinner B288
-To: Pablo Mazzini <pmazzini@gmail.com>
-Cc: Chen-Yu Tsai <wens@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Maxime Ripard <mripard@kernel.org>, Rob Herring <robh@kernel.org>,
-        Samuel Holland <samuel@sholland.org>, Ulf Hansson <ulfh@kernel.org>,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-sunxi@lists.linux.dev
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTMwMDA2NCBTYWx0ZWRfXyunNiohM2muA
- vBpwLBRlgp3+QzZ6npTzHllJGFmPQWLXidEp0oIeRO8+g0H/DDP3IfQLwz8FY3K7j1gFO++jzHB
- HELh7sp9l6+WILOCfkm/zLgQeItP3mw=
-X-Proofpoint-GUID: fQGTOwZ-K-KsiWykhWWHl6HzEghQcccu
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTMwMDA2NCBTYWx0ZWRfX+2RVUHaeM+fL
- 2LUac6ZIug2tuo//rJC31Zz3ZwHmY8xovxNP/hQ5gWspFubHb9p+tj4hxuDQs6baYFykVRMOO3m
- 5MaSoU4QWh6ht0dKJI28NTDZpG0vxWf7DqQ5PCx/Qlwckp0WYppBa4O0xf6VAsHFhuZg3oY5JF/
- rvF5zA2BL21k/2s5dw0xUAFx5jKWKgULgWPwdT23TNzR7hqbSi1psBJYTaFaOHw+kPQOa8EyYKv
- tDdqQJlQ2iMvuL4yOa6/l2+qullj7SW1kewnwrGELv1gJKqCjEs1T5FEDILsnPIQlEMvrquKi2K
- sU8oANBq1kv00VLGqYr+yb5eiB9N57Q0/cLfEk4PJOO8/TMW3a0HI5ldbhRMaihqR9dONxe1s8V
- e90+oEJUeJxZMGHXjO+GadsdRciJnw/Hdmhp4c6988jHjA3UjvQENAHxC15Z+koJZ9/lwRQWN8H
- rEVQEeOtGkUcev5ifzg==
-X-Authority-Analysis: v=2.4 cv=J8Q/fwnS c=1 sm=1 tr=0 ts=6abd3311 cx=c_pps
- a=Oh5Dbbf/trHjhBongsHeRQ==:117 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10
- a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=yOCtJkima9RkubShWh1s:22 a=pGLkceISAAAA:8 a=kqsBenvbzo-VylAG1WUA:9
- a=QEXdDO2ut3YA:10 a=_Vgx9l1VpLgwpw_dHYaR:22
-X-Proofpoint-ORIG-GUID: fQGTOwZ-K-KsiWykhWWHl6HzEghQcccu
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-09-30_03,2026-09-21_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 lowpriorityscore=0 malwarescore=0 phishscore=0 clxscore=1015
- bulkscore=0 priorityscore=1501 suspectscore=0 adultscore=0 spamscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609300064
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: GV2PR04MB11799:EE_|PA1PR04MB12223:EE_
+X-MS-Office365-Filtering-Correlation-Id: ff32fa8b-4f36-40de-5d9e-08df1f20a348
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|366016|376014|7416014|19092799006|1800799024|23010399003|10067099003|5023799004|56012099006|260925021311599003|260925021911599003|260925022911599003|11063799006|3023799007|6133799003|18002099003|921020;
+X-Microsoft-Antispam-Message-Info:
+	J6+2Hv3oMe0jMVskZVRzs/b9uzZUSuDyc3oecpDd3RwTbOi9Os3Z5PpgPcJnzAtl4nUPvoYkKhuWd0ox8kFDXgQfvRGw4ZRyDsmHspmUqtTOcPPrXeSrjcBAdm/Z4xpc3yIwgR5i2ijEvm2Aa7l7w9JNyaIRq5iBLXvHaEW5pWiC91mcR6+tre4L1jiXo4uDSc3w6P86ww0eWLQJeNROp/djRVNwSxwbNicxUAn7Yc+cIOUDeFRb0I+9lI9E82t8ZUViVb/iSlTNXeFmb69atAecxpNqcQnM6W5Ppw9LDdxhxjZhEQUfLqHQD9uKlL6ev31HPwbzmXTO5IRl2Gcr3x+cBeH4G11cNn/DhTDvmwaEoPnzVTy4EDmqmDp/Jq3t8EM0MGk6JdTuI1eP4Uurqb6J+BqUc+yQ5fjMKV7nBq+qqQ7HZ8oE05u6EYbw93r96GUAjWUjDCuLjR9ueRo2r2M25f+4g2AXBjsEqW/Y9conD9oMR2IkJ5sDtQka7/HxAHGrvXWZ64nKNV/Im2oNMaM8Jr6poTFMP2SgkOBm3c+C6STJjRa6dga2yJmNlgcKYmZD//oQNKJb3+oDPLV7LkGPfT894jTNwfUVmVa3LXzpHFR7W1eW3pxH2Qnvlrc+C8NyDGaBIOEqVRwPz9d7YxwWFjp2UIXxyCyx7W88hHG2umOVS6Z9/LQbN5TVLtnI5GU2GXrkMDYw2kwDC6guSQ==
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GV2PR04MB11799.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(7416014)(19092799006)(1800799024)(23010399003)(10067099003)(5023799004)(56012099006)(260925021311599003)(260925021911599003)(260925022911599003)(11063799006)(3023799007)(6133799003)(18002099003)(921020);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?092qCvOA5VMQ4xYAx0jIKTkVDvTu/nyyHTZWjPvXPup/msvJ2Axwq0q6mPHd?=
+ =?us-ascii?Q?1FhahzXhhRj3F7E44B47ShCw9sbDwq/yMTF6DJaqVpfAtySaDKfeLKkTKxBC?=
+ =?us-ascii?Q?bG2/uQFBfse9Ql8IxTV/eVcoon1RYh9wCHNaKuO10oEJyxddrYAXGln1sW6i?=
+ =?us-ascii?Q?+2E+hpptV969Op76pZhruM5Et1/zJ+O91wHbkkJP/UjnCF9UFy34m5PRI+5v?=
+ =?us-ascii?Q?JvIMZV/24HKD7PvJwf4wtvRD+UuFvI1QXX7z4zX/RMvz3SmQMdaPg23E0YXr?=
+ =?us-ascii?Q?il3PgU7inZyNlAHAPIekU4PyfVDKOvNl8wNzuef1YtQY+IO0wRExIoIOh4GT?=
+ =?us-ascii?Q?Hc3vtChTjgZWRrpdPeEJT9ZCXp63BlH4BAkcui50QkAt+CJ2YsVSLPR6m13O?=
+ =?us-ascii?Q?nN6RckbnMtQe9+zc3r3LNhfjHoYALzbDnYa5+mUfA8lu0iz4KYp8bu8PXAI+?=
+ =?us-ascii?Q?OirD2rWhgT4N30XAiWjIeYBQdz2BNHqwYRgLdX0PNT7xubVyERKBN82b0a3q?=
+ =?us-ascii?Q?dTYB6EDRQxO4qUA+N2Z0p3dWg3+ZFI0P3csEXgjPteRxjUkecKAAqT3YHFkv?=
+ =?us-ascii?Q?cDEz34N7d1UD385yq9X83smzzqdrYPUR0Scsv+hWdI01Uw4CBw+2EH8dK+HT?=
+ =?us-ascii?Q?sDvPkr384wZJVZMd6Oic4vpo3aUovRnw/9nlImou/bySKrET9XR3qv4Li5vn?=
+ =?us-ascii?Q?HizTx+iufIsQWtjSahjpzxFPi3w0myk3Hx4LbKBsYzdkbwspvgj/GfB0Kk8V?=
+ =?us-ascii?Q?OjJ4nUWEfjnERnAdVXXQ6hOJEC07i1a0o3XCbxg+g9xtLoWaiNPI/ljknawD?=
+ =?us-ascii?Q?Nxvj3BpDN5bymX+yofGGNTs6TdPL49/vYNKSnZNBdnjXOBaCmj40ygXQt2Wh?=
+ =?us-ascii?Q?WBijeK8RkgqLftIsar2GQiuP7/uWEr94r3p4PHxTOmWxttxEk/njb/UIi6oS?=
+ =?us-ascii?Q?SQ4vzDj2pN/JbQ7YaEKIkVWLfavJVv6Uyx5CqPRygNoKKPTbIPcq1SzjfISW?=
+ =?us-ascii?Q?U3J8dYoYTKyGcHeDYFDQgRt5db1cVsCSRmyD8HBahOZF+0DkUXWie25s/+eF?=
+ =?us-ascii?Q?FB4mHaRPFZU1mZQLHN3cgZv00G1hgn8fJ/1NVWyvWNd97WSG5XwGjtU5pbVU?=
+ =?us-ascii?Q?bA2OOBKlULG9w6+0FNYCiAWnnRZdTvbYxnevfV9TyC15EhB9/bKwurIiT06S?=
+ =?us-ascii?Q?+8lQPM87PUl7TNM6buHVVwBnKMs67Iawedf5NzJ6CW/rHgVcsJIvJa0xRCoK?=
+ =?us-ascii?Q?Kiap70r5AB8u6RI1M7ypVXYM+NXskxBW5g2na5xwp+qd4eg5GEnN9gJQU5eM?=
+ =?us-ascii?Q?juFHWHC9tUA26EftcPPHKZZppCvJmfX4XwYw7oSVL8Bx5HwXNIwLKnVCID8L?=
+ =?us-ascii?Q?bO5/nuxkLJEdGaErTkRdIC/H1uo+CksEEAQoCnJ13BvK0dczQ6EkJ4bpiTwd?=
+ =?us-ascii?Q?nbrUTiiCxHZQCRoU7Wm3QXEZOYmjDh6MkMgLlnI0v8VpZnPFT+FN1VAyWbPF?=
+ =?us-ascii?Q?j1BDwrv5gUzfLqqyUmQ/fagZ9n8iRuL578subu/5+I3SsatA4WK4ra0T8kwM?=
+ =?us-ascii?Q?CBjyOJGEmL3KJZsxhcijAvoiClm+C/JZ7vk9n4Iqm/3xEFXXYktAEndQ2TU0?=
+ =?us-ascii?Q?VxdF7Uf+xf6DsuBJamuTeAgZA0UFNhnCnwTjpnTaCoVWwRyb1pXeliBj27CG?=
+ =?us-ascii?Q?eHJH1OWdtPSajkKXQlFtVI2gXI4nqZ66SlKgbNt/m4wk3FajoQ0guhZAuWQ/?=
+ =?us-ascii?Q?ikJ8a3TI67KgdOagw5wXx65L78wIKSR6DHw1heXY9UCexDtrFHVU?=
+X-OriginatorOrg: oss.nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: ff32fa8b-4f36-40de-5d9e-08df1f20a348
+X-MS-Exchange-CrossTenant-AuthSource: GV2PR04MB11799.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Sep 2026 18:28:35.1282
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: WHGnpWjLQKtC14TqiQFT8KMw+c747q6YOGm5D20GUoTVpW5BNfY8M0TDSZviYGjh0/EQ/auBhuv6ufV+jcAxMkwIJ299pS7dOUtzZhs7E/2ocka8eDUTWvQnmiT3QyGo
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA1PR04MB12223
 
-On Sun, Sep 27, 2026 at 5:12=E2=80=AFPM Pablo Mazzini <pmazzini@gmail.com> =
-wrote:
->
-> Add the MMC and eMMC compatibles.
->
-> Signed-off-by: Pablo Mazzini <pmazzini@gmail.com>
+From: Frank Li <Frank.Li@nxp.com>
 
-Applied for next, thanks!
+Replace direct dma_chan::device::dev access with the proper
+dmaengine_get_dma_device() for consumer API
 
-Kind regards
-Uffe
+chan->device->dev is not always the device used for DMA mapping.
+Some DMA engines support per-channel IOMMU mappings, so different
+channels may use different DMA devices.  dmaengine_get_dma_device()
+returns the correct device for each channel.
 
-> ---
->  .../devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml        | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mm=
-c.yaml b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> index 9e9610bb1eda..c2ec7151dccf 100644
-> --- a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> @@ -32,10 +32,12 @@ properties:
->        - items:
->            - enum:
->                - allwinner,sun8i-a83t-mmc
-> +              - allwinner,sun8i-b288-mmc
->                - allwinner,suniv-f1c100s-mmc
->            - const: allwinner,sun7i-a20-mmc
->        - items:
->            - enum:
-> +              - allwinner,sun8i-b288-emmc
->                - allwinner,sun8i-r40-emmc
->                - allwinner,sun50i-h5-emmc
->                - allwinner,sun50i-h6-emmc
-> --
-> 2.53.0
->
+This also prepares for making the DMA engine provider data structures
+private. DMA consumers should not access DMA engine internals directly.
+
+mxs-mmc.c wrong use mmc host device when do DMA map. Fix it by use
+dmaengine_get_dma_device().
+
+Assisted-by: LLM
+Reviewed-by: Linus Walleij <linusw@kernel.org>
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Reviewed-by: Vinod Koul <vkoul@kernel.org>
+Signed-off-by: Frank Li <Frank.Li@nxp.com>
+---
+Change in v5
+- remove debug code for kconfig change.
+- Arnd Bergmann, It take more time to implement move dma_map_sg() into
+prep() functions, some dmaengine driver's implement is quite difference
+and need find good place to do unmap(). It is on my todo list. I suggest
+use this version firstly to making the DMA engine provider data structures
+private.
+
+Change in v4
+- Fix miss "R" at Reviewed-by tags.
+- Fix error path unmap dev at mxs-mmc.c (sashakio reported)
+- move dmaengine_get_dma_device(host->dma) after mxcmci_use_dma() to avoid
+defer host->dma if use pio mode (sashakio reported)
+
+Change in v3
+- add Linus Walleij and Vinod Koul's review by tags
+- Add missed omap and mxs-mmc.c (sashakio reported)
+
+Change in v2
+- find more place, which use device->dev for dma mapping. This time should
+clean all.
+- Reviewed-by: Linus Walleij <linusw@kernel.org>
+
+Cc: imx@lists.linux.dev
+Cc: vkoul@kernel.org
+---
+ drivers/mmc/host/atmel-mci.c             |  8 +++++---
+ drivers/mmc/host/jz4740_mmc.c            |  8 ++++----
+ drivers/mmc/host/mmci.c                  | 14 +++++++-------
+ drivers/mmc/host/moxart-mmc.c            | 10 ++++++----
+ drivers/mmc/host/mxcmmc.c                | 14 +++++++-------
+ drivers/mmc/host/mxs-mmc.c               |  9 +++++----
+ drivers/mmc/host/omap.c                  |  4 ++--
+ drivers/mmc/host/omap_hsmmc.c            | 12 ++++++------
+ drivers/mmc/host/owl-mmc.c               |  4 ++--
+ drivers/mmc/host/pxamci.c                |  4 ++--
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c |  8 ++++----
+ drivers/mmc/host/sh_mmcif.c              |  8 ++++----
+ drivers/mmc/host/usdhi6rol0.c            |  6 +++---
+ 13 files changed, 57 insertions(+), 52 deletions(-)
+
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 8f4df250a77a0..fb756e8858db3 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -961,7 +961,7 @@ static void atmci_dma_cleanup(struct atmel_mci *host)
+ 	struct mmc_data                 *data = host->data;
+ 
+ 	if (data)
+-		dma_unmap_sg(host->dma.chan->device->dev,
++		dma_unmap_sg(dmaengine_get_dma_device(host->dma.chan),
+ 				data->sg, data->sg_len,
+ 				mmc_get_dma_dir(data));
+ }
+@@ -1116,6 +1116,7 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ 	unsigned int			sglen;
+ 	u32				maxburst;
+ 	u32 iflags;
++	struct device *dma_dev;
+ 
+ 	data->error = -EINPROGRESS;
+ 
+@@ -1145,6 +1146,7 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ 		return -ENODEV;
+ 
+ 	chan = host->dma.chan;
++	dma_dev = dmaengine_get_dma_device(chan);
+ 	host->data_chan = chan;
+ 
+ 	if (data->flags & MMC_DATA_READ) {
+@@ -1161,7 +1163,7 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ 		atmci_writel(host, ATMCI_DMA, ATMCI_DMA_CHKSIZE(maxburst) |
+ 			ATMCI_DMAEN);
+ 
+-	sglen = dma_map_sg(chan->device->dev, data->sg,
++	sglen = dma_map_sg(dma_dev, data->sg,
+ 			data->sg_len, mmc_get_dma_dir(data));
+ 
+ 	dmaengine_slave_config(chan, &host->dma_conf);
+@@ -1177,7 +1179,7 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ 
+ 	return iflags;
+ unmap_exit:
+-	dma_unmap_sg(chan->device->dev, data->sg, data->sg_len,
++	dma_unmap_sg(dma_dev, data->sg, data->sg_len,
+ 		     mmc_get_dma_dir(data));
+ 	return -ENOMEM;
+ }
+diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+index 6a3c26b7c82d8..3343c8aa1bffe 100644
+--- a/drivers/mmc/host/jz4740_mmc.c
++++ b/drivers/mmc/host/jz4740_mmc.c
+@@ -256,7 +256,7 @@ static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
+ 	 * the parameters of the DMA engine device.
+ 	 */
+ 	if (host->dma_tx) {
+-		struct device *dev = host->dma_tx->device->dev;
++		struct device *dev = dmaengine_get_dma_device(host->dma_tx);
+ 		unsigned int max_seg_size = dma_get_max_seg_size(dev);
+ 
+ 		if (max_seg_size < host->mmc->max_seg_size)
+@@ -264,7 +264,7 @@ static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
+ 	}
+ 
+ 	if (host->dma_rx) {
+-		struct device *dev = host->dma_rx->device->dev;
++		struct device *dev = dmaengine_get_dma_device(host->dma_rx);
+ 		unsigned int max_seg_size = dma_get_max_seg_size(dev);
+ 
+ 		if (max_seg_size < host->mmc->max_seg_size)
+@@ -289,7 +289,7 @@ static void jz4740_mmc_dma_unmap(struct jz4740_mmc_host *host,
+ 	struct dma_chan *chan = jz4740_mmc_get_dma_chan(host, data);
+ 	enum dma_data_direction dir = mmc_get_dma_dir(data);
+ 
+-	dma_unmap_sg(chan->device->dev, data->sg, data->sg_len, dir);
++	dma_unmap_sg(dmaengine_get_dma_device(chan), data->sg, data->sg_len, dir);
+ 	data->host_cookie = COOKIE_UNMAPPED;
+ }
+ 
+@@ -307,7 +307,7 @@ static int jz4740_mmc_prepare_dma_data(struct jz4740_mmc_host *host,
+ 	if (data->host_cookie == COOKIE_PREMAPPED)
+ 		return data->sg_count;
+ 
+-	sg_count = dma_map_sg(chan->device->dev,
++	sg_count = dma_map_sg(dmaengine_get_dma_device(chan),
+ 			data->sg,
+ 			data->sg_len,
+ 			dir);
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 416bdb184ed4c..2d72f56d354f1 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -893,14 +893,14 @@ int mmci_dmae_setup(struct mmci_host *host)
+ 	 * the parameters of the DMA engine device.
+ 	 */
+ 	if (dmae->tx_channel) {
+-		struct device *dev = dmae->tx_channel->device->dev;
++		struct device *dev = dmaengine_get_dma_device(dmae->tx_channel);
+ 		unsigned int max_seg_size = dma_get_max_seg_size(dev);
+ 
+ 		if (max_seg_size < host->mmc->max_seg_size)
+ 			host->mmc->max_seg_size = max_seg_size;
+ 	}
+ 	if (dmae->rx_channel) {
+-		struct device *dev = dmae->rx_channel->device->dev;
++		struct device *dev = dmaengine_get_dma_device(dmae->rx_channel);
+ 		unsigned int max_seg_size = dma_get_max_seg_size(dev);
+ 
+ 		if (max_seg_size < host->mmc->max_seg_size)
+@@ -940,7 +940,7 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ 	else
+ 		chan = dmae->tx_channel;
+ 
+-	dma_unmap_sg(chan->device->dev, data->sg, data->sg_len,
++	dma_unmap_sg(dmaengine_get_dma_device(chan), data->sg, data->sg_len,
+ 		     mmc_get_dma_dir(data));
+ }
+ 
+@@ -1023,7 +1023,7 @@ static int _mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 		.device_fc = variant->dma_flow_controller,
+ 	};
+ 	struct dma_chan *chan;
+-	struct dma_device *device;
++	struct device *dma_dev;
+ 	struct dma_async_tx_descriptor *desc;
+ 	int nr_sg;
+ 	unsigned long flags = DMA_CTRL_ACK;
+@@ -1056,8 +1056,8 @@ static int _mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 	if (host->variant->dma_power_of_2 && !is_power_of_2(data->blksz))
+ 		return -EINVAL;
+ 
+-	device = chan->device;
+-	nr_sg = dma_map_sg(device->dev, data->sg, data->sg_len,
++	dma_dev = dmaengine_get_dma_device(chan);
++	nr_sg = dma_map_sg(dma_dev, data->sg, data->sg_len,
+ 			   mmc_get_dma_dir(data));
+ 	if (nr_sg == 0)
+ 		return -EINVAL;
+@@ -1077,7 +1077,7 @@ static int _mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 	return 0;
+ 
+  unmap_exit:
+-	dma_unmap_sg(device->dev, data->sg, data->sg_len,
++	dma_unmap_sg(dma_dev, data->sg, data->sg_len,
+ 		     mmc_get_dma_dir(data));
+ 	return -ENOMEM;
+ }
+diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+index 28aed13549a64..6c0974c494207 100644
+--- a/drivers/mmc/host/moxart-mmc.c
++++ b/drivers/mmc/host/moxart-mmc.c
+@@ -262,6 +262,7 @@ static void moxart_transfer_dma(struct mmc_data *data, struct moxart_host *host)
+ 	u32 len, dir_slave;
+ 	struct dma_async_tx_descriptor *desc = NULL;
+ 	struct dma_chan *dma_chan;
++	struct device *dma_dev;
+ 	long timeout;
+ 
+ 	if (host->data_len == data->bytes_xfered)
+@@ -275,7 +276,8 @@ static void moxart_transfer_dma(struct mmc_data *data, struct moxart_host *host)
+ 		dir_slave = DMA_DEV_TO_MEM;
+ 	}
+ 
+-	len = dma_map_sg(dma_chan->device->dev, data->sg,
++	dma_dev = dmaengine_get_dma_device(dma_chan);
++	len = dma_map_sg(dma_dev, data->sg,
+ 			 data->sg_len, mmc_get_dma_dir(data));
+ 
+ 	if (len > 0) {
+@@ -306,7 +308,7 @@ static void moxart_transfer_dma(struct mmc_data *data, struct moxart_host *host)
+ 	data->bytes_xfered = host->data_len;
+ 
+ unmap:
+-	dma_unmap_sg(dma_chan->device->dev,
++	dma_unmap_sg(dma_dev,
+ 		     data->sg, data->sg_len,
+ 		     mmc_get_dma_dir(data));
+ }
+@@ -642,8 +644,8 @@ static int moxart_probe(struct platform_device *pdev)
+ 		dmaengine_slave_config(host->dma_chan_rx, &cfg);
+ 
+ 		mmc->max_seg_size = min3(mmc->max_req_size,
+-			dma_get_max_seg_size(host->dma_chan_rx->device->dev),
+-			dma_get_max_seg_size(host->dma_chan_tx->device->dev));
++			dma_get_max_seg_size(dmaengine_get_dma_device(host->dma_chan_rx)),
++			dma_get_max_seg_size(dmaengine_get_dma_device(host->dma_chan_tx)));
+ 	}
+ 
+ 	if (readl(host->base + REG_BUS_WIDTH) & BUS_WIDTH_4_SUPPORT)
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 097498a3f8ff4..91502cde0b6cc 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -290,6 +290,7 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+ 	unsigned int datasize = nob * blksz;
+ 	struct scatterlist *sg;
+ 	enum dma_transfer_direction slave_dirn;
++	struct device *dma_dev;
+ 	int i, nents;
+ 
+ 	host->data = data;
+@@ -302,6 +303,8 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+ 	if (!mxcmci_use_dma(host))
+ 		return 0;
+ 
++	dma_dev = dmaengine_get_dma_device(host->dma);
++
+ 	for_each_sg(data->sg, sg, data->sg_len, i) {
+ 		if (sg->offset & 3 || sg->length & 3 || sg->length < 512) {
+ 			host->do_dma = 0;
+@@ -319,8 +322,7 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+ 		mxcmci_swap_buffers(data);
+ 	}
+ 
+-	nents = dma_map_sg(host->dma->device->dev, data->sg,
+-				     data->sg_len,  host->dma_dir);
++	nents = dma_map_sg(dma_dev, data->sg, data->sg_len,  host->dma_dir);
+ 	if (nents != data->sg_len)
+ 		return -EINVAL;
+ 
+@@ -329,8 +331,7 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+ 		DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+ 
+ 	if (!host->desc) {
+-		dma_unmap_sg(host->dma->device->dev, data->sg, data->sg_len,
+-				host->dma_dir);
++		dma_unmap_sg(dma_dev, data->sg, data->sg_len, host->dma_dir);
+ 		host->do_dma = 0;
+ 		return 0; /* Fall back to PIO */
+ 	}
+@@ -439,7 +440,7 @@ static int mxcmci_finish_data(struct mxcmci_host *host, unsigned int stat)
+ 	int data_error;
+ 
+ 	if (mxcmci_use_dma(host)) {
+-		dma_unmap_sg(host->dma->device->dev, data->sg, data->sg_len,
++		dma_unmap_sg(dmaengine_get_dma_device(host->dma), data->sg, data->sg_len,
+ 				host->dma_dir);
+ 		mxcmci_swap_buffers(data);
+ 	}
+@@ -1125,8 +1126,7 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 	if (host->dma)
+-		mmc->max_seg_size = dma_get_max_seg_size(
+-				host->dma->device->dev);
++		mmc->max_seg_size = dma_get_max_seg_size(dmaengine_get_dma_device(host->dma));
+ 	else
+ 		dev_info(mmc_dev(host->mmc), "dma not available. Using PIO\n");
+ 
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 7c7c52d9e8e72..c42e7734caf1e 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -143,7 +143,7 @@ static void mxs_mmc_request_done(struct mxs_mmc_host *host)
+ 		mxs_mmc_start_cmd(host, mrq->cmd);
+ 		return;
+ 	} else if (data) {
+-		dma_unmap_sg(mmc_dev(host->mmc), data->sg,
++		dma_unmap_sg(dmaengine_get_dma_device(ssp->dmach), data->sg,
+ 			     data->sg_len, ssp->dma_dir);
+ 		/*
+ 		 * If there was an error on any block, we mark all
+@@ -214,6 +214,7 @@ static struct dma_async_tx_descriptor *mxs_mmc_prep_dma(
+ 	struct mxs_mmc_host *host, unsigned long flags)
+ {
+ 	struct mxs_ssp *ssp = &host->ssp;
++	struct device *dma_dev = dmaengine_get_dma_device(ssp->dmach);
+ 	struct dma_async_tx_descriptor *desc;
+ 	struct mmc_data *data = host->data;
+ 	struct scatterlist * sgl;
+@@ -221,7 +222,7 @@ static struct dma_async_tx_descriptor *mxs_mmc_prep_dma(
+ 
+ 	if (data) {
+ 		/* data */
+-		dma_map_sg(mmc_dev(host->mmc), data->sg,
++		dma_map_sg(dma_dev, data->sg,
+ 			   data->sg_len, ssp->dma_dir);
+ 		sgl = data->sg;
+ 		sg_len = data->sg_len;
+@@ -238,7 +239,7 @@ static struct dma_async_tx_descriptor *mxs_mmc_prep_dma(
+ 		desc->callback_param = host;
+ 	} else {
+ 		if (data)
+-			dma_unmap_sg(mmc_dev(host->mmc), data->sg,
++			dma_unmap_sg(dma_dev, data->sg,
+ 				     data->sg_len, ssp->dma_dir);
+ 	}
+ 
+@@ -640,7 +641,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+ 	mmc->max_blk_size = 1 << 0xf;
+ 	mmc->max_blk_count = (ssp_is_old(ssp)) ? 0xff : 0xffffff;
+ 	mmc->max_req_size = (ssp_is_old(ssp)) ? 0xffff : 0xffffffff;
+-	mmc->max_seg_size = dma_get_max_seg_size(ssp->dmach->device->dev);
++	mmc->max_seg_size = dma_get_max_seg_size(dmaengine_get_dma_device(ssp->dmach));
+ 
+ 	platform_set_drvdata(pdev, mmc);
+ 
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index 527b89a5ed707..37a8408351750 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -431,7 +431,7 @@ mmc_omap_release_dma(struct mmc_omap_host *host, struct mmc_data *data,
+ 			/* Claim nothing transferred on error... */
+ 			data->bytes_xfered = 0;
+ 		}
+-		dev = c->device->dev;
++		dev = dmaengine_get_dma_device(c);
+ 	}
+ 	dma_unmap_sg(dev, data->sg, host->sg_len, dma_data_dir);
+ }
+@@ -1037,7 +1037,7 @@ mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
+ 			*bp = burst;
+ 		}
+ 
+-		host->sg_len = dma_map_sg(c->device->dev, data->sg, sg_len,
++		host->sg_len = dma_map_sg(dmaengine_get_dma_device(c), data->sg, sg_len,
+ 					  dma_data_dir);
+ 		if (host->sg_len == 0)
+ 			goto use_pio;
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index de5a3b70107d8..44c326fd2a9b2 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -915,7 +915,7 @@ static void omap_hsmmc_dma_cleanup(struct omap_hsmmc_host *host, int errno)
+ 		struct dma_chan *chan = omap_hsmmc_get_dma_chan(host, host->data);
+ 
+ 		dmaengine_terminate_all(chan);
+-		dma_unmap_sg(chan->device->dev,
++		dma_unmap_sg(dmaengine_get_dma_device(chan),
+ 			host->data->sg, host->data->sg_len,
+ 			mmc_get_dma_dir(host->data));
+ 
+@@ -1170,7 +1170,7 @@ static void omap_hsmmc_dma_callback(void *param)
+ 	data = host->mrq->data;
+ 	chan = omap_hsmmc_get_dma_chan(host, data);
+ 	if (!data->host_cookie)
+-		dma_unmap_sg(chan->device->dev,
++		dma_unmap_sg(dmaengine_get_dma_device(chan),
+ 			     data->sg, data->sg_len,
+ 			     mmc_get_dma_dir(data));
+ 
+@@ -1204,7 +1204,7 @@ static int omap_hsmmc_pre_dma_transfer(struct omap_hsmmc_host *host,
+ 
+ 	/* Check if next job is already prepared */
+ 	if (next || data->host_cookie != host->next_data.cookie) {
+-		dma_len = dma_map_sg(chan->device->dev, data->sg, data->sg_len,
++		dma_len = dma_map_sg(dmaengine_get_dma_device(chan), data->sg, data->sg_len,
+ 				     mmc_get_dma_dir(data));
+ 
+ 	} else {
+@@ -1390,7 +1390,7 @@ static void omap_hsmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
+ 	if (host->use_dma && data->host_cookie) {
+ 		struct dma_chan *c = omap_hsmmc_get_dma_chan(host, data);
+ 
+-		dma_unmap_sg(c->device->dev, data->sg, data->sg_len,
++		dma_unmap_sg(dmaengine_get_dma_device(c), data->sg, data->sg_len,
+ 			     mmc_get_dma_dir(data));
+ 		data->host_cookie = 0;
+ 	}
+@@ -1912,8 +1912,8 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	 * increase this figure here, we get warnings from the DMA API debug.
+ 	 */
+ 	mmc->max_seg_size = min3(mmc->max_req_size,
+-			dma_get_max_seg_size(host->rx_chan->device->dev),
+-			dma_get_max_seg_size(host->tx_chan->device->dev));
++			dma_get_max_seg_size(dmaengine_get_dma_device(host->rx_chan)),
++			dma_get_max_seg_size(dmaengine_get_dma_device(host->tx_chan)));
+ 
+ 	/* Request IRQ for MMC operations */
+ 	ret = devm_request_irq(&pdev->dev, host->irq, omap_hsmmc_irq, 0,
+diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
+index d5b8a110267b8..668cf9704ac29 100644
+--- a/drivers/mmc/host/owl-mmc.c
++++ b/drivers/mmc/host/owl-mmc.c
+@@ -162,7 +162,7 @@ static void owl_mmc_finish_request(struct owl_mmc_host *owl_host)
+ 	owl_host->mrq = NULL;
+ 
+ 	if (data)
+-		dma_unmap_sg(owl_host->dma->device->dev, data->sg, data->sg_len,
++		dma_unmap_sg(dmaengine_get_dma_device(owl_host->dma), data->sg, data->sg_len,
+ 			     owl_host->dma_dir);
+ 
+ 	/* Finally finish request */
+@@ -313,7 +313,7 @@ static int owl_mmc_prepare_data(struct owl_mmc_host *owl_host,
+ 		owl_host->dma_cfg.direction = DMA_DEV_TO_MEM;
+ 	}
+ 
+-	dma_map_sg(owl_host->dma->device->dev, data->sg,
++	dma_map_sg(dmaengine_get_dma_device(owl_host->dma), data->sg,
+ 		   data->sg_len, owl_host->dma_dir);
+ 
+ 	dmaengine_slave_config(owl_host->dma, &owl_host->dma_cfg);
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index f8427f071c009..c3edd98376bcc 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -201,7 +201,7 @@ static void pxamci_setup_data(struct pxamci_host *host, struct mmc_data *data)
+ 		return;
+ 	}
+ 
+-	host->dma_len = dma_map_sg(chan->device->dev, data->sg, data->sg_len,
++	host->dma_len = dma_map_sg(dmaengine_get_dma_device(chan), data->sg, data->sg_len,
+ 				   host->dma_dir);
+ 
+ 	tx = dmaengine_prep_slave_sg(chan, data->sg, host->dma_len, direction,
+@@ -337,7 +337,7 @@ static int pxamci_data_done(struct pxamci_host *host, unsigned int stat)
+ 		chan = host->dma_chan_rx;
+ 	else
+ 		chan = host->dma_chan_tx;
+-	dma_unmap_sg(chan->device->dev,
++	dma_unmap_sg(dmaengine_get_dma_device(chan),
+ 		     data->sg, data->sg_len, host->dma_dir);
+ 
+ 	if (stat & STAT_READ_TIME_OUT)
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index c7df4da9e865b..bf2b32cfbec6c 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -134,11 +134,11 @@ static void renesas_sdhi_sys_dmac_dma_callback(void *arg)
+ 		goto out;
+ 
+ 	if (host->data->flags & MMC_DATA_READ)
+-		dma_unmap_sg(host->chan_rx->device->dev,
++		dma_unmap_sg(dmaengine_get_dma_device(host->chan_rx),
+ 			     host->sg_ptr, host->sg_len,
+ 			     DMA_FROM_DEVICE);
+ 	else
+-		dma_unmap_sg(host->chan_tx->device->dev,
++		dma_unmap_sg(dmaengine_get_dma_device(host->chan_tx),
+ 			     host->sg_ptr, host->sg_len,
+ 			     DMA_TO_DEVICE);
+ 
+@@ -188,7 +188,7 @@ static void renesas_sdhi_sys_dmac_start_dma_rx(struct tmio_mmc_host *host)
+ 		sg = host->sg_ptr;
+ 	}
+ 
+-	ret = dma_map_sg(chan->device->dev, sg, host->sg_len, DMA_FROM_DEVICE);
++	ret = dma_map_sg(dmaengine_get_dma_device(chan), sg, host->sg_len, DMA_FROM_DEVICE);
+ 	if (ret > 0)
+ 		desc = dmaengine_prep_slave_sg(chan, sg, ret, DMA_DEV_TO_MEM,
+ 					       DMA_CTRL_ACK);
+@@ -264,7 +264,7 @@ static void renesas_sdhi_sys_dmac_start_dma_tx(struct tmio_mmc_host *host)
+ 		sg = host->sg_ptr;
+ 	}
+ 
+-	ret = dma_map_sg(chan->device->dev, sg, host->sg_len, DMA_TO_DEVICE);
++	ret = dma_map_sg(dmaengine_get_dma_device(chan), sg, host->sg_len, DMA_TO_DEVICE);
+ 	if (ret > 0)
+ 		desc = dmaengine_prep_slave_sg(chan, sg, ret, DMA_MEM_TO_DEV,
+ 					       DMA_CTRL_ACK);
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index a205c222a821d..e8d2bd1491eee 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -289,7 +289,7 @@ static void sh_mmcif_start_dma_rx(struct sh_mmcif_host *host)
+ 	dma_cookie_t cookie = -EINVAL;
+ 	int ret;
+ 
+-	ret = dma_map_sg(chan->device->dev, sg, data->sg_len,
++	ret = dma_map_sg(dmaengine_get_dma_device(chan), sg, data->sg_len,
+ 			 DMA_FROM_DEVICE);
+ 	if (ret > 0) {
+ 		host->dma_active = true;
+@@ -339,7 +339,7 @@ static void sh_mmcif_start_dma_tx(struct sh_mmcif_host *host)
+ 	dma_cookie_t cookie = -EINVAL;
+ 	int ret;
+ 
+-	ret = dma_map_sg(chan->device->dev, sg, data->sg_len,
++	ret = dma_map_sg(dmaengine_get_dma_device(chan), sg, data->sg_len,
+ 			 DMA_TO_DEVICE);
+ 	if (ret > 0) {
+ 		host->dma_active = true;
+@@ -1173,11 +1173,11 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
+ 							 host->timeout);
+ 
+ 	if (data->flags & MMC_DATA_READ)
+-		dma_unmap_sg(host->chan_rx->device->dev,
++		dma_unmap_sg(dmaengine_get_dma_device(host->chan_rx),
+ 			     data->sg, data->sg_len,
+ 			     DMA_FROM_DEVICE);
+ 	else
+-		dma_unmap_sg(host->chan_tx->device->dev,
++		dma_unmap_sg(dmaengine_get_dma_device(host->chan_tx),
+ 			     data->sg, data->sg_len,
+ 			     DMA_TO_DEVICE);
+ 
+diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+index 8d9d4f362999f..74888260e85c5 100644
+--- a/drivers/mmc/host/usdhi6rol0.c
++++ b/drivers/mmc/host/usdhi6rol0.c
+@@ -539,10 +539,10 @@ static void usdhi6_dma_stop_unmap(struct usdhi6_host *host)
+ 	host->dma_active = false;
+ 
+ 	if (data->flags & MMC_DATA_READ)
+-		dma_unmap_sg(host->chan_rx->device->dev, data->sg,
++		dma_unmap_sg(dmaengine_get_dma_device(host->chan_rx), data->sg,
+ 			     data->sg_len, DMA_FROM_DEVICE);
+ 	else
+-		dma_unmap_sg(host->chan_tx->device->dev, data->sg,
++		dma_unmap_sg(dmaengine_get_dma_device(host->chan_tx), data->sg,
+ 			     data->sg_len, DMA_TO_DEVICE);
+ }
+ 
+@@ -583,7 +583,7 @@ static int usdhi6_dma_setup(struct usdhi6_host *host, struct dma_chan *chan,
+ 		return -EINVAL;
+ 	}
+ 
+-	ret = dma_map_sg(chan->device->dev, sg, data->sg_len, data_dir);
++	ret = dma_map_sg(dmaengine_get_dma_device(chan), sg, data->sg_len, data_dir);
+ 	if (ret > 0) {
+ 		host->dma_active = true;
+ 		desc = dmaengine_prep_slave_sg(chan, sg, ret, dir,
+-- 
+2.43.0
+
