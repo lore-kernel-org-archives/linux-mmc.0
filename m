@@ -1,103 +1,98 @@
-Received: from mail-wm2-f13.google.com (mail-wm2-f13.google.com [74.125.225.141])
+Received: from mail-oi1-f199.google.com (mail-oi1-f199.google.com [209.85.167.199])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFE321E9919
-	for <linux-mmc@vger.kernel.org>; Sat,  3 Oct 2026 08:11:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.225.141
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 689C01632DD
+	for <linux-mmc@vger.kernel.org>; Sun,  4 Oct 2026 04:33:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.199
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791015068; cv=none; b=secKMQt1wcQ1ONAaw34MzJ/CY6YQedAdCxWuVw/nqQt07xHGnQbjPZDybhxoGj6GLo05E9PjCVs92Xcjq34ma5AWWIAWHoteSb7VX3jPY37eahltafUV5AayHEJECUs2Qk++TUfPJ2Ukovug/30XbGNgpn87zJ3eLNBfFpM9egQ=
+	t=1791088422; cv=none; b=Xj/xKDA9+rLPCSeI5sIG7ldeXMV4mSSQRjiQ657bi+hTYWrWU1ykrkM4o/dAMlOpsptPKhmHpyH1CQgWrKoKl1oeJc1vbBmjo1rl6Cx9TX5MFvWF31cBTqiUbb02h9aR+zb8Kio7WcfSdJHCVaejUWD7jMP9ZcvogRxbOpyL/2E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791015068; c=relaxed/simple;
-	bh=wtwQ6JzEMapAlW6zEvQWmul06EKyW5l8OOrIKIXFqHg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=D7bP4w8wtz0W7xvwvacTQFQllqvggrkbVXr8GUOWBiJtWB78v1s1FGg4Gc61ZnItv6ghsN5shh66Tt+ZDziBfH4A7VgECVE2JOPIHoIhmeht3+pS5wvuKzC61beyFY4gW1z0kUZst+/MHwfGq3zIPEi2qfReNHWmc6EU+xQl3Dw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=74.125.225.141
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-wm2-f13.google.com with SMTP id 5b1f17b1804b1-4a169d33ef6so1160595e9.1
-        for <linux-mmc@vger.kernel.org>; Sat, 03 Oct 2026 01:11:06 -0700 (PDT)
+	s=arc-20240116; t=1791088422; c=relaxed/simple;
+	bh=1GDbIu7PE2AjKB9yS/1ZXtbOoN8q8/dNL6RxZ3LffCk=;
+	h=MIME-Version:Date:Message-ID:Subject:From:To:Content-Type; b=rUTHJFLLJM8HEZfGPkQHT6fF9Meeaz4h3fzi6/8liZWZ2QBjebOu6v/khSQTRCuDFU50jm3PuZ1g7V7+JID6wUz2fgD3AS4V4/B7O9oIZ492M2mB90rf8lGSAhNtVy+eIgeZ7nwxgewuuTX0Xza4Ph4UVlr5ENcMB0Zy+Kdp5Mg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=209.85.167.199
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
+Received: by mail-oi1-f199.google.com with SMTP id 5614622812f47-4e778acdbc6so1351315b6e.3
+        for <linux-mmc@vger.kernel.org>; Sat, 03 Oct 2026 21:33:41 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791015065; x=1791619865;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=8UOj4UBtpSDtB1u/mynjbblWtbQNRWQi1yFF6YRu1C8=;
-        b=NV16n3H0oH5tztr2qC8TY0pNiNF+Hr3M1q5BNAGwDAQqoH6UV4jL9SZI/8sRlQXGCX
-         kQu/QUbq5LankeYIr5srA3fKHTYcNG416wNReEl0uo+3jlvrhMHTyXzxz1XX+1DGM41s
-         J9O9Bl6wktnLjBMzvyApyZJnb/vuXsUUOE2N2HGXolzA/M7YToyyCpxzFHbpchExHTNg
-         kUIaUZRGu2GkDNB+FtThxK+Nqr+VuAy3H/QHjEvL8JIGYj78FjXeJQnj17wSu46VQXmr
-         L96vFycuZUfvQxrhHrGXqQ1KfGdlEaBOZ5SrbgOLEFUeC+SYfB0ANBRp35x6LmHUBRfx
-         9iqA==
-X-Forwarded-Encrypted: i=1; AKwUvByzlk86GanhfepAvvzKpli+FqIklGIXQzDla0jbG5aV92v5T+m/t9RmUau2b6wT0VNe9YqziPUY2BU=@vger.kernel.org
-X-Gm-Message-State: AFuF++ncSIONHl7lKyO4/+WO9eMcJwhoSpUhV2WEPWlh3d4vG+owMKCn
-	yBY9Qpy7tSBK//vEgyIo4h2rbEzut9U6FgFBICaGg+23lyh69aHOgorX
-X-Gm-Gg: AYBFou2oFncc6zA4xxw4CbGOFTcBLRcpuga7e9iq6nEDP4lPDx7BHA6N/o/MClUUJM9
-	6KO8o0ZJtKxwXE6RkWaf/J8V3fUA0tIiHSQfARCdsnWsNmmKUd89daS+mim08kuNuxbngD/yuLY
-	yRYvGWE2OB2QzS8Pq/zm8o7snZVQv40AbFi6DJWQ2iW4P9p5sOg6gAP/2o4TLsTobRyk71s2TDS
-	uUvd8J5OSaM/wcKcqMG7pfnn2xBPqSeqNSBVLqGeTpwXGSrnrBCXbnLMqPjct9kFKaEdinswHt2
-	uuxxbqG8OjJy6ie6y9v9w2ljHsGDy3ch1Z11e2UX8uYSmDlFkKt6TaIlVazvZsuc97XL7vrOnS3
-	cZKnqa/MTEpJY83Vj8gzpAx5TKrk8riQGiMhQ5g4iD6nQ0dntRRKaJaw7e1bMzufFRwFvWIJUlB
-	hT0e4/o5w89xLi1VqE0RwZqLuHPwuvpS4fhB9+FEKz5KeMtCowWklfdTM2ailKMBrqNDSvAsWm5
-	iiT9/pNVoIPcjycWQ4eyt+xuuWx
-X-Received: by 2002:a05:600c:a011:b0:49d:4ef:bf70 with SMTP id 5b1f17b1804b1-4a02756716amr80264645e9.10.1791015064857;
-        Sat, 03 Oct 2026 01:11:04 -0700 (PDT)
-Received: from [192.168.1.135] ([84.68.183.72])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48b82253e7esm10140636f8f.0.2026.10.03.01.11.03
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 03 Oct 2026 01:11:04 -0700 (PDT)
-Message-ID: <b3ed6eb7-2d32-436f-a984-45366389d0da@linux.com>
-Date: Sat, 3 Oct 2026 09:11:03 +0100
+        d=1e100.net; s=20260707; t=1791088420; x=1791693220;
+        h=content-type:to:from:subject:message-id:date:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=PKJCTUIEtBlhRM4dNTsrpV8kt9lM1iUiJh0EwaNyx80=;
+        b=srnaqewPMlaw0HDux19YzRl20zITgydh61JJdjjnmHH0QteWL8rZq9/3pH+sBScyIr
+         OZN2yjSbkDfNJaiyFupdJu5bYvUviqNWwaMf3QqTs2Oec1ik4r333NgprjXFR6K5sITh
+         QulByP7ZtsMWUmZS9C99ZHtuzRWXDPvoCmTRCt/RZOB0pXvK+7AMEAuUHQ81DQUhtkta
+         VzGa9nrVAjwWpQIDKpvNn0K/VtLRcY1bN+aTeyzqYn1BhpiCphZoK0/Mlhiooxa4q5uv
+         sACC5ad3WKc6zhijdxKouXGuCSDBnne+xxOoCO7yACLjbEzfp0xX91zC1Gup1JIB93R8
+         2Lxg==
+X-Forwarded-Encrypted: i=1; AKwUvBw00SbZuL9ixSy0Ak/ppxtLFZQSLEKy720W8pn5Zs46N9nM5ckI+3ZmLQpYRc5kq6aipDfYvlnl6hk=@vger.kernel.org
+X-Gm-Message-State: AFuF++nH5FUxXIQzyb/JrRZpWb2RefWTKkRZXHso+zaxY4TltciReThs
+	jkxdjc4RtOQw18p7kw3yqphP0DHqDs8i0lREUU4G8g4S99ZcBNJ+esqflsRh2ar+allUvqxoXKM
+	MZZTzQBs0rm7ml3RAkxLKSp1PVnD7LR1WFdxyeFVlKI57PoQoPuHf7UpISM8=
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/4] dt-bindings: mmc: amlogic,meson-gx-mmc: document
- the T7 pipeline clock
-To: Rob Herring <robh@kernel.org>
-Cc: Ulf Hansson <ulfh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>,
- Neil Armstrong <neil.armstrong@linaro.org>,
- Jerome Brunet <jbrunet@baylibre.com>, Kevin Hilman <khilman@baylibre.com>,
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
- Stephen Boyd <sboyd@kernel.org>, Brian Masney <bmasney+clk@redhat.com>,
- Chuan Liu <chuan.liu@amlogic.com>, Jian Hu <jian.hu@amlogic.com>,
- Ronald Claveau <linux-kernel-dev@aliel.fr>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-amlogic@lists.infradead.org, linux-clk@vger.kernel.org,
- linux-kernel@vger.kernel.org
-References: <20260905153234.133217-1-tanure@linux.com>
- <20260905153234.133217-2-tanure@linux.com>
- <20260916203701.GA1463751-robh@kernel.org>
-Content-Language: en-US
-From: Lucas Tanure <tanure@linux.com>
-In-Reply-To: <20260916203701.GA1463751-robh@kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+X-Received: by 2002:a05:6808:1a0a:b0:4cb:f21c:a79e with SMTP id
+ 5614622812f47-4f52a77893bmr6779562b6e.38.1791088420438; Sat, 03 Oct 2026
+ 21:33:40 -0700 (PDT)
+Date: Sat, 03 Oct 2026 21:33:40 -0700
+X-Google-Appengine-App-Id: s~syzkaller
+X-Google-Appengine-App-Id-Alias: syzkaller
+Message-ID: <6ac1d724.34119e79.2f92f3.001c.GAE@google.com>
+Subject: [syzbot] Monthly mmc report (Oct 2026)
+From: syzbot <syzbot+list47ee4443aeac8f86ebca@syzkaller.appspotmail.com>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	syzkaller-bugs@googlegroups.com, ulf.hansson@linaro.org
+Content-Type: text/plain; charset="UTF-8"
 
-On 16/09/2026 21:37, Rob Herring wrote:
-> On Sat, Sep 05, 2026 at 04:32:31PM +0100, Lucas Tanure wrote:
->> The SD/eMMC controllers of the T7 SoC are physically far from the
->> NIC_MATRIX bus fabric, so the hardware design inserts a pipeline stage
->> in the middle of the bus path to help timing closure. This stage is fed
->> by its own gate clock and, when that clock is disabled, a controller
->> that starts a DMA transfer can never complete it.
->>
->> Allow a fourth clock entry, named "pipeline", and require it for the
->> amlogic,t7-mmc compatible. The other controllers of this family keep
->> the existing three clocks.
-> 
-> Did the SD controller not work without this clock? If it did, then this
-> is an ABI break which is evident by the current warning in linux-next.
-> 
-> Rob
-Yes, the SD controller doesn't work with this clock, so I don't think is 
-a ABI break, as the current code doesn't work and the board crashes a lot.
-And a few patches got merged from my work, so I will resubmit a new 
-series for this.
+Hello mmc maintainers/developers,
 
-Thanks
-Lucas
+This is a 31-day syzbot report for the mmc subsystem.
+All related reports/information can be found at:
+https://syzkaller.appspot.com/upstream/s/mmc
+
+During the period, 2 new issues were detected and 0 were fixed.
+In total, 13 issues are still open.
+There is also 1 low-priority issue.
+
+Some of the still happening issues:
+
+Ref  Crashes Repro Title
+<1>  865     No    INFO: task hung in mmc_stop_host
+                   https://syzkaller.appspot.com/bug?extid=d0688023306aea3aefdc
+<2>  401     No    INFO: task hung in sdio_reset
+                   https://syzkaller.appspot.com/bug?extid=e8678cd3d8b65d1f2c74
+<3>  354     No    WARNING: suspicious RCU usage in cancel_delayed_work_sync
+                   https://syzkaller.appspot.com/bug?extid=9c1988bc953fca2086a3
+<4>  193     No    INFO: task hung in mmc_go_idle
+                   https://syzkaller.appspot.com/bug?extid=bb55e8118af00556efa2
+<5>  128     No    WARNING: suspicious RCU usage in mmc_free_host
+                   https://syzkaller.appspot.com/bug?extid=0d22039ef0915696ad4b
+<6>  80      No    INFO: task hung in mmc_io_rw_direct_host
+                   https://syzkaller.appspot.com/bug?extid=fd993974345f022e97f2
+<7>  69      No    INFO: task hung in mmc_send_if_cond_pcie
+                   https://syzkaller.appspot.com/bug?extid=30341f17551668478919
+<8>  65      Yes   WARNING: ODEBUG bug in vub300_disconnect
+                   https://syzkaller.appspot.com/bug?extid=f4a0159ce6802a0a4774
+<9>  63      No    INFO: task hung in mmc_send_io_op_cond
+                   https://syzkaller.appspot.com/bug?extid=15adedb55f72fa957b00
+<10> 41      No    WARNING in mmc_free_host
+                   https://syzkaller.appspot.com/bug?extid=82a0a7de6d84867d030e
+
+---
+This report is generated by a bot. It may contain errors.
+See https://goo.gl/tpsmEJ for more information about syzbot.
+syzbot engineers can be reached at syzkaller@googlegroups.com.
+
+To disable reminders for individual bugs, reply with the following command:
+#syz set <Ref> no-reminders
+
+To change bug's subsystems, reply with:
+#syz set <Ref> subsystems: new-subsystem
+
+You may send multiple commands in a single email message.
