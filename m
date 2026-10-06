@@ -1,140 +1,136 @@
-Received: from mail-pj1-f44.google.com (mail-pj1-f44.google.com [209.85.216.44])
+Received: from mta1.migadu.com (out-22.mta1.migadu.com [95.215.58.22])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37D784349A7
-	for <linux-mmc@vger.kernel.org>; Tue,  6 Oct 2026 12:49:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EABE445563B
+	for <linux-mmc@vger.kernel.org>; Tue,  6 Oct 2026 13:19:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.22
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791291009; cv=none; b=l/3a/mdAwE3mpPPE6w6aJ6A/0BRQ63OctS9RJ1S4goL9uoj+4YKLoB1soAL0pYvEf8gXEP+FGOZdiF5tfuQQOMNJrfiatSGuGHp1ktiQkX0xeYRfctIYerOI0uXzTWsX4KqNRIpAzsKRiQI2xOhZ+1cv5xdw5Ik0psYwD0MJO7g=
+	t=1791292746; cv=none; b=loI+2XXTrTiC8spzuFDc1xFB8PMdriIVbNfofle7afdghliIIXz7ot5tjajRyBneql8ZZMN7YVgOivB9ssCWM/MW8bRhxBdNBPH/O7jdkWMjNx5ltwkZfwfpDL+lnWcAv+otQxiYfSP4Ec0myp3lyBkPT28fUfYXmAVZpdBJYto=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791291009; c=relaxed/simple;
-	bh=Yj0CJu0cTezFzA494Z/lD76Pdm3vlF6yfr0DbWTWl6c=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=E9g3+8q6Hi1UT5xiroD9zyQ7fqQxSjPCu9tX3Q3GduC0IYyDyxnljArSd/gEE75ypz1uffZ/3dPmVseOMd8WGwRue5bsEdF5jcu6gdSZ1UeMoqscp4/YaQmwL2VDkI0yl740bcdXTxp8QZTemiB0WbYRYyF+Uq3pqpK6wHht0PQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=g/iOCMVr; arc=none smtp.client-ip=209.85.216.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1791292746; c=relaxed/simple;
+	bh=DRIrSbkbtrBkartjFVq+RFV2/jC6XURTKQFkUBIVp7w=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=o0fJLFCM66K+tPkv2G/Q99vxVE86vJ6BThzcBsfp4moTLpt5uhpnMNvngSE4B+itE9yLw3d4EpvwXCrVyOLdFcKITBfLbnF3w+FND/9V5xxQUIZhca6kE1h7apbq5sarxxRD0k5BSh+5Xc/U0bCPrPYzmi9UgUbFSRITNngShPk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=AjqrfXhZ; arc=none smtp.client-ip=95.215.58.22
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="g/iOCMVr"
-Received: by mail-pj1-f44.google.com with SMTP id 98e67ed59e1d1-38e42560ebcso1570677a91.1
-        for <linux-mmc@vger.kernel.org>; Tue, 06 Oct 2026 05:49:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1791290995; x=1791895795; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=i1m5R0v4bzaEG9q5h5fbCPMd2vUE3+sYABtiEkaFp90=;
-        b=g/iOCMVryz3LrPesTT9tCh+a/fhgUf0rIDZqgGiIZeNIeODMLnL5oHA3sRxHvx/PCo
-         83kJV1pAxq+EiArv10ek2XnPQdWnc7pwvH/LW0RIMj/sV283V3YNRlRyfrNMEZ795iLT
-         8fxquAbkV9YtX2lZWFnTkhk6AXgL72bvLz/qnd3Vvnhx1f82DKBckqC50zl8YjtpW5XQ
-         XB2hohhdoieBMBcM7oTQeV2xpAMI+MXstU15dP3KSoHpy4+9J/qhnTF1BtKTsauprcIX
-         XYjk0wYJEShUJB6Cb8LZ4GzFd46aFt53PTeA89jrcEN64G5cgx+qNNPVSNnjjgJx2no6
-         DlwQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791290995; x=1791895795;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=i1m5R0v4bzaEG9q5h5fbCPMd2vUE3+sYABtiEkaFp90=;
-        b=wGZc25wrNf2UocV9qYnhcf6sdRpa0IdbUD9mYaVERDJPMP1WI2baW7Pt2cd1pPQKhv
-         9Y476/a2f2QreosXARZzJp8maped+wX1gbrtEU5ne8Ak/EgLQORhMnxl4rcgkQMrmedi
-         6m82I0Yi9dFAuCVorutonYxLuXvyLS4qK7jx3XR5Fj70JzLiPIEn4meYQ4xgFyJRC+LV
-         ClOJXkdVC9r4huGOjfELLBplIedC+HOcV3AcdAD1RJmJzLLmxGNwBnQbzgYS7AkWAIL4
-         SeJhW2AzaDTYsZfGu7YgMLFYboLN3bHG0fi4D0b4kGJd4orYa1bo62gSTbeH+KeyAjar
-         zffg==
-X-Gm-Message-State: AFq9FYK//f50OEgH2AEquFgGRrY0K3flNkbhzudyYFkuCbFG06hKnohe
-	X6xm+H/LWcizjXazDOrL5MTyq11S5XXUomQxQgWgk2vDm1Jk3sBp922N
-X-Gm-Gg: AYBFou368qVDWDsiAZCLg8otwbCSL921EXvVI/N7lhi59n+D3n8Pc8eco9j89u0qpXk
-	woD2OlARJdXUg2cChLj0XQebNw4dRKhuNT+hbMLHDJ2Qctdb+ttrTWdyjssUyWhcwzwbF5L+CmK
-	DuP1YGpB1CqgYYKGKrIP/h9oZmoFBgAHGkCkzk9m+A7+OClj8xcGQBVusea/6BtkPhOps9eIQMM
-	n0wbXCbKxo3NfR06wzI1D+JPdcWHQjLW1XY9ciYVKS53WNGxosipkEU1PZWo3FD64CM8gZu8IJq
-	KZsP4ihIHQwf4zwRdiCwViVSQXvTqf/eKBf5Lys4hFdVa/D5pzoI/Bqa4d1BGdhCI4U9vRv3x7J
-	Y/QgYGAIfjIxIX6x9JssEFuIcXh6rDxlbtQPDrlLNoxCc5aovGd3mexX945+GCfeWQX6S+ClzW+
-	kgl/WBP5LJYQ2yDJiVb6LbMpNQlQcrjVnBPARdjNes7VY/SGbO8omIrcP9xxG9GYsKc0j26yigh
-	lVcrRApPNgpQTlp3A==
-X-Received: by 2002:a17:90a:4cc7:b0:3a7:b260:9ced with SMTP id 98e67ed59e1d1-3a7b260a03bmr4414827a91.58.1791290994945;
-        Tue, 06 Oct 2026 05:49:54 -0700 (PDT)
-Received: from LAPTOP-450UDG4J ([2401:4900:900c:ec20:d139:f8fd:7043:7eb2])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3a85d51825dsm3875556a91.12.2026.10.06.05.49.49
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 06 Oct 2026 05:49:54 -0700 (PDT)
-From: Yogesh Gaur <yogeshgaur.83@gmail.com>
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="AjqrfXhZ"
+X-Envelope-To: linux-mmc@vger.kernel.org
+DKIM-Signature: a=rsa-sha256; bh=DRIrSbkbtrBkartjFVq+RFV2/jC6XURTKQFkUBIVp7w=;
+ c=simple/simple; d=linux.dev;
+ h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
+ t=1791292741; v=1; x=1791897541;
+ b=AjqrfXhZj3cFgdo8TelIuhFI0bfSPdumqJREtUX1+K3qGkaL6qdMxhFmIOOdAhMnF3p1+3lM
+ r9C5eR3dBI3CIsCT/MwhuN+VdLiycFTjeYreI2hqRG9p5BFuGtxZVPF6/CJpOZZpaQPYWO/1NtI
+ 1trzirqTiw4IpuBnOiLQK7R4=
+X-Envelope-To: linux-mmc@vger.kernel.org
+Received: by smtp.migadu.com with ESMTPS id 9087b2f6437d9c29;
+	Tue, 06 Oct 2026 13:19:00 +0000
+X-Mizu-Trace-ID: 9087b2f6437d9c29
+X-Migadu-Flow: FLOW_OUT
+From: Shawn Lin <shawn.lin@linux.dev>
 To: Ulf Hansson <ulfh@kernel.org>
 Cc: linux-mmc@vger.kernel.org,
+	Adrian Hunter <adrian.hunter@intel.com>,
 	linux-kernel@vger.kernel.org,
-	Yogesh Gaur <yogeshgaur.83@gmail.com>,
-	syzbot+c6d8091b47243f2023b8@syzkaller.appspotmail.com,
-	stable@vger.kernel.org
-Subject: [PATCH] mmc: vub300: complete the pending request when the device is gone
-Date: Tue,  6 Oct 2026 18:19:38 +0530
-Message-ID: <20261006124938.1861-1-yogeshgaur.83@gmail.com>
-X-Mailer: git-send-email 2.55.0.windows.5
+	Shawn Lin <shawn.lin@linux.dev>
+Subject: [PATCH] mmc: core: Fix max_dtr passed to SD drive strength selection
+Date: Tue,  6 Oct 2026 21:18:46 +0800
+Message-Id: <1791292726-31978-1-git-send-email-shawn.lin@linux.dev>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-vub300_mmc_request() hands the request to vub300_cmndwork_thread() and
-returns; the work is what eventually calls mmc_request_done().  But if
-vub300_disconnect() has cleared vub300->interface by the time the work
-runs, the work just drops its reference and returns, and the request
-is never completed.
+sd_select_driver_type() passes card->sw_caps.uhs_max_dtr to
+mmc_select_drive_strength(), but that field is only assigned later by
+sd_set_bus_speed_mode().  A card initialized for the first time thus
+gets max_dtr=0, while a re-initialized card (system resume or
+hw reset recovery reuse the card struct) gets the stale value from the
+previous initialization.
 
-The MMC core waits for it with no timeout, and vub300_disconnect() then
-waits for the core: mmc_remove_host() cancels mmc_rescan(), which is
-the one stuck on the request.  syzbot hits this as two hung tasks:
+No in-tree driver implementing ->select_drive_strength() (AMD and Intel
+SDHCI) actually looks at max_dtr, so there is no functional impact
+today.  Still, compute the frequency from the bus speed mode that
+sd_update_bus_speed_mode() has already selected, so the core doesn't
+hand out a bogus value, and use the same helper in sd_set_bus_speed_mode()
+to keep a single mapping.
 
-  INFO: task kworker/1:2:984 blocked for more than 143 seconds.
-  Workqueue: events_freezable mmc_rescan
-   mmc_wait_for_req_done+0xcd/0x3d0 drivers/mmc/core/core.c:408
-   mmc_wait_for_cmd+0x154/0x200 drivers/mmc/core/core.c:645
-   mmc_app_cmd+0x170/0x340 drivers/mmc/core/sd_ops.c:64
-   ...
-   mmc_attach_sd+0xb8/0x3d0 drivers/mmc/core/sd.c:1854
-   mmc_rescan+0xcd5/0x11c0 drivers/mmc/core/core.c:2316
-  INFO: task kworker/0:5:5709 blocked for more than 143 seconds.
-  Workqueue: usb_hub_wq hub_event
-   cancel_delayed_work_sync+0xd1/0xf0 kernel/workqueue.c:4642
-   mmc_stop_host+0xe9/0x400 drivers/mmc/core/core.c:2373
-   mmc_remove_host+0x15/0x60 drivers/mmc/core/host.c:681
-   vub300_disconnect+0x12d/0x170 drivers/mmc/host/vub300.c:2387
-
-Fail the request with -ESHUTDOWN in that case, as vub300_mmc_request()
-already does when it sees the interface gone before queueing the work.
-
-Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
-Reported-by: syzbot+c6d8091b47243f2023b8@syzkaller.appspotmail.com
-Cc: stable@vger.kernel.org
-Assisted-by: LLM
-Signed-off-by: Yogesh Gaur <yogeshgaur.83@gmail.com>
+Signed-off-by: Shawn Lin <shawn.lin@linux.dev>
 ---
-Built with W=1 only; not runtime-tested.
 
- drivers/mmc/host/vub300.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+ drivers/mmc/core/sd.c | 25 +++++++++++++++++++------
+ 1 file changed, 19 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index 2dae474dcd06..01fa7f9e9659 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -1739,6 +1739,16 @@ static void vub300_cmndwork_thread(struct work_struct *work)
- 	struct vub300_mmc_host *vub300 =
- 		container_of(work, struct vub300_mmc_host, cmndwork);
- 	if (!vub300->interface) {
-+		struct mmc_request *req = vub300->req;
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index c763efb..5ba4e2d 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -417,6 +417,22 @@ int mmc_sd_switch_hs(struct mmc_card *card)
+ 	return err;
+ }
+ 
++static unsigned int sd_get_bus_speed_dtr(struct mmc_card *card)
++{
++	switch (card->sd_bus_speed) {
++	case UHS_SDR104_BUS_SPEED:
++		return UHS_SDR104_MAX_DTR;
++	case UHS_DDR50_BUS_SPEED:
++		return UHS_DDR50_MAX_DTR;
++	case UHS_SDR50_BUS_SPEED:
++		return UHS_SDR50_MAX_DTR;
++	case UHS_SDR25_BUS_SPEED:
++		return UHS_SDR25_MAX_DTR;
++	default:
++		return UHS_SDR12_MAX_DTR;
++	}
++}
 +
-+		/* the core waits for this request, so finish it */
-+		if (req) {
-+			vub300->req = NULL;
-+			vub300->cmd = NULL;
-+			vub300->data = NULL;
-+			req->cmd->error = -ESHUTDOWN;
-+			mmc_request_done(vub300->mmc, req);
-+		}
- 		kref_put(&vub300->kref, vub300_delete);
- 		return;
- 	} else {
+ static int sd_select_driver_type(struct mmc_card *card, u8 *status)
+ {
+ 	int card_drv_type, drive_strength, drv_type;
+@@ -427,7 +443,7 @@ static int sd_select_driver_type(struct mmc_card *card, u8 *status)
+ 	card_drv_type = card->sw_caps.sd3_drv_type | SD_DRIVER_TYPE_B;
+ 
+ 	drive_strength = mmc_select_drive_strength(card,
+-						   card->sw_caps.uhs_max_dtr,
++						   sd_get_bus_speed_dtr(card),
+ 						   card_drv_type, &drv_type);
+ 
+ 	if (drive_strength) {
+@@ -490,28 +506,25 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
+ 	switch (card->sd_bus_speed) {
+ 	case UHS_SDR104_BUS_SPEED:
+ 		timing = MMC_TIMING_UHS_SDR104;
+-		card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
+ 		break;
+ 	case UHS_DDR50_BUS_SPEED:
+ 		timing = MMC_TIMING_UHS_DDR50;
+-		card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
+ 		break;
+ 	case UHS_SDR50_BUS_SPEED:
+ 		timing = MMC_TIMING_UHS_SDR50;
+-		card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
+ 		break;
+ 	case UHS_SDR25_BUS_SPEED:
+ 		timing = MMC_TIMING_UHS_SDR25;
+-		card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
+ 		break;
+ 	case UHS_SDR12_BUS_SPEED:
+ 		timing = MMC_TIMING_UHS_SDR12;
+-		card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
+ 		break;
+ 	default:
+ 		return 0;
+ 	}
+ 
++	card->sw_caps.uhs_max_dtr = sd_get_bus_speed_dtr(card);
++
+ 	err = mmc_sd_switch(card, SD_SWITCH_SET, 0, card->sd_bus_speed, status);
+ 	if (err)
+ 		return err;
 -- 
-2.55.0.windows.5
+2.7.4
 
