@@ -1,106 +1,104 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D95373812DB;
-	Tue,  6 Oct 2026 06:59:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.8
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 149913B47FC;
+	Tue,  6 Oct 2026 07:28:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.19
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791269949; cv=fail; b=g4uNMdaUh9r1IAX3GFpE8cR5c8sLr0W7VivgJkCaUFLZzuaxWohTDTWxhJGoucVDbzwp5MHFIc4b2OueFdsMa2OREwsAbLFyfX8XuPuf/x3o43twk/bMATpAdlNgdShLG2Esbu6VG24lW4SoDXfX9SbZMO2D2AyYADgPqRqxJbM=
+	t=1791271737; cv=fail; b=FgPMHZefcxk151IUqzH/jy86FB9QocWRZXDOOXwb0iOXlflEz2qb0DmOxdR3eDOr3eUF7zlLzoZihiOkL6bxgnjGVT1fHoKetUnk0GBHQTRH9oLRRvEgst3b/4tfCzYI0t3UuefJEArNouCFYUqhzyDlcn9t6x4Hs7RubeSliBc=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791269949; c=relaxed/simple;
-	bh=qT6MauEJV8cuxD85SNq2gyRw96m0PCCbiE5T0aPfNFo=;
+	s=arc-20240116; t=1791271737; c=relaxed/simple;
+	bh=HVyVtUnN7Dyayak+1srAdO+WF7uFhlWYNmKTcjZO/NI=;
 	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=CZWosRIY8GL7PVZ54DJoqJH4pS8bjIL4VGN/8TEPXHxjooueYFnJDPbeivx193O2+I7V2nH7dbVQUZ6w+s+QlgV3vZ2mvfGIiBAomb0Up+s69DrnhQapX1OImaMXZxlpoeUVR3l3Ac4GC7+99odN8dAI+IS7CuTqWdnw2ZQLQzs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=jpyD33nt; arc=fail smtp.client-ip=192.198.163.8
+	 Content-Type:MIME-Version; b=aRyCcsrlzjA//ih3yO1CF03SgKhiR1JJLfJyZPYD12737/FDO6Zn8TMSjXoSOAzwjS10pvMjUDm73d+sDMrYc5l/dn38a+7UgX3opWHdUMUlKYXBOpRRxefEORfEtAsn8g+HZK3DyZRWbSH5+pQiCw29tZ3jxxnFK2oUf1p4jSo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=dRi0Rqp7; arc=fail smtp.client-ip=192.198.163.19
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="jpyD33nt"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="dRi0Rqp7"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1791269947; x=1822805947;
+  t=1791271733; x=1822807733;
   h=message-id:date:subject:to:cc:references:from:
    in-reply-to:content-transfer-encoding:mime-version;
-  bh=qT6MauEJV8cuxD85SNq2gyRw96m0PCCbiE5T0aPfNFo=;
-  b=jpyD33ntUWjX6820+Gq1lMaXT8B71CeDahLxcmiOsbGMxV7QG+KxHWPP
-   X7v0hS9ouWR90AlF0PQokGrzYoFfR+Gz8nLaBumbd6QhbD7DVN6fCPu5U
-   4lOY7ljbzTh90HA+KZkuIVaoodj7gZ7Nn0aq5bezHROYCaIPO9zD+Kwkz
-   jC96A1InCIPZ3GmbtaRDOcTgE12i7RuHF9zA9rhrtSRGahty1+s8GZysY
-   4yrZFNXY/83fQeKzqiOJhgtkd8Bsf3ItrT5CHujxqaaVop6wyT15brJus
-   t6osnIyjTc0YonEiain4ga94c3G+HgyakUY9yhrSsweAr7EqtPnn6huSV
-   w==;
-X-CSE-ConnectionGUID: CLVR7zRORVWxdfrBlYvEQg==
-X-CSE-MsgGUID: b8doNBGrSnSedBeZPVtgkA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11926"; a="109440238"
+  bh=HVyVtUnN7Dyayak+1srAdO+WF7uFhlWYNmKTcjZO/NI=;
+  b=dRi0Rqp77OgkRL8aE+Xxa4MsRyU6irZHVruv+/hk1siz+f/hkt1d5GZv
+   JKO9/ahJq7hDqCRdiAk/35RejhWISqOcnybH8Y+2UOR9CNAnQPyE8JloZ
+   9JJlM7UxjbqOamC/HXOseal/CiMnbhepdAS713FvpLc/em5+fdq4UBYHa
+   mEna59+G4xvCkkbbE9NDGp7SUEWvzd4wcBaDXZ+WI8tp1G016CnFJTci6
+   vpVHFTHK2XQkj35CAOgKw3fxVoYcK92EFDFTcKE+SGYXhdmnibn5CSKdC
+   dXCYCEjAZAm7yFfzoZSCajUtmwrMvSiiDj4wPMo1c1Qup4gsWTIYwUs4k
+   g==;
+X-CSE-ConnectionGUID: KRt+65IZSyWo7aGM3iytVw==
+X-CSE-MsgGUID: TNlRAXFLQxqRQFo8xcdc/Q==
+X-IronPort-AV: E=McAfee;i="6800,10657,11926"; a="99827"
 X-IronPort-AV: E=Sophos;i="6.27,143,1787036400"; 
-   d="scan'208";a="109440238"
+   d="scan'208";a="99827"
 Received: from orviesa004.jf.intel.com ([10.64.159.144])
-  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Oct 2026 23:59:06 -0700
-X-CSE-ConnectionGUID: SVYwIWyvSAGAEAu/lLsCTQ==
-X-CSE-MsgGUID: h7U9bYeFS86UzSP5SBEViA==
+  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Oct 2026 00:28:36 -0700
+X-CSE-ConnectionGUID: ff17EB9XTHSjD65xyDZ2Fg==
+X-CSE-MsgGUID: hePr9gtASSm6+bwjf7wmCQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.27,143,1787036400"; 
-   d="scan'208";a="280360607"
-Received: from fmsmsx903.amr.corp.intel.com ([10.18.126.92])
-  by orviesa004.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Oct 2026 23:59:06 -0700
-Received: from FMSMSX902.amr.corp.intel.com (10.18.126.91) by
- fmsmsx903.amr.corp.intel.com (10.18.126.92) with Microsoft SMTP Server
+   d="scan'208";a="280368234"
+Received: from fmsmsx902.amr.corp.intel.com ([10.18.126.91])
+  by orviesa004.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Oct 2026 00:28:37 -0700
+Received: from FMSMSX901.amr.corp.intel.com (10.18.126.90) by
+ fmsmsx902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.49; Mon, 5 Oct 2026 23:59:04 -0700
-Received: from fmsedg902.ED.cps.intel.com (10.1.192.144) by
- FMSMSX902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
+ 15.2.2562.49; Tue, 6 Oct 2026 00:28:36 -0700
+Received: from fmsedg903.ED.cps.intel.com (10.1.192.145) by
+ FMSMSX901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.49 via Frontend Transport; Mon, 5 Oct 2026 23:59:04 -0700
-Received: from CH1PR05CU001.outbound.protection.outlook.com (52.101.193.1) by
- edgegateway.intel.com (192.55.55.82) with Microsoft SMTP Server
+ 15.2.2562.49 via Frontend Transport; Tue, 6 Oct 2026 00:28:36 -0700
+Received: from SN4PR2101CU001.outbound.protection.outlook.com (40.93.195.45)
+ by edgegateway.intel.com (192.55.55.83) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.49; Mon, 5 Oct 2026 23:59:04 -0700
+ 15.2.2562.49; Tue, 6 Oct 2026 00:28:35 -0700
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=AxDlHBYnAdoFJrhAKhd12pjKWZfNio1aB26rLclEjcKDMwIuFKGQpS4iNdQ5Bjo/Ru7WttkxHuCk5J/D20a2TJPCtt1DRurB6SxyQzJciJ2qlRxtC/7kNc9DNcDidWodr+NhWIOExWgszzySqSN7zK1rKwyLq/2XuZDVUWRBoxdhO6itARkVn3sJfaeI1gPKJnvFy4TI/pItY04a/HNIH85/pKzVrog8NjKF9W8b7lowQor2OnJ7wbJhvGu5iiaFYDpeMvxI+uOSOEWqd/O6jcJ+mpysSsRPKnK0dk7Q2X/9B53fh9dAj34h/yDMXWbG1/tjsX4I4DaEbJhuu0TQBQ==
+ b=q7hxScVn3eOs7FBzNkU9wcFmYPqC2uNqUCDlPbR6nizCJsmVI3VoRMYlFJtFuwaJ4Ii/6SyVIRDIbDLL/j8hgcgM5OgjY2VlY5JYt5BG0N+TdrpBvszk5FB0yfI1uVeMaywStjIZaAETPSoJhxiqjdxo7/K6wgqrqAUFv1xrv6xmZUDjnYjsbEvz4Si1GSowo7RAJcb9V264wCo/JY6Bzej6Hyf+koC7MdUoapx/3tkG2xUgpR63oC7nsTb4Gkn77oNNaivqq5wNjAYXFaNtRsuw/syB6bbDDJPlZdAjd3BoaqS8qSnAtvTo/mjCqFd0iQ2IkVbbAGVjPNaGOGpXzw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=BabfzHiqQagtgsl8VtBOhSsMzrIZTGiB5A+HQT/5khA=;
- b=S7sXfbvP3j3K/FyzIjoulQ0l1KEvNvUTsMHHVgl7VJ9GlG8LtZl2mfTErxNG1tfGfAgtHabjJwb5zeQ8WtBD9TuDFqHxW4xA05j28mKUdP2vKrcK2o60PT/VW79ZEv8FWiI8Kh81eRFf7O6Az0DFOvJwSwDv9kqBHoLs9pvx/H5pNbrEq+E2j03R1cXV9R/+r8wWw9DifAokf6kSJ8ikfCQS8XrdClZRLc5Mqzi3rXvnCh5gR2nAADzEzOYrP7JlzUViHiTF0CbnEXIsY0651kygOvgdwKjIuOG29X9q+PALkzG20AmhtpRdQ2JGwTs2RsKIjXlat0UN/O4mzqkLSQ==
+ bh=Dp1lZKBVY756pkhORpsU1dKWwzO6/37RDrh/ebmT4z4=;
+ b=typY2jy6eLCMc2rLVXVqolmlUmsFuqs2XNzLAVPKDJCBkXNkE3vWSdoy4PvKt1fjfYGGmelUNeVEM5+Bxqe18L/S/TObJYGa3PBfQbpQMu0lMQlQyPhf01jcgwO9q8G7XH6AyrQjpaGtSlQ/pJqa/f0qOl2UBc3UBG6RfaNMdxXK0W7FrkLleUQhUqcrq4rK0F3KmK2RVDnsjznOCRX6+1vjbFpwRhNbVSGEXVC6DKZajDJFESyW9buEBIc75kZnMvsStqq7L1a5eNIqT85NBO2owkr8VIq7YL+Z2dPzOQHjjJ8GvTtR0K6orZRxBXaCYvv8dRk+h/FO5pgAWA5m1w==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
  dkim=pass header.d=intel.com; arc=none
 Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=intel.com;
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by BL1PR11MB5253.namprd11.prod.outlook.com (2603:10b6:208:310::20) with
+ by CH3PR11MB8137.namprd11.prod.outlook.com (2603:10b6:610:15c::8) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.472.15; Tue, 6 Oct
- 2026 06:58:57 +0000
+ 2026 07:28:28 +0000
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456%3]) with mapi id 15.21.0472.015; Tue, 6 Oct 2026
- 06:58:57 +0000
-Message-ID: <b79f1b5c-9fc7-4138-a6ec-e82571307622@intel.com>
-Date: Tue, 6 Oct 2026 09:58:51 +0300
+ 07:28:28 +0000
+Message-ID: <ae9b702d-6a19-4f97-8117-b6626e69cc9d@intel.com>
+Date: Tue, 6 Oct 2026 10:28:23 +0300
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-of-dwcmshc: Add support for StarFive
- JHB100
-To: Changhuang Liang <changhuang.liang@starfivetech.com>, Rob Herring
-	<robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
-	<conor+dt@kernel.org>, Ulf Hansson <ulfh@kernel.org>, Inochi Amaoto
-	<inochiama@gmail.com>, Chen Wang <chen.wang@linux.dev>, Jisheng Zhang
-	<jszhang@kernel.org>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<devicetree@vger.kernel.org>, <sophgo@lists.linux.dev>, Philipp Zabel
-	<p.zabel@pengutronix.de>
-References: <20260930103258.13375-1-changhuang.liang@starfivetech.com>
- <20260930103258.13375-3-changhuang.liang@starfivetech.com>
+Subject: Re: [PATCH] mmc: core: Don't program invalid host driver type for
+ fixed eMMC type
+To: Ian Ray <ian.ray@gehealthcare.com>
+CC: Ulf Hansson <ulf.hansson@oss.qualcomm.com>, Ulf Hansson <ulfh@kernel.org>,
+	Shawn Lin <shawn.lin@rock-chips.com>, Kamal Dasu <kamal.dasu@broadcom.com>,
+	<stable@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>
+References: <20260926122908.866-1-ian.ray@gehealthcare.com>
+ <CAPx+jO-59V8bg+DB4pOqEmdPZrfLi098YsyzkBRnf2Krb7ufVA@mail.gmail.com>
+ <791c00cf-4f25-423c-b2f3-4cdc2d2c4a2b@intel.com> <ar5-udUwk8JeB-ut@zeus>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
  6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
  4, Domiciled in Helsinki
-In-Reply-To: <20260930103258.13375-3-changhuang.liang@starfivetech.com>
+In-Reply-To: <ar5-udUwk8JeB-ut@zeus>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DU2PR04CA0201.eurprd04.prod.outlook.com
- (2603:10a6:10:28d::26) To IA1PR11MB7198.namprd11.prod.outlook.com
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: DU2P251CA0003.EURP251.PROD.OUTLOOK.COM
+ (2603:10a6:10:230::13) To IA1PR11MB7198.namprd11.prod.outlook.com
  (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -109,332 +107,360 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|BL1PR11MB5253:EE_
-X-MS-Office365-Filtering-Correlation-Id: 074f635b-4eb9-4ab4-8150-08df23774a98
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|CH3PR11MB8137:EE_
+X-MS-Office365-Filtering-Correlation-Id: bc06ab0c-bab4-42b7-affa-08df237b6a31
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|376014|7416014|1800799024|23010399003|10067099003|5023799004|4143699003|56012099006|6133799003|11063799006|22082099003|18002099003;
-X-Microsoft-Antispam-Message-Info: CeaxXglgkR1/GQjuGw5/w6cjVHU3N/qTYzVPdcD3qkaWc/7m201g5uAPG6FupjOLgr0D/k+GUxU4+EoVow1/vs4LgZmVRleu55IoHyQ7fsSdCxVbi55mJwQdG8M/kIejF4g0taKUdRY4U9VpK2XYVqYPbzZ/2hmTblnwzPi3vdGLIOQmlsEB7/ZOssKon31zDfVTV/jHpWV/LC3O+I+HHdaBm6OQXaQaI91JF/Bv/IbV3H6XSfMOOWwRsmKKrN18VA8l45lS0EED2txXd0PiXjQmC7jepSx2W8EgGUoa+v52bGRj5d3m6kPD/OawUr9YmJt51sRJkhd7IJbrHh1I0T+aPHaFi/L/mfyljYNW0BaKVPDk9Zu5HKsJSnXblu5J/Br9EF/bNaRot2oOzbfTNYb07QVDsOJwFctXp4H0/4heFqNZ18oGUKmTe3uutS856VVV+nBHL4exc9cLvSYsjIITiGCRJFTnmnjdUiKNcxC4VUK0EJuU8jmqJijYzJVCdX9TZFSNaRgwvjLGVxbI5tFt3v6Y5553+QA6nn2nXRhQyDkpmX4g40byOccyPLESI7imdA3MDscpW5YOqRSKdZI9B51SdTQilbF8n5BUSYGlYc/xe0mdmcEb0dtXDw9UgRm2jmjpQjHIO3Dz3UxNr+HKR18WbDQpjZEmpjysn/c=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(7416014)(1800799024)(23010399003)(10067099003)(5023799004)(4143699003)(56012099006)(6133799003)(11063799006)(22082099003)(18002099003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|23010399003|366016|376014|18002099003|22082099003|6133799003|3023799007|56012099006|4143699003|10067099003|11063799006;
+X-Microsoft-Antispam-Message-Info: g/vwxQeAvvvCeJJFtcUe5r8SPaqzDQpL4FZ95fj50jttKka/z4G2y/ripFOi4Ui9iSjueE6k3SXyUMSvvaerjKEX97JzsA0UmGx1siyPxsx1wE0pemnT6kc/jyWQqSITbShQvoRVjVHH8hVrt+XB7dDCWzS5ISayV3t/Mii6V37fh7DN7/YdXECL967KIAZLftlgTq83PjKaTOo7/Wmp444uG4vV9IiRa/gVbbRVSSJ3VgVlgklny4IxGwQMjpQAsLj6ICd+hG0rCdDSmXe3smUGE5F3dibaYltvfrWlkHFcrBez8OE2lANabV86BI+2jLwrLo5Vf34geUXLjymoX/cr/h/rslM4n70b9BZLxZmSHZdbT0I13Cx6MnZTKeXl9nyeqVek2K9XXpwXqW/thnmcS3I/ChjHrM+egndZ8OoOu4lChaZkHzc/RuBAzjMwAnCwX7e6/JIlyFNVza/b3mu24RxjdGqowyM19/Jw3cif2kXgL+30RzwXhu6PtbNiaT4Y8KZUec8Q0gi83ulKSy+qnIc2yVcmEBzBGqSRyoFkDIc1ecPJnutdfa5RuyqL4WXDiCFRKSvo8V1uc6PztyNYJpujySpebJEsDrxi2dKMdCc6nALV6vJ2DNqzoWgBG4ShnweMvRp4q8TYGnysupTiL+Eh06uv4JMrRSvtZhk=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(23010399003)(366016)(376014)(18002099003)(22082099003)(6133799003)(3023799007)(56012099006)(4143699003)(10067099003)(11063799006);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?cnhDUGQ1a3A3cjRzdE5wbHZOK0lBaGVLemJXYy9YRThPam9lOWNaRkNrRGdy?=
- =?utf-8?B?NVhYaHUyVEF1anBIUG1wdHFaQ08vMjhERDNUdjFBeVFjbk1kajVqR21QQlJ1?=
- =?utf-8?B?cHZJVVoyaDZnUmlwQ0NLajUrN1FXYWh6SkprNWthdXdiS0g1WjVzekljTEdT?=
- =?utf-8?B?d1hSMlVEb3RxdmFITFdYei9LeHRUTC85VjZZREJucHpLRGJEQkhwVG02NkJw?=
- =?utf-8?B?b21FeWdpWUFWZTJsMXg3LzEvbEtlRHVSK2wrY3pPOEhsdW9vSmtvcmY2Skwv?=
- =?utf-8?B?cVFJS25wZU9jNHpLNE5FMXpacGV6SGwvdnpKVUhoVEgzWHFUQ3BzNUZFNGVC?=
- =?utf-8?B?NnkrSnpPUTVHWmNhWVoxZ3FncnZtYXAvM3NKVHpvZkhyUjZpR2dob0gyckFn?=
- =?utf-8?B?NG0vNy9wcE9xNFhLMkJJbGFzVkhGZ1hHMHJ1YmhVZmx1Zm90ZDh4Nk5USzNY?=
- =?utf-8?B?VjY3b0R4blljZlJHZW82Nmk1TFZBSG9pMm1nVlFDanNwYVI0TkRrNnY3MDk3?=
- =?utf-8?B?S0ZseFhPZEwwT0hHWE03RVF4dHZHK1B5aWZXVk4zOWRKTmZpV0Ird1dWQkNQ?=
- =?utf-8?B?YUdCTnloMHYrOThQZ2FOSXlWdjdONE11clcrQWtHZkNwalFzWjRObVlJLzdr?=
- =?utf-8?B?TXFaNUV3dGhha1FhbnRPL2x1OUs5UFRDYXYxOFExL2VLS3JJQXFsREhiRlBu?=
- =?utf-8?B?aU1xVzJBZXFJb3Vwb3EwSVRicU5ySmZHVzBtenZpZ1lLazU2UHlPcDVTZzJ3?=
- =?utf-8?B?THRwU2hBZWVaTDJJLzB2dFpVZmw1TWNqL091aHZWVElNVHNFcnc5Y283Y1B4?=
- =?utf-8?B?OHZaZmU0R05jUThnK2o3RVJTQWFmdXVmOGdzNUQ4cEtjcitNV1F2dWhWUWE1?=
- =?utf-8?B?aUErS1F2WEpUQzRVcnBwd3JPU1hxUnJ5YmZiWTM3YTF2QjY1QXlVYS9IYXdI?=
- =?utf-8?B?RkhmWXVzcU1qSWZCbHRBQk4zUnBJTG1GOFhiRkRqd0F5U0dmRUNlaUNJdFgy?=
- =?utf-8?B?SHROSVNiaUhXUDRCYzZPMmhLaVBhS05qYUVZck9ZWDkzWVgzNHRNQ3JpZ3l2?=
- =?utf-8?B?VzVvMlp3aWhpUnZLbmdEVEMzN3EyZHJJY01JT1V5TFcxQUR1SjJuOGFsSXpK?=
- =?utf-8?B?VkNVbVpiWHhQOXF4NVN1bHAyNUtDM3l0cjMxZ3BJOXA4NkJ2WDRibGppZjdw?=
- =?utf-8?B?dGpEVUlIbzU5WWxIMGcwbU9udVJOZWJCb0FleFcwS28xUTE4RU5BTEtuNWEz?=
- =?utf-8?B?N3RxL2VwVE9SVjg2R0xmT2t1N2RqQkVFYjJ3cE5idXFLSDBpUVBRR0hpNEZ4?=
- =?utf-8?B?Yk1CRU5MbDhWODlUb2EwdGlvK2krMDVLY0xTaWJ2TGVRc3VieThjaGQrZjd1?=
- =?utf-8?B?eTRFUEtxck12K1NPc1lNSXNIRUNmRmZLK2o1ckw1SXdVWkF6UHVzclRnMWxx?=
- =?utf-8?B?eDFGallqN1BBLytQSmpMRmhWOUNEN0FKSmx5MkFVT1JjL0hDNjZnYm4yZXRl?=
- =?utf-8?B?S3N6aHlRTkdiZkI4L3p3SnZBS0VwOEdoL1pIL1YrVkRBMDN3RnVEanQ5eVlR?=
- =?utf-8?B?VEczdFBLSzZQSWRIanNHUlIxZjdWa3E4Ly9KYWg4SW5XamcvcFpTYzFmbnJz?=
- =?utf-8?B?UUVQYjhTVXg1UzlNeDBMTzdsSmFHQVdrdVlubUNCZ3RTTjhodERWYStDS2RQ?=
- =?utf-8?B?cFpJODVGZEIwcWhNTEp1aFVzaGlUYVNPM0NSZE1qWUx1bllZVmp2VmpKOStm?=
- =?utf-8?B?R1d3UVB4TFJuQnFWN1R2UWJyMXZYMHZ3VzNBNjdPTDJ6Skt6YUlwTlZoKzdL?=
- =?utf-8?B?bzdnWTZObTFVUG54VXJrN3ZtUlBYNENjQTVNaTlkQnZXYXZ6OWdnd1RQc2hY?=
- =?utf-8?B?aUpSKzU4OWVZSjhjRmhiNDlFb2ZDcDczTmFpMVROYm5tT0RFTkh1SnFTaVRU?=
- =?utf-8?B?UGNRT2duV3V1M0ZRU0xBalF2L1FqMXh2cE1sQUFOVWtxNnNuWUhZdEREWi9l?=
- =?utf-8?B?Rjg0UHN5NklUVGFYblF5d09FV3hqbHpJeDhOelMyRHg4aGNhcW93WnFLbUpo?=
- =?utf-8?B?VVhYUUlCYlQyTXY0K1ZuVW11Q0NWV3FzL2dQTU9BcHhMU2dLM3E1TlI2Y1h2?=
- =?utf-8?B?amJZTW55Wkt1WlJTdlRHTVpjVEpXOFVNa29hMHh4UTY5SWR2aVpSNm1NUy9L?=
- =?utf-8?B?VHN3OVZreTlmS25MeDlmZ2I1d0RzcDdnTVZuVU5sRHVZZS9aWEN2NGdWdGcv?=
- =?utf-8?B?NmMzdERKUzdtbzRlbnZvTEZndkk5ZWcvTm1PQkpyWjhIWlo2OGd1TU1oQXFZ?=
- =?utf-8?B?SGRQLytFdzQ2NklzZTFzVUdZSkJzZWFTOUJrbWYzMy9WTHBUUjZZSU10MWF2?=
- =?utf-8?Q?IW4CV5ckR4yS5Mc4=3D?=
-X-Exchange-RoutingPolicyChecked: TKRdDeWwAxx8kNd5iLX2NNuoFRl2JXafkYytASSXmFD645aXawhYUlrbGP7+t3kSvwcOncEKu4z0wyzmKVyfeUV9moLvUCz/0eKvGvsnMqcIBcguN1jT2LBp4yzC3geeXYssfS6YT/msdBcsG5qZMxUk3FsJJp7HMFWRyTtg0ZNDRPj706xILc7sYauroF40EC1rN6ZoPJ1k2/thnN5S+aqKBehWy4RDfqWgkkSp6Zmq653vuOHiukogwgoIRNdZ+9+hKabL57kAXW8KHvbYBKFv7GR4BtjPqahjNtZlRIgLrI8M6OQ1fMv/QER6H0RmY1icuDf5MKyArPC3G0P4JQ==
-X-MS-Exchange-CrossTenant-Network-Message-Id: 074f635b-4eb9-4ab4-8150-08df23774a98
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?NGo5ZmFhR2FCTXJCUnQ1UExnQUdtdEg5KzRFdXFjN1hTUi9qZGJMNTMvRk0v?=
+ =?utf-8?B?Zkt2NVNQR1VnbnRNTzRXRk1lM0I3UmttU29PTXQybXU5MmFmUklPc284aW12?=
+ =?utf-8?B?TEhrUWN6ZEVxaFJreXdRc3dmNS84MERXOG9UTk8vQURWdnNYQTlSOE9SVzI4?=
+ =?utf-8?B?VTJMM1hTOUZQLy9ZNjh0WVd6T1o4NlJiQUlSbUgxYjdQT1dvWmp4YzNPTHpB?=
+ =?utf-8?B?VlZSc3owZk1uajVpRTdMZUozamdIRGN1OGQzTGk1SkNaU0pBSjhiK25TNmky?=
+ =?utf-8?B?RHVocjdGbXduWGFrRDNKRVM0Y3JYQnpRaEFKNDJmVFhJSk41RGw2T3B3dEpy?=
+ =?utf-8?B?R0dKamIyV2VnUDV1TTBuZ1k0YnRoU0QyT0FWc1hhaU1UNVFKZkwrajIyQ1VO?=
+ =?utf-8?B?ZlZ2dGRONEhtR3gwaGYwQVNOM3RHNGFzTktDajNNOS8yMTVnc0VDa3o0VEx6?=
+ =?utf-8?B?RmM1dTc5RWxnVURwNEpjRDl2WG5wRUpZaWxtdURhWXhWVy8yVk03OUlyU2dj?=
+ =?utf-8?B?L05HQ1ZPcFJRV3JjUEl4NWttNkp3eHFYVXZyajJUVGs2VkM0OW9Uem5uZnNa?=
+ =?utf-8?B?UGt6cEwwS0t2VitCb3pkRTl0Y0ltZG5NWDJHc0ZRcG9CdTdjYmIyOHovSEpR?=
+ =?utf-8?B?bFkwT0VKTmlLS0FHUWoxTEUwNkd1NlVmVnN3WWRVRmNZTFp0SGpvS0Y5bGZx?=
+ =?utf-8?B?cFlLU3FRYzVtbmt1Z1E3MXpQNG5Hcm1lQWVqRnIwencyck1ONnRvaTkxTFhH?=
+ =?utf-8?B?RGh2WVFWdGx1RnkwcllCN0RKcmhXYk4vb3JrY0RHWW5Rc2lQWTZmRGNUOWRz?=
+ =?utf-8?B?SDNudzZaUFhFY3FrMWxXNEFLakwxSUtCbCtmWVdkYzd4STJlcGFoQWsxbU1o?=
+ =?utf-8?B?VTliWVhuTDQ3Tm9IUGRyMTFXdTZSZVdNKzJSM3lKR3RBamQ1R081T2ZDWTBv?=
+ =?utf-8?B?TnUvMzd6RVA3djBwOFF6djc1ZGJJbWl2S09qRHFFcFQ2YzBBSzl4bzZ5MWRm?=
+ =?utf-8?B?cndibURIM1lGWUtYaG8xYVkvMEQ3cjdsdFIwZXJGVFNQUVlJUnEvRGdNRDY0?=
+ =?utf-8?B?RFpRL0JYeTNWZFFwd2hmK1R3ZFl3Y3NoZnY5Z3NuSnZELzJ3NXNMTU80b3lM?=
+ =?utf-8?B?UU41blNQWTU3OHkyVjRRY1BOMGxxbUNnN1g3YTBheGxHVm1PZ3FscW5wT3hU?=
+ =?utf-8?B?MGdxNHp5UDYyNkNBckE4bklCQkRVNzgydXM5aDgxS1NJMmdEU2ZITVlVMjVE?=
+ =?utf-8?B?aC9oN2plWFNxMjhsVUVBaWZPdHhoQWd6NXl3Q0x6NDg2aVV0U2l5ZU9YQVh3?=
+ =?utf-8?B?SElQOFR3Q0RkWHM5cDBtK0xPRi9FWERBc0RBb1FoRUFZeDJYdllPWnkvWUt4?=
+ =?utf-8?B?T3krK3JqUWJkNGFYNUFVZTBaRWFEbGlNR2N6cEo4SCtPVFRTV3NDMjJHSjVu?=
+ =?utf-8?B?bGY5TFNFL3N2UFR4Z25rZlF6d01BZUIzblQ0RlcxRGhQNUNiY3pJaXFsNGdz?=
+ =?utf-8?B?S3MzTXNNVWlxcUlqVlE3VlhXdVpHVEQrMlpqR3M4RVNMYmR0T05aSi9OY0kw?=
+ =?utf-8?B?dFUwd3ZDcmJzQTFaVWVaeWE0M045TmE0Y2hBSUJCei9rb2p2eWUyU0gxUWZ0?=
+ =?utf-8?B?bTFHaVpPVTZBQ3hiN21GYWdYcmdiblV2TTd0Z09NSDVzYmN3WGo3TkU1eGM5?=
+ =?utf-8?B?YnNtdXo3cTFnYmlSQkhCVnVCMnJJcDhiOXFEaDdtdG1EMHhiU2ZBaE9LUnEv?=
+ =?utf-8?B?TVMyT2c4N3FNb3I3ckZRM3ZhRkdLRGtXTXloY01kM3hRL1V0MElFTDBjTFFm?=
+ =?utf-8?B?NkRTZDY4c09wdnhTcmdYWHB3bkNKSXFRTElaR0RrKzgzVURscmtOcUh6aEtm?=
+ =?utf-8?B?aFpOdjIzcFhQS0FxNisxR0c3VjdSdVZybkxnKzFTWGY0dm1COVRoc01iNHcz?=
+ =?utf-8?B?MEVNWWZNQkUyL1djczJUdnJPQ09zcUM4RHpaTk9RUUNZTDgwTXNyL0Z5NFJy?=
+ =?utf-8?B?anFVcDMyZEU1OFN3ZmYyOWhUNFRHMUdUNlhpOGhBUEhHbDlOdld6NzhPZ1Z3?=
+ =?utf-8?B?cFpsOEc1ODlOUW1QeE4yR3dWWjY1RmpNR0pUOFh2ZklTcWd5SDFpVnpqeUJj?=
+ =?utf-8?B?WGZ2KzhRUWR6dEVjSERsdE15TUxGcC9WTzMydTA5Wnhkb1BFSTA2YWpVWTcz?=
+ =?utf-8?B?OGNTVGIyWDFydUhiQjBwdGVnUHp2Z2F1a2FOaEMwK1Vob1l6aG14ZWRSN0d3?=
+ =?utf-8?B?K0VUY0tCWGYyMjY0WjFTeVdRYXpDUjBmaTZUUUlhekM5aUkxUEF6dGlKTjVZ?=
+ =?utf-8?B?OWora0tEc1JoVVpGcURTNGRQams4bjJpVm52OHNSTFdRdHo3aUtvRE12WUhh?=
+ =?utf-8?Q?rrilYhmnapWguEQE=3D?=
+X-Exchange-RoutingPolicyChecked: R9aV0E7yAV7f3Tkt++yblfcTZWO6emfZVWUVShjPsSvvqRA2mej7FLQgLP4i4ze8ROGBbZ+miJ12MxhFHKvyITYB3ZYk0ofEFZs++0p3JJ+Btky6LUxDLyRuaGsRuOIkk+7zzdI0HeHc2ShnHZQZ9Y+0RMiFsooef6f8Bm4jPkMjpPDG5QU4GBxrAh2vZTyjBQnD912weDicVkIhGMb1O3RI4Rk6PojOzW4WLyrZhy1oQnR+sWqgHeRAOLpLUUwL0fivX51XtCrKANvjwwCCp8X6yi87sM/33cnhWQGDht6EFtFPSmZck4LsNTKmoxam2WY8rx7XOO2mFVbPOwtaKA==
+X-MS-Exchange-CrossTenant-Network-Message-Id: bc06ab0c-bab4-42b7-affa-08df237b6a31
 X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Oct 2026 06:58:57.1886
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Oct 2026 07:28:28.3139
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: KD9zherAWptk0rPSXJkKollhY6lEpxXk61zQamlptuTdIVgYI3zpk8XrNv3eTeHeLZpQGGpjzIILVmIfYXg3VA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL1PR11MB5253
+X-MS-Exchange-CrossTenant-UserPrincipalName: TNe3uYjSxWr8R73wvFdju7dR5jeN8PtJhVo/UTuqdGy/+yjZsnvAY/oOb/Z3gOTiauSoBZW5Q9Erf2ZaJfr9kw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH3PR11MB8137
 X-OriginatorOrg: intel.com
 
-On 30/09/2026 13:32, Changhuang Liang wrote:
-> Add support for the DWCMSHC controller found on the StarFive JHB100
-> SoC.
+On 01/10/2026 18:39, Ian Ray wrote:
+> On Wed, Sep 30, 2026 at 10:00:47PM +0300, Adrian Hunter wrote:
+>> On 29/09/2026 16:06, Ulf Hansson wrote:
+>>> + Adrian
+>>>
+>>> On Sat, Sep 26, 2026 at 2:29 PM Ian Ray <ian.ray@gehealthcare.com> wrote:
+>>>>
+>>>> The host controller driver type value used by the MMC core [1] _mostly_
+>>>> overlaps with the eMMC device I/O driver strength value [2] as shown in
+>>>> the table below; however, there is _no_ host mapping for eMMC value 4.
+>>>
+>>> I think the mapping exists only because that is what the SD spec
+>>> provided when this was introduced.
+>>>
+>>> We can certainly add something that corresponds to value 4 from the
+>>> eMMC spec as well, to make this complete.
+>>>
+>>>>
+>>>>   host value/type   | eMMC value | nominal impedance | strength
+>>>>   ------------------+------------+-------------------+---------
+>>>>   0 / Type B        | 0          | 50 Ohm            | x1
+>>>>   1 / Type A        | 1          | 33 Ohm            | x1.5
+>>>>   2 / Type C        | 2          | 66 Ohm            | x0.75
+>>>>   3 / Type D        | 3          | 100 Ohm           | x0.5
+>>>>   (none)            | 4          | 40 Ohm            | x1.2
+>>>>
+>>>> [1] MMC_SET_DRIVER_TYPE_* in include/linux/mmc/host.h
+>>>>
+>>>> [2] 'fixed-emmc-driver-type', see JESD84-B51 Table 206 and
+>>>>
+>>>>
+>>>> Since commit 5a52c5701a67 ("mmc: core: Fix host controller programming
+>>>> for fixed driver type"), the selected eMMC driver strength is passed
+>>>> directly to mmc_set_driver_type().  For a fixed eMMC driver type of 4
+>>>> this reaches sdhci_set_ios(), which only knows types 0..3 and therefore
+>>>> complains on every ios update:
+>>>>
+>>>>   mmc2: invalid driver type, default to driver type B
+>>>
+>>> Perhaps the print above from sdhci_set_ios() is simply a bit
+>>> misleading. For example, it looks like arasan_select_phy_clock()
+>>> actually uses the value in ios.drv_type as is.
+>>>
+>>> To me, it looks like the problem is that mmc_select_drive_strength()
+>>> doesn't really do its job correctly, as it should help us to figure
+>>> out what is supported by the card *and* by the host, so we can request
+>>> a proper driver type when calling the ->set_ios() callback.
+>>
+>> mmc_select_drive_strength() returns the card value directly and
+>> the host value in *drv_type.
+>>
+>> fixed-emmc-driver-type as described by
+>> Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+>> doesn't mention the host controller, and the original commits
+>> 6186d06c519e2 "mmc: parse new binding for eMMC fixed driver type"
+>> be17f1ce8572d "mmc: core: properly init drv_type" seemingly
+>> deliberately left it alone.
+>>
+>> 5a52c5701a67d "mmc: core: Fix host controller programming for
+>> fixed driver type" introduces a new policy: fixed-emmc-driver-type
+>> is a host controller setting also.
+>>
+>> If that was done by mmc_select_drive_strength(), it would look
+>> something like below ( note it no longer allows fixed_drv_type to override
+>> ->select_drive_strength() , and fixed-emmc-driver-type will then hit
+>> any nonremovable SD or SDIO ):
+>>
+>> int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
+>>                               int card_drv_type, int *drv_type)
+>> {
+>>         struct mmc_host *host = card->host;
+>>         int fixed_drv_type = host->fixed_drv_type;
+>>         int host_drv_type = SD_DRIVER_TYPE_B;
+>>
+>>         *drv_type = 0;
+>>
+>>         if (!host->ops->select_drive_strength) {
+>>                 if (fixed_drv_type >= 0 &&
+>>                     (card_drv_type & mmc_driver_type_mask(fixed_drv_type))) {
+>>                         *drv_type = fixed_drv_type;
+>>                         return fixed_drv_type;
+>>                 }
+>>                 return 0;
+>>         }
+>>
+>>         /* Use SD definition of driver strength for hosts */
+>>         if (host->caps & MMC_CAP_DRIVER_TYPE_A)
+>>                 host_drv_type |= SD_DRIVER_TYPE_A;
+>>
+>>         if (host->caps & MMC_CAP_DRIVER_TYPE_C)
+>>                 host_drv_type |= SD_DRIVER_TYPE_C;
+>>
+>>         if (host->caps & MMC_CAP_DRIVER_TYPE_D)
+>>                 host_drv_type |= SD_DRIVER_TYPE_D;
+>>
+>>         /*
+>>          * The drive strength that the hardware can support
+>>          * depends on the board design.  Pass the appropriate
+>>          * information and let the hardware specific code
+>>          * return what is possible given the options
+>>          */
+>>         return host->ops->select_drive_strength(card, max_dtr,
+>>                                                 host_drv_type,
+>>                                                 card_drv_type,
+>>                                                 drv_type);
+>> }
+>>
+>> and:
+>>
+>> static void mmc_select_driver_type(struct mmc_card *card)
+>> {
+>>         int card_drv_type, drive_strength, drv_type = 0;
+>>
+>>         card_drv_type = card->ext_csd.raw_driver_strength |
+>>                         mmc_driver_type_mask(0);
+>>
+>>         drive_strength = mmc_select_drive_strength(card,
+>>                                                    card->ext_csd.hs200_max_dtr,
+>>                                                    card_drv_type, &drv_type);
+>>
+>>         card->drive_strength = drive_strength;
+>>
+>>         if (drv_type)
+>>                 mmc_set_driver_type(card->host, drv_type);
+>> }
+>>
+>> But that doesn't help with drivers where the controller does
+>> do not support the value passed by fixed-emmc-driver-type even
+>> though the card does.  mmc_select_drive_strength() has no way
+>> of knowing that.  The ->select_drive_strength() callback
+>> allows selecting different values. fixed-emmc-driver-type is
+>> one value.
+>>
+>> The warning in sdhci.c seems correct.  SDHCI is an SD standard,
+>> so doesn't define value 4 (and only has 2 bits for the field).
+>> The selected driver strength is not being programmed - deserves
+>> a warning.
+>>
+>> Perhaps if the affected driver implements
+>> ->select_drive_strength():
+>>
+>> static int ???_select_drive_strength(struct mmc_card *card,
+>>                                      unsigned int max_dtr, int host_drv,
+>>                                      int card_drv, int *host_driver_strength)
+>> {
+>>         struct mmc_host *host = card->host;
+>>         int fixed_drv_type = host->fixed_drv_type;
+>>
+>>         if (fixed_drv_type >= 0 &&
+>>             (card_drv & mmc_driver_type_mask(fixed_drv_type))) {
+>>                 if (fixed_drv_type == 4)
+>>                         *drv_type = MMC_SET_DRIVER_TYPE_B;
+>>                 else
+>>                         *drv_type = fixed_drv_type;
+>>                 return fixed_drv_type;
+>>         }
+>>         return 0;
+>> }
+>>
+>> But that requires the changes to
+>> mmc_select_drive_strength() and mmc_select_driver_type()
+>> above (with its caveats), so that ->select_drive_strength()
+>> overrides fixed-emmc-driver-type.  That would be fine for
+>> drivers/mmc/host/sdhci-pci-core.c, and probably
+>> amd_select_drive_strength(), but it is starting to get
+>> complicated.
+>>
+>> A simpler alternative is for the affected driver to hook
+>> ->set_ios() and fix up the value.
+>>
+>> void ???_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>> {
+>>         if (ios->drv_type == 4)
+>>                 ios->drv_type = MMC_SET_DRIVER_TYPE_B;
+>>
+>>         return sdhci_set_ios(mmc, ios);
+>> }
+>>
+>> And in probe (assuming struct sdhci_host *host):
+>>
+>>         host->mmc_host_ops.set_ios = ???_set_ios;
+>>
 > 
-> The JHB100 CMSHC controller only drives 32 DMA address bits. The higher
-> DMA address bits [35:32] are supplied by the PER1 SYSCON, so the DMA
-> mask is set to 36 bits to describe this hardware capability. Fix these
-> bits to 4, which limits the DMA range to [0x400000000 - 0x4ffffffff].
-> The dma-ranges of the parent bus are expected to restrict DMA to this
-> window, so that any address outside of it fails to map instead of
-> being passed to the hardware.
+> Thank you for the feedback.
 > 
-> The cclk_tx clock must be disabled before sdhci_set_clock() to
-> eliminate glitches, and re-enabled afterwards unless the card clock is
-> turned off, so that cclk_tx stays gated during suspend. The 15us delay
-> after disabling cclk_tx is a JHB100 specific requirement from the SoC
-> simulation. cclk_tx is enabled during probe and disabled in the
-> platform deinit callback, which is invoked from dwcmshc_remove().
+> The "invalid driver type" warning that I originally observed originates
+> in sdhci_set_ios_common() which is shared by all SDHCI hosts (IIUC).
 > 
-> Additionally, clear the PHY_DLLDL_CNFG_R register and re-initialize
-> the PHY when setting UHS signaling, and force 1.8V fixed I/O when the
-> DT specifies a DDR/HS200/HS400 1.8V mode.
-> 
-> Signed-off-by: Changhuang Liang <changhuang.liang@starfivetech.com>
+> Thus any SDHCI host configured with `fixed-emmc-driver-type = <4>` would
+> log that warning.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+The warning is valid.  SDHCI does not support value 4 and doesn't know
+what is a valid alternative or even if there is one.  That is up to the
+driver to sort out.  If other drivers do it the same way, then a
+helper or something could be added.
 
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 169 ++++++++++++++++++++++++++++
->  1 file changed, 169 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 1baa2379c9c3..249055f14162 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -48,6 +48,9 @@
->  #define DWCMSHC_ENHANCED_STROBE		BIT(8)
->  #define DWCMSHC_EMMC_ATCTRL		0x40
->  #define DWCMSHC_AT_STAT			0x44
-> +/* StarFive JHB100 SoC MSHCCS register */
-> +#define DWCMSHC_ARWADDR			GENMASK(3, 0)
-> +#define DWCMSHC_ARWADDR_DEFAULT		4
->  /* Tuning and auto-tuning fields in AT_CTRL_R control register */
->  #define AT_CTRL_AT_EN			BIT(0) /* autotuning is enabled */
->  #define AT_CTRL_CI_SEL			BIT(1) /* interval to drive center phase select */
-> @@ -184,6 +187,7 @@
->  #define PHY_SDCLKDL_DC_INITIAL		0x40 /* initial delay code */
->  #define PHY_SDCLKDL_DC_DEFAULT		0x32 /* default delay code */
->  #define PHY_SDCLKDL_DC_HS400		0x18 /* delay code for HS400 mode */
-> +#define PHY_SDCLKDL_DC_JHB100		0x10 /* delay code for StarFive JHB100 */
->  
->  #define PHY_SMPLDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x20)
->  #define PHY_SMPLDL_CNFG_EXTDLY_EN	BIT(0)
-> @@ -294,6 +298,11 @@ struct k230_priv  {
->  	struct regmap *hi_sys_regmap;
->  };
->  
-> +struct jhb100_priv {
-> +	struct clk *cclk_tx;
-> +	bool cclk_tx_on;
-> +};
-> +
->  #define DWCMSHC_MAX_OTHER_CLKS 3
->  
->  struct dwcmshc_priv {
-> @@ -314,6 +323,7 @@ struct dwcmshc_pltfm_data {
->  	const struct sdhci_pltfm_data pdata;
->  	const struct cqhci_host_ops *cqhci_host_ops;
->  	int (*init)(struct device *dev, struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
-> +	void (*deinit)(struct dwcmshc_priv *dwc_priv);
->  	void (*postinit)(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
->  };
->  
-> @@ -2257,6 +2267,155 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_hpe_gsc_pdata = {
->  	.init = dwcmshc_hpe_gsc_init,
->  };
->  
-> +static int sdhci_jhb100_set_dma_mask(struct sdhci_host *host)
-> +{
-> +	struct mmc_host *mmc = host->mmc;
-> +	struct device *dev = mmc_dev(mmc);
-> +	int ret;
-> +
-> +	/*
-> +	 * The StarFive JHB100's CMSHC controller only drives 32 DMA address
-> +	 * bits, the higher DMA address bits [35:32] are supplied by the
-> +	 * ARWADDR field in the PER1 SYSCON. The 36-bit mask describes this
-> +	 * hardware capability. As ARWADDR is fixed to 4, the controller can
-> +	 * only reach [0x400000000 - 0x4ffffffff]. The dma-ranges of the
-> +	 * parent bus must restrict DMA to this window, so that any address
-> +	 * outside of it fails to map and is never passed to the hardware.
-> +	 */
-> +	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(36));
-> +	if (ret)
-> +		dev_err(dev, "Failed to set 36-bit DMA mask.\n");
-> +
-> +	return ret;
-> +}
-> +
-> +static void sdhci_jhb100_set_clock(struct sdhci_host *host, unsigned int clock)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
-> +	struct jhb100_priv *priv = dwc_priv->priv;
-> +
-> +	/*
-> +	 * The cclk_tx clock is disabled before sdhci_set_clock(), and then a
-> +	 * 15us delay is required, This delay is determined by SoC simulation
-> +	 * and is a special requirement on JHB100 SoC, mainly used to eliminate
-> +	 * glitches caused by frequency switching.
-> +	 */
-> +	if (priv->cclk_tx_on) {
-> +		clk_disable_unprepare(priv->cclk_tx);
-> +		priv->cclk_tx_on = false;
-> +		fsleep(15);
-> +	}
-> +
-> +	sdhci_set_clock(host, clock);
-> +
-> +	/* keep cclk_tx gated while the card clock is off, e.g. during suspend */
-> +	if (!clock)
-> +		return;
-> +
-> +	if (clk_prepare_enable(priv->cclk_tx))
-> +		dev_err(mmc_dev(host->mmc), "failed to re-enable cclk_tx\n");
-> +	else
-> +		priv->cclk_tx_on = true;
-> +}
-> +
-> +static void sdhci_jhb100_set_uhs_signaling(struct sdhci_host *host,
-> +					   unsigned int timing)
-> +{
-> +	dwcmshc_set_uhs_signaling(host, timing);
-> +	sdhci_writeb(host, 0, PHY_DLLDL_CNFG_R);
-> +	th1520_sdhci_set_phy(host);
-> +}
-> +
-> +static const struct sdhci_ops starfive_jhb100_ops = {
-> +	.set_dma_mask		= sdhci_jhb100_set_dma_mask,
-> +	.set_clock		= sdhci_jhb100_set_clock,
-> +	.set_uhs_signaling	= sdhci_jhb100_set_uhs_signaling,
-> +	.set_bus_width		= sdhci_set_bus_width,
-> +	.reset			= dwcmshc_reset,
-> +	.get_max_clock		= dwcmshc_get_max_clock,
-> +	.adma_write_desc	= dwcmshc_adma_write_desc,
-> +	.irq			= dwcmshc_cqe_irq_handler,
-> +	.voltage_switch		= dwcmshc_phy_init,
-> +	.platform_execute_tuning = th1520_execute_tuning,
-> +};
-> +
-> +static int dwcmshc_starfive_jhb100_init(struct device *dev, struct sdhci_host *host,
-> +					struct dwcmshc_priv *dwc_priv)
-> +{
-> +	struct reset_control *reset;
-> +	struct jhb100_priv *priv;
-> +	unsigned int reg_offset;
-> +	struct regmap *syscon;
-> +	int ret;
-> +
-> +	priv = devm_kzalloc(dev, sizeof(struct jhb100_priv), GFP_KERNEL);
-> +	if (!priv)
-> +		return -ENOMEM;
-> +
-> +	syscon = syscon_regmap_lookup_by_phandle_args(dev->of_node,
-> +						      "starfive,jhb100-per1-syscon",
-> +						      1, &reg_offset);
-> +	if (IS_ERR(syscon))
-> +		return PTR_ERR(syscon);
-> +
-> +	/* configure the higher DMA address bits [35:32] */
-> +	ret = regmap_update_bits(syscon, reg_offset, DWCMSHC_ARWADDR,
-> +				 DWCMSHC_ARWADDR_DEFAULT);
-> +	if (ret)
-> +		return ret;
-> +
-> +	reset = devm_reset_control_get_exclusive_deasserted(mmc_dev(host->mmc), NULL);
-> +	if (IS_ERR(reset))
-> +		return dev_err_probe(mmc_dev(host->mmc), PTR_ERR(reset),
-> +				     "Failed to get&deassert reset control\n");
-> +
-> +	priv->cclk_tx = devm_clk_get(dev, "cclk_tx");
-> +	if (IS_ERR(priv->cclk_tx))
-> +		return dev_err_probe(dev, PTR_ERR(priv->cclk_tx),
-> +				     "Failed to get cclk_tx clock\n");
-> +
-> +	ret = clk_prepare_enable(priv->cclk_tx);
-> +	if (ret)
-> +		return dev_err_probe(dev, ret, "Failed to enable cclk_tx clock\n");
-> +
-> +	priv->cclk_tx_on = true;
-> +
-> +	if (host->mmc->caps & MMC_CAP_1_8V_DDR ||
-> +	    host->mmc->caps2 & (MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR))
-> +		dwc_priv->flags |= FLAG_IO_FIXED_1V8;
-> +	else
-> +		dwc_priv->flags &= ~FLAG_IO_FIXED_1V8;
-> +
-> +	dwc_priv->delay_line = PHY_SDCLKDL_DC_JHB100;
-> +	dwc_priv->priv = priv;
-> +
-> +	if (dwc_priv->flags & FLAG_IO_FIXED_1V8) {
-> +		host->flags &= ~SDHCI_SIGNALING_330;
-> +		host->flags |=  SDHCI_SIGNALING_180;
-> +	}
-> +
-> +	return 0;
-> +}
-> +
-> +static void dwcmshc_starfive_jhb100_deinit(struct dwcmshc_priv *dwc_priv)
-> +{
-> +	struct jhb100_priv *priv = dwc_priv->priv;
-> +
-> +	if (priv->cclk_tx_on)
-> +		clk_disable_unprepare(priv->cclk_tx);
-> +}
-> +
-> +static const struct dwcmshc_pltfm_data sdhci_dwcmshc_jhb100_pdata = {
-> +	.pdata = {
-> +		.ops = &starfive_jhb100_ops,
-> +		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> +		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +	},
-> +	.init = dwcmshc_starfive_jhb100_init,
-> +	.deinit = dwcmshc_starfive_jhb100_deinit,
-> +};
-> +
->  static const struct cqhci_host_ops dwcmshc_cqhci_ops = {
->  	.enable		= dwcmshc_sdhci_cqe_enable,
->  	.disable	= sdhci_cqe_disable,
-> @@ -2377,6 +2536,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
->  		.compatible = "hpe,gsc-dwcmshc",
->  		.data = &sdhci_dwcmshc_hpe_gsc_pdata,
->  	},
-> +	{
-> +		.compatible = "starfive,jhb100-dwcmshc",
-> +		.data = &sdhci_dwcmshc_jhb100_pdata,
-> +	},
->  	{},
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
-> @@ -2503,6 +2666,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  err_rpm:
->  	pm_runtime_disable(dev);
->  	pm_runtime_put_noidle(dev);
-> +	if (pltfm_data->deinit)
-> +		pltfm_data->deinit(priv);
->  err_bus_clk:
->  	clk_disable_unprepare(priv->bus_clk);
->  err_clk:
-> @@ -2527,6 +2692,7 @@ static void dwcmshc_remove(struct platform_device *pdev)
->  	struct sdhci_host *host = platform_get_drvdata(pdev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	const struct dwcmshc_pltfm_data *pltfm_data = priv->dwcmshc_pdata;
->  
->  	pm_runtime_get_sync(&pdev->dev);
->  	pm_runtime_disable(&pdev->dev);
-> @@ -2534,6 +2700,9 @@ static void dwcmshc_remove(struct platform_device *pdev)
->  
->  	sdhci_remove_host(host, 0);
->  
-> +	if (pltfm_data->deinit)
-> +		pltfm_data->deinit(priv);
-> +
->  	dwcmshc_disable_card_clk(host);
->  
->  	clk_disable_unprepare(pltfm_host->clk);
+> The affected driver for my scenario is sdhci-esdhc-imx.c, and the
+> proposed change (below) suppresses the warning.
+> 
+> But I am hesitant to open-code the same fixup in every SDHCI driver.
+> And I am unsure whether this belongs per-driver, or whether the right
+> fix is in the core / or to the warning itself.
+> 
+> Comments welcome!
+> 
+> drivers/mmc/host/sdhci-esdhc-imx.c
+> 
+> ```
+> static void sdhci_esdhc_imx_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> {
+>        /*
+>         * A drv_type of 4 reaches this callback only via the eMMC
+>         * 'fixed-emmc-driver-type' path: it is the eMMC I/O driver strength
+>         * value 4 (40 Ohm, see JESD84-B51 Table 206), which has no equivalent
+>         * host driver type in the SD standard that SDHCI implements (only
+>         * types B/A/C/D are defined).  Map it to the default Type B here to
+>         * avoid an "invalid driver type" warning from sdhci_set_ios().  The
+
+The objective is not to avoid the warning.  The warning is valid.  The
+objective is to provide a valid value.  4 is not.
+
+If the actual value doesn't matter here at all, then say so and set
+it to MMC_SET_DRIVER_TYPE_B always.
+
+>         * card's HS_TIMING field is programmed separately from
+>         * card->drive_strength and is unaffected.
+>         */
+>        if (ios->drv_type == 4)
+>                ios->drv_type = MMC_SET_DRIVER_TYPE_B;
+> 
+>        sdhci_set_ios(mmc, ios);
+> }
+> 
+> static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+> {
+> ...
+>                /*
+>                 * Support fix up of eMMC driver types which have no SDHCI
+>                 * host driver type equivalent.
+>                 */
+>                host->mmc_host_ops.set_ios = sdhci_esdhc_imx_set_ios;
+> 
+> ```
+> 
+>>
+>>>
+>>>>
+>>>> The mmc card itself is still programmed correctly (the HS_TIMING driver
+>>>> strength field is set from card->drive_strength independently), so this
+>>>> is a spurious, repeated warning for a valid, documented configuration.
+>>>>
+>>>> Change to only program the host when the eMMC driver type value maps to
+>>>> a valid host driver type.
+>>>>
+>>>> Tested on i.MX8MP (usdhc3, eMMC in HS400) with
+>>>> `fixed-emmc-driver-type = <4>`: the warning is no longer logged and the
+>>>> HS_TIMING register contains 0x43 as expected.
+>>>>
+>>>> Fixes: 5a52c5701a67 ("mmc: core: Fix host controller programming for fixed driver type")
+>>>> Cc: stable@vger.kernel.org
+>>>> Signed-off-by: Ian Ray <ian.ray@gehealthcare.com>
+>>>
+>>> I have looped in Adrian, to get his opinion on this.
+>>>
+>>> Kind regards
+>>> Uffe
+>>>
+>>>> ---
+>>>>  drivers/mmc/core/mmc.c | 8 +++++---
+>>>>  1 file changed, 5 insertions(+), 3 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>>> index 05444ecf3909..ff5d4b805998 100644
+>>>> --- a/drivers/mmc/core/mmc.c
+>>>> +++ b/drivers/mmc/core/mmc.c
+>>>> @@ -1371,9 +1371,11 @@ static void mmc_select_driver_type(struct mmc_card *card)
+>>>>
+>>>>         card->drive_strength = drive_strength;
+>>>>
+>>>> -       if (fixed_drv_type >= 0 && drive_strength)
+>>>> -               mmc_set_driver_type(card->host, drive_strength);
+>>>> -       else if (drv_type)
+>>>> +       if (fixed_drv_type >= 0 && drive_strength) {
+>>>> +               /* eMMC driver types >= 4 have no host controller equivalent. */
+>>>> +               if (drive_strength <= MMC_SET_DRIVER_TYPE_D)
+>>>> +                       mmc_set_driver_type(card->host, drive_strength);
+>>>> +       } else if (drv_type)
+>>>>                 mmc_set_driver_type(card->host, drv_type);
+>>>>  }
+>>>>
+>>>> --
+>>>> 2.49.0
+>>>>
+>>
 
