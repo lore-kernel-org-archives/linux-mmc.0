@@ -1,221 +1,204 @@
-Received: from mail-wm1-f45.google.com (mail-wm1-f45.google.com [209.85.128.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from AS8PR04CU009.outbound.protection.outlook.com (mail-westeuropeazon11011014.outbound.protection.outlook.com [52.101.70.14])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24AE241DE0D
-	for <linux-mmc@vger.kernel.org>; Thu,  8 Oct 2026 08:30:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.45
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791448243; cv=none; b=DjijO/kC//onDXDatYfaVIR9iad02szTApU5Ir143pPcJ4aAuF6cdueFmWsVT46gr4UDpSGSauq9Eks5Dj1EbENST5UyeZ2pUu2SpoZjPYmTACVJDFIvsxeJt/oyTBOOUYKsD0o7oNDh5Rx3qJcAMDnP5nYt7nbCFt1pcYcV/qI=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791448243; c=relaxed/simple;
-	bh=JkHgF9flfmEmpwopaAwoC/sgDgVuxCOuTX1ptM5bC5M=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=BFy5HnE+X6QrMc2wPab3JDS+oAFuBqWRKrae70WsjCXer8lsmDlMhbv0pbJBMqjEMqmVhVn46E4rHlQX4WNyX63Dt1sbjKDGwcQEFtFygTGmU/KLRcBVmXt7dgDI5wIdFzizcIGWdvv+xNeI2Yu8P/qKRw3MFwjG2+uZSlDz3MI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xmVt3rwn; arc=none smtp.client-ip=209.85.128.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E754C3F12EF;
+	Thu,  8 Oct 2026 09:39:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.70.14
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1791452378; cv=fail; b=GeJg7e1qnvovzo2RNV4jcOQnHiwy+IetalUj+sBP8jmrnTH/M1HpwqHI9I/jPsk75addJ7zQKzdtI+z9MXSllaLbfw7RyQhptmrVWKD1YMZf+UioaDQO0menDh7liKhNSYlv+twLh5f3GItOHRkYMUTzPSS4eKsCQiFHOr7z4uM=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1791452378; c=relaxed/simple;
+	bh=sklQzSvp8MkX5EnaZMFRqbdlCdzUF4MCw37B0JJ/n/0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
+	 Content-Disposition:In-Reply-To:MIME-Version; b=XMAH/Lqch0npJra69i0B01pdREIvdx5PzmnW80Q7dlemcTBeKZ5S4bssPoMaF0AkgzPNA29bhlerLvsxmUjWUSv/Bddq6KWtVtdQHakWN8fcwYJLEbf/ifPdPJLEiXa2iLj5RQRA2kLvX+Pd/pFKBbrf/kf3rWKsRg4LGD7xlWQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com; spf=pass smtp.mailfrom=oss.nxp.com; dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b=X1maxc2a; arc=fail smtp.client-ip=52.101.70.14
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xmVt3rwn"
-Received: by mail-wm1-f45.google.com with SMTP id 5b1f17b1804b1-4a01933b584so24627415e9.0
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Oct 2026 01:30:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1791448239; x=1792053039; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:organization
-         :autocrypt:content-language:references:cc:to:subject:reply-to:from
-         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=K52pgwEsFh/s2byahqoHEGKJhKcLRQ+lmV8r0ELRlTc=;
-        b=xmVt3rwnwbezKaKyaG6wWQj6Ep8m7OvIKR9YPnt3jQrKMnmme5/nnd0eQHuKopXzqo
-         nZN7DvhDrmQcONJ1lo7A3uYHryEF46yYo2I7X3M5mTTc0NTuIehMk1uEVoHTbTIwuJcT
-         uAu3P/KAY16FbJKvqQC8DNI0590v1wHvi8HEF/jkwWY01GzmSlIXYwhu765YUzWS+QB8
-         CRt99+qEIJ2yn2NQGzILHV6zJ9t2feiKvaJK81yYNobFfOv3bsry4uxEb7JjDkbYlWhH
-         HX+tGPrM1e0ssEGSvxfY/C41aCLyMQZtwyCSK81ByB1YqtJJ7v3vlJB1D2sWEghScgl4
-         BRcw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791448239; x=1792053039;
-        h=content-transfer-encoding:content-type:in-reply-to:organization
-         :autocrypt:content-language:references:cc:to:subject:reply-to:from
-         :user-agent:mime-version:date:message-id:x-gm-gg:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=K52pgwEsFh/s2byahqoHEGKJhKcLRQ+lmV8r0ELRlTc=;
-        b=bvLzC8EyNLjwSmrEriDizQYph2mbdcCLKmsujrhVQi6Vh6ZhKC0MLFOSkupza5I5qh
-         27osRer3D/q/HuIzQFKKT0mpjn1F00btx8kVu9vNhASsuindSOoLZk9YuFSFdZAAYesP
-         ZavGAJpw24OnfjWOFdF/itI+fPKuzTrpvrtXA9CeJnoqsXGnJ2EQBe2OFeQnxoQWDAdL
-         lpE6Mjx6EDOcrTOUwNqXmlMhywfa9ZEkBEc2KyZRatL6H+ntqiW0mqiRjHK2lZlan5HL
-         IMWMNbr4Y4z5gBD5X4v/w5aOpsKdagrumz4cyEyZp32lT9TIrBo7aNmS5WtEZi5LQB0O
-         ub/w==
-X-Forwarded-Encrypted: i=1; AKwUvBwZkRpfWYcM3FbTwutbp8qEEL/UM4BrgL/oNBxiYqww29ja5YVSbvls30GWsBHUtv/jra8vlonBg7c=@vger.kernel.org
-X-Gm-Message-State: AFuF++ldW4TOu/JfEAIe4G1mvTmbbuP4Luap7Bi1DBfT5qOV5Pb6/QLu
-	08RsbhdjpA73L6h/NoCp5pmOHQJMzDJ5BL8BdD+XN2+aGFXH+iWndxLNW7YnVlN5jzMqMS0frJ3
-	zeAkptkMIJA==
-X-Gm-Gg: AYBFou0bAxRDMv7pCC8YtpwgkkOI9Piu7AUQz51Rxnlk13/s/adNFgvzggvLkwTKMlI
-	dVfSmICx/eG63LiWUKNrIGB0TaApHA77BRclX0smI7FU2vxU8C5pTPFjAVhkJMJfN4zCEET0wFt
-	V7nPiP44CbFcTEQF+wxXasco5qaN3zSbTy7iyRy8vf4vP05Gnvvpp9RkgvoAA0r74ktFW7tb+DX
-	FyyzbS3lNCig3JbLx3ONr8gNFnmZs5+tf+43a1Gpp86NzMKX5pIyf8zQ2SWSrG8A8XA5oop3Mw3
-	un5Sl12nALe/RMk3yJldRJjswnDcl22e4jnfL1sei0uRia/nS4BhekzAS0uV/SsWBQJv3ED4XHo
-	uXLR+xSE2wVJktbAudLxKB3imZ/sxFB2YILvjN5n4q7Jw1huP7TYgM9bxLrrlN2+TX9ZKKtAts7
-	MN6RPBvCKY5+MCHMx08I5QfIzJVCg+G+H1m/9qPObJohlZpJgABawVnhjm7bL+wCiidnjXI+xQZ
-	orCEvze7pAyLZtW5UdvuIBn+qVPqJg=
-X-Received: by 2002:a05:600c:190c:b0:4a1:7f8e:6e67 with SMTP id 5b1f17b1804b1-4a1800d6880mr71908935e9.4.1791448239166;
-        Thu, 08 Oct 2026 01:30:39 -0700 (PDT)
-Received: from [192.168.151.76] (90-182-211-1.rcp.o2.cz. [90.182.211.1])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48c71d2d563sm9920967f8f.41.2026.10.08.01.30.38
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 08 Oct 2026 01:30:38 -0700 (PDT)
-Message-ID: <1ade78a4-b1cb-400d-932a-3a7423f9892b@linaro.org>
-Date: Thu, 8 Oct 2026 10:30:37 +0200
+	dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b="X1maxc2a"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=X2yDDRWRTtCEqaJ6PAXRWTSr+36LMD4PbqyDIbCvz6f6k+J0eL5xJLx7dSAcYGDTw3KijxWhhqhEnlHYILquFwPVMIIH69jv6ifbCCmPyocV++rsNiwRbZ+k6ShbONnmtVATdjDQ+tqCRyWMtVehlBSRzHNgmbHU1tzxvWw+yYilxpH53bNIPa0X8m95IiFglkZszGwaSPsyD8OT3MUVLLor5nmGFprvB5MfqFeuR+kP7RuBQiGDL+obAurVd7TUH+X20HihpdMF8g6FFqUfHvKaioT8ly9GQCdsidg+5JxQ6JSX0It54GwuU/H6oj3prrI2cmRW4v/djF33BQNkig==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=4RuQx0aUlQvZQN82Vz5Sp5n43usD+c5t8WWso/Q7tWs=;
+ b=NfFThgIyvtmYhfkDJWGz3or4DpNNmy2Luf2QXmIV5uHEIcdTW3OxM7olBccblVWlMw8f64YFuRe25NR8H5h0UuxZLHP/V8zHpE+Ap0CW76Rpqwv6O4ptUVHWI5hfnHE2jDgjvFnyp/bqBKiOQipMKlsF/23z0h1lXbuyBtEnGGm2NGq9EeDC79mL7vbfNEF7YyLy4/gm4punM+J7yTEIv3Y4JYFhQTHukRWv2HvF+HY8PRn6d0NGRlRyXVfl1qHdNXhlDtu/htflN6uoPA5A+8C7Yv+3gbAD3s0FUNH07M0vZG/9y5ih5GZbblUrRDRo0EiZL82pEycmSRNw190N3Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
+ dkim=pass header.d=oss.nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
+ s=selector1-NXP1-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=4RuQx0aUlQvZQN82Vz5Sp5n43usD+c5t8WWso/Q7tWs=;
+ b=X1maxc2ak7+BWm0WFGU+e0OUkOAjI4EWs24lad83M/S+5zSbulaUR9HSKYlNXCIMSp2uAEiJsBWbnDLRLwJeBoCjld2cE8uo2sR21ZxZ5oHGWV8iY9FB08fL56CSDD/lsFBwjMZPiEIO1Sw2v8HTpFMYnD488R+9H0VoAHsqWaUy0DfLcVLn/QrAR62ImUmoLHqYf7PFTCk0uR3N/TeHLkPxELZ53tDXlO3MGJ774lYlSu86VceE1F9j/e5gVz3hJp2ADU1vRdt3Q9hsP3tFL/4TK0gF2qxh3WAoRADN2VRhVroJwb4TEHC6XjMinF5hvhlQFg6lByqfz8Uw30w7jA==
+Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=oss.nxp.com;
+Received: from PA6PR04MB11909.eurprd04.prod.outlook.com
+ (2603:10a6:102:51c::22) by GV2PR04MB11828.eurprd04.prod.outlook.com
+ (2603:10a6:150:2d0::12) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.496.15; Thu, 8 Oct
+ 2026 09:39:32 +0000
+Received: from PA6PR04MB11909.eurprd04.prod.outlook.com
+ ([fe80::a4b:fa4e:7fe7:e6a2]) by PA6PR04MB11909.eurprd04.prod.outlook.com
+ ([fe80::a4b:fa4e:7fe7:e6a2%7]) with mapi id 15.21.0496.010; Thu, 8 Oct 2026
+ 09:39:30 +0000
+Date: Thu, 8 Oct 2026 17:44:02 +0800
+From: Bough Chen <haibo.chen@oss.nxp.com>
+To: Ian Ray <ian.ray@gehealthcare.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
+	Haibo Chen <haibo.chen@nxp.com>, Ulf Hansson <ulfh@kernel.org>,
+	Frank Li <Frank.Li@nxp.com>, Sascha Hauer <s.hauer@pengutronix.de>,
+	Pengutronix Kernel Team <kernel@pengutronix.de>,
+	Fabio Estevam <festevam@gmail.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Kamal Dasu <kamal.dasu@broadcom.com>, stable@vger.kernel.org,
+	linux-mmc@vger.kernel.org, imx@lists.linux.dev, s32@nxp.com,
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3] mmc: sdhci-esdhc-imx: map unsupported driver type to
+ Type B
+Message-ID: <20261008094402.hnnfdbca3r44gvcj@shlinux89>
+References: <20261007070313.863-1-ian.ray@gehealthcare.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20261007070313.863-1-ian.ray@gehealthcare.com>
+X-ClientProxiedBy: MA5P287CA0162.INDP287.PROD.OUTLOOK.COM
+ (2603:1096:a01:1ba::17) To PA6PR04MB11909.eurprd04.prod.outlook.com
+ (2603:10a6:102:51c::22)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Neil Armstrong <neil.armstrong@linaro.org>
-Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
-Subject: Re: [PATCH] mmc: meson-gx: honour the busy timeout for R1b commands
-To: iav@iav.lv, Ulf Hansson <ulfh@kernel.org>
-Cc: Kevin Hilman <khilman@baylibre.com>, Jerome Brunet
- <jbrunet@baylibre.com>,
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
- linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <20261008-meson-gx-busy-timeout-v1-1-d92f3c68c409@iav.lv>
-Content-Language: en-US, fr
-Autocrypt: addr=neil.armstrong@linaro.org; keydata=
- xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
- GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
- BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
- qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
- 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
- AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
- OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
- Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
- YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
- GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
- UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
- GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
- yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
- QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
- SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
- 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
- Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
- oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
- M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
- 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
- KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
- 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
- QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
-Organization: Linaro
-In-Reply-To: <20261008-meson-gx-busy-timeout-v1-1-d92f3c68c409@iav.lv>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PA6PR04MB11909:EE_|GV2PR04MB11828:EE_
+X-MS-Office365-Filtering-Correlation-Id: aa583b9e-3162-427d-f1f5-08df25200d18
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|1800799024|376014|23010399003|7416014|366016|19092799006|6133799003|18002099003|22082099003|10067099003|11063799006|56012099006;
+X-Microsoft-Antispam-Message-Info:
+	P2qhhHOjobg2y8EkqSDwh9osYBlkG+aZsmXlluj1obEssrPoVEaqBTHzO8QpyJShlnNLjW0tanUm9w8uPqufyES1+j3nfTqMLAllJUlPaGm5jkTFjs80Tt60RAydJ3PFcO1lMTGECnN4+6S9pQFU0qUxyF4dJxut+CVc9npQW4a4k91bjNDm4ROu1ufh/YseHjcsuP5bFmRTLHDvGeYlSJN6ZrNQ8nC/hzGWWG5BnwOsCqW3aCYKYLcNRmStx2XQk9nGuI463TgqtpieMa6qo9yBE8T5/fobZmGCXFv636aEbvERqfCdg5Pb2yoNDN5AUHP0LC+FvD/NDCqB5/LX4L1SuXkooGm4ib82g85kbY+sULscwnt583vPml9dw5w4FTZC7rf/xSYIu8KyV8jQPswAiD/EATXDnsfMNMiQ8MIhKP0yMHnNPpkO/3mVe/sNtPpC1SiWKslEgfqfq2zCEcRM9q85EzywHmvpwZDEdCAVpO1sI1OmtvE1wyj68B89ZgCAvwx2xkgXY6F9b1of634qHqrDXctbfzgJrt7rblbolEsbYzlYCo4aDWPLWpaxo04YL8+ZuEs63tXnCfEEmvBYSysrvWsFxGFTzCOmxBl5132/g3znI2ck/86pXzxYaVLkn0t3FFi/G3spNrB9EYCyeLfOa5zM6llWXa48nZI=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PA6PR04MB11909.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(23010399003)(7416014)(366016)(19092799006)(6133799003)(18002099003)(22082099003)(10067099003)(11063799006)(56012099006);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?vqWFNjSTQ6/E+wpq+HYiJ86cdjgQ1Zio0tih10LVRtk/pMY/49YGEMXNW0hU?=
+ =?us-ascii?Q?sRSscM6v8Nvo6u9Ow7+IURlegZhO340PkzGNW6uGBFAb3LNqwuIDJVxSoeOK?=
+ =?us-ascii?Q?shemlBS4VwcIBKOuYES2l/Vyl8E361Xo+Pw/qhLxr14BGh5GObvGvArwGSU+?=
+ =?us-ascii?Q?WRg6jT1eQyzBHnEy8hciuaSiPqfADl5kyIDtY++deLgyXzF32UdioZh+Lj8S?=
+ =?us-ascii?Q?SPL9rrFV6oXpM7Y1FJsrtnMLNEhhzWnVEO9kISMd38NtQByfSUaEO6NBiaq1?=
+ =?us-ascii?Q?BzbrPbexwlyIuEZZ1ydf9BJ63P1TublcUVBXcY940crWTmcbNzC3xC/5bGP4?=
+ =?us-ascii?Q?45sciFaduAbM2NGHux1uBcsfRLVBIIfNB5Sz1gYafvN7ak/DQVLIID6EvEJG?=
+ =?us-ascii?Q?NJd4j16aXPOfybG19/NV1KEe6LLDDNGRqdwcauafGL6uuFQ7LM34IVne7pwm?=
+ =?us-ascii?Q?pbu65z2pBE4nVnIYnVzPWxYWN6hd9tPAiWCaGjGM7MIM7OaVfNS1tgr4NXDV?=
+ =?us-ascii?Q?ZSoSObjWHcG5Hy4/C/bnRy7hT9RyO5soTucyAUANZR7BlduR/kOm1GCB9g9p?=
+ =?us-ascii?Q?+597E8LrnqS/ZifmbVKkVJJ6Z6yiN7oST5Cd8qgxG+japhfxyjG4G/S7legP?=
+ =?us-ascii?Q?9YoAwONbdHHAqWqbvmwLodghUyqrMEWxth0Hu5DfxGWbXbz/469JvRarHWEf?=
+ =?us-ascii?Q?gb06MTW5cWhNc+kIO4wnm0jp8MmdHu8w24RuwuHFkqlsRlLVFSMheN1TLjhn?=
+ =?us-ascii?Q?J269b8Q/GDfHrxHEN76fxY4Lu6OVnoi9ZIR087xqEjgVX3p/aRa414IeqYVK?=
+ =?us-ascii?Q?DaC7IGzibjFFbn7UC+kNtfTqxcaLzxosXX/+S0iIeoz9g6dsCi/BJ5s3NmXm?=
+ =?us-ascii?Q?aPKvTE4+taB9lAmLOpBPr6ue7n3en2i8pb9E0lng8E6+C+5JIv49HSZWdXdy?=
+ =?us-ascii?Q?DyVcikS9tZbkZPWdUAVyqJI8RyACa2JH/ScSlLdGBZYEjIDG8a1JeXPCbJOd?=
+ =?us-ascii?Q?oz86Dh8r3BUH/CJX/t+cFv74AfTFkLt+cfabNHFVf8+XL4Lmzjn3RcLuhHur?=
+ =?us-ascii?Q?SAHHjZ7rXLaZQF2KbLEWmi7oQkjGEDyhpODBrAPFJVpZYBxSqUvY+plfna1F?=
+ =?us-ascii?Q?e9E7yiv7iCrFh0b3XuWBRqMsOQp4uzPEhlWdBia5cyN1MMDmY9BD3J6F2GmP?=
+ =?us-ascii?Q?xRT4mL8p79LnI+NHp+GqwRZ2sJyPBi5FuJs9x+P/McZLM/qWcZmjNDwRCpqW?=
+ =?us-ascii?Q?AkLRf3HOvicRcFK7Yq+SCzrdqwg1X+kDC2mv0Y7ZEBD1nC1hzYlk+pzZdMgM?=
+ =?us-ascii?Q?If8DFf5wzJBOd2YK7g+ZQnRbHRd/DOXccRsW8Lmg/n5NHZ7D0jvEy962ph+L?=
+ =?us-ascii?Q?Qcu+ywD3KLapi0mLeJoBNETrCdvdJbH0keNOoUgKF1+HnyPKs9U3qT3wdKm0?=
+ =?us-ascii?Q?ac6U+x93s6AxZnos1cZ1hHAiBxXrNLcwgr4ZMBTrszT0m1xGtRpIGr7lpJEX?=
+ =?us-ascii?Q?TaricCON61DcPrEFqyMCRPMJrXpbsTtAK780Bc5qLbw6pamV10bIPJQyfKVE?=
+ =?us-ascii?Q?m6twotv3Gnd36oOyLlB+nuJmFAf8AUzMR6edTziV779Wr8mThzTto1/JpMP7?=
+ =?us-ascii?Q?Mz0MCl02y52U5p1EUS6CjjVso7kGoE2e1eeVT7c1Ep9THhZdZyFGePKlNMOL?=
+ =?us-ascii?Q?vLrK3s+lTzAKxkWkowdrRNiCr2Z/9O2sWMQKWlsjG6HJgpuXexjPOVVkEUa5?=
+ =?us-ascii?Q?EtjdBac7th4TyH6PBRxRnZGd539DHwu8e0aujM3nTSLmowxTZfDD?=
+X-OriginatorOrg: oss.nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: aa583b9e-3162-427d-f1f5-08df25200d18
+X-MS-Exchange-CrossTenant-AuthSource: PA6PR04MB11909.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Oct 2026 09:39:30.2557
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 2DGu2rYgGdI+o5QBDtdv9Yu2WLLu+X8NKDdHMogW0TVP1uvE98CciVbyaMXUove7uoGx1AvS9q1HZp3FeR4ST6qAIDkhpoiw6GjnTO1QL4fB4aJTBP28zzsmvussNaiy
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: GV2PR04MB11828
 
-On 10/8/26 06:26, Igor Velkov via B4 Relay wrote:
-> From: Igor Velkov <iav@iav.lv>
+On Wed, Oct 07, 2026 at 10:03:12AM +0300, Ian Ray wrote:
+> Since commit 5a52c5701a67 ("mmc: core: Fix host controller programming
+> for fixed driver type"), the eMMC driver strength is passed directly to
+> mmc_set_driver_type(), which propagates the value through ios.drv_type
+> all the way to sdhci_set_ios().  For value 4, SDHCI correctly warns:
 > 
-> For a command without data the driver programs a fixed 1024 ms into the
-> CMD_CFG timeout field, and for R1b the controller waits for the card to
-> release busy within that time. The driver does not set max_busy_timeout,
-> so the core sends erase and cache flush as R1b with busy timeouts of up
-> to 60 s and 30 s, and the controller gives up after one second:
+>   mmc2: invalid driver type, default to driver type B
 > 
->    mmc_erase: erase error -110, status 0x0
->    mmc1: cache flush error -110
+> The host driver type has no effect on this controller: esdhc_writew_le()
+> never programs the driver-type field of SDHCI_HOST_CONTROL2.  Hook
+> set_ios() and force drv_type to the always-valid Type B, so that SDHCI
+> never sees an unsupported value.
 > 
-> Program the timeout from cmd->busy_timeout, rounded up to a power of
-> two and kept within 1024..32768 ms, and report 32768 ms, the largest
-> value the field holds, as max_busy_timeout. The core then sizes discards
-> to fit and, for a longer wait, sends R1 and polls for busy itself.
-> sdhci takes its command timeout from cmd->busy_timeout in the same way.
+> Tested on i.MX8MP (usdhc3, eMMC in HS400) with
+> `fixed-emmc-driver-type = <4>`: the warning is gone and the HS_TIMING
+> register contains 0x43 as expected.
 > 
-> Fixes: 51c5d8447bd7 ("MMC: meson: initial support for GX platforms")
-> Assisted-by: LLM
-> Signed-off-by: Igor Velkov <iav@iav.lv>
+
+Reviewed-by: Haibo Chen <haibo.chen@nxp.com>
+
+Regards
+Haibo Chen
+> Fixes: 5a52c5701a67 ("mmc: core: Fix host controller programming for fixed driver type")
+> Link: https://lore.kernel.org/all/20260926122908.866-1-ian.ray@gehealthcare.com/
+> Cc: stable@vger.kernel.org
+> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Ian Ray <ian.ray@gehealthcare.com>
 > ---
-> Tested on ODROID-N2+ (S922X), 256 GB eMMC, btrfs root with discard=async, Armbian builds in docker as load.
-> Without the patch (7.3-rc6): 262 errors in 3 h and 68 in 2.5 h in two runs; the first came 4 and 43 min into the build.
-> With the patch (7.3-rc6): 0 in 2.4 h.
-> On 7.1 with the previous eMMC module, a synthetic test (20 GiB write + fstrim) gave 48 errors without the patch, 0 and 0 with it.
+> v2 -> v3: Force drv_type to Type B unconditionally;
+>           hook set_ios() for all esdhc variants, not only usdhc (since
+>           the driver-type field is ignored in all variants);
+>           reword comments.
 > 
-> The timeout is rounded up to a power of two: the field holds powers of two only, and the timeout is a lower bound.
-> MMC_CAP_WAIT_WHILE_BUSY is not set: I have not checked that the controller waits for busy on every R1b command, HS400 switches included.
-> ---
->   drivers/mmc/host/meson-gx-mmc.c | 22 ++++++++++++++++++++--
->   1 file changed, 20 insertions(+), 2 deletions(-)
+> v1 -> v2: Move fix from mmc core to sdhci-esdhc-imx driver per review
+>           (see "Link:" above); always provide a valid host driver type.
 > 
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 7ef16d7c03cb..8de3eb65ccb0 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -125,6 +125,7 @@
->   #define SD_EMMC_CFG_RESP_TIMEOUT 256 /* in clock cycles */
->   #define SD_EMMC_CMD_TIMEOUT 1024 /* in ms */
->   #define SD_EMMC_CMD_TIMEOUT_DATA 4096 /* in ms */
-> +#define SD_EMMC_CMD_TIMEOUT_MAX 32768 /* in ms, 2^15: limit of CMD_CFG_TIMEOUT_MASK */
-
-This is a cleanup and be sent separately
-
->   #define SD_EMMC_CFG_CMD_GAP 16 /* in clock cycles */
->   #define SD_EMMC_DESC_BUF_LEN PAGE_SIZE
->   
-> @@ -212,7 +213,21 @@ static unsigned int meson_mmc_get_timeout_msecs(struct mmc_data *data)
->   
->   	timeout = roundup_pow_of_two(timeout);
->   
-> -	return min(timeout, 32768U); /* max. 2^15 ms */
-> +	return min_t(unsigned int, timeout, SD_EMMC_CMD_TIMEOUT_MAX);
-> +}
-
-Same here
-
-> +
-> +/* For R1b the controller waits for busy to be released within this timeout. */
-> +static unsigned int meson_mmc_get_cmd_timeout_msecs(struct mmc_command *cmd)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 17 +++++++++++++++++
+>  1 file changed, 17 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 6ab59d3e346f..931e383748a9 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1142,6 +1142,20 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
+>  	}
+>  }
+>  
+> +static void sdhci_esdhc_imx_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 > +{
-> +	unsigned int timeout = cmd->busy_timeout;
+> +	/*
+> +	 * This controller has no driver-type control: esdhc_writew_le()
+> +	 * discards the driver-type field when writing SDHCI_HOST_CONTROL2.
+> +	 * The programmed value is therefore irrelevant, but SDHCI rejects
+> +	 * non-SD values such as 4 (eMMC 40 ohm, from fixed-emmc-driver-type).
+> +	 * Force an always-valid Type B.
+> +	 */
+> +	ios->drv_type = MMC_SET_DRIVER_TYPE_B;
 > +
-> +	if (!timeout)
-> +		return SD_EMMC_CMD_TIMEOUT;
+> +	sdhci_set_ios(mmc, ios);
+> +}
 > +
-> +	timeout = roundup_pow_of_two(timeout);
+>  static void usdhc_init_card(struct mmc_host *mmc, struct mmc_card *card)
+>  {
+>  	struct sdhci_host *host = mmc_priv(mmc);
+> @@ -1952,6 +1966,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>  		host->max_timeout_count = 0xF;
+>  	}
+>  
+> +	/* No SDHCI driver type control */
+> +	host->mmc_host_ops.set_ios = sdhci_esdhc_imx_set_ios;
 > +
-> +	return clamp_t(unsigned int, timeout, SD_EMMC_CMD_TIMEOUT,
-> +		       SD_EMMC_CMD_TIMEOUT_MAX);
->   }
->   
->   static struct mmc_command *meson_mmc_get_next_command(struct mmc_command *cmd)
-> @@ -841,7 +856,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
->   		cmd_data = host->bounce_dma_addr & CMD_DATA_MASK;
->   	} else {
->   		cmd_cfg |= FIELD_PREP(CMD_CFG_TIMEOUT_MASK,
-> -				      ilog2(SD_EMMC_CMD_TIMEOUT));
-> +				      ilog2(meson_mmc_get_cmd_timeout_msecs(cmd)));
->   	}
->   
->   	/* Last descriptor */
-> @@ -1168,6 +1183,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
->   
->   	mmc->caps |= MMC_CAP_CMD23;
->   
-> +	/* The longest busy wait the CMD_CFG timeout field can hold. */
-> +	mmc->max_busy_timeout = SD_EMMC_CMD_TIMEOUT_MAX;
-
-So you seem to fix 2 issues:
-- for timeouts larger than 32768U, we don't wait enough, so ok this should be in a single changeset
-- we don't wait the right time for r1b, so you add meson_mmc_get_cmd_timeout_msecs(), ok
-   so please sent it in a separate change aswell
-
-> +
->   	if (mmc->caps & MMC_CAP_SDIO_IRQ)
->   		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
->   
+>  	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
+>  		sdhci_esdhc_ops.platform_execute_tuning =
+>  					esdhc_executing_tuning;
+> -- 
+> 2.47.3
 > 
-> ---
-> base-commit: fd9af27f6c2319713bb23832066585f8a59a1771
-> change-id: 20261005-meson-gx-busy-timeout-7e8e3fdcb3e3
-> 
-> Best regards,
-
-Thanks,
-Neil
