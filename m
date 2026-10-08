@@ -1,38 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0923639C63E;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08F4F39A05C;
 	Thu,  8 Oct 2026 14:28:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791469687; cv=none; b=qoWG9Rdb5AayVOoQJH9FD01S6AXs3QYoIVm/oQLg+35EMxSYh3QNBkdE1aXoP9b7AQ8mE8ML/Q1GS02Pk+WYkpBl1QOIrMNIJEYN02KTJ/uelyCykKftvlaNQyAb65aRDnJUeJT/EkuGGiUTBWIYsTbyJrU8am8fNUFbxTzpmZo=
+	t=1791469687; cv=none; b=Dgi6rgUIks+/QPkc112b3kxHTNoXz2EhZYcObSFqLf+0Jn0n9dBH4ZMnWejv0z2FctW4qP7K160b8UaRYi45kT3ezNcnj5yxusDGeVCSouASJaDQrE8OBwfgKntkSb/eBj8sWBQ8as2BmoDUL6TIxEOGSk2yKz8DNqMyvjFYYb0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1791469687; c=relaxed/simple;
-	bh=XXv4CjnLsE/u9Me7mkTlw60K2Njx2d7DLdS4d2h8YEk=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=j07q7pzoQDs1B22wJSct7KlhCDwTX/2ZRpojDicJCCFyNYezFs2kS6uiWuEY76tqmckmV/uGUaR57ORnOygnY2DpvKBgovvjpM9BnrVXNqPfnzJhD+aG26vbmNZuCe45D3WZD5gVOSY1hO0LGfpzwVIgQcmZW8GXuIUOU2GHyFQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SgT3jURz; arc=none smtp.client-ip=10.30.226.201
+	bh=aob2hi/UbUSMrfIwQ3spIcIL9xjNoG64Kt0jPa/1Hdg=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=WTTxtlqy0UMZq5hLTmH/yxpwwk+7BB1SRAqZsEghwgGNw4AuA99306cmOg/EAf1rLv0S02MUF78aIJsGvP9eNRgPL9Vu1T6yxQTml8XM53Ip8gQAdme/73US6qctogf3JRYBi3wJxzIbS8LmB1264w9D0HDH6QLsUGMXj08RQz4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Q+RqM+Nb; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SgT3jURz"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 915ABC2BCC7;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Q+RqM+Nb"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id AA84CC2BCFD;
 	Thu,  8 Oct 2026 14:28:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1791469686;
-	bh=XXv4CjnLsE/u9Me7mkTlw60K2Njx2d7DLdS4d2h8YEk=;
-	h=From:Subject:Date:To:Cc:Reply-To:From;
-	b=SgT3jURzsYNCGAipz7JemHk4tf1QzJCY8PchqTU8nTKDtWI0K2+Y2wQXJ8CPIlw3C
-	 GJ5RYU6ICWKk25lvkJ9crI3rrKA+VRQwGHVH4Ak+MjUWqoZAqjzOrXfhibPh5lT02c
-	 kiEyNFxtRcGwwuY42O4ZYvCMht8pAyvlmJ5GPaYDlNMkQ2HD0WJ86yg+olrMRQoqM7
-	 ShnoAypMG+3aex4EnV6qq4WrpEjoleBAKBJ21xk0Y45nuGVJz0sw3uQY7T1rahFX8j
-	 Dn41CAg3hDtf4Cs2KSsDJTm4fJLCUyLlkwU9Brq2oBD39BzjW7A2tUq9iHEdjOTCK1
-	 ih4H+uTqQemIQ==
+	bh=aob2hi/UbUSMrfIwQ3spIcIL9xjNoG64Kt0jPa/1Hdg=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
+	b=Q+RqM+NbUEJxveSOoTdzCUdYh2kgAkG4Snqm3rLEuZ4ZrPVh6eVjt9BnEC4lUH6vb
+	 z5bDMtbcWxoOwDZ7QZO5IPKBW6EwUqvCamLsJPUzirIuTaXFnePUnyg40961abxBhI
+	 sEIvf66Sbw/Nv5iG5c92rLB8wANrj9pk4qA6cwE+mqVmm/stlYd3jbI4BiSyY3LT/o
+	 Y+nG7txJXvT85iIfB2NxgmnVn9W2mGiksO7ftL2ETE5sJXv3Uo7xveJ7jObGgexZPu
+	 Xt9sCRDZzk34v+TUvdsX6M4L/wKKOfizwYrXIt8VXMrwoHpFJthnB25mzFtHBlk3kG
+	 PuKd6vZWgovcA==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5CDBCCA600B;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AFC8CA600D;
 	Thu,  8 Oct 2026 14:28:06 +0000 (UTC)
 From: Igor Velkov via B4 Relay <devnull+iav.iav.lv@kernel.org>
-Subject: [PATCH v2 0/3] mmc: meson-gx: honour the busy timeout for R1b
+Date: Thu, 08 Oct 2026 14:28:00 +0000
+Subject: [PATCH v2 2/3] mmc: meson-gx: honour the busy timeout for R1b
  commands
-Date: Thu, 08 Oct 2026 14:27:58 +0000
-Message-Id: <20261008-meson-gx-busy-timeout-v2-0-8bde1adfb5b4@iav.lv>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -41,10 +41,9 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAG6ox2oC/3WNyw6CMBBFf4XM2jF9KIIr/8OwgDLAJEJNWxoI4
- d+tJC5dnpPcczfw5Jg83LMNHEX2bKcE6pSBGeqpJ+Q2MSihcinEFUfydsJ+wWb2KwYeyc4Bb1S
- Q7lrTaNKQtm9HHS9H91klHtgH69bjJsqv/RWLP8UoUWJbqk6bvDAXUT64judXhGrf9w+yu03Zt
- wAAAA==
+Message-Id: <20261008-meson-gx-busy-timeout-v2-2-8bde1adfb5b4@iav.lv>
+References: <20261008-meson-gx-busy-timeout-v2-0-8bde1adfb5b4@iav.lv>
+In-Reply-To: <20261008-meson-gx-busy-timeout-v2-0-8bde1adfb5b4@iav.lv>
 To: Ulf Hansson <ulfh@kernel.org>
 Cc: Neil Armstrong <neil.armstrong@linaro.org>, 
  Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>, 
@@ -53,56 +52,77 @@ Cc: Neil Armstrong <neil.armstrong@linaro.org>,
  linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
  Igor Velkov <iav@iav.lv>
 X-Mailer: b4 0.13.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1673; i=iav@iav.lv;
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2127; i=iav@iav.lv;
  h=from:subject:message-id;
- bh=XXv4CjnLsE/u9Me7mkTlw60K2Njx2d7DLdS4d2h8YEk=;
- b=owGbwMvMwCVmNH1q96v4SmbG02pJDFnHVxTvt9+wJ/f5porj+RKPPrsVFjXvZSw+YBL0w/Ok2
- u03ycrxHaUsDGJcDLJiiiwTDmncylhy9a+/h/kDmDmsTCBDGLg4BWAi72YzMswt51abeH67T/N7
- lS+/trDK+h1azJ63cMY85zDTuhLXcy8Y/vCWJSkUnQ/PN7U1vM5492uc+/oiaX++W1wr4xO/b79
- mxgYA
+ bh=9xGrDCPi8rJjeIzvAyq5Lt1wlFmJSZrwiazD8/BoI9g=;
+ b=owGbwMvMwCVmNH1q96v4SmbG02pJDFnHV5R0Zt1sTva8kntm1fkyxsgPc/LOLty0zGkma0Z6K
+ O/ty3/vdZSyMIhxMciKKbJMOKRxK2PJ1b/+HuYPYOawMoEMYeDiFICJzDFhZLgwbbrvk6kLdXcu
+ /GMVEry2SHbzsTcqb/PWMjoVPOTcYOXByHDArvTjzrxV37mmtXS3BJ1tEnh88mxp4Ca5GUtObWO
+ zmM4GAA==
 X-Developer-Key: i=iav@iav.lv; a=openpgp;
  fpr=90C228DA68A4D5FD4F4837E03297958BEA5F7903
 X-Endpoint-Received: by B4 Relay for iav@iav.lv/default with auth_id=1060
 X-Original-From: Igor Velkov <iav@iav.lv>
 Reply-To: iav@iav.lv
 
+From: Igor Velkov <iav@iav.lv>
+
 For a command without data the driver programs a fixed 1024 ms into the
-CMD_CFG timeout field and does not tell the core how long the controller
-can wait for busy. Erase and cache flush then fail with -110 on eMMC.
+CMD_CFG timeout field, and for R1b the controller waits for the card to
+release busy within that time. The core sends erase and cache flush as
+R1b with busy timeouts of up to 60 s and 30 s, and the controller gives
+up after one second:
 
-Tested on ODROID-N2+ (S922X), 256 GB eMMC, btrfs root with discard=async,
-Armbian builds in docker as load. Without the patches (7.3-rc6): 262
-errors in 3 h and 68 in 2.5 h in two runs; the first came 4 and 43 min
-into the build. With the patches (7.3-rc6): 0 in 2.4 h. On 7.1 with the
-previous eMMC module a synthetic test (20 GiB write + fstrim) gave 48
-errors without the patches, 0 and 0 with them.
+  mmc_erase: erase error -110, status 0x0
+  mmc1: cache flush error -110
 
-The timeout is rounded up to a power of two: the field holds powers of
-two only, and the timeout is a lower bound. MMC_CAP_WAIT_WHILE_BUSY is
-not set: I have not checked that the controller waits for busy on every
-R1b command, HS400 switches included.
+Program the timeout from cmd->busy_timeout, rounded up to a power of
+two and kept within 1024..32768 ms, the range the field holds. sdhci
+takes its command timeout from cmd->busy_timeout in the same way.
 
+Fixes: 51c5d8447bd7 ("MMC: meson: initial support for GX platforms")
+Assisted-by: LLM
+Signed-off-by: Igor Velkov <iav@iav.lv>
 ---
-Changes in v2:
-- Split into three patches, as Neil asked: name the limit of the
-  timeout field, program the R1b timeout from cmd->busy_timeout, report
-  max_busy_timeout.
-- Link to v1: https://lore.kernel.org/r/20261008-meson-gx-busy-timeout-v1-1-d92f3c68c409@iav.lv
+ drivers/mmc/host/meson-gx-mmc.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
 
----
-Igor Velkov (3):
-      mmc: meson-gx: name the limit of the CMD_CFG timeout field
-      mmc: meson-gx: honour the busy timeout for R1b commands
-      mmc: meson-gx: report the longest busy wait the controller can do
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 06479ba38525..dd7d3d67f029 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -216,6 +216,20 @@ static unsigned int meson_mmc_get_timeout_msecs(struct mmc_data *data)
+ 	return min_t(unsigned int, timeout, SD_EMMC_CMD_TIMEOUT_MAX);
+ }
+ 
++/* For R1b the controller waits for busy to be released within this timeout. */
++static unsigned int meson_mmc_get_cmd_timeout_msecs(struct mmc_command *cmd)
++{
++	unsigned int timeout = cmd->busy_timeout;
++
++	if (!timeout)
++		return SD_EMMC_CMD_TIMEOUT;
++
++	timeout = roundup_pow_of_two(timeout);
++
++	return clamp_t(unsigned int, timeout, SD_EMMC_CMD_TIMEOUT,
++		       SD_EMMC_CMD_TIMEOUT_MAX);
++}
++
+ static struct mmc_command *meson_mmc_get_next_command(struct mmc_command *cmd)
+ {
+ 	if (cmd->opcode == MMC_SET_BLOCK_COUNT && !cmd->error)
+@@ -842,7 +856,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ 		cmd_data = host->bounce_dma_addr & CMD_DATA_MASK;
+ 	} else {
+ 		cmd_cfg |= FIELD_PREP(CMD_CFG_TIMEOUT_MASK,
+-				      ilog2(SD_EMMC_CMD_TIMEOUT));
++				      ilog2(meson_mmc_get_cmd_timeout_msecs(cmd)));
+ 	}
+ 
+ 	/* Last descriptor */
 
- drivers/mmc/host/meson-gx-mmc.c | 22 ++++++++++++++++++++--
- 1 file changed, 20 insertions(+), 2 deletions(-)
----
-base-commit: fd9af27f6c2319713bb23832066585f8a59a1771
-change-id: 20261005-meson-gx-busy-timeout-7e8e3fdcb3e3
-
-Best regards,
 -- 
-Igor Velkov <iav@iav.lv>
+2.43.0
 
 
