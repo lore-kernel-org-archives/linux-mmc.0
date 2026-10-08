@@ -1,144 +1,162 @@
-Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB3572AD3F
-	for <linux-mmc@vger.kernel.org>; Thu,  8 Oct 2026 00:07:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7714833B6EF;
+	Thu,  8 Oct 2026 04:27:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791418063; cv=none; b=VMuTW8ds/sCeOiytNBy0U61M2Kja/mwglm7dGEnRaJ9SlkDaNcqV0wCLh6CrOeCgyzVs8c3ezab1X9bRfwJb2JpTFILVecMpxUEt6FXmDP2AzjQVPdyBPDGzI5kakZyTVTfIfZER7Szhj4ILTEDaiwUcVU5NUle8OMMXuMwFkYE=
+	t=1791433620; cv=none; b=F5o1gJSk2C42s77VMfWMNNDi6W7XkGuGQVPXdDMCLWNIq0B9qnXRf8YjFg4vHuGBI3obHrLFENhtKdUvOMbHC5gfldFKudEkxt+peEe+v6N8Q3Ou0Ok6jLBOvnnDqBbf16L69ae4N+8JBkJdSdRErKy2Zs9Gre6nPC6aedOMuRI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791418063; c=relaxed/simple;
-	bh=izMm3ub5pHWSzU9B5+I9vrWo+LdhgWZ+NZKCaQYUlMA=;
-	h=Content-Type:Mime-Version:Subject:From:In-Reply-To:Date:Cc:
-	 Message-Id:References:To; b=acMZJQBFA7jS6CFMtuFGCUQDltCQmDLnn4a0TakCXBCx6L7gZTuCY29+8SFUXRVhMPsXQOqsE+NpsT7EoitI8NucqGueq0+La9BUoq6AFMP3YTZd/XiE2eTt9vy0UHmxZ21+AFz1Sb6iV4RYHApDhej/ehYWUcZ1WAqSIzrE2cA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=iG57klW+; arc=none smtp.client-ip=209.85.221.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1791433620; c=relaxed/simple;
+	bh=l27bWrfddOJK7P2yJT5xwUQcpylWpGnEOKiwyAdUIkU=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=mk5YZm+8BDfHYxKSxD5aaNu1qcf1heteHfSstYXj3E+o9WT44N8R9IPmqIv0bVl7VmS/duCQyfZlF3STKihNAKFLmTHmzJzsa7RsAnr7c7dOJlv14RiZK5/wMxwgck3bgT2DwyBqCeMezhbuwfFIvue1AlfSSPv7MFYbq31WPXk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cCcCRqfv; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iG57klW+"
-Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-486e70f2457so2084495f8f.2
-        for <linux-mmc@vger.kernel.org>; Wed, 07 Oct 2026 17:07:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1791418059; x=1792022859; darn=vger.kernel.org;
-        h=to:references:message-id:content-transfer-encoding:cc:date
-         :in-reply-to:from:subject:mime-version:content-type:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=izMm3ub5pHWSzU9B5+I9vrWo+LdhgWZ+NZKCaQYUlMA=;
-        b=iG57klW+wzwbJiwL9z7I3Vw0Gb4EvVA84WWSsEKl51G/4OL5Ia4iOj2mF18kKc7baJ
-         O9O8d3fTKBxnm4duBRTdAIsxowZnA6lMNGRiFG5RpKITA5k7iPb+YaGkV6QRwZw74Ael
-         yL/3hWfWMjnMVVRyPRTz7jOEN34pEvl7OFRBBcRzOM+lr+GYKaz2Qx9Ul8rjaD5aSOZR
-         9Q4qFrnTBW4mcU6KOvM1gEvLuEvhpaO/beq+PIHhYvuC1ptPJTcHPY5TTbB0CRQkNQeL
-         zzs0qGWHVlYC7jq2o7qxrA0dx2flDaKHfFy51Qbs0HxrWWjFGHr04LBN3DoFtYzzt7gg
-         JVhA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791418059; x=1792022859;
-        h=to:references:message-id:content-transfer-encoding:cc:date
-         :in-reply-to:from:subject:mime-version:content-type:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=izMm3ub5pHWSzU9B5+I9vrWo+LdhgWZ+NZKCaQYUlMA=;
-        b=ZGVz8HHxCrVI83TcZOAba6D8eQoG5lSYRmyNFqD53eLbmQ/QkMRcMV1uWO/on5aSko
-         ZD1qU8skIbWi4TPWW2bZLGrPnRagWn4DykpHphZilzDPpqYsMC9ylNPxQso3kBr79ma3
-         rne0/nBBY6J+MTFZsugmW8UCqCBTWY1AlxrSiahQu70uqq5ON2AatXXVvPKEGWyfNNj4
-         CcuFTND/MTAwbc/g4gteqVIl/0hT0v4ehOauC0rGJPJHJmsGOfnSFOTe+O5haAqRTKlA
-         bMqZ0H7vL8RwdRCHCWXEdIF08hopZbIeh0GmTCtmR+JSAr84bPifB6MG0MhrJASuAmKe
-         pusA==
-X-Forwarded-Encrypted: i=1; AKwUvBxVQnfCFdCC2xeQrtcP5FiZygRJklXDiwvlXT5tQdui2ikv7DPcny7XsQx1lTBEvKOTEJ3wQsxFA68=@vger.kernel.org
-X-Gm-Message-State: AFq9FYKKufPxl1gQWnRT0ai+rrexqCj4sZaoVYSldYR+2UVJ/LW4vtSZ
-	5UL4Yf8+N6xVLJ0ZxD2+z2ksxWhn1/hJZ9ahOY8g+vAEgJHHQk21lqAE
-X-Gm-Gg: AYBFou3q8Q1FjjvBM9cPJrUSO/NmvQtyunB1ckoBxA0gMNlqWzQ2mYnWsAd0nGbXI11
-	9L0/+91pnBH2kGWXU8J3NjE/SS+NySuaq6h0uSvK1poDFi2R1zr/vlYONy6NMDruPx9GpjW8Xfe
-	StcBeN4EZvyD5pquWWrLn2/tF4TqT6A/Hic7RsfXD1UJYN1uVZ567i4/4bdiLer2Df8rHDkiYdL
-	nXpyYRacBf1tSxCmqyIzKO3KzWo7OBPAj8eqCJFvkDlhxAKS1AM0SaPhGrL+t0gEGBcDPA5v2n5
-	LauFnW3gRLhwWLx00DbrKrBewZmUACFsyn3O5uydWTpQi8brgo16VyIWdT5H8S8AUI6ufTpm3fJ
-	DyFsam423ZhOWC1tAjTNl6Mk2YseyfvNRIPXcIlmaOHawJ4Jl5iDSV7MsmhbUqhYBf850UqjmHb
-	NdGFdDYFqdj2lnn2H0/eE4r5EbXd1rLAkJ2F8X3P5YOoWX2vtduXPafFsFDz15QtBfY2A1z6M6l
-	IguQFu+/6fCR2mtrrMt4+bK8R07
-X-Received: by 2002:a05:6000:4818:b0:488:8751:e78e with SMTP id ffacd0b85a97d-48c72788373mr6736354f8f.16.1791418058790;
-        Wed, 07 Oct 2026 17:07:38 -0700 (PDT)
-Received: from smtpclient.apple ([87.200.95.144])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48c7fb9eda1sm1040996f8f.7.2026.10.07.17.07.35
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 07 Oct 2026 17:07:38 -0700 (PDT)
-Content-Type: text/plain;
-	charset=utf-8
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cCcCRqfv"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id E3D3EC2BCF5;
+	Thu,  8 Oct 2026 04:26:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1791433620;
+	bh=l27bWrfddOJK7P2yJT5xwUQcpylWpGnEOKiwyAdUIkU=;
+	h=From:Date:Subject:To:Cc:Reply-To:From;
+	b=cCcCRqfvfa/h3DRWRyaPgsZmk6wWeTvf/yEDFpzxIypnWX/GJJSLtR8VHmxuYpECy
+	 nHbtD1pWuMiS0+m27dBbRCA3CENC5D7XLv5nHbWOGxsSSDvYnx8lOIzT0oKR4jIpfz
+	 AjW7qB0HzmkQrATgkRNu0N8HRako5tJshcPPKVQnF+uLt+B3fBovdiNg0sRlunK9Or
+	 6wcXO1gBaonR+W3m/8soG1GSl22VjaQ36afbj2TBmKiN7iQZ7shUkunP6mDPEH0deC
+	 +y8/ss28nrHOW7qr8V5jQyNyhwV5FEqQSP6bwN+Ik0q3YRaGTThDuNEbGTZZGd6Jjh
+	 0cYWVhfR4fE4w==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5EA0CA6002;
+	Thu,  8 Oct 2026 04:26:59 +0000 (UTC)
+From: Igor Velkov via B4 Relay <devnull+iav.iav.lv@kernel.org>
+Date: Thu, 08 Oct 2026 07:26:56 +0300
+Subject: [PATCH] mmc: meson-gx: honour the busy timeout for R1b commands
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3864.700.51.1.3\))
-Subject: Re: [PATCH] arm64: dts: amlogic: meson-sm1-odroid: let the SD card be
- powered down
-From: Christian Hewitt <christianshewitt@gmail.com>
-In-Reply-To: <179140715034.293470.4459182430175564610@iav.lv>
-Date: Thu, 8 Oct 2026 04:07:23 +0400
-Cc: Neil Armstrong <neil.armstrong@linaro.org>,
- Kevin Hilman <khilman@baylibre.com>,
- Jerome Brunet <jbrunet@baylibre.com>,
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
- Ulf Hansson <ulf.hansson@linaro.org>,
- Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>,
- Dongjin Kim <tobetter@gmail.com>,
- Eric Neulight <Eric.Neulight@linuxdev.slmail.me>,
- linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org,
- linux-amlogic@lists.infradead.org,
- linux-kernel@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <AD1E9AE8-8FA9-4CC2-AED8-AB2F455FA8E2@gmail.com>
-References: <20261003-hc4-sd-power-off-v1-1-f7ffba01b348@iav.lv>
- <179100548183.3372253.2014593916926884551@iav.lv>
- <179140715034.293470.4459182430175564610@iav.lv>
-To: Igor Velkov <iav@iav.lv>
-X-Mailer: Apple Mail (2.3864.700.51.1.3)
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20261008-meson-gx-busy-timeout-v1-1-d92f3c68c409@iav.lv>
+X-B4-Tracking: v=1; b=H4sIAI8bx2oC/x3MSwqEMBBF0a1IjS2IhtamtyIO/Dy1BiaSMqKIe
+ +/g8AzuvUkRBEq/7KaAQ1S8SyjyjIalczNYxmQqTVkVxnx4hXrH88l91It3WeHjzjW+sNM49Ba
+ WUrsFTHK+36Z9nj8F1fTsZwAAAA==
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: Neil Armstrong <neil.armstrong@linaro.org>, 
+ Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>, 
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
+ linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, 
+ linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+ Igor Velkov <iav@iav.lv>
+X-Mailer: b4 0.13.0
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3870; i=iav@iav.lv;
+ h=from:subject:message-id;
+ bh=T7oobr9NpP0BRx9jjcdEGQ9sD4psJISkXHbN62KiO2U=;
+ b=owGbwMvMwCVmNH1q96v4SmbG02pJDFnHpSe9NV/Q+DxiwluPyffc47acXirLP3tx2Rl21gdl6
+ TPWBr237ShlYRDjYpAVU2SZcEjjVsaSq3/9PcwfwMxhZQIZwsDFKQATufaAkeFG2p0pt2wvqLDX
+ LL+q6Ne3cYG+pnV6ecrBjpcvpDwmRnMw/A9nsoy8N+dx0Dpukd91x6dIz9w7hdvgxC4rxU32+84
+ 9duEEAA==
+X-Developer-Key: i=iav@iav.lv; a=openpgp;
+ fpr=90C228DA68A4D5FD4F4837E03297958BEA5F7903
+X-Endpoint-Received: by B4 Relay for iav@iav.lv/default with auth_id=1060
+X-Original-From: Igor Velkov <iav@iav.lv>
+Reply-To: iav@iav.lv
 
-> On 8 Oct 2026, at 1:05=E2=80=AFam, Igor Velkov <iav@iav.lv> wrote:
->=20
-> Follow-up to the dropped patch.
->=20
-> An out-of-tree restart handler [1] power-cycles the card: it drives
-> TFLASH_VDD and both tf_io lines low for 100 ms, then releases them and
-> the card is powered again. With the SPI flash erased, ODROID-HC4 boots
-> from SD after a warm reboot 5/5 on 6.18, 7.2 and 7.3-rc5. Without the
-> handler the boot stalls in the ROM or in U-Boot.
->=20
-> Where should this live upstream: the mmc core on restart, =
-meson-gx-mmc,
-> or a board driver like this one?
->=20
-> [1] =
-https://github.com/armbian/build/blob/main/patch/kernel/archive/meson64-7.=
-3/meson64-reboot-02-port-to-gpiod.patch
+From: Igor Velkov <iav@iav.lv>
 
-I=E2=80=99ve been doing some bring-up work on S4 support with a VIM1S =
-board
-and Claude initially suggested a u-boot variant of the same patch [1]
-which improved but did not fully resolve the situation. I was also not
-able to explain why applying the same change via the Linux device-tree
-that u-boot consumes didn=E2=80=99t have the same effect as essentially =
-the
-same change in the u-boot dtsi file.
+For a command without data the driver programs a fixed 1024 ms into the
+CMD_CFG timeout field, and for R1b the controller waits for the card to
+release busy within that time. The driver does not set max_busy_timeout,
+so the core sends erase and cache flush as R1b with busy timeouts of up
+to 60 s and 30 s, and the controller gives up after one second:
 
-Claude subsequently added a second patch [2] which resulted in 100%
-reliable boot. However that allowed me to move forwards with kernel
-work and I haven=E2=80=99t yet circled back to u-boot to run an =
-experiment
-without the first patch.
+  mmc_erase: erase error -110, status 0x0
+  mmc1: cache flush error -110
 
-[1] =
-https://github.com/chewitt/u-boot/commit/0a3f5693a4ff192eb044fc4c5a434770d=
-e053835
-[2] =
-https://github.com/chewitt/u-boot/commit/8e663632bc500ee6a83a846bcd3242231=
-c33aa43
+Program the timeout from cmd->busy_timeout, rounded up to a power of
+two and kept within 1024..32768 ms, and report 32768 ms, the largest
+value the field holds, as max_busy_timeout. The core then sizes discards
+to fit and, for a longer wait, sends R1 and polls for busy itself.
+sdhci takes its command timeout from cmd->busy_timeout in the same way.
 
-As usual both of Claude=E2=80=99s authoritatively worded descriptions =
-sound
-convincingly or conveniently good :)
+Fixes: 51c5d8447bd7 ("MMC: meson: initial support for GX platforms")
+Assisted-by: LLM
+Signed-off-by: Igor Velkov <iav@iav.lv>
+---
+Tested on ODROID-N2+ (S922X), 256 GB eMMC, btrfs root with discard=async, Armbian builds in docker as load.
+Without the patch (7.3-rc6): 262 errors in 3 h and 68 in 2.5 h in two runs; the first came 4 and 43 min into the build.
+With the patch (7.3-rc6): 0 in 2.4 h.
+On 7.1 with the previous eMMC module, a synthetic test (20 GiB write + fstrim) gave 48 errors without the patch, 0 and 0 with it.
 
-Christian
+The timeout is rounded up to a power of two: the field holds powers of two only, and the timeout is a lower bound.
+MMC_CAP_WAIT_WHILE_BUSY is not set: I have not checked that the controller waits for busy on every R1b command, HS400 switches included.
+---
+ drivers/mmc/host/meson-gx-mmc.c | 22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 7ef16d7c03cb..8de3eb65ccb0 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -125,6 +125,7 @@
+ #define SD_EMMC_CFG_RESP_TIMEOUT 256 /* in clock cycles */
+ #define SD_EMMC_CMD_TIMEOUT 1024 /* in ms */
+ #define SD_EMMC_CMD_TIMEOUT_DATA 4096 /* in ms */
++#define SD_EMMC_CMD_TIMEOUT_MAX 32768 /* in ms, 2^15: limit of CMD_CFG_TIMEOUT_MASK */
+ #define SD_EMMC_CFG_CMD_GAP 16 /* in clock cycles */
+ #define SD_EMMC_DESC_BUF_LEN PAGE_SIZE
+ 
+@@ -212,7 +213,21 @@ static unsigned int meson_mmc_get_timeout_msecs(struct mmc_data *data)
+ 
+ 	timeout = roundup_pow_of_two(timeout);
+ 
+-	return min(timeout, 32768U); /* max. 2^15 ms */
++	return min_t(unsigned int, timeout, SD_EMMC_CMD_TIMEOUT_MAX);
++}
++
++/* For R1b the controller waits for busy to be released within this timeout. */
++static unsigned int meson_mmc_get_cmd_timeout_msecs(struct mmc_command *cmd)
++{
++	unsigned int timeout = cmd->busy_timeout;
++
++	if (!timeout)
++		return SD_EMMC_CMD_TIMEOUT;
++
++	timeout = roundup_pow_of_two(timeout);
++
++	return clamp_t(unsigned int, timeout, SD_EMMC_CMD_TIMEOUT,
++		       SD_EMMC_CMD_TIMEOUT_MAX);
+ }
+ 
+ static struct mmc_command *meson_mmc_get_next_command(struct mmc_command *cmd)
+@@ -841,7 +856,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ 		cmd_data = host->bounce_dma_addr & CMD_DATA_MASK;
+ 	} else {
+ 		cmd_cfg |= FIELD_PREP(CMD_CFG_TIMEOUT_MASK,
+-				      ilog2(SD_EMMC_CMD_TIMEOUT));
++				      ilog2(meson_mmc_get_cmd_timeout_msecs(cmd)));
+ 	}
+ 
+ 	/* Last descriptor */
+@@ -1168,6 +1183,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 
+ 	mmc->caps |= MMC_CAP_CMD23;
+ 
++	/* The longest busy wait the CMD_CFG timeout field can hold. */
++	mmc->max_busy_timeout = SD_EMMC_CMD_TIMEOUT_MAX;
++
+ 	if (mmc->caps & MMC_CAP_SDIO_IRQ)
+ 		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
+ 
+
+---
+base-commit: fd9af27f6c2319713bb23832066585f8a59a1771
+change-id: 20261005-meson-gx-busy-timeout-7e8e3fdcb3e3
+
+Best regards,
+-- 
+Igor Velkov <iav@iav.lv>
+
 
