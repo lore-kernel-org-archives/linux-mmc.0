@@ -1,144 +1,188 @@
-Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from CY7PR03CU001.outbound.protection.outlook.com (mail-westcentralusazon11010049.outbound.protection.outlook.com [40.93.198.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7221D1D5AC2
-	for <linux-mmc@vger.kernel.org>; Fri,  9 Oct 2026 00:32:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791505938; cv=none; b=ltkiaX4OL+Hsvm3Lyq/ZqyNOPn+64OyIN+urKOMwz+S25gGMDMZSom4p/1Lw1oqbyKuy041h5EEz3SHqgjCEwGApVrJOfdmalYCez8T4GAG3DGj4OpTMrVHC1NGVfZGHGD91OZK+zBNOVeXhhBSRrQZuWs6cOvidms8LcjTy8vU=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791505938; c=relaxed/simple;
-	bh=gNLg6Qgamg7mjc3UkG6SuB4YvLH7gMzwvVuIS70oNsE=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=HOTT/LVUSzsDmswBomR82rF+vEgGfoi0pEokKYUGDfffH3BmNdktjTGIcpLlweA9l5vIk0zPa4w/Da3ENC9UHstmv3+SAYvLYlk9uA/3QZ6AOGmtArU5m34GDo/b5nGAe1y4my/EbmG2qQgpAXTjVmO0BiCS1NKeOQVybJdodyk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=g187p4h6; arc=none smtp.client-ip=209.85.128.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B773434CFC2;
+	Fri,  9 Oct 2026 02:15:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.93.198.49
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1791512105; cv=fail; b=qunfdwHtjuBgDpC8wky0wwfi6z8bWthuoYnEm4r7JMXXrkqsB1NZfmtUKHvZ8DvlSj+OMW+6twYq58fJXiWOHU0vMl6aUyntFRAo+59dLsPIITY4Ocm+lhuGuglvfbKd/aLiniNxNHKmoRU/es8pLb6mlou/RkbdK6WiLFHYUjg=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1791512105; c=relaxed/simple;
+	bh=pooTA62CqprsI16IWDm65j50e7m3uUMJxT5aUG8X5Yc=;
+	h=From:To:Subject:Date:Message-ID:Content-Type:MIME-Version; b=h3ME4L8F+lkIYZYeGWc5+DUok+dBpO+UBAPS/zzr6N+F9+JZwYFPCDn1O2bp5GmX2k7JmoXDt1/tSP9QNrhZDU5EKd9iKHCj74035F6NPHUhSpO9sf1JkrrVD2PnzUZ6THGCqqL1/tMwSnjDgJHsPt1qjacFBpzWDSgvgwllc6k=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=AzjEDlpC; arc=fail smtp.client-ip=40.93.198.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="g187p4h6"
-Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-49fbb2acc90so33097485e9.2
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Oct 2026 17:32:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1791505936; x=1792110736; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=kd9f6IzxLdOe+YXs15sHvBb+DnWpHr6FxR7UwEMv3EU=;
-        b=g187p4h6vRTvEAN9SN1eHqKnvSL3K8myML0YpfTVkjnPaRau9gUL5cFxuxJTE7G+sp
-         zniXPOfAcg2iSrYVj4lcoUjqwarsoe7zfY2AWeZelcsEDHBDVWNXkkypVtF/p6jK4Q5j
-         3JmgAX0jwrEfbiuMUEANIi0118cETltnC80faHbUJSfV3FKVQYGU1qYux5Jt+DkfzgwT
-         0a5W2h66tpXwUQa1txV13DzAf5tyNQ6veG4o84aepwG9DpaVLlTBAT9XEVXN0wYW+4j0
-         GNG99KIWDld+MLpShvhzdBhXdr+miGHsb8ug8hz9VLNoCXUuc31qxRlPIX9FDf6E0dfq
-         3hCg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791505936; x=1792110736;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=kd9f6IzxLdOe+YXs15sHvBb+DnWpHr6FxR7UwEMv3EU=;
-        b=dmHXY93ycKbIJO9zn/KkBaFMdp8yMDWaIlMpg6D0EhSg+7rVB/Db5o8gXpcjz/hfxw
-         GRiudORa43B26U9gnYaI2+zUeuHqDXZS44tBL9BAHQx9yMSknnNMsTIWLdQ4RF0WS3y4
-         1I+Z7XY5hTimIqgAxlufEH13vMcUNQ+oPhLWGZABKTZgbeOxE86K0542EpFOdIkYGdLj
-         JE1mH7nsfybUxQDxvr1iSuNBSWwfQJp+mYl2lPMHDmAl9RNlU+oVPprB5CHhEV9wfvnc
-         sEZC3n3LUO9nGEefcGeqyDO2/3IaZcS1NbNuOj0Wo/zuFH1HD2O3dYcyxa2QAE0/AjYE
-         afvg==
-X-Forwarded-Encrypted: i=1; AKwUvByPcQBkium302vk21qjfd+x2iMvpSKjL7bHh7PbxihhCeTAUgnykfl3+SXshmWDPZKTozZI+cBj4pA=@vger.kernel.org
-X-Gm-Message-State: AFuF++nZkoA03OQKVIN5N/Nxd2MP5wzDc0vEF7aKYGx/+UFHHeHTcym2
-	P8zMimVy704UeD0OG458I9ll+tYQvHE5A2d3rX3dIWjaAr2FJfS3DyJOETdx3ijT
-X-Gm-Gg: AYBFou2Ngcs89mGfVq6OHP9G1lRDfJg3A5EZHdSPYayeETp8Fb+hrc4589/lB/T+YmM
-	g9nO841D4hKUPF+2WwsGQD1l9RBj2SguQem0zOjKEPkLUiqs972elN1t+70zcypUq+cGrgFAkNf
-	iTQLcBSKrJzaMIK7IFn2jrFXTQYHfOFWVh0ruyGI8d00bbC9ESjkMpmjxuj6c5E5J5cL2B4hXih
-	Fa/mynA/iLySyV1mgJae6HzO1l4a2J9a4rHt5RkAJf4pnpwWIy9eHqQSQo/vIhvYgNyKMO4vIyY
-	eoQMePILq4TOQlZN6lYux43AMXgdZVtEEDVIFsaYPqspMxMOfqqdCKV7hoBKoewhZfOtHbzumzp
-	Ujh5VXDknKClJfzdcnfPmm1UARJZ2l0L31a9TUnAPnFwut1kHwwJW6h5kzlISrtygcdZ0ExU5CJ
-	5V7tlI26mUv3slBwjH1Ivc5Aqm9exFNBjf2QVsnQJGfVE8m3E6SM3KvGLtF6/nYmlwvXjyzXbuO
-	c7r5lFN7p9AGOvcINcTE8+uInEyLjFB1bDQyMlMrH6B6Q66YXcqGHds8yUwc1tJOx6LEaCRU8+V
-	V9HDVawXOZC4EEH3GVijUrgUcU4MEf1IgllNUQzbbRfEH7mjDOXfLhYdVXZLFOWkEFNumRhXGut
-	abRDYKjk=
-X-Received: by 2002:a05:600c:3510:b0:4a1:7033:5b55 with SMTP id 5b1f17b1804b1-4a18e4cc437mr2753135e9.21.1791505935518;
-        Thu, 08 Oct 2026 17:32:15 -0700 (PDT)
-Received: from localhost.localdomain (dynamic-2a02-3100-ad61-5a01-743c-891f-b33c-cae7.310.pool.telefonica.de. [2a02:3100:ad61:5a01:743c:891f:b33c:cae7])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48db94e33d2sm1133434f8f.9.2026.10.08.17.32.14
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Thu, 08 Oct 2026 17:32:14 -0700 (PDT)
-From: Karl Mehltretter <kmehltretter@gmail.com>
-To: Kamal Dasu <kamal.dasu@broadcom.com>,
-	Al Cooper <alcooperx@gmail.com>,
+	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="AzjEDlpC"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=MJaTJl5nWcZflvezJ7GR2qmWBeIQrb/TS0EpRtRW+m5ULcWFAt06/cVIDKjHtf7lSX8jSIJyCg5nsZhoHBBZwPAvWzSk7joevxx1JGjYYvxP641pSgW6BVXO47zTUt2TKMay9eRcPFJlIPa0Ud0pwps42nUEY+wizBwE35rWL+j39yYkLWeGUx8tYCA7qpGE8cgtg4yBBACWbuHL1DD601Qpg3K+v73dXDv/wmx4mL4HOVdG+y0wlhod5/PGVu1U0eXJqVvr1ndkLjG51kuQmfWBZ6CpGeUEAeciM4VMlRmXorrB3pYm6i3idhzyyP/WLZAgm9y3zgp7nuQYUod4Cg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=fugCbZbQ76mqp5++bOMGKfyqkLIPMblRFoMxjLkBfQM=;
+ b=cakbf2HC2zEdJOczUILgqPrYg0Y9I/a5MezqEcannXly4mW6YWUdMaOpzKaAxdPgPw6J6ZbKHhj0FfSTfzONLIqgowy7/P3V9H80RNioW2Mimn5ZwUDdneQLHrkz7W55TD/tQuZBlgIEHbD06oM5sDpUQd5tbuzHQuSJmyQYCbdmpOkJ/6JGASxdCkS4oeH70VVmtXKp7JfdCx3nH8TALBlS2uomuZoAq+WnLR0JYhbI9FDjWrcIA40HfAy75avMro0LFSVO1spbyVHBMG5pikhBeG5b1VT9BDtV8qmoYHnrBSynXH/CPhaPyca1KQ0tVMrzRW01mhLprVXg5w9h5A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
+ dkim=pass header.d=altera.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=fugCbZbQ76mqp5++bOMGKfyqkLIPMblRFoMxjLkBfQM=;
+ b=AzjEDlpCdyKBEOk6XDGCWT1jhvg+Z31PbdGFgz5rckBS6FotdUVM6vJk9m7Z+sPrIo33RuDpqh1DnXo7TLkB31KC8BWqixRYsk1rD75ae55/FK7lBb7Pn2ab366MSXU/AEKFxwJ9GkFOx5ZAu5302EYASDqJMcYieikPvBpA8hb78WK9VdpeCVQULChNk+D1Hiau2RkWhqxlREgIlUtjDsyUizYIL0JmAkdkaI/enjZaFniPMQUk9kW/71lrJcB0xAMm+3jct6TYkz4lL+fmtebd97rTycoK/HaHGS2tRzmAUSshcGfaoSitJNeWHBvEe7U4R2wNuIOu+JqN/IG4sQ==
+Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=altera.com;
+Received: from SJ0PR03MB5950.namprd03.prod.outlook.com (2603:10b6:a03:2d3::20)
+ by IA1PR03MB8063.namprd03.prod.outlook.com (2603:10b6:208:594::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.496.15; Fri, 9 Oct
+ 2026 02:14:57 +0000
+Received: from SJ0PR03MB5950.namprd03.prod.outlook.com
+ ([fe80::53a0:bf93:6b6b:de01]) by SJ0PR03MB5950.namprd03.prod.outlook.com
+ ([fe80::53a0:bf93:6b6b:de01%5]) with mapi id 15.21.0472.016; Fri, 9 Oct 2026
+ 02:14:57 +0000
+From: tze.yee.ng@altera.com
+To: Tanmay Kathpalia <tanmay.kathpalia@altera.com>,
 	Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulfh@kernel.org>
-Cc: Karl Mehltretter <kmehltretter@gmail.com>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
 	linux-mmc@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-brcmstb: don't log an error for missing BOOT registers
-Date: Fri,  9 Oct 2026 02:32:01 +0200
-Message-Id: <20261009003201.68288-1-kmehltretter@gmail.com>
-X-Mailer: git-send-email 2.39.5 (Apple Git-154)
+	linux-kernel@vger.kernel.org,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	devicetree@vger.kernel.org
+Subject: [PATCH v2 0/4] mmc: sdhci-cadence: SD6HC DDR50/DDR52 read-path tuning and fixes
+Date: Fri,  9 Oct 2026 10:14:47 +0800
+Message-ID: <cover.1791459448.git.tze.yee.ng@altera.com>
+X-Mailer: git-send-email 2.43.7
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: BY3PR03CA0011.namprd03.prod.outlook.com
+ (2603:10b6:a03:39a::16) To SJ0PR03MB5950.namprd03.prod.outlook.com
+ (2603:10b6:a03:2d3::20)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: SJ0PR03MB5950:EE_|IA1PR03MB8063:EE_
+X-MS-Office365-Filtering-Correlation-Id: a5be5ea8-b271-4133-5789-08df25ab1d68
+X-MS-Exchange-AtpMessageProperties: SA
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|23010399003|1800799024|366016|376014|3023799007|11063799006|56012099006|55112099003|18002099003|10067099003|6133799003;
+X-Microsoft-Antispam-Message-Info:
+	ikn+aEzZWnViHPmKhUHpWdpYjg5isjRqOYTrzL7gev7aPVjO3FnRhScqZjAx51NEl4OUFdxdYp/FN3aqwWucRLjmi3EtF5EAXRhYscwTeKoHey4xutQJv/MhLtzGFgaqKxg/YPNWhwFQ9MFiFfl9jnBNbhv2uXCyt6OYBliJauIX2zpOAoUY0Qnh4ul81OFG/qsvtmCuR+YFBokZA441IFoGb9oboGbQB6AMxjs7Vp8R5DK7l5SLbMmy+8WP/t2aWvTF3XwG2VHcuPx3jD22C6APNqQiPJxW66tDRd560u7TUbg0t02NVPNPyyODJj7mvpHuEcZTHgWm0mAScebPcZhtyGtCSJWVhXf7aVhmSM5uQT30kbZVnIypTW5OlQkSUZNfVDp/ZbgJh2KFX723eaTvWfBVAjgAQPWpXVWtqSjU99zo46RwRSxvLw5SAWKms+DMXJittPY5JKdzjMV83HuQMTdo+xc/1Y69WFoaPZJaqt/xqInttjak8SzTbUEp0g9wl9SijxBtGTYXOLyyIU55XDs/VULgQcy8K3GfD43SQVs+Qwav+39t9/EHkd2Sefe1vNaqXkO4ILDFvObUxA4J1KqPQgg15zNO4CQg7I2zoGWWA5bZNpZw4d6uZD6sLnSLfDADobqq3lWiCPxLTgBvxNunDRGahnRgUtmtxF4=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR03MB5950.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(1800799024)(366016)(376014)(3023799007)(11063799006)(56012099006)(55112099003)(18002099003)(10067099003)(6133799003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?Qfs9cHDYq+mjlkJTmWcs4wj3Et3cXE8niIlCpGKGyLqX7VxyBDlTaFZAaKMG?=
+ =?us-ascii?Q?uEtT2MQ7N3QYdXYRwfVMeyT3Bf8eRWKfjGsR2fnVQi+xbKCV1B1fwNTQmWGJ?=
+ =?us-ascii?Q?FSfQeJjvuknbViMmV07cTwQ3fbee/RgEjPNGC/BoxOP/cNWchef9VsgbXbPQ?=
+ =?us-ascii?Q?PvsN+ag6bKaS9hdQnS1G4xs7o4+5b6w45gi+uV/ducwuQjlKxKs91kByhQjy?=
+ =?us-ascii?Q?Qa2BaO8Ka+34uDa8FxGNf0h0V0xGHlmGJmED4U2mR9Y7IEqLV3ak30xVKLGb?=
+ =?us-ascii?Q?WVPe8JmBZ3eG2kXdClTGLywzju5NqBk6si59RHpQdKLdY01ls4byxX+Vt6hg?=
+ =?us-ascii?Q?zayu23EHxRx/wqu6sdXFw8WyLErCWQb5lunyZHE+lQptfF+Ige9jPGzwLmGn?=
+ =?us-ascii?Q?Wf1N7aFP4W3BFuA+uNt7QsRSd8QvtIzNk6NrG9vtYW5SajWGlvF16q2v0xAn?=
+ =?us-ascii?Q?Fv7tglVLk/5QwD0VUYDKwZOuVrGtnyfZCuex29A/LXpWSu2paina+2mk+tLU?=
+ =?us-ascii?Q?eEOOaHJS5JXku6kzJIo2s06KeCrqx/GwuXJ/WflPC9CXGrpIJpYYPwLO1J/6?=
+ =?us-ascii?Q?cRQ+fWzAIxKElDWLc50HcWk8mKKf6W/JoljNNL4uZ5ZOrfsje947fi+tEcXG?=
+ =?us-ascii?Q?MT1i54bVgO84ot7JDPrNnUT7hW054PeIY+KAXyNYjyCRhkcDQGvrj4NRyS0V?=
+ =?us-ascii?Q?0xbf6Y2KACHBAQX6BjSuvdVhSFrQErqm9ClhzNC7y5DHWYt1Xwi9eX7SfxYW?=
+ =?us-ascii?Q?GeN1QWKhnY1zf1k8t0XmlOcSlLnnhCjPQb7k0UN1Hnh4HsM3I6pmja4r9ZSP?=
+ =?us-ascii?Q?IqQAI4Bg550OFvULiD6HF2VLf1q2ypnhs61ccFNWEW5DdNc/XvrjSgL12hZI?=
+ =?us-ascii?Q?7BMOCQOsCuwSQRsdXl3cz1DYmZED12rCpLYSEhd5vlPch7aZw9iohUaUc2Xi?=
+ =?us-ascii?Q?LSL2jSrr6wKjOnd4OsuzRMQb1S3PnssZXa4S+ocHPAgBRR4LN2cASQ/aa4lc?=
+ =?us-ascii?Q?8vSvGQEaDo1qLSvUPZgyAL+3Ytmg4NE/msdYjK/Bcjb3ucJQWBiz/qi8UFNl?=
+ =?us-ascii?Q?wXPSfKUK++1VQmGx/izP7cn+719aK/yFB5AxbFoJUvmFDAX6VOlvD6mne7dD?=
+ =?us-ascii?Q?hOxyxTmxYoSanZKXYrCOSS1lQh2E2c761er/8AZwXZLzTDspSdY5NtvjuJJ0?=
+ =?us-ascii?Q?JhA8F9gDDEw7wLD2dCpIbFQr+G9lDItOY5Lywbcy9HCoqACNv2niu9dqV27y?=
+ =?us-ascii?Q?uEyVlpA0jz7+HTQiCgmmEN5/QNtVXp/zgmHp3flgZfQ1DGv65HVCpn5M8UB4?=
+ =?us-ascii?Q?pZHK+ANYhxcWVuGgXT0Jp5umjp1ImA6N5SIG85KKzwWjK1Q29jK0mFwzJ/ow?=
+ =?us-ascii?Q?sWhibzqjLc0CN6D1WGM5HgwGr8TtZjKwFQI7yUeJRg9wzwzcSsz+A4dMDvr4?=
+ =?us-ascii?Q?nmmHFjUD8n2yS9rNxuQhkk9PiazM2aq4PhO6vOWLuGftBY1xf3dXvGRbTnX5?=
+ =?us-ascii?Q?Vo4XHsts8Aq5XBErUnCm0WNCWVmTNC006rukmF+Tv21tZJDpslwCejHShxED?=
+ =?us-ascii?Q?zoFu0T4r/J60LW/jXD81+f+68EmiS9rn2QIUUJsBSSPYPFxKLMwn+3TNOJbM?=
+ =?us-ascii?Q?WOqgEtJa8KdSD8cEnqFqeGsnFebqZZZtkwmggA4aytaS7/lNjDChuDrlnOfr?=
+ =?us-ascii?Q?ruK6lL3ilvmADWcQHEG+uHuWwwvXg6K78oE32ysRh82Fa7hvoEgkbcJwWB3R?=
+ =?us-ascii?Q?tUIOJYN7jQ=3D=3D?=
+X-OriginatorOrg: altera.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: a5be5ea8-b271-4133-5789-08df25ab1d68
+X-MS-Exchange-CrossTenant-AuthSource: SJ0PR03MB5950.namprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Oct 2026 02:14:57.6292
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: Ynjw7yBiJBijoV3VxdftDxzOUiHumXmIzIT/DMFIXw+ZpKpRkhywNKVk5XM2ACPixTFQgOPnexWamaepZ6zVfA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA1PR03MB8063
 
-The BOOT register range is optional: the probe function ignores a
-failure to map it and the suspend/resume code checks for NULL. It is
-mapped with devm_platform_get_and_ioremap_resource(), though, which
-calls dev_err_probe() when the resource does not exist. Every
-non-removable host without a third reg entry therefore logs an error
-at probe time and then works normally.
+From: Tze Yee Ng <tze.yee.ng@altera.com>
 
-The binding only describes the "host" and "cfg" ranges, so this is the
-case for the in-tree users. On the Raspberry Pi 5 family (BCM2712),
-where the SDIO host of the Wi-Fi module is non-removable, each boot
-prints:
+This series enables the extended-read DDR modes - SD DDR50 and eMMC
+DDR52 - on the Cadence SD6HC (SD/eMMC v6) PHY. Neither mode runs a host
+tuning sequence (CMD19/CMD21), so the read path must be centred by
+static, board/SoC-characterised PHY settings. Bringing it up on Agilex5
+also exposed PHY issues affecting the existing tuned modes.
 
-  sdhci-brcmstb 1001100000.mmc: error -EINVAL: invalid resource (null)
+  - Patch 1: settle the PHY once after the final tuning tap, before the
+    first post-tuning command (an R1b CMD6 during HS400 selection can
+    otherwise time out); matches sdhci_cdns6_phy_init().
+  - Patch 2: program PHONY_DQS_TIMING (left 0 in all modes); in the
+    extended-read DDR modes it must be the rebar pulse width in clk_phy
+    cycles minus 1, else one DDR beat is duplicated.
+  - Patch 3: document three optional SD6HC read-path properties for the
+    extended-read DDR modes (SD DDR50, eMMC DDR52).
+  - Patch 4: read those properties at probe and apply them in DDR50 and
+    DDR52, and make the DQS_TIMING update clear USE_LPBK_DQS before
+    reprogramming it so the loopback/phony selection takes effect.
 
-Look the resource up with platform_get_resource() first and map it only
-when it is present. Hosts that do have the range are mapped by the same
-two calls as before.
+The new cdns,ddr-* properties are unused in this series; they will be
+consumed by the socfpga_agilex5_socdk and socfpga_agilex5_socdk_emmc
+device trees, submitted as a separate series.
 
-Fixes: b7e614802e3f ("mmc: sdhci-brcmstb: save and restore registers during PM")
-Assisted-by: LLM
-Signed-off-by: Karl Mehltretter <kmehltretter@gmail.com>
----
-Tested on a Raspberry Pi 500+ with v7.3-rc4: the message is gone, the
-SDIO card is detected as before and Wi-Fi works. Suspend/resume, the
-only user of these registers, was not tested.
+Tested on Agilex5 SoCDK: SD DDR50 and eMMC DDR52.
 
- drivers/mmc/host/sdhci-brcmstb.c | 11 ++++++++---
- 1 file changed, 8 insertions(+), 3 deletions(-)
+Changes in v2:
+  - Patch 1: moved the 5 ms PHY settle out of the per-tap tuning loop to
+    a single settle after the winning tap, on the success path only, and
+    rewrote the comment to explain this specific call site. (Adrian
+    Hunter, Tanmay Kathpalia)
+  - Patch 2: added Adrian's Acked-by; reworded the commit message to drop
+    the "generic to any SD6HC-PHY SoC" framing. (Adrian Hunter)
+  - Patch 3: retitled to "dt-bindings: mmc: cdns,sd6hc:"; renamed
+    cdns,ddr50-* -> cdns,ddr-*; cdns,ddr-read-dqs-delay-ps is now in
+    picoseconds; replaced the read-DQS source selector with a
+    cdns,ddr-no-lpbk-dqs boolean; reworded the phony-dqs-timing text;
+    dropped the SD4HC note. (Krzysztof Kozlowski, Tanmay Kathpalia)
+  - Patch 4: renamed the properties to cdns,ddr-*; read
+    cdns,ddr-read-dqs-delay-ps in ps and convert it to delay elements
+    (dividing by cdns,delay-element-ps), clamping that quotient to the
+    8-bit PHY field so a small delay element cannot make it wrap; read
+    cdns,ddr-no-lpbk-dqs via of_property_read_bool() to opt out of the
+    default loopback DQS read path; dropped the v1 per-property range
+    checks and redundant FIELD_MAX() write masks; apply the overrides in
+    both DDR50 and DDR52. Also retitled to "mmc: sdhci-cadence6:" since it
+    touches only the v6 PHY. (Krzysztof Kozlowski, Adrian Hunter,
+    Tanmay Kathpalia)
 
-diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-index 1de2f05..7c17a3c 100644
---- a/drivers/mmc/host/sdhci-brcmstb.c
-+++ b/drivers/mmc/host/sdhci-brcmstb.c
-@@ -491,6 +491,7 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
- 	struct sdhci_brcmstb_priv *priv;
- 	u32 actual_clock_mhz;
- 	struct sdhci_host *host;
-+	struct resource *boot_res;
- 	struct clk *clk;
- 	struct clk *base_clk = NULL;
- 	int res;
-@@ -534,9 +535,13 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
- 
- 	/* map non-standard BOOT registers if present */
- 	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
--		priv->boot_regs = devm_platform_get_and_ioremap_resource(pdev, 2, NULL);
--		if (IS_ERR(priv->boot_regs))
--			priv->boot_regs = NULL;
-+		boot_res = platform_get_resource(pdev, IORESOURCE_MEM, 2);
-+		if (boot_res) {
-+			priv->boot_regs = devm_ioremap_resource(&pdev->dev,
-+								boot_res);
-+			if (IS_ERR(priv->boot_regs))
-+				priv->boot_regs = NULL;
-+		}
- 	}
- 
- 	/*
+Tze Yee Ng (4):
+  mmc: sdhci-cadence: add PHY settle after tuning for SD6HC
+  mmc: sdhci-cadence6: program PHONY_DQS_TIMING for extended-read DDR
+  dt-bindings: mmc: cdns,sd6hc: add SD6HC DDR50 read-path tuning
+  mmc: sdhci-cadence6: read SD6HC DDR50 tuning from device tree
 
-base-commit: 6c377d19d4a5116d9bec5203aa3c6c11523e7898
+ .../devicetree/bindings/mmc/cdns,sd6hc.yaml   | 30 ++++++++
+ drivers/mmc/host/sdhci-cadence-core.c         |  6 +-
+ drivers/mmc/host/sdhci-cadence-phy-v6.c       | 74 ++++++++++++++++++-
+ 3 files changed, 108 insertions(+), 2 deletions(-)
+
+
+base-commit: 2d2431cf24dda7303d59e47b7d116be8beda66b1
+-- 
+2.43.7
+
