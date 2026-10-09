@@ -1,146 +1,144 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 251D9305692
-	for <linux-mmc@vger.kernel.org>; Thu,  8 Oct 2026 21:02:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7221D1D5AC2
+	for <linux-mmc@vger.kernel.org>; Fri,  9 Oct 2026 00:32:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791493334; cv=none; b=SI+QwUdi8HDV/PHUFWcE206UeasAjt0QJ9PNeVag+LDbHheqQJlaxh3G33wZ2b9GJCxbnrlIVIiohvqQ4J1wREPJ7taltPwG/XQOpuh3M7Tb9FQtERuc/lxoaIPj9M3B8ECDmfaW2jDDummhYkCgl52GmQuzXn4/TZqZ3pYujLk=
+	t=1791505938; cv=none; b=ltkiaX4OL+Hsvm3Lyq/ZqyNOPn+64OyIN+urKOMwz+S25gGMDMZSom4p/1Lw1oqbyKuy041h5EEz3SHqgjCEwGApVrJOfdmalYCez8T4GAG3DGj4OpTMrVHC1NGVfZGHGD91OZK+zBNOVeXhhBSRrQZuWs6cOvidms8LcjTy8vU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791493334; c=relaxed/simple;
-	bh=zzbL2DxW3HgIFLpNuRMEEytronEcId7gBv0pJACaAe4=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=PtslJuQavBsN6kB2Is3uIVomlt5YkQI06Jl6oCQhv4KOXjMxQP+JnPoq95ZPFkjPha/RIl/fGzMtFNKkywSbTUJht6G/2FbBG7Fglbu/Fr0E1FmjaApO4qpk7ofOD7Y8+ZRTl+FLvJX6KGuYQLe2mrm75JirXanJ+XvdgNjJr/k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ezsdlgTV; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1791505938; c=relaxed/simple;
+	bh=gNLg6Qgamg7mjc3UkG6SuB4YvLH7gMzwvVuIS70oNsE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=HOTT/LVUSzsDmswBomR82rF+vEgGfoi0pEokKYUGDfffH3BmNdktjTGIcpLlweA9l5vIk0zPa4w/Da3ENC9UHstmv3+SAYvLYlk9uA/3QZ6AOGmtArU5m34GDo/b5nGAe1y4my/EbmG2qQgpAXTjVmO0BiCS1NKeOQVybJdodyk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=g187p4h6; arc=none smtp.client-ip=209.85.128.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ezsdlgTV"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 98D86C2BCF7;
-	Thu,  8 Oct 2026 21:02:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1791493333;
-	bh=zzbL2DxW3HgIFLpNuRMEEytronEcId7gBv0pJACaAe4=;
-	h=From:Date:Subject:To:Cc:Reply-To:From;
-	b=ezsdlgTVpz1cSGyAo0HwUsBEz0A7M2BkgvWBjK8Pq48fuZCBWerWN5FZwV5Z6lg2Q
-	 oEG7Ne2QxyyoLENYLvqBJcf29ZO075dZtbXM0b/5Bj9uHi9OPndW8Ln32w/nJOeUhq
-	 8iX4yZTECo3fZpdoVdMB5NcyMbc88kZWkyKgzFx727FR8CQt/FYXWlLQDDk4Dd6+4t
-	 pxeJ9j1WuDFdJFr+PSMj1tWcEX3gkV8bOQ4+dlL5GKWzE0mJC4eNIzUBSsi69D6esK
-	 ZedLgRv45tlPgSNpEayjeSl3+P6n8VHoG6HVjtYi2bTF9Ua5cbE9mN7o70rDkuoQjE
-	 +yxQNyHGNfj1A==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E98ACA6017;
-	Thu,  8 Oct 2026 21:02:13 +0000 (UTC)
-From: Sebastien Bacher via B4 Relay <devnull+sebastien.bacher.canonical.com@kernel.org>
-Date: Thu, 08 Oct 2026 23:02:09 +0200
-Subject: [PATCH] mmc-utils: Use an unsigned byte counter in DO_IO()
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="g187p4h6"
+Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-49fbb2acc90so33097485e9.2
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Oct 2026 17:32:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1791505936; x=1792110736; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=kd9f6IzxLdOe+YXs15sHvBb+DnWpHr6FxR7UwEMv3EU=;
+        b=g187p4h6vRTvEAN9SN1eHqKnvSL3K8myML0YpfTVkjnPaRau9gUL5cFxuxJTE7G+sp
+         zniXPOfAcg2iSrYVj4lcoUjqwarsoe7zfY2AWeZelcsEDHBDVWNXkkypVtF/p6jK4Q5j
+         3JmgAX0jwrEfbiuMUEANIi0118cETltnC80faHbUJSfV3FKVQYGU1qYux5Jt+DkfzgwT
+         0a5W2h66tpXwUQa1txV13DzAf5tyNQ6veG4o84aepwG9DpaVLlTBAT9XEVXN0wYW+4j0
+         GNG99KIWDld+MLpShvhzdBhXdr+miGHsb8ug8hz9VLNoCXUuc31qxRlPIX9FDf6E0dfq
+         3hCg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1791505936; x=1792110736;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=kd9f6IzxLdOe+YXs15sHvBb+DnWpHr6FxR7UwEMv3EU=;
+        b=dmHXY93ycKbIJO9zn/KkBaFMdp8yMDWaIlMpg6D0EhSg+7rVB/Db5o8gXpcjz/hfxw
+         GRiudORa43B26U9gnYaI2+zUeuHqDXZS44tBL9BAHQx9yMSknnNMsTIWLdQ4RF0WS3y4
+         1I+Z7XY5hTimIqgAxlufEH13vMcUNQ+oPhLWGZABKTZgbeOxE86K0542EpFOdIkYGdLj
+         JE1mH7nsfybUxQDxvr1iSuNBSWwfQJp+mYl2lPMHDmAl9RNlU+oVPprB5CHhEV9wfvnc
+         sEZC3n3LUO9nGEefcGeqyDO2/3IaZcS1NbNuOj0Wo/zuFH1HD2O3dYcyxa2QAE0/AjYE
+         afvg==
+X-Forwarded-Encrypted: i=1; AKwUvByPcQBkium302vk21qjfd+x2iMvpSKjL7bHh7PbxihhCeTAUgnykfl3+SXshmWDPZKTozZI+cBj4pA=@vger.kernel.org
+X-Gm-Message-State: AFuF++nZkoA03OQKVIN5N/Nxd2MP5wzDc0vEF7aKYGx/+UFHHeHTcym2
+	P8zMimVy704UeD0OG458I9ll+tYQvHE5A2d3rX3dIWjaAr2FJfS3DyJOETdx3ijT
+X-Gm-Gg: AYBFou2Ngcs89mGfVq6OHP9G1lRDfJg3A5EZHdSPYayeETp8Fb+hrc4589/lB/T+YmM
+	g9nO841D4hKUPF+2WwsGQD1l9RBj2SguQem0zOjKEPkLUiqs972elN1t+70zcypUq+cGrgFAkNf
+	iTQLcBSKrJzaMIK7IFn2jrFXTQYHfOFWVh0ruyGI8d00bbC9ESjkMpmjxuj6c5E5J5cL2B4hXih
+	Fa/mynA/iLySyV1mgJae6HzO1l4a2J9a4rHt5RkAJf4pnpwWIy9eHqQSQo/vIhvYgNyKMO4vIyY
+	eoQMePILq4TOQlZN6lYux43AMXgdZVtEEDVIFsaYPqspMxMOfqqdCKV7hoBKoewhZfOtHbzumzp
+	Ujh5VXDknKClJfzdcnfPmm1UARJZ2l0L31a9TUnAPnFwut1kHwwJW6h5kzlISrtygcdZ0ExU5CJ
+	5V7tlI26mUv3slBwjH1Ivc5Aqm9exFNBjf2QVsnQJGfVE8m3E6SM3KvGLtF6/nYmlwvXjyzXbuO
+	c7r5lFN7p9AGOvcINcTE8+uInEyLjFB1bDQyMlMrH6B6Q66YXcqGHds8yUwc1tJOx6LEaCRU8+V
+	V9HDVawXOZC4EEH3GVijUrgUcU4MEf1IgllNUQzbbRfEH7mjDOXfLhYdVXZLFOWkEFNumRhXGut
+	abRDYKjk=
+X-Received: by 2002:a05:600c:3510:b0:4a1:7033:5b55 with SMTP id 5b1f17b1804b1-4a18e4cc437mr2753135e9.21.1791505935518;
+        Thu, 08 Oct 2026 17:32:15 -0700 (PDT)
+Received: from localhost.localdomain (dynamic-2a02-3100-ad61-5a01-743c-891f-b33c-cae7.310.pool.telefonica.de. [2a02:3100:ad61:5a01:743c:891f:b33c:cae7])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48db94e33d2sm1133434f8f.9.2026.10.08.17.32.14
+        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
+        Thu, 08 Oct 2026 17:32:14 -0700 (PDT)
+From: Karl Mehltretter <kmehltretter@gmail.com>
+To: Kamal Dasu <kamal.dasu@broadcom.com>,
+	Al Cooper <alcooperx@gmail.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulfh@kernel.org>
+Cc: Karl Mehltretter <kmehltretter@gmail.com>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	linux-mmc@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-brcmstb: don't log an error for missing BOOT registers
+Date: Fri,  9 Oct 2026 02:32:01 +0200
+Message-Id: <20261009003201.68288-1-kmehltretter@gmail.com>
+X-Mailer: git-send-email 2.39.5 (Apple Git-154)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20261008-do-io-unsigned-counter-v1-1-744fa81f0a0a@canonical.com>
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/x3MQQqAIBBA0avErBuwIomuEi1MR5vNGFoRSHdPW
- r7F/wUyJaYMc1Mg0c2Zo1R0bQN2NxII2VVDr3rdKTWhi8gRL8kchBzaeMlJCUc9GT1shvxoocZ
- HIs/PP17W9/0AC3MUt2gAAAA=
-X-Change-ID: 20261008-do-io-unsigned-counter-568a63baef5c
-To: linux-mmc@vger.kernel.org
-Cc: ulfh@kernel.org, Sebastien Bacher <seb128@ubuntu.com>, 
- Sebastien Bacher <sebastien.bacher@canonical.com>
-X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2342;
- i=sebastien.bacher@canonical.com; h=from:subject:message-id;
- bh=RFqFYmhSpK7v33WRCuY5MzgPPz11wJINJ0qqSHLpdqs=;
- b=owEBbQKS/ZANAwAIAVlh/b6cYZgJAcsmYgBqyATU53VOOz1SAgihPexDQBAm8rofepz4y6YoG
- IPTopO29aaJAjMEAAEIAB0WIQSS/k+LQMrcTszWDB9ZYf2+nGGYCQUCasgE1AAKCRBZYf2+nGGY
- CR91EACKSpeNuKDwBmMwmrxupBJM34CQXXXyCBpHut47MmfU5YcrMDPTBmwoEffktZ32Jf2EDLP
- C4+xuV4AVZOfsdVDxTR9tNPa7hZAS9nBynrfBqHeUwCl12T5ACTBMrUPq7bJjPsSBJC6NpFS/F9
- uMHkLRbpzcpEmTv4dg4UVrjx1ZdNqrZ2ENEanesswr5fGMjYnUV1wa8idoI5H04TqtUzXhOhHh4
- xpoBJLftO67c4D3OJXdH5ms1rFNsdlgWHJlnjmNPmdS9TF2n4fdwqsjI3TEmCx56Y2jrPRMErP1
- mJyg8AN1JdNf6UKEw0KJn8v59hnxkSKBcwWPtmkqeER7sF46pBP1kRw+47kkWA6b4jbZ6MQtuq4
- zM//q85ihfTLvXB9yzepZ0Yns297Whm5lz355SthxYD4daPeVzbQJ2CsVlbUqhOz98JUCf/sFia
- Aqq4UJzpdQ+FNX9fAV5kkIao0fFIKwT7dwT442/zlJqgipfZ3UnO/FZsFOyDnsMyx+uk9tp/r17
- L3tuKKpNfspNTFwjYT7UZZxrgArw/0+U3K44ipzLfi3eL+v8KuXmgZcYGN+pglT15H99Npn1089
- HMT5jetTIm4rMiA4SdcqGUTCAbIGClmSYJ/EuFJV+01XuEIdnjNblxoybKj94+d5zXJnuw4SGbQ
- RoDaoQ8WiLYExPg==
-X-Developer-Key: i=sebastien.bacher@canonical.com; a=openpgp;
- fpr=92FE4F8B40CADC4ECCD60C1F5961FDBE9C619809
-X-Endpoint-Received: by B4 Relay for sebastien.bacher@canonical.com/default
- with auth_id=1136
-X-Original-From: Sebastien Bacher <sebastien.bacher@canonical.com>
-Reply-To: sebastien.bacher@canonical.com
+Content-Transfer-Encoding: 8bit
 
-From: Sebastien Bacher <seb128@ubuntu.com>
+The BOOT register range is optional: the probe function ignores a
+failure to map it and the suspend/resume code checks for NULL. It is
+mapped with devm_platform_get_and_ioremap_resource(), though, which
+calls dev_err_probe() when the resource does not exist. Every
+non-removable host without a third reg entry therefore logs an error
+at probe time and then works normally.
 
-DO_IO() tracks the number of bytes already transferred in a signed
-ssize_t, which is also used to report errors. When building with
-_FORTIFY_SOURCE=3 and LTO, gcc 15 can't prove that "nbyte - ret" stays
-within the destination buffer, and the build fails on the RPMB data read
-in do_rpmb_write_block():
+The binding only describes the "host" and "cfg" ranges, so this is the
+case for the in-tree users. On the Raspberry Pi 5 family (BCM2712),
+where the SDIO host of the Wi-Fi module is non-removable, each boot
+prints:
 
-  In function 'read',
-      inlined from 'do_rpmb_write_block' at mmc_cmds.c:...
-  bits/unistd.h:32:10: error: '__read_alias' writing 484 or more bytes
-  into a region of size 256 overflows the destination
-  [-Werror=stringop-overflow=]
+  sdhci-brcmstb 1001100000.mmc: error -EINVAL: invalid resource (null)
 
-The loop can't actually overflow, so this is a false positive. Track the
-progress with a size_t, which can't go negative inside the loop, and only
-convert to the ssize_t return value at the end. The behaviour is
-unchanged: EINTR is retried, other errors return -1, and EOF returns the
-short count.
+Look the resource up with platform_get_resource() first and map it only
+when it is present. Hosts that do have the range are mapped by the same
+two calls as before.
 
-This is the default hardening configuration on Ubuntu, so mmc-utils
-currently fails to build there.
-
-Signed-off-by: Sebastien Bacher <seb128@ubuntu.com>
+Fixes: b7e614802e3f ("mmc: sdhci-brcmstb: save and restore registers during PM")
+Assisted-by: LLM
+Signed-off-by: Karl Mehltretter <kmehltretter@gmail.com>
 ---
-Signed-off-by: Sebastien Bacher <sebastien.bacher@canonical.com>
----
- mmc_cmds.c | 19 +++++++++++--------
- 1 file changed, 11 insertions(+), 8 deletions(-)
+Tested on a Raspberry Pi 500+ with v7.3-rc4: the message is gone, the
+SDIO card is detected as before and Wi-Fi works. Suspend/resume, the
+only user of these registers, was not tested.
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 2d9069f..8e21a25 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -2207,18 +2207,21 @@ int do_sanitize(int nargs, char **argv)
+ drivers/mmc/host/sdhci-brcmstb.c | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index 1de2f05..7c17a3c 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -491,6 +491,7 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+ 	struct sdhci_brcmstb_priv *priv;
+ 	u32 actual_clock_mhz;
+ 	struct sdhci_host *host;
++	struct resource *boot_res;
+ 	struct clk *clk;
+ 	struct clk *base_clk = NULL;
+ 	int res;
+@@ -534,9 +535,13 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
  
- #define DO_IO(func, fd, buf, nbyte)					\
- 	({												\
--		ssize_t ret = 0, r;							\
-+		size_t done = 0;							\
-+		ssize_t r;									\
- 		do {										\
--			r = func(fd, buf + ret, nbyte - ret);	\
--			if (r < 0 && errno != EINTR) {			\
--				ret = -1;							\
-+			r = func(fd, (char *)(buf) + done,		\
-+				 (nbyte) - done);					\
-+			if (r < 0) {							\
-+				if (errno == EINTR)					\
-+					continue;						\
-+				done = (size_t)-1;					\
- 				break;								\
- 			}										\
--			else if (r > 0)							\
--				ret += r;							\
--		} while (r != 0 && (size_t)ret < nbyte);	\
-+			done += (size_t)r;						\
-+		} while (r != 0 && done < (size_t)(nbyte));	\
- 													\
--		ret;										\
-+		(ssize_t)done;								\
- 	})
+ 	/* map non-standard BOOT registers if present */
+ 	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
+-		priv->boot_regs = devm_platform_get_and_ioremap_resource(pdev, 2, NULL);
+-		if (IS_ERR(priv->boot_regs))
+-			priv->boot_regs = NULL;
++		boot_res = platform_get_resource(pdev, IORESOURCE_MEM, 2);
++		if (boot_res) {
++			priv->boot_regs = devm_ioremap_resource(&pdev->dev,
++								boot_res);
++			if (IS_ERR(priv->boot_regs))
++				priv->boot_regs = NULL;
++		}
+ 	}
  
- #define RPMB_MULTI_CMD_MAX_CMDS 3
+ 	/*
 
----
-base-commit: c6692d5f9bf1ab6fbf5694a0b61477621cc4d016
-change-id: 20261008-do-io-unsigned-counter-568a63baef5c
-
-Best regards,
--- 
-Sebastien Bacher <sebastien.bacher@canonical.com>
-
-
+base-commit: 6c377d19d4a5116d9bec5203aa3c6c11523e7898
