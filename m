@@ -1,180 +1,147 @@
-Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B4B346F4BB
-	for <linux-mmc@vger.kernel.org>; Mon, 12 Oct 2026 09:23:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791797020; cv=none; b=jZiNA1cHwnEPaorfzNL7Yr78DbBlCme3Q/Ld4kiWgYcrEvrIXwBOVeVejoHEiNzcjCxLKdBuGT6xwjeuap8DMj+Dz/TYz8dOsCrgqN+H6MMMIAPQHskmJQgQeptangeSEPnl37bSabimosPm9OmZN9IuDk6Zi1teLKWU4jmcLS4=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791797020; c=relaxed/simple;
-	bh=nHzUwHePOxq2aoo85Lh6q2Qyb0zVMyTUscHVEyJRWUE=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=K2YNvCiE5v/SNwDhSrcJic5Cae8+2pe7OFyLBMq3mi36NXastjHVUy95GgC3x+Ej81zhdTV9jijQB2Q6LTFCWwxBto5c+RZniz1BqRV2yXwIq35n+18pbkn2q3UIRu/WHYQHR9bIDyQWn3YqyJhMcMgO0q/xE7/NM80Sr3/N+oY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=iv8u8IJq; arc=none smtp.client-ip=209.85.128.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B36AB4F4736
+	for <linux-mmc@vger.kernel.org>; Mon, 12 Oct 2026 21:34:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.173
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1791840869; cv=pass; b=U73sRQZ68dOeQsa0frGMQB0giC6aAaL8G0bNdmm2V0oOB/btN4jcAC31LlLO8qStUGetH+BSofXGPd0p0Vcag98cjh6913uhQIIgL0q5NAfeAg+hBSZqfRB2Krsa6+QzELCg7kAYNiD1ovRGWtLaMKH7JJL+s712mdN/npIaHro=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1791840869; c=relaxed/simple;
+	bh=/bJ5PQP4uoYZBIo22Fzx5lB/ygVpuCF+t05OUgq3nrM=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=HFxF2Nzdc2uKocRw9yDLNFGc7qDJ+3b7Z8maPnS7vAcqeujZ3l5aPC7Gz9RgPqQemS9lSNoyQUQzwxr1NHi74DVO3m4LfBGfiDMJQEEXG5yfHMeKE6JcyZEyiMMz71nwuxMUL9ESqZ6h17n01pYMrbGe3C/Tchd/BdWgVLuioew=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems; spf=pass smtp.mailfrom=starlabs.systems; dkim=pass (2048-bit key) header.d=starlabs-systems.20251104.gappssmtp.com header.i=@starlabs-systems.20251104.gappssmtp.com header.b=hyslrloe; arc=pass smtp.client-ip=209.85.128.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starlabs.systems
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iv8u8IJq"
-Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-4a19cba5c14so9532115e9.3
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Oct 2026 02:23:37 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=starlabs-systems.20251104.gappssmtp.com header.i=@starlabs-systems.20251104.gappssmtp.com header.b="hyslrloe"
+Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-8ab37e44643so13191727b3.0
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Oct 2026 14:34:26 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1791840865; cv=none;
+        d=google.com; s=arc-20260327;
+        b=VVrRt5JAEsBR2tBZSb10WH2EmcDDRcSuvw++uOPGkM7Nef28mD3e11LIDrWSmdbYq5
+         tw1Ea3bzbfCShyL71SrdMF2cAuzyySWI8ftRXIxKumE/2rtGRMRc/cgKehII7qQMf1it
+         L3M/Qr05H3H5R0UkONF9Kec3uv43byhpEy8+TLAlV0Tqch4gbUpHUDfNgjSnnI2uFals
+         ehh5NZcsJE5mIz5kWE1DsIDQRwfu9tLaOCDNtT6bHhva3eWBydwfrr8b/sDTaCrQJiRu
+         gACLtnHxbIt7cZueu9BayPyxq+K53gKRKOZRLAtB2TQ44Q8L3DXP5SSiwk/+IOUu2L8h
+         9t+Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=ysmRiqiC15vYpG/lYmDhf4jWZxZpBo2Htczu87XzkBA=;
+        fh=3tMgWDJfuVZuL88F1fju0kjJK19KxG7L9tFJnifBMic=;
+        b=is+8jieW1yCEf3dpd5xtcqmLS9wklvMpC+J/rYrz70HvUk+AjW//Sdouy7SNaadmbP
+         H2Lyab5Egueua5hBSKYUB0bmZGxAppKVU2QaUw25qhIKm8VsO112iKYC8/drHnpYwXL+
+         ruXIaDrLlL8Q2+D0agBgs3Z9wd6i0EzrhQWmfZRKEqjHSdhSimz2KGLO3UNubGMC60lg
+         CQyOFToK9fiDuCwtYtv1She+1wu8eHmGtA4CdsNmOt0Nv2qG3fef5K681UvasBMPrZdp
+         7iEJFUEvi324bIo3SnG0eEdnNIpUznXQQ7dwYYaSjOnRwB4zQWd2rF0gnG36AEIw+fUY
+         uEzQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1791797016; x=1792401816; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:organization
-         :autocrypt:content-language:references:cc:to:subject:reply-to:from
-         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=FHs5QmsAznY6JYFFT0GfFNt0MOtPZ8zk+n24R7ETBWM=;
-        b=iv8u8IJqF1vobad+EkHp32mlRF3wQ82LRZUH71f/9sfsudbnWnnhFua5PoUloi2D5w
-         eWjJnXP/yxLkTW6fZPJHrAKxfpPyIwc6ytWAWJ6wfCVWl3MKHsa/Huvp0IRkNRIV0cla
-         +5zDNc4VMVGXCANMAbx3ovWU1BFBqyzTR+rBdHKEfQM4ZmMLtvwybY3XA7v/xKXMKmxN
-         SXZzs4Pl8pC5xFQNUgqD6bmmDVbcxEI1g2UKLJFfa59tY+XxwohSk8yFP7auSqxEE1ia
-         HQOJYl9qHSxbFcLBBUJa9E4xO0v71D8AS83OL4bvS4nvqvtrDRobKMC0h5brUGxoyizK
-         Fzgg==
+        d=starlabs-systems.20251104.gappssmtp.com; s=20251104; t=1791840865; x=1792445665; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=ysmRiqiC15vYpG/lYmDhf4jWZxZpBo2Htczu87XzkBA=;
+        b=hyslrloec1zhakASu16CVHaH1MEMPk4jP+epSDIEaD3BxKb48lqPSzFO9cJWpZDqiP
+         lw25luTM7J8GC2qkLio35jeqIm/ZbsJqVEH7NsP+qAbYjFmn8fVwtkL3+7AU2GNkgMy+
+         yq3L9M4ZyCdiBOHVJORO+Wg7Seutmz64XxSn+c2LHcyqFcnrpxovLrCWyG8R7I2XEUYL
+         2L5ZpstCoKqyVcOP1ygcCzWdI8nrma0/lBgMd3DIi6htavNicO6PkmmiLp4KGzYvg7Ig
+         8DY+Tqj81qtuMxTP0k18k/w6we/1jHfUO25ZVGwolJk75uS+w2Q71IZGYpHHz+bCD5N9
+         TebA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791797016; x=1792401816;
-        h=content-transfer-encoding:content-type:in-reply-to:organization
-         :autocrypt:content-language:references:cc:to:subject:reply-to:from
-         :user-agent:mime-version:date:message-id:x-gm-gg:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=FHs5QmsAznY6JYFFT0GfFNt0MOtPZ8zk+n24R7ETBWM=;
-        b=tm1RGtMFV8gHZ6KELwZnAjNCMBQWjeGc7Pp7tOUE11qvqaIzfKd/12obS/au2Wro8G
-         QsjQtwsVExVvTvUK0Lujws6arP7zJEVdl5lSSkWcotAycJMXbRGWaujvhdXOzXOD6gKo
-         f6jnHFlvvAaxdOEwP0llYMToZhhtyl77ZTP3hazUE176D7rC+VLv5d2mnobliOlHy2eJ
-         erwb+kP4lwOipSW0+LaRnGU4wkKUu1SMClY62Ot6htF+xHBoBA8aw8d4yubPzS0gQDAp
-         Lg4b8oFNSXY06K21AJyVI+aWHDu1PtToLx8ia4FiZ4+bnviB79nmkzm0cEDRVjhQBB+V
-         9Qfg==
-X-Forwarded-Encrypted: i=1; AKwUvByYHuMg6NEL6ra1zCh9EqJpTdxHJilGRIAZPwynRARCZaDPvgkxWdFV95TbluRE/utt6dioCA53XyQ=@vger.kernel.org
-X-Gm-Message-State: AFq9FYJF/tyzr/keTdaGeICE4UHkaFnussMgQBYoxHBgwW+/aRJGw/uS
-	PRaCpPr5qHP4fTHgAMLneBQyoeG2zET/jFJw2/mWdMcIQO73gJPNP365rj2f0ozeUus=
-X-Gm-Gg: AYBFou3iLDwlt5wN5I+Hf0u7XZSZS69rvydYa47p7zrv3K4RYJO6OEFC3kM5naBhGAs
-	KWENkdZ3tk3Uv4IFDNmHqwVZqi+GbMc9GOdyA5tLEjK2ucKINkBlag3rtDX8MGHj11SxQ6Xrlf/
-	KWrdboqBceWaB104o/74hLGyQPNJ5hz+68qadfNWCV+4Zvsh5RsLnFUS9Z6wxL9SHvc1mZBB7TB
-	jiNg4L3JLYH7NYHkas98UD+6Tk4bBEcpnqNbh7pWezZFXlzQ8va+PCFHJlmojauBJ2m5kXHM5v4
-	Hv3bqNOLnSAfxgSCU+DCxY6kM/w/hbLvZrsFEILMVdaaLla5hXSOIqMYJrvfIwt/KaMIR+qdxPl
-	XrypDNuANKClSQYaloFBVVmZRCmZVNYCJetJ6YOwhdiPsgvkscRjXiVREm6JcCPxaltwySqGQE9
-	3hMIAhMyA3P3711ddYPFHAKcekGxW1lNT8uIBMo1l+kSd/BCB7/w4nhG4FgjQv/stXBE+TDn3iR
-	Atb0nrNQYT0F3nFIBmYKEB0wCqKPGAbaBrH/r+dvDk8Xu5NHIw=
-X-Received: by 2002:a05:600c:3e8d:b0:4a1:7701:f863 with SMTP id 5b1f17b1804b1-4a18e4aeae4mr156670605e9.15.1791797016157;
-        Mon, 12 Oct 2026 02:23:36 -0700 (PDT)
-Received: from ?IPV6:2a01:e0a:106d:1080:417e:f4c4:5b8:8c48? ([2a01:e0a:106d:1080:417e:f4c4:5b8:8c48])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4a18bb68abfsm304568075e9.0.2026.10.12.02.23.35
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 12 Oct 2026 02:23:35 -0700 (PDT)
-Message-ID: <27d5c013-9346-4159-aded-12ed8ce4e951@linaro.org>
-Date: Mon, 12 Oct 2026 11:23:34 +0200
+        d=1e100.net; s=20260707; t=1791840865; x=1792445665;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=ysmRiqiC15vYpG/lYmDhf4jWZxZpBo2Htczu87XzkBA=;
+        b=tYAMzS9ORZOR7K5xM8IjFedfDvAg5TLUI6WqEeXDjzPLcnDVvrnBAJc/zgsFIAw7sX
+         CQPAHFvVCy395W0jFXGNxiAptZhYz9QtrEBPL02qPj6aq+ma57/vgkGsx/SrVuGIssAs
+         QJHYbCAdokJCWduzMSJKYSuaqX7cajP30JZCUdAhBY/CdsQe/MfpyjngkLEfaqxq/P+x
+         J2xr9eITOUclFw2Ig5OvJPpyuGAeex9NXbyYS1Vx6pfrZlmZI6f5FP6mikDvjITzSBfd
+         yZh+NdC4jz+AWRe4r1FJmq0ZCJl4yn6yufYgM/+H7fltyAIj15iPUu3svkjP0Wa9Q3UK
+         HYag==
+X-Forwarded-Encrypted: i=1; AKwUvBzfKXyKEPsnZoajBA/eGyS0ls6olu4kAA0C5LvWuqLJFfJqTMBbTWndtHtSUQcROPmblpxd+8bOHZ8=@vger.kernel.org
+X-Gm-Message-State: AFq9FYI0apyn2slhEitlrAQWeNZwpJ+W6cC+3dffdAwSYo1+V1o5SvYz
+	kJXCaN+s36RgCw5OsSHFDRg1Wq8DNj0cG/H45pRjcRRAkgF8U3b2cjt/FGz1jXXQY4HMxKhfBeO
+	qoa5F6if/0q8haE/VvVPThIro41A1PvpgCpsFDa83
+X-Gm-Gg: AYBFou0d174sGlK8Bmc21oJs1LEJnkpcCoCBWmYzsK0Tt2fPMdeFqaBGXuyiYNmfVLJ
+	NA4URiCLPiOasQheREeoDmYqFzjm7sFY9TjIKVrpolZeA2XBQPove1LQa+OT6hGcopzC004tgoI
+	yeUi+9TPVLgIXZVXXq4wtdQdjrE95MHDDckvnoMBVH2T1/3kUY3sMY+WhMUzqy1iiUswSnBU+hm
+	Z2y3+FaAbJMlbQfn2J1UVJKQ0eqmy6SCMkzLDtzEbZkIeUUzFDrhka3EONqD8Hplr1fHGJ74Q0Z
+	c/eWJr1YOnKn2DJ0T/LmjCzUtpFOlNqqbNTSDDykx+p0P+kDMbhxLiNiiB+Wg/07ixDYQcXhf5X
+	+8g5y1oK1NAS8RXQLb3PI
+X-Received: by 2002:a05:690c:a652:b0:89a:63da:fab0 with SMTP id
+ 00721157ae682-8b07ee4c479mr23157817b3.107.1791840865295; Mon, 12 Oct 2026
+ 14:34:25 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Neil Armstrong <neil.armstrong@linaro.org>
-Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
-Subject: Re: [PATCH v3 0/4] mmc: meson-gx: honour the busy timeout for R1b
- commands
-To: iav@iav.lv, Ulf Hansson <ulfh@kernel.org>
-Cc: Kevin Hilman <khilman@baylibre.com>, Jerome Brunet
- <jbrunet@baylibre.com>,
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
- linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <20261009-meson-gx-busy-timeout-v3-0-67d0db3a8328@iav.lv>
-Content-Language: en-US, fr
-Autocrypt: addr=neil.armstrong@linaro.org; keydata=
- xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
- GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
- BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
- qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
- 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
- AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
- OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
- Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
- YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
- GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
- UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
- GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
- yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
- QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
- SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
- 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
- Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
- oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
- M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
- 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
- KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
- 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
- QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
-Organization: Linaro
-In-Reply-To: <20261009-meson-gx-busy-timeout-v3-0-67d0db3a8328@iav.lv>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <cover.1783352430.git.sean@starlabs.systems> <7acac70a471452a6ccf23b7ccc557f3c3861e0ad.1783352430.git.sean@starlabs.systems>
+ <20261005103011.03175826.michal.pecio@gmail.com>
+In-Reply-To: <20261005103011.03175826.michal.pecio@gmail.com>
+From: Sean Rhodes <sean@starlabs.systems>
+Date: Mon, 12 Oct 2026 22:34:14 +0100
+X-Gm-Features: AclHuK-f_thTWraeWd7Wac9OHXbR64A-8Mn1b6vg99UV8M_3MiTAJtpOrwS45N0
+Message-ID: <CABtds-3t+ECCPeFShq__iNa9niRAge=WOED4cHtNZAFVw6kPzw@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] misc: rtsx_usb: avoid USB I/O in runtime autosuspend
+To: Michal Pecio <michal.pecio@gmail.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ricky Wu <ricky_wu@realtek.com>, 
+	Lee Jones <lee@kernel.org>, Roger Tseng <rogerable@realtek.com>, 
+	Dan Carpenter <error27@gmail.com>, Jisheng Zhang <jszhang@kernel.org>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On 10/9/26 19:02, Igor Velkov via B4 Relay wrote:
-> For a command without data the driver programs a fixed 1024 ms into the
-> CMD_CFG timeout field and does not tell the core how long the controller
-> can wait for busy. Erase and cache flush then fail with -110 on eMMC.
-> Patch 3 fixes card_busy, which reported a busy card free; patch 4 makes
-> the core rely on it.
-> 
-> Tested on ODROID-N2+ (S922X), 256 GB eMMC, btrfs root with discard=async,
-> Armbian builds in docker as load. Without the series (7.3-rc6): 262
-> errors in 3 h and 68 in 2.5 h in two runs; the first came 4 and 43 min
-> into the build. With v1 (7.3-rc6): 0 in 16 h, 2.4 h of it under the
-> build. With v3: 0 in a 37 min kernel build and in a 20 GiB write +
-> fstrim; a sanitize went out as R1 and the core polled DAT0 for 523 ms
-> until the card was back in TRAN. On 7.1 with the previous eMMC module
-> a synthetic test (20 GiB write + fstrim) gave 48 errors without the
-> patches, 0 and 0 with them.
-> 
-> ODROID-N2 (S922X), 128 GB Kingston eMMC, 20 GiB write + fstrim:
-> without the series an erase hit the 1024 ms limit and failed with -110
-> in 3 of 3 runs. With v3, in 3 such runs and a fill of the card to 85 %
-> with rm + fstrim, 5 erases took over 1024 ms, up to 1219 ms, and
-> completed; 0 errors.
-> 
-> ODROID-HC4, SD card in SDR104 at 1.8 V: 0 errors in 5 boots.
-> 
-> The timeout is rounded up to a power of two: the field holds powers of
-> two only, and the timeout is a lower bound. MMC_CAP_WAIT_WHILE_BUSY is
-> not set: I have not checked that the controller waits for busy on every
-> R1b command, HS400 switches included.
-> 
-> ---
-> Changes in v3:
-> - Clamp cmd->busy_timeout to the range of the field before rounding it
->    up to a power of two: the rounding of a value above 2^31 overflowed
->    unsigned int (Sashiko).
-> - New patch 3: card_busy reports busy from DAT0 alone. It required
->    DAT0..3 all low and reported a busy card free (Sashiko).
-> - Link to v2: https://lore.kernel.org/r/20261008-meson-gx-busy-timeout-v2-0-8bde1adfb5b4@iav.lv
-> 
-> Changes in v2:
-> - Split into three patches, as Neil asked: name the limit of the
->    timeout field, program the R1b timeout from cmd->busy_timeout, report
->    max_busy_timeout.
-> - Link to v1: https://lore.kernel.org/r/20261008-meson-gx-busy-timeout-v1-1-d92f3c68c409@iav.lv
-> 
-> ---
-> Igor Velkov (4):
->        mmc: meson-gx: name the limit of the CMD_CFG timeout field
->        mmc: meson-gx: honour the busy timeout for R1b commands
->        mmc: meson-gx: report busy from DAT0 alone
->        mmc: meson-gx: report the longest busy wait the controller can do
-> 
->   drivers/mmc/host/meson-gx-mmc.c | 26 ++++++++++++++++++++++----
->   1 file changed, 22 insertions(+), 4 deletions(-)
-> ---
-> base-commit: fd9af27f6c2319713bb23832066585f8a59a1771
-> change-id: 20261005-meson-gx-busy-timeout-7e8e3fdcb3e3
-> 
-> Best regards,
+> How is the driver supposed to detect card insertion after the last poll
+but before the reader goes to suspend and can issue remote wakeup?
 
-This looks much better!
+The reader uses remote wake; what hardware are you testing on?
 
-For me it looks all good, so:
-Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
-
-Thanks,
-Neil
+On Mon, 5 Oct 2026 at 09:30, Michal Pecio <michal.pecio@gmail.com> wrote:
+>
+> On Mon,  6 Jul 2026 16:40:43 +0100, Sean Rhodes wrote:
+> > The runtime autosuspend callback currently queries card status and
+> > clears OCP by issuing USB register accesses. This can run from the
+> > USB runtime-PM path itself, which is the wrong place to start more
+> > device I/O.
+> >
+> > Keep a cached copy of the card-status bits from normal status reads
+> > instead. During runtime autosuspend, use that cached value only to
+> > preserve the existing Memory Stick autosuspend deferral.
+>
+> How is the driver supposed to detect card insertion after the last poll
+> but before the reader goes to suspend and can issue remote wakeup?
+>
+> This is exactly what happens now: if I insert a new card within two
+> seconds of the "card removed" message showing up (which itself happens
+> up to a second after removal) the insertion is never detected and the
+> reader enters suspend with the card in.
+>
+> It seems that not only was "starting more I/O in the runtime-PM path"
+> actually a good idea, but polling should only stop when the parent USB
+> device suspends, not the child MMC host, because there is a two second
+> delay between them. And even with this patch reverted, insertion never
+> works if USB autosuspend is simply disabled altogether.
+>
+> Also, does anyone know if there is any way to utilize the interrupt
+> endpoint instead of polling? I tried submitting a URB to it and got
+> regular responses, but only zeros. Can this be changed?
+>
+> > Do not treat raw SD_CD as an autosuspend blocker, because tray-based
+> > SD readers can assert SD_CD with an empty tray. A real SD card is
+> > protected by the SD/MMC child runtime-PM usage once powered.
+>
+> Sounds like the proper condition is to ignore the card if and only if
+> it failed to initialize and has not been swapped for a new one.
+>
+> Hence the question about interrupts: this would vastly reduce the risk
+> that a swap for an actual working card remains undetected.
+>
+> Regards,
+> Michal
