@@ -1,130 +1,180 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0855283FE5;
-	Mon, 12 Oct 2026 08:48:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B4B346F4BB
+	for <linux-mmc@vger.kernel.org>; Mon, 12 Oct 2026 09:23:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791794908; cv=none; b=i+ELZlUvTwOGp14wpHjKeGqqlKjMaBecvaEtxrq1GUiDFHOYPvP7fJbfKnKcF0bD85anteAypW5mzPYe8zJi/mzdq/IGhaCiVSDlvaNIKQJO6RTgLcS2RVjCsIkFeFZSzfzt8fElzNRf9R4dNwPMVM8el/8Sucv45Hz82uphRtU=
+	t=1791797020; cv=none; b=jZiNA1cHwnEPaorfzNL7Yr78DbBlCme3Q/Ld4kiWgYcrEvrIXwBOVeVejoHEiNzcjCxLKdBuGT6xwjeuap8DMj+Dz/TYz8dOsCrgqN+H6MMMIAPQHskmJQgQeptangeSEPnl37bSabimosPm9OmZN9IuDk6Zi1teLKWU4jmcLS4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791794908; c=relaxed/simple;
-	bh=TYFiB0tNnd/72B3ne3cOgEkkNoHhoEfvK6O7CnYI99c=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OIJPNjSMyZlW34MgupfcP+rkNtIvkCJi//r5GpNkI2dr/WGK6nrEextvPkJI/L7RwGemf9noJlxWZiMK2cTefVKI8d7DBhuJysqsh7r1gGQNEutoXVfAz32mBAEcdQusTVLg3WNJ76PuywSP3jRuMcfHvZphKuyUr5gaYhEgPG4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NYEqFSLz; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1791797020; c=relaxed/simple;
+	bh=nHzUwHePOxq2aoo85Lh6q2Qyb0zVMyTUscHVEyJRWUE=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=K2YNvCiE5v/SNwDhSrcJic5Cae8+2pe7OFyLBMq3mi36NXastjHVUy95GgC3x+Ej81zhdTV9jijQB2Q6LTFCWwxBto5c+RZniz1BqRV2yXwIq35n+18pbkn2q3UIRu/WHYQHR9bIDyQWn3YqyJhMcMgO0q/xE7/NM80Sr3/N+oY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=iv8u8IJq; arc=none smtp.client-ip=209.85.128.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NYEqFSLz"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 08C6C1F0089B;
-	Mon, 12 Oct 2026 08:48:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1791794906;
-	bh=iQ8Aespnn0g3VnguJP6XSqwJAP+gOegBjYI/7U1C5BQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=NYEqFSLzIXtJ426tZLZHou1wUySfopity/7cEarAufcL+tOCHtsDiUvHwCTGsBJP0
-	 Mr1T9BDwDGUbEwxNOaSRWp6p7uF0hCnFaAXm8SSKkjVX9uKWpq1uu9IT0bwjV86OK0
-	 7THla2Zz+WQif8deOkP5NfdJMNHiBIK5lblJZ7veSy8l7Ffx4GbFN7iZ09yElWNcQa
-	 KoPPbtg/u4EeGr64NkyT9FoKZcpPQ6EknXoeu73jHJkbGlafEKQ4Mok7N0X3xk/ygJ
-	 T1su92E3ds2+aeId4zSG6ja8RwGBZ7Z3LaRRiThhwJl6Q/O1LVusaEPXWsAbMECrw8
-	 VrAU6fqDU1K/Q==
-Date: Mon, 12 Oct 2026 10:48:23 +0200
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: tze.yee.ng@altera.com
-Cc: Tanmay Kathpalia <tanmay.kathpalia@altera.com>, 
-	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, devicetree@vger.kernel.org
-Subject: Re: [PATCH v2 3/4] dt-bindings: mmc: cdns,sd6hc: add SD6HC DDR50
- read-path tuning
-Message-ID: <20261012-futuristic-worm-of-camouflage-cc2e3e@quoll>
-References: <cover.1791459448.git.tze.yee.ng@altera.com>
- <5ea5d406b527cb9b7015693191c9bdeb9202a1bc.1791459448.git.tze.yee.ng@altera.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iv8u8IJq"
+Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-4a19cba5c14so9532115e9.3
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Oct 2026 02:23:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1791797016; x=1792401816; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:organization
+         :autocrypt:content-language:references:cc:to:subject:reply-to:from
+         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=FHs5QmsAznY6JYFFT0GfFNt0MOtPZ8zk+n24R7ETBWM=;
+        b=iv8u8IJqF1vobad+EkHp32mlRF3wQ82LRZUH71f/9sfsudbnWnnhFua5PoUloi2D5w
+         eWjJnXP/yxLkTW6fZPJHrAKxfpPyIwc6ytWAWJ6wfCVWl3MKHsa/Huvp0IRkNRIV0cla
+         +5zDNc4VMVGXCANMAbx3ovWU1BFBqyzTR+rBdHKEfQM4ZmMLtvwybY3XA7v/xKXMKmxN
+         SXZzs4Pl8pC5xFQNUgqD6bmmDVbcxEI1g2UKLJFfa59tY+XxwohSk8yFP7auSqxEE1ia
+         HQOJYl9qHSxbFcLBBUJa9E4xO0v71D8AS83OL4bvS4nvqvtrDRobKMC0h5brUGxoyizK
+         Fzgg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1791797016; x=1792401816;
+        h=content-transfer-encoding:content-type:in-reply-to:organization
+         :autocrypt:content-language:references:cc:to:subject:reply-to:from
+         :user-agent:mime-version:date:message-id:x-gm-gg:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=FHs5QmsAznY6JYFFT0GfFNt0MOtPZ8zk+n24R7ETBWM=;
+        b=tm1RGtMFV8gHZ6KELwZnAjNCMBQWjeGc7Pp7tOUE11qvqaIzfKd/12obS/au2Wro8G
+         QsjQtwsVExVvTvUK0Lujws6arP7zJEVdl5lSSkWcotAycJMXbRGWaujvhdXOzXOD6gKo
+         f6jnHFlvvAaxdOEwP0llYMToZhhtyl77ZTP3hazUE176D7rC+VLv5d2mnobliOlHy2eJ
+         erwb+kP4lwOipSW0+LaRnGU4wkKUu1SMClY62Ot6htF+xHBoBA8aw8d4yubPzS0gQDAp
+         Lg4b8oFNSXY06K21AJyVI+aWHDu1PtToLx8ia4FiZ4+bnviB79nmkzm0cEDRVjhQBB+V
+         9Qfg==
+X-Forwarded-Encrypted: i=1; AKwUvByYHuMg6NEL6ra1zCh9EqJpTdxHJilGRIAZPwynRARCZaDPvgkxWdFV95TbluRE/utt6dioCA53XyQ=@vger.kernel.org
+X-Gm-Message-State: AFq9FYJF/tyzr/keTdaGeICE4UHkaFnussMgQBYoxHBgwW+/aRJGw/uS
+	PRaCpPr5qHP4fTHgAMLneBQyoeG2zET/jFJw2/mWdMcIQO73gJPNP365rj2f0ozeUus=
+X-Gm-Gg: AYBFou3iLDwlt5wN5I+Hf0u7XZSZS69rvydYa47p7zrv3K4RYJO6OEFC3kM5naBhGAs
+	KWENkdZ3tk3Uv4IFDNmHqwVZqi+GbMc9GOdyA5tLEjK2ucKINkBlag3rtDX8MGHj11SxQ6Xrlf/
+	KWrdboqBceWaB104o/74hLGyQPNJ5hz+68qadfNWCV+4Zvsh5RsLnFUS9Z6wxL9SHvc1mZBB7TB
+	jiNg4L3JLYH7NYHkas98UD+6Tk4bBEcpnqNbh7pWezZFXlzQ8va+PCFHJlmojauBJ2m5kXHM5v4
+	Hv3bqNOLnSAfxgSCU+DCxY6kM/w/hbLvZrsFEILMVdaaLla5hXSOIqMYJrvfIwt/KaMIR+qdxPl
+	XrypDNuANKClSQYaloFBVVmZRCmZVNYCJetJ6YOwhdiPsgvkscRjXiVREm6JcCPxaltwySqGQE9
+	3hMIAhMyA3P3711ddYPFHAKcekGxW1lNT8uIBMo1l+kSd/BCB7/w4nhG4FgjQv/stXBE+TDn3iR
+	Atb0nrNQYT0F3nFIBmYKEB0wCqKPGAbaBrH/r+dvDk8Xu5NHIw=
+X-Received: by 2002:a05:600c:3e8d:b0:4a1:7701:f863 with SMTP id 5b1f17b1804b1-4a18e4aeae4mr156670605e9.15.1791797016157;
+        Mon, 12 Oct 2026 02:23:36 -0700 (PDT)
+Received: from ?IPV6:2a01:e0a:106d:1080:417e:f4c4:5b8:8c48? ([2a01:e0a:106d:1080:417e:f4c4:5b8:8c48])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4a18bb68abfsm304568075e9.0.2026.10.12.02.23.35
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 12 Oct 2026 02:23:35 -0700 (PDT)
+Message-ID: <27d5c013-9346-4159-aded-12ed8ce4e951@linaro.org>
+Date: Mon, 12 Oct 2026 11:23:34 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <5ea5d406b527cb9b7015693191c9bdeb9202a1bc.1791459448.git.tze.yee.ng@altera.com>
+User-Agent: Mozilla Thunderbird
+From: Neil Armstrong <neil.armstrong@linaro.org>
+Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
+Subject: Re: [PATCH v3 0/4] mmc: meson-gx: honour the busy timeout for R1b
+ commands
+To: iav@iav.lv, Ulf Hansson <ulfh@kernel.org>
+Cc: Kevin Hilman <khilman@baylibre.com>, Jerome Brunet
+ <jbrunet@baylibre.com>,
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+ linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org,
+ linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20261009-meson-gx-busy-timeout-v3-0-67d0db3a8328@iav.lv>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <20261009-meson-gx-busy-timeout-v3-0-67d0db3a8328@iav.lv>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Fri, Oct 09, 2026 at 10:14:50AM +0800, tze.yee.ng@altera.com wrote:
-> From: Tze Yee Ng <tze.yee.ng@altera.com>
+On 10/9/26 19:02, Igor Velkov via B4 Relay wrote:
+> For a command without data the driver programs a fixed 1024 ms into the
+> CMD_CFG timeout field and does not tell the core how long the controller
+> can wait for busy. Erase and cache flush then fail with -110 on eMMC.
+> Patch 3 fixes card_busy, which reported a busy card free; patch 4 makes
+> the core rely on it.
 > 
-> DDR50 has no CMD19 tuning, so the SD6HC read path must be centred by
-> static, board/SoC-characterised PHY settings. Add three optional SD6HC
-> properties for the extended-read DDR modes (SD DDR50 and eMMC DDR52):
+> Tested on ODROID-N2+ (S922X), 256 GB eMMC, btrfs root with discard=async,
+> Armbian builds in docker as load. Without the series (7.3-rc6): 262
+> errors in 3 h and 68 in 2.5 h in two runs; the first came 4 and 43 min
+> into the build. With v1 (7.3-rc6): 0 in 16 h, 2.4 h of it under the
+> build. With v3: 0 in a 37 min kernel build and in a 20 GiB write +
+> fstrim; a sanitize went out as R1 and the core polled DAT0 for 523 ms
+> until the card was back in TRAN. On 7.1 with the previous eMMC module
+> a synthetic test (20 GiB write + fstrim) gave 48 errors without the
+> patches, 0 and 0 with them.
 > 
->   - cdns,ddr-read-dqs-delay-ps: read-DQS delay in picoseconds that centres
->     the read eye (default 0).
->   - cdns,ddr-no-lpbk-dqs:       disable the loopback DQS read strobe and
->     use the fabricated phony DQS instead. Loopback DQS is the recommended
->     default; set this only on boards that need the phony DQS read path.
->   - cdns,ddr-phony-dqs-timing:  PHY_CTRL[9:4] phony DQS assertion timing.
->     The driver derives this from the RE# pulse width; this property
->     overrides the computed value for boards whose flight time shifts the
->     DDR data return.
+> ODROID-N2 (S922X), 128 GB Kingston eMMC, 20 GiB write + fstrim:
+> without the series an erase hit the 1024 ms limit and failed with -110
+> in 3 of 3 runs. With v3, in 3 such runs and a fill of the card to 85 %
+> with rm + fstrim, 5 erases took over 1024 ms, up to 1219 ms, and
+> completed; 0 errors.
 > 
-> Signed-off-by: Tze Yee Ng <tze.yee.ng@altera.com>
+> ODROID-HC4, SD card in SDR104 at 1.8 V: 0 errors in 5 boots.
+> 
+> The timeout is rounded up to a power of two: the field holds powers of
+> two only, and the timeout is a lower bound. MMC_CAP_WAIT_WHILE_BUSY is
+> not set: I have not checked that the controller waits for busy on every
+> R1b command, HS400 switches included.
+> 
 > ---
+> Changes in v3:
+> - Clamp cmd->busy_timeout to the range of the field before rounding it
+>    up to a power of two: the rounding of a value above 2^31 overflowed
+>    unsigned int (Sashiko).
+> - New patch 3: card_busy reports busy from DAT0 alone. It required
+>    DAT0..3 all low and reported a busy card free (Sashiko).
+> - Link to v2: https://lore.kernel.org/r/20261008-meson-gx-busy-timeout-v2-0-8bde1adfb5b4@iav.lv
+> 
 > Changes in v2:
-> - Retitled to "dt-bindings: mmc: cdns,sd6hc:". (Tanmay Kathpalia)
-> - Renamed cdns,ddr50-* -> cdns,ddr-*. (Tanmay Kathpalia)
-> - cdns,ddr-read-dqs-delay-ps is now in picoseconds. (Krzysztof Kozlowski)
-> - Replaced the read-DQS source selector with a cdns,ddr-no-lpbk-dqs
->   boolean. (Krzysztof Kozlowski)
-> - Reworded the phony-dqs-timing text. (Krzysztof Kozlowski, 
->   Tanmay Kathpalia)
-> - Dropped the SD4HC note. (Tanmay Kathpalia)
-> - Scope the new properties to the extended-read DDR modes (DDR50 and
->   DDR52). (Tanmay Kathpalia)
-
-There are no lore links in the cover letter to previous versions and b4
-diff fails.
-
-b4 diff 'cover.1791459448.git.tze.yee.ng@altera.com'
-Looking up cover.1791459448.git.tze.yee.ng@altera.com
-Checking for older revisions
-Grabbing search results from lore.kernel.org
----
-Analyzing 5 messages in the thread
-Could not find lower series to compare against.
-
-Why aren't you using b4 to send patches? Why making it difficult for us?
-
-> ---
->  .../devicetree/bindings/mmc/cdns,sd6hc.yaml   | 30 +++++++++++++++++++
->  1 file changed, 30 insertions(+)
+> - Split into three patches, as Neil asked: name the limit of the
+>    timeout field, program the R1b timeout from cmd->busy_timeout, report
+>    max_busy_timeout.
+> - Link to v1: https://lore.kernel.org/r/20261008-meson-gx-busy-timeout-v1-1-d92f3c68c409@iav.lv
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sd6hc.yaml b/Documentation/devicetree/bindings/mmc/cdns,sd6hc.yaml
-> index d5ea2717904b..911ce58f8dab 100644
-> --- a/Documentation/devicetree/bindings/mmc/cdns,sd6hc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/cdns,sd6hc.yaml
-> @@ -74,6 +74,36 @@ properties:
->      maximum: 1000
->      default: 24
->  
-> +  cdns,ddr-read-dqs-delay-ps:
-> +    description: >
-> +      Read-DQS delay (DLL_SLAVE[7:0]) in picoseconds that centres the read
-> +      eye in the extended-read DDR modes (SD DDR50, eMMC DDR52), which have
-> +      no CMD19 tuning. The PHY runs the DLL bypassed in these modes, so the
-> +      driver converts this to delay elements (divided by
-> +      cdns,delay-element-ps). The 8-bit field holds at most 255 elements;
-> +      larger values are clamped to that limit.
-> +    minimum: 0
+> ---
+> Igor Velkov (4):
+>        mmc: meson-gx: name the limit of the CMD_CFG timeout field
+>        mmc: meson-gx: honour the busy timeout for R1b commands
+>        mmc: meson-gx: report busy from DAT0 alone
+>        mmc: meson-gx: report the longest busy wait the controller can do
+> 
+>   drivers/mmc/host/meson-gx-mmc.c | 26 ++++++++++++++++++++++----
+>   1 file changed, 22 insertions(+), 4 deletions(-)
+> ---
+> base-commit: fd9af27f6c2319713bb23832066585f8a59a1771
+> change-id: 20261005-meson-gx-busy-timeout-7e8e3fdcb3e3
+> 
+> Best regards,
 
-Drop, 0 is the default.
+This looks much better!
 
-Where is the maximum value?
+For me it looks all good, so:
+Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
 
-> +    default: 0
-> +
-> +  cdns,ddr-no-lpbk-dqs:
-> +    description: >
-
-Drop > everywhere
-
-Best regards,
-Krzysztof
-
+Thanks,
+Neil
