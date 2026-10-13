@@ -1,107 +1,126 @@
-Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
+Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A221A4F85B6
-	for <linux-mmc@vger.kernel.org>; Tue, 13 Oct 2026 12:27:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.45
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791894465; cv=none; b=CdAnw0+HwHCIndedZvzAfdbiO+r2uWIChonSvNu2n6vOWll/WbcEASNtDcs+9OZargkuakbQamAMzHGOBcU3lztaD25HMqsRjPtOL+K/YClyxpaC4DrCphUzxLtPHBbTflgtkacdo8BDJkKQHOMQJd7XnhrbaTo39xpqgEOBElA=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791894465; c=relaxed/simple;
-	bh=zQ5+4ylMkV7zI54Lss3PN1OlS39taIPE6dxZocdAmZs=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=GJz4mvrje2JRXY/FsRIDcgWuvOWrBlqHE/A1UGeQnOwOJR2Mjo8fhErazrBmug1CjFzxcelylEbQyTFk7J/sUK49+MCxUXOzOOkbA+RJUPNVgl3ZR/FcWOrBz3qdPL94NLw+lzhqNq5vJCRmq45e4PufP4/37NP7eEtwqIhlXsA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gcp7xIp1; arc=none smtp.client-ip=209.85.218.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C01584EF122
+	for <linux-mmc@vger.kernel.org>; Tue, 13 Oct 2026 12:31:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.174
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1791894701; cv=pass; b=Q0zlFnanAakq0mVzHPRVrO9BVk+ZbQ3Ju34Ywfvn+4ANCl4TzyjoapM38jrUOxg0pKAws61DjlI7AG6cmInhnOaRfy8b7IztYKGD9lbywVwhK0YOzEMWxn70QHxC8aZLY/STdLU5awpbVFi6Da4RltcHA+tV68FfbkdfqyiCD64=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1791894701; c=relaxed/simple;
+	bh=bQuvyd+lLMLpP+/naLydRfyvKQ0tICbP+2oXkYg2JWE=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=D31vZ7aL1wi5jZ5oIW0A1IHthgvjhToZjNlz7Y1oMyYIclSUddxURJ6GnwAocCFdsEcvMEDlRiR+RTHEbtI3jIsU5xiW48pK4GG80CmxpYPAz6Q5ke1aGtBnmyOlw3vqR7/UvChL3TQGlKXEoX+st4e322ApZfGNiFkE+qdUi4c=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems; spf=pass smtp.mailfrom=starlabs.systems; dkim=pass (2048-bit key) header.d=starlabs-systems.20251104.gappssmtp.com header.i=@starlabs-systems.20251104.gappssmtp.com header.b=rMGIzNtm; arc=pass smtp.client-ip=209.85.128.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starlabs.systems
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gcp7xIp1"
-Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-c3156e7705cso471165066b.1
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Oct 2026 05:27:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=starlabs-systems.20251104.gappssmtp.com header.i=@starlabs-systems.20251104.gappssmtp.com header.b="rMGIzNtm"
+Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-8acda240937so20650197b3.3
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Oct 2026 05:31:39 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1791894698; cv=none;
+        d=google.com; s=arc-20260327;
+        b=VAUYeJy6j/tHm+doiPjTA+ZHP3ByM+SFjsNAWX/3nmqBGLoKHym6bP7CxdklvlT6J3
+         GguRdgsXv6FuVBfLhxsbtcFJ1UWINiua8xncRk3A8x853V5Dl94vt6ZAoE7dLTdiJDsX
+         7eZcaYENwfNYDvL8lzRFLoWljXAa5ricwcU0cZFj5r+ESV/nPeKQ4+POPLxBWq4Wsvo4
+         qMJMDCWlEvESU1swAOasc9RVlUPTrcxO6CjXsTTjYCQ4FKDmhm4qKYAH/EY43ikTpjZM
+         cyI0jZW81pYn152L1zw7WFC81vw4PE8d0gpADAdzARwm/767BNXrmWCACFEihymVx1F3
+         B89w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=bQuvyd+lLMLpP+/naLydRfyvKQ0tICbP+2oXkYg2JWE=;
+        fh=/XAxZ0cSkKaP93no3ENmFoN5dWDQcwuP7My8cUi5WcA=;
+        b=RaKh5U9ubQoXtHEI85OkDG9JqakatU2x7ysqmAPsWsuxrmImFvqfcS9VrmZhlSxIf0
+         7WZo/CqZ3tReCOfm3HA94rxarCqL5OQxljp5DYcTjT4nQjNXSm8+dN5oTPlMUubMgFdk
+         pzAmaeosItKU5XpmvmGaObDm6vSCpQge7T+bLdkq6bWhLcT7KinOia+kqfRNdPhnWChL
+         YqAlS8FEpG5ou8loWJWN1y1bUOCxtOXRVWLWpJytaoi1SxUu76kJkAf07GdpyfP/AjiI
+         QLp9Wc/aL2xJTLQaOYGBehlYTfc0Qb9XBpIAYDJrAVid1M2+WP/ovl08Q3usoQWKXiTN
+         CXlg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1791894462; x=1792499262; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:mime-version:references
-         :in-reply-to:message-id:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=wMfuPHIBKRtt7D2U1S+lSZH4kD0V5/KNbgrrq+UgAl0=;
-        b=gcp7xIp1tI1sMQewdEAeo2hHL7l+MJMRTws0nzpYHelV4ZN3hAphmjDWeRPmtIKKlv
-         n7s3Hl8TDkVQcCiK5bVaIJUHbAFNioG0jrIlc5IYzhoVHu3qYZqmVzV7Qq1RQpRam9BA
-         mg1zTvmr/xcOASUWx2xhz682VNdBidEa+HMVGnjIKOL+Zy0TxWibH4L//oZNynQ7GUER
-         oRS57xADN7aN6iar/HND2oR7h7DH4iF2w7sqtkveV0IOPfdmcVOtrDm+GSqHCmM3LmkB
-         kyunxhsT6bQEXP8zd3TpjC+2FEHXb8MGgAlRYPeV0Kf53d/ZXamtQQJq0XWnGm1xqqlX
-         oqEA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791894462; x=1792499262;
-        h=content-transfer-encoding:content-type:mime-version:references
-         :in-reply-to:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+        d=starlabs-systems.20251104.gappssmtp.com; s=20251104; t=1791894698; x=1792499498; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=wMfuPHIBKRtt7D2U1S+lSZH4kD0V5/KNbgrrq+UgAl0=;
-        b=yqS2f4mFr09CGRIeINBN48IM9+gH2ag7nHMlAkZNOOy+btmn4kqa/z6kEvfO8DRMsv
-         EHZljnTkhrCQI2qlbVaZn8Wp70JmzIvwjLmT7P5ahqjrTWMnJK3/Yu5WnOPDiTIhE2A1
-         PNlKwcG5k2WlsP3GIXawJeRTnsH1PSvX54R0sF+/bvXz9B20j4Zh5sAMf5fANmJpUNxG
-         8YEsTLI2UvxRs1GpOQl7RAuDWK4WVTAleQogk4WjBlrVxmw5SsMycCx/yIVFZ/FfDe/O
-         kc0Icsy6ovM4fnb5TTPNvRclhnmzr8h0Fx9xE+sM64Z55KltbCKYGz/cA64TT3OAtJ5S
-         bS4Q==
-X-Forwarded-Encrypted: i=1; AKwUvBzA8INdn1YmzIYkzrd6/wO8qkCGPTtYJ2jK4ggBlGxbgiNp871sACcCsH9b41/oGEMhKrjmc6dOJVM=@vger.kernel.org
-X-Gm-Message-State: AFq9FYKAkQ5ZI/lIOzOMYhzncF66XoZLDKZGTYd7KGQ+OIiWrrwJSc9U
-	yh1dxo0bqkEvQNnqZE6b5ZfPjD6OAzIULJfzl6mUgsYIjVC4fsDnLR7G
-X-Gm-Gg: AYBFou32Yea04APcGd6ni8xQ2I4/TXfDIruWhQr41LN2K4KDsOTA5k55pbknbAxWlut
-	ah69sy2G2wEJ8vPI1VINFd8/N7Ku9KRrUTSG+Ly15rnlMAJJbxaAkr1o5ROuc9rqG0+mpY2RD5c
-	AYSD2kKEdMbZIIaM0yDS+2EqCS2BmlfhkKWzTrBLSzSCp/djL2sRUZCDLlILC+8qSmia2QojO20
-	4iUSyT1yKh1utVjxdm3hMwqFU5wuUhWLPoh0H6Fj86EnK+HwcuScpS3KOrVQvk3dya9EMBnJxFs
-	YepytzD5H2lnj/BB6AKqFqj5T9rvv56vAthHpx6BMqMw1nlUxLo9bEzq7IRwJkz572Mz+gtN+/e
-	PN20beHJMB3+64gnsM06ZznA81dtuEjroKVaO1Aaw+S+cco4uYkk8T5rZ6LE1c0Dc3L3wg9dUvb
-	GZHDTJhzHYD+e8C1cVXF/ClaQzY/I8AwwKgMbyEdZOx/0OJeI0lzhfgWvkvo8HPz9CByOtkEJaR
-	vYag+2SiA==
-X-Received: by 2002:a17:907:3d89:b0:c2a:fd39:f23b with SMTP id a640c23a62f3a-c31aa00e119mr1216678266b.24.1791894461702;
-        Tue, 13 Oct 2026 05:27:41 -0700 (PDT)
-Received: from foxbook (bez186.neoplus.adsl.tpnet.pl. [83.28.37.186])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c31d8510ce1sm518041066b.19.2026.10.13.05.27.40
-        (version=TLS1_2 cipher=AES128-SHA bits=128/128);
-        Tue, 13 Oct 2026 05:27:41 -0700 (PDT)
-Date: Tue, 13 Oct 2026 14:27:37 +0200
-From: Michal Pecio <michal.pecio@gmail.com>
-To: Sean Rhodes <sean@starlabs.systems>
-Cc: Ulf Hansson <ulfh@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Greg
- Kroah-Hartman <gregkh@linuxfoundation.org>, Ricky Wu
- <ricky_wu@realtek.com>, Lee Jones <lee@kernel.org>, Roger Tseng
- <rogerable@realtek.com>, Dan Carpenter <error27@gmail.com>, Jisheng Zhang
- <jszhang@kernel.org>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 1/2] misc: rtsx_usb: avoid USB I/O in runtime
- autosuspend
-Message-ID: <20261013142737.7b10a5b0.michal.pecio@gmail.com>
-In-Reply-To: <CABtds-3t+ECCPeFShq__iNa9niRAge=WOED4cHtNZAFVw6kPzw@mail.gmail.com>
-References: <cover.1783352430.git.sean@starlabs.systems>
-	<7acac70a471452a6ccf23b7ccc557f3c3861e0ad.1783352430.git.sean@starlabs.systems>
-	<20261005103011.03175826.michal.pecio@gmail.com>
-	<CABtds-3t+ECCPeFShq__iNa9niRAge=WOED4cHtNZAFVw6kPzw@mail.gmail.com>
+        bh=bQuvyd+lLMLpP+/naLydRfyvKQ0tICbP+2oXkYg2JWE=;
+        b=rMGIzNtmZ2LTP4fb+HRn7UnXWzwpEnMhQ83qiWXYn4CN/oEBf8B5Np3sMm98DEy2qb
+         ftdZAMfGP4YjCTeVCvJIfOgolt4iXYJtaH/x0+cSIHZLt+yhdVS56BecrrP+Z6YQ7Cts
+         KHF0AJOavpzubN5VRn+z3pjQpZB6k4o8grKu0n6LrlPOHC6TFCIjH8Jc+WwGVQz3OdZ3
+         d4abxQdpX7+Og2N1FRS0MHgcYbmO7G9OPyQxd7+nZSTVIJOzT06kKGu1kmKLDtZbp8Lr
+         hXcwF1HJaPcb+WuiUAVuZ50Iz6xr7FQyGyiTCRw0/JCbeJYKtfR7O9gNMHsVB+TMi5w9
+         BWqA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1791894698; x=1792499498;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=bQuvyd+lLMLpP+/naLydRfyvKQ0tICbP+2oXkYg2JWE=;
+        b=IqoRtrEW0Yg1xqGHjnijtU+l89r/5YLuA49g5qoV8tB2fGIKWgk+AutjSR9YzRWlJX
+         RYnSIiGss7q6p6YvTtwGiMCmE8emyHIcu4C+oSarYqJsbit1cQLdQJxQHENMe1CUebTb
+         boFmLm3Sz2nmh6W6F6yXivatTT3KBpkWpxwyJOdOu4EHyt7qmtyNYlnSyLdzTBxxZpj6
+         ADAWJFrHyVmnaHS/+fXPgXfaoHiMu6oXVNO3XM+Qrgq0ZHcmtNbPDZl6R9K/QxuluIJY
+         8/lNgHI3UbzulqZyS95MD7KKLo9qZdKZje1IF10ACJGfc1cjBPlYaM5jXFqABNPsUGPp
+         2sHQ==
+X-Forwarded-Encrypted: i=1; AKwUvBzJHcq+1BXTQw1tkTCOGOvj1ekJASNAWq4oqtA11zryYAi8uGmmK6FhBCBgccaaGFUs9lhmzqBbd3E=@vger.kernel.org
+X-Gm-Message-State: AFq9FYI6XEZJLwuVAgwop2wWC1twe1CERc4zgtB3zmylPffN7/FAAwMz
+	RlHHyEBkNRVOkcI1ho/ZUA9aq8XspPEQ6w5LQJbTb41YW4Fltmba9gMlJfdN/QP1fJDeYD6HUAL
+	2Rz92Wk0qdS+LEzKfRc5knvtXjRMVJ+BbChKfs/er
+X-Gm-Gg: AYBFou0tb36EfRomKxomQJTTQQu9TuLoxsNsdGHfkr0YvtTI8WILkrVL4WetPEMvfDO
+	L7tw6mv4E7udXBW1PiuJf9W5+0qPvKn8Dj11g0lCcei+qn4K4uK2CQ5uyv28ASphVi8A3A7lCRn
+	u0gjhhStsgs+9xIYC4uCBPKWcgAL8Emc+L+UHUfXCL8RvH/fWcd97rXIWcx0UKVIs2ncAThJTwt
+	Mroh8vyMfSrAS2B/827DG8hByEjNQKEWXy0Qb/R9WmwS+40N6OezEzEhxkCI7tMtYwUE18K343o
+	ERNDxRujIUTU4Wsp0URMmUE3gGs5/RleY6zDCAHnyXR+RWuk2ae1812ku1kEC5IoQRPofnNENxB
+	i5ftEz26UZZk=
+X-Received: by 2002:a05:690e:1c1c:b0:676:85ca:71a0 with SMTP id
+ 956f58d0204a3-67936297c42mr4229864d50.112.1791894698388; Tue, 13 Oct 2026
+ 05:31:38 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+References: <cover.1783352430.git.sean@starlabs.systems> <7acac70a471452a6ccf23b7ccc557f3c3861e0ad.1783352430.git.sean@starlabs.systems>
+ <20261005103011.03175826.michal.pecio@gmail.com> <CABtds-3t+ECCPeFShq__iNa9niRAge=WOED4cHtNZAFVw6kPzw@mail.gmail.com>
+ <20261013142737.7b10a5b0.michal.pecio@gmail.com>
+In-Reply-To: <20261013142737.7b10a5b0.michal.pecio@gmail.com>
+From: Sean Rhodes <sean@starlabs.systems>
+Date: Tue, 13 Oct 2026 13:31:26 +0100
+X-Gm-Features: AclHuK-gfZVil9yXDIcZhUFuimzZc6z2C6fJBrCjyXvykiGCNcXOlXVVejAHGvM
+Message-ID: <CABtds-0s8Co-qWk0xm=R1pdz3JyV_GyaiwYzgxS9g2tFwtHRzg@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] misc: rtsx_usb: avoid USB I/O in runtime autosuspend
+To: Michal Pecio <michal.pecio@gmail.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ricky Wu <ricky_wu@realtek.com>, 
+	Lee Jones <lee@kernel.org>, Roger Tseng <rogerable@realtek.com>, 
+	Dan Carpenter <error27@gmail.com>, Jisheng Zhang <jszhang@kernel.org>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 12 Oct 2026 22:34:14 +0100, Sean Rhodes wrote:
-> > How is the driver supposed to detect card insertion after the last
-> > poll but before the reader goes to suspend and can issue remote
-> > wakeup?
-> 
-> The reader uses remote wake; what hardware are you testing on?
+> I have a card reader with RTS5178 and a simple SD slot, no tray.
 
-I have a card reader with RTS5178 and a simple SD slot, no tray.
+Thanks, but what is that attached to? i.e. Arrow Lake
 
-Remote wake doesn't work when the reader is not suspended, so before
-suspending we used to check one last time that no new card has been
-inserted. This made sense.
-
-Any delay between the last time the reader is polled (by anyone, for
-any reason) and actually placed in suspend is a time when a new card
-can be inserted and completely undetected, forever.
-
-Regards,
-Michal
+On Tue, 13 Oct 2026 at 13:27, Michal Pecio <michal.pecio@gmail.com> wrote:
+>
+> On Mon, 12 Oct 2026 22:34:14 +0100, Sean Rhodes wrote:
+> > > How is the driver supposed to detect card insertion after the last
+> > > poll but before the reader goes to suspend and can issue remote
+> > > wakeup?
+> >
+> > The reader uses remote wake; what hardware are you testing on?
+>
+> I have a card reader with RTS5178 and a simple SD slot, no tray.
+>
+> Remote wake doesn't work when the reader is not suspended, so before
+> suspending we used to check one last time that no new card has been
+> inserted. This made sense.
+>
+> Any delay between the last time the reader is polled (by anyone, for
+> any reason) and actually placed in suspend is a time when a new card
+> can be inserted and completely undetected, forever.
+>
+> Regards,
+> Michal
