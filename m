@@ -1,128 +1,208 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7CE934908D1
-	for <linux-mmc@vger.kernel.org>; Wed, 14 Oct 2026 20:25:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8CC440801E;
+	Wed, 14 Oct 2026 20:28:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.154.123
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792009504; cv=none; b=sFOPk/bdLMnrT8dloCQyhaBUKgN3+BkfLMboP7Z4RWFIKR8gKrFiqN2XGxyPL6LnHh3gHJjd20wouSBoJYzHouogJyEJpTEb+pL46sM53ZCy5o61bURHK7gXyio0D54nFIPtXoAwRpvyqSWSJ2nZIQHejUSSbLdpuhJ7B0e6dgQ=
+	t=1792009708; cv=none; b=GswmAavocp42QI0GD/1yx+wTPtUAqm731NQGNzhX1ECn7bOHklG90/TX8r615jYiA/Tzi5h/veUY7t8xS7/4FjNXwchjgc89zLCsol1usWQ0+L+68koIMDj0woQ30OiZEO9r8Z+uGv+Ulz6RB7VoTUiAR3KMrqCMOB6Q2I/U0yo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792009504; c=relaxed/simple;
-	bh=nW/2CYUliCpoe36rO5FycOqU8CpMiHRemZxrB0wzElM=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=TD5oYWDTnBtxpHijibIYZcXwBRbZJ2qLA7ukSc/JtOPDpFaLP4ngzEz4eucuqrRKZxO075o4XskUS0BHFEj+8cL+XIiv2zsuvIII3CbNr9LRwQcgPZcSvFUPT5x86/EV7V3kDhZKPWd7sHNYrsJTocM47cI2PkP/n8MNTdZx8q8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Lf8tveLM; arc=none smtp.client-ip=209.85.221.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1792009708; c=relaxed/simple;
+	bh=c5kTXmOvgSqIYT6Hs/HhiyaSTu6YGk6E/XaeA6AWj08=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=fE0cDR7YB+PYk0BQt1N6vBwCUoAcIoTGMFv+7zHITe7DpT70sMHYeJ71AB2AfGJdPlHgqURb5A8ZYi9xz7vzafw55r3PHUzxkjAdzTXavQX80rOUhg+VFTdn0lWyauhhC3jHjvIWirNA84jbhm+grDqa78KmRO5O00jbgVVA9Cg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=mD2gC9Mf; arc=none smtp.client-ip=68.232.154.123
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Lf8tveLM"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-48b02b1b4cfso4178629f8f.0
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Oct 2026 13:25:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1792009502; x=1792614302; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:mime-version:references
-         :in-reply-to:message-id:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=4L9YzOnth9DsCZixyFf9BkVDmJ4QHvH7yn8J2G8kxV0=;
-        b=Lf8tveLMp10X8aWoR9M+p2I/13SqdLcF3VK2MBoyupTZt3rVV2gZJWMvREr4FiJcEw
-         BgAWqFosNOqKarUtvLZs0vwH28YT0sfjOHcwctjKvFzEMJeEko9jxbkLtkuX1l3MmbKp
-         k5684USAWaLPvF0hkw7Z+h2aHHT3NKUqctVy3OfJKl0B0QxRyxuvIgFPy1HxvOyuJAhU
-         bXdjmF19gVocHCTLay+wA2k/UqYz4arSuHxZLRXWvxrcAdjvpXe8yjNzv5/Bi3ujFAD4
-         k4BIm9AGBdCQvPrxQs37dT4d48Sxee+zD+pX4HHJXQFkZ7fiWmxF84eE5kYFKU42ifwe
-         0G+g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792009502; x=1792614302;
-        h=content-transfer-encoding:content-type:mime-version:references
-         :in-reply-to:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=4L9YzOnth9DsCZixyFf9BkVDmJ4QHvH7yn8J2G8kxV0=;
-        b=Su1ZKF6Uwexvbj3I2eUcCf5ig5anhKhxSg83O7gYMaE60Qt9qN9USyDgvDQJLGgLcM
-         ftC1izHRUk/HqP3FWDE2ZsFpsPxT6L4O9lZ7VlQYLsvDv/+mfJ1QDanH9yynknIgSRQA
-         TYUDk7DRAXtwZrAsVqbX43NlGfSfugMprIgk9B2qlgjdSYbyXiormN8GPHSUfUqUNsEI
-         MtFOpPKDuxozmsSrBGs1tFxnFviSozupxoqlomQWfaU3dWFsmA/UYp4omo4WXFHxRJMV
-         Kg2E3UBWyEd7AgLzmSL6Y3VBF+jmCS67bfxl2u7W/XqXAX0k2m1N6LOg7l/Hzh0AIY8q
-         Lyiw==
-X-Forwarded-Encrypted: i=1; AKwUvBx/ZcQLkbrtr2mxNibkpUt8ckGDlcE7ndW8zVUhesbzEu8Ik2VAJT5yW2WGiSvTU8M3Uf8bZQjszcM=@vger.kernel.org
-X-Gm-Message-State: AFq9FYIqywdYcrJkf2jzrhcs7WOuhvNRQbCgR46HPNRx0g2lj6C6ZnPC
-	Ki+lnenIfczRXCPk9micaqRxntLbug2Tme+TbZwuam7bkEn43ZJSglVH
-X-Gm-Gg: AYBFou3vSnxaJElmeiZlugamrIdi9CwO80/ygEIgHcTtyu70GwgGUFFXP39YcRbSS5u
-	uHYZGpB8h6jFWhDJwGygh6LYgM7TZ2yUOzthoflBiFXCfjS0eijZFZ3SEH3e1yMVS+e4+Q6GUHW
-	1Mdfv3Z9GRgVUL3rcmnoervIYNd5d2A5zyymaA7krUwUJWr2YlRkOllMvUpuGt8r/DcGbWuL0N3
-	FYIGFiK3d2Gji+iLuTiS6IkTxQV1zCQBQPMv/q0E2fUeapHR8msNm+NDsPqLMHWT5j8H9HXJueQ
-	VG0rD36MVk+3k98ou7IV0T3p+YAevUBgci1Xe7e8/7Xl0KSRtwp1U4foKO/FAGRY0IT/+rE4ZLS
-	w9ne4LYJdWpYmnCjT0JEAAnU/ulWepg5WoSv1KTM9sud4SrvKeu1db8GujEQ8UrUBianUtJPcgs
-	mB3igQh5twfNqlpByq9kpQE+r1rkP3K9i0USh48d7CAALeQffQlLdZwtyQ8sEBXEzUGYXR4N3dy
-	DwQddQa7SutRPlwlQLf
-X-Received: by 2002:a05:6000:dd1:b0:487:13a9:80d with SMTP id ffacd0b85a97d-48dbaae342fmr27653662f8f.10.1792009501573;
-        Wed, 14 Oct 2026 13:25:01 -0700 (PDT)
-Received: from foxbook (bez186.neoplus.adsl.tpnet.pl. [83.28.37.186])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48de0ab4f34sm14448527f8f.28.2026.10.14.13.25.00
-        (version=TLS1_2 cipher=AES128-SHA bits=128/128);
-        Wed, 14 Oct 2026 13:25:01 -0700 (PDT)
-Date: Wed, 14 Oct 2026 22:24:55 +0200
-From: Michal Pecio <michal.pecio@gmail.com>
-To: Sean Rhodes <sean@starlabs.systems>
-Cc: Ulf Hansson <ulfh@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Greg
- Kroah-Hartman <gregkh@linuxfoundation.org>, Ricky Wu
- <ricky_wu@realtek.com>, Lee Jones <lee@kernel.org>, Roger Tseng
- <rogerable@realtek.com>, Dan Carpenter <error27@gmail.com>, Jisheng Zhang
- <jszhang@kernel.org>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 1/2] misc: rtsx_usb: avoid USB I/O in runtime
- autosuspend
-Message-ID: <20261014222455.10595a68.michal.pecio@gmail.com>
-In-Reply-To: <CABtds-1kHYrA_RtTtUh0jmx7jC6=08vDce5pREWhtv_cxGAgAA@mail.gmail.com>
-References: <cover.1783352430.git.sean@starlabs.systems>
-	<7acac70a471452a6ccf23b7ccc557f3c3861e0ad.1783352430.git.sean@starlabs.systems>
-	<20261005103011.03175826.michal.pecio@gmail.com>
-	<CABtds-3t+ECCPeFShq__iNa9niRAge=WOED4cHtNZAFVw6kPzw@mail.gmail.com>
-	<20261013142737.7b10a5b0.michal.pecio@gmail.com>
-	<CABtds-0s8Co-qWk0xm=R1pdz3JyV_GyaiwYzgxS9g2tFwtHRzg@mail.gmail.com>
-	<20261013143836.76ad7bf4.michal.pecio@gmail.com>
-	<CABtds-1kHYrA_RtTtUh0jmx7jC6=08vDce5pREWhtv_cxGAgAA@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="mD2gC9Mf"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1792009707; x=1823545707;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=c5kTXmOvgSqIYT6Hs/HhiyaSTu6YGk6E/XaeA6AWj08=;
+  b=mD2gC9MfOZNwaRuCRa6g8eVL2IlUkNzL3BsAhJnaAWn79dAT4IDgu+51
+   07xqNSHFzHuOhaTRuPoSTcd96ZIfHwa1UuoXCnbL900/0jbPnGL17T5Z7
+   uZuVD4jyI0naIvcNpIp69wsDCkWeEV7NhK8hmH+k7I97phkUllH4fWtg0
+   BQL8tWFZp0u/7IvLrIuxast/HfEIpxvflC6ieLBEmAK4/SVYXLH8AyYBP
+   KBjxWluU6RlJ7ByZB8qRbJnJ2wVnIfct8CnV/z/lAwD76IAFqEAslHSxx
+   DduqUB2dRDu1Gz9QudxrjvBbLpDbkrJt0qL/71JxUUdCYSJS0xxzFBzp9
+   A==;
+X-CSE-ConnectionGUID: zv7YhBbySSSm7hs3J5Vahw==
+X-CSE-MsgGUID: v9B0qLJ1TgmQYWoK/O8m6A==
+X-IronPort-AV: E=Sophos;i="6.27,158,1787036400"; 
+   d="scan'208";a="65328629"
+X-Amp-Result: SKIPPED(no attachment in message)
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa2.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Oct 2026 13:28:26 -0700
+Received: from chn-vm-ex01.mchp-main.com (10.10.87.71) by
+ chn-vm-ex3.mchp-main.com (10.10.87.32) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.2.2562.49; Wed, 14 Oct 2026 13:28:25 -0700
+Received: from ROU-LL-M51280.microchip.com (10.10.85.11) by
+ chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server id
+ 15.1.2507.58 via Frontend Transport; Wed, 14 Oct 2026 13:28:22 -0700
+From: Aubin Constans <aubin.constans@microchip.com>
+To: Ulf Hansson <ulfh@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
+	Eugen Hristev <ehristev@kernel.org>, Claudiu Beznea
+	<claudiu.beznea@tuxon.dev>, Romain Sioen <romain.sioen@microchip.com>,
+	Nicolas Ferre <nicolas.ferre@microchip.com>, Ludovic Desroches
+	<ludovic.desroches@microchip.com>, Robert Marko <robert.marko@sartura.hr>
+CC: Alexandre Belloni <alexandre.belloni@bootlin.com>, Ryan Wanner
+	<ryan.wanner@microchip.com>, <linux-mmc@vger.kernel.org>,
+	<linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
+	"Aubin Constans" <aubin.constans@microchip.com>
+Subject: [PATCH v2] mmc: sdhci-of-at91: disable selectively clocks on pm runtime
+Date: Wed, 14 Oct 2026 22:26:18 +0200
+Message-ID: <20261014202619.715573-1-aubin.constans@microchip.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 
-On Tue, 13 Oct 2026 14:48:54 +0100, Sean Rhodes wrote:
-> > For the record, I have no issues with wakeup on insertion when the
-> > reader is suspend.  
-> 
-> I do, but only on Meteor Lake
+From: Claudiu Beznea <claudiu.beznea@microchip.com>
 
-Sounds like an unrelated USB bug.
+SDMMC run-time clock disabling is not supported in newer SoCs, including
+SAMA7G54, SAMA7D65 and LAN969x.
 
-> >  The problem is when it goes to suspend with a card already
-> > inserted and doesn't wake.  
-> 
-> I can't replicate this at all; my "bunch" are all fine (glk through
-> arl, and cezanne through phoenix)
+Make the clock disabling scenario conditional:
+- still enabled for the sama5d2 and sam9x60 compatibles (which are all
+  those implemented at present),
+- otherwise avoided by default, for subsequent SoC families.
 
-Host shouldn't matter in principle. Reproduction is simple:
+Signed-off-by: Claudiu Beznea <claudiu.beznea@microchip.com>
+[Romain: Fix unbalanced clock activation/deactivation]
+Co-developed-by: Romain Sioen <romain.sioen@microchip.com>
+Signed-off-by: Romain Sioen <romain.sioen@microchip.com>
+[Aubin: Rebase before sama7g5 support and edit the commit msg]
+Signed-off-by: Aubin Constans <aubin.constans@microchip.com>
+Tested-by: Robert Marko <robert.marko@sartura.hr>
+---
+Changes in v2:
+- Edit the commit msg to say the patch prepares SAMA7G54/SAMA7D65/LAN969x
+  SoC support w/o immediate change.
+  Also, move and summarize Romain's own commit msg close to its sign-off.
+- Restore Claudiu's author and sign-off email to the microchip.com address
+  he had upon writing the patch.
+- Link to v1: https://lore.kernel.org/r/20260918153414.909333-1-aubin.constans@microchip.com
 
-echo 'module usbcore +p' >/proc/dynamic_debug/control
-# remove the card
-# in less than one second, this appears
+ drivers/mmc/host/sdhci-of-at91.c | 36 ++++++++++++++++++++++++--------
+ 1 file changed, 27 insertions(+), 9 deletions(-)
 
-[38244.954611] usb 10-1: kworker/0:0 timed out or killed on ep2in len=0/8
-[38244.956547] mmc0: card 0260 removed
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index 7c4ac65f247d..399856643e57 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -39,6 +39,7 @@ struct sdhci_at91_soc_data {
+ 	const struct sdhci_pltfm_data *pdata;
+ 	bool baseclk_is_generated_internally;
+ 	unsigned int divider_for_baseclk;
++	bool pm_runtime_disable_clks;
+ };
+ 
+ struct sdhci_at91_priv {
+@@ -149,12 +150,14 @@ static const struct sdhci_pltfm_data sdhci_sama5d2_pdata = {
+ static const struct sdhci_at91_soc_data soc_data_sama5d2 = {
+ 	.pdata = &sdhci_sama5d2_pdata,
+ 	.baseclk_is_generated_internally = false,
++	.pm_runtime_disable_clks = true,
+ };
+ 
+ static const struct sdhci_at91_soc_data soc_data_sam9x60 = {
+ 	.pdata = &sdhci_sama5d2_pdata,
+ 	.baseclk_is_generated_internally = true,
+ 	.divider_for_baseclk = 2,
++	.pm_runtime_disable_clks = true,
+ };
+ 
+ static const struct of_device_id sdhci_at91_dt_match[] = {
+@@ -164,7 +167,7 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
+ 
+-static int sdhci_at91_set_clks_presets(struct device *dev)
++static int sdhci_at91_set_clks_presets(struct device *dev, bool start_clks)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -174,7 +177,14 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+ 	unsigned int			gck_rate, clk_base_rate;
+ 	unsigned int			preset_div;
+ 
+-	clk_prepare_enable(priv->hclock);
++	/*
++	 * Manage clock prepare/enable procedure depending on if the board
++	 * support runtime clock disabling and if we come from the probing
++	 * or restoring procedure (for backup+self refresh).
++	 */
++	if (start_clks)
++		clk_prepare_enable(priv->hclock);
++
+ 	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
+ 	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
+ 
+@@ -223,8 +233,11 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+ 	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+ 	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
+ 
+-	clk_prepare_enable(priv->mainck);
+-	clk_prepare_enable(priv->gck);
++	/* Same clock management as for hclock */
++	if (start_clks) {
++		clk_prepare_enable(priv->mainck);
++		clk_prepare_enable(priv->gck);
++	}
+ 
+ 	return 0;
+ }
+@@ -254,9 +267,11 @@ static int sdhci_at91_runtime_suspend(struct device *dev)
+ 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+ 		mmc_retune_needed(host->mmc);
+ 
+-	clk_disable_unprepare(priv->gck);
+-	clk_disable_unprepare(priv->hclock);
+-	clk_disable_unprepare(priv->mainck);
++	if (priv->soc_data->pm_runtime_disable_clks) {
++		clk_disable_unprepare(priv->gck);
++		clk_disable_unprepare(priv->hclock);
++		clk_disable_unprepare(priv->mainck);
++	}
+ 
+ 	return 0;
+ }
+@@ -269,7 +284,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+ 	int ret;
+ 
+ 	if (priv->restore_needed) {
+-		ret = sdhci_at91_set_clks_presets(dev);
++		ret = sdhci_at91_set_clks_presets(dev, priv->soc_data->pm_runtime_disable_clks);
+ 		if (ret)
+ 			return ret;
+ 
+@@ -277,6 +292,9 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+ 		goto out;
+ 	}
+ 
++	if (!priv->soc_data->pm_runtime_disable_clks)
++		goto out;
++
+ 	ret = clk_prepare_enable(priv->mainck);
+ 	if (ret) {
+ 		dev_err(dev, "can't enable mainck\n");
+@@ -344,7 +362,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 		return dev_err_probe(&pdev->dev, PTR_ERR(priv->gck),
+ 				     "failed to get multclk\n");
+ 
+-	ret = sdhci_at91_set_clks_presets(&pdev->dev);
++	ret = sdhci_at91_set_clks_presets(&pdev->dev, true);
+ 	if (ret)
+ 		return ret;
+ 
+-- 
+2.43.0
 
-# MMC host is suspended and polling stops
-# for two seconds, card insertion will go unnoticed
-# the reader enters suspend with a card inserted
-
-[38247.021374] usb 10-1: usb auto-suspend, wakeup 1
-
-# removing the card wakes it up
-
-[38250.163400] hub 10-0:1.0: state 7 ports 4 chg 0000 evt 0002
-[38250.174416] usb 10-1: usb wakeup-resume
-
-Regards,
-Michal
