@@ -1,88 +1,88 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81587539776
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 962B5539782
 	for <linux-mmc@vger.kernel.org>; Thu, 15 Oct 2026 14:26:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792074394; cv=none; b=CMv8CW6caWSu9wp9cDtaLjwAI+CDrQchIxV6MaGwGIgqJmndnpASPBXXLA+cU5jdqTztMvXYS2/e7bTQOF+9aBm5vINuURom/xiahgfjISS7swWw3LdG/7yhVpGQrw2Vsr3LFkkw4ySV3xaoDKHFGDGUtRP1KEYxT8l83tojUbg=
+	t=1792074396; cv=none; b=PbgqKTUpkCmwjVvoHgHgEOtZu9PSg8sdtxLA9NHyZS0KlXqQlJFthVkaL2ouGD+mGWsLdLCMp4R3YtSfMLssMCEHOnMJRUpQTC1nUQBkwrhS03eI/HQdqtLYlIHMoqlrbGn/RYVuC8EiLg5ok4eP7Eea/H+0Zwy0w5LLffWdpIc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792074394; c=relaxed/simple;
-	bh=3be6ZRrkuwe5O6MvoCJ3NJTdkt/zK0OZYHzR1WryNh4=;
+	s=arc-20240116; t=1792074396; c=relaxed/simple;
+	bh=L92wgefYXvtbzOMdFEhUTkLwtCR1yYb0ZcvRRGDMuNM=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=LS5+BRlzuTNl8sN66SLAnLoF48Ol8jQNdak05QNybnq9/BYJGvglxsUHPEFzzUDhHsTLvnX6bsf3ES2B9xGYYnZut+qkwAD8XGKPtukr6TLM+wnP9Esb/lrGBRHmofjI2deRLw/2Uv8VE0VmEu86Qna9N4CdpDtIkdgJH7A/Nig=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=FwjSPjvD; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=NkFNSX3d; arc=none smtp.client-ip=205.220.180.131
+	 In-Reply-To:To:Cc; b=g1u/IJ+Fd3AWmU7PfEpsliOF0e+d3es3lJyd3rSb0oHgmto/LnNUmg4a3IbYJPKlJv+Dyh/tqRkCfSSkjNfRErYUaB/zGy3gpQsj0+SFJkxyFwVfElfhQ0jca0XWx2qN4T441aLDaXiz+6g1l3qal3Y5f7bnG44MQsFQ4Y6QItc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=Xw+nnUMX; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=RlTbl1rg; arc=none smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="FwjSPjvD";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="NkFNSX3d"
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69F9jfC81955731
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="Xw+nnUMX";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="RlTbl1rg"
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69FAPu8P1596370
 	for <linux-mmc@vger.kernel.org>; Thu, 15 Oct 2026 14:26:26 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	IE79JMn0wPrEDgdovegTuQ5M+CHvyEMAVwZJre8pogM=; b=FwjSPjvD7W2PMEe5
-	Jhgvf42cxtSO7T1hqxcoWM9lmq71G57eUJzUPFYtXqaPlv3X+VOyFEFikHXdcacd
-	Zxl++rFEoG+Qwv1Hi1KpUhXcPVkRjbT3alg7JqHIFnbsXFx6ZxYbyLpoED70rH9E
-	qD7Q+kQp2NO5EKdmTCWHV4GL06v9Y7iWs3rvKmwusLx3YvK5ESchEPbC+NRAUEeX
-	ZruNCfvaac/F4rmPfUfXDKtXd7QJpnbTjyukC+Qnb+b1KQhS8jLWOCf9/gQzY3k0
-	SmFX0UF/jP8Hb/wdU3t+dvAdZRfGFgoYvHoOSAujVJE72GMFbTUVP6fx5DCq/0Fx
-	c8Ixng==
-Received: from mail-vs1-f70.google.com (mail-vs1-f70.google.com [209.85.217.70])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hakdeubhm-1
+	cPeNqGPMRBWAfsA5CvuzYdqPrDk9qOkztMDjoEMaK1o=; b=Xw+nnUMXYJLgyFLR
+	sgenKLp2gy1/pzlHNA6p1TwDnLe7EftRxd3PhapGoPbvljnOy+/Y/4qCM33jk1HQ
+	Sxw+y6smKXcWD5SO2xNB/oxoY+PyYO7b1C9Zkq/KAmMgRT8pT0L4TWtgfrqwDjYg
+	68qIFv54NdN6GtES8WsEnIBfJVIqkwU7kNo4JIMchhSBFAWEYwO4MnN0VwCUy24M
+	B8tfk763BKDKIeiviXvivxge/iMhBiGWb43298FP3p8ZQKM/p72C6VpwEvvWn1qn
+	vjCzaDUYIHUkcLg62wC3/8ub4IX+FfhFXAwv+LusR0mmSalYYk5D7XwjuNLNPPVC
+	ljFEVA==
+Received: from mail-ua1-f69.google.com (mail-ua1-f69.google.com [209.85.222.69])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4haw2v8x8n-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
 	for <linux-mmc@vger.kernel.org>; Thu, 15 Oct 2026 14:26:26 +0000 (GMT)
-Received: by mail-vs1-f70.google.com with SMTP id ada2fe7eead31-7cc0e78a4ccso117244137.0
+Received: by mail-ua1-f69.google.com with SMTP id a1e0cc1a2514c-99077a0be0bso24862241.2
         for <linux-mmc@vger.kernel.org>; Thu, 15 Oct 2026 07:26:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1792074385; x=1792679185; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1792074386; x=1792679186; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :content-type:mime-version:subject:date:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=IE79JMn0wPrEDgdovegTuQ5M+CHvyEMAVwZJre8pogM=;
-        b=NkFNSX3dWDOXky27bZDNMiPtBCGxme69VV0p/bT73jubF+0RDRR3ICOTzyvfRztGkL
-         4tDC8B2U4uRI9i9LDpTDX2XNYhNe/IlMzRTtIu6GNqh/uy+QARhsr5ImfIMOIkt/EAyo
-         PXmlXH/zBUUrlNvYqAcKJue7G1THLImL42d3sc2xzNGWfGvfeMjokJq4f+nR+PL52ppI
-         MeZanDzHlV/s34ZdE79Z43fZMR5/2GJnU99U8oxudV6TFHcKUuMXOMWqi7vHyntxMRVj
-         iialtZhB3Uc73R4vmsSPgQUWA/ui/z+Mkbz49g4TPX+YPb+eyYG1b7crM02rLmeRTyFr
-         v9Ag==
+        bh=cPeNqGPMRBWAfsA5CvuzYdqPrDk9qOkztMDjoEMaK1o=;
+        b=RlTbl1rglvqpMqiMGMBxpRyBuAJTlL+yFJfqEClIM6fLWmXn/h3+F2o77X5uic9eO8
+         ep0YSPuIzvYsp5iKpjbxkbV2ojGsTqoHziA3qR0//JwvId2nrSS2Ir+qabLum9o/GHbC
+         AmJ1mOt81lkuyoor1BUBMTWCsn4Cm2FU1rgP8IRRMmPHmGaBXLomH8MTd3ZslKbMUPik
+         W39BvrTGUHlk8t9nIbq/g8wKTAcuELJ+jH1NavEDRocRX7HWMrM95TsyQ+oggs+JKIBR
+         REyQALlCzJLaEq3ArcxjZtZVeM8pH7jEeeM7HWZI6XFTj4vHCRn1R37y7mm2bdVUBFtC
+         tfxg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792074385; x=1792679185;
+        d=1e100.net; s=20260707; t=1792074386; x=1792679186;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :content-type:mime-version:subject:date:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=IE79JMn0wPrEDgdovegTuQ5M+CHvyEMAVwZJre8pogM=;
-        b=phjv04WYhKvrYR9SWHkgzrr1/QM1bjvh2yafq/6Nk+NJCHihKKAUVKl2dgI9vqH8Rf
-         D4CJZ3w5GMO/fyeEWt2I74hl2pVleq+znEaVPG/Eoos6XVSlvQFHK4k9ZR4Wi7obAI+z
-         jYhFYMqcMZiX/qPExnQ4HZmYQwycSqFddAYVePnBsoYntl56l6H51ugfdoBy42ZnyChz
-         kHPM+UKeQJhgAaYBlS3e6ovartAiKpPTgg+7YzholA1fIs7mIu6iFmj2zvLRHIBF0G5n
-         AfG1pkQMyBkCC/0rqe/yG5gN6HZplLxOCr5ljt2Y6smp9SYiusOkQwhASq76U1VOlzaX
-         fn5w==
-X-Gm-Message-State: AFq9FYKRUgMA0ZGiZW/QbaLwCZY4j1AuZavcjlEFibVof7yaBRTqNBED
-	/Q4Ls1MfK1DcoaryaTqWuZide/mtHrCNe5flXpTr8qk+5RXt6drL5VWG8RBDgMI3JAr912L2DLL
-	Pz5gXZcexyR1ZW5GCN0kSf4yBfJBgU5uOe8qA4u0g8gtAvpFWNexnjOIIQ3iCIn8=
-X-Gm-Gg: AYBFou0GzU2uYNUCx55VEeR6o/BTCoYErh4LSjQhtzqlJwQAI7gfe+x6gkAV6N7lVvu
-	sYlWxAT+PfRgdN12bLM71LL9MWQiFwgXbdUSP69elgxdwP8tOfCulSssHdvs9nlBwlFCLE/VMxI
-	EasdLFVXe3r2s3tGwH/8EoxKQ/5kYDwffKhvaotTZNdVgTBmk5p3gWusOzwooUAHRpTCoLliZ54
-	CIOorAW5gt9Pvk9MMhL1x20aBeT6ke1r7AFFIFx5MxatPsyIyfd3hvgvJ9kAD2v1jhwgZHdtkRg
-	ucgo7C8b5O8KjeozBJ+/R13V9CTTUYK2z1Nhomzn92cXN4Vj1RLb0sUEII/dJ/4jdlCvfWR2ZKU
-	PM9v6zAu5qF/4fYFIFbuKVZZm7bPoTHVqcYy9VWUkBCBk3yxVBzCI/RVNwhKVcdJ8sz/wyk/0Ec
-	Y9QIOjAyUCtDqAyBTVxoimkXXPe+G14ZV9hEwo/m5D/i6UUaXYJdI=
-X-Received: by 2002:a05:6102:5cca:b0:7c4:a0e4:1a79 with SMTP id ada2fe7eead31-7cb37317ab0mr3850190137.19.1792074380128;
-        Thu, 15 Oct 2026 07:26:20 -0700 (PDT)
-X-Received: by 2002:a05:6102:5cca:b0:7c4:a0e4:1a79 with SMTP id ada2fe7eead31-7cb37317ab0mr3850159137.19.1792074379260;
-        Thu, 15 Oct 2026 07:26:19 -0700 (PDT)
+        bh=cPeNqGPMRBWAfsA5CvuzYdqPrDk9qOkztMDjoEMaK1o=;
+        b=BsmdHJbAawnthEGI64MMRzfgIFQYh3K5FOZThmIYiNZKamzS5s4X3WiMdM4Feyb2uM
+         g84L1bYB+74UjQRx5/kTso29HscoyTj3HkUAWEFj3lbNNOnfLyQq++72KCySFYF3fEGl
+         sFoLMZXZyyz3a6peXflxTeLlLg6K9YAEfQCSUpf9B4VGr0YIX+maZSnBxBYDhTl5WAAM
+         SayuNuypLdn3SnqbTyxWWE5zLU1+QpBfQx4yrShZEl1gE8x0t9EHmj4YCeRX3V3nOuny
+         MdHxZR8PhMcnOuPKmZBWV2gSUkTTuDPmNCI9mzT9muvURazMJ2aP8W5uLHYQsGRkJvtQ
+         x1Hw==
+X-Gm-Message-State: AFq9FYLyQ1rEjNyMJWii5PmvZyx3ZXNpdVCRjtBatRZdgZkcy23GZTJO
+	QcV3ti4t1P/tzwh9bzuuO8GJI46uYprXJUq2bxMsKV8rhojTk2X77JTLGB0cDQaaTA97bcY6AHA
+	tOHTWVpQ/4kpRsHBJuHB8IgwchSKLxs9sUdCL+BozbgzQ2q4PkTB9v3/MChkTwew=
+X-Gm-Gg: AYBFou3tdlZ4xJzoLpVPa+YA9jPkdHaG+1JxAolE65pON3r3rpJxi4y2e6WGOSZOxO0
+	7PJWYknUK5ZQQj46lLTRu/sJQVobGqyUp6vVKzbgD9f3goQlmfXizT7oNpe1w/sz2AwBD4bCe6l
+	f5mMoinXoaGNi3eq52Hvijy3HGx4ZuLCPCn/kvTx4IpIKoV3uOHBFijUIjPKRy4bXSr0qW0+Puz
+	4sc54rruKpRXd0z1Lb2/7piIXbIGTBErX/KCMHqg6PC2k+UmXUvvk/JSZ/PK1iU2uuOYe2WZzFe
+	rN0/c9SlLg3VYSh1PejnTH+IaHNEXi8UoSf0wrpmdXJxU83+FjJgYIL6OnRRRGlojvfhTu9bZaB
+	wDalwzKgoOjGifYbGuY43J89gaUKKiM5HKw/kNl8JIbO9zPRR0KccHIVLxT/A+Fx8E2/Pj8DIag
+	QgD+1xYo3tui8xy91peZLfZczipNBr3ozC7jIwm/KA1ej0hP0k/Ps=
+X-Received: by 2002:a05:6102:5114:b0:7c3:3890:6076 with SMTP id ada2fe7eead31-7cb37250532mr5104300137.6.1792074385415;
+        Thu, 15 Oct 2026 07:26:25 -0700 (PDT)
+X-Received: by 2002:a05:6102:5114:b0:7c3:3890:6076 with SMTP id ada2fe7eead31-7cb37250532mr5104279137.6.1792074384767;
+        Thu, 15 Oct 2026 07:26:24 -0700 (PDT)
 Received: from QCOM-eG0v1AUPpu.na.qualcomm.com ([2a01:e0a:830:450:5402:5e0b:9ef0:9b5b])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4a1bd6428b3sm69083145e9.1.2026.10.15.07.26.16
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4a1bd6428b3sm69083145e9.1.2026.10.15.07.26.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 15 Oct 2026 07:26:17 -0700 (PDT)
+        Thu, 15 Oct 2026 07:26:23 -0700 (PDT)
 From: Loic Poulain <loic.poulain@oss.qualcomm.com>
-Date: Thu, 15 Oct 2026 16:26:01 +0200
-Subject: [PATCH v11 2/7] block: partitions: of: Attach partition fwnode to
- the block device
+Date: Thu, 15 Oct 2026 16:26:03 +0200
+Subject: [PATCH v11 4/7] net: of_net: Add of_get_nvmem_eui48() helper for
+ EUI-48 lookup
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -91,7 +91,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20261015-block-as-nvmem-v11-2-f890ac74f87d@oss.qualcomm.com>
+Message-Id: <20261015-block-as-nvmem-v11-4-f890ac74f87d@oss.qualcomm.com>
 References: <20261015-block-as-nvmem-v11-0-f890ac74f87d@oss.qualcomm.com>
 In-Reply-To: <20261015-block-as-nvmem-v11-0-f890ac74f87d@oss.qualcomm.com>
 To: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
@@ -122,176 +122,158 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         ath10k@lists.infradead.org, linux-bluetooth@vger.kernel.org,
         netdev@vger.kernel.org, daniel@makrotopia.org,
         Loic Poulain <loic.poulain@oss.qualcomm.com>,
-        Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>,
-        Christoph Hellwig <hch@lst.de>
+        Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
 X-Mailer: b4 0.14.2
-X-Authority-Analysis: v=2.4 cv=OdENnRTY c=1 sm=1 tr=0 ts=6ad0e292 cx=c_pps
- a=N1BjEkVkxJi3uNfLdpvX3g==:117 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDE1MDA1NyBTYWx0ZWRfX91shqssCdRPX
+ d1+JC5Ot7w20d5iNXV+uYGrZq2ANdjZHLbSA7CmqguoaiLdouFwnUCWgOycBPRSIq7oJlZcpBLG
+ kr1ugw2dZelxaBaEZj7qUYndwyDMcNUx3hHTMd57kMiH6UTrtbKk7cgYxy3Xl9sXzaGiTalCp/H
+ gmrY6Hq3xWrgszRn6ZnoQayeQITW2yLyk9Fm1wAy+AqFZFauMGi0WaN20JVoNaAJCOCtyVAMs4+
+ 5Gtl1BgeChtsw1uyDc7WNdcY5cBsmdLhQvtjUp6jSGBh0JgVhEoxPzJsoysvXFozwsM3dcwgeJv
+ SGR1IqEZshmch0hTvBxEPqeXRTXsxyO94aKTuahPVmcsLhUdq8uHHWCBRqanMhRPhu9i41OC6HQ
+ xLpciWBxFKk++8Hb9jg4AqN6MrIXn16KttKP5V7p9/atZjzU518azz1FMKBHFe/Mp6DnPW+A0QT
+ +XjGPI7b1MwhvyvpGEA==
+X-Proofpoint-ORIG-GUID: KiPgrliOPVirOtrF7U6SnNwhbtWbrpFa
+X-Proofpoint-GUID: KiPgrliOPVirOtrF7U6SnNwhbtWbrpFa
+X-Authority-Analysis: v=2.4 cv=G/CJgNk5 c=1 sm=1 tr=0 ts=6ad0e292 cx=c_pps
+ a=UbhLPJ621ZpgOD2l3yZY1w==:117 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
  a=660iZSQnnn4A:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=u7WPNUs3qKkmUXheDGA7:22 a=yx91gb_oNiZeI1HMLzn7:22 a=EUspDBNiAAAA:8
- a=2ffTNAQyBkxXHBiWhEgA:9 a=QEXdDO2ut3YA:10 a=crWF4MFLhNY0qMRaF8an:22
-X-Proofpoint-ORIG-GUID: kw-6qmQrURj0A2iICusbJTETYvL4QI6n
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDE1MDA1NyBTYWx0ZWRfX3gclkitwnAH/
- iAa+p6Ya7HEGv9FIcb0MfnuHbEe2KvKkMaeWKxiJxfb2j+uZWY4HQ85+AF0Gsni6mRfbFHuI3Kv
- ndyGLwv5O9w2s6JgzWQFRw1R8iU2RRh42zsXmIKb1dppVn4lv9oTp+CpLSTCNKggqOprkjg3Qy6
- fekUerjG+Q4hj2DAMJTZmEiqgonNoL8eMVGVE4dZQYusv4if/F4ueMqssLMfhmWFglHI+LbU7M/
- vAD+82a0YqFBa9wCUvbSZw3su2cu1vjPLkOBkLfhhF3w9+wytcuTThqBCyIhBZpBQexR51pKk/A
- jnhGtSGODf+XJn2kaVTq2ETTe6lTQgbrIcu4xuvtC/kh8vTQB84YGIs5s/6F2sENNBlGrVvgR08
- 0vAn9JSBMWCbNhtSfPLlEOa2fQBF9+qiOpf+Xljdpglt6PD+7XTvWfRH8ObEAzlWSYwiB6s+lC6
- A/iqHSGhGHT4Kq8GVdQ==
-X-Proofpoint-GUID: kw-6qmQrURj0A2iICusbJTETYvL4QI6n
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMDE1MDA1NyBTYWx0ZWRfX1dgDkFUKDwjN
- QOpml/z9IN12jLzm3QUhYPYqtNoQLt9VV+YOyhU4wnXMzpaZsQxpCMK431zyG12IPDwuC1LeJYQ
- 0SFUbnHRZV7rZtwDt27AwgEshrGX4ng=
+ a=u7WPNUs3qKkmUXheDGA7:22 a=DJpcGTmdVt4CTyJn9g5Z:22 a=EUspDBNiAAAA:8
+ a=bEbww9rD5qa0LKludeoA:9 a=QEXdDO2ut3YA:10 a=TOPH6uDL9cOC6tEoww4z:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMDE1MDA1NyBTYWx0ZWRfX2hV3ITRnWwND
+ bTHimuQGPAQsQ6koi2uxwpC7FOZHq19llyWyUtwDBOz+DBaYbCEueUqLl6rfzoJN5GF26KTmglc
+ cj9IcpyyJo3DZuiBUTHJ/HVWXhGqnXg=
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-10-14_01,2026-10-14_01,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- bulkscore=0 spamscore=0 impostorscore=0 phishscore=0 clxscore=1015
- priorityscore=1501 lowpriorityscore=0 malwarescore=0 adultscore=0
- suspectscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2610080000
- definitions=main-2610150057
+ malwarescore=0 lowpriorityscore=0 spamscore=0 clxscore=1015 bulkscore=0
+ impostorscore=0 suspectscore=0 adultscore=0 phishscore=0 priorityscore=1501
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2610080000 definitions=main-2610150057
 
-The OF partition parser reads offset, size and label from each
-"fixed-partitions" child node but does not associate that node with the
-resulting partition block device. As a result a partition has no
-of_node, unlike the whole-disk device which gets its firmware node via
-add_disk_fwnode().
+Factor out the common NVMEM EUI-48 retrieval logic from
+of_get_mac_address_nvmem() into a new of_get_nvmem_eui48() helper that
+accepts the NVMEM cell name as a parameter. This allows other subsystems
+(e.g. Bluetooth) to reuse the same lookup-validate-copy pattern with a
+different cell name, without duplicating code.
 
-Carry the partition's device tree node through the parser and attach it
-to the partition's block device with device_set_node(), mirroring the
-whole-disk case. This lets consumers describe per-partition properties
-in the device tree (for example an NVMEM layout on a partition node) and
-look them up through the partition device.
-
-No functional change for existing users, partitions without a matching
-device tree node simply get a NULL fwnode.
+of_get_mac_address_nvmem() is updated to call of_get_nvmem_eui48() with
+"mac-address", preserving its existing behavior.
 
 Reviewed-by: Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
 Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
 ---
- block/partitions/check.h |  1 +
- block/partitions/core.c  | 20 +++++++++++++++++---
- block/partitions/of.c    |  3 +++
- 3 files changed, 21 insertions(+), 3 deletions(-)
+ include/linux/of_net.h |  7 +++++++
+ net/core/of_net.c      | 52 ++++++++++++++++++++++++++++++++++++++------------
+ 2 files changed, 47 insertions(+), 12 deletions(-)
 
-diff --git a/block/partitions/check.h b/block/partitions/check.h
-index b0997467b61a54a8a621b9c155c8329289649460..326081499d9a6be730dbd659c110449cfa06921f 100644
---- a/block/partitions/check.h
-+++ b/block/partitions/check.h
-@@ -17,6 +17,7 @@ struct parsed_partitions {
- 		int flags;
- 		bool has_info;
- 		struct partition_meta_info info;
-+		struct fwnode_handle *fwnode;
- 	} *parts;
- 	int next;
- 	int limit;
-diff --git a/block/partitions/core.c b/block/partitions/core.c
-index b5c59b79ca7cbb28d4d93478ee1c80908f76ee9f..eee954df1ac6ef7dd4f02ad5c9d49aed778bf015 100644
---- a/block/partitions/core.c
-+++ b/block/partitions/core.c
-@@ -11,6 +11,7 @@
- #include <linux/sysfs.h>
- #include <linux/ctype.h>
- #include <linux/vmalloc.h>
-+#include <linux/property.h>
- #include <linux/raid/detect.h>
- #include "check.h"
- 
-@@ -110,8 +111,17 @@ static struct parsed_partitions *allocate_partitions(struct gendisk *hd)
- 	return state;
+diff --git a/include/linux/of_net.h b/include/linux/of_net.h
+index d88715a0b3a52f87af23d47791bea3baf5be5200..7854ba555d9a55f3d020a37fe00a27ae52e0e5dc 100644
+--- a/include/linux/of_net.h
++++ b/include/linux/of_net.h
+@@ -15,6 +15,7 @@ struct net_device;
+ extern int of_get_phy_mode(struct device_node *np, phy_interface_t *interface);
+ extern int of_get_mac_address(struct device_node *np, u8 *mac);
+ extern int of_get_mac_address_nvmem(struct device_node *np, u8 *mac);
++int of_get_nvmem_eui48(struct device_node *np, const char *cell_name, u8 *addr);
+ int of_get_ethdev_address(struct device_node *np, struct net_device *dev);
+ extern struct net_device *of_find_net_device_by_node(struct device_node *np);
+ #else
+@@ -34,6 +35,12 @@ static inline int of_get_mac_address_nvmem(struct device_node *np, u8 *mac)
+ 	return -ENODEV;
  }
  
-+static void drop_partitions_fwnodes(struct parsed_partitions *state)
++static inline int of_get_nvmem_eui48(struct device_node *np,
++				      const char *cell_name, u8 *addr)
 +{
-+	for (int i = 0; i < state->limit; i++) {
-+		fwnode_handle_put(state->parts[i].fwnode);
-+		state->parts[i].fwnode = NULL;
-+	}
++	return -ENODEV;
 +}
 +
- static void free_partitions(struct parsed_partitions *state)
+ static inline int of_get_ethdev_address(struct device_node *np, struct net_device *dev)
  {
-+	drop_partitions_fwnodes(state);
- 	vfree(state->parts);
- 	kfree(state);
- }
-@@ -139,6 +149,7 @@ static struct parsed_partitions *check_partition(struct gendisk *hd)
- 
- 	i = res = err = 0;
- 	while (!res && check_part[i]) {
-+		drop_partitions_fwnodes(state);
- 		memset(state->parts, 0, state->limit * sizeof(state->parts[0]));
- 		res = check_part[i++](state);
- 		if (res < 0) {
-@@ -247,6 +258,7 @@ static const struct attribute_group *part_attr_groups[] = {
- 
- static void part_release(struct device *dev)
+ 	return -ENODEV;
+diff --git a/net/core/of_net.c b/net/core/of_net.c
+index 93ea425b9248a23f4f95a336e9cdbf0053248e32..999ca0e9258c41580823b80e0ef6db26617bc968 100644
+--- a/net/core/of_net.c
++++ b/net/core/of_net.c
+@@ -61,9 +61,7 @@ static int of_get_mac_addr(struct device_node *np, const char *name, u8 *addr)
+ int of_get_mac_address_nvmem(struct device_node *np, u8 *addr)
  {
-+	fwnode_handle_put(dev_fwnode(dev));
- 	put_disk(dev_to_bdev(dev)->bd_disk);
- 	bdev_drop(dev_to_bdev(dev));
- }
-@@ -294,7 +306,8 @@ static const DEVICE_ATTR(whole_disk, 0444, whole_disk_show, NULL);
-  */
- static struct block_device *add_partition(struct gendisk *disk, int partno,
- 				sector_t start, sector_t len, int flags,
--				struct partition_meta_info *info)
-+				struct partition_meta_info *info,
-+				struct fwnode_handle *fwnode)
- {
- 	dev_t devt = MKDEV(0, 0);
- 	struct device *ddev = disk_to_dev(disk);
-@@ -343,6 +356,7 @@ static struct block_device *add_partition(struct gendisk *disk, int partno,
- 	pdev->class = &block_class;
- 	pdev->type = &part_type;
- 	pdev->parent = ddev;
-+	device_set_node(pdev, fwnode_handle_get(fwnode));
+ 	struct platform_device *pdev = of_find_device_by_node(np);
+-	struct nvmem_cell *cell;
+-	const void *mac;
+-	size_t len;
++	u8 mac[ETH_ALEN] __aligned(sizeof(u16));
+ 	int ret;
  
- 	/* in consecutive minor range? */
- 	if (bdev_partno(bdev) < disk->minors) {
-@@ -449,7 +463,7 @@ int bdev_add_partition(struct gendisk *disk, int partno, sector_t start,
+ 	/* Try lookup by device first, there might be a nvmem_cell_lookup
+@@ -75,27 +73,57 @@ int of_get_mac_address_nvmem(struct device_node *np, u8 *addr)
+ 		return ret;
  	}
  
- 	part = add_partition(disk, partno, start, length,
--			ADDPART_FLAG_NONE, NULL);
-+			ADDPART_FLAG_NONE, NULL, NULL);
- 	ret = PTR_ERR_OR_ZERO(part);
- out:
- 	mutex_unlock(&disk->open_mutex);
-@@ -564,7 +578,7 @@ static bool blk_add_partition(struct gendisk *disk,
- 	}
- 
- 	part = add_partition(disk, p, from, size, state->parts[p].flags,
--			     &state->parts[p].info);
-+			     &state->parts[p].info, state->parts[p].fwnode);
- 	if (IS_ERR(part)) {
- 		if (PTR_ERR(part) != -ENXIO) {
- 			printk(KERN_ERR " %s: p%d could not be added: %pe\n",
-diff --git a/block/partitions/of.c b/block/partitions/of.c
-index 53664ea06b6540e3d1155141adaafac7286f2d21..4fc7c80c407de42b2b31be2c82e0e6bc2a30c9e3 100644
---- a/block/partitions/of.c
-+++ b/block/partitions/of.c
-@@ -3,6 +3,7 @@
- #include <linux/blkdev.h>
- #include <linux/major.h>
- #include <linux/of.h>
-+#include <linux/property.h>
- #include <linux/string.h>
- #include "check.h"
- 
-@@ -62,6 +63,8 @@ static void add_of_partition(struct parsed_partitions *state, int slot,
- 		partname = of_get_property(np, "name", &len);
- 	strscpy(info->volname, partname, sizeof(info->volname));
- 
-+	state->parts[slot].fwnode = fwnode_handle_get(of_fwnode_handle(np));
+-	cell = of_nvmem_cell_get(np, "mac-address");
++	ret = of_get_nvmem_eui48(np, "mac-address", mac);
++	if (ret)
++		return ret;
 +
- 	seq_buf_printf(&state->pp_buf, "(%s)", info->volname);
- }
++	if (!is_valid_ether_addr(mac))
++		return -EINVAL;
++
++	memcpy(addr, mac, ETH_ALEN);
++	return 0;
++}
++EXPORT_SYMBOL(of_get_mac_address_nvmem);
++
++/**
++ * of_get_nvmem_eui48 - Read a 6-byte EUI-48 address from a named NVMEM cell.
++ * @np:		Device node to look up the NVMEM cell from.
++ * @cell_name:	Name of the NVMEM cell (e.g. "mac-address", "local-bd-address").
++ * @addr:	Output buffer for the 6-byte address.
++ *
++ * Reads the named NVMEM cell and validates that it contains a non-zero 6-byte
++ * address. Returns 0 on success, negative errno on failure.
++ */
++int of_get_nvmem_eui48(struct device_node *np, const char *cell_name, u8 *addr)
++{
++	struct nvmem_cell *cell;
++	const void *eui48;
++	size_t len;
++
++	cell = of_nvmem_cell_get(np, cell_name);
+ 	if (IS_ERR(cell))
+ 		return PTR_ERR(cell);
  
+-	mac = nvmem_cell_read(cell, &len);
++	eui48 = nvmem_cell_read(cell, &len);
+ 	nvmem_cell_put(cell);
+ 
+-	if (IS_ERR(mac))
+-		return PTR_ERR(mac);
++	if (IS_ERR(eui48))
++		return PTR_ERR(eui48);
+ 
+-	if (len != ETH_ALEN || !is_valid_ether_addr(mac)) {
+-		kfree(mac);
++	/* Reject unprogrammed cells that read as all-zeroes or all-ones */
++	if (len != ETH_ALEN ||
++	    !memchr_inv(eui48, 0x00, ETH_ALEN) ||
++	    !memchr_inv(eui48, 0xff, ETH_ALEN)) {
++		kfree(eui48);
+ 		return -EINVAL;
+ 	}
+ 
+-	memcpy(addr, mac, ETH_ALEN);
+-	kfree(mac);
++	memcpy(addr, eui48, ETH_ALEN);
++	kfree(eui48);
+ 
+ 	return 0;
+ }
+-EXPORT_SYMBOL(of_get_mac_address_nvmem);
++EXPORT_SYMBOL_GPL(of_get_nvmem_eui48);
+ 
+ /**
+  * of_get_mac_address()
 
 -- 
 2.34.1
