@@ -1,46 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 611C05BA3CB;
-	Mon, 19 Oct 2026 14:00:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD7D55CFA4B;
+	Mon, 19 Oct 2026 14:01:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792418455; cv=none; b=qC07lHUFsIgyZmD10B+O8TxYQ5+CjlLVCIEASCmTnfltxgD8xWU7MMYk8WR2oNjCiiVk87A5wgkJqHd0BKJRjlievsmcEhkFhDz+O7k1OFJIbtS5WpeGhLffYvFKn+6eWp6831X3Ab7H7z3+CibRgVjOBumppqFgxdoPy7188pw=
+	t=1792418485; cv=none; b=AF/m9yseKxKekVDJ4jSl91TqQkckyEN0cNDLxThzoUzk34G5MNRA9RcxyQhrUv1DYQjAhwuuFP4XabtteZ5FU1WFT1iJbVFzGssoCcMY67XbUYggZjp7QCA3jXPJxYL8eJBksOahJbSITzb/UJ5TghJ/r6QZkcP8tkB+4HdyU8Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792418455; c=relaxed/simple;
-	bh=r0zsBFHATJcVfG4CZqubPjoA1F7bzzSDI9zIRslLnXQ=;
+	s=arc-20240116; t=1792418485; c=relaxed/simple;
+	bh=3zkUz8vKBzJk2PcRoTlwHiicQys/aPwdESXGrkdBgUg=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=lkTkERMv7KsYFaYiODOsMXipqkasO/zcE70s+RuyLN80CdpHkI6j1eLyopbiodvs/+GFivqP0aC0ftxlFgVZo5u89v+E6MDPa9jtc7FiKju9v3JJYNi8n34Cb0B+zpa7YJ903Wxtybq+nIsjffngTrqYn1tLXTObSRmEJX1Xpoc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FK/oHWpV; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=ATFh1j9o1ZabuGDVEITe8BJZyN3yVH8Cd5BLKjJCJsvZURpcbsT0tptveWSa/aAdHhJgMq8NPQqe7VXeEZToulGY6A6WxjrqLfRoKfmjMdJ1V2v2LxfZ6eqj2NgNh4MJcQFTl2vjI04iaa+sHg6eURo5tNPVw4wtjPyMX7qQ8pU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iLaW5l9M; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FK/oHWpV"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 04C381F000CB;
-	Mon, 19 Oct 2026 14:00:51 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iLaW5l9M"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D41AF1F000C9;
+	Mon, 19 Oct 2026 14:01:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792418453;
-	bh=6rgQydcwj3fnLt9d7NChznuTHnqmnYcDevtU01Fxjjg=;
+	s=k20260515; t=1792418482;
+	bh=DTgVlcXPob2+dJEyJG/7iG8jOR3jrppL3zma4P8Fiac=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=FK/oHWpVhQQgXfumIe1uM8UDXZPeUpJkS7Cw78IXFLbh5Q5FrYQfFX4F4pnh1eWVW
-	 glTcFwqdqbIf0/Nd5D559AC2sZaXzz4c29VXXEh7g/QVk2inszqJ+x0RcARNhFHiZn
-	 NwJoxW7oH0OTxEYIdlyXOl2M5Rinsjz3vt8CJjWhd0R6eDEC3A62jevst+FjYVPpYA
-	 WTGTSRHxsA0EXeywYdnpsEr+C21WWaMb5nmQ+pBmjHx4qseayBG8TooJPrxpjv/bqk
-	 nZ4U2MWaG60foR2iP2FWx6Jr2Yqb5SqWtZAezUM+3AquiSsLJH+BUWTJF1NBbPkLIU
-	 6mhH1sAy4bHAA==
+	b=iLaW5l9Me1Tf9sLH0wnpLAMLPMxpWzrirJZldUHpvhH9GaF5HegleTxLQe6zaxZi9
+	 cZQESWAZRhZeKtdpwURKL2YIRuyp1l76wSq90CNI43yyyrPARQAkfrlgMlM+mg7cVP
+	 G+qVfZVhcFmHbd8MUpGuEz9/AlX+IbordWwvJsDEeJpJaSnDYia8O/NvNFLJXnV618
+	 VkkYoDtQu8gK5gamlr7FP5MFWAhLNBn6sZsQZ46yTouP+WYc0o15/KkM/hNVfZS1jK
+	 PDzSl96YTWNGGaj9okDOmj873whBLusCfv8HJ96VI8Rf1hS+Syshugr2vpOZtRo3sc
+	 nMbeULERc0XXA==
 From: Sasha Levin <sashal@kernel.org>
 To: patches@lists.linux.dev,
 	stable@vger.kernel.org
-Cc: Pengpeng Hou <pengpeng@iscas.ac.cn>,
+Cc: Xu Rao <raoxu@uniontech.com>,
 	Ulf Hansson <ulfh@kernel.org>,
 	Sasha Levin <sashal@kernel.org>,
-	adrian.hunter@intel.com,
-	ychuang3@nuvoton.com,
-	schung@nuvoton.com,
 	linux-mmc@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.18-6.12] mmc: sdhci-of-ma35d1: add missing MODULE_DEVICE_TABLE()
-Date: Mon, 19 Oct 2026 09:49:10 -0400
-Message-ID: <20261019135441.1420968-259-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.18-5.10] mmc: block: reject invalid perdev_minors before division
+Date: Mon, 19 Oct 2026 09:49:31 -0400
+Message-ID: <20261019135441.1420968-280-sashal@kernel.org>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20261019135441.1420968-1-sashal@kernel.org>
 References: <20261019135441.1420968-1-sashal@kernel.org>
@@ -56,397 +52,392 @@ X-stable-base: Linux 6.18.57
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-From: Pengpeng Hou <pengpeng@iscas.ac.cn>
+From: Xu Rao <raoxu@uniontech.com>
 
-[ Upstream commit 9b3732cce41d177acac731e0b8024d72f0dfde38 ]
+[ Upstream commit 5253aee00a4383cb0482d5e99bde48b8054ae2c0 ]
 
-The driver has an OF match table wired to .of_match_table, but does
-not export the table with MODULE_DEVICE_TABLE().
+The mmcblk.perdev_minors module parameter is parsed as a signed int and
+is used during mmc_blk_init() to compute the number of supported block
+devices.
 
-Add the missing MODULE_DEVICE_TABLE(of, ...) entry so module alias
-information is generated for OF based module autoloading.
+Passing perdev_minors=0 makes the init path divide by zero when it
+computes max_devices. Negative values are invalid as well and would make
+max_devices negative before it is later used as an IDA limit.
 
-Signed-off-by: Pengpeng Hou <pengpeng@iscas.ac.cn>
+Reject non-positive perdev_minors values before registering any mmcblk
+resources.
+
+Signed-off-by: Xu Rao <raoxu@uniontech.com>
 Signed-off-by: Ulf Hansson <ulfh@kernel.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
 
 LLM Generated explanations, may be completely bogus:
 
-# Stable backport analysis: `mmc: sdhci-of-ma35d1: add missing
-MODULE_DEVICE_TABLE()`
+I have the bug mechanism, history, and review thread. Compiling the
+nine-phase verdict for this 7.3-rc4 tree.
 
-Local tree: **v7.3-rc4** (`7.3.0-rc4`, `VERSION=7 PATCHLEVEL=3
-SUBLEVEL=0 EXTRAVERSION=-rc4`).
-Candidate: `9b3732cce41d177acac731e0b8024d72f0dfde38`.
-The driver and the missing-alias bug exist in this tree; the one-line
-fix is already present here as a mainline commit.
+## Phase 1: Commit message forensics
 
----
+**Step 1.1: Subject line**
+- Record: **[mmc/block] [reject] reject invalid `perdev_minors` before
+  division**
+- Subsystem: `mmc: block:`. Verb: **reject** (guard / prevent invalid
+  input). Intent: do not use a non-positive module parameter as a
+  divisor.
 
-## PHASE 1: COMMIT MESSAGE FORENSICS
+**Step 1.2: Tags**
+- Record:
+  - `Signed-off-by: Xu Rao <raoxu@uniontech.com>` (author)
+  - `Signed-off-by: Ulf Hansson <ulfh@kernel.org>` (MMC maintainer;
+    committed 2026-07-10)
+  - **No** `Fixes:`, `Reported-by:`, `Tested-by:`, `Reviewed-by:`,
+    `Acked-by:`, `Link:`, or `Cc: stable@vger.kernel.org`
+  - Absence of `Fixes:` / `Cc: stable` is expected for this review and
+    is not a negative signal
+- SHA in this tree: `5253aee00a4383cb0482d5e99bde48b8054ae2c0`
 
-**Step 1.1: PARSE THE SUBJECT LINE**
-Record: **[mmc / sdhci-of-ma35d1] [add] [export OF match table via
-MODULE_DEVICE_TABLE so the module can autoload]**
+**Step 1.3: Body**
+- Record:
+  - **Bug:** `mmcblk.perdev_minors` is a signed `int` module parameter.
+    `mmc_blk_init()` computes `max_devices` as `(1 << MINORBITS) /
+    perdev_minors`.
+  - **Symptoms:** `perdev_minors=0` → divide-by-zero in init. Negative
+    values → negative `max_devices`, later used as an IDA upper bound.
+  - **Version info:** none in the message.
+  - **Root cause:** no validation before division / IDA use. Fix: reject
+    `<= 0` before registering any mmcblk resources.
 
-**Step 1.2: PARSE ALL COMMIT MESSAGE TAGS**
-Record:
-- **Fixes:** none (expected)
-- **Reported-by / Tested-by / Reviewed-by / Acked-by:** none
-- **Link:** none in the committed message
-- **Cc: stable:** none (expected)
-- **Signed-off-by:** Pengpeng Hou (author); Ulf Hansson (MMC maintainer,
-  applied it)
-- Ignore any pipeline SOBs
+**Step 1.4: Hidden bug fix?**
+- Record: **No disguise.** This is an explicit crash/UB fix, not
+  cleanup-as-fix.
 
-Notable: maintainer SOB; no user report; no syzbot.
+## Phase 2: Diff analysis
 
-**Step 1.3: ANALYZE THE COMMIT BODY TEXT**
-Record:
-- **Bug:** OF match table is wired to `.of_match_table` but not exported
-  with `MODULE_DEVICE_TABLE(of, ...)`.
-- **Symptom:** `depmod`/`modinfo` get no `of:` aliases, so udev/kmod
-  will not autoload `sdhci-ma35` when DT has `compatible =
-  "nuvoton,ma35d1-sdhci"`. Built-in (`=y`) matching still works.
-- **Version info:** none in the message. Driver introduced in v6.12-rc1.
-- **Root cause:** missing `MODULE_DEVICE_TABLE` so `file2alias.c` never
-  publishes the table.
+**Step 2.1: Inventory**
+- Record:
+  - File: `drivers/mmc/core/block.c` — **+5 / −0**
+  - Function: `mmc_blk_init()`
+  - Scope: **single-file surgical fix**
 
-Original mailing-list body (stripped before commit) said this is a
-source-level fix with no hardware reproduction; evidence is the table
-itself.
+**Step 2.2: Code flow**
+- Record: **Before:** `mmc_blk_init()` registers the RPMB bus and chrdev
+  region, then does `max_devices = min(MAX_DEVICES, (1 << MINORBITS) /
+  perdev_minors)` with no check. **After:** if `perdev_minors <= 0`, log
+  and `return -EINVAL` **before** any of those registrations (no leak on
+  the new error path).
 
-**Step 1.4: DETECT HIDDEN BUG FIXES**
-Record: **Not hidden.** It is an explicit autoload/alias fix. Same class
-as “add a device ID”: the ID exists; userspace was never told.
+Verified parent of the fix (no check):
 
----
+```
+max_devices = min(MAX_DEVICES, (1 << MINORBITS) / perdev_minors);
+```
 
-## PHASE 2: DIFF ANALYSIS
+**Step 2.3: Bug mechanism**
+- Record: **Logic / correctness + memory-safety (div-by-zero, invalid
+  IDA limit)**
+  - `perdev_minors == 0`: integer division by zero in `mmc_blk_init()`
+    (oops / exception on init).
+  - `perdev_minors < 0`: signed division yields a negative
+    `max_devices`; `ida_alloc_max(..., max_devices - 1, ...)` takes
+    `unsigned int max`, so the negative value **wraps** to a huge limit
+    (`include/linux/idr.h`). Probe then uses `devidx * perdev_minors`
+    for `first_minor`.
+  - Same divisor is also used in `mmc_get_devidx()` (`disk->first_minor
+    / perdev_minors`).
 
-**Step 2.1: INVENTORY THE CHANGES**
-Record:
-- File: `drivers/mmc/host/sdhci-of-ma35d1.c` — **+1 / −0**
-- Function: none; one statement after `sdhci_ma35_dt_ids[]`
-- Scope: **single-file, one-line surgical fix**
+**Step 2.4: Fix quality**
+- Record: **Obviously correct and minimal.** Matches Kconfig
+  (`MMC_BLOCK_MINORS` range 4–256). Valid defaults (8) unchanged.
+  Regression risk **very low**: only rejects values that already crash
+  or mis-size the IDA. Early return happens before `bus_register`, so no
+  new leak.
 
-**Step 2.2: UNDERSTAND THE CODE FLOW CHANGE**
-Record:
-- **Before:** `sdhci_ma35_dt_ids` is only used as `.of_match_table` (in-
-  kernel match when the module is already loaded or built-in).
-- **After:** same, plus `MODULE_DEVICE_TABLE(of, sdhci_ma35_dt_ids)` so
-  modpost emits `MODULE_ALIAS("of:N*T*Cnuvoton,ma35d1-sdhci")`.
-- Path: **module build / autoload**, not probe/error/init runtime logic.
+## Phase 3: Git history
 
-**Step 2.3: IDENTIFY THE BUG MECHANISM**
-Record: **[Hardware enablement / missing module alias]** — category
-**(h) plus logic for autoload**. Not UAF, leak, race, or crash. Without
-the macro, a modular build never gets OF aliases. Confirmed by
-`include/linux/module.h`: `MODULE_DEVICE_TABLE` creates a `used` alias
-so `scripts/mod/file2alias.c` can find the table.
+**Step 3.1: Blame**
+- Record:
+  - `perdev_minors` module param: `5e71b7a64cb4c` (“mmc: make number of
+    mmcblk minors configurable”, Olof Johansson, 2010) —
+    **v2.6.37-rc1**.
+  - Division `(1 << MINORBITS) / perdev_minors`: `a26eba614afff0` (“mmc:
+    block: Increase max_devices”, Ben Hutchings, 2014) — **v3.19-rc1**.
+  - Bug is over a decade old in this lineage, not new 7.x code.
 
-**Step 2.4: ASSESS THE FIX QUALITY**
-Record:
-- **Quality:** obviously correct; this is the documented way to export
-  OF IDs.
-- **Regression risk:** negligible. Macro only adds a static alias
-  symbol; no locking, no API, no runtime path change except autoload
-  starts working.
-- **Red flags:** none on the diff. Author is doing a wide
-  `MODULE_DEVICE_TABLE` sweep (rtc, vdpa, gpio, iio, …); that does not
-  make *this* line wrong. MMC maintainer applied it after trimming the
-  disclaimer.
+**Step 3.2: Fixes: tag**
+- Record: **No `Fixes:` tag.** Introducing commits above are in this
+  tree (ancient ancestors of HEAD).
 
----
+**Step 3.3: File history**
+- Record: Recent `block.c` work is unrelated (RPMB unregister, MQ
+  retry). `git log --grep=perdev_minors -- drivers/mmc/` shows only this
+  fix plus old param/prefix commits. **Standalone, not a series.** No
+  follow-ups on `block.c` after `5253aee`.
 
-## PHASE 3: GIT HISTORY INVESTIGATION
+**Step 3.4: Author**
+- Record: Xu Rao has one other recent MMC commit (`mmc: spi: reset
+  bytes_xfered...`). Not the subsystem maintainer. **Ulf Hansson** (MMC
+  maintainer) applied it.
 
-**Step 3.1: BLAME THE CHANGED LINES**
-Record:
-- Table and driver: `addc9ecb9ddb3` (“Add Nuvoton MA35D1 SDHCI driver”),
-  Shan-Chun Hung, 2024-07-16, committed 2024-08-26.
-- First appeared: **v6.12-rc1** (`git describe --contains addc9ecb9ddb3`
-  → `v6.12-rc1~158^2~42`).
-- Original driver had the match table and `.of_match_table` and **no**
-  `MODULE_DEVICE_TABLE` from day one.
-- Bug age: ~v6.12 through this July 2026 fix.
+**Step 3.5: Dependencies**
+- Record: **None.** The check uses existing `perdev_minors` and
+  `pr_err`. Applies on its own.
 
-**Step 3.2: FOLLOW THE FIXES: TAG**
-Record: **No Fixes: tag.** Buggy commit is the original driver add,
-verified by blame and by `git show addc9ecb9ddb3` (tail of the file has
-the table without the macro). That commit **is** an ancestor of this
-tree.
+## Phase 4: Mailing list / external
 
-**Step 3.3: CHECK FILE HISTORY**
-Record (this file only):
-- `addc9ecb9ddb3` — add driver
-- `078e548af9c3a` — `remove_new` → `remove`
-- `01bc623f9a5c2` — drop `sdhci_pltfm_free()`
-- `995832b2cebe6` — include-header churn
-- `9b3732cce41d1` — this fix
+**Step 4.1: Original discussion**
+- Record: `b4 dig -c 5253aee00a438` matched patch-id
+  `291b9622c960b2f250c74c590d7e9916013372a3`.
+  - Lore/msgid: `https://patch.msgid.link/C7A17066496D0ABA+2026070609250
+    1.853376-1-raoxu@uniontech.com`
+  - **v1 only** (`b4 dig -a`); committed version is that v1.
+  - Ulf Hansson (10 Jul 2026): **“Applied for next, thanks!”** — no NAK,
+    no requested respin.
+  - Direct lore.kernel.org fetch returned **403**; thread confirmed via
+    b4 + LKML/openwall mirrors.
 
-No prerequisite refactor for this one line. **Standalone.**
+**Step 4.2: Recipients (`b4 dig -w`)**
+- Record: `ulfh@kernel.org`, `linux-mmc@vger.kernel.org`, Avri Altman,
+  Bean Huo, Shawn Lin, Jens Wiklander, **Kees Cook**, plus others.
+  Maintainer was To: and merged the patch. No reviewer `Reviewed-by` in
+  git.
 
-**Step 3.4: CHECK THE AUTHOR'S OTHER COMMITS**
-Record: Pengpeng Hou is not the MMC maintainer; many similar “add
-missing MODULE_DEVICE_TABLE()” commits across subsystems. Ulf Hansson
-applied this one. Related MMC precedent by others: `6e540da4c1db7`
-(“mmc: sdhci-of-aspeed: fix module autoloading”) is the same one-line
-change **and had `Fixes:` + `Cc: stable@vger.kernel.org`**.
+**Step 4.3: Bug report**
+- Record: **No `Reported-by` / syzbot / bugzilla.** Author describes the
+  mechanism; no public crash log found.
 
-**Step 3.5: DEPENDENT/PREREQUISITE COMMITS**
-Record: **None.** Only needs `sdhci_ma35_dt_ids` and `module.h` (already
-included). Can apply standalone on any tree that has this driver.
+**Step 4.4: Series**
+- Record: **Standalone single patch**, not N/M.
 
----
+**Step 4.5: Stable list**
+- Record: Web search of `lore.kernel.org/stable` for `perdev_minors` did
+  **not** turn up a nomination or a rejection of this patch. Direct lore
+  fetch was 403. **UNVERIFIED** that nobody ever asked stable@; no
+  evidence of a known NAK for stable either.
 
-## PHASE 4: MAILING LIST AND EXTERNAL RESEARCH
+## Phase 5: Semantic / call graph
 
-**Step 4.1: FIND THE ORIGINAL PATCH DISCUSSION**
-Record:
-- `b4 dig -c 9b3732cce41d1` →
-  https://patch.msgid.link/20260704124115.2874-1-pengpeng@iscas.ac.cn
-- `b4 dig -a`: **v1 only** (2026-07-04). Applied version is that v1
-  (commit message cleaned).
-- Thread (mbox): Ulf Hansson, 2026-07-06: **“Applied for next (by
-  cleanup of the commit message a bit), thanks!”**
-- No NAK, no reviewer-requested `Cc: stable`, no risk discussion.
-- lore.kernel.org HTTP fetch returned 403 (Anubis); thread recovered via
-  `b4 dig -m`.
+**Step 5.1: Functions**
+- Record: **`mmc_blk_init` only** (plus it protects later use of
+  `perdev_minors` in `mmc_get_devidx`, `mmc_blk_alloc_req`,
+  `mmc_blk_alloc_rpmb_part`).
 
-**Step 4.2: CHECK WHO REVIEWED THE PATCH**
-Record (`b4 dig -w`): To/Cc included Ulf Hansson (MMC), Adrian Hunter
-(SDHCI), Nuvoton (Jacky Huang, Shan-Chun Hung), `linux-mmc`, `linux-arm-
-kernel`. Right people. Only maintainer reply was “applied”.
+**Step 5.2: Callers**
+- Record: `module_init(mmc_blk_init)` only — boot (builtin,
+  `CONFIG_MMC_BLOCK=y` default) or `modprobe mmcblk`. Not a hot path,
+  not IRQ, not a syscall except via privileged module load / kernel
+  cmdline.
 
-**Step 4.3: SEARCH FOR THE BUG REPORT**
-Record: **No user/syzbot/bugzilla report.** Author stated it was
-inferred from source. The failure mode is still deterministic for `=m`
-builds.
+**Step 5.3: Callees**
+- Record: After the new check: `bus_register`, `alloc_chrdev_region`,
+  `register_blkdev`, `mmc_register_driver`. The new path calls none of
+  these.
 
-**Step 4.4: RELATED PATCHES AND SERIES**
-Record: **Standalone 1/1.** Same-week author activity is a tree-wide
-missing-alias sweep, not a multi-patch MMC series.
+**Step 5.4: Reachability**
+- Record: **Yes, from admin/boot configuration.**
+  `module_param(perdev_minors, int, 0444)` — set at load
+  (`mmcblk.perdev_minors=0`) or on the kernel command line if builtin.
+  **Not** writable later (0444). **Unprivileged users cannot set it** on
+  a normal system. Kconfig `range 4 256` cannot produce 0; only the
+  module/boot param can.
 
-**Step 4.5: CHECK STABLE MAILING LIST HISTORY**
-Record: **UNVERIFIED** via lore.kernel.org/stable (Anubis 403). No `Cc:
-stable` on this patch. Closest analogue in-tree (`sdhci-of-aspeed`
-autoload) *was* explicitly nominated for stable.
+**Step 5.5: Similar patterns**
+- Record: `perdev_minors` exists only in this file. No sibling mmc
+  driver with the same hole. Pattern is the usual “signed module_param
+  used as divisor without a positivity check.”
 
----
+## Phase 6: This checkout
 
-## PHASE 5: CODE SEMANTIC ANALYSIS
+**Step 6.1: Buggy code in this tree?**
+- Record:
+  - `git describe HEAD` → **`v7.3-rc4-27-gf0100363d8c37`**
+  - `make kernelversion` → **7.3.0-rc4**
+  - The mmc block driver and the division **are present**. The
+    **unfixed** sequence is the parent of `5253aee`; **HEAD already
+    contains the fix** (`git merge-base --is-ancestor 5253aee00a438
+    HEAD` → yes).
+  - Commit first landed via MMC for **v7.3** (`git describe 5253aee` →
+    `v7.2-rc2-25-g5253aee00a438`; **not** an ancestor of `v7.2`). Bug
+    **introduction** is v3.19-era, long before this branch.
+  - Being an ancestor of this mainline/rc HEAD is expected for a
+    candidate; it is not “already selected for stable.”
 
-**Step 5.1: KEY FUNCTIONS**
-Record: **No function body changed.** Touches `sdhci_ma35_dt_ids` and
-the `sdhci_ma35_driver` registration site.
+**Step 6.2: Backport difficulty**
+- Record: **Clean apply on this tree** (hunk matches `mmc_blk_init`
+  exactly). No extra helpers required.
 
-**Step 5.2: TRACE CALLERS**
-Record:
-- `.probe = ma35_probe` — driver-core platform probe.
-- `.of_match_table = sdhci_ma35_dt_ids` — OF matching when the driver is
-  present.
-- `MODULE_DEVICE_TABLE` is not a runtime caller; it feeds **modpost**.
-- Impact surface: modular `CONFIG_MMC_SDHCI_OF_MA35D1=m` on
-  `nuvoton,ma35d1-sdhci` DT.
+**Step 6.3: Related fixes already here**
+- Record: This **is** the fix. No alternate/earlier validation of
+  `perdev_minors`. No follow-up revert.
 
-**Step 5.3: TRACE CALLEES**
-Record: Unchanged. `ma35_probe` still does `sdhci_pltfm_init` / host
-setup. Macro expands to a static alias (verified in
-`include/linux/module.h`).
+## Phase 7: Subsystem context
 
-**Step 5.4: FOLLOW THE CALL CHAIN**
-Record: DT node `compatible = "nuvoton,ma35d1-sdhci"` → kmod alias
-lookup → load `sdhci-ma35` → `ma35_probe`. Reachable on MA35D1 boot if
-the driver is a module. Not a syscall/UAF path. **Userspace-visible:**
-missing MMC/SD host until manual `modprobe`.
+**Step 7.1:**
+- Record: **`drivers/mmc/core` (MMC block)** — **IMPORTANT** (eMMC/SD
+  block devices; `CONFIG_MMC_BLOCK` defaults to `y`). Not core mm/VFS,
+  not staging.
 
-**Step 5.5: SEARCH FOR SIMILAR PATTERNS**
-Record: Other `sdhci-of-*.c` drivers already have
-`MODULE_DEVICE_TABLE(of, ...)`. Historical MMC autoload fixes: aspeed,
-am654, at91, mediatek. This driver was the outlier.
+**Step 7.2:**
+- Record: File is actively maintained (RPMB, MQ recovery, etc.). The
+  **bug site** (`max_devices = … / perdev_minors`) has been stable since
+  2014.
 
-Kconfig: `MMC_SDHCI_OF_MA35D1` is **tristate** (`depends on ARCH_MA35 ||
-COMPILE_TEST`), so `=m` is a supported config. Help text: “say Y or M
-here.”
+## Phase 8: Impact and risk
 
----
+**Step 8.1: Who is affected**
+- Record: Users of `mmcblk` who pass **`mmcblk.perdev_minors=0` or a
+  negative value** (cmdline or `modprobe`). Default Kconfig path is
+  fine. Population: **config/admin-specific**, not universal.
 
-## PHASE 6: CROSS-REFERENCING AGAINST THE LOCAL TREE
+**Step 8.2: Trigger**
+- Record: One-shot at `mmc_blk_init`. **Not** timing-dependent. **Not**
+  triggerable by an unprivileged syscall on a typical system.
+  Commonness: **low** (must override a param whose Kconfig range is
+  already 4–256).
 
-**Step 6.1: DOES THE BUGGY CODE EXIST IN THIS TREE?**
-Record: **Yes.** File exists; table and `.of_match_table` exist; the
-missing alias was the original 6.12 code. This checkout already contains
-the fix line at `drivers/mmc/host/sdhci-of-ma35d1.c:293`. `git merge-
-base --is-ancestor addc9ecb9ddb3 HEAD` and `9b3732cce41d1 HEAD` both
-succeed. Bug introduced **v6.12**, not after this tree.
+**Step 8.3: Failure mode**
+- Record:
+  - `= 0`: divide-by-zero → **oops / exception during MMC block init**.
+    Builtin + `panic_on_oops` → boot failure; otherwise mmcblk fails and
+    eMMC/SD never appear (root-on-eMMC can fail to boot).
+  - `< 0`: negative `max_devices` → **unsigned wrap in
+    `ida_alloc_max`**, wrong minors, possible further corruption of
+    device numbering.
+  - Severity: **HIGH** if triggered (crash / failed storage), **MEDIUM
+    overall** because the trigger is an invalid privileged parameter.
 
-**Step 6.2: BACKPORT COMPLICATIONS**
-Record: **Clean apply.** One added line next to a table that has been
-there since the driver was added. Later churn (`remove`,
-`sdhci_pltfm_free`, includes) does not conflict with this hunk.
+**Step 8.4: Risk–benefit**
+- Record: **Benefit: high for a tiny hardening/crash fix** (prevents
+  init oops; clean `-EINVAL`). **Risk: very low** (5 lines, error path
+  only, no API/lock/struct change). Ratio: **favorable**.
 
-**Step 6.3: RELATED FIXES ALREADY HERE**
-Record: This *is* the fix. No earlier equivalent. Sibling OF SDHCI
-drivers already export their tables.
+## Phase 9: Synthesis
 
----
+**Step 9.1: Evidence**
 
-## PHASE 7: SUBSYSTEM AND MAINTAINER CONTEXT
+**For backporting**
+- Real divide-by-zero in `mmc_blk_init` when `perdev_minors=0`.
+- Negative values produce a negative `max_devices` and wrap in
+  `ida_alloc_max()`.
+- 5-line, obviously correct check before any resource registration.
+- Bug in code since ~v3.19; param since v2.6.37; MMC block present in
+  this 7.3-rc4 tree.
+- No dependencies; standalone; maintainer applied it with no objections.
+- `CONFIG_MMC_BLOCK` is default y — driver is widely built.
 
-**Step 7.1: SUBSYSTEM AND CRITICALITY**
-Record: **MMC host / SDHCI platform driver.** Criticality:
-**PERIPHERAL** (Nuvoton MA35D1 only), but it is the SD/MMC host for that
-SoC — root-on-SD/eMMC is a realistic layout.
+**Against**
+- No `Reported-by` / syzbot; no evidence of production hits.
+- Trigger is privileged (boot arg / `modprobe`), param is 0444.
+- No `Reviewed-by`; v1 merged as-is.
+- Not a hot-path race or unprivileged UAF.
 
-**Step 7.2: SUBSYSTEM ACTIVITY**
-Record: `drivers/mmc/host/` is active (many recent fixes). This
-particular file is low-churn (five commits total).
+**Unresolved**
+- lore.kernel.org HTTP 403; used b4 + LKML mirrors.
+- No hit on stable@ for this subject (search quality limited).
 
----
+**Step 9.2: Stable rules**
+1. Obviously correct and tested? **PASS** — trivial positivity check;
+   maintainer merged to MMC next. No extra Tested-by, but the change is
+   reviewable by inspection.
+2. Fixes a real bug that affects users? **PASS** — div-by-zero / invalid
+   IDA limit if the param is set wrong.
+3. Important (crash/security/corruption/deadlock)? **PASS** — kernel
+   oops on init; storage devices never register. Not unprivileged
+   security.
+4. Small and contained? **PASS** — +5 lines, one function.
+5. No new features/APIs? **PASS**.
+6. Can apply to this tree? **PASS** — same file/function; no missing
+   prereqs.
 
-## PHASE 8: IMPACT AND RISK ASSESSMENT
+**Step 9.3: Exception category**
+- Record: **None** (not a device ID/quirk/DT/docs-only change). It is a
+  normal small bugfix.
 
-**Step 8.1: WHO IS AFFECTED**
-Record: **Platform-specific / config-specific:** `ARCH_MA35` +
-`CONFIG_MMC_SDHCI_OF_MA35D1=m`. Built-in (`=y`) is unaffected. Distro-
-style modular kernels are the users who benefit.
+**Step 9.4: Decision**
 
-**Step 8.2: TRIGGER CONDITIONS**
-Record: Every boot/enumeration of `nuvoton,ma35d1-sdhci` when the driver
-is a module. Not a race. Unprivileged users do not trigger it;
-**boot/udev does**. Common *on that hardware* if distros ship the driver
-as `=m`.
+This tree is **7.3.0-rc4**. The MMC block driver and the unvalidated
+division exist here; the patch is self-contained and matches local
+`mmc_blk_init()`. A 5-line reject of non-positive `perdev_minors`
+prevents a real init-time divide-by-zero and a broken IDA limit, with
+negligible regression risk. That meets stable-kernel-rules for this
+checkout.
 
-**Step 8.3: FAILURE MODE SEVERITY**
-Record: **Missing driver autoload → SD/MMC host never probes → no
-card/root disk until manual load.** Not oops/UAF. Severity **MEDIUM**,
-**HIGH** if root is on that host and the module is not in the initramfs
-by name. Same user-visible class as a missing device ID.
+### Why it matters here
+Invalid `mmcblk.perdev_minors` is enough to oops while bringing up
+mmcblk (or to wrap the IDA max). On systems with builtin mmcblk (the
+default), that is boot-time. The fix fails init with `-EINVAL` instead.
 
-**Step 8.4: RISK-BENEFIT RATIO**
-Record:
-- **Benefit:** medium for MA35D1 modular builds (storage may not
-  appear).
-- **Risk:** **very low** (1 line, alias-only).
-- **Ratio:** favorable. Same pattern already taken for stable on other
-  SDHCI OF drivers.
+### Risk vs benefit
+Benefit is avoiding a crash/failed MMC probe; risk is a check that does
+not run for any Kconfig-legal default.
 
----
-
-## PHASE 9: FINAL SYNTHESIS
-
-**Step 9.1: EVIDENCE**
-
-**For backporting:**
-- Real, deterministic autoload bug when `MMC_SDHCI_OF_MA35D1=m`.
-- One-line, obviously correct, no new API.
-- Driver has been in this lineage since v6.12; table was never exported.
-- MMC maintainer applied it; SDHCI/Nuvoton were on Cc; no NAK.
-- Same change as `mmc: sdhci-of-aspeed: fix module autoloading`, which
-  carried `Cc: stable`.
-- Matches the stable-rules “device ID” / hardware-enablement exception
-  in spirit: publish an ID the driver already matches.
-- Applies cleanly; no prerequisites.
-
-**Against:**
-- No `Reported-by` / no hardware reproduction (author said so).
-- Peripheral SoC, not a core path.
-- Not a crash, UAF, or corruption.
-- No `Cc: stable` on this specific patch (Ulf took it for *next*, not as
-  an urgent fix).
-- Author is running a tree-wide alias sweep (quality of *this* hunk is
-  still fine).
-
-**Unresolved:**
-- Whether linux-stable already discussed this (lore.kernel.org/stable
-  blocked).
-- How many shipping MA35D1 kernels use `=m` vs `=y` (unverified).
-
-**Step 9.2: STABLE RULES CHECKLIST**
-1. Obviously correct and tested? **PASS** — standard macro; maintainer
-   applied. “Tested” is source-level, not lab hardware.
-2. Fixes a real bug that affects users? **PASS** — modular autoload is
-   broken; Kconfig allows `=m`.
-3. Important issue? **PASS** (as device-ID / hardware-enablement, not as
-   a crash). Storage host may never appear on boot.
-4. Small and contained? **PASS** — +1 line, one file.
-5. No new features or APIs? **PASS** — only module aliases for an
-   existing compatible string.
-6. Can apply to the local tree? **PASS** — driver present; hunk is the
-   existing table site.
-
-**Step 9.3: EXCEPTION CATEGORIES**
-Record: **Device ID / module alias publication for an existing driver**
-(same practical class as adding PCI/USB/OF IDs). Not a new driver.
-
-**Step 9.4: DECISION**
-This tree has the MA35D1 SDHCI driver and had the missing alias from
-introduction until this commit. The patch is a one-line, zero-runtime-
-risk fix that makes the already-supported compatible string autoload
-when the driver is a module. That is stable-appropriate hardware
-enablement, not a feature or refactor.
+### Concerns
+No in-the-wild report; trigger needs a bad privileged param. That lowers
+urgency but does not make the patch unsafe or feature-like. No backport
+rework needed on this tree.
 
 ---
 
-## What the commit solves for stable users
-
-On Nuvoton MA35D1, `sdhci-of-ma35d1` already matches
-`nuvoton,ma35d1-sdhci` **if loaded**. Without `MODULE_DEVICE_TABLE`, a
-modular kernel never generates the OF alias, so the MMC/SD controller is
-silent until someone runs `modprobe`. Backporting restores autoload.
-Risk is essentially zero.
-
----
-
-## Verification
-- [Phase 1] Parsed commit `9b3732cce41d1`: no Fixes/Reported-
-  by/Cc:stable; SOBs Pengpeng Hou + Ulf Hansson
-- [Phase 2] Diff: +1 line `MODULE_DEVICE_TABLE(of, sdhci_ma35_dt_ids)`
-  in `sdhci-of-ma35d1.c`
-- [Phase 2] `MODULE_DEVICE_TABLE` expansion verified in
-  `include/linux/module.h:255-257`
-- [Phase 3] `git blame`: table from `addc9ecb9ddb3` (v6.12-rc1), no
-  MODULE_DEVICE_TABLE until this commit
-- [Phase 3] `git show addc9ecb9ddb3`: original driver had
-  `.of_match_table` only
-- [Phase 3] `git merge-base --is-ancestor addc9ecb9ddb3 HEAD` and
-  `9b3732cce41d1 HEAD`: both true
-- [Phase 3] File log: 5 commits; no extra prereqs for this line
-- [Phase 3] Precedent `6e540da4c1db7` (aspeed autoload): same one-liner,
-  had `Cc: stable`
-- [Phase 4] `b4 dig -c/-a/-w/-m`: v1-only; lore msgid
-  `20260704124115.2874-1-pengpeng@iscas.ac.cn`; Ulf “Applied for next”
-- [Phase 4] WebFetch lore/patch.msgid.link: 403; thread read from mbox
-  instead
-- [Phase 5] Kconfig: `MMC_SDHCI_OF_MA35D1` is tristate, `depends on
-  ARCH_MA35 || COMPILE_TEST`
-- [Phase 5] Other `sdhci-of-*.c` already have `MODULE_DEVICE_TABLE`
+**Verification:**
+- [Phase 1] Parsed message/tags: author + Ulf SOB only; no
+  Fixes/Reported-by/Cc stable. SHA `5253aee00a438`.
+- [Phase 2] Diff: +5 in `mmc_blk_init()`; `git show
+  5253aee^:drivers/mmc/core/block.c` confirmed unvalidated `(1 <<
+  MINORBITS) / perdev_minors`.
+- [Phase 2] `ida_alloc_max()` in `include/linux/idr.h` takes `unsigned
+  int max` — negative `max_devices - 1` wraps (verified).
+- [Phase 2] `MINORBITS` is 20 in `include/linux/kdev_t.h` (verified).
+- [Phase 2] Kconfig `MMC_BLOCK_MINORS` `range 4 256`, `default 8`;
+  `CONFIG_MMC_BLOCK` `default y` (verified).
+- [Phase 3] `git blame`: param `5e71b7a64cb4c` (v2.6.37-rc1); division
+  `a26eba614afff0` (v3.19-rc1).
+- [Phase 3] `git log --grep=perdev_minors -- drivers/mmc/`: this commit
+  + old param commits only; no series/follow-up.
+- [Phase 3] `git log --author='Xu Rao' -- drivers/mmc/`: this + one
+  unrelated spi fix.
+- [Phase 4] `b4 dig -c 5253aee00a438`: msgid
+  `C7A17066496D0ABA+20260706092501.853376-1-raoxu@uniontech.com`; v1
+  only; Ulf CC’d.
+- [Phase 4] LKML: Ulf “Applied for next, thanks!” — no NAK.
+- [Phase 4] lore.kernel.org WebFetch: **403**. Stable@ search: **no
+  relevant thread found**.
+- [Phase 5] `mmc_blk_init` only via `module_init`; `module_param(...,
+  0444)` — admin/boot only (verified in `block.c`).
+- [Phase 5] Call sites of `perdev_minors`: init division,
+  `mmc_get_devidx`, `md->disk->minors` / `first_minor` (grep verified).
 - [Phase 6] `git describe HEAD` = `v7.3-rc4-27-gf0100363d8c37`; `make
-  kernelversion` = `7.3.0-rc4`
-- [Phase 6] Current file line 293 already has the macro
-- [Phase 8] Failure mode: module not autoloaded; no oops
-- UNVERIFIED: linux-stable list discussion (Anubis); how common `=m` is
-  on MA35D1 distro kernels
+  kernelversion` = `7.3.0-rc4`.
+- [Phase 6] `git merge-base --is-ancestor 5253aee00a438 HEAD` = yes;
+  `git merge-base --is-ancestor 5253aee00a438 v7.2` = not in v7.2.
+- [Phase 6] HEAD already has the `if (perdev_minors <= 0)` block at
+  `block.c:3340` (this is the mainline commit under review, not a
+  stable-queue marker).
+- [Phase 8] Failure mode: div-by-zero oops at mmcblk init, or IDA limit
+  wrap for negatives.
+- UNVERIFIED: full lore.kernel.org thread HTML (403); whether stable@
+  ever discussed this hash.
 
 **YES**
 
- drivers/mmc/host/sdhci-of-ma35d1.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/core/block.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-ma35d1.c b/drivers/mmc/host/sdhci-of-ma35d1.c
-index 287026422616c..73f772db04148 100644
---- a/drivers/mmc/host/sdhci-of-ma35d1.c
-+++ b/drivers/mmc/host/sdhci-of-ma35d1.c
-@@ -291,6 +291,7 @@ static const struct of_device_id sdhci_ma35_dt_ids[] = {
- 	{ .compatible = "nuvoton,ma35d1-sdhci" },
- 	{}
- };
-+MODULE_DEVICE_TABLE(of, sdhci_ma35_dt_ids);
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index e8e45b161a398..5077842b286fe 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -3407,6 +3407,11 @@ static int __init mmc_blk_init(void)
+ {
+ 	int res;
  
- static struct platform_driver sdhci_ma35_driver = {
- 	.driver	= {
++	if (perdev_minors <= 0) {
++		pr_err("mmcblk: invalid minors per device: %d\n", perdev_minors);
++		return -EINVAL;
++	}
++
+ 	res  = bus_register(&mmc_rpmb_bus_type);
+ 	if (res < 0) {
+ 		pr_err("mmcblk: could not register RPMB bus type\n");
 -- 
 2.53.0
 
