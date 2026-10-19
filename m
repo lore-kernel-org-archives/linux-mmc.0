@@ -1,443 +1,154 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f177.google.com (mail-qk1-f177.google.com [209.85.222.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD7D55CFA4B;
-	Mon, 19 Oct 2026 14:01:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792418485; cv=none; b=AF/m9yseKxKekVDJ4jSl91TqQkckyEN0cNDLxThzoUzk34G5MNRA9RcxyQhrUv1DYQjAhwuuFP4XabtteZ5FU1WFT1iJbVFzGssoCcMY67XbUYggZjp7QCA3jXPJxYL8eJBksOahJbSITzb/UJ5TghJ/r6QZkcP8tkB+4HdyU8Y=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792418485; c=relaxed/simple;
-	bh=3zkUz8vKBzJk2PcRoTlwHiicQys/aPwdESXGrkdBgUg=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=ATFh1j9o1ZabuGDVEITe8BJZyN3yVH8Cd5BLKjJCJsvZURpcbsT0tptveWSa/aAdHhJgMq8NPQqe7VXeEZToulGY6A6WxjrqLfRoKfmjMdJ1V2v2LxfZ6eqj2NgNh4MJcQFTl2vjI04iaa+sHg6eURo5tNPVw4wtjPyMX7qQ8pU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iLaW5l9M; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 164FB57F1CA
+	for <linux-mmc@vger.kernel.org>; Mon, 19 Oct 2026 14:29:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.177
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1792420191; cv=pass; b=d5WLIhu4ncUsAK2DKoKgcSzM2R044zFrhS70fVoMcIgm9l0Ex8Ctqwu5wS8KO1cGvH64D8xj0M4ozBgvCmFIKKa5Hz+mLnGKG3CAbFxfX0U3WScN/oFWSMJqdL+XNoYpygQg93IJVWgNNHcoIAxQaGf/d+GOXD37DrTWCQQi3Y0=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1792420191; c=relaxed/simple;
+	bh=1815ZKD8D0Cw6LnUL4cFghBinoHsDcTyW6YJxteqQLg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=TWLOxyV7QuZ3ffZjSFGpYXf3APZVXkIzJOht/spXP0Sv6nD4MK6n5vu2uQFJdrK0Hc6UkO34XjKM7DY83ThtQUkByyPajEn9E7KSjlwoLkpfDG3oqIvEMzizfjMFdFDu9NtvlVlNecb/h/UAgkAXJYgiBKySXJ2zvKdOMII+kMY=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Yo5M6yyv; arc=pass smtp.client-ip=209.85.222.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iLaW5l9M"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D41AF1F000C9;
-	Mon, 19 Oct 2026 14:01:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792418482;
-	bh=DTgVlcXPob2+dJEyJG/7iG8jOR3jrppL3zma4P8Fiac=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=iLaW5l9Me1Tf9sLH0wnpLAMLPMxpWzrirJZldUHpvhH9GaF5HegleTxLQe6zaxZi9
-	 cZQESWAZRhZeKtdpwURKL2YIRuyp1l76wSq90CNI43yyyrPARQAkfrlgMlM+mg7cVP
-	 G+qVfZVhcFmHbd8MUpGuEz9/AlX+IbordWwvJsDEeJpJaSnDYia8O/NvNFLJXnV618
-	 VkkYoDtQu8gK5gamlr7FP5MFWAhLNBn6sZsQZ46yTouP+WYc0o15/KkM/hNVfZS1jK
-	 PDzSl96YTWNGGaj9okDOmj873whBLusCfv8HJ96VI8Rf1hS+Syshugr2vpOZtRo3sc
-	 nMbeULERc0XXA==
-From: Sasha Levin <sashal@kernel.org>
-To: patches@lists.linux.dev,
-	stable@vger.kernel.org
-Cc: Xu Rao <raoxu@uniontech.com>,
-	Ulf Hansson <ulfh@kernel.org>,
-	Sasha Levin <sashal@kernel.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.18-5.10] mmc: block: reject invalid perdev_minors before division
-Date: Mon, 19 Oct 2026 09:49:31 -0400
-Message-ID: <20261019135441.1420968-280-sashal@kernel.org>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20261019135441.1420968-1-sashal@kernel.org>
-References: <20261019135441.1420968-1-sashal@kernel.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Yo5M6yyv"
+Received: by mail-qk1-f177.google.com with SMTP id af79cd13be357-93e503815adso197746185a.1
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Oct 2026 07:29:49 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1792420189; cv=none;
+        d=google.com; s=arc-20260327;
+        b=fTXGOuNWY4YVLLPAWz6FwelbGjS0kR7KA6CdOmToS1kyIhVglb7Z8BiVpcK5Q34qBn
+         8YiYpaJJz8QLhe5i7oBobJa68DeqETX4IwDfeGypMG0y3M0qXrHuxiCMfyUK+LNGSClu
+         SBuFyb5Sd2bVhN4kRLdbYGCFQaxPSvnV/RMZoSf2ml1DcUO1gO9FkUpUsR4HsWNJXTyI
+         gqKYCo3xOzKdcO3KA4HL0X8b1auLm1QAi13ofz87U2OMxfxcZlud/sxGYpaOe+/7XjTy
+         LhYlicv0zVP4ORuU6Mv2N9cpn709H7KmLzxaOTsQjIxJd2V3Ro3Q+pE6Z2JRR9GgS1je
+         HkMg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=G0dMN6vSXcfuXrHsY+C/X/nR9uDe+9XWJ3CV7QZbaZk=;
+        fh=v2qUanTAdtzoZ16r/rn4hZ464xRNG9cubrwsUgRziks=;
+        b=G/x0h4imwtfwVGrVnRjm+iPwQ513wz+bwZKhMZu95SXD8TZaPEc8HQiFx4YJ/fMmjE
+         U0RMrzRUblOim4fptwOuc+1VSZfv7yhUF9cP47p1/bDEmcSLhpMyPOnb7L4bUNUMGh9S
+         tXgK6kzqBUu4uvo/O0bZPLzNgFtArwuruvNafrOKIuXma8Fi9m27enjgzsSqQNWk4U5q
+         230AjYj1r55j9Z/vdAZY0e8A4OIIDGQMhBCzvtbUo+EFhRk0eVXl0oXUzPGIAwpCobyo
+         v2SeSDiIRbvWFATiVstKh/ngdHgT1IpLIIOjX8RzSL+2LcQBMxi4w/JzvnyWrmfEgyiR
+         xQ5g==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1792420189; x=1793024989; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=G0dMN6vSXcfuXrHsY+C/X/nR9uDe+9XWJ3CV7QZbaZk=;
+        b=Yo5M6yyvHjhJgBBk9/3+cZeYfCGs9gWgqFXTDtzLSKQ6bJbWDcLAG5cKsnKgEkHCML
+         oBPGqsqWTlyC1LRO0kAwI6WSPMiqDpouBk2VysUpqMrN8sxojVjjL44stj0PHvKCQB88
+         rwGKiHX+86r/AS8BrUB5JOgL3wVn9JElWr4qVB8KCPJ5puw+IzJpVrKrpkY4bqIe87hb
+         eShcKku/GZVA5xWsj4DIvRkbfmEC5SBw70Rz5J9t6cnBn6bE0gW/1jCKSX00/MYDPNbF
+         zZhghVWaOtvGrICp1o5Vih5YcRoW+jtd7Ij3FOSLlcgkDLqrIlMtFvC3aRetHT4WUf/M
+         5EiA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1792420189; x=1793024989;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=G0dMN6vSXcfuXrHsY+C/X/nR9uDe+9XWJ3CV7QZbaZk=;
+        b=grIFBaoadcL8SOQQhf0A4FxZZy+aN77BNMdvNxk413n7kRqydxLzuRIAXKZD4Lzj8+
+         evNFwsDDO9HEhQ337usmXTL7PZ3GWfKYyTZUW9H0Vtkn17xeAkBtE+vwYp6U+VDFqwk7
+         r9VIdy45KRGO6RP7Nz0LmcLSRVxK/aF3sp2RQvZnJagj51zkhgodG1cLiwGSBhIA8GdS
+         nJ2tfa/a6onmOPTgHn0YrX02FXSxhWcj0tBqu8tdueOqzaHmZLTH6vh+baN5C+Dr+4tS
+         BnKWkwbKFQjIbNq3rliZlSPw8vRBPkDDpSCSQRPSqjuWDYA7iDz6Y6I4jDT9k7t/dKae
+         eSVA==
+X-Forwarded-Encrypted: i=1; AKwUvBxOSo1RSLhTsUXEwBxuwsTAo2oZD3llyAwTjPoCfrjF0DyGtPCyl/n/nrMVzGefYuIYxDY3WgV4MHM=@vger.kernel.org
+X-Gm-Message-State: AFq9FYLFfGiNKT/OdxU9MhINb89qudfZTJH6T5A8hr0fUpBqximANs59
+	NP90wkXHrGyqNeYQynZKoOaQhYeoNSfz7Vu96w0CO4PL9tcptDt00LoMKkkvSgvk3hTlqarbwhz
+	IIU/Vsh6G2MkNOxAC4qno2+xiJvLmiO6w7k6I
+X-Gm-Gg: AYBFou0V9UAUlscwSYyswYlhnwK255V1m+smd1XDQ6AkH6aRP9r/s/+7Ak7axE5Rxcs
+	QUx8JZfg+5oDaRLiXn9+rjgDKH/8+G4dHksJakTPd9mtWe57HLhFua3KDG8AB68FsY9plzAH5+e
+	btlOF4m8IkXEhk2kJdihtvJSjjT8KXpFhvknbGhYt2xF6eXnOkFvFwo1mZ2sjB/ZGEAiuPhy+k7
+	yGFzYpa1C8ZKYQcfO0HF+8z+d2Fe61AdnPS8I39o97fCtF2Skd/n/CjCncf2PqcXGfMeZqkzSuP
+	mokk9cCPfFU8rulg52QRXsjU31bokCWS6CjVvahQxWnEEe6rR8iCT5vHLNjpxBJC8U2i86P/KMb
+	odqNUJIbkNjFQ
+X-Received: by 2002:a05:620a:8808:b0:93e:c12c:f12e with SMTP id
+ af79cd13be357-93f29df8430mr1133759085a.73.1792420188341; Mon, 19 Oct 2026
+ 07:29:48 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.18.57
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-
-From: Xu Rao <raoxu@uniontech.com>
-
-[ Upstream commit 5253aee00a4383cb0482d5e99bde48b8054ae2c0 ]
-
-The mmcblk.perdev_minors module parameter is parsed as a signed int and
-is used during mmc_blk_init() to compute the number of supported block
-devices.
-
-Passing perdev_minors=0 makes the init path divide by zero when it
-computes max_devices. Negative values are invalid as well and would make
-max_devices negative before it is later used as an IDA limit.
-
-Reject non-positive perdev_minors values before registering any mmcblk
-resources.
-
-Signed-off-by: Xu Rao <raoxu@uniontech.com>
-Signed-off-by: Ulf Hansson <ulfh@kernel.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
-
-LLM Generated explanations, may be completely bogus:
-
-I have the bug mechanism, history, and review thread. Compiling the
-nine-phase verdict for this 7.3-rc4 tree.
-
-## Phase 1: Commit message forensics
-
-**Step 1.1: Subject line**
-- Record: **[mmc/block] [reject] reject invalid `perdev_minors` before
-  division**
-- Subsystem: `mmc: block:`. Verb: **reject** (guard / prevent invalid
-  input). Intent: do not use a non-positive module parameter as a
-  divisor.
-
-**Step 1.2: Tags**
-- Record:
-  - `Signed-off-by: Xu Rao <raoxu@uniontech.com>` (author)
-  - `Signed-off-by: Ulf Hansson <ulfh@kernel.org>` (MMC maintainer;
-    committed 2026-07-10)
-  - **No** `Fixes:`, `Reported-by:`, `Tested-by:`, `Reviewed-by:`,
-    `Acked-by:`, `Link:`, or `Cc: stable@vger.kernel.org`
-  - Absence of `Fixes:` / `Cc: stable` is expected for this review and
-    is not a negative signal
-- SHA in this tree: `5253aee00a4383cb0482d5e99bde48b8054ae2c0`
-
-**Step 1.3: Body**
-- Record:
-  - **Bug:** `mmcblk.perdev_minors` is a signed `int` module parameter.
-    `mmc_blk_init()` computes `max_devices` as `(1 << MINORBITS) /
-    perdev_minors`.
-  - **Symptoms:** `perdev_minors=0` → divide-by-zero in init. Negative
-    values → negative `max_devices`, later used as an IDA upper bound.
-  - **Version info:** none in the message.
-  - **Root cause:** no validation before division / IDA use. Fix: reject
-    `<= 0` before registering any mmcblk resources.
-
-**Step 1.4: Hidden bug fix?**
-- Record: **No disguise.** This is an explicit crash/UB fix, not
-  cleanup-as-fix.
-
-## Phase 2: Diff analysis
-
-**Step 2.1: Inventory**
-- Record:
-  - File: `drivers/mmc/core/block.c` — **+5 / −0**
-  - Function: `mmc_blk_init()`
-  - Scope: **single-file surgical fix**
-
-**Step 2.2: Code flow**
-- Record: **Before:** `mmc_blk_init()` registers the RPMB bus and chrdev
-  region, then does `max_devices = min(MAX_DEVICES, (1 << MINORBITS) /
-  perdev_minors)` with no check. **After:** if `perdev_minors <= 0`, log
-  and `return -EINVAL` **before** any of those registrations (no leak on
-  the new error path).
-
-Verified parent of the fix (no check):
-
-```
-max_devices = min(MAX_DEVICES, (1 << MINORBITS) / perdev_minors);
-```
-
-**Step 2.3: Bug mechanism**
-- Record: **Logic / correctness + memory-safety (div-by-zero, invalid
-  IDA limit)**
-  - `perdev_minors == 0`: integer division by zero in `mmc_blk_init()`
-    (oops / exception on init).
-  - `perdev_minors < 0`: signed division yields a negative
-    `max_devices`; `ida_alloc_max(..., max_devices - 1, ...)` takes
-    `unsigned int max`, so the negative value **wraps** to a huge limit
-    (`include/linux/idr.h`). Probe then uses `devidx * perdev_minors`
-    for `first_minor`.
-  - Same divisor is also used in `mmc_get_devidx()` (`disk->first_minor
-    / perdev_minors`).
-
-**Step 2.4: Fix quality**
-- Record: **Obviously correct and minimal.** Matches Kconfig
-  (`MMC_BLOCK_MINORS` range 4–256). Valid defaults (8) unchanged.
-  Regression risk **very low**: only rejects values that already crash
-  or mis-size the IDA. Early return happens before `bus_register`, so no
-  new leak.
-
-## Phase 3: Git history
-
-**Step 3.1: Blame**
-- Record:
-  - `perdev_minors` module param: `5e71b7a64cb4c` (“mmc: make number of
-    mmcblk minors configurable”, Olof Johansson, 2010) —
-    **v2.6.37-rc1**.
-  - Division `(1 << MINORBITS) / perdev_minors`: `a26eba614afff0` (“mmc:
-    block: Increase max_devices”, Ben Hutchings, 2014) — **v3.19-rc1**.
-  - Bug is over a decade old in this lineage, not new 7.x code.
-
-**Step 3.2: Fixes: tag**
-- Record: **No `Fixes:` tag.** Introducing commits above are in this
-  tree (ancient ancestors of HEAD).
-
-**Step 3.3: File history**
-- Record: Recent `block.c` work is unrelated (RPMB unregister, MQ
-  retry). `git log --grep=perdev_minors -- drivers/mmc/` shows only this
-  fix plus old param/prefix commits. **Standalone, not a series.** No
-  follow-ups on `block.c` after `5253aee`.
-
-**Step 3.4: Author**
-- Record: Xu Rao has one other recent MMC commit (`mmc: spi: reset
-  bytes_xfered...`). Not the subsystem maintainer. **Ulf Hansson** (MMC
-  maintainer) applied it.
-
-**Step 3.5: Dependencies**
-- Record: **None.** The check uses existing `perdev_minors` and
-  `pr_err`. Applies on its own.
-
-## Phase 4: Mailing list / external
-
-**Step 4.1: Original discussion**
-- Record: `b4 dig -c 5253aee00a438` matched patch-id
-  `291b9622c960b2f250c74c590d7e9916013372a3`.
-  - Lore/msgid: `https://patch.msgid.link/C7A17066496D0ABA+2026070609250
-    1.853376-1-raoxu@uniontech.com`
-  - **v1 only** (`b4 dig -a`); committed version is that v1.
-  - Ulf Hansson (10 Jul 2026): **“Applied for next, thanks!”** — no NAK,
-    no requested respin.
-  - Direct lore.kernel.org fetch returned **403**; thread confirmed via
-    b4 + LKML/openwall mirrors.
-
-**Step 4.2: Recipients (`b4 dig -w`)**
-- Record: `ulfh@kernel.org`, `linux-mmc@vger.kernel.org`, Avri Altman,
-  Bean Huo, Shawn Lin, Jens Wiklander, **Kees Cook**, plus others.
-  Maintainer was To: and merged the patch. No reviewer `Reviewed-by` in
-  git.
-
-**Step 4.3: Bug report**
-- Record: **No `Reported-by` / syzbot / bugzilla.** Author describes the
-  mechanism; no public crash log found.
-
-**Step 4.4: Series**
-- Record: **Standalone single patch**, not N/M.
-
-**Step 4.5: Stable list**
-- Record: Web search of `lore.kernel.org/stable` for `perdev_minors` did
-  **not** turn up a nomination or a rejection of this patch. Direct lore
-  fetch was 403. **UNVERIFIED** that nobody ever asked stable@; no
-  evidence of a known NAK for stable either.
-
-## Phase 5: Semantic / call graph
-
-**Step 5.1: Functions**
-- Record: **`mmc_blk_init` only** (plus it protects later use of
-  `perdev_minors` in `mmc_get_devidx`, `mmc_blk_alloc_req`,
-  `mmc_blk_alloc_rpmb_part`).
-
-**Step 5.2: Callers**
-- Record: `module_init(mmc_blk_init)` only — boot (builtin,
-  `CONFIG_MMC_BLOCK=y` default) or `modprobe mmcblk`. Not a hot path,
-  not IRQ, not a syscall except via privileged module load / kernel
-  cmdline.
-
-**Step 5.3: Callees**
-- Record: After the new check: `bus_register`, `alloc_chrdev_region`,
-  `register_blkdev`, `mmc_register_driver`. The new path calls none of
-  these.
-
-**Step 5.4: Reachability**
-- Record: **Yes, from admin/boot configuration.**
-  `module_param(perdev_minors, int, 0444)` — set at load
-  (`mmcblk.perdev_minors=0`) or on the kernel command line if builtin.
-  **Not** writable later (0444). **Unprivileged users cannot set it** on
-  a normal system. Kconfig `range 4 256` cannot produce 0; only the
-  module/boot param can.
-
-**Step 5.5: Similar patterns**
-- Record: `perdev_minors` exists only in this file. No sibling mmc
-  driver with the same hole. Pattern is the usual “signed module_param
-  used as divisor without a positivity check.”
-
-## Phase 6: This checkout
-
-**Step 6.1: Buggy code in this tree?**
-- Record:
-  - `git describe HEAD` → **`v7.3-rc4-27-gf0100363d8c37`**
-  - `make kernelversion` → **7.3.0-rc4**
-  - The mmc block driver and the division **are present**. The
-    **unfixed** sequence is the parent of `5253aee`; **HEAD already
-    contains the fix** (`git merge-base --is-ancestor 5253aee00a438
-    HEAD` → yes).
-  - Commit first landed via MMC for **v7.3** (`git describe 5253aee` →
-    `v7.2-rc2-25-g5253aee00a438`; **not** an ancestor of `v7.2`). Bug
-    **introduction** is v3.19-era, long before this branch.
-  - Being an ancestor of this mainline/rc HEAD is expected for a
-    candidate; it is not “already selected for stable.”
-
-**Step 6.2: Backport difficulty**
-- Record: **Clean apply on this tree** (hunk matches `mmc_blk_init`
-  exactly). No extra helpers required.
-
-**Step 6.3: Related fixes already here**
-- Record: This **is** the fix. No alternate/earlier validation of
-  `perdev_minors`. No follow-up revert.
-
-## Phase 7: Subsystem context
-
-**Step 7.1:**
-- Record: **`drivers/mmc/core` (MMC block)** — **IMPORTANT** (eMMC/SD
-  block devices; `CONFIG_MMC_BLOCK` defaults to `y`). Not core mm/VFS,
-  not staging.
-
-**Step 7.2:**
-- Record: File is actively maintained (RPMB, MQ recovery, etc.). The
-  **bug site** (`max_devices = … / perdev_minors`) has been stable since
-  2014.
-
-## Phase 8: Impact and risk
-
-**Step 8.1: Who is affected**
-- Record: Users of `mmcblk` who pass **`mmcblk.perdev_minors=0` or a
-  negative value** (cmdline or `modprobe`). Default Kconfig path is
-  fine. Population: **config/admin-specific**, not universal.
-
-**Step 8.2: Trigger**
-- Record: One-shot at `mmc_blk_init`. **Not** timing-dependent. **Not**
-  triggerable by an unprivileged syscall on a typical system.
-  Commonness: **low** (must override a param whose Kconfig range is
-  already 4–256).
-
-**Step 8.3: Failure mode**
-- Record:
-  - `= 0`: divide-by-zero → **oops / exception during MMC block init**.
-    Builtin + `panic_on_oops` → boot failure; otherwise mmcblk fails and
-    eMMC/SD never appear (root-on-eMMC can fail to boot).
-  - `< 0`: negative `max_devices` → **unsigned wrap in
-    `ida_alloc_max`**, wrong minors, possible further corruption of
-    device numbering.
-  - Severity: **HIGH** if triggered (crash / failed storage), **MEDIUM
-    overall** because the trigger is an invalid privileged parameter.
-
-**Step 8.4: Risk–benefit**
-- Record: **Benefit: high for a tiny hardening/crash fix** (prevents
-  init oops; clean `-EINVAL`). **Risk: very low** (5 lines, error path
-  only, no API/lock/struct change). Ratio: **favorable**.
-
-## Phase 9: Synthesis
-
-**Step 9.1: Evidence**
-
-**For backporting**
-- Real divide-by-zero in `mmc_blk_init` when `perdev_minors=0`.
-- Negative values produce a negative `max_devices` and wrap in
-  `ida_alloc_max()`.
-- 5-line, obviously correct check before any resource registration.
-- Bug in code since ~v3.19; param since v2.6.37; MMC block present in
-  this 7.3-rc4 tree.
-- No dependencies; standalone; maintainer applied it with no objections.
-- `CONFIG_MMC_BLOCK` is default y — driver is widely built.
-
-**Against**
-- No `Reported-by` / syzbot; no evidence of production hits.
-- Trigger is privileged (boot arg / `modprobe`), param is 0444.
-- No `Reviewed-by`; v1 merged as-is.
-- Not a hot-path race or unprivileged UAF.
-
-**Unresolved**
-- lore.kernel.org HTTP 403; used b4 + LKML mirrors.
-- No hit on stable@ for this subject (search quality limited).
-
-**Step 9.2: Stable rules**
-1. Obviously correct and tested? **PASS** — trivial positivity check;
-   maintainer merged to MMC next. No extra Tested-by, but the change is
-   reviewable by inspection.
-2. Fixes a real bug that affects users? **PASS** — div-by-zero / invalid
-   IDA limit if the param is set wrong.
-3. Important (crash/security/corruption/deadlock)? **PASS** — kernel
-   oops on init; storage devices never register. Not unprivileged
-   security.
-4. Small and contained? **PASS** — +5 lines, one function.
-5. No new features/APIs? **PASS**.
-6. Can apply to this tree? **PASS** — same file/function; no missing
-   prereqs.
-
-**Step 9.3: Exception category**
-- Record: **None** (not a device ID/quirk/DT/docs-only change). It is a
-  normal small bugfix.
-
-**Step 9.4: Decision**
-
-This tree is **7.3.0-rc4**. The MMC block driver and the unvalidated
-division exist here; the patch is self-contained and matches local
-`mmc_blk_init()`. A 5-line reject of non-positive `perdev_minors`
-prevents a real init-time divide-by-zero and a broken IDA limit, with
-negligible regression risk. That meets stable-kernel-rules for this
-checkout.
-
-### Why it matters here
-Invalid `mmcblk.perdev_minors` is enough to oops while bringing up
-mmcblk (or to wrap the IDA max). On systems with builtin mmcblk (the
-default), that is boot-time. The fix fails init with `-EINVAL` instead.
-
-### Risk vs benefit
-Benefit is avoiding a crash/failed MMC probe; risk is a check that does
-not run for any Kconfig-legal default.
-
-### Concerns
-No in-the-wild report; trigger needs a bad privileged param. That lowers
-urgency but does not make the patch unsafe or feature-like. No backport
-rework needed on this tree.
-
----
-
-**Verification:**
-- [Phase 1] Parsed message/tags: author + Ulf SOB only; no
-  Fixes/Reported-by/Cc stable. SHA `5253aee00a438`.
-- [Phase 2] Diff: +5 in `mmc_blk_init()`; `git show
-  5253aee^:drivers/mmc/core/block.c` confirmed unvalidated `(1 <<
-  MINORBITS) / perdev_minors`.
-- [Phase 2] `ida_alloc_max()` in `include/linux/idr.h` takes `unsigned
-  int max` — negative `max_devices - 1` wraps (verified).
-- [Phase 2] `MINORBITS` is 20 in `include/linux/kdev_t.h` (verified).
-- [Phase 2] Kconfig `MMC_BLOCK_MINORS` `range 4 256`, `default 8`;
-  `CONFIG_MMC_BLOCK` `default y` (verified).
-- [Phase 3] `git blame`: param `5e71b7a64cb4c` (v2.6.37-rc1); division
-  `a26eba614afff0` (v3.19-rc1).
-- [Phase 3] `git log --grep=perdev_minors -- drivers/mmc/`: this commit
-  + old param commits only; no series/follow-up.
-- [Phase 3] `git log --author='Xu Rao' -- drivers/mmc/`: this + one
-  unrelated spi fix.
-- [Phase 4] `b4 dig -c 5253aee00a438`: msgid
-  `C7A17066496D0ABA+20260706092501.853376-1-raoxu@uniontech.com`; v1
-  only; Ulf CC’d.
-- [Phase 4] LKML: Ulf “Applied for next, thanks!” — no NAK.
-- [Phase 4] lore.kernel.org WebFetch: **403**. Stable@ search: **no
-  relevant thread found**.
-- [Phase 5] `mmc_blk_init` only via `module_init`; `module_param(...,
-  0444)` — admin/boot only (verified in `block.c`).
-- [Phase 5] Call sites of `perdev_minors`: init division,
-  `mmc_get_devidx`, `md->disk->minors` / `first_minor` (grep verified).
-- [Phase 6] `git describe HEAD` = `v7.3-rc4-27-gf0100363d8c37`; `make
-  kernelversion` = `7.3.0-rc4`.
-- [Phase 6] `git merge-base --is-ancestor 5253aee00a438 HEAD` = yes;
-  `git merge-base --is-ancestor 5253aee00a438 v7.2` = not in v7.2.
-- [Phase 6] HEAD already has the `if (perdev_minors <= 0)` block at
-  `block.c:3340` (this is the mainline commit under review, not a
-  stable-queue marker).
-- [Phase 8] Failure mode: div-by-zero oops at mmcblk init, or IDA limit
-  wrap for negatives.
-- UNVERIFIED: full lore.kernel.org thread HTML (403); whether stable@
-  ever discussed this hash.
-
-**YES**
-
- drivers/mmc/core/block.c | 5 +++++
- 1 file changed, 5 insertions(+)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index e8e45b161a398..5077842b286fe 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -3407,6 +3407,11 @@ static int __init mmc_blk_init(void)
- {
- 	int res;
- 
-+	if (perdev_minors <= 0) {
-+		pr_err("mmcblk: invalid minors per device: %d\n", perdev_minors);
-+		return -EINVAL;
-+	}
-+
- 	res  = bus_register(&mmc_rpmb_bus_type);
- 	if (res < 0) {
- 		pr_err("mmcblk: could not register RPMB bus type\n");
--- 
-2.53.0
-
+References: <20261019135307.2074577-1-bruceli20040604@gmail.com>
+In-Reply-To: <20261019135307.2074577-1-bruceli20040604@gmail.com>
+From: Alexey Charkov <alchark@gmail.com>
+Date: Mon, 19 Oct 2026 18:29:37 +0400
+X-Gm-Features: AclHuK9cnl2EsfcrhGGH-sXis-mAncR2ezLY-0k25GrZdO9W1GU6GuzZn-sH_E4
+Message-ID: <CABjd4YzjRAJ8+U+fmSNjbx7AbD8Caiit5MpE=NEL=SsmSc5SQQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: wmt-sdmmc: release DMA descriptors after stopping
+ the host
+To: Guanxin Li <bruceli20040604@gmail.com>
+Cc: Krzysztof Kozlowski <krzk@kernel.org>, Ulf Hansson <ulfh@kernel.org>, 
+	linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, Oct 19, 2026 at 5:53=E2=80=AFPM Guanxin Li <bruceli20040604@gmail.c=
+om> wrote:
+>
+> wmt_mci_remove() currently frees the DMA descriptor buffer before calling
+> mmc_remove_host() and freeing the controller IRQs. The controller may sti=
+ll
+> be using the descriptors, and an interrupt handler may still access them
+> during this window.
+>
+> Stop the MMC host and free both IRQs before releasing the DMA buffer to
+> prevent DMA or interrupt accesses to the freed memory during device remov=
+al.
+>
+> Signed-off-by: Guanxin Li <bruceli20040604@gmail.com>
+> ---
+>  drivers/mmc/host/wmt-sdmmc.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+> index 489daee4f4fc..c44befabc909 100644
+> --- a/drivers/mmc/host/wmt-sdmmc.c
+> +++ b/drivers/mmc/host/wmt-sdmmc.c
+> @@ -896,14 +896,14 @@ static void wmt_mci_remove(struct platform_device *=
+pdev)
+>         writeb(0xFF, priv->sdmmc_base + SDMMC_STS1);
+>
+>         /* release the dma buffers */
+> -       dma_free_coherent(&pdev->dev, priv->mmc->max_blk_count * 16,
+> -                         priv->dma_desc_buffer, priv->dma_desc_device_ad=
+dr);
+> +
+
+If you are moving the function call, please move the comment too (or
+better yet delete it altogether, as it doesn't add much information).
+And no double blank lines please.
+
+>         mmc_remove_host(mmc);
+>
+>         free_irq(priv->irq_regular, priv);
+>         free_irq(priv->irq_dma, priv);
+> -
+> +       dma_free_coherent(&pdev->dev, priv->mmc->max_blk_count * 16,
+> +                         priv->dma_desc_buffer, priv->dma_desc_device_ad=
+dr);
+>         iounmap(priv->sdmmc_base);
+>
+>         clk_disable_unprepare(priv->clk_sdmmc);
+
+Other than the above,
+
+Reviewed-by: Alexey Charkov <alchark@gmail.com>
+
+Best regards,
+Alexey
