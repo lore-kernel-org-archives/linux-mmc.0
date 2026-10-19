@@ -1,44 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3683D546288;
-	Mon, 19 Oct 2026 13:56:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 853AB57F1D2;
+	Mon, 19 Oct 2026 13:59:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792418191; cv=none; b=CBT+XvEmyOZ9x5L7WUUNi0mr1Dk8yHOxwKXy2MAGcP63KvMyR5P2vi/vhgpOa3LC9YBrIcOdHOSdeutbhrO3qykw77YZ14s5fjxc8sp2Vx47CZtUYEnZwEbUIBJkFr4Xt8I0wWSpHRpChgarIUSfT+QpikeCBqQtBsjCQb+u8wk=
+	t=1792418378; cv=none; b=WDiBpzPPniyEcPZReFwKd87emBqkHTOuA0iDalEZEtKT3roOcEita1b35c9E7+78f9FuzWsBLg8YYe43x2cTn+mJFQwWKGv8DmeSR64YhDiKbhxXp1jajOpTMd/pYr/oPFt6aygnw+5f6bRRbITrCoDBb9a2Dwos3261JPG1mTA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792418191; c=relaxed/simple;
-	bh=AX4G5M/l4pEn3tkdmVigvCkYkKoXoaKsb4/sjzEYnwc=;
+	s=arc-20240116; t=1792418378; c=relaxed/simple;
+	bh=qnXrjUcJJqClhLn+Ki6L+Mpuo0occNiLhMEUo1RPNt4=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=O8nDTFga1Gs2I85KnU24++dActqztEjqQT8i9D3+nttRT+VMi5boeo07v3WxX2OXSmCPwYdO14tE+jmCGnZg1kMKk2HKDxYoIvyAfv3IufEsFJ2DiWtdVIyTcFsYrlzb30AlRboPWxmeBDJI9w3QcdrvRbSufFySTNvoYj+QsUo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SAfbooNo; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=GMSz3/xsP1zIr0scAUdqz4g9+OIwY8d05i8ZLtk72+XrTIV7rFNV55/59NgndHPwbAC2n6NjrjLMBcmxUmMTbg6TJPRGO/yY7oBIrwrhITLwI0/LLq1rvG3y7t+37k3o9ymP+0te2l7t2bLAig4tC1cr7QBdOszaKMtBnIn9A1o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TVAI91bk; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SAfbooNo"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 31D1C1F000C9;
-	Mon, 19 Oct 2026 13:56:28 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TVAI91bk"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AD0911F000C9;
+	Mon, 19 Oct 2026 13:59:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792418189;
-	bh=UQlDHQUdb/bd+gCQro2HwgqSCPn9jpzGKnGKL2csRHo=;
+	s=k20260515; t=1792418375;
+	bh=+6Bwhcwgc/Udf0kESur2WclREBL1W9s0N9EO1i2I9X4=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=SAfbooNotILCYa5eiTOutjebDTa1BWTuJbbynknjLoSTEc2/M2Ln8T10ZKbu1haGw
-	 7tI1odBvG68DW33j1Rk/orn1z3L1ubm83mdWIjE1FOXM0cAKmU5FFrI5HPzbMKYW4w
-	 PfjY2EHw0jFgz32OqV9TAYNi+w++rqr/LUuVUEYL8c0pWUs+Cj3s3iDPNwW/Pz021A
-	 R6TnPPWwG2jUEMSIGso5YMh6pRaARGVG/BmHzYU5XcMAozqmzaR/KacYwWgeRG6mK8
-	 Ofdh56YXzR1gyE2bC33AtQggx0gl+HqNDQbiOMoLip6IGt6LObuWaekloVy7qOqhDk
-	 8PX62F1+1stJg==
+	b=TVAI91bkHTk+TU53HruAgjl182kacQonIQX88BbYSQVfV+rgfi2Pz/hbQaYhJN2dV
+	 b361DcyZ2B8H2hveZGP7kdi+RzzKktggukiXS2fT8tXEzCrh8Nszh/h6mUh2Nt4Qjd
+	 RVyYTrkwcGXo4wlRQP4pJv5f0r0daMryxI0yPUZl0MUQGbZfPs12I6bqX7T+RlaHde
+	 MaAvyfeaPDmKuZxtm5JJTbWHHiOnAt4dsmk+Uw6jXsSWhkQDSqwrdON3LdcW2YSc3s
+	 AsXhCGu8RUZzDa3kKFf32cafZq/3mydYamSns0gromZ8Q0mKzRjOY4wAuBIyUEWLYv
+	 C2x9DGnJ+3GHg==
 From: Sasha Levin <sashal@kernel.org>
 To: patches@lists.linux.dev,
 	stable@vger.kernel.org
-Cc: Marek Szyprowski <m.szyprowski@samsung.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>,
+Cc: Pengpeng Hou <pengpeng@iscas.ac.cn>,
 	Ulf Hansson <ulfh@kernel.org>,
 	Sasha Levin <sashal@kernel.org>,
-	jh80.chung@samsung.com,
 	linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.18-5.15] mmc: dw_mmc: stop and complete DMA also in STATE_DATA_BUSY state
-Date: Mon, 19 Oct 2026 09:46:06 -0400
-Message-ID: <20261019135441.1420968-75-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.18-6.12] mmc: moxart: report DMA completion timeout
+Date: Mon, 19 Oct 2026 09:48:15 -0400
+Message-ID: <20261019135441.1420968-204-sashal@kernel.org>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20261019135441.1420968-1-sashal@kernel.org>
 References: <20261019135441.1420968-1-sashal@kernel.org>
@@ -54,310 +52,431 @@ X-stable-base: Linux 6.18.57
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-From: Marek Szyprowski <m.szyprowski@samsung.com>
+From: Pengpeng Hou <pengpeng@iscas.ac.cn>
 
-[ Upstream commit cb3fcb8d118b874178251d1f02613f60d25e4ddc ]
+[ Upstream commit e29e650077e01dddf69bc8fac31e0cd60043aa7c ]
 
-When transfer was stopped in STATE_DATA_BUSY state, there was no call to
-dma_ops->cleanup function, so the DMA mapped buffer was never properly
-unmapped. Fix this by calling dw_mci_stop_dma() function also in that
-state to ensure proper cleanup call when DMA transfer was used.
+moxart_transfer_dma() waits for the DMA completion but ignores
+wait_for_completion_interruptible_timeout(). It then unconditionally
+reports the full transfer length in data->bytes_xfered.
 
-Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+Terminate the DMA channel and set data->error when the wait is
+interrupted or times out. Only report host->data_len as transferred
+after the completion is observed.
+
+Signed-off-by: Pengpeng Hou <pengpeng@iscas.ac.cn>
 Signed-off-by: Ulf Hansson <ulfh@kernel.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
 
 LLM Generated explanations, may be completely bogus:
 
-The local checkout is mainline **v7.3-rc4** (`origin/master`). The
-candidate is `cb3fcb8d118b8` (`mmc: dw_mmc: stop and complete DMA also
-in STATE_DATA_BUSY state`): a one-line DMA-cleanup hole in a host used
-on Exynos, Rockchip, and similar SoCs.
+The local tree is mainline **7.3.0-rc4** (`v7.3-rc4-27-gf0100363d8c37`).
+The candidate is `e29e650077e01` (“mmc: moxart: report DMA completion
+timeout”). Analysis below is of that commit against this checkout.
 
-## Phase 1: Commit message forensics
+===============================================================
+PHASE 1: COMMIT MESSAGE FORENSICS
+===============================================================
 
-**Step 1.1 — Subject**
-Record: **[mmc/dw_mmc] [stop and complete] Call DMA stop/cleanup in
-`STATE_DATA_BUSY` so mapped buffers are unmapped.**
+**Step 1.1: PARSE THE SUBJECT LINE**
+Record: **[mmc/moxart] [report] [DMA wait timeout was ignored; now
+surface it as an I/O error]**
 
-**Step 1.2 — Tags**
+**Step 1.2: PARSE ALL COMMIT MESSAGE TAGS**
 Record:
-- Signed-off-by: Marek Szyprowski (author; DMA-mapping maintainer)
-- Reviewed-by: Shawn Lin (dw_mmc co-maintainer)
-- Signed-off-by: Ulf Hansson (MMC maintainer)
-- No Fixes:, Reported-by, Tested-by, Link:, or Cc: stable (absence is
-  expected here)
+- Signed-off-by: Pengpeng Hou \<pengpeng@iscas.ac.cn\> (author)
+- Signed-off-by: Ulf Hansson \<ulfh@kernel.org\> (MMC host maintainer;
+  applied)
+- No Fixes:, Reported-by:, Tested-by:, Reviewed-by:, Acked-by:, Link:,
+  or Cc: stable (absence is expected for this review)
+- Notable: maintainer SOB only; no user/syzbot report
 
-**Step 1.3 — Body**
-Record: **Bug:** finishing a transfer in `STATE_DATA_BUSY` never called
-`dma_ops->cleanup`, so a DMA-mapped SG list was left mapped.
-**Symptom:** DMA mapping leak (DMA-API/IOMMU leftover mappings). **Root
-cause:** `dw_mci_stop_dma()` already runs in the sending-data / error
-paths, but not in `STATE_DATA_BUSY` before `host->data = NULL`.
-**Versions:** none stated.
+**Step 1.3: ANALYZE THE COMMIT BODY TEXT**
+Record:
+- **Bug:** `moxart_transfer_dma()` calls
+  `wait_for_completion_interruptible_timeout()` but discards the return
+  value, then always sets `data->bytes_xfered = host->data_len`.
+- **Symptom:** A timed-out or interrupted DMA transfer is reported as a
+  full successful transfer.
+- **Fix:** On `timeout <= 0`, `dmaengine_terminate_sync()`, set
+  `data->error`, skip `bytes_xfered` update, still unmap.
+- **Version info:** none in the message. Driver dates to v3.16
+  (`1b66e94e6b999`).
+- **Root cause (author):** ignored wait status plus unconditional
+  success accounting.
 
-**Step 1.4 — Hidden bug fix?**
-Record: **No disguise.** It is an explicit resource-cleanup fix.
+**Step 1.4: DETECT HIDDEN BUG FIXES**
+Record: Not disguised. Explicit timeout/error-path fix. Also stops DMA
+before `dma_unmap_sg()`, which is a memory-safety fix even though the
+subject only says “report”.
 
-## Phase 2: Diff analysis
+===============================================================
+PHASE 2: DIFF ANALYSIS - LINE BY LINE
+===============================================================
 
-**Step 2.1 — Inventory**
-Record: `drivers/mmc/host/dw_mmc.c` **+1 / −0**. Function:
-`dw_mci_work_func()`. **Single-file, one-line surgical fix.**
+**Step 2.1: INVENTORY THE CHANGES**
+Record:
+- File: `drivers/mmc/host/moxart-mmc.c` — **+9 / −2** (11-line net in
+  one function)
+- Function: `moxart_transfer_dma()`
+- Scope: **single-file surgical fix**
 
-**Step 2.2 — Flow**
-Record: In `case STATE_DATA_BUSY:`, after `EVENT_DATA_COMPLETE` and
-`dw_mci_stop_fault_timer()`, **before** `host->data = NULL`, the code
-now calls `dw_mci_stop_dma(host)`. That function stops the DMA engine if
-`host->using_dma` and then runs `dma_ops->cleanup()`. Previously this
-state only nulled `host->data` and completed the request.
+**Step 2.2: UNDERSTAND THE CODE FLOW CHANGE**
+Record (verified against `e29e650077e01^`):
+- **Before:** map SG → optionally submit DMA → wait (return ignored) →
+  always `bytes_xfered = host->data_len` → unmap. Timeout, signal, or
+  failed `dmaengine_prep_slave_sg()` still looked like a full transfer,
+  and unmap ran while DMA could still be active.
+- **After:** same wait; if `timeout <= 0`, terminate the channel, set
+  `data->error` to `-ERESTARTSYS` or `-ETIMEDOUT`, skip accounting, then
+  unmap. Success path unchanged.
 
-**Step 2.3 — Bug mechanism**
-Record: **Resource leak / DMA mapping leak.** `dw_mci_dma_cleanup()`
-unmaps only when `host->data` is set and `host_cookie == COOKIE_MAPPED`.
-Clearing `host->data` first made later cleanup a no-op.
+**Step 2.3: IDENTIFY THE BUG MECHANISM**
+Record:
+- **Category:** logic/correctness (ignored wait) **plus** memory safety
+  (unmap while DMA may still run) **plus** false success to the MMC
+  block layer.
+- **Mechanism:** `wait_for_completion_interruptible_timeout()` returns 0
+  on timeout, `-ERESTARTSYS` if interrupted, remaining jiffies on
+  success (`kernel/sched/completion.c`). `timeout ?: -ETIMEDOUT` maps
+  those correctly.
+- MMC block completion uses `bytes_xfered` as success size
+  (`mmc_blk_mq_complete_rq()`). A full `bytes_xfered` with no error
+  completes the request as OK — silent data corruption on write,
+  stale/wrong data on read.
+- `sh_mmcif.c` already uses the same terminate + `data->error` pattern.
 
-Verified paths:
-- Success: IDMAC/EDMAC `dw_mci_dmac_complete_dma()` already calls
-  cleanup, then `EVENT_XFER_COMPLETE` moves the machine into
-  `STATE_DATA_BUSY`. Second cleanup is a no-op (`COOKIE_UNMAPPED`).
-- Error from `STATE_SENDING_DATA`: already calls `dw_mci_stop_dma()`.
-- **DMA start failure then PIO fallback:** `dw_mci_submit_data_dma()`
-  sets `using_dma = 1` after a successful map, then on
-  `dma_ops->start()` failure calls `stop()` but **not** cleanup, and
-  **does not** clear `using_dma`. PIO then completes via
-  `STATE_DATA_BUSY`. Without this line the mapping is left. Verified:
-  `using_dma` is assigned only at lines 998 and 1010; PIO fallback
-  (lines 1070–1103) never clears it.
-- `COOKIE_PRE_MAPPED` block I/O still unmaps in `dw_mci_post_req()`;
-  this change does not double-unmap that path.
+**Step 2.4: ASSESS THE FIX QUALITY**
+Record:
+- Obviously correct and minimal. Matches documented wait return values
+  and existing MMC DMA drivers.
+- `moxart_transfer_dma()` is called with the host spinlock dropped
+  (`moxart_request()`), so `dmaengine_terminate_sync()` is in process
+  context as required.
+- Residual issues (pre-existing, not introduced): still waits even if
+  `desc` is NULL; PIO wait at line 436 still ignores its return. After
+  DMA error, `moxart_request()` still waits for `MASK_DATA`. Harmless
+  extra delay; `data->error` is already set.
+- Regression risk: **low**.
 
-**Step 2.4 — Fix quality**
-Record: **Obviously correct** and matches the other data-path states.
-Cleanup is idempotent. `dw_mci_start_request()` zeros `pending_events`,
-so the extra `EVENT_XFER_COMPLETE` bit from `dw_mci_stop_dma()` does not
-leak into the next request. **Regression risk: low.**
-`dmaengine_terminate_async()` / IDMAC reset after a completed transfer
-is the same stop used on errors; IDMAC start already resets the engine.
+===============================================================
+PHASE 3: GIT HISTORY INVESTIGATION
+===============================================================
 
-## Phase 3: Git history
+**Step 3.1: BLAME THE CHANGED LINES**
+Record:
+- Function and ignored wait: `1b66e94e6b999` (“mmc: moxart: Add MOXA ART
+  SD/MMC driver”), **v3.16-rc1**.
+- Unconditional `bytes_xfered = host->data_len` after wait:
+  `54fd8cd617996` (2024, “Fix accounting in DMA transfer”) — moved the
+  assignment after the wait but still did not check the wait result.
+- Bug class (ignored wait + unmap-while-active) has been in the driver
+  since introduction.
 
-**Step 3.1 — Blame**
-Record: `host->data = NULL` in `STATE_DATA_BUSY` is from
-**f95f3850f7a9e1** (Will Newton, 2011-01-02), first in **v2.6.38**. The
-hole is old.
+**Step 3.2: FOLLOW THE FIXES: TAG**
+Record: No `Fixes:` tag. Not applicable. Introduced-by is
+`1b66e94e6b999`; `git merge-base --is-ancestor 1b66e94e6b999 HEAD`
+succeeds.
 
-**Step 3.2 — Fixes: tag**
-Record: **None.** Related older fix **faecf41106123** (“fix unmap sg
-twice when finding data err”, 2016) made cleanup skip IDMAC complete
-when `EVENT_DATA_ERROR` is set, so `stop_dma()` is the unmap path on
-errors. That makes missing `stop_dma()` in `STATE_DATA_BUSY` more
-important, not less.
+**Step 3.3: CHECK FILE HISTORY FOR RELATED CHANGES**
+Record:
+- Recent: platform helpers, `devm_mmc_alloc_host`, sg_miter revert, DMA
+  accounting, `moxart_use_dma()`.
+- Not part of a numbered series. Standalone.
+- Prerequisite for a clean textual apply of this exact hunk:
+  `54fd8cd617996` (already in this tree). The timeout check itself does
+  not depend on that accounting change.
 
-**Step 3.3 — File history**
-Record: Recent dw_mmc work is refactor (board struct, PM macros). This
-commit is standalone, not `N/M`. No follow-up in `cb3fcb8d118b8..HEAD`
-except an unrelated `dw_mci_pmops` move.
+**Step 3.4: CHECK THE AUTHOR'S OTHER COMMITS**
+Record:
+- Pengpeng Hou is not the MMC maintainer; many nearby commits are small
+  correctness/ID-table patches.
+- Ulf Hansson applied it (“Applied for next, thanks!”).
+- Only this moxart change from the author in `drivers/mmc/host/`.
 
-**Step 3.4 — Author**
-Record: Marek Szyprowski is the DMA-mapping maintainer; first dw_mmc
-commit in this file. Shawn Lin (dw_mmc maintainer) reviewed it. Ulf
-Hansson applied it.
+**Step 3.5: CHECK FOR DEPENDENT/PREREQUISITE COMMITS**
+Record:
+- Uses `dmaengine_terminate_sync()` from `include/linux/dmaengine.h`
+  (added `b36f09c3c441a`, 2015). Present here; used by other MMC hosts.
+- Standalone. No new helpers.
 
-**Step 3.5 — Dependencies**
-Record: **None.** It only calls existing `dw_mci_stop_dma()`. Applies
-standalone.
+===============================================================
+PHASE 4: MAILING LIST AND EXTERNAL RESEARCH
+===============================================================
 
-## Phase 4: Mailing list
+**Step 4.1: FIND THE ORIGINAL PATCH DISCUSSION**
+Record:
+- `b4 dig -c e29e650077e01` →
+  https://patch.msgid.link/20260623061117.35280-1-pengpeng@iscas.ac.cn
+- `b4 dig -a`: **v1 only**, applied as submitted.
+- Thread (saved via `b4 dig -m`): Ulf Hansson, 2026-07-06: “Applied for
+  next, thanks!” No NAK, no requested changes, no Cc: stable from
+  reviewers.
+- lore WebFetch returned HTTP 403; discussion recovered from the mbox.
 
-**Step 4.1**
-Record: https://patch.msgid.link/20260603083935.3201411-1-
-m.szyprowski@samsung.com
-**v1 only** (no v2/v3). Thread (3 messages via `b4 dig -m`):
-1. Patch (3 Jun 2026)
-2. Shawn Lin: Reviewed-by
-3. Ulf Hansson: “Applied for next, thanks! Please, let me know if you
-   think there is reason to tag this for stable kernels too.” **No
-   reply** in the thread.
+**Step 4.2: CHECK WHO REVIEWED THE PATCH**
+Record (`b4 dig -w`): To/Cc Pengpeng Hou, Ulf Hansson, Binbin Zhou,
+Huacai Chen, linux-mmc, linux-kernel. Maintainer was the recipient and
+applied it. Zhou/Chen look like list/CC noise (Loongson MMC), not
+reviewers of this driver.
 
-**Step 4.2**
-Record: CCs were linux-mmc, Jaehoon Chung, Shawn Lin, Ulf Hansson — the
-right maintainers.
+**Step 4.3: SEARCH FOR THE BUG REPORT**
+Record: No Reported-by, no bugzilla/syzbot link. Code-inspection fix,
+not a user report.
 
-**Step 4.3**
-Record: No syzbot/bugzilla. Author describes a mapping leak, not a crash
-log.
+**Step 4.4: CHECK FOR RELATED PATCHES AND SERIES**
+Record: Standalone v1. Same author also has `mmc: sdhci-of-ma35d1: add
+missing MODULE_DEVICE_TABLE()` — unrelated.
 
-**Step 4.4**
-Record: Standalone, not part of a series.
+**Step 4.5: CHECK STABLE MAILING LIST HISTORY**
+Record: lore.kernel.org/stable WebFetch returned 403. `git log
+--grep='DMA completion timeout' -- drivers/mmc/host/` only this commit.
+**UNVERIFIED:** no confirmation of a prior stable-list NAK.
 
-**Step 4.5**
-Record: **UNVERIFIED** — lore.kernel.org/stable is behind bot protection
-(403/Anubis). linux-mmc thread has Ulf’s open stable question and no
-nomination.
+===============================================================
+PHASE 5: CODE SEMANTIC ANALYSIS
+===============================================================
 
-## Phase 5: Code semantics
+**Step 5.1: IDENTIFY KEY FUNCTIONS IN THE DIFF**
+Record: `moxart_transfer_dma()` only. Uses `moxart_dma_complete()` as
+DMA callback (`complete(&host->dma_complete)`).
 
-**Step 5.1**
-Record: Modified: `dw_mci_work_func`. Callee: `dw_mci_stop_dma` →
-`dma_ops->stop` / `dma_ops->cleanup` (`dw_mci_idmac_stop_dma` or
-`dw_mci_edmac_stop_dma`, then `dw_mci_dma_cleanup`).
+**Step 5.2: TRACE CALLERS**
+Record:
+- Sole caller: `moxart_request()` (`mmc_host_ops.request`).
+- Path: MMC core request → host `.request` → DMA if `data_len >
+  fifo_width && have_dma`.
+- Process context, lock dropped. Userspace block I/O to the SD card
+  reaches this.
 
-**Step 5.2**
-Record: `dw_mci_work_func` is the host BH work (`host->bh_work`), queued
-from IRQ/timeout/DMA complete. Reachable on every data transfer for this
-host.
+**Step 5.3: TRACE CALLEES**
+Record: `dma_map_sg` / `dmaengine_prep_slave_sg` / `dmaengine_submit` /
+`dma_async_issue_pending` / wait / (new) `dmaengine_terminate_sync` /
+`dma_unmap_sg`.
 
-**Step 5.3**
-Record: Completes MMC requests (`dw_mci_data_complete`,
-`dw_mci_request_end` → `mmc_request_done`).
+**Step 5.4: FOLLOW THE CALL CHAIN**
+Record: Reachable from normal MMC/SD reads and writes on MOXA ART
+(UC-7112-LX and related). Timeout is 1000 ms (`host->timeout =
+msecs_to_jiffies(1000)`). Unprivileged I/O on that hardware can hit it.
 
-**Step 5.4**
-Record: Userspace (block I/O, ioctl, card init) triggers it via the MMC
-core. **Yes, reachable from userspace** on DW MMC hardware.
+**Step 5.5: SEARCH FOR SIMILAR PATTERNS**
+Record:
+- PIO path in the same file already sets `data->error = -ETIMEDOUT` on
+  FIFO wait failure — DMA was inconsistent.
+- `moxart_request()` still ignores the PIO completion wait return (line
+  436). Same class of bug, not this patch.
+- `sh_mmcif.c` checks timeout/interrupt, zeros `bytes_xfered` on error,
+  calls `dmaengine_terminate_sync()`.
 
-**Step 5.5**
-Record: Same `dw_mci_stop_dma()` already used in `STATE_SENDING_CMD`
-(cmd+data error) and twice in `STATE_SENDING_DATA`. This fills the
-missing sibling.
+===============================================================
+PHASE 6: CROSS-REFERENCING AGAINST THE LOCAL TREE
+===============================================================
 
-## Phase 6: This tree
+**Step 6.1: DOES THE BUGGY CODE EXIST IN THIS TREE?**
+Record: Yes. File and function have been here since v3.16. Pre-image
+confirmed at `e29e650077e01^`. `git merge-base --is-ancestor
+e29e650077e01 HEAD` succeeds (fix already on this mainline snapshot).
+Introduced ~v3.16.
 
-**Step 6.1**
-Record: Tree is **v7.3-rc4** (`git describe`:
-`v7.3-rc4-27-gf0100363d8c37`, `VERSION=7 PATCHLEVEL=3`). Candidate **is
-an ancestor of HEAD**. Buggy pattern existed here before that commit;
-introduced in v2.6.38.
+**Step 6.2: CHECK FOR BACKPORT COMPLICATIONS**
+Record: Hunk is local to `moxart_transfer_dma()`. APIs used exist here.
+**Clean apply** on this tree (already applied). No conflicting later
+logic change except an unrelated platform-helper commit.
 
-**Step 6.2**
-Record: **Clean apply** on this tree (already applied). Context
-(`dw_mci_stop_fault_timer` then `host->data = NULL`) is present.
+**Step 6.3: CHECK IF RELATED FIXES ARE ALREADY HERE**
+Record: `54fd8cd617996` only moved accounting after the wait; it did not
+check the wait. No other timeout fix for this DMA path.
 
-**Step 6.3**
-Record: No other fix for this hole. faecf41106123 is a related double-
-unmap fix, not a substitute.
+===============================================================
+PHASE 7: SUBSYSTEM AND MAINTAINER CONTEXT
+===============================================================
 
-## Phase 7: Subsystem
+**Step 7.1: IDENTIFY THE SUBSYSTEM AND ITS CRITICALITY**
+Record:
+- Subsystem: MMC host (`drivers/mmc/host/moxart-mmc.c`),
+  `CONFIG_MMC_MOXART`, `depends on ARCH_MOXART || COMPILE_TEST`.
+- Hardware: MOXA ART (Faraday FA526 ARMv4), UC-7101 / UC-7112-LX /
+  UC-7110 / IA240 / IA241 / IA3341.
+- Criticality: **PERIPHERAL** (legacy industrial SoC), but the bug is in
+  the host’s main DMA I/O path.
 
-**Step 7.1**
-Record: **MMC host (Synopsys DesignWare).** **IMPORTANT** — eMMC/SD on
-Exynos, Rockchip, Hisilicon, StarFive, BlueField, K3 (`MMC_DW_*` in
-Kconfig). Not core mm/VFS, not staging.
+**Step 7.2: ASSESS SUBSYSTEM ACTIVITY**
+Record: Driver is mature (2014) with occasional fixes. Not an active
+rewrite. Long-standing bug.
 
-**Step 7.2**
-Record: File is actively maintained (refactors in 2026 plus this fix).
-The state machine itself is old and stable.
+===============================================================
+PHASE 8: IMPACT AND RISK ASSESSMENT
+===============================================================
 
-## Phase 8: Impact and risk
+**Step 8.1: DETERMINE WHO IS AFFECTED**
+Record: **Driver-specific / platform-specific** — MOXA ART boards with
+this MMC host and DMA enabled. Not universal.
 
-**Step 8.1**
-Record: **Driver-specific / config-specific** (`CONFIG_MMC_DW`). Large
-ARM/embedded population.
+**Step 8.2: DETERMINE THE TRIGGER CONDITIONS**
+Record:
+- Trigger: DMA completion misses the 1s wait, or the waiter is
+  interrupted.
+- Also: `dma_map_sg`/prep failure (completion never signaled) previously
+  still reported a full transfer.
+- Commonness: timeout is not every I/O; when it happens the old code
+  treated it as success.
+- Unprivileged userspace I/O on that hardware can reach it.
 
-**Step 8.2**
-Record: Hits whenever `STATE_DATA_BUSY` finishes a DMA-using request
-that did not already go through `stop_dma()`. Common path still unmaps
-via the DMA complete callback or `post_req`. The leak is real on **DMA-
-submit failure → PIO**, and on any DATA_BUSY completion that never ran
-complete/stop. Unprivileged block I/O can reach the host.
+**Step 8.3: DETERMINE THE FAILURE MODE SEVERITY**
+Record:
+- False `bytes_xfered` + no `data->error` → block layer completes I/O as
+  OK (`mmc_blk_mq_complete_rq` uses `bytes_xfered`). **Data
+  corruption.**
+- `dma_unmap_sg()` while the engine may still be running → DMA to
+  unmapped memory, crash or memory corruption.
+- Later `moxart_wait_for_status(MASK_DATA)` can still timeout and set
+  `data->error`, but unmap already happened inside
+  `moxart_transfer_dma()`, and if the controller finished while the DMA
+  engine did not, MASK_DATA can succeed and the false-success path
+  remains.
+- Severity: **HIGH** (corruption / use of unmapped DMA buffers). Not a
+  panic on every timeout, but the failure mode is serious.
 
-**Step 8.3**
-Record: **DMA mapping leak.** Leftover mappings: DMA-API warnings, IOMMU
-table growth, coherency issues if pages are reused while still mapped.
-**Severity: HIGH** on the leak path, **MEDIUM** overall because the hot
-success path already unmaps.
+**Step 8.4: CALCULATE RISK-BENEFIT RATIO**
+Record:
+- **Benefit:** HIGH for MOXA ART users (correct I/O error, DMA stopped
+  before unmap). LOW globally (few platforms).
+- **Risk:** VERY LOW (9 lines, error path, maintainer-applied, same
+  pattern as other hosts).
+- **Ratio:** benefit outweighs risk for a stable backport of this driver
+  fix.
 
-**Step 8.4**
-Record: **Benefit: high** for DW MMC users (correct DMA lifetime, stop
-IDMAC after data-complete). **Risk: very low** (1 line, idempotent
-cleanup). **Ratio: favorable.**
+===============================================================
+PHASE 9: FINAL SYNTHESIS
+===============================================================
 
-## Phase 9: Synthesis
+**Step 9.1: COMPILE THE EVIDENCE**
 
-**For backporting**
-- Real DMA-mapping leak; author is the DMA-mapping maintainer.
-- One line, same helper already used in sibling states.
-- dw_mmc co-maintainer Reviewed-by; MMC maintainer applied it.
-- Hardware is common; bug dates to v2.6.38.
-- Cleanup is idempotent; next request clears pending events.
-- No series dependency, no follow-up revert.
+FOR backporting:
+- Real bug: ignored wait, fake full transfer, unmap while DMA may still
+  run.
+- Failure mode is data corruption and DMA-to-unmapped-memory, not
+  cosmetics.
+- Small (+9/−2), obviously correct, process-context terminate.
+- PIO path already reports timeout; DMA did not.
+- Bug present since v3.16; DMA I/O path of an in-tree driver.
+- MMC maintainer applied v1 with no objections.
+- `dmaengine_terminate_sync` and the surrounding function exist in this
+  tree.
 
-**Against**
-- No Fixes:/Cc: stable (expected in this pipeline).
-- Ulf explicitly asked whether it belonged in stable; author never
-  answered.
-- No crash/syzbot report; success-path unmap often already happened.
-- Leak is most clearly proven on the DMA-start-failure → PIO path, not
-  every transfer.
+AGAINST:
+- Niche ARMv4 industrial SoC; no Reported-by / syzbot.
+- Author looks like an audit-style contributor; not a hardware user
+  report.
+- PIO completion wait still ignores its return (incomplete sibling).
+- No Fixes:/Cc: stable (not a negative per the review rules).
 
-**Unresolved**
-- No stable@ discussion found (lore blocked).
-- Exact reproducer Marek hit is not in the mail (only the mechanism).
+UNRESOLVED:
+- Stable-list discussion could not be fetched (HTTP 403).
+- No public confirmation of how often DMA actually times out on
+  UC-7112-LX hardware.
 
-**Stable rules**
-1. Obviously correct and tested? **PASS** — 1-line, reviewed, in
-   mainline since 2026-07-06.
-2. Real user-affecting bug? **PASS** — leftover DMA mappings on DW MMC.
-3. Important (crash/security/corruption/deadlock)? **PASS** — mapping
-   leak can WARN, exhaust IOMMU, and cause coherency bugs; not a panic,
-   but it is a real DMA-lifetime bug, not style.
-4. Small and contained? **PASS** — +1 line, one file.
-5. No new features/APIs? **PASS**.
-6. Applies to this tree? **PASS**.
+**Step 9.2: APPLY THE STABLE RULES CHECKLIST**
+1. Obviously correct and tested? **PASS** — return-value handling
+   matches the API; maintainer applied it; same pattern as `sh_mmcif`.
+2. Fixes a real bug that affects users? **PASS** — false success and
+   unmap-while-active on this host’s DMA path.
+3. Important issue? **PASS** — data corruption and DMA memory safety;
+   HIGH, not a panic-on-boot.
+4. Small and contained? **PASS** — one function, 9 insertions.
+5. No new features or APIs? **PASS**.
+6. Can apply to the local tree? **PASS** — pre-image and APIs are here;
+   commit is already an ancestor of HEAD.
 
-**Exception category:** none (not a device ID / quirk / DT / build / doc
-patch). It is a normal contained bugfix.
+**Step 9.3: CHECK FOR EXCEPTION CATEGORIES**
+Record: None (not a device ID, quirk, DT, build, or doc fix). Qualifies
+as a normal bugfix.
 
-Ulf’s “tag for stable?” question is caution, not a NAK. The instructions
-say missing stable tags must not drive a NO. On technical merit this
-belongs in stable: tiny, correct, and it closes a DMA unmap hole in a
-widely deployed MMC host.
+**Step 9.4: MAKE YOUR DECISION**
+This tree has the buggy DMA path. The patch is a small, maintainer-acked
+correction of ignored DMA completion that otherwise reports a full
+transfer and unmaps buffers while the engine may still run. That is
+stable-worthy even on a niche host: the risk is negligible and the
+failure mode is corruption.
 
 Verification:
-- [Phase 1] Parsed tags: Marek SOB, Shawn Lin R-b, Ulf SOB; no
+- [Phase 1] Parsed tags: author + Ulf Hansson SOB only; no
   Fixes/Reported-by/Cc: stable
-- [Phase 2] Diff: +1 line `dw_mci_stop_dma(host)` in `STATE_DATA_BUSY`
-  before `host->data = NULL`
-- [Phase 2] `dw_mci_stop_dma`/`dw_mci_dma_cleanup` read; cleanup gated
-  on `COOKIE_MAPPED`
-- [Phase 2] IDMAC/EDMAC complete path already calls cleanup; `using_dma`
-  not cleared on DMA-start failure (lines 998, 1010, 1039–1045, 1070)
-- [Phase 3] blame: f95f3850f7a9e1 (v2.6.38); candidate cb3fcb8d118b8;
-  related faecf41106123 double-unmap
-- [Phase 3] `git merge-base --is-ancestor cb3fcb8d118b8 HEAD` — true; no
-  follow-up fix on dw_mmc.c
-- [Phase 4] `b4 dig -c/-a/-w/-m`: v1 only; Shawn R-b; Ulf applied and
-  asked about stable; no author reply
-- [Phase 4] lore WebFetch 403; mbox used instead
-- [Phase 5] callers: BH work from IRQ/DTO/DMA complete; userspace via
-  MMC core
+- [Phase 1] Body: ignored wait + unconditional `bytes_xfered`
+- [Phase 2] Diff: +9/−2 in `moxart_transfer_dma()`; timeout<=0 →
+  terminate_sync, set error, skip accounting
+- [Phase 2] Pre-image at `e29e650077e01^` confirmed ignored wait then
+  `bytes_xfered = host->data_len`
+- [Phase 2] `wait_for_completion_interruptible_timeout` returns
+  -ERESTARTSYS / 0 / remaining jiffies (`kernel/sched/completion.c`)
+- [Phase 2] `mmc_blk_mq_complete_rq()` completes OK when `bytes_xfered
+  != 0`
+- [Phase 3] Blame: wait from `1b66e94e6b999` (v3.16); accounting move
+  `54fd8cd617996` still ignored wait
+- [Phase 3] `git merge-base --is-ancestor 1b66e94e6b999 HEAD` and
+  `e29e650077e01 HEAD` both true
+- [Phase 3] `dmaengine_terminate_sync` added in `b36f09c3c441a` (2015);
+  present in this tree
+- [Phase 4] `b4 dig`: lore
+  https://patch.msgid.link/20260623061117.35280-1-pengpeng@iscas.ac.cn ;
+  v1 only
+- [Phase 4] mbox: Ulf “Applied for next, thanks!”; no NAK; no Cc: stable
+- [Phase 4] WebFetch lore/stable: HTTP 403 (UNVERIFIED stable-list
+  history)
+- [Phase 5] Only caller `moxart_request()`; lock dropped; 1s timeout
+- [Phase 5] Sibling `sh_mmcif` uses the same terminate/error pattern
 - [Phase 6] `git describe HEAD` = v7.3-rc4-27-gf0100363d8c37; `make
   kernelversion` = 7.3.0-rc4
-- [Phase 7] MAINTAINERS: Jaehoon Chung, Shawn Lin; Kconfig MMC_DW_*
-  platforms
-- [Phase 8] Failure mode: DMA mapping leak, severity HIGH on leak path
-- UNVERIFIED: stable@ archive search (Anubis); exact runtime stack Marek
-  saw
+- [Phase 6] Buggy DMA wait present before the commit; patch already on
+  HEAD
+- [Phase 7] `CONFIG_MMC_MOXART` / ARCH_MOXART (UC-7112-LX family)
+- [Phase 8] Failure mode: false MMC success + DMA unmap while active;
+  HIGH
+- UNVERIFIED: frequency of DMA timeouts on real MOXA hardware; stable
+  mailing-list discussion
+
+The patch is small, correct, and fixes a real DMA-timeout path that can
+complete I/O as success and unmap live buffers. That meets stable
+criteria for this tree.
 
 **YES**
 
- drivers/mmc/host/dw_mmc.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/moxart-mmc.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index c5db92bbb0946..90cc41901edaa 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2213,6 +2213,7 @@ static void dw_mci_work_func(struct work_struct *t)
- 			}
+diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+index 3dd8f232052f6..4a4d8b19b18cc 100644
+--- a/drivers/mmc/host/moxart-mmc.c
++++ b/drivers/mmc/host/moxart-mmc.c
+@@ -264,6 +264,7 @@ static void moxart_transfer_dma(struct mmc_data *data, struct moxart_host *host)
+ 	u32 len, dir_slave;
+ 	struct dma_async_tx_descriptor *desc = NULL;
+ 	struct dma_chan *dma_chan;
++	long timeout;
  
- 			dw_mci_stop_fault_timer(host);
-+			dw_mci_stop_dma(host);
- 			host->data = NULL;
- 			set_bit(EVENT_DATA_COMPLETE, &host->completed_events);
- 			err = dw_mci_data_complete(host, data);
+ 	if (host->data_len == data->bytes_xfered)
+ 		return;
+@@ -296,11 +297,17 @@ static void moxart_transfer_dma(struct mmc_data *data, struct moxart_host *host)
+ 		dma_async_issue_pending(dma_chan);
+ 	}
+ 
+-	wait_for_completion_interruptible_timeout(&host->dma_complete,
+-						  host->timeout);
++	timeout = wait_for_completion_interruptible_timeout(&host->dma_complete,
++							    host->timeout);
++	if (timeout <= 0) {
++		dmaengine_terminate_sync(dma_chan);
++		data->error = timeout ?: -ETIMEDOUT;
++		goto unmap;
++	}
+ 
+ 	data->bytes_xfered = host->data_len;
+ 
++unmap:
+ 	dma_unmap_sg(dma_chan->device->dev,
+ 		     data->sg, data->sg_len,
+ 		     mmc_get_dma_dir(data));
 -- 
 2.53.0
 
