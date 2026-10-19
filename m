@@ -1,58 +1,74 @@
-Received: from mail-gw01.astralinux.ru (mail-gw01.astralinux.ru [37.230.196.243])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f50.google.com (mail-pj1-f50.google.com [209.85.216.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E9EF4CEE7E;
-	Mon, 19 Oct 2026 12:54:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.230.196.243
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 886B04F85A6
+	for <linux-mmc@vger.kernel.org>; Mon, 19 Oct 2026 13:53:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792414485; cv=none; b=L0eQpLiozmm68vyX8nYPcISWDSBxKCtt45xX9vGBphwWgT+8bI4mCMOkRz8bLsXQ29dMgr2Pa9jYdKowmucJOy0TpF4lCvJRXVKgXFO5BPgElHg4SQvwiDkbZyACFJsjTzWPR1kb2ajr+OKYIBsTQ5P1HNp23wMPqzUpaQuxmL8=
+	t=1792418033; cv=none; b=WBvp91aoM0CqYb6EFU5HbLoNeTRPawnEAbgivOCCwrkmCRfk302Oe2il7I9tXdtbAOCQhvRzypu6jBtMyCFVf8w/HwnDGo9YsvdeNudoe4a6rydUIV3++DA4rq5lE2OdduqYzxHud7qM9Ht12cpscCyiU0mFpkr3WzPMRqDTXa8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792414485; c=relaxed/simple;
-	bh=f7+CSI21ULZAx2MnSdN/FH8vkpUscy4bdliXenRSZew=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=lfszHrjbJtJxjsGTKY6yu2bS6/KXJbTdaucRcgkcANioVrh8SwM/W0xgtRf7WAg23ZWxRrNtPHDrqWZLDssB+CYuMldy7PN97DBPgPsPp89/IFsADiw2YT1BfYaFS2c2qoCF6S/PwBfcy6NZvpCV5Mqqg5J7f8oJR+jday9LARM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=astralinux.ru; spf=pass smtp.mailfrom=astralinux.ru; dkim=pass (2048-bit key) header.d=astralinux.ru header.i=@astralinux.ru header.b=e0a+KyrJ; arc=none smtp.client-ip=37.230.196.243
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=astralinux.ru
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=astralinux.ru
+	s=arc-20240116; t=1792418033; c=relaxed/simple;
+	bh=zsoRutJnx4JOxfaFJBrKcctpwUrhOWkjDKLwKrTyt+A=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=N8R6XPYQenzrjF84BqPKEa841iTFDJBzWZco1if0vSHelH2cYDLVJh9cIncEv0pW3a4QrRtQp2WNoxR8C34wLjwZGlHYykcfBVQvikUPzkaLb4jVINkooGfDyohbwVaP8zF8SrZelonzAIm9Mb0urtI367ehH/sTHsGWI0xc8Sk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=SeoXrWKi; arc=none smtp.client-ip=209.85.216.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=astralinux.ru header.i=@astralinux.ru header.b="e0a+KyrJ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=astralinux.ru;
-	s=mail; t=1792414475;
-	bh=f7+CSI21ULZAx2MnSdN/FH8vkpUscy4bdliXenRSZew=;
-	h=From:To:Cc:Subject:Date:From;
-	b=e0a+KyrJ7eX71otPcAkU9TVo1GQi+SSevky2jj0fPjJfNBB+EShanapr+CMjN1ScT
-	 DzTFKErZZ9fnS5KpvFLd4VBHdRkWNy2yTtVvNlhm29k8tnAmuTIQ/IIwkyrgk0aE5n
-	 KOtE7S+d0YIKUO9Za/fu7PxxBs3ureiCgRWz124d4ni6yV/9K5cCub3hHBhmgHKjK5
-	 wRRbQWOwylGXSaJhLZZQcGaCoUmCUlGeWsuyARzOIHu/vIhOfYHQpqsyTEaANJtrhd
-	 lGcpdPJgLxe3O+3YXJNk7EPWoTi+Mu/Yk6/dqLsW6/XLpIbpskCJdlQjEZ4zDjWKKG
-	 DmuxY82kaxFOQ==
-Received: from gca-sc-a-srv-ksmg01.astralinux.ru (localhost [127.0.0.1])
-	by mail-gw01.astralinux.ru (Postfix) with ESMTP id F413725CFA;
-	Mon, 19 Oct 2026 15:54:34 +0300 (MSK)
-Received: from new-mail.astralinux.ru (unknown [10.205.207.8])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (P-256) server-digest SHA256)
-	(No client certificate requested)
-	by mail-gw01.astralinux.ru (Postfix) with ESMTPS;
-	Mon, 19 Oct 2026 15:54:33 +0300 (MSK)
-Received: from DESKTOP-D46TNHI (unknown [10.198.51.9])
-	by new-mail.astralinux.ru (Postfix) with ESMTPA id 4j7b953KqXzq2b;
-	Mon, 19 Oct 2026 15:54:33 +0300 (MSK)
-From: Mikhail Dmitrichenko <mdmitrichenko@astralinux.ru>
-To: stable@vger.kernel.org,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Mikhail Dmitrichenko <mdmitrichenko@astralinux.ru>,
-	Sasha Levin <sashal@kernel.org>,
-	Fan Wu <fanwu01@zju.edu.cn>,
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SeoXrWKi"
+Received: by mail-pj1-f50.google.com with SMTP id 98e67ed59e1d1-3ab7b8e6fc2so282261a91.3
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Oct 2026 06:53:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1792418032; x=1793022832; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=OZf5l3nm0qL9va+rXssexyiV+xjPumJIrkIx3ruN0bU=;
+        b=SeoXrWKirbXBeNeSjS1nnmPbYH0YJ9yPBcBM2W5HSIN98o9CfpW1oppwLQhOqGKWa9
+         7p1Ag89cZOLotss2IegljDWpEA2j3bn89gBqL/DbuGCgzpaJbc/0MV6F14YkMOcU8LBH
+         sMhX7CEFMk3YdSo0Xoi9iBuj7TcTfHy/4k5zD9LgVB76TFVAGwja8w/5DBB92rvBt4Mq
+         At1vSmGb8zul80TgeLSQLuxsyiBI597ONxGWt3Obco2OTwiAKYaLWlveVdnaSgOvNSij
+         xT4AoEj+uCE/ocucYtTFBiI3w7IYEm4svhQHkZP8wRetKolKBD9yT615Oz5GBBNQjNY3
+         tC0w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1792418032; x=1793022832;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=OZf5l3nm0qL9va+rXssexyiV+xjPumJIrkIx3ruN0bU=;
+        b=mtUHZ5+sggDEpVFldk99VuL5ohh1IFv5P+AzlDMO7+noI82wivdESRfTt9c4JcBlRh
+         C1Ca8bx2qDMqgqCxK4/GyGV1X0nEYf91faVzv6GA23guPUd5sinT5Js6S/XhS8pJZjfG
+         rtgV8Sv6l88iLOqlWlD4bOMZ/YuDa9RiqOwGx0cgj20ByoxMgBlbUkEWzMOs7yGlTdIk
+         EQnt9JtFBl616Pj7zuy+PdJNHBmsUFjzDp6w+mP8lsgiDaRGKoGgSf2br+tgODLIGnnk
+         3o+Mx3m4glK0WW+6u0pN37PGdbI1ZyJGI8nlz4u7C3Y8giapsaq8wGBowHUMODMsLsca
+         FbeA==
+X-Forwarded-Encrypted: i=1; AKwUvBx81d/iA149PCuXTveDwbjRBI4SsHyx1q/MBjG8lw1MgWJwLNC5q6kYSBE8wsUq8YcaASRMsHW6CWE=@vger.kernel.org
+X-Gm-Message-State: AFq9FYLrPrl/I0Z8K9hfmpFvpdP6Qr5l6Bkd+YIZ1kkic3eczwUuEyej
+	K2lec/q8rCPWoLc3jOOgcewnAwQl/GKxaTZvzzjTE37Ev937U/CXMx1a
+X-Gm-Gg: AYBFou1fsn8oYl5CSY1sDAAi5U5twlSKaCnlVkQc0ymLYtG6Z6ykDg9cQxpFRggAq4H
+	nvLAfTlAUFq/iCBHKONdhOv2AiYGO9db/BTbl7dEu74s8+exjfk5EwUGjlxWbr+VQrk8NEltsHB
+	Ti3ddqqHPlBkbDVR5PLBJS3SuuPUAVYyxN35CYv25QFrt0AKsDkDdgZRnxQOUp1si7r9M/6NvrS
+	LGUn0Di7ykwYFYaZKu0vjKIEaFRcbGxnR/wj9bbBPEbX0PHPDrq9WA0SXHr0bCy7C4+kDBrD1WX
+	ZAdZpb9guG9NwSFOVjXxYQ8QqWAMItxS0AUdC+HeMGAJeED3irMxbdzsWkY5i0LiqcSt6cMoIEB
+	QxoaAajFy1lJjGM2vLIeZAkxi6aMDK/KlA0V3BS1I2SO6pboBJMQNzk04SjVUQOWZeTzb/bbXx/
+	ezYzc0rTVd5722D9WHpHWj0w5/5QWMPpqivdemEXQDDktzmkrQa91FDLrmcc4A2yEe/JDJ8ROzI
+	t6X3nNFOWZGHTz+ow==
+X-Received: by 2002:a17:90b:39ad:b0:3a6:e61f:749d with SMTP id 98e67ed59e1d1-3acee27aa63mr10757870a91.1.1792418031830;
+        Mon, 19 Oct 2026 06:53:51 -0700 (PDT)
+Received: from LSSP.an0.nb ([2001:da8:7001:22:db98:829a:1281:5d10])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3ac9474b52fsm23337328a91.9.2026.10.19.06.53.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 19 Oct 2026 06:53:51 -0700 (PDT)
+From: Guanxin Li <bruceli20040604@gmail.com>
+To: Alexey Charkov <alchark@gmail.com>,
+	Krzysztof Kozlowski <krzk@kernel.org>,
 	Ulf Hansson <ulfh@kernel.org>,
-	Shawn Lin <shawn.lin@rock-chips.com>,
-	Luke Wang <ziniu.wang_1@nxp.com>,
+	Guanxin Li <bruceli20040604@gmail.com>,
+	linux-arm-kernel@lists.infradead.org,
 	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	lvc-project@linuxtesting.org
-Subject: [PATCH 5.10/5.15] mmc: core: Cancel SDIO IRQ work before freeing host
-Date: Mon, 19 Oct 2026 15:53:34 +0300
-Message-ID: <20261019125335.562-1-mdmitrichenko@astralinux.ru>
-X-Mailer: git-send-email 2.54.0.windows.1
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: wmt-sdmmc: release DMA descriptors after stopping the host
+Date: Mon, 19 Oct 2026 21:53:07 +0800
+Message-ID: <20261019135307.2074577-1-bruceli20040604@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -60,66 +76,42 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-KSMG-AntiPhishing: NotDetected
-X-KSMG-AntiSpam-Auth: dkim=none
-X-KSMG-AntiSpam-Envelope-From: mdmitrichenko@astralinux.ru
-X-KSMG-AntiSpam-Info: LuaCore: 127 0.3.127 0884f7b061fa529b810563f359267cd65d2ec05c, {diag_burst_silent}, {Tracking_from_domain_doesnt_match_to}, 127.0.0.199:7.1.2;astralinux.ru:7.1.1;new-mail.astralinux.ru:7.1.1;d41d8cd98f00b204e9800998ecf8427e.com:7.1.1, FromAlignment: s
-X-KSMG-AntiSpam-Interceptor-Info: scan successful
-X-KSMG-AntiSpam-Lua-Profiles: 206791 [Oct 19 2026]
-X-KSMG-AntiSpam-Method: none
-X-KSMG-AntiSpam-Rate: 0
-X-KSMG-AntiSpam-Status: not_detected
-X-KSMG-AntiSpam-Version: 6.1.1.27
-X-KSMG-AntiVirus: Kaspersky Secure Mail Gateway, version 2.1.0.7854, bases: 2026/10/19 08:59:00 #28702808
-X-KSMG-AntiVirus-Status: NotDetected, skipped
-X-KSMG-LinksScanning: NotDetected
-X-KSMG-Message-Action: skipped
-X-KSMG-Rule-ID: 1
 
-From: Fan Wu <fanwu01@zju.edu.cn>
+wmt_mci_remove() currently frees the DMA descriptor buffer before calling
+mmc_remove_host() and freeing the controller IRQs. The controller may still
+be using the descriptors, and an interrupt handler may still access them
+during this window.
 
-commit 6feadbecdae60a6324c967f3b1493741083793a3 upstream.
+Stop the MMC host and free both IRQs before releasing the DMA buffer to
+prevent DMA or interrupt accesses to the freed memory during device removal.
 
-A host controller that uses sdio_signal_irq() schedules host->sdio_irq_work
-from its interrupt handler.  That work is only cancelled on the suspend
-path (mmc_sdio_suspend()), not on the remove/free path, so a worker armed
-just before the controller freed its IRQ can run after
-mmc_host_classdev_release() has freed the host and dereference it through
-container_of().
-
-Cancel host->sdio_irq_work in mmc_free_host(), like the existing
-host->detect drain added by commit 1036f69e2513 ("mmc: core: Cancel
-delayed work before releasing host").
-
-This issue was found by an in-house static analysis tool.
-
-Fixes: 682696605c70 ("mmc: sdio: Add API to manage SDIO IRQs from a workqueue")
-Cc: stable@vger.kernel.org
-Assisted-by: Codex:gpt-5.6
-Signed-off-by: Fan Wu <fanwu01@zju.edu.cn>
-Signed-off-by: Ulf Hansson <ulfh@kernel.org>
-[ mdmitrichenko: sdio_irq_work is still a delayed_work here, it became
-  a plain work_struct only with commit 1dd611a9c55f ("mmc: core: Switch
-  to basic workqueue API for sdio_irq_work"), so use
-  cancel_delayed_work_sync() instead of cancel_work_sync(). ]
-Signed-off-by: Mikhail Dmitrichenko <mdmitrichenko@astralinux.ru>
+Signed-off-by: Guanxin Li <bruceli20040604@gmail.com>
 ---
-Backport fix for CVE-2026-98213
- drivers/mmc/core/host.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/wmt-sdmmc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 5598f8490726..994bbc03be2e 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -612,6 +612,7 @@ EXPORT_SYMBOL(mmc_remove_host);
- void mmc_free_host(struct mmc_host *host)
- {
- 	cancel_delayed_work_sync(&host->detect);
-+	cancel_delayed_work_sync(&host->sdio_irq_work);
- 	mmc_pwrseq_free(host);
- 	put_device(&host->class_dev);
- }
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 489daee4f4fc..c44befabc909 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -896,14 +896,14 @@ static void wmt_mci_remove(struct platform_device *pdev)
+ 	writeb(0xFF, priv->sdmmc_base + SDMMC_STS1);
+ 
+ 	/* release the dma buffers */
+-	dma_free_coherent(&pdev->dev, priv->mmc->max_blk_count * 16,
+-			  priv->dma_desc_buffer, priv->dma_desc_device_addr);
++
+ 
+ 	mmc_remove_host(mmc);
+ 
+ 	free_irq(priv->irq_regular, priv);
+ 	free_irq(priv->irq_dma, priv);
+-
++	dma_free_coherent(&pdev->dev, priv->mmc->max_blk_count * 16,
++			  priv->dma_desc_buffer, priv->dma_desc_device_addr);
+ 	iounmap(priv->sdmmc_base);
+ 
+ 	clk_disable_unprepare(priv->clk_sdmmc);
 -- 
 2.43.0
 
