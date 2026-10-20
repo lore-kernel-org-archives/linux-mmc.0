@@ -1,124 +1,156 @@
-Received: from mail-pg1-f177.google.com (mail-pg1-f177.google.com [209.85.215.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.215.181
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1792505275;
+	b=5slQob5boRQm93AC6frRakHiugZAUnrBDwQzXRqG0H9Sr9UpNat1YRD3gOG2M6HhzD0F
+	 iU9MqiQXkR2b78htjtDULklezu2F4Yk5H27a2lSaAIXg9llGn6HTJm+C5Jgud9mr7O2SU
+	 jp6ttV77V57z58EemvSWn6UaFR1yx+9fztb3tJamlTTBG+UGqN+UF5A2xs4pu+ygJmU3J
+	 9T9uE0ybdHUX1a6NL+axUDWlWnDzOfw07geq1g/q7ZLWIO8B6f0QH2MBFjHEvoN2zieXq
+	 BoYDcHpRr5wSfriHxDy8l2SsHB03QXarFe+ow71ya0OWwXkVsoattITpDjZl3r1iJmA==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792505275;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
+	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:MIME-Version:
+	 Content-Transfer-Encoding;
+	bh=IHU3kr6H4ebRnMajlQ45rUZRzGT3LcsJKitPjmSl92U=;
+	b=Cc9A98L5gz5CafQZt6NVxKSi/UkkJmb9ByclFbplr587v9JGJ3ongZY897Yc0nTdIHhe
+	 Qfiee9TtC4kycaUdFQffoQDQrTAjbbUf9L3c+ljsxpnJu/gqE7ab6TroaNXFybd2XLLSX
+	 gZgX3E+jfbGXcL8Pvzh8PQL27mXqT7XH418bhQHcSphLwuHoyltJ+WKHXNSRchpyhiKjl
+	 4Z8s5K4apM9iznwhwz6D3ykzlxX3JXNiSyOw8aUCXWPaarIKY6WTeWhhyns0ptHdAmYXz
+	 zOSJnO8/y1+MXcGN35IWyVAW7mfwqOk1adhALemZjS+Y0HAaSkmRKd65yjhhr/iO4EA==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=gnd0VxFh;
+	arc=none smtp.remote-ip=209.85.215.181
+Received: from mail-pg1-f181.google.com (mail-pg1-f181.google.com [209.85.215.181])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79D674FD29E
-	for <linux-mmc@vger.kernel.org>; Mon, 19 Oct 2026 14:33:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.177
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792420409; cv=none; b=s9wQYJL7x+KcKB4ZylYC2TK6NfQ8EKomX32XliCjLWimIQe/AQYjMSjSeq9m1sFj0XngWnTNaiEphLXVxogNyA3ZaFAP8mJkzyI/7Is1vPAwS9Yjb/fwgUe9ZEskkk62EPgHm6NDx5uLfUDGYQIzPapagWkLHLBBTH8jJB2140s=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792420409; c=relaxed/simple;
-	bh=HkPfe4TwSkVsbnZmS4H8xckQ8k5iAfFxgOmrbcXbDY4=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=F4/51pWxQ26coY0hvLnp5+se9TZmc/yGHDK4dnaf9m9SWuBJRpqWiMW3xN5115jijzaHil0ozuFOgwTpfr0ULgbK+a4QLaHYzegfFmogoGHbZyWZIB/fQbBto7ypsrbl4G3+UiUMxG+E93mxKYiIeOurdl15PRfDbgtYNcHUuH8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BYkvkZ6+; arc=none smtp.client-ip=209.85.215.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A243E606A326
+	for <linux-mmc@vger.kernel.org>; Tue, 20 Oct 2026 14:07:54 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A243E606A326
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BYkvkZ6+"
-Received: by mail-pg1-f177.google.com with SMTP id 41be03b00d2f7-cd5f2834b19so91689a12.0
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Oct 2026 07:33:27 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=gnd0VxFh
+Received: by mail-pg1-f181.google.com with SMTP id 41be03b00d2f7-cd69a51d767so15907a12.3
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Oct 2026 07:07:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1792420407; x=1793025207; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=rjxEHDZhnxdkStUSnVdQe9iZZzJrl+XY6zteXqLUhxo=;
-        b=BYkvkZ6+I2101KxneXqIrnwd0x9FAN8CDp6MlXghoF/zAegQ2x4TPXi8zzZ8yvfxpa
-         naOrhjf0yzux96+Nu34k3aUlERG/gJ0VqEIY4BBIS9+DJGJdw8Ne7nZuLL1PCYmfEYvU
-         pcuGFt+4EqpHFrvJaBoEKYJSqlfw02z3Qetd98b23PIk7+Ih9XuIHXwN5GLzHj77kRWi
-         Gd2yCElCcAXK8ZG1IH43CQy9O4L/QjqyvjSdQqCjAW12AnC3q3D7ANwtwn2+ncTVcSK8
-         nlrNDcQSNp2mhfYKBgc79ktfByvl7YYwHyNrxOLZUxTOcm1LYGfG1+7Is8NNJ6sMFZNs
-         ViYg==
+        d=gmail.com; s=20251104; t=1792505274; x=1793110074; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=IHU3kr6H4ebRnMajlQ45rUZRzGT3LcsJKitPjmSl92U=;
+        b=gnd0VxFhaEiVHqKR6cYe64yfq4qesQy426F6HEdRyq20V4WOvYgxDm585r8Z6sRNgW
+         LiSaX8+ot3gmLvWssMmo6AXkao1OCC3Eh9y/ZYSo4FmhybDYOC4M/U4zL0CMvP/h2I0U
+         HS+Z5W+RrQLHWMkZu5Q8Wovm0Rq7A83b/fR5afrYJQn03DXCfTw6AQu+FjHufvcxborG
+         Eqyq/G5Avo6Uq6cglysqTdsNkbwllcESDWf0druCZK175Pj48LwQN342WkWsn0hLeIkj
+         X4z/CS1FoNTzf5izj/XjZZYlwk9DhVACjn0dt+uLcdVwGkM4dqfX3qmnEpcQiYoleL7g
+         /FiQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792420407; x=1793025207;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to:content-type;
-        bh=rjxEHDZhnxdkStUSnVdQe9iZZzJrl+XY6zteXqLUhxo=;
-        b=1dtfap10U88R7WR3swCvCbyguWc0fTV+xxsU/xPtLXr2jQv7vVVND1caYkEIl1bZVO
-         6u2qs5CFtRI1CeYzgyL/v/AMZ/69vzVC6t3+kFLA6peNuSWYeiJ4DqfaYu5UVa7ts8s5
-         JTQlWbhmhLtFhQ9FHJxvRgY5iKfXOdF7hAZ8ixy5vXuevin58EZvhJrUzhZVbnRNoIRo
-         OUALIkjir76ZaJlQHiA41CpQwGqHrQKo6HsvhLWQRsNWqRo8doTX8gd+LSR63m7fvx/r
-         hEzVrnpDmEgbxuSKEN9Xk/tUO59T+9bmm271U5HBqkzCQJU/iSAJVDgGdWLCxKNnz7+Z
-         Fbzg==
-X-Forwarded-Encrypted: i=1; AKwUvBzOZGFpiNL8Ariqn5kMlb6hxTQ8CWGjWqya+xJDDHIMWOwjJK7Y08vWep9e3iMgYNYovw6C2L8P2Wk=@vger.kernel.org
-X-Gm-Message-State: AFq9FYLrchXy2wqYTOuI1dK/gQmui3QZ0vza6e//YIidsolkn2PkiEkh
-	xng2J8HyOz6r/DH2B9rCYdF59SjEmyQoHY5xO86lAackTFl1Yd3t+id6
-X-Gm-Gg: AYBFou24/IBIE5ZR7Ty9pbK6OFdJepzuwkQNYgPTv9r8jyMPb+/EfzsX86FaR53+puE
-	YVm7y8437xMJA/nwjVRM3CizfHhTutBF/PDnF+uoEIHiIyUE3khLTZicuEXeXH8EayRWXi9dt7F
-	/39AAyC8Kuw2vjkXw+Uz7aeZfK+zeN9pqzq+9spF6T+qe0YvyYw6nbz2Fgar/JrP92ELYKTkagU
-	d2giWVSuD6CYlKWeoVFjnTSHzIQkqkKDhc+kvz9uFc59OPj+/npAtpn/iGMPVb7u+ouCBZuGbo4
-	GDrjlhm13c/0hp9nlNjnVgsVDqZMoxikdMa3eKLL1Vk491W6JLA+MJEX5GpNhGJUofx047BSOwM
-	+1sh6VrM+ZnO1uvmpYmLegoWv4vPx8l5hlWSIacHU37MKDg0uyRpbxOPP6ycBb42FeGx5iQRfxH
-	U/cYpkMsVLLA4wF2tIRwlsTQAn+34PQqSPUl5+wx8DFA5IQ/sFaT7lzHTOIl4iR2wYpNgJU9Mex
-	3zRdNo=
-X-Received: by 2002:a05:6a00:4807:b0:89d:88bc:d9f5 with SMTP id d2e1a72fcca58-8a04ba25e3amr6477601b3a.3.1792420406628;
-        Mon, 19 Oct 2026 07:33:26 -0700 (PDT)
-Received: from LSSP.an0.nb ([2001:da8:7001:22:db98:829a:1281:5d10])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-8a06a6407e0sm1249239b3a.5.2026.10.19.07.33.24
+        d=1e100.net; s=20260707; t=1792505274; x=1793110074;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=IHU3kr6H4ebRnMajlQ45rUZRzGT3LcsJKitPjmSl92U=;
+        b=zXNxp+jA75ICTtQ6pCtTyxwpiBKma6QbH0A056+a32/YXawaR55aFj/wNbAm4R/Fkq
+         tKOzDeI+aq24TqDeE5Afh4eFOvf1L2oqWWKU++CjzTYikZVTFJRLwYNNQu8BPj61bE88
+         kF+1weSz9wKDfnKjxdoIgz/Eqewcc9zjesJiroJLulGGQWYQo7hhCrxmpdiRlJMJJIQX
+         FfDWDj8Tan1TQOKdVZ72vsBgUxx0UxIR7R8Cb7igbK4obOa0ZhevHQVxJ9jlcIFibeAh
+         S92Sj9GkvDd1BHdJBgUmUkZ/C/qKgQX5HKjL/S9lhtmRffh+ZwYenOb1ISwQNBPMovGW
+         +HHQ==
+X-Forwarded-Encrypted: i=1; AKwUvBw/sztcsKrZPmDYt0vrL4joY6KcR8B4U0iw5ozGS1qTw2q58ZDBlXSx96akLwW/Xvh4sQ6MXAJjZ4U=@vger.kernel.org
+X-Gm-Message-State: AFq9FYJ/d3icWMlJq7NTvHBYPAARtBcl38CHzdRxap1+LBfrav+h0oq+
+	Z9/FHCowjXlhg/QP8O2wMNOtcUld/uyP3MZ7EdB1g5sgedseNoeNUrMW
+X-Gm-Gg: AYBFou15DySQLZ8bPP2uRphOwFs2ih6meZ2c94ncfHqf20Ew2mAmghUeL6LVX4dHybZ
+	K1Y3iqlION8Olt1dn3hInuNQalUC33bxBvQFflSxZgGXgrf7kLwToKeHoHDMUhQniu1Ds8OmNbo
+	AEgdTIooh6Guv2sbz3ObGRyt1mJq1l6Fa6t3ugaBk8caoaESnefT6ZAl4VRALPdstBrlhCBMVfx
+	9FPNXpadbYnJKV3bqx+qvZ2HF2CheYQHcvGgDqEE7S+tD+wjrUKVo5Q7IqMF8A2pa67UH7JkZ/5
+	c+v6ySBxqNL34Lps4fd9p55tSwGH8CPeptqjvqsU4NlfDGXh/BmNd1qrfmv3q991b50KoFogeMo
+	jOFR3+Frv9385TTWtORDCfvgoPy18Gi9xWB6O8zdlqPvnU8aJJSLNm2ZuBiTV/z2/Jw9ZoBwwff
+	HK6pGjKJmgCFkDe0P72Y9RhECBXF0OyiArkbCMS6QFcJ4EtNYpsLfzSCGTs9h8hJo+YrUpO6D1F
+	tQScwhDjaXfhyvFuQ==
+X-Received: by 2002:a17:902:e84f:b0:2e9:4175:306b with SMTP id d9443c01a7336-2e9a6832e3cmr148561805ad.1.1792505273849;
+        Tue, 20 Oct 2026 07:07:53 -0700 (PDT)
+Received: from LSSP.an0.nb ([2001:da8:7001:22:4372:4888:28d9:3e09])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ea145b7805sm13430075ad.8.2026.10.20.07.07.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 19 Oct 2026 07:33:26 -0700 (PDT)
+        Tue, 20 Oct 2026 07:07:53 -0700 (PDT)
 From: Guanxin Li <bruceli20040604@gmail.com>
-To: Alexey Charkov <alchark@gmail.com>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
+To: Aubin Constans <aubin.constans@microchip.com>,
 	Ulf Hansson <ulfh@kernel.org>,
-	Guanxin Li <bruceli20040604@gmail.com>,
-	linux-arm-kernel@lists.infradead.org,
+	Nicolas Ferre <nicolas.ferre@microchip.com>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
 	linux-mmc@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v2] mmc: wmt-sdmmc: release DMA descriptors after stopping the host
-Date: Mon, 19 Oct 2026 22:33:17 +0800
-Message-ID: <20261019143317.2222236-1-bruceli20040604@gmail.com>
+Cc: Guanxin Li <bruceli20040604@gmail.com>
+Subject: [PATCH] mmc: atmel-mci: fix PDC bounce buffer use-after-free
+Date: Tue, 20 Oct 2026 22:07:43 +0800
+Message-ID: <20261020140743.2765011-1-bruceli20040604@gmail.com>
 X-Mailer: git-send-email 2.43.0
-Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
+List-Post: <mailto:linux-mmc@vger.kernel.org>
+List-Help: <mailto:linux-mmc+help@vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
+Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-wmt_mci_remove() currently frees the DMA descriptor buffer before
-calling mmc_remove_host() and freeing the controller IRQs. The
-controller may still be using the descriptors, and an interrupt
-handler may still access them during this window.
+atmci_remove() currently frees the coherent PDC buffer immediately
+after pm_runtime_get_sync(), before the controller and its interrupt
+handler have been quiesced.
 
-Stop the MMC host and free both IRQs before releasing the DMA
-buffer to prevent DMA or interrupt accesses to the freed memory
-during device removal.
+A pending RXBUFF or TXBUFE interrupt can enter atmci_interrupt() after
+the buffer has been freed. For a completed receive transfer,
+atmci_pdc_complete() accesses host->buffer while copying received data
+to the request scatterlist. When data remains, the interrupt handler
+can instead call atmci_pdc_set_both_buf(), which may program
+host->buf_phys_addr back into the PDC and make the PDC access a freed
+coherent allocation.
+
+The buffer must also remain valid while atmci_cleanup_slot() calls
+mmc_remove_host(), since an in-flight request may complete during host
+removal and take the same interrupt paths.
+
+Move dma_free_coherent() after the controller is disabled, the timer
+and IRQ handler are synchronized, and bh_work is canceled. Keep the
+remaining teardown order unchanged so that in-flight requests can
+finish before the buffer is released.
 
 Signed-off-by: Guanxin Li <bruceli20040604@gmail.com>
 ---
-Changes in v2:
-- Wrapped commit message lines to comply with the 72-column limit.
-- Moved the DMA buffer comment next to dma_free_coherent().
+ drivers/mmc/host/atmel-mci.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
- drivers/mmc/host/wmt-sdmmc.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 489daee4f4fc..55675aa8d08a 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -895,15 +895,15 @@ static void wmt_mci_remove(struct platform_device *pdev)
- 	writeb(0xFF, priv->sdmmc_base + SDMMC_STS0);
- 	writeb(0xFF, priv->sdmmc_base + SDMMC_STS1);
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 8f4df250a77a..7f1a5864da96 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -2592,9 +2592,6 @@ static void atmci_remove(struct platform_device *pdev)
  
--	/* release the dma buffers */
--	dma_free_coherent(&pdev->dev, priv->mmc->max_blk_count * 16,
--			  priv->dma_desc_buffer, priv->dma_desc_device_addr);
+ 	pm_runtime_get_sync(dev);
+ 
+-	if (host->buffer)
+-		dma_free_coherent(dev, host->buf_size, host->buffer, host->buf_phys_addr);
 -
- 	mmc_remove_host(mmc);
+ 	for (i = 0; i < ATMCI_MAX_NR_SLOTS; i++) {
+ 		if (host->slot[i])
+ 			atmci_cleanup_slot(host->slot[i], i);
+@@ -2612,6 +2609,9 @@ static void atmci_remove(struct platform_device *pdev)
  
- 	free_irq(priv->irq_regular, priv);
- 	free_irq(priv->irq_dma, priv);
+ 	cancel_work_sync(&host->bh_work);
  
-+	/* release the dma buffers */
-+	dma_free_coherent(&pdev->dev, priv->mmc->max_blk_count * 16,
-+			  priv->dma_desc_buffer, priv->dma_desc_device_addr);
++	if (host->buffer)
++		dma_free_coherent(dev, host->buf_size, host->buffer, host->buf_phys_addr);
 +
- 	iounmap(priv->sdmmc_base);
+ 	clk_disable_unprepare(host->mck);
  
- 	clk_disable_unprepare(priv->clk_sdmmc);
+ 	pm_runtime_disable(dev);
 -- 
 2.43.0
 
