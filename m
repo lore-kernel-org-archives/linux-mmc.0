@@ -1,66 +1,67 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=162.62.58.211
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=194.117.254.33
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792657899;
-	b=04ftnjLdHaEVgwyGOGtgwZh3zaJdr6d4clO2WrMB7NlSacFxi5y7VWMBf6zUuyPx5eue
-	 Vf1HueZcerD0vdju3XiET9S5o0nAMjRrO5yOvXiilnhg9bvYP01UPusoEoaFxBsGlDXWR
-	 Ri2t/z6m13d6muKpwbDLkZOMETEmj9TdJvv/KYqY7YEjQPNn7mFOVtXPw+ujO/cEjEQum
-	 L57RAkwejpJwZrAQrwFlgs6kkYDNtoAkWJ3oQbNVyrvikDAI8uu5KEuc3VLreMT7RkpEx
-	 zROX/LeA8G92B7y1go8JAg1hVxDqkFCo+m8iWn6g9xu70c/NptmNECQfD5iqLQK/6tA==
+	t=1792659819;
+	b=Z8dMsvo4zNSJdqqiesoouudYnYF1k3Ox5Mpn3LKTb3PpmDpNQpmJ52EXX/2tJ1TcxRe+
+	 Z+qebgpPsGPGHE0qdJ/BPKm7v2dqap7/99bRa880LR3PzsZlKqQbOO/8QRq02eTcdokx3
+	 BYjCsrHpvSzs24lwMtWdwtKYNLBDSv29VWBRDRUezs+sDbxPIlzEG7OztZXshnCPlzbCJ
+	 VAMfZXCTSE/WTgqqN2XBnCaaf39VrQgpCiZohdBmkvWOHAPV0MG6GxzBIIJ6AJYoYhgMP
+	 /7unoOAVy4yFk0p11y5RWlTq6dZ7zcF3jnBwn+lv3oh/p/kjyrQlGka13fON+d8VWqA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792657899;
-	h=DMARC-Filter:DKIM-Signature:X-QQ-XMRINFO:X-QQ-XMAILINFO:From:To:Cc:
-	 Subject:Mime-Version:Content-Type:Content-Transfer-Encoding:Date:
-	 X-Priority:Message-ID:X-QQ-MIME:X-Mailer:X-QQ-Mailer:References:
-	 In-Reply-To:X-QQ-mid;
-	bh=STANDc24tjLvIjwpWVUmAsj3lx2tDmc6YgtW+icG3B4=;
-	b=JI1X8wRx8R0jayzOsr1HJy0FVlDKmt6kxLar97qbd9t8epEYWjqWKfELfYgWXIn080V/
-	 ODOWfTWCQqAgf1LWYiwi9bccNYvxC0yNNNu2i8E2lWP/gZtJcOatIjJz/r/hIw+HGAJ8g
-	 ACcPc+VeWsbhD+x3A2yTUaqq+g91QRou5e5+stNWefLFpS0sAAX763kdEw7mcsQDL4P93
-	 gVq7d2mqhN31ungCu/z7/fjk7k6woDANYiYlGrTpI9CG/0O9Hb2pI+mhvVVwD5MnUkPM/
-	 3x44BWQHmkknGoHdm4qiA7Y4+5aoWmi53hIYN2S/3iY3ay3+aiV/IrPLE8kPGO7eblg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792659819;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:X-UD-Smtp-Session:Date:
+	 From:To:Cc:Subject:Message-ID:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To;
+	bh=th1rgFIEa+Cf+jvGOKhrS5SYYwAobP8Fiqzy1jWnEdM=;
+	b=stEMauXumg58fkFtJM/+j+VBZQBssyqXVFs19aRJjaXeQfiS6we/Z1TRXtIiquco1K1f
+	 nsUN9hJOMJiNKTG1a1+CPkAZTno8XCjSprKvh6Wb52vYC1k85VZkEC7QIvsK6OIIiS9Ee
+	 4yuYZmIp6jjWVVg+aJRZhN9ScSF45JHxE1OUivV+dHxA/xhT9uaz97RfLYcqDcJaXD7Y8
+	 AFAHKW0zi5gn8RnfmhoZ4fnv7iOPnuRlo7e/7xcFvbAURH+X6ST6lSfqJmFDev/Vtk9av
+	 E7vXVBLo2n4GsHQFPUIXDrFsMxLCBQNIJZQRRnN/B35c9qBlDmcNKjnaQMnnPh4nq9w==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=qq.com;
-	spf=pass smtp.mailfrom=qq.com;
-	dkim=pass header.d=qq.com header.i=@qq.com header.a=rsa-sha256 header.s=s201512 header.b=fUyjrIWN;
-	arc=none smtp.remote-ip=162.62.58.211
-Received: from out162-62-58-211.mail.qq.com (out162-62-58-211.mail.qq.com [162.62.58.211])
-	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
+	dmarc=none header.from=sang-engineering.com;
+	spf=pass smtp.mailfrom=sang-engineering.com;
+	dkim=pass header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=GAdxC5qf;
+	arc=none smtp.remote-ip=194.117.254.33
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55985606A31A;
-	Thu, 22 Oct 2026 08:31:35 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 55985606A31A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=qq.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qq.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 928C5606A31B
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2026 09:03:35 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 928C5606A31B
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=qq.com header.i=@qq.com header.a=rsa-sha256 header.s=s201512 header.b=fUyjrIWN
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qq.com; s=s201512;
-	t=1792657892; bh=STANDc24tjLvIjwpWVUmAsj3lx2tDmc6YgtW+icG3B4=;
-	h=From:To:Cc:Subject:Date:References:In-Reply-To;
-	b=fUyjrIWNZngROUclxWWKZVyN/bRgeThQB4k/DjoUpctc/a8tx8gCiSYfCCsdEKoOT
-	 eI6Fcpgm5nbNe6p1TI3zdXAuoVAgFwv97ir6Fo0KXMCbikO9gAi1ZiyB5afHEPF11I
-	 YMmMjBP4xH0nfUlUFSPm7uP4PbORqu3v0foxg+a8=
-X-QQ-XMRINFO: MSVp+SPm3vtSI1QTLgDHQqIV1w2oNKDqfg==
-X-QQ-XMAILINFO: MdmyWVu0InhAZ8CuOl+WbGFKb0ebdFMF3mPSDUyiHYO6r7cCGW4mjYzB3NBROn
-	 A9jpVSF4u5EGvEY+hd9HqK0oJrog5xvbOMlpipPRJufSIYbzcDiHl7z1PQMAap6nUQRMYmsXXrTj2
-	 tk0tu+feORbWkh2MZvFlU6kFWGBDTovA9C78iIph96PStjs9Es57Lo5xtDOysKUKMazNBnBIRzXyV
-	 MrDMJ/nR6ENpT11vObm03xfcgHiUZmvbLYBNxYzkM9rWk/c8kXIUlrVRHSrjx1mJjWSwuR5ikLS90
-	 IA9oWFvjt5F1LrALDB8oYuhsvLYKtLJ5ZkmJZCMyfCvCIOrYeHecIvDsFyx+oo5L4n3vgJ4ILNe7w
-	 IWF/UoBKpSMC6IECVj2Z9f319IRWT7EtoQ3/KSPMVurUnn/z6RI9NhVutrd7FEEPyf2psClNX8xxs
-	 s3PodM+x6fnfX+HsW82g3vD8H2txXYRk7zN+9LrD09FtOt6JshsmPGwwAeMukpJ98J91aFKfwVtXG
-	 hBG+k2dK0PJajAwkc9bcbgYtz+Q2QR/RrNM6mtAf6w1rBmXaym1TMdQrgHoBFJdV2Yq2POKQKAvme
-	 EL86NXj9H2XUOECt/ikrQ4GvvRhc0W9Wo5HM2Kne7g8Tierj5RJN8KGA9QCQrgBYDnaAMIirrE89H
-	 /jI/jnpkPoEF6rQGbKH3V/RamkwDMVcm5rYvbUthGDSPKmiwUJk1kKo+Iyv/ZHZrmPUxG48EfbqTn
-	 HwXwLKP5guQm5Gr592nEMxLOh8CzkPL9PdfBHto0MAlW9nSWwpa6DmlElREMdAJrqEaSDrqmzII0S
-	 sRL9obZFk6mBkHY4RseG3hqBrBd+TNy0yz+nfoR6xF3WORhgAZbTIwwUQwf4/zUhc5WO6AamzLy7e
-	 JEZv0CDUEAtadJBWrvTVq+ZCI77/7ajFV0NgGLf9cPk9NrxnZnSqBHWuF/1iL6D3H7rwgSZ5puDA8
-	 FC5wND+fVe7bNKWVf/B3mWtxt6n1/TKztIPBU/DRVcT1NTS4JlKx6oT9ngX/okTR18+YLz8bG04q4
-	 K40wSnuLyRd1DNII7GNYR7vz6pxerbM2KyZCwhtwsaRd49zRlHj2xiYVP5iDbcjjkWk/Vy7nD++zK
-	 zkFHOwuBXxHfZg==
-From: "=?utf-8?B?Q3VuaGFvIEx1?=" <1579567540@qq.com>
-To: "=?utf-8?B?SGVpa28gU3TDvGJuZXI=?=" <heiko@sntech.de>
-Cc: "=?utf-8?B?RWxhaW5lIFpoYW5n?=" <zhangqing@rock-chips.com>, "=?utf-8?B?bGludXgtY2xr?=" <linux-clk@vger.kernel.org>, "=?utf-8?B?ZGV2aWNldHJlZQ==?=" <devicetree@vger.kernel.org>, "=?utf-8?B?bGludXgtYXJtLWtlcm5lbA==?=" <linux-arm-kernel@lists.infradead.org>, "=?utf-8?B?bGludXgtcm9ja2NoaXA=?=" <linux-rockchip@lists.infradead.org>, "=?utf-8?B?bGludXgta2VybmVs?=" <linux-kernel@vger.kernel.org>, "=?utf-8?B?bWZk?=" <mfd@lists.linux.dev>, "=?utf-8?B?bGludXgtZ3Bpbw==?=" <linux-gpio@vger.kernel.org>, "=?utf-8?B?bmV0ZGV2?=" <netdev@vger.kernel.org>, "=?utf-8?B?bGludXgtcG0=?=" <linux-pm@vger.kernel.org>, "=?utf-8?B?bGludXgtaTJj?=" <linux-i2c@vger.kernel.org>, "=?utf-8?B?bGludXgtc2VyaWFs?=" <linux-serial@vger.kernel.org>, "=?utf-8?B?bGludXgtbW1j?=" <linux-mmc@vger.kernel.org>, 
-	"=?utf-8?B?bGludXgtc3RtMzI=?=" <linux-stm32@st-md-mailman.stormreply.com>, "=?utf-8?B?bGludXgtcGh5?=" <linux-phy@lists.infradead.org>, "=?utf-8?B?bGludXgtdXNi?=" <linux-usb@vger.kernel.org>
-Subject: Re: [PATCH 07/27] clk: rockchip: Add RK3572 clock and reset support
+	dkim=pass (2048-bit key, unprotected) header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=GAdxC5qf
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=th1r
+	gFIEa+Cf+jvGOKhrS5SYYwAobP8Fiqzy1jWnEdM=; b=GAdxC5qfwc/v8PergLgg
+	ARjzl/5C1uq9wE5rb2FygQ3Y/xB/YXHzFtpTjf/O3feH13UYXyi7/TxzIRCUy9KE
+	HWiyHHvCrw2mQiotEvXLoUH/CiZq0iXODaRz4V9uIle6NFX6LJaQt0pg+9tszE3F
+	PpnW+JwGV8VOwcdQfLxaTRNCII/IZghPcrX5kV3p61DQowlcg85x+z4QIfChfEKI
+	GQPGiNLgVyQwxtULG/IgGXG+ieJl8AgJ6ZZIEj9v1of/k68o928VXg0dgf3R87qS
+	r0UvmgiyziO2P4AIUc3DTVl0XkZwAaJyrVLxKOCZIPSSvgEtHRFpKzhGdi5eL2Al
+	6A==
+Received: (qmail 1079903 invoked from network); 22 Oct 2026 11:03:28 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 22 Oct 2026 11:03:28 +0200
+X-UD-Smtp-Session: l3s3148p1@GyYOI2peXLoujns/
+Date: Thu, 22 Oct 2026 11:03:27 +0200
+From: wsa+renesas <wsa+renesas@sang-engineering.com>
+To: Biju Das <biju.das.jz@bp.renesas.com>
+Cc: "biju.das.au" <biju.das.au@gmail.com>, Ulf Hansson <ulfh@kernel.org>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: Re: [PATCH v24 08/15] mmc: renesas_sdhi: Add
+ TMIO_MMC_INTERNAL_DIVIDER flag
+Message-ID: <atnRXPLulZyrkp_m@shikoro>
+References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
+ <20260820171657.62815-9-biju.das.jz@bp.renesas.com>
+ <apk_81IYqxrWZyJK@shikoro>
+ <TY3PR01MB11346EC6636C810EEBA215F4E86B22@TY3PR01MB11346.jpnprd01.prod.outlook.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -69,33 +70,69 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
-Date: Thu, 22 Oct 2026 16:31:30 +0800
-X-Priority: 3
-Message-ID: <tencent_48E1098E2322016888397E2F4D1D34343208@qq.com>
-X-QQ-MIME: TCMime 1.0 by Tencent
-X-Mailer: QQMail 2.x
-X-QQ-Mailer: QQMail 2.x
-References: <20261022-add-board-ok3572-c-v1-0-0b0fd85a31ee@qq.com>
- <2339330.72vocr9iq0@diego>
- <tencent_791C8CE4050020CEF9E536C9D3B4CA9C250A@qq.com>
-	<2117228.PIDvDuAF1L@diego>
-In-Reply-To: <2117228.PIDvDuAF1L@diego>
-X-QQ-mid: xmsezb41-0t1792657890ti513lphq
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="pQ+xqu+tRMuz+sma"
+Content-Disposition: inline
+In-Reply-To: <TY3PR01MB11346EC6636C810EEBA215F4E86B22@TY3PR01MB11346.jpnprd01.prod.outlook.com>
 
-SGkgSGVpa28sCgo+IFJvY2tjaGlwIGhhcyBwdWJsaXNoZWQgYSBkZXZlbG9wbWVudCBicmFu
-Y2ggYmFzZWQgb24gNi4xMiBvbiBnaXRodWIgWzBdIC4KPiBUaGlzIGluY2x1ZGVzIHRoaXMg
-Y2xvY2sgZHJpdmVyIFsxXSBhbmQgbW9zdCBsaWtlbHkgYWxsIHRoZSBvdGhlciBwYXJ0cyBh
-cyB3ZWxsLgo+IFlvdSBjYW4gdXNlIHRoaXMgdG8gY3Jvc3MtcmVmZXJlbmNlLgo+Cj4gSWYg
-dGhlcmUgYXJlIG11bHRpcGxlIGF1dGhvcnMgY2hhbmdpbmcgdGhlIHJrMzU3Mi1zcGVjaWZp
-YyBwYXJ0cyBvZiBhIGZpbGUsCj4gcGxlYXNlIHVzZSB0aGUgZmlyc3QgcGF0Y2ggYXV0aG9y
-IGZyb20gdGhhdCBoaXN0b3J5IGZvciB5b3VyIHBhdGNoLCBhcyB3ZQo+IGRvbid0IHdhbnQg
-dG8gcmVwbGljYXRlIHRoZSBkZXZlbG9wbWVudCBoaXN0b3J5IGZyb20gdGhhdCB2ZW5kb3Ig
-a2VybmVsCj4gdHJlZS4KClRoYW5rIHlvdSBmb3IgdGhlIGxpbmsgYW5kIGNsYXJpZmljYXRp
-b24uCgpJJ2xsIGNyb3NzLXJlZmVyZW5jZSB0aGUgUkszNTcyIGNoYW5nZXMgd2l0aDoKICBy
-b2NrY2hpcC1saW51eC9rZXJuZWw6ZGV2ZWxvcC02LjEyCgpCZXN0IHJlZ2FyZHMsCkN1bmhh
-bwo=
+--pQ+xqu+tRMuz+sma
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
+Hi Biju,
+
+> > > drivers/mmc/host/renesas_sdhi_core.c:renesas_sdhi_clk_enable() {
+> > >     ...
+> > > 	if (!mmc->f_max)
+> > > 		mmc->f_max =3D clk_get_rate(priv->clk);
+>=20
+> The SoC with TMIO_MMC_INTERNAL_DIVIDER has always frequency defined in So=
+C dtsi
+> and this condition is skipped. Please let me know should I add a comment =
+here??
+
+"has always defined" is not ensured currently, or?. So, to achieve that
+we minimally should
+
+a) make 'max-frequency' a 'required' property for SoCs which have an intern=
+al divider.
+
+To make everything more robust (and IMHO also more understandable) we
+should also
+
+b) move the above 'if (!mmc->f_max)' block to probe (as 'f_max' only
+   needs to be set once unlike 'f_min')
+c) bail out in the above if block if TMIO_MMC_INTERNAL_DIVIDER is set
+   because it then is required. A small comment explaining why will make
+   it easier for our future selves ;)
+
+Makes sense?
+
+Happy hacking,
+
+   Wolfram
+
+
+--pQ+xqu+tRMuz+sma
+Content-Type: application/pgp-signature; name=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmrZ0VwACgkQFA3kzBSg
+KbbmRA/+MhQg1xA9UN7Bne4VszF1SbCcMHEsgPab1Gv1X4NfaVLlfp7ydFhQbga9
+yrt3I7BT6Wxol15oC529c2XVeh5mm28sfmlLprCc8MWfxCUAKl4gBLTj7Etdoma9
+HSXahjV4OBVjnRAs2lEa3eoTWimmpUhQrSz6gQcU+G26kgNuBTisljNM7TlC0CBy
+vQ9AD1SiZRahg3nKEIARkEzWY6ezpbFYwpLZAXleR++0nhCzFwCgqxj6BScrcLLV
+ao7J5tFpZp3wDe8GozzG4xcBBt4x2cIKveZHjEk0WpfxvvsmwVas5J38kdCWzCay
+pit4O6zOKEx2WqF56VWGcceIhzohPdfDGLtFUQc533Das5eAjt27XsJHedAd9RDy
+KY7zo1uSGgb3Oo9XFJnn/qJPGWOZ2PXeBzRk8xeVkmXfgVrZEa7KCccI3xcX8OGr
+flQ3Ifg+/y+XGCgQYENliAhp2gjyXJkgXsealhc29H29MtsbXAXJ8txtpAWAEgol
+4b28jh02prS3MQn96RcBYZz+uI7he2RsIfrucBNW0WtxuukTkV6o+LKpXW6h8rtg
+y2OFmmmqtgVL2f7JcQn/l1TMK1L36uQg6THonLanj0/VBcqcm0axWe7I4hrdamPf
+7p6QB/VgBDeb9pqbbPVolkiUxWHQwbgynMAMZun10EqLudUwctw=
+=mOAh
+-----END PGP SIGNATURE-----
+
+--pQ+xqu+tRMuz+sma--
