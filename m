@@ -1,52 +1,52 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=194.117.254.33
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792659819;
-	b=Z8dMsvo4zNSJdqqiesoouudYnYF1k3Ox5Mpn3LKTb3PpmDpNQpmJ52EXX/2tJ1TcxRe+
-	 Z+qebgpPsGPGHE0qdJ/BPKm7v2dqap7/99bRa880LR3PzsZlKqQbOO/8QRq02eTcdokx3
-	 BYjCsrHpvSzs24lwMtWdwtKYNLBDSv29VWBRDRUezs+sDbxPIlzEG7OztZXshnCPlzbCJ
-	 VAMfZXCTSE/WTgqqN2XBnCaaf39VrQgpCiZohdBmkvWOHAPV0MG6GxzBIIJ6AJYoYhgMP
-	 /7unoOAVy4yFk0p11y5RWlTq6dZ7zcF3jnBwn+lv3oh/p/kjyrQlGka13fON+d8VWqA==
+	t=1792661460;
+	b=3+bsrPB7JrIzRk0vctLn4wi1OQ5rXrOSfo6cT/D1eoqAlwjxdru7M8VazaF4WWtgxRwC
+	 gW2pg5pEeLxx/aBX+x0pdfgOiNjlh49Rd9KYVbebX1rCZyjdvp5UrowN4pW/aWtnz91kF
+	 lL10zQDI94BQnAfOTBecwgYH6eNxQQR7b0SsbzpncCeqHMV5CJGoDKlvJAHrR4oz5BzL7
+	 H+QpGq9AHbym2J8D6hR/NiXOs1alFYAuDhohCM4ZcmQh8JPJzW+z2CyPZkeUWnrr+V85R
+	 kmbkw5yUFOt7RAQpH32bPi1wBfPNajZdd7Lq9sYS2CWmzCHzXsDw/OsTDuk0fwd0c2w==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792659819;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792661460;
 	h=DMARC-Filter:DKIM-Signature:Received:Received:X-UD-Smtp-Session:Date:
 	 From:To:Cc:Subject:Message-ID:References:MIME-Version:Content-Type:
 	 Content-Disposition:In-Reply-To;
-	bh=th1rgFIEa+Cf+jvGOKhrS5SYYwAobP8Fiqzy1jWnEdM=;
-	b=stEMauXumg58fkFtJM/+j+VBZQBssyqXVFs19aRJjaXeQfiS6we/Z1TRXtIiquco1K1f
-	 nsUN9hJOMJiNKTG1a1+CPkAZTno8XCjSprKvh6Wb52vYC1k85VZkEC7QIvsK6OIIiS9Ee
-	 4yuYZmIp6jjWVVg+aJRZhN9ScSF45JHxE1OUivV+dHxA/xhT9uaz97RfLYcqDcJaXD7Y8
-	 AFAHKW0zi5gn8RnfmhoZ4fnv7iOPnuRlo7e/7xcFvbAURH+X6ST6lSfqJmFDev/Vtk9av
-	 E7vXVBLo2n4GsHQFPUIXDrFsMxLCBQNIJZQRRnN/B35c9qBlDmcNKjnaQMnnPh4nq9w==
+	bh=bgMmuHFkYogLF/Eeq6wTohVNZfvdHb4m4Si1W26cc2I=;
+	b=1wNfkIt49Vm9zT0mploVwadD92q6ybZ4vFf0MoW93NARJNIkInxZb+UIgAoiy7Sbujfh
+	 Kdrzml6kjRXHgQt+9OTw19Bc9vUHSr84jgv1SjbSlFcIXkA3xzw3cwSDTBOyJJCCp3OM/
+	 DxmOy0JmvKNPLsl3VGvq0v7gf4M5P1x4C+SwB/LjClqg/Q62hKpAPCfyJhtZsEJISqk0H
+	 2u5V4/Z6jGveB8h966vMDiRDbbXZ3BiAH35NRnPjvcTomiAAIOo9fIUIISwPE40tnzHu5
+	 JPgdUAOnxG66zjIwZ5mUF6rgVHLOhLUVPVck5m1hqxUPPnIKD/C3sqj/aWE5PqeZvHw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=none header.from=sang-engineering.com;
 	spf=pass smtp.mailfrom=sang-engineering.com;
-	dkim=pass header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=GAdxC5qf;
+	dkim=pass header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=RdnH1TWy;
 	arc=none smtp.remote-ip=194.117.254.33
 Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 928C5606A31B
-	for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2026 09:03:35 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 928C5606A31B
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94FDE606A31D
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2026 09:30:58 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 94FDE606A31D
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=GAdxC5qf
+	dkim=pass (2048-bit key, unprotected) header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=RdnH1TWy
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
 	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=th1r
-	gFIEa+Cf+jvGOKhrS5SYYwAobP8Fiqzy1jWnEdM=; b=GAdxC5qfwc/v8PergLgg
-	ARjzl/5C1uq9wE5rb2FygQ3Y/xB/YXHzFtpTjf/O3feH13UYXyi7/TxzIRCUy9KE
-	HWiyHHvCrw2mQiotEvXLoUH/CiZq0iXODaRz4V9uIle6NFX6LJaQt0pg+9tszE3F
-	PpnW+JwGV8VOwcdQfLxaTRNCII/IZghPcrX5kV3p61DQowlcg85x+z4QIfChfEKI
-	GQPGiNLgVyQwxtULG/IgGXG+ieJl8AgJ6ZZIEj9v1of/k68o928VXg0dgf3R87qS
-	r0UvmgiyziO2P4AIUc3DTVl0XkZwAaJyrVLxKOCZIPSSvgEtHRFpKzhGdi5eL2Al
-	6A==
-Received: (qmail 1079903 invoked from network); 22 Oct 2026 11:03:28 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 22 Oct 2026 11:03:28 +0200
-X-UD-Smtp-Session: l3s3148p1@GyYOI2peXLoujns/
-Date: Thu, 22 Oct 2026 11:03:27 +0200
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=bgMm
+	uHFkYogLF/Eeq6wTohVNZfvdHb4m4Si1W26cc2I=; b=RdnH1TWy6ekLjoFVP53U
+	94XgulBdcTkQPPwtZIXJxxjYUYmpBDAvQvN5dVogERKmDpfiqVLQtHAyDd6Ratmi
+	6NIxTIjQ5UVtvjYkQVJqoAy+/QHT0BO51JVnttmgBjtT+KYNGtd3ObJiK6opRBxx
+	TisXC7ShjvqtnEzeUb0/49RnRglCjeSbYG3njtF0bjdEwzfruAjOXO0no0HzKrxi
+	rnscx+2gatzXkf0qe5e342vijZ+gUKrQv9eD+0Z+U2e060q/NOyqiKNQEzt/wuiL
+	uhTpx3IGz52lFdD4JOLjzxi2PYq2POlIWy+bqIcTl0Kaf5DPPZr28E03TJRhzWJy
+	rQ==
+Received: (qmail 1087945 invoked from network); 22 Oct 2026 11:30:56 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 22 Oct 2026 11:30:56 +0200
+X-UD-Smtp-Session: l3s3148p1@r89FhWpeGIgujns/
+Date: Thu, 22 Oct 2026 11:30:55 +0200
 From: wsa+renesas <wsa+renesas@sang-engineering.com>
 To: Biju Das <biju.das.jz@bp.renesas.com>
 Cc: "biju.das.au" <biju.das.au@gmail.com>, Ulf Hansson <ulfh@kernel.org>,
@@ -57,11 +57,11 @@ Cc: "biju.das.au" <biju.das.au@gmail.com>, Ulf Hansson <ulfh@kernel.org>,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Subject: Re: [PATCH v24 08/15] mmc: renesas_sdhi: Add
  TMIO_MMC_INTERNAL_DIVIDER flag
-Message-ID: <atnRXPLulZyrkp_m@shikoro>
+Message-ID: <atnXz00Hci6R-7Ux@shikoro>
 References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
  <20260820171657.62815-9-biju.das.jz@bp.renesas.com>
- <apk_81IYqxrWZyJK@shikoro>
- <TY3PR01MB11346EC6636C810EEBA215F4E86B22@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+ <aplBTMnnF1V71BDL@shikoro>
+ <TY3PR01MB1134610EEF7D300BA8890357A86B22@TY3PR01MB11346.jpnprd01.prod.outlook.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -72,67 +72,113 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="pQ+xqu+tRMuz+sma"
+	protocol="application/pgp-signature"; boundary="3gL2mKKOOA5mRAgO"
 Content-Disposition: inline
-In-Reply-To: <TY3PR01MB11346EC6636C810EEBA215F4E86B22@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+In-Reply-To: <TY3PR01MB1134610EEF7D300BA8890357A86B22@TY3PR01MB11346.jpnprd01.prod.outlook.com>
 
---pQ+xqu+tRMuz+sma
+--3gL2mKKOOA5mRAgO
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
 Hi Biju,
 
-> > > drivers/mmc/host/renesas_sdhi_core.c:renesas_sdhi_clk_enable() {
-> > >     ...
-> > > 	if (!mmc->f_max)
-> > > 		mmc->f_max =3D clk_get_rate(priv->clk);
+> > static unsigned int renesas_sdhi_clk_get_rate(struct tmio_mmc_host *hos=
+t,
+> > 					      struct clk *clk)
+> > {
+> > 	unsigned int freq =3D clk_get_rate(clk);
+> >=20
+> > 	return host->pdata->flags & TMIO_MMC_INTERNAL_DIVIDER ? freq / 2 : fre=
+q; }
+> >=20
+> > Was this AI generated?
 >=20
-> The SoC with TMIO_MMC_INTERNAL_DIVIDER has always frequency defined in So=
-C dtsi
-> and this condition is skipped. Please let me know should I add a comment =
-here??
+> I kept 2 function as renesas_sdhi_is_internal_divider_enabled() is reused=
+ in
+> renesas_sdhi_set_clock()while adding support for HS400 mode.
+>=20
+> Currently, we decided to focus only for basic RZ/G3L support. So I can me=
+rge it into
+> Single function as you suggested.
 
-"has always defined" is not ensured currently, or?. So, to achieve that
-we minimally should
+Please do. And if the flag is checked later again, I think we can just
+check the flag. We don't need a helper for checking each flag, or?
 
-a) make 'max-frequency' a 'required' property for SoCs which have an intern=
-al divider.
+>=20
+> >=20
+> > > @@ -184,10 +205,14 @@ static unsigned int
+> > > renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+> > >
+> > >  	clk_set_rate(ref_clk, best_freq);
+> > >
+> > > -	if (priv->clkh)
+> > > +	if (priv->clkh) {
+> > > +		if (host->pdata->flags & TMIO_MMC_INTERNAL_DIVIDER)
+> > > +			clkh_shift =3D 1;
+> >=20
+> > No, this needs to be handled a bit above where clkh_shift is initially =
+set up, so we have it all in one
+> > block.
+>=20
+> There is a difference here.
+>=20
+> SDx_Clock (HS clk) Figure 4.4-8 Block Diagram of the Deformed Clock Syste=
+m (7)
+> IMCLK =3D SDx_Clock/2
+>=20
+> SD_Clock  Figure 6.2-2 Functional Diagram of Clock Divider for SD_CLK
+>=20
+> Currently framework request a clk to set, we set HS clk first, followed by
+> SD_CLK.
+>=20
+> On RZ/G3L, SD_CLK value is based on internal divider.
+>=20
+> For HS400 mode, SD_CLK =3D SDx_Clock(HS clk)/2
+>=20
+> For Non-HS400 mode, SD_CLK =3D SDx_Clock(HS clk)/4
+>=20
+> I don't find an easy way to move this logic to the above.
 
-To make everything more robust (and IMHO also more understandable) we
-should also
+I get an idea what is the problem here, but I am still confused about
+one thing. I'll summarize what I understood:
 
-b) move the above 'if (!mmc->f_max)' block to probe (as 'f_max' only
-   needs to be set once unlike 'f_min')
-c) bail out in the above if block if TMIO_MMC_INTERNAL_DIVIDER is set
-   because it then is required. A small comment explaining why will make
-   it easier for our future selves ;)
+* as of this patch, HS400 is not supported on G3L
+* so, in renesas_sdhi_clk_update(), 'clk_shift' value is 2 before clock
+  calculation
+* as HS400 is not supported yet, the internal divider is always active
+* so, you need to decrease the 'clk_shift' value from 2 to 1 after clock
+  calculation
 
-Makes sense?
+So far, so good. My expectation is now that when you add HS400 mode, you
+would need some extra code keeping 'clk_shift' at 2 because the internal
+divider is disabled then. But I don't find such code in later patches.
 
-Happy hacking,
+What am I missing?
+
+Thanks and happy hacking,
 
    Wolfram
 
 
---pQ+xqu+tRMuz+sma
+--3gL2mKKOOA5mRAgO
 Content-Type: application/pgp-signature; name=signature.asc
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmrZ0VwACgkQFA3kzBSg
-KbbmRA/+MhQg1xA9UN7Bne4VszF1SbCcMHEsgPab1Gv1X4NfaVLlfp7ydFhQbga9
-yrt3I7BT6Wxol15oC529c2XVeh5mm28sfmlLprCc8MWfxCUAKl4gBLTj7Etdoma9
-HSXahjV4OBVjnRAs2lEa3eoTWimmpUhQrSz6gQcU+G26kgNuBTisljNM7TlC0CBy
-vQ9AD1SiZRahg3nKEIARkEzWY6ezpbFYwpLZAXleR++0nhCzFwCgqxj6BScrcLLV
-ao7J5tFpZp3wDe8GozzG4xcBBt4x2cIKveZHjEk0WpfxvvsmwVas5J38kdCWzCay
-pit4O6zOKEx2WqF56VWGcceIhzohPdfDGLtFUQc533Das5eAjt27XsJHedAd9RDy
-KY7zo1uSGgb3Oo9XFJnn/qJPGWOZ2PXeBzRk8xeVkmXfgVrZEa7KCccI3xcX8OGr
-flQ3Ifg+/y+XGCgQYENliAhp2gjyXJkgXsealhc29H29MtsbXAXJ8txtpAWAEgol
-4b28jh02prS3MQn96RcBYZz+uI7he2RsIfrucBNW0WtxuukTkV6o+LKpXW6h8rtg
-y2OFmmmqtgVL2f7JcQn/l1TMK1L36uQg6THonLanj0/VBcqcm0axWe7I4hrdamPf
-7p6QB/VgBDeb9pqbbPVolkiUxWHQwbgynMAMZun10EqLudUwctw=
-=mOAh
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmrZ188ACgkQFA3kzBSg
+KbZW+w/9FDXVFDcXzKJv7Zx9UjskHBdfXgUqtxPLq109Y1kdg/Mgvk3oNTJ70IMj
+A125l1ch4FlFZOlulIt+1UXWLqeB5UJgE/mLk+k/t0UGP/XNENddjgT23VhbWZmR
+PDDtqc3VygI+KXQ2DObPnbQedT0OMUM1FZuOxXntrx9ej5izywlYodI3p4tEEzn3
+DP0OEl8OXgiXVFCttHwIIZaqHRxZZxa19ZPVFwsTXgJqucacHIOyzT8PZ7fVnBPq
+YRRqECM1q7WriEJjXV0wf5F1SF6QtJ83sn5cwqMw/+4rfSQgbW+//7KqYqMD0MNn
+TnQVIWPLUlssaekQ2Rvu0LBfQNeKnCfWKxV+Kde2yy6T7lO/yp8wGNuCTxEwRhDq
+UPEPJvsVNsWcFnciqEBgKo1nn2hDHYqRzvgObptvQTFLDiG031zXzX0J8BUvoZgG
+vq799wP09GaGyZw5WUBxqa3FORreEwHfPnUy5OuV4tTBgLCrIiX7QJbdGzDHuWbU
+ULW9HrBbcMYW8BQeVIBznyR2qZp2PYaSO3C7S5JsXK+NdEcnfv0shTAjYXcSXZtc
+wwEi0AtyZURP7DjzPXvt6QDKjGQ8Z/xslWnClrnfLKK6gSWwTqgjsHDcmwAg0eKD
+Mv9Cxz5PP3SWZXWU6x99dXptpPUIFV3zt0BHmk8kbohHWanNsbs=
+=T5Ds
 -----END PGP SIGNATURE-----
 
---pQ+xqu+tRMuz+sma--
+--3gL2mKKOOA5mRAgO--
