@@ -1,67 +1,108 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=205.220.180.131
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792661460;
-	b=3+bsrPB7JrIzRk0vctLn4wi1OQ5rXrOSfo6cT/D1eoqAlwjxdru7M8VazaF4WWtgxRwC
-	 gW2pg5pEeLxx/aBX+x0pdfgOiNjlh49Rd9KYVbebX1rCZyjdvp5UrowN4pW/aWtnz91kF
-	 lL10zQDI94BQnAfOTBecwgYH6eNxQQR7b0SsbzpncCeqHMV5CJGoDKlvJAHrR4oz5BzL7
-	 H+QpGq9AHbym2J8D6hR/NiXOs1alFYAuDhohCM4ZcmQh8JPJzW+z2CyPZkeUWnrr+V85R
-	 kmbkw5yUFOt7RAQpH32bPi1wBfPNajZdd7Lq9sYS2CWmzCHzXsDw/OsTDuk0fwd0c2w==
+	t=1792662724;
+	b=grERDsJ2PwBnrAc2w+4Jo3QqRhSuWLVDXj/0sALtoIXJDd1rXBCMeOqRybMg6qLIShNO
+	 n75PcOqsUo2ClS0cOF5bIA/SfhMVD0kPi1eF1BUKnm/GjwwnwrH7Hn1EMqitVPi9tt492
+	 2kMLjIpomsti0o7TvhKvgxJtxyn5qKX9/xlSiWi9OUWC5mFu+pSe5SBE45mbJOjbIUExk
+	 NTqKdHO+SyQFdMjNFlqX5iuuE+Lb9PpF7eNgfzZsS0oRAPSKEJJ01sYdb8fR1gbdWHNoG
+	 o00irp3w7S/BeJadxvgevbcZgG+jHxFAVUhAhs2dyDMAdmHhplVfY9XYLzK1IBK4q8g==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792661460;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:X-UD-Smtp-Session:Date:
-	 From:To:Cc:Subject:Message-ID:References:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To;
-	bh=bgMmuHFkYogLF/Eeq6wTohVNZfvdHb4m4Si1W26cc2I=;
-	b=1wNfkIt49Vm9zT0mploVwadD92q6ybZ4vFf0MoW93NARJNIkInxZb+UIgAoiy7Sbujfh
-	 Kdrzml6kjRXHgQt+9OTw19Bc9vUHSr84jgv1SjbSlFcIXkA3xzw3cwSDTBOyJJCCp3OM/
-	 DxmOy0JmvKNPLsl3VGvq0v7gf4M5P1x4C+SwB/LjClqg/Q62hKpAPCfyJhtZsEJISqk0H
-	 2u5V4/Z6jGveB8h966vMDiRDbbXZ3BiAH35NRnPjvcTomiAAIOo9fIUIISwPE40tnzHu5
-	 JPgdUAOnxG66zjIwZ5mUF6rgVHLOhLUVPVck5m1hqxUPPnIKD/C3sqj/aWE5PqeZvHw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792662724;
+	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
+	 DKIM-Signature:X-Google-DKIM-Signature:X-Gm-Message-State:X-Gm-Gg:
+	 X-Received:X-Received:Received:From:Subject:Date:Message-Id:
+	 MIME-Version:Content-Type:Content-Transfer-Encoding:X-B4-Tracking:
+	 X-Change-ID:To:Cc:X-Mailer:X-Proofpoint-Spam-Info:
+	 X-Authority-Analysis:X-Proofpoint-GUID:X-Proofpoint-ORIG-GUID:
+	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-Virus-Version:
+	 X-Proofpoint-Spam-Details;
+	bh=ibZbAM6mxwTviQGJE6mRb86msHnx1wYpor8WMO/JeSc=;
+	b=CLXDdYcac5wIGo2JczHHx/gQba4WF7SiUcvY/sJGs8lkkZu+zRTR/WgpDesc7v9Jvn73
+	 /s9dF8t3ehpky3ryex+08RZM6P7KU7+RKLWBKETDKvaZWNHHQVxLpr1S7A3nA8c8X++n3
+	 YEa1cx/TXKoCk0x+E65ihBX3mvkaZ0vjDKe0m36jxbfqUBRpWkkjLWsCKea5tLIqDUzhK
+	 7weMuBeIQKpLwljrg4rajrQDO3QS0OrqVMKUAYxr9H48c6OnBMuSIgkRaqHZZ8Fkidwr/
+	 YmhwOmQiB2YqRJWbHDvuA91aLqNkmeNIQDy76YJncMiPxIcUfGDlg7WMrV6TbmO/jPA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=sang-engineering.com;
-	spf=pass smtp.mailfrom=sang-engineering.com;
-	dkim=pass header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=RdnH1TWy;
-	arc=none smtp.remote-ip=194.117.254.33
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	dmarc=pass header.from=oss.qualcomm.com;
+	spf=pass smtp.mailfrom=oss.qualcomm.com;
+	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=C7Xzwrny;
+	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=SmUBGrpg;
+	arc=none smtp.remote-ip=205.220.180.131
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94FDE606A31D
-	for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2026 09:30:58 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 94FDE606A31D
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11901606A31F
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2026 09:52:03 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 11901606A31F
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=RdnH1TWy
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=bgMm
-	uHFkYogLF/Eeq6wTohVNZfvdHb4m4Si1W26cc2I=; b=RdnH1TWy6ekLjoFVP53U
-	94XgulBdcTkQPPwtZIXJxxjYUYmpBDAvQvN5dVogERKmDpfiqVLQtHAyDd6Ratmi
-	6NIxTIjQ5UVtvjYkQVJqoAy+/QHT0BO51JVnttmgBjtT+KYNGtd3ObJiK6opRBxx
-	TisXC7ShjvqtnEzeUb0/49RnRglCjeSbYG3njtF0bjdEwzfruAjOXO0no0HzKrxi
-	rnscx+2gatzXkf0qe5e342vijZ+gUKrQv9eD+0Z+U2e060q/NOyqiKNQEzt/wuiL
-	uhTpx3IGz52lFdD4JOLjzxi2PYq2POlIWy+bqIcTl0Kaf5DPPZr28E03TJRhzWJy
-	rQ==
-Received: (qmail 1087945 invoked from network); 22 Oct 2026 11:30:56 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 22 Oct 2026 11:30:56 +0200
-X-UD-Smtp-Session: l3s3148p1@r89FhWpeGIgujns/
-Date: Thu, 22 Oct 2026 11:30:55 +0200
-From: wsa+renesas <wsa+renesas@sang-engineering.com>
-To: Biju Das <biju.das.jz@bp.renesas.com>
-Cc: "biju.das.au" <biju.das.au@gmail.com>, Ulf Hansson <ulfh@kernel.org>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: Re: [PATCH v24 08/15] mmc: renesas_sdhi: Add
- TMIO_MMC_INTERNAL_DIVIDER flag
-Message-ID: <atnXz00Hci6R-7Ux@shikoro>
-References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
- <20260820171657.62815-9-biju.das.jz@bp.renesas.com>
- <aplBTMnnF1V71BDL@shikoro>
- <TY3PR01MB1134610EEF7D300BA8890357A86B22@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+	dkim=pass (2048-bit key, unprotected) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=C7Xzwrny;
+	dkim=pass (2048-bit key, unprotected) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=SmUBGrpg
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69M9hboT3955556
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2026 09:52:03 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=qcppdkim1; bh=ibZbAM6mxwTviQGJE6mRb8
+	6msHnx1wYpor8WMO/JeSc=; b=C7Xzwrnyd9b9GwslpMsBv5OubS0kInrGpENouM
+	O6O3cNuzljTdAxD09OxwUiu9GneqxHbEdsZjGn+jfoKED7NRGKTKE2fcQ6uk2aU4
+	aHOx5/8peflJn1j+eN+OtdzZRFVnGN402bn2b01qb0jENTsOk8cFPAKUjrA9M4CF
+	nS7R/CdRSOAi8y1VzfipC/szB5xyyTx0ARJsDnGY525C1AtpcvGwLttpLkH5wX4m
+	EqH7G4D841pyLMsaPNtpE4lRa3bYiFa3bqh8MiIBBpVdm58gp93QijbUw3MKu+Ym
+	d1QydRW2CzCnCszkW12IbKIYFmwBjD0AZ/iFiJJApc2T4O7w==
+Received: from mail-dy1-f199.google.com (mail-dy1-f199.google.com [74.125.82.199])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hf93c9r0b-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2026 09:52:02 +0000 (GMT)
+Received: by mail-dy1-f199.google.com with SMTP id 5a478bee46e88-35c3c370b17so2807580eec.0
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2026 02:52:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1792662722; x=1793267522; darn=vger.kernel.org;
+        h=cc:to:content-transfer-encoding:content-type:mime-version
+         :message-id:date:subject:from:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=ibZbAM6mxwTviQGJE6mRb86msHnx1wYpor8WMO/JeSc=;
+        b=SmUBGrpgJUf+Tq9+aT80UlaXIpb35ocvWF/8JPjhbZZwzP5H1GhnQn3w2vKhsVB9aW
+         mwML6HYM43P939haimf0VL4Z/F3Snrw83eywgLTyx0w6tqQ9bOFfqjMmEhfqak4llGxa
+         sUGAq017CS18nXPZz4rfLqj41UdNuxNsCcOL5CwRFYacvVjjz+lPIYBQPSg+KDC/UbIJ
+         zxnHu8nxZr7BOp+G8ZeMhD4kSm0jq8qNpWTtmr+XaU8W/lJ3nN4gAYzhyOae8XpS2pPV
+         zOAmzanlrWrLyi7kDs5ulX6mllRZVUr+Owr98kqBFzA1rZfC5aZD2n+6bRg8sq8d47hf
+         2Tug==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1792662722; x=1793267522;
+        h=cc:to:content-transfer-encoding:content-type:mime-version
+         :message-id:date:subject:from:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=ibZbAM6mxwTviQGJE6mRb86msHnx1wYpor8WMO/JeSc=;
+        b=nMZxdLKSUJES/F9IW2HuMm+HeWpUC8mEO2+BuagnO3BjsTg1acFiAeeEtpWKSP16IT
+         jQ000iLG5LtXQ45uLfEacqi2iJ0ipSr5bZ6tA6j5NCIBzbz+8awNlO3ICPkqo3mlY8sn
+         vSkJiaSFUC8J1O8VMH/B1n9TzBT63VkXP9wiGKPfcSHwoZQ2UlRYjjVoGTOI55PZaVPr
+         dBxUHKyM2rz7CdFfeTbia6/XTySvsLt6xi5+ig3rc8RDYL/7d8ePgI5l/Zq+HKQzcX0p
+         tr3gbTfzkNC6TBGu+O1XnNQ2a8fis0BfvKHNlF0O7g3kJNXFe15sQwGCSnM9ElEu/PRc
+         kHlA==
+X-Gm-Message-State: AFq9FYLY+oOViYdyORaW16zbDuo2ejQGTQUx/ECoQrFb8DCx96mlGJzG
+	kXcGiF0lt1Pvp0CHKZGFA2zifqkJm38lzUd3Qnk9bUlmLr8c/DiZiZ/WV4nDbdjXiD4VVuc+fw1
+	jLYDv1mO636hO9ZgwDDR2FxWZ0sMsH0syC5rtfP4P+g4d6U1w/F4J2QWlXMWdn0E=
+X-Gm-Gg: AYBFou0iqflAPlBuC0uOc/9vy23J9PrTmuDvJA67a2cGkkdt24UCV41Jyzanc3lIAx4
+	DMnZBpBVm//UDvnOsdJh94IjS5RSjG9QYrhQZ2rvnJQlXbDRgBLE+ybm4eGftdHNIpH/UYDkuET
+	/3jR+f84lU+Pvb0CmeSd1od4DaP3OAtujz8PvyPr4Wtn8KcfkPhN+QBHo/zhK4j9AHYBFNVOLeV
+	83i/izesRGnko+YfMA2Pia10eq3lj8fNwnE9hP5wzwSCjhriNCIKRe1H9BM404OuZHcEA0tcZg0
+	rdFNUOduOTyFPHxpS0Zh5/V8MtkNxU2LHkOeP+S3WglK9cC0lrWRHE4JZryylyrVlEk5/3fAvhh
+	8D7xvlTPFzy9awmZh/RYGRl2TtZsxlPvB
+X-Received: by 2002:a05:7022:f512:b0:187:efba:9ba2 with SMTP id a92af1059eb24-190a84c55a9mr4905124c88.44.1792662721793;
+        Thu, 22 Oct 2026 02:52:01 -0700 (PDT)
+X-Received: by 2002:a05:7022:f512:b0:187:efba:9ba2 with SMTP id a92af1059eb24-190a84c55a9mr4905106c88.44.1792662721247;
+        Thu, 22 Oct 2026 02:52:01 -0700 (PDT)
+Received: from hu-kuldsing-hyd.qualcomm.com ([202.46.23.25])
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3673e153519sm15742170eec.3.2026.10.22.02.51.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 22 Oct 2026 02:52:00 -0700 (PDT)
+From: Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
+Subject: [PATCH 0/3] ICE: Enable runtime PM support
+Date: Thu, 22 Oct 2026 15:21:49 +0530
+Message-Id: <20261022-qcom_ice_pm_enable-v1-0-f7a84086c651@oss.qualcomm.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -71,114 +112,98 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="3gL2mKKOOA5mRAgO"
-Content-Disposition: inline
-In-Reply-To: <TY3PR01MB1134610EEF7D300BA8890357A86B22@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIALXc2WoC/yXMQQ6CMBBG4auQWduEDmqCVzGmocOPjpGCrRASw
+ t2tsvwW762UEBWJLsVKEbMmHUKGPRQkjybcYbTNJi75bEtm85ahdypwY+8QGv+CqeTUsvV1jSN
+ TDseITpf/9HrbnSb/hHx+J9q2L2ZT2vp2AAAA
+X-Change-ID: 20261022-qcom_ice_pm_enable-3c5d21b99e42
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
+        Abel Vesa <abelvesa@kernel.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+        "Martin K. Petersen" <mkp@kernel.org>,
+        Eric Biggers <ebiggers@google.com>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-scsi@vger.kernel.org,
+        linux-crypto@vger.kernel.org,
+        Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
+X-Mailer: b4 0.15.2
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMDIyMDAzOSBTYWx0ZWRfXyjff4q0feqdW
+ bx3HUeT//pMzBx0k+w/So5y2T3JGV1LX6gFq82uYEf/fHKnYUIvp5A/xy6zLSFq6mV4o0CpO+5L
+ T7XR9TaPh5//Bi4ZaYQB+/rCwyLE5l8=
+X-Authority-Analysis: v=2.4 cv=ReAFmFtv c=1 sm=1 tr=0 ts=6ad9dcc2 cx=c_pps
+ a=cFYjgdjTJScbgFmBucgdfQ==:117 a=ZePRamnt/+rB5gQjfz0u9A==:17
+ a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=3WHJM1ZQz_JShphwDgj5:22
+ a=EUspDBNiAAAA:8 a=q2l7TY2mCMnZi5pTjLMA:9 a=QEXdDO2ut3YA:10
+ a=scEy_gLbYbu1JhEsrz4S:22
+X-Proofpoint-GUID: NvvaHsRDz31mOSM17td2eOCEtDCwkdxL
+X-Proofpoint-ORIG-GUID: NvvaHsRDz31mOSM17td2eOCEtDCwkdxL
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDIyMDAzOSBTYWx0ZWRfXw+yW8ZTazZSu
+ 3ZYpejeOCB+3yeGetumjlSLW9YR+EYjOcKKokUYlKJR4GD2irWIZcByM4CI4u7uLMCvmrqmYA2U
+ BXkGvc2kyVgpdOtJ7y0Pl29XTqmnV7RSA+JPpEe6oxT8YRRQYcuLer0kK8O0XsbfjXc78J33AqB
+ 8DS+sHzzNBD92lEZBHLYTndZMSbnOqwoCASsGHDMEYo8GQdSSuAkVUgkqAsv7NIwMWXs2TtT1jl
+ fciXXygUiEUbf1h3RuAVZoutEvO4lwN1uSvOcm6VNt5vcGzbMODLjLjRrONrvLYMZolFfHYTPdx
+ 2x2GsFFLI3L0Mt/YnbiousaBhVgWgkN4877Xjf0WYZbCfuaTiqo84b2cB7nFaAIu2tswUC7pkTP
+ veyU0GKyyDPCViemNtJM9+1LlmpPzx3VOyd6/cQf8J6PrIeQ6zTLskDtXe5ip2XArERh6bDzxKp
+ 0V7ZAu4Ws6qMGvyy/Dw==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
+ definitions=2026-10-22_03,2026-10-21_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 spamscore=0 suspectscore=0 adultscore=0 lowpriorityscore=0
+ malwarescore=0 bulkscore=0 clxscore=1015 phishscore=0 impostorscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2610190000 definitions=main-2610220039
 
---3gL2mKKOOA5mRAgO
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+This series fixes ICE clock lifetime handling when ICE is modeled as a
+standalone device and referenced by storage controllers through
+qcom,ice.
 
-Hi Biju,
+Currently, ICE driver enables clocks during probe and keeps them
+prepared after probe completes. This keeps the ICE clock voted even when
+the storage controller is idle. Add runtime PM support to the ICE driver
+so the standalone ICE device can enable clocks for probe-time register
+access, then disable them and remain suspended while idle.
 
-> > static unsigned int renesas_sdhi_clk_get_rate(struct tmio_mmc_host *hos=
-t,
-> > 					      struct clk *clk)
-> > {
-> > 	unsigned int freq =3D clk_get_rate(clk);
-> >=20
-> > 	return host->pdata->flags & TMIO_MMC_INTERNAL_DIVIDER ? freq / 2 : fre=
-q; }
-> >=20
-> > Was this AI generated?
->=20
-> I kept 2 function as renesas_sdhi_is_internal_divider_enabled() is reused=
- in
-> renesas_sdhi_set_clock()while adding support for HS400 mode.
->=20
-> Currently, we decided to focus only for basic RZ/G3L support. So I can me=
-rge it into
-> Single function as you suggested.
+While enabling runtime PM in ice exposed couple of sequence bugs in
+storage drivers(ufs and sdhci-msm) as any key programming call used to
+go ice and never complaint as ice-clocks were always on.
+Example, unclocked register access happened from ufs/mmc in
+qcom_ice_program_key().
 
-Please do. And if the flag is checked later again, I think we can just
-check the flag. We don't need a helper for checking each flag, or?
+qcom_ice_writel(ice, 0x0, QCOM_ICE_REG_CRYPTOCFG(slot));
 
->=20
-> >=20
-> > > @@ -184,10 +205,14 @@ static unsigned int
-> > > renesas_sdhi_clk_update(struct tmio_mmc_host *host,
-> > >
-> > >  	clk_set_rate(ref_clk, best_freq);
-> > >
-> > > -	if (priv->clkh)
-> > > +	if (priv->clkh) {
-> > > +		if (host->pdata->flags & TMIO_MMC_INTERNAL_DIVIDER)
-> > > +			clkh_shift =3D 1;
-> >=20
-> > No, this needs to be handled a bit above where clkh_shift is initially =
-set up, so we have it all in one
-> > block.
->=20
-> There is a difference here.
->=20
-> SDx_Clock (HS clk) Figure 4.4-8 Block Diagram of the Deformed Clock Syste=
-m (7)
-> IMCLK =3D SDx_Clock/2
->=20
-> SD_Clock  Figure 6.2-2 Functional Diagram of Clock Divider for SD_CLK
->=20
-> Currently framework request a clk to set, we set HS clk first, followed by
-> SD_CLK.
->=20
-> On RZ/G3L, SD_CLK value is based on internal divider.
->=20
-> For HS400 mode, SD_CLK =3D SDx_Clock(HS clk)/2
->=20
-> For Non-HS400 mode, SD_CLK =3D SDx_Clock(HS clk)/4
->=20
-> I don't find an easy way to move this logic to the above.
+Fixing this issue require ice instance at early ufs/emmc probe so that
+correct sequence is established and ice is ready to accept key program
+calls from blk-crypto or any explicit storage operation.
 
-I get an idea what is the problem here, but I am still confused about
-one thing. I'll summarize what I understood:
+Merge strategy:
+Patch 1/3 and 2/3 are storage driver fixes and should be available
+before patch 3/3 lands otherwise will result in bootup crash.
 
-* as of this patch, HS400 is not supported on G3L
-* so, in renesas_sdhi_clk_update(), 'clk_shift' value is 2 before clock
-  calculation
-* as HS400 is not supported yet, the internal divider is always active
-* so, you need to decrease the 'clk_shift' value from 2 to 1 after clock
-  calculation
+Validation:
+Tested on shikra-evk, kodiak rb3-gen2 and sm8750-mtp.
 
-So far, so good. My expectation is now that when you add HS400 mode, you
-would need some extra code keeping 'clk_shift' at 2 because the internal
-divider is disabled then. But I don't find such code in later patches.
+Signed-off-by: Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
+---
+Kuldeep Singh (3):
+      mmc: sdhci-msm: Enable ICE before enabling crypto support
+      ufs: ufs-qcom: Enable ICE before enabling crypto support
+      soc: qcom: ice: Add runtime PM support
 
-What am I missing?
+ drivers/mmc/host/sdhci-msm.c |  21 ++-----
+ drivers/soc/qcom/ice.c       | 139 ++++++++++++++++++++++++++++++++++++-------
+ drivers/ufs/host/ufs-qcom.c  |  29 ++++++---
+ 3 files changed, 142 insertions(+), 47 deletions(-)
+---
+base-commit: 9a482184d910775cf648863148944945b74e2815
+change-id: 20261022-qcom_ice_pm_enable-3c5d21b99e42
 
-Thanks and happy hacking,
+Best regards,
+--  
+Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
 
-   Wolfram
-
-
---3gL2mKKOOA5mRAgO
-Content-Type: application/pgp-signature; name=signature.asc
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmrZ188ACgkQFA3kzBSg
-KbZW+w/9FDXVFDcXzKJv7Zx9UjskHBdfXgUqtxPLq109Y1kdg/Mgvk3oNTJ70IMj
-A125l1ch4FlFZOlulIt+1UXWLqeB5UJgE/mLk+k/t0UGP/XNENddjgT23VhbWZmR
-PDDtqc3VygI+KXQ2DObPnbQedT0OMUM1FZuOxXntrx9ej5izywlYodI3p4tEEzn3
-DP0OEl8OXgiXVFCttHwIIZaqHRxZZxa19ZPVFwsTXgJqucacHIOyzT8PZ7fVnBPq
-YRRqECM1q7WriEJjXV0wf5F1SF6QtJ83sn5cwqMw/+4rfSQgbW+//7KqYqMD0MNn
-TnQVIWPLUlssaekQ2Rvu0LBfQNeKnCfWKxV+Kde2yy6T7lO/yp8wGNuCTxEwRhDq
-UPEPJvsVNsWcFnciqEBgKo1nn2hDHYqRzvgObptvQTFLDiG031zXzX0J8BUvoZgG
-vq799wP09GaGyZw5WUBxqa3FORreEwHfPnUy5OuV4tTBgLCrIiX7QJbdGzDHuWbU
-ULW9HrBbcMYW8BQeVIBznyR2qZp2PYaSO3C7S5JsXK+NdEcnfv0shTAjYXcSXZtc
-wwEi0AtyZURP7DjzPXvt6QDKjGQ8Z/xslWnClrnfLKK6gSWwTqgjsHDcmwAg0eKD
-Mv9Cxz5PP3SWZXWU6x99dXptpPUIFV3zt0BHmk8kbohHWanNsbs=
-=T5Ds
------END PGP SIGNATURE-----
-
---3gL2mKKOOA5mRAgO--
