@@ -1,65 +1,69 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=43.163.128.52
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.11.138.130
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792651057;
-	b=Lv9HqETH5a2VqGDuFarH75uRSS05FfAeAFkbW7yvP0xYeSM5lDguGcdBrJMN9oNKDNOK
-	 RWiI/xM7ygeKfQaHVLtLbpUlrIGPCx3QsNzczHTVvsc6PgNfwDMq3zlFSulMnXz36bwSj
-	 2CoznWs1Jm9z1mWrg8iTG/yL5g+YjBtWH6wkOE1A5BCpQSrIdl+0RlvRUYM5eiPI5/aVs
-	 zI4xutyZbSscZZmCrYz+gPJjSyKccY3GzwWl7GbXS5G5MaCaWMiQJAAnaircOhLkKgDzP
-	 NkbYC0vSkthl9VrsaVEAVvVDpf7vyeAZinBYZH+wcFQFde+loDMR18KSIIURUtd8cDw==
+	t=1792654701;
+	b=yKoIVW2vVy5jNpbwxbPTAVgVt8zCDDByCvwW9w63ZaNtu8afoipuegqPbTrbYKuDN/oE
+	 z0oWWCTiljGKwS2aTjhUtdrbEOJ+ZYOGIBNmfJIwJ7inshL93AndJnI6wkOor3pClSr+C
+	 lWTyxEb3yHjvA57GCK6hgX73eb2ZlIEickV+1OFqV/NefOni1wlydFCP6WozEbfc2TS7O
+	 +mNrgrb+oH9XVCHNm/kN6zDEBKhE27mUGRIc7b6Fh+2ha+oRwveqqN/kKwPiamn4YFVmH
+	 1uQFVqLNcp9xUcSo1o7avs55J+YeCAfEF5QMhNhLPCoDnsuCjNss8gS1ZZ4/rGu9HeA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792651057;
-	h=DMARC-Filter:DKIM-Signature:X-QQ-XMRINFO:X-QQ-XMAILINFO:From:To:Cc:
-	 Subject:Mime-Version:Content-Type:Content-Transfer-Encoding:Date:
-	 X-Priority:Message-ID:X-QQ-MIME:X-Mailer:X-QQ-Mailer:References:
-	 In-Reply-To:X-QQ-mid;
-	bh=VQFTusPZWZAQO9ncVP5/pVATTKlUKVRB9FJ/9plts7M=;
-	b=rOqigqugdI/vH7ScdRZWTCGBZe/YBZ6WHRvvm+cYKUGR/wnHCQdG20UNhG+9om0tVYZ8
-	 mNwcjlCghb8u+FJLb6afwcoaKDHfRM18wrKpOg7NUAAxT2cDM4Q3N11fSHpoOlsafLYL4
-	 2cf/KrtzHGcA6WYTCsQCcc95ssLcgQkl7+Dd0ixYcwrucZ2Ysxy835sv6KXHGLE3mNgxl
-	 55HSv9PAATbXHgu57s0uiY9wsOSbvP8PX9f43FW/kQk46xOYpnjR+chARs1fVL+t7jGgR
-	 0VlLCQUpuDF8A4q+vfkdo1YoUOKuEwXqI/r5ZexW10QXPxbMZwtyd/7NYimkvZpYX3Q==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792654701;
+	h=DMARC-Filter:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:
+	 In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:
+	 Content-Type;
+	bh=WnoNYrh8MOVI5Naq9oKQorrqR4sbrLyiz7U4v4AXZCE=;
+	b=Y/GX5mSxhJg7Nz7NtlKg6YYPyaN6JLUFZJToavX9xOKsH5ha6vsKwCiaDsNbsL4sgJbe
+	 GaXluXQEoqBjjsNhq2y6p4APOLj8SewiB5mVAzXct3ZbxUjZgiiRQlN8ui0G7Qdw8FHNi
+	 CzVeD/5n91TQcUqg51ZyTfCRfYH6G/DnxzDP5Jc4C6aD3ePyEqXf8mr/fyAGaJQqn7hLP
+	 NtSpe2NUHp91QelASG3mfyEZT97pO3eVD4h+AytUMYztN8HMezYGSBEKyHU/P04F1ltwR
+	 pw1VRipMNYVAveU2eVDE0zQBqMjHhilMRp6QRlIHFrVds7WxYzky97doXQ1uHKv6jyw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=qq.com;
-	spf=pass smtp.mailfrom=qq.com;
-	dkim=pass header.d=qq.com header.i=@qq.com header.a=rsa-sha256 header.s=s201512 header.b=GmTf6oYL;
-	arc=none smtp.remote-ip=43.163.128.52
-Received: from xmbghk7.mail.qq.com (xmbghk7.mail.qq.com [43.163.128.52])
-	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
+	dmarc=pass header.from=sntech.de;
+	spf=pass smtp.mailfrom=sntech.de;
+	dkim=pass header.d=sntech.de header.i=@sntech.de header.a=rsa-sha256 header.s=gloria202408 header.b=ZEyUwzAR;
+	arc=none smtp.remote-ip=185.11.138.130
+Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange ECDHE (prime256v1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94CB3606A31A;
-	Thu, 22 Oct 2026 06:37:35 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 94CB3606A31A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=qq.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qq.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B548606A319;
+	Thu, 22 Oct 2026 07:38:19 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6B548606A319
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sntech.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=qq.com header.i=@qq.com header.a=rsa-sha256 header.s=s201512 header.b=GmTf6oYL
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qq.com; s=s201512;
-	t=1792651052; bh=VQFTusPZWZAQO9ncVP5/pVATTKlUKVRB9FJ/9plts7M=;
-	h=From:To:Cc:Subject:Date:References:In-Reply-To;
-	b=GmTf6oYL8AKlduANqJiMvZbkQOf7gKp/zQwFXmoaknAFcT1VltESHTOaOrg1fcjsW
-	 ooQVtPfnStMG4UMWTARNwo+QdJW0/ktwQv7oAfnOSn7krkbD0yr8PCfT2j9MVsT4Ld
-	 a+4EUQyPnJwSlLkvXFQ17TUOpHSAfKWsStATXj6U=
-X-QQ-XMRINFO: NyFYKkN4Ny6FuXrnB5Ye7Aabb3ujjtK+gg==
-X-QQ-XMAILINFO: N6vT1niysq6m+dolIeSRQmZ0Z/lSCBqEUxgMgKnhlcqyDzFYwRYb/nFI862AH8
-	 hx16FZ7vQ76yOO4KNrAZLP9nGxJ89E38Vmc3rNG+xB70iOUAV7wSRAQwTihTOulk5fqrM0fPZ230B
-	 KEjiMz7HM7L4qzHyBVCqvG9OHxF9AE9K5R4nq44q5B5A5vDvoF2e6N2kZaxF1Xwl7qyXn0HPU+w0q
-	 jx+hU0FDBXH84DVvxXpEVC45nfZW7RE5b4cT+s2JTCz893w+J65yZGKPYhKhbfVjLu1uzs423rZHF
-	 YhpWLoHB7Z5iyFTSqhVekL+bsNuil22wBS381bllGmpRd0Z5eGD8IpYIPKcsKtvIw3suSvGWztqCp
-	 ZGnIzV/u3oZCv65hNU2vXGJYFoE1CwNhDvwyxZLhcqUptZfdM3alzxLkTi4sZcGcAkl0YQLxv0wcs
-	 xDYdGeTy4dt8w7sun/yBo2hbrgzaosoCMO9RohKNuUElD6qUPsPbWHI0n7ImrN45HY2QPGs1bCvVk
-	 MWSRQYnB5gBQQseXW+2S7fzKMYfLxHzAz/06wSHooNP221o35sl8hHLxnG+gxrgIhpp8SEAZcRLdv
-	 wttYLqc66aRhuxibq6faN+1fdUvvf0l4cS04L724Xdz7CC95Ngz5WGvieS2ipVQY1PH3RPEC0SCQc
-	 LLZDi4lUTEtGHPpV3lXVwSsXOJZKBClnzlse4Bo/O+ZEZSX8poOOa0aS22M1U1Gi0XNUU8VxABkh2
-	 bEmFwFeuf6x8bwc+bj+CMBVRMOBbJozHjSlFbbqRMjHcly44ucpG1KRKT5UmvuIARe2VdvezT5O6l
-	 4AjpimmT+Wwm48X5K++Szf3pWy8brWR888+n7HrXrJNl+S1bpTLclyQC60yZO5MIsRD1+1zgcsxEy
-	 Y16MLptC3/0G6NBTSzeoOt/17k+XaE4mdHZh69reiQfF1CWqaBhKA87ASDRQ945nLDYWOlNQ6C5AI
-	 wOHX74OkmtP7bfnjvPr48Afne4f9RYdonvRTS0CxUYkICRgEbasogiv1kyvxnWGZzdyciyj+lRx9T
-	 ZTKQ1aSJt3odwsS1uNe1fIHMqU8WkURomskKvfn9JQJrjd4w=
-From: "=?utf-8?B?Q3VuaGFvIEx1?=" <1579567540@qq.com>
-To: "=?utf-8?B?U2hhd24gTGlu?=" <shawn.lin@rock-chips.com>
-Cc: "=?utf-8?B?c2hhd24ubGlu?=" <shawn.lin@rock-chips.com>, "=?utf-8?B?bGludXgtY2xr?=" <linux-clk@vger.kernel.org>, "=?utf-8?B?ZGV2aWNldHJlZQ==?=" <devicetree@vger.kernel.org>, "=?utf-8?B?bGludXgtYXJtLWtlcm5lbA==?=" <linux-arm-kernel@lists.infradead.org>, "=?utf-8?B?bGludXgtcm9ja2NoaXA=?=" <linux-rockchip@lists.infradead.org>, "=?utf-8?B?bGludXgta2VybmVs?=" <linux-kernel@vger.kernel.org>, "=?utf-8?B?bWZk?=" <mfd@lists.linux.dev>, "=?utf-8?B?bGludXgtZ3Bpbw==?=" <linux-gpio@vger.kernel.org>, "=?utf-8?B?bmV0ZGV2?=" <netdev@vger.kernel.org>, "=?utf-8?B?bGludXgtcG0=?=" <linux-pm@vger.kernel.org>, "=?utf-8?B?bGludXgtaTJj?=" <linux-i2c@vger.kernel.org>, "=?utf-8?B?bGludXgtc2VyaWFs?=" <linux-serial@vger.kernel.org>, "=?utf-8?B?bGludXgtbW1j?=" <linux-mmc@vger.kernel.org>, 
-	"=?utf-8?B?bGludXgtc3RtMzI=?=" <linux-stm32@st-md-mailman.stormreply.com>, "=?utf-8?B?bGludXgtcGh5?=" <linux-phy@lists.infradead.org>, "=?utf-8?B?bGludXgtdXNi?=" <linux-usb@vger.kernel.org>
-Subject: Re: [PATCH 00/27] rockchip: Add RK3572 and Forlinx OK3572-C support
+	dkim=pass (2048-bit key, unprotected) header.d=sntech.de header.i=@sntech.de header.a=rsa-sha256 header.s=gloria202408 header.b=ZEyUwzAR
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
+	s=gloria202408; h=Content-Type:Content-Transfer-Encoding:MIME-Version:
+	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Reply-To;
+	bh=WnoNYrh8MOVI5Naq9oKQorrqR4sbrLyiz7U4v4AXZCE=; b=ZEyUwzARHz47EcN8uXbOF0XTuA
+	GafSTJMtAMhaWxo68Ky2tAuyNcvr5wuHLp8DWusSyEJVmh5AFDovAInOT1dY1KEDOlvC1A+UBRk9w
+	c86FDr9qwHhzcU4JXi/b8SLVWkNRJ2YbVw5O+njeSXd/qp1DU3BTOvxsrYgOinZ/lCArbUsoLJ6n2
+	Yzliopu+QLaQ9xrLhbOKATH2R+ktrtbbROzUojDub+NX/69SzMzD0z8EdcRxG5hXIarq8FuTcODk9
+	uD2WKRfkLekwmmOazjrVXJc3PUNDowJ5qiFv980+1WoJKn+E6fL/lLBl7FHHwea54zuBJuYW388Pz
+	ZdsNgirw==;
+From: Heiko =?UTF-8?B?U3TDvGJuZXI=?= <heiko@sntech.de>
+To: Elaine Zhang <zhangqing@rock-chips.com>, Cunhao Lu <1579567540@qq.com>
+Cc: linux-clk <linux-clk@vger.kernel.org>,
+ devicetree <devicetree@vger.kernel.org>,
+ linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+ linux-rockchip <linux-rockchip@lists.infradead.org>,
+ linux-kernel <linux-kernel@vger.kernel.org>, mfd <mfd@lists.linux.dev>,
+ linux-gpio <linux-gpio@vger.kernel.org>, netdev <netdev@vger.kernel.org>,
+ linux-pm <linux-pm@vger.kernel.org>, linux-i2c <linux-i2c@vger.kernel.org>,
+ linux-serial <linux-serial@vger.kernel.org>,
+ linux-mmc <linux-mmc@vger.kernel.org>,
+ linux-stm32 <linux-stm32@st-md-mailman.stormreply.com>,
+ linux-phy <linux-phy@lists.infradead.org>,
+ linux-usb <linux-usb@vger.kernel.org>
+Subject: Re: [PATCH 07/27] clk: rockchip: Add RK3572 clock and reset support
+Date: Thu, 22 Oct 2026 09:38:06 +0200
+Message-ID: <2117228.PIDvDuAF1L@diego>
+In-Reply-To: <tencent_791C8CE4050020CEF9E536C9D3B4CA9C250A@qq.com>
+References:
+ <20261022-add-board-ok3572-c-v1-0-0b0fd85a31ee@qq.com>
+ <2339330.72vocr9iq0@diego>
+ <tencent_791C8CE4050020CEF9E536C9D3B4CA9C250A@qq.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -68,27 +72,56 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
-Date: Thu, 22 Oct 2026 14:37:30 +0800
-X-Priority: 3
-Message-ID: <tencent_1468586598128C460803261171FD769AA209@qq.com>
-X-QQ-MIME: TCMime 1.0 by Tencent
-X-Mailer: QQMail 2.x
-X-QQ-Mailer: QQMail 2.x
-References: <20261022-add-board-ok3572-c-v1-0-0b0fd85a31ee@qq.com>
-	<7fa26028-5c7c-4c5d-8cc5-3116b2e51cc0@rock-chips.com>
-In-Reply-To: <7fa26028-5c7c-4c5d-8cc5-3116b2e51cc0@rock-chips.com>
-X-QQ-mid: xmsezb41-0t1792651050t9mjujcfl
+MIME-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
 
-SGksCgo+IFRoYW5rcyBmb3IgeW91ciBwYXRjaGVzLiBUeXBpY2FsbHksIGEgc2VyaWVzIG9m
-IHRoaXMgc2l6ZSBjb3ZlcmluZyBTb0MKPiBzdXBwb3J0IHNob3VsZCBiZSBzcGxpdCBieSBz
-dWJzeXN0ZW3vvIxmb3IgaW5zdGFuY2UsIHNlcGFyYXRlIERUIGJpbmRpbmcKPiBhbmQgZHJp
-dmVyIHBhdGNoZXMgZm9yIGVhY2ggc3Vic3lzdGVt77yMYW5kIG9ubHkgQ0MgdGhlIHJlbGV2
-YW50Cj4gbWFpbnRhaW5lcnMgYW5kIG1haWxpbmcgbGlzdHMuIFRoZSBEVFMgcGF0Y2ggY2Fu
-IGZvbGxvdyBhZnRlcndhcmRzLgoKVGhhbmsgeW91IGZvciB0aGUgZ3VpZGFuY2UuIEkgYXBv
-bG9naXplIGZvciB0aGUgaW5jb252ZW5pZW5jZS4gSSdsbCBzcGxpdAp2MiBieSBzdWJzeXN0
-ZW0uCgpCZXN0IHJlZ2FyZHMsCkN1bmhhbw==
+Hi,
+
+Am Donnerstag, 22. Oktober 2026, 08:09:02 Mitteleurop=C3=A4ische Sommerzeit=
+ schrieb Cunhao Lu:
+> Hi Heiko,
+>=20
+> > As you didn't write this driver on your own and even kept the original
+> > author, please also credit the original author in the commit itself.
+> >
+> > This can be done for example with something like
+> > git commit --amend --author=3D"Elaine Zhang <zhangqing@rock-chips.com>"
+> > and in the commit also have both signed-offs-by, aka Elaine first
+> > then yours below as the submitter, i.e. like
+> >
+> > +++++++++++
+> > Signed-off-by: Elaine Zhang <zhangqing@rock-chips.com>
+> > [document what changes you did inside the brackets]
+> > Signed-off-by: Cunhao Lu <1579567540@qq.com>
+> > +++++++++++
+> >
+> > The same applies to all commits coming from the Rockchip vendor kernel.
+>=20
+> Thanks for pointing this out, and sorry for missing the commit authorship.
+>=20
+> I'll review all patches and add the original authors' names where necessa=
+ry.
+> However, because the BSP I received does not include Git commit history, =
+I can
+> only identify them from the names noted in the file headers.
+
+Rockchip has published a development branch based on 6.12 on github [0] .
+This includes this clock driver [1] and most likely all the other parts as =
+well.
+You can use this to cross-reference.
+
+If there are multiple authors changing the rk3572-specific parts of a file,
+please use the first patch author from that history for your patch, as we
+don't want to replicate the development history from that vendor kernel
+tree.
+
+
+Thanks
+Heiko
+
+[0] https://github.com/rockchip-linux/kernel/tree/develop-6.12
+[1] https://github.com/rockchip-linux/kernel/blob/develop-6.12/drivers/clk/=
+rockchip/clk-rk3572.c
+
 
