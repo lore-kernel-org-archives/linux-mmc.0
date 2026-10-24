@@ -1,44 +1,111 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=154.81.10.178
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=202.12.124.159
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792808681;
-	b=VaAPK+vEf+9r+SBTwkJTRDNirqOgy28sLPkR5rRzCP0HCGxspb4jsCOk+xxmgQw4bghU
-	 oWnYj3rCM1JHTF5OB8SY2nm7V6JbDngU3mAfdJWsXOD3BW9b+6dDGz37JWHdK+j6AORNr
-	 PQZEJ3cDHXN6cYf+lr07xWJ/oAFVHbOu9Gj7bUSHhGR6/yvXYX3uZRh8QB9pPve+51WtK
-	 OxDeorePPGUtylo4zt+xfS49OhHdgK++8eCJP53nqfmaAvrW7ON08hb2T18Au7aUmOQNY
-	 ItgtV2xmMBuK9ubAScfey/3Wd9NPLUEl0/Uq+1bAW/h6zYMH1CYRw7SdZ2oFtSnQ83g==
+	t=1792839973;
+	b=Mllc/1HHkPdCnJkxFa/Dn5IRnT869uvUCPbeMrytEa+2kPrvtMXN8Ky0S+ypdcH08I+q
+	 LNOLWSKLuQdAxJcxR0NlDwzCI2MHgr6dxOQ0pwFNWhCoj9tbxO+MmZHqMtxoiZpQlA4p/
+	 GjNyjTHVkfgNXlVV1Cd+QdWhO1q6YdAwfPFJKHJn+ZOZsVGAA6y1QkliC49BJlG4TNBU6
+	 yS+ncnyILJ4trSBSTd6LcP/jpToRD5p2mhb98DwX3wunGKFmsmu3lMNVlCJ0zAajxwOCK
+	 BBYH8rXKsSi4eK00dd0y3nxZ+weGLEJS/cCVc87WtzJBUglP5A9EmdAaO3bdWBeey3w==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792808681;
-	h=DMARC-Filter:Received:Message-ID:Date:MIME-Version:User-Agent:Cc:
-	 Subject:To:References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:X-HM-Tid:X-HM-MType:X-HM-Spam-Status:
-	 DKIM-Signature;
-	bh=LjLEPNvenb7YjElma6kPzXf+v9Ogk6cyjnBoKhglyPY=;
-	b=Kmzh+zEjOVt8HuBbKOVacVZf5/FntzfEnFiTgZD0I77ZkG/4aBECgt1ZYdUf2kSWdKcD
-	 d8GDF4jUKjyOVwePrsQUTDoVyUm8/z8wRBkRg7Wbr3Mrs1HHKjeDpFTK726lBHlR2fEKL
-	 SfXW3pzfk5AC3kYGXVsUoucsJBYbpQ2qz7pdJ0ROv39ESZKprvb56wWu7BTW710mmdtnt
-	 uNzwqnJu2iMUK2Bip6OVFLKa2K2hi1jIAokL5zjBiP6zUdWXDsnueFtfxChXjr5aU2m/5
-	 RZqVH64KN4rm5RnpIiuVF6WWcgugDcwLVwsMiFOaGjzkLyoSBnavlEjp+ApMMHKIjHw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792839973;
+	h=DMARC-Filter:Received:Received:DKIM-Signature:DKIM-Signature:
+	 X-DKIM2-Info:DKIM2-Signature:X-DKIM2-Info:Message-Instance:
+	 X-ME-Sender:X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
+	 MIME-Version:X-ThreadId:Date:From:To:Cc:Message-Id:In-Reply-To:
+	 References:Subject:Content-Type:Content-Transfer-Encoding;
+	bh=B6vn2DStihtHQBWmF0Gq3R4jCMavXN0lRtS7lQi8Oxk=;
+	b=3ksR0aSo3VOvtouSVSHtJz7gjNe/6KZAY26AQr5Hpf0jIThqmapVh/ljzkAyKIM3efV5
+	 Dfadz8sG0xp++JWB1reYpOyNIfQBLlM4FgphdA7CAbKbQxnEFdYoNVxPHb8LAxl8oysJr
+	 M9dQEqwQcq6fuJDMgLvrDvEfjd4n4ajlSXmY9WGTFskmCHycnjSmnR/gYY4fHYGU6myfl
+	 HfcxeQgKlmgezrx6UzDtGYDS1Rfz3H9fgxU6/aih9sKPV3VeqzEgWkT8xhqy8G48IWiYP
+	 LBb6UWuqNupxgNhUYtvccFUGvjAM+sajuPMFTISrZ8KrhjuqVujdPpFU19vaPtV3yEw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=rock-chips.com;
-	spf=pass smtp.mailfrom=rock-chips.com;
-	dkim=pass header.d=rock-chips.com header.i=@rock-chips.com header.a=rsa-sha256 header.s=default header.b=fi2BxbuM;
-	arc=none smtp.remote-ip=154.81.10.178
-Received: from mail-m10178.netease.com (mail-m10178.netease.com [154.81.10.178])
+	dmarc=pass header.from=arndb.de;
+	spf=pass smtp.mailfrom=arndb.de;
+	dkim=temperror header.d=arndb.de header.i=@arndb.de header.a=rsa-sha256 header.s=fm1 header.b=CISwAWnV;
+	dkim=pass header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm2 header.b="fAt/3jzu";
+	arc=none smtp.remote-ip=202.12.124.159
+Received: from fhigh-b8-smtp.messagingengine.com (fhigh-b8-smtp.messagingengine.com [202.12.124.159])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52F57606A31A;
-	Sat, 24 Oct 2026 02:24:37 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 52F57606A31A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 028D2606A31E
+	for <linux-mmc@vger.kernel.org>; Sat, 24 Oct 2026 11:06:12 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 028D2606A31E
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=rock-chips.com header.i=@rock-chips.com header.a=rsa-sha256 header.s=default header.b=fi2BxbuM
-Received: from [172.16.12.48] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 523106e85;
-	Sat, 24 Oct 2026 10:24:28 +0800 (GMT+08:00)
-Message-ID: <4e8bbb32-e062-40fe-8ee4-363e83a68f2b@rock-chips.com>
-Date: Sat, 24 Oct 2026 10:24:27 +0800
+	dkim=temperror header.d=arndb.de header.i=@arndb.de header.a=rsa-sha256 header.s=fm1 header.b=CISwAWnV;
+	dkim=pass (2048-bit key, unprotected) header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm2 header.b=fAt/3jzu
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfhigh.stl.internal (Postfix) with ESMTP id 1B04E7A0168
+	for <linux-mmc@vger.kernel.org>; Sat, 24 Oct 2026 07:06:12 -0400 (EDT)
+Received: from ams-imap-03 ([10.64.2.23])
+  by ams-compute-02.internal (MEProxy); Sat, 24 Oct 2026 07:06:12 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+	:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm1; t=1792839961;
+	 x=1792926361; bh=B6vn2DStihtHQBWmF0Gq3R4jCMavXN0lRtS7lQi8Oxk=; b=
+	CISwAWnVFNABLcds7W9xIwX9UzJFVPk+T+yM7cMXiivsqEv2Ikd7cuBhEzL6ipv1
+	qZNbm+oePHNosoeCuGV27clXiq2GgUuYb+8fcnlteTEL/752+3ZCcnSsilW4nwtk
+	3CLhnCGM8+3obzJPZgWjQiIk/KP6ukFoLeJHLdY3qd91t44VQRLAJxNhdIneHrtR
+	qMAqCgaxoaczEjhRK8V7P5JcM+EsLJwUDMHRv2zKuqmqsRpfKhGHrKWu7A5Cpk0R
+	AmWmPSA2l42YbzK/spA/gJxAA0XNMrsQrDWeJZRUJzoVO9uSxewCfDA0Qhdkn2X7
+	zPJ6Bglyij7+20Ce22ztHw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1792839961; x=
+	1792926361; bh=B6vn2DStihtHQBWmF0Gq3R4jCMavXN0lRtS7lQi8Oxk=; b=f
+	At/3jzuVCZDSFDEcage5UKeO22EIlsURUX8d6jykMFAyk9djKHt2Qcm05ajHpX+f
+	XuY6Ipa2WGgkrd/meruPdU02r/vwHxPJ5wD9J7+RyP9kBHNXpwqs59HHT8ZqJLlI
+	nndJ0qVJ3pvL6r/z5Qm8nMXAPzZ293ArJlU4fuGy+jnuPuPcbXCPq9OEHsz3qNQs
+	EPZqYgkX7vcwLq4V7G/32PoJ9abdwKAMeGvGRuPA+skUh0SBQoLaRv7Oo5Qt4Ec5
+	/qKSdooikGQnz81y50jvlsXDIZ8j1AtnVm1222Xrq5FC2jH0T+heIYSxdwHMgBea
+	KmQ1XZtcWlAjRrxEUWRdQ==
+X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-07;
+	repo=github.com/dkim2wg/interop; date=2026-10-18; sw=lmtpprox;
+	action=sign d=arndb.de a=rsa-sha256;
+DKIM2-Signature: i=1; m=1; t=1792839961; d=arndb.de;
+	mf=PGFybmRAYXJuZGIuZGU+;
+	rt=PGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc+;
+	s=fm1:rsa-sha256:RBksa1GAUfTBdW3CC4JhSz6I/D1w1Pw/BMG2JE26R1Xo7xe
+	X6DcyNXzpfVZujI0yAH0elRyw/zfVGD1YpeTL3CqB+PTMe81PSA0gvO2oYWKFYyY
+	/NxPyqNDRAPDTuC4sCod3qYDdYwRQ/vQScPjtMWVELDiloJpftvm76bsvS3N776h
+	g4bU9axKxbUWSBwB2ryw0RcVl60pmZHu5iHNiT77PtpuxLOo2ggylHgMbBzE2WJc
+	hICYE8vArNnJNjMd3q3ap6YMHwj+XTFZnDYD4TiKTs9pRKBLcaOsQG3+Y28RLrGQ
+	FAoTbwJMH4Jt0JNpIwd7+XsvXN5TEs6ZXtowqwA==;
+X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-07;
+	repo=github.com/dkim2wg/interop; date=2026-10-18; sw=lmtpprox;
+	action=mi-m=1; hc=12;
+	hn=cc,content-transfer-encoding,content-type,date,feedback-id,
+	from,in-reply-to,message-id,mime-version,references,subject,to;
+Message-Instance: m=1; h=sha256:6ocqnLBAD47eRfPt1LDxYvWcaenY4jjHGmLLK74+H7g=:jEbyEn2zJtQuEuH3sAaGvS9R6lKmI9NPxBte+5hi4EE=;
+X-ME-Sender: <xms:EZHcapyVobuaxjA9pYoD5X6IBFhfzpCSPyzKHCtvkW6-gcySzsieUw>
+    <xme:EZHcakGvlR-nVDA8S_8BXFlmK05LFFVEXiykM2psBcU2uVySDtbDsg8Gh_eof8r7v
+    0LVWXk38GlUykmiRfNsfWHYouOMoS69yWaosp9QVRexN8ky7zTO7jCL>
+X-ME-Proxy-Cause: dmFkZTGKJZlY7FFlfPJ8aPWgIhMiJ0abUV63GpKIM+BPAyyYxg32bVWMo9pnqmVlAUdIc5
+    sOwzQUeAb3oCqdYoAAgC5I0kHbCkJ9NJhjTwwzjLdHym299Z+eAGdNIvqBO0hpkUvzPzdD
+    QpQ7UG/Tq1+s++RpW3czmer7qUTwjwoRg8RohYRKQGUKbVsDsNWIxu2d3GiDeLAsTEsEOd
+    XfpdJBrbp5J6/68I86tJT3nm76YXQN+5GmIKpQ+xHruD+zQy5VKcDH3Pm1/ih+bdPtsOlp
+    wK0ys9JcgztEJyj/KR2hW4zPof2nqLVFJ7dvWh0D1t20P6hujZghB2CXWCqSAWDdYmY8KW
+    Ywei9ALMUXODCtt86LTDU/MyZAynWN6iSG3pQj1yzAL0PbJL3VTxuFj7HcS94dXfOF/3Lg
+    jL3AI0eZ2vXE3pz/e6fvVof4RMVyfQ0w1AeE8ky52GF8nnGU3Eb8mLtTB7bIVt1TuPJgAF
+    EARP+NA3RC6z06KXXcnYJBs0UGfHz/R+HdGzKQBVjiaLGufpF93rYEV5BCMGJtwyhbaGiT
+    bInBvcqLt/1Vs/Wy7R60XJSgasVfxEEjklDT3HCVsNT9/hm3poEUuIkYCfzx43cnLC0jmm
+    ej9cx1B1njTLnLk7tFa43hNju+sA3hSKBBjc3xeAzqa4BUimNA+gJun2hEgA
+X-ME-Proxy: <xmx:FJHcaiKtQi20VW3Heyi4EiFNNZ2zHPQspeqvGrI0Qzh-J-oShGCxbg>
+    <xmx:FJHcavAaGsElm4uqMv806T7ufabQfqqnERyg4tR0ZtiNee9S902M-A>
+    <xmx:FJHcarRg3dSQ5iaELLxFLd5mk1ALtTewfYSRf5-MmYCQiWMavYjwgg>
+    <xmx:FJHcaoozF6EziMfKBP-RpOEnt7MQLGctPJodfPN3k9GIazUW5RI3IQ>
+    <xmx:GZHcask2vgZPEHMXCg2ePfOpeS6c4GWhWpikn6JQYffOj04x2sAZLSbb>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 5AF9832A0098; Sat, 24 Oct 2026 07:05:53 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -48,104 +115,138 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, Jensen Huang <jensenhuang@friendlyarm.com>
-Subject: Re: [PATCH 2/2] mmc: core: sdio: skip CMD11 if signalling is already
- 1.8V
-To: Deomid rojer Ryabkov <rojer@rojer.me>, Ulf Hansson <ulfh@kernel.org>
-References: <20261023232813.2983368-1-rojer@rojer.me>
- <20261023232813.2983368-3-rojer@rojer.me>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <20261023232813.2983368-3-rojer@rojer.me>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0aa16bb94d4503a4kunm11e1daa02bc0ba
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1kYFggdWUFKV1ktWUFJV1kPCRoVCBIfWUFZGUIfHVYYSx4dGhoYSU
-	8YTUhWFRQJFhoXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0
-	tIVUpLSU9PT0hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=fi2BxbuMCjV5r74pZJtw87Ozx44iBr51BNowyxP0/A22l6/QpOPSSjqzUBzEl/jciHdeTESkWJ+reAMoqG0IF6XgTYw9cek/p5f5lr1kb15VaEQSv6WqMBd0itGz8C4G+JLx0FQW3R2Kxh6HzzW712LNjoGKd4tarH6OXR0730k=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=LjLEPNvenb7YjElma6kPzXf+v9Ogk6cyjnBoKhglyPY=;
-	h=date:mime-version:subject:message-id:from;
+X-ThreadId: Ax4Cw9gIx-EN
+Date: Sat, 24 Oct 2026 13:05:19 +0200
+From: "Arnd Bergmann" <arnd@arndb.de>
+To: "David Laight" <david.laight.linux@gmail.com>
+Cc: "Ian Rogers" <irogers@google.com>, "Andy Lutomirski" <luto@kernel.org>,
+ "Thomas Gleixner" <tglx@kernel.org>,
+ "Vincenzo Frascino" <vincenzo.frascino@arm.com>,
+ "Arnaldo Carvalho de Melo" <acme@redhat.com>,
+ "Stefan Kerkmann" <s.kerkmann@pengutronix.de>,
+ "Marc Kleine-Budde" <mkl@pengutronix.de>,
+ "Christophe Leroy" <chleroy@kernel.org>, "Helge Deller" <deller@gmx.de>,
+ "James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>,
+ "Jason A . Donenfeld" <Jason@zx2c4.com>,
+ "Alexander Viro" <viro@zeniv.linux.org.uk>,
+ "Eric Biggers" <ebiggers@google.com>, linux-kernel@vger.kernel.org,
+ linux-parisc@vger.kernel.org, linux-mmc@vger.kernel.org,
+ "Jaehoon Chung" <jh80.chung@samsung.com>,
+ "Shawn Lin" <shawn.lin@rock-chips.com>
+Message-Id: <5674ade0-db6d-45c4-9a0a-d032efa00667@app.fastmail.com>
+In-Reply-To: <20261024093209.09367c73@pumpkin>
+References: <20261020163210.742728-1-irogers@google.com>
+ <20261020190718.6cba898b@pumpkin>
+ <9ad54286-4337-4022-8657-65e1ed86b6df@app.fastmail.com>
+ <20261024093209.09367c73@pumpkin>
+Subject: Re: [PATCH v2 1/2] vdso: Add VDSO_UNALIGNED_PACKED config option
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
+On Sat, Oct 24, 2026, at 10:32, David Laight wrote:
+> On Fri, 23 Oct 2026 23:49:50 +0200 "Arnd Bergmann" <arnd@arndb.de> wrote:
+>> On Tue, Oct 20, 2026, at 20:07, David Laight wrote:
+>> > On Tue, 20 Oct 2026 09:32:09 -0700 Ian Rogers <irogers@google.com> wrote:  
+>>
+>> This is the traditional way we have been doing the unaligned access
+>> in the kernel before the change. By annotating the structure as
+>> __packed, we tell the compiler that it cannot rely on alignment here,
+>> so it uses whatever method it knows to access unaligned data depending
+>> on the architecture and flags.
+>
+> That relies on the compiler not tracking the alignment through the casts.
+> The only way the C language lets you get a 'foo *' pointer is taking the
+> address of a 'foo' data item so it must be aligned.
 
+I have definitely seen the reverse, where a u32 pointer dereference in
+__raw_readl() gets turned into individual byte accesses because
+the pointer originally came from a packed structure. This is
+also bad because it breaks MMIO register access.
 
-在 2026/10/24 星期六 7:28, Deomid rojer Ryabkov 写道:
-> Per the SDIO Simplified Specification Version 3.00, section 3.1.2, a card
-> whose signalling is already at 1.8V must report S18A = 0 in the R4
-> response, and the core relies on that: it only sends CMD11
-> (SD_SWITCH_VOLTAGE) when S18A is set.
-> 
-> Some cards don't follow this. The Realtek RTL8822CS (as fitted on the
-> FriendlyElec NanoPi R2S Plus, where the M.2 SDIO bus is wired to a fixed
-> 1.8V vqmmc) answers CMD5 with S18A = 1 even though the bus is already at
-> 1.8V. CMD11 then times out:
-> 
->    dwmmc_rockchip ff5f0000.mmc: Unexpected CMD11 timeout
->    mmc_host mmc2: Timeout sending command (cmd 0x10202000 arg 0x0 status 0x90202000)
->    mmc2: new high speed SDIO card at address 0001
-> 
-> and the card ends up in 50 MHz high-speed mode instead of SDR104.
-> 
-> When vqmmc can't do 3.3V, mmc_set_initial_signal_voltage() has already
-> fallen back to 1.8V by the time CMD5 is sent, so the host knows there is
-> nothing to switch. Skip CMD11 in that case. ocr keeps R4_18V_PRESENT, so
-> mmc_sdio_init_uhs_card() still runs and the card is tuned to SDR104:
-> 
->    dwmmc_rockchip ff5f0000.mmc: Successfully tuned phase to 64
->    mmc2: new ultra high speed SDR104 SDIO card at address 0001
-> 
-> Hosts that start at 3.3V are not affected, nor are compliant cards that
-> report S18A = 0 at 1.8V. A non-compliant card that does need CMD11
-> before entering UHS at 1.8V would now fail UHS init; with the previous
-> patch it falls back to high-speed mode and keeps working.
-> 
-> FriendlyElec's BSP for this board works around this with a card
-> quirk, MMC_QUIRK_BROKEN_ROCR_S18A[1], matched on the "realtek,rtl8822cs"
-> compatible, which drops the switch request whenever this chip is
+We also know that the packed struct version works, either because
+the standard requires a punned pointer to respect the minimum
+alignment, or because the implementation is smart enough to only
+ever lower the alignment for punned pointers.
 
+> So even if you cast it to another type that alignment can be assumed.
+> I've seen crashes from memcpy() using word accesses when trying to
+> copy from a misaligned pointer into an aligned copy of the structure.
+> Now the current code must be avoiding that - but I think the compiler
+> can do it.
 
-Thanks for this series.
+Right, especially the memcpy() without type punning seems dangerous.
+We have had several instances of code breaking on armv7 where
+CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS is set but the stp/ldp
+instructions for 64-bit objects still require alignment.
 
-I knew some vendor's SDIO cards misbehave it on Rockchip's bug trace
-system, including this one. This patch matches what I suggested there
-instead of the alternative one. FWIW,
+I don't see any instances of the exact issue you describe, but this
+one is similar and definitely broken on armv7 (adding the dw_mmc
+maintainers to Cc for information):
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+#ifndef readq
+#define __raw_writeq(__value, __reg) \
+        (*(volatile u64 __force *)(__reg) = (__value))
+#define __raw_readq(__reg) (*(volatile u64 __force *)(__reg))
+#endif
+#define mci_fifo_writeq(__value, __reg) __raw_writeq(__reg, __value)
+static void dw_mci_push_data64(struct dw_mci *host, void *buf, int cnt)
+{
+...
+#ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
+        if (unlikely((unsigned long)buf & 0x7)) {
+                while (cnt >= 8) {
+                        u64 aligned_buf[16];
+                        int len = min(cnt & -8, (int)sizeof(aligned_buf));
+                        int items = len >> 3;
+                        int i;
+                        /* memcpy from input buffer into aligned buffer */
+                        memcpy(aligned_buf, buf, len);
+                        buf += len;
+                        cnt -= len;
+                        /* push data from aligned buffer into fifo */
+                        for (i = 0; i < items; ++i)
+                                mci_fifo_writeq(host->fifo_reg, aligned_buf[i]);
+                }
+        } else
+#endif
+        {
+                u64 *pdata = buf;
 
-> present. The misreported S18A is the card's fault, but ignoring it is
-> only correct when the bus is already at 1.8V: on a board with a
-> switchable vqmmc the same chip would then be run in UHS at 3.3V. A card
-> quirk would need knowledge of the board's supply that it doesn't have.
-> The core does know the current signal voltage, so handle it there, which
-> also takes care of any other card that turns out to behave the same way.
-> 
-> [1] https://github.com/friendlyarm/kernel-rockchip/commit/aee62cf7ae16b5ede6c6d92a8ee20e796482754e
-> Cc: Jensen Huang <jensenhuang@friendlyarm.com>
-> Signed-off-by: Deomid rojer Ryabkov <rojer@rojer.me>
-> ---
->   drivers/mmc/core/sdio.c | 6 ++++--
->   1 file changed, 4 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index 6787fdf1c5..a986ee04ba 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -737,9 +737,11 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
->   	 * 1.8v, the card sets S18A to 0 in the R4 response. So it will
->   	 * fails to check rocr & R4_18V_PRESENT,  but we still need to
->   	 * try to init uhs card. sdio_read_cccr will take over this task
-> -	 * to make sure which speed mode should work.
-> +	 * to make sure which speed mode should work. Some cards (RTL8822CS)
-> +	 * set S18A regardless, so don't send CMD11 if we are already at 1.8V.
->   	 */
-> -	if (rocr & ocr & R4_18V_PRESENT) {
-> +	if ((rocr & ocr & R4_18V_PRESENT) &&
-> +	    host->ios.signal_voltage != MMC_SIGNAL_VOLTAGE_180) {
->   		err = mmc_set_uhs_voltage(host, ocr_card);
->   		if (err == -EAGAIN) {
->   			mmc_sdio_pre_init(host, ocr_card, card);
+                for (; cnt >= 8; cnt -= 8)
+                        mci_fifo_writeq(host->fifo_reg, *pdata++);
+                buf = pdata;
+        }
 
+The 'u64 *pdata = buf' cast is of course broken here since that
+is not allowed for unaligned pointers on supported target regardless
+of CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS. The else{...} portion
+has to be written using get_unaligned_u64() here, as the #ifndef
+branch should only optimize for performance and not be required
+for correctness.
+If '*buf' was a u64 pointer instead of void, I could see the
+compiler messing this up in the way you describe, by optimizing
+out the temporary array entirely.
+
+An unrelated problem is that the mci_fifo_writeq() definition
+is not portable because the volatile u64 pointer dereference
+does not guarantee that the two 32-bit halves are stored
+in the order that the hardware register requires. Presumably
+that was what led to DW_MMC_QUIRK_FIFO64_32.
+
+>> The reason we need the struct here is that you cannot use __packed
+>> as a qualifier on a variable, only on a type or struct member.
+>
+> I know all about that.
+> Somewhere it also says that you can only increase the alignment (I think
+> of a type), but you can definitely have a type for 'u64 with 32bit
+> alignment' and use it in a structure.
+
+Right, we do rely on that in e.g. x86
+
+typedef s64 __attribute__((aligned(4))) compat_s64;
+
+We cannot use this in a macro though because there is no
+way to define a local typedef inside of a function or
+to change the alignment of pointer without the struct.
+
+       Arnd
