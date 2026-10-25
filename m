@@ -1,97 +1,54 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.56.5
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1792959466;
-	b=3tsPUSRQZNVI7VJdX7sblyUMiuRcyr/ieEOIbN2UquowAlXaCwncb+/C+XH7gmHRC06+
-	 ymmWyT42C/yd9eKv5/NJWDGos0m6FV1KWhQTZaCTHoGFTyiiSBLW08uFiNrDK0qSHSN8l
-	 JzfzfLPu8nj0WXLe+yDcUWc7KxJCNi3l/EwbbeV+Urj6UI7daqkpTUNrKgkk+BkX7NomL
-	 NlLRnlJnGmjFPs5v0u5rQedpctKB7gkVgE3yvXe9oQjn6IAGKR7TRNr5V9Odjq9dPAU9P
-	 J2hHBn4jI5MObk/6GEr9yedJyqMJGEWv2j3MijSbthn/9vmWW7Be2RDmPtQS6Cc5Duw==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792959466;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:Message-ID:Date:
-	 User-Agent:Subject:To:References:Content-Language:From:In-Reply-To:
-	 Content-Type:Content-Transfer-Encoding:X-ClientProxiedBy:MIME-Version:
-	 X-MS-PublicTrafficType:X-MS-TrafficTypeDiagnostic:
-	 X-MS-Office365-Filtering-Correlation-Id:
-	 X-MS-Exchange-AtpMessageProperties:X-MS-Exchange-SenderADCheck:
-	 X-MS-Exchange-AntiSpam-Relay:X-Microsoft-Antispam:
-	 X-Microsoft-Antispam-Message-Info:X-Forefront-Antispam-Report:
-	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
-	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
-	 X-MS-Exchange-CrossTenant-FromEntityHeader:
-	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
-	 X-MS-Exchange-CrossTenant-UserPrincipalName:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=eDe8QWYIcWpTx/SuEAWwTBzENf2Pj+roRmj0ZMAT6T0=;
-	b=1wDeDG9xqvXoF5AKCO5nTUkKPpBH3rS99EBV31FzgRiVlNl3kqoUAPcR4s8nVwpPdSnF
-	 X0ZtmSIjxBS7+YK08BR7bPEMwMisLXgpmKERnz96rKLrFkLF6d5o3x5E8IR/M+X0WhAxN
-	 wZAjU4U2MrjY4ydzbYCK14p7WKK8aygkRyW0xG9JNtRwmNGIWW5VnAN+joKhRAnmasR34
-	 C9WsyAalxxXacCagHa7G35MJw/YwZwI8CLiOo6jkiBdwzbvywd58k0PPgSCIweIpdHtrz
-	 sUR2rRMB/73KDbcn8f5GWrGteO8fEWVG0kOr/9LqH3ZY01gdPsbrboTKmEo9UdtEe4w==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=altera.com;
-	spf=pass smtp.mailfrom=altera.com;
-	dkim=pass header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=QJexpRZy;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.56.5
-Received: from BN1PR04CU002.outbound.protection.outlook.com (mail-eastus2azon11010005.outbound.protection.outlook.com [52.101.56.5])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.167.198
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1792960370;
+	b=bVa8Szl1XGOfG/j6Q+CbDpqoaE8Ss5yxm9MHYEPk+jba38ggYB1u/sLOKPGKb8m7Xw23
+	 wKCdk5DsUlrufrmXZgqn2Yt++02pqyQ7MkJBHJL/08OmlF7OoexgK9nWb4aRlRY++LbVt
+	 xTKu+L135gM7ifKHWAHD5mHPpBFkqL6xVwHF91BAXZlVVG8OXdIxnA3snzhJGaOtizfLC
+	 r3hn2oMkLJ43ErWIj/rQrZoHe2ys0IdqSqCBHJLpCw0lHQdTkbD3R6SXK2IaUnCS4Z+kH
+	 m6hieH6ud0Ygw/ZolUvMNkmCEWAMNdVjNGv6aCCI5jSNxwwvuwgXZwXPc9b7qr1aEeQ==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792960370;
+	h=DMARC-Filter:Received:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
+	 X-Gm-Message-State:MIME-Version:X-Received:Date:
+	 X-Google-Appengine-App-Id:X-Google-Appengine-App-Id-Alias:Message-ID:
+	 Subject:From:To:Content-Type;
+	bh=m06jpghAmTAg4J5trRpXBGFbKvdwbzdWo7mkvNAM83I=;
+	b=JvMaESdgx/qm2AZwKssx5w7KNyHr+ZswGHTraCfJXQDlKnOnSzjM8OKlmUBtqREg9ANX
+	 eEhs6oXoydlS8NMQ+GODYfc8iuFJ1jG9uaGqpAzs/b5INs4aJt3cJyqyDJVkESLDScVNv
+	 liSyPNQ7w59HXzWfv3VUergHvHYZzUascBHLW/dSGS/XKPK3cmx0G9vNsO/15V4Obhhkz
+	 s2k9PhbN7T7o3ZIUgT6a/kC7VW6f6c2KVYVrt6FHGXuD2ubNcAbziby3IqrUUucFHtuXq
+	 145A77vhhLrwLgHB5xCKT1LEYPg7EBNwMeLRVZoSm19t6RhrHFH/kY4MrU4/MtKR/cw==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=fail header.from=syzkaller.appspotmail.com;
+	spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com;
+	arc=none smtp.remote-ip=209.85.167.198
+Received: from mail-oi1-f198.google.com (mail-oi1-f198.google.com [209.85.167.198])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 872BB606A31B;
-	Sun, 25 Oct 2026 20:17:45 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 872BB606A31B
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=QJexpRZy
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=gmlU+i7sqEC1Iz0jj2PkU+XpZChCzzF62BF2HAAk+d1l4r2I3trxKCRbs5g8M554uV/BH0MCq4ilEpMU+LLlVSDDWSHGekIzdUZIChobJdCgtIP71Iim1FtRQNoU+LXLMT/KJ9M86bpI/0iwzLs+RgdJiNjp2fa9mCBWTcuUwKywj12g6XG6Hlaou/7/9NzyANBPT/viFqmqgmWJSe28Z7eozxaUsGgOyF1X+TM98QKVDj1BrY7pdbUpCa5Ay87W6kUletX5Qf7reONk248DnmmvaBlh7ttOeTaYGp5xm080igayfkjg8OTfw1wMJ8hw7TzlQ1pWyeSPKRB4S9i4EA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=eDe8QWYIcWpTx/SuEAWwTBzENf2Pj+roRmj0ZMAT6T0=;
- b=APb+51wXjzXHbMFuWIfDgMFzvrhiUAmnukDFWht+nWBLQ8gz/NzaPGylezKZ2qK66P8oKLB21GfMhmpy7p8nZgIYyyIZABPoC4O5HPSwq0mdps0Lc6wHL+0tKLuhblZ/NsJ/LKmEKcS1E+IEmuv5r2WjdAq54UbyFLjIcahpDEP+5lOs85iFaVBCzgYKio1JiAQR1yZMFjpRUJe2RIZwAkXHZp4TLTeFc3Jru6g6PJhCEND3XTSQPydL6MtZQcSJVXMXK4qxukEXOHo16fkLpml6XTPOCTVY6wCkHxee2zctCW4NMSiAWF3bw/wSIKTD5aqdFbW1vvLHGtuLI4TE7w==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
- dkim=pass header.d=altera.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=eDe8QWYIcWpTx/SuEAWwTBzENf2Pj+roRmj0ZMAT6T0=;
- b=QJexpRZy3Cjv7QAx3N80GOki8wZvZzn1pkVIjEigadVFmpasJRzVpDLfUzaxMMRZCOSlCXf7pba69+Nns5a5dKiSp0x7SKNSvEVRxfurfQvdxmDOcs7srRZnawXwoZpeC6d6JY8/wJxQwl2nWeoK7Nng+1k/06SMiOM5yIHrxvW7iu7dszaSfDyz3S4XGc6zvde95ZFskTMYL9hjm5QEt6uYe5+t361Yr6VIlKRdohLomQ9oVWNU0YFQ5afHN2sOaC1V5m1tqbL+SdA9WpfDkXYj+vkuWgOGh2k4xeIz71rU0BqHm1EvDLTiP4fG2vhZb5tlX7dPaKhD/jo2KbwHlQ==
-Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=altera.com;
-Received: from DM4PR03MB6208.namprd03.prod.outlook.com (2603:10b6:5:39c::19)
- by EAYPR03MB989302.namprd03.prod.outlook.com (2603:10b6:303:2c7::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.546.22; Sun, 25 Oct
- 2026 20:17:41 +0000
-Received: from DM4PR03MB6208.namprd03.prod.outlook.com
- ([fe80::2216:93ef:67b:9e04]) by DM4PR03MB6208.namprd03.prod.outlook.com
- ([fe80::2216:93ef:67b:9e04%3]) with mapi id 15.21.0546.021; Sun, 25 Oct 2026
- 20:17:40 +0000
-Message-ID: <dab17adc-1691-463f-bb85-7d1276fbf28f@altera.com>
-Date: Mon, 26 Oct 2026 01:47:32 +0530
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/4] mmc: sdhci-cadence: add PHY settle after tuning
- for SD6HC
-To: tze.yee.ng@altera.com, Adrian Hunter <adrian.hunter@intel.com>,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, devicetree@vger.kernel.org
-References: <cover.1791459448.git.tze.yee.ng@altera.com>
- <073f81c6e6dcc931d6e12c358b48679b2855a72a.1791459448.git.tze.yee.ng@altera.com>
-Content-Language: en-US
-From: "Kathpalia, Tanmay" <tanmay.kathpalia@altera.com>
-In-Reply-To: <073f81c6e6dcc931d6e12c358b48679b2855a72a.1791459448.git.tze.yee.ng@altera.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: PN4PR01CA0111.INDPRD01.PROD.OUTLOOK.COM
- (2603:1096:c01:266::16) To DM4PR03MB6208.namprd03.prod.outlook.com
- (2603:10b6:5:39c::19)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D716606A31B
+	for <linux-mmc@vger.kernel.org>; Sun, 25 Oct 2026 20:32:49 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 1D716606A31B
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
+Received: by mail-oi1-f198.google.com with SMTP id 5614622812f47-4cc89e86e4dso3885870b6e.2
+        for <linux-mmc@vger.kernel.org>; Sun, 25 Oct 2026 13:32:49 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1792960369; x=1793565169;
+        h=content-type:to:from:subject:message-id:date:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=m06jpghAmTAg4J5trRpXBGFbKvdwbzdWo7mkvNAM83I=;
+        b=Pmi/W7Mk9zSEspZVQfxp9nZx8fdbZNGFN4duZAIGjn28ZTomz1S/ItfK6WwsKTcoll
+         sazLKrWEV38J3wYJ34yPTlm2c+KLSfK9JsNno8sw4U20jybBwHiZxW9ccBD5Vyd+eRrn
+         bbxdvw52TliZJ5Jhzvm5m8YvQpfkH3ZFqxmCE1xokPtYoDttPYwua+xgzOtbH3lIjrgF
+         eKDPuFlT9VVItAghlG9uxiK8ABfcEEsdVs4HrFVSgnF1nLhYk7yYue880skDB0domtJ/
+         9gFjAwclzuPKMntfbDds0sB4YCi3KYhBtnNhVvS5/VgT0Jq6KWRvLF5iu/RqicWOxUXG
+         5D7Q==
+X-Forwarded-Encrypted: i=1; AKwUvBwtDLOfRgdCsnPS26Wr8iNtxeGyV6ouAFH1mn4DhtS+dlNVI8VdiV2lwFdkRsF6UjltOcokTLY1ABE=@vger.kernel.org
+X-Gm-Message-State: AFq9FYKMtdlCUnXT8KvzJvMArGe2FCqSuJCB97pmyvk66XFntpHk3DhR
+	hVukqTjEXRhnljbtjztdvmvjo11GFqOwMv1ab90+V7mk+oxY3lR6D9CM/RyBzE+vlQt7BthONwt
+	DU6N52dcMl3fe7IEdOpb99tKOFkyUw2dalejuPIm+jW7U4oZZZ8qwfqqQLVI=
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -101,147 +58,237 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|EAYPR03MB989302:EE_
-X-MS-Office365-Filtering-Correlation-Id: 13052a5f-d07f-41fd-9673-08df32d50506
-X-MS-Exchange-AtpMessageProperties: SA
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|23010399003|366016|1800799024|4143699003|11063799006|56012099006|261021123027099003|261021121427099003|261022105027099003|261022075727099003|261009223027099003|10067099003|55112099003|18002099003|22082099003|6133799003;
-X-Microsoft-Antispam-Message-Info:
-	cNrSMgwsfFUPgREkz3dWwzLjP8AxVf+0sbg9llDTcCI0xpe8TIpCg27IeTS6iDZzM65wwv2V1I9yr9ks6TYsv1ffHK/apNklNUoUbdRPB1cMJKT5JA9eMRIWSX+1QKQo1BULOUdK06E5EyuNC94yV9ihK1LjsbIDGgiLJUwja4ryQsJ9XdOTfgAB8aoyendPMOPl38gFKh4hwXCv0ot//YMJJnG46Jsz+2h+QNR1nvckAQ0TFQ2tLILdZ8sIb3iTEgvzklr73UMe2zaflTmXPkS+sk/9oB7Al9ipAlUo3E/iBnAYtHFZCu1Lznk+SZzjt4ifHDeHPaBlrZNA77VRKW6dh6MdOCtElXsupm79gPrLkCU5+YMAJ4LSrtcmk4XtiVsLoYWdxYpgt9ggSj74OaPkM9F0fLTCrcUsjE1i+2g4X9k5vq5RJfe9aCXaZ4UHtprKabFMQUMExVFD6hvYTuy4loR3SfxSlcUm/7+SB1yHehtKK2zGUKR4WrBpTNbyh4im8G/LcRTJh2GXFdRYh5lAD6039unmIslA2OcNx6+vG9KirVdpyeirRGb5aX7F/eaRh9aaLFLAAnBsvC4tUgR7Yx2Hz8tO8A0d8fqgKMXKDwS0l06Jlc4GMZ4qogFPm9Qhiut4O3FdGlF7T+CZbq5WOwWz/7vJ4BU/+qTpMM4=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(23010399003)(366016)(1800799024)(4143699003)(11063799006)(56012099006)(261021123027099003)(261021121427099003)(261022105027099003)(261022075727099003)(261009223027099003)(10067099003)(55112099003)(18002099003)(22082099003)(6133799003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?OGxlREYrQTl2RDg0a3pIVTl3SHlWZDZmK3VKSmk2cVIxZ2lRT3EyUnpYei9W?=
- =?utf-8?B?Q2RhMXBmbG5pQ3JZd2xkazdybzFLS2R4RWxFNWwrVzFOd0FNZWVMTzhrMXVq?=
- =?utf-8?B?L2V4YVc5WEtENEZJM0RVOVoxTVExSDdNYU80SjhuRFJCTGpzbnB3Y3pML0xj?=
- =?utf-8?B?RVRsOFdsOGhJZzJzeGVGNEJaWjFuM01rdWJVakwwdTdIbFhsYzVKSnlJbHFr?=
- =?utf-8?B?eGtEUXBBdE40aGdHOFRtZUNSSlJqSFM3OHRSUFV3VjM4QTZYN0dSc1NiQXN0?=
- =?utf-8?B?SklTdGl4SXJBK2UrZUhvTXNoRnRIVUNmYVdiQ1BmcGVpMmhrWjV6Q3hJUWx2?=
- =?utf-8?B?aDZVT2JiOG1sSjQ4RHRpS0dMYmxmZzlTeEl1VXpyekViVWJvbTNDZ3oxV3lh?=
- =?utf-8?B?amZzNVlpVmNyZndJNHVnYzZRTW5aU1hYK1hGNzlZMExtbFVWb3AxZmxUVzdX?=
- =?utf-8?B?TEUvRDVZUFpCSnNkWjk4U1dGUmQ4Tk15ZlBRbUVHYmt4Z295Skp5ZVI2RDhm?=
- =?utf-8?B?T2F6SDU5U2VQYkZIQyt0L2JUL05WYkpmclJvT3Zab3NPTEsvcXczS3k0Vkdq?=
- =?utf-8?B?WE9Wdmk4YUpuQXd5am93WVd0Mjg2b0dZdzZ5a1RGYk9vU0VpSlhNMC9iVXZR?=
- =?utf-8?B?ZGxmVXkxZmJQaUErNXdTSW1UQkcwZ1g3ZGdDalR3U1YyaE1LUnhCNTBXSWgz?=
- =?utf-8?B?aThLVUdxaEdBK01yOHVkUzFielAzdmdxNFBSQXR1VlAwc3hDL2thcFhnS1VB?=
- =?utf-8?B?WFdYM0xqemZHa3RJK0hxWVRjeHZWQlZ6RGxhcElKN0F2OWp3YkJmQmlIZkpq?=
- =?utf-8?B?Z3Rvdi95UHNRZExNOS8zbTBvSGZiMWU4cGJxb3JYSjVabjA2Smc4R3VZSXBY?=
- =?utf-8?B?L1BaR0szNXN5UTlBQ0dMczcwWEVhbVJSQWY0Y0pjdnRoOFVGWC9QQzF6dWNm?=
- =?utf-8?B?aGU0ZkNHWFc0aURrOGtiQmI2MUpUelp2T0JseUtEcXFEWThZSHlvbHVaZkow?=
- =?utf-8?B?c2pUejhENmM1QXl5R0tzUUc0bkxWZDlrWGluUzhaR25PbGkxWWI4RFhoU05N?=
- =?utf-8?B?UFpWUFVMMHlTQkk3b1pSSE90UWMyVWpYd1pzY2ZHOWxSYzlOazNtRzhUeHJW?=
- =?utf-8?B?ajdWeVJWSEJCYVVzOE43VkFrS2hWTStya1VWVHNSMjlGUjBheTBoZG1uNmJj?=
- =?utf-8?B?VGxEY3gzYnJFQWlJODN0TTR4cnZRSllZRmJ0YWVoMTBUTzVndkQ4bHlnYzM2?=
- =?utf-8?B?T05NdG84YWprc21NekJ6TFhVVFBGVGRkbEJ5U3g3RDZLZE5Cd3U5WHlxQVpC?=
- =?utf-8?B?VWdGbU12N1hPMk9LeFFUNWpWQlpRZHFJRVR6Q244Y0dRcUFiSFgwS3B5Tlov?=
- =?utf-8?B?U2FwZWd5UGpWS2Vhd3drcHlCRjFoSjBFU08vYUR0UXM3dTVDZC9aUWpLR0dZ?=
- =?utf-8?B?Q0xvUS8wWTloZ2F1Nnd4dnBRTTZhNWlaK1hCLzNsR1RMaUFWZzNmTzVGZENz?=
- =?utf-8?B?Z2U3aWJQQ2VzdmI5am55WWozNXlCTi85Uld2QlhlVnNvMVNnUkxIR3NRQUVh?=
- =?utf-8?B?TDh4RVQrVW1KRi9mdHdJcVJNYlJmNUF0LzNQNCs2aDM5b3lNRCt6V3VOa1VR?=
- =?utf-8?B?QUM4Zi8rM1BORHQ2Q1NIZi9WU2l3Mkd6MUFFdmwveUhRSm5HR0c2cHJybUMz?=
- =?utf-8?B?bE8rRGE4Zkp6eWVud2JVQnZWL2JpZjVvZkNqTE5vTEYyM1htbEpPTzJMbFZs?=
- =?utf-8?B?aStzSU1lb2hPQU10SnA3R0ZVTFFtTlluN1IyZHhhaHUyV0J0WVJtR2VGMHNP?=
- =?utf-8?B?M3B6RG05cUczUEdSMGFlVUJ6OEZwL3ZUNkhrQ0RNeXc2U00yeUpZbU1uMzNL?=
- =?utf-8?B?WVAxeUtFcEluajIrRjFwUElTMklHMXZuMmMzeWl1OXhqdEdnOGtkaEp0cWRm?=
- =?utf-8?B?ajV3UHZxUUF0M3lHaHF1YkhBVTZKOWdPVEs2cTJoeTVla2Rqa1U2dFdHcXl0?=
- =?utf-8?B?dDhFelNUR284K1Fram4zdGNVb3RteDRoWU90UjhqZ1dwcDRmQWpzTFFUeWVK?=
- =?utf-8?B?WUFwYis3T3haajhiaDZyODR6SGI1SDI2dHpucjAyQVhqb0FqQXBkTDBtNnJU?=
- =?utf-8?B?eTYwcHByM2s4bVlWeHlLVFAzRG9LbkNDUmlJWi9ncWhkRnc4cUl1cHBleTBu?=
- =?utf-8?B?TVdNckxqcWNMcldCd1NVY0Q3UTZoS2JYVWZIaVljMjV6dGt1bFF4TnllbDUw?=
- =?utf-8?B?cElFalIxZGlDT3Evc1RyUTdVbDBJRGcyaGl2cmdheTgrMVRSWDRmdXNVUnV4?=
- =?utf-8?B?NFpzYWliY2xrMUpGbENUbGErbUJmVVJlTWNVbHN5RnhqVE9vN05wT210OTVa?=
- =?utf-8?Q?tiX0jxy23WlEc+lg=3D?=
-X-OriginatorOrg: altera.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 13052a5f-d07f-41fd-9673-08df32d50506
-X-MS-Exchange-CrossTenant-AuthSource: DM4PR03MB6208.namprd03.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Oct 2026 20:17:40.6088
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: oNDZVnEjSUAB3sjJgEdZOquqaLzoPX+r/UddoZCAttWS7J3kxCCgVPSTdDHi5BNjo8R7fPIB58uUGTuNAd6izF0t4EPOE1UpyhvBx5Uzse4=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: EAYPR03MB989302
+X-Received: by 2002:a05:6808:bc9:b0:4f5:77f:5 with SMTP id 5614622812f47-55c00242278mr3205733b6e.41.1792960369094;
+ Sun, 25 Oct 2026 13:32:49 -0700 (PDT)
+Date: Sun, 25 Oct 2026 13:32:49 -0700
+X-Google-Appengine-App-Id: s~syzkaller
+X-Google-Appengine-App-Id-Alias: syzkaller
+Message-ID: <6ade6771.4ce6c07b.2dfc0c.000b.GAE@google.com>
+Subject: [syzbot] [mmc?] INFO: task hung in __mmc_send_op_cond_cb
+From: syzbot <syzbot+b5a34078de484f06145c@syzkaller.appspotmail.com>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-usb@vger.kernel.org, syzkaller-bugs@googlegroups.com, 
+	ulf.hansson@linaro.org
+Content-Type: text/plain; charset="UTF-8"
 
-Hi Tze,
+Hello,
 
-Sorry for the slow reply. I spent some time going through the tuning
-path against the eMMC specification before answering.
+syzbot found the following issue on:
 
-On 09-10-2026 07:44, tze.yee.ng@altera.com wrote:
-> From: Tze Yee Ng <tze.yee.ng@altera.com>
->
-> On SD6HC the first command after tuning may be an R1b busy command (e.g.
-> the HS200->HS CMD6 during HS400 selection) that can time out on some eMMC
-> unless the PHY is given a brief settle after the final tap and DLL
-> re-lock.
->
-> Add a single 5 to 5.5 ms settle at the end of the SD6HC tuning path,
-> after the winning tap is applied, rather than on every set_tune_val()
-> call in the scan.
->
-> Signed-off-by: Tze Yee Ng <tze.yee.ng@altera.com>
-> ---
-> Changes in v2:
-> - Moved the 5ms PHY settle out of the per-tap tuning loop to a single
->    settle after the winning tap, on the success path only.
->    (Adrian Hunter, Tanmay Kathpalia)
-> - Rewrote the comment to explain this specific call site.
->    (Tanmay Kathpalia)
-> ---
->   drivers/mmc/host/sdhci-cadence-core.c | 6 +++++-
->   1 file changed, 5 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-cadence-core.c b/drivers/mmc/host/sdhci-cadence-core.c
-> index 745455743b01..c25b235ee909 100644
-> --- a/drivers/mmc/host/sdhci-cadence-core.c
-> +++ b/drivers/mmc/host/sdhci-cadence-core.c
-> @@ -7,6 +7,7 @@
->   
->   #include <linux/bitfield.h>
->   #include <linux/bits.h>
-> +#include <linux/delay.h>
->   #include <linux/dma-mapping.h>
->   #include <linux/iopoll.h>
->   #include <linux/module.h>
-> @@ -352,8 +353,11 @@ static int sdhci_cdns_execute_tuning(struct sdhci_host *host, u32 opcode)
->   		return ret;
->   
->   	/* Block gap tuning is only required for SD4HC, not for SD6HC */
-> -	if (host->version >= SDHCI_SPEC_420)
-> +	if (host->version >= SDHCI_SPEC_420) {
-> +		/* Let the PHY settle after the final tap and DLL re-lock. */
-> +		usleep_range(5000, 5500);
->   		return 0;
-> +	}
->   
+HEAD commit:    bdf12cde3083 usb: gadget: dummy_hcd: prevent unbind via sy..
+git tree:       https://git.kernel.org/pub/scm/linux/kernel/git/gregkh/usb.git usb-testing
+console output: https://syzkaller.appspot.com/x/log.txt?x=1599fb3e580000
+kernel config:  https://syzkaller.appspot.com/x/.config?x=5b0f112b6a5be5fa
+dashboard link: https://syzkaller.appspot.com/bug?extid=b5a34078de484f06145c
+compiler:       gcc (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44
 
-Every scan step re-locks the DLL and immediately issues CMD21, which
-carries an R1 response on the CMD line, with no delay. The eMMC
-specification moves the card to the Data state for CMD21 and treats
-any command issued from that state as illegal. If a tap fails with a
-command error, the card can remain in the Data state, so the next
-command - the CMD6 that mmc_select_hs400() sends straight after
-tuning gets no response and the host reports a response timeout.
+Unfortunately, I don't have any reproducer for this issue yet.
 
-Adrian added mmc_abort_tuning() in commit e711f0309109 ("mmc: mmc:
-Introduce mmc_abort_tuning()") for exactly this case: a timed-out
-tuning command can leave the card still processing it, and the eMMC
-specification allows CMD12 to stop CMD21.
+Downloadable assets:
+disk image: https://storage.googleapis.com/syzbot-assets/72018a922be9/disk-bdf12cde.raw.xz
+vmlinux: https://storage.googleapis.com/syzbot-assets/536c72282fba/vmlinux-bdf12cde.xz
+kernel image: https://storage.googleapis.com/syzbot-assets/5b4965094e0b/bzImage-bdf12cde.xz
 
-This also fits with your report that SD SDR104 never fails: CMD12
-isn't defined for CMD19, which is why mmc_send_abort_tuning() is a
-no-op for it. So this theory is consistent with the SD/eMMC split
-you observed.
+IMPORTANT: if you fix the issue, please add the following tag to the commit:
+Reported-by: syzbot+b5a34078de484f06145c@syzkaller.appspotmail.com
 
-I'll test aborting each CMD21 that fails with a command error, and
-also a single abort after tuning completes, to see whether that
-removes the CMD6 failure. If you can test the same, that would help.
-I would prefer that fix over an unconditional sleep.
+INFO: task kworker/1:0:24 blocked for more than 143 seconds.
+      Not tainted syzkall
+      Not tainted syzkaller #0
+"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+task:kworker/1:0     state:D stack:21160 pid:24    tgid:24    ppid:2      task_flags:0x4208060 flags:0x00080000
+Workqueue: events_freezable mmc_rescan
+Call Trace:
+ <TASK>
+ context_switch kernel/sched/core.c:5533 [inline]
+ __schedule+0x1325/0x47e0 kernel/sched/core.c:7284
+ __schedule_loop kernel/sched/core.c:7361 [inline]
+ schedule+0xdd/0x2c0 kernel/sched/core.c:7376
+ schedule_timeout+0x1b2/0x280 kernel/time/sleep_timeout.c:75
+ do_wait_for_common kernel/sched/completion.c:100 [inline]
+ __wait_for_common+0x2e7/0x4c0 kernel/sched/completion.c:121
+ mmc_wait_for_req_done+0xcd/0x3d0 drivers/mmc/core/core.c:408
+ mmc_wait_for_req+0x207/0x2c0 drivers/mmc/core/core.c:619
+ mmc_wait_for_cmd+0x154/0x200 drivers/mmc/core/core.c:645
+ __mmc_send_op_cond_cb+0x94/0x2b0 drivers/mmc/core/mmc_ops.c:200
+ __mmc_poll_for_busy+0x109/0x230 drivers/mmc/core/mmc_ops.c:529
+ mmc_send_op_cond+0x13d/0x260 drivers/mmc/core/mmc_ops.c:245
+ mmc_attach_mmc+0x107/0x420 drivers/mmc/core/mmc.c:2411
+ mmc_rescan_try_freq drivers/mmc/core/core.c:2142 [inline]
+ mmc_rescan+0x914/0x11c0 drivers/mmc/core/core.c:2316
+ process_one_work+0xac7/0x1b10 kernel/workqueue.c:3396
+ process_scheduled_works kernel/workqueue.c:3479 [inline]
+ worker_thread+0x5ef/0xe50 kernel/workqueue.c:3560
+ kthread+0x373/0x450 kernel/kthread.c:436
+ ret_from_fork+0x69f/0xc90 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+ </TASK>
+INFO: task kworker/1:5:5304 blocked for more than 143 seconds.
+      Not tainted syzkaller #0
+"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+task:kworker/1:5     state:D stack:20288 pid:5304  tgid:5304  ppid:2      task_flags:0x4288060 flags:0x00080000
+Workqueue: usb_hub_wq hub_event
+Call Trace:
+ <TASK>
+ context_switch kernel/sched/core.c:5533 [inline]
+ __schedule+0x1325/0x47e0 kernel/sched/core.c:7284
+ __schedule_loop kernel/sched/core.c:7361 [inline]
+ schedule+0xdd/0x2c0 kernel/sched/core.c:7376
+ schedule_timeout+0x1b2/0x280 kernel/time/sleep_timeout.c:75
+ do_wait_for_common kernel/sched/completion.c:100 [inline]
+ __wait_for_common+0x2e7/0x4c0 kernel/sched/completion.c:121
+ __flush_work+0x7c7/0xcb0 kernel/workqueue.c:4448
+ __cancel_work_sync kernel/workqueue.c:4568 [inline]
+ cancel_delayed_work_sync+0xd1/0xf0 kernel/workqueue.c:4642
+ __mmc_stop_host drivers/mmc/core/core.c:2368 [inline]
+ __mmc_stop_host drivers/mmc/core/core.c:2357 [inline]
+ mmc_stop_host+0xe9/0x400 drivers/mmc/core/core.c:2373
+ mmc_remove_host+0x15/0x60 drivers/mmc/core/host.c:681
+ vub300_disconnect+0x12d/0x170 drivers/mmc/host/vub300.c:2387
+ usb_unbind_interface+0x1dd/0x9b0 drivers/usb/core/driver.c:460
+ device_remove drivers/base/dd.c:618 [inline]
+ device_remove+0x12a/0x180 drivers/base/dd.c:610
+ __device_release_driver drivers/base/dd.c:1349 [inline]
+ device_release_driver_internal+0x44e/0x620 drivers/base/dd.c:1372
+ bus_remove_device+0x2bc/0x560 drivers/base/bus.c:664
+ device_del+0x376/0x9b0 drivers/base/core.c:3965
+ usb_disable_device+0x367/0x810 drivers/usb/core/message.c:1484
+ usb_disconnect+0x2e2/0x9a0 drivers/usb/core/hub.c:2355
+ hub_port_connect drivers/usb/core/hub.c:5425 [inline]
+ hub_port_connect_change drivers/usb/core/hub.c:5725 [inline]
+ port_event drivers/usb/core/hub.c:5889 [inline]
+ hub_event+0x1d46/0x4510 drivers/usb/core/hub.c:5971
+ process_one_work+0xac7/0x1b10 kernel/workqueue.c:3396
+ process_scheduled_works kernel/workqueue.c:3479 [inline]
+ worker_thread+0x5ef/0xe50 kernel/workqueue.c:3560
+ kthread+0x373/0x450 kernel/kthread.c:436
+ ret_from_fork+0x69f/0xc90 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+ </TASK>
 
-Regards,
-Tanmay
+Showing all locks held in the system:
+locks held by pr/ttyS0/15: 2, last CPU#0:
+ #0: ffffffff898d3238 (console_srcu){....}-{0:0}, at: rcu_try_lock_acquire include/linux/rcupdate.h:314 [inline]
+ #0: ffffffff898d3238 (console_srcu){....}-{0:0}, at: srcu_read_lock_nmisafe include/linux/srcu.h:439 [inline]
+ #0: ffffffff898d3238 (console_srcu){....}-{0:0}, at: console_srcu_read_lock+0x49/0x60 kernel/printk/printk.c:291
+ #1: ffffffff944998f8 (&port_lock_key){-.-.}-{3:3}, at: __uart_port_lock_irqsave include/linux/serial_core.h:613 [inline]
+ #1: ffffffff944998f8 (&port_lock_key){-.-.}-{3:3}, at: univ8250_console_device_lock+0x64/0xc0 drivers/tty/serial/8250/8250_core.c:413
+locks held by kworker/1:0/24: 2, on CPU#1:
+ #0: ffff88810006a140 ((wq_completion)events_freezable){+.+.}-{0:0}, at: process_one_work+0x1466/0x1b10 kernel/workqueue.c:3371
+ #1: ffffc9000019fd18 ((work_completion)(&(&host->detect)->work)){+.+.}-{0:0}, at: process_one_work+0xa2c/0x1b10 kernel/workqueue.c:3372
+locks held by khungtaskd/31: 1, last CPU#1:
+ #0: ffffffff898e6f20 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:309 [inline]
+ #0: ffffffff898e6f20 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:849 [inline]
+ #0: ffffffff898e6f20 (rcu_read_lock){....}-{1:3}, at: debug_show_all_locks+0x3d/0x184 kernel/locking/lockdep.c:6871
+locks held by getty/2930: 2, on CPU#0:
+ #0: ffff8881125cd0a0 (&tty->ldisc_sem){++++}-{0:0}, at: tty_ldisc_ref_wait+0x24/0x80 drivers/tty/tty_ldisc.c:243
+ #1: ffffc900000452e8 (&ldata->atomic_read_lock){+.+.}-{4:4}, at: n_tty_read+0x419/0x14e0 drivers/tty/n_tty.c:2211
+locks held by kworker/0:4/5254: 6, on CPU#0:
+ #0: ffff888105effd40 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: process_one_work+0x1466/0x1b10 kernel/workqueue.c:3371
+ #1: ffffc9000265fd18 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: process_one_work+0xa2c/0x1b10 kernel/workqueue.c:3372
+ #2: ffff88810ab341d8 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
+ #2: ffff88810ab341d8 (&dev->mutex){....}-{4:4}, at: hub_event+0x1bb/0x4510 drivers/usb/core/hub.c:5917
+ #3: ffff88810abb9560 (&port_dev->status_lock){+.+.}-{4:4}, at: usb_lock_port drivers/usb/core/hub.c:3270 [inline]
+ #3: ffff88810abb9560 (&port_dev->status_lock){+.+.}-{4:4}, at: hub_port_connect drivers/usb/core/hub.c:5482 [inline]
+ #3: ffff88810abb9560 (&port_dev->status_lock){+.+.}-{4:4}, at: hub_port_connect_change drivers/usb/core/hub.c:5725 [inline]
+ #3: ffff88810abb9560 (&port_dev->status_lock){+.+.}-{4:4}, at: port_event drivers/usb/core/hub.c:5889 [inline]
+ #3: ffff88810abb9560 (&port_dev->status_lock){+.+.}-{4:4}, at: hub_event+0x2c08/0x4510 drivers/usb/core/hub.c:5971
+ #4: ffff88810a7ca560 (hcd->address0_mutex){+.+.}-{4:4}, at: hub_port_connect drivers/usb/core/hub.c:5483 [inline]
+ #4: ffff88810a7ca560 (hcd->address0_mutex){+.+.}-{4:4}, at: hub_port_connect_change drivers/usb/core/hub.c:5725 [inline]
+ #4: ffff88810a7ca560 (hcd->address0_mutex){+.+.}-{4:4}, at: port_event drivers/usb/core/hub.c:5889 [inline]
+ #4: ffff88810a7ca560 (hcd->address0_mutex){+.+.}-{4:4}, at: hub_event+0x2c31/0x4510 drivers/usb/core/hub.c:5971
+ #5: ffffffff8a54a6c8 (ehci_cf_port_reset_rwsem){.+.+}-{4:4}, at: hub_port_reset+0x1a1/0x1d20 drivers/usb/core/hub.c:3085
+locks held by kworker/1:5/5304: 5, on CPU#1:
+ #0: ffff888105effd40 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: process_one_work+0x1466/0x1b10 kernel/workqueue.c:3371
+ #1: ffffc9000277fd18 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: process_one_work+0xa2c/0x1b10 kernel/workqueue.c:3372
+ #2: ffff88810abbc1d8 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
+ #2: ffff88810abbc1d8 (&dev->mutex){....}-{4:4}, at: hub_event+0x1bb/0x4510 drivers/usb/core/hub.c:5917
+ #3: ffff88813bb171d8 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
+ #3: ffff88813bb171d8 (&dev->mutex){....}-{4:4}, at: usb_disconnect+0x10a/0x9a0 drivers/usb/core/hub.c:2346
+ #4: ffff88813523f1a0 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
+ #4: ffff88813523f1a0 (&dev->mutex){....}-{4:4}, at: __device_driver_lock drivers/base/dd.c:1171 [inline]
+ #4: ffff88813523f1a0 (&dev->mutex){....}-{4:4}, at: device_release_driver_internal+0xb2/0x620 drivers/base/dd.c:1369
+locks held by kworker/1:6/5320: 5, on CPU#1:
+ #0: ffff888105effd40 ((wq_completion)usb_hub_wq){+.+.}-{0:0}, at: process_one_work+0x1466/0x1b10 kernel/workqueue.c:3371
+ #1: ffffc900021efd18 ((work_completion)(&hub->events)){+.+.}-{0:0}, at: process_one_work+0xa2c/0x1b10 kernel/workqueue.c:3372
+ #2: ffff88810a7ac1d8 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
+ #2: ffff88810a7ac1d8 (&dev->mutex){....}-{4:4}, at: hub_event+0x1bb/0x4510 drivers/usb/core/hub.c:5917
+ #3: ffff88810568b1d8 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
+ #3: ffff88810568b1d8 (&dev->mutex){....}-{4:4}, at: __device_attach+0x7e/0x4d0 drivers/base/dd.c:1073
+ #4: ffff8881192041a0 (&dev->mutex){....}-{4:4}, at: device_lock include/linux/device.h:1104 [inline]
+ #4: ffff8881192041a0 (&dev->mutex){....}-{4:4}, at: __device_attach+0x7e/0x4d0 drivers/base/dd.c:1073
+
+=============================================
+
+NMI backtrace for cpu 1
+CPU: 1 UID: 0 PID: 31 Comm: khungtaskd Not tainted syzkaller #0 PREEMPT(lazy) 
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 10/07/2026
+Call Trace:
+ <TASK>
+ __dump_stack lib/dump_stack.c:94 [inline]
+ dump_stack_lvl+0x100/0x190 lib/dump_stack.c:120
+ nmi_cpu_backtrace.cold+0x12d/0x151 lib/nmi_backtrace.c:123
+ nmi_trigger_cpumask_backtrace+0x21f/0x2a0 lib/nmi_backtrace.c:66
+ trigger_all_cpu_backtrace include/linux/nmi.h:164 [inline]
+ __sys_info lib/sys_info.c:157 [inline]
+ sys_info+0x141/0x190 lib/sys_info.c:165
+ check_hung_uninterruptible_tasks kernel/hung_task.c:353 [inline]
+ watchdog+0xcb1/0x1030 kernel/hung_task.c:561
+ kthread+0x373/0x450 kernel/kthread.c:436
+ ret_from_fork+0x69f/0xc90 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+ </TASK>
+Sending NMI from CPU 1 to CPUs 0:
+NMI backtrace for cpu 0
+CPU: 0 UID: 0 PID: 15 Comm: pr/ttyS0 Not tainted syzkaller #0 PREEMPT(lazy) 
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 10/07/2026
+RIP: 0010:io_serial_in+0x87/0xb0 drivers/tty/serial/8250/8250_port.c:410
+Code: ba 82 fe 48 8d 7d 40 44 89 e1 48 b8 00 00 00 00 00 fc ff df 48 89 fa d3 e3 48 c1 ea 03 80 3c 02 00 75 1a 66 03 5d 40 89 da ec <5b> 0f b6 c0 5d 41 5c c3 cc cc cc cc e8 b8 ec ed fe eb a2 e8 41 ed
+RSP: 0018:ffffc900000ff968 EFLAGS: 00000002
+RAX: dffffc0000000000 RBX: 00000000000003fd RCX: 0000000000000000
+RDX: 00000000000003fd RSI: ffffffff83327400 RDI: ffffffff94499920
+RBP: ffffffff944998e0 R08: 0000000000000001 R09: 000000000000001f
+R10: 0000000000000000 R11: 205d313354202020 R12: 0000000000000000
+R13: 0000000000000020 R14: fffffbfff2893379 R15: dffffc0000000000
+FS:  0000000000000000(0000) GS:ffff8882683d5000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 000000110c38a975 CR3: 00000001365b2000 CR4: 00000000003506f0
+Call Trace:
+ <TASK>
+ serial_in drivers/tty/serial/8250/8250.h:128 [inline]
+ serial_lsr_in drivers/tty/serial/8250/8250.h:150 [inline]
+ wait_for_lsr+0x13a/0x210 drivers/tty/serial/8250/8250_port.c:2013
+ serial8250_fifo_wait_for_lsr_thre+0x5f/0xd0 drivers/tty/serial/8250/8250_port.c:3270
+ __serial8250_console_fifo_write+0xa5/0x290 drivers/tty/serial/8250/8250_port.c:3345
+ serial8250_console_fifo_write drivers/tty/serial/8250/8250_port.c:3378 [inline]
+ __serial8250_console_write drivers/tty/serial/8250/8250_port.c:3429 [inline]
+ serial8250_console_write+0xf46/0x1330 drivers/tty/serial/8250/8250_port.c:3493
+ nbcon_emit_next_record+0x8f7/0xa70 kernel/printk/nbcon.c:1070
+ nbcon_emit_one+0x1a8/0x2b0 kernel/printk/nbcon.c:1157
+ nbcon_kthread_func+0x613/0x7d0 kernel/printk/nbcon.c:1271
+ kthread+0x373/0x450 kernel/kthread.c:436
+ ret_from_fork+0x69f/0xc90 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+ </TASK>
+
+
+---
+This report is generated by a bot. It may contain errors.
+See https://goo.gl/tpsmEJ for more information about syzbot.
+syzbot engineers can be reached at syzkaller@googlegroups.com.
+
+syzbot will keep track of this issue. See:
+https://goo.gl/tpsmEJ#status for how to communicate with syzbot.
+
+If the report is already addressed, let syzbot know by replying with:
+#syz fix: exact-commit-title
+
+If you want to overwrite report's subsystems, reply with:
+#syz set subsystems: new-subsystem
+(See the list of subsystem names on the web dashboard)
+
+If the report is a duplicate of another one, reply with:
+#syz dup: exact-subject-of-another-report
+
+If you want to undo deduplication, reply with:
+#syz undup
