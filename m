@@ -1,101 +1,47 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.42
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.119.170.32
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793003969;
-	b=YG3wUcshWxPDmKtJotV0V933yS5GuLYCTBhurJxWDqHr+EJ3ZhHzMEUT7D89cyLjkhpV
-	 hPYJ1LMLYJDeLyEsmGEuGcfwo4+JsWYs2e4dz+6M+HziaJvLuwXp68/Retz2oiKe+9n/F
-	 bWRDGIUrXrb+RiRjV2isD0iPxYzGqJ7aIGiidxNAh7dbenVeGdlMvzcandzPEfP6z1U3w
-	 wj7KbHtC2ghKvcCtrExRxxB3n1xsP9fqJ5dBIw+ucbe/drm/ZKCe2TtuXbAzxh6pYtmp5
-	 nl9uh6dmxH4B5AXBM2krKprociet/XzTiGV17RFoUC/e+6Ib0ivcHbi6D6GSu0flscw==
+	t=1793004165;
+	b=Xgsu+fMMcnFCsS2Vor6qrAMi3VlrGy3zxxu9mUMhjv8toW7gQ6Z/A4naZjaskNOCmC/f
+	 INAcvAq1hUpl2WcmNpvUD4+uPB0091LXJnXdyHgRtka6CWeK8tdJuoQIETGC4CPytGaq2
+	 AYm65TKNai1gTnjiTnSo/N/pMtkd3EHa1qoc5V//b1GvddDOPlVQ8h1GCc3fPv+aDEjuJ
+	 QzjmsOH1K5/srVwj3B2y/qLjadWmTe8Xbuo7gmEx62ehIUe6JvJkdBtK4fZZphqBJm3qk
+	 h2TwLYd3Rzb/t2PShEc9VIT8dfhKBONVlsmY2hxIPx4h3tSbIdbVflRPfpERk3JfB4w==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793003969;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
-	 MIME-Version:Content-Transfer-Encoding;
-	bh=FNsk93EuVFBxLJj508WFUJM8x83vnwjCep0MYdpKjqI=;
-	b=fzB1jSt/ssHErv8mULjgor3iWbYafBHdsAQxBs/JJojp8ytVgFn8LbQD3OLCHl8h8bFR
-	 lTNt2EkQJrwmdFcn52isG8Ut6vCKu19OwIPzBhsNjIlhif9WuUtZyug21SZfgTYsJ2wgQ
-	 ysHGrucWGHu8FbTLJ/1xyVBUqAlMXrxyQDWLOhFJU47FYgCvLUuXcEvy9BG1s409RaPAV
-	 iHRaJvsCb95zILDPlSitOTKd8Hw4u9escjHboTUcMmYX1u7H9VwoRUm1vziACyKU7Uoay
-	 TTaYq9ZrW4zmi1eh2POq/MyJYw1lmz3eBMe19m93ggLqklElRVO0XEn2mtekQg80d6A==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793004165;
+	h=DMARC-Filter:Message-ID:Subject:From:To:Cc:Date:In-Reply-To:
+	 References:Content-Type:Content-Transfer-Encoding:MIME-Version;
+	bh=E1nL2/Vfk4pnrbVLCTirKX2aylDFGWUjxOEqPVE/VhU=;
+	b=nR++INgiTcJLWNd+6oc4d28jHRmKBqwrqqsRoK7LntIhJTPfEbldUXf6nCoA3FlNOhDT
+	 uE+SbDP7dsijCTT4jOaR69yIFFaV1ckp3zcClI1BOCdZFB0wiVQoHT6jf5xivC6/HSOvb
+	 je0LXIrjtQmWPiQ0DVUuXXn7u9OZ8joC9zyx/vbDsa98N0LgWqOmTdpp4BDpjwKmqztKf
+	 hScAA3kv957nPf7C2hDYuNXhZMicv4Kn1x/IJ+gc3MF7J8qbaiFpSkK0rdOzfNMLdEykr
+	 dXUcuMAvMQseLwr9LycPklSDzzvL2aUtTbCy96yV5b4RHpeuuNCnKrqPZzefatFPHjw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=fail header.from=mgcrea.io;
-	spf=pass smtp.mailfrom=mg-crea.com;
-	dkim=pass header.d=mg-crea-com.20251104.gappssmtp.com header.i=@mg-crea-com.20251104.gappssmtp.com header.a=rsa-sha256 header.s=20251104 header.b=rg1j5lHg;
-	arc=none smtp.remote-ip=209.85.221.42
-Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	dmarc=pass header.from=crapouillou.net;
+	spf=pass smtp.mailfrom=crapouillou.net;
+	arc=none smtp.remote-ip=185.119.170.32
+Received: from aposti.net (aposti.net [185.119.170.32])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05834606A31E
-	for <linux-mmc@vger.kernel.org>; Mon, 26 Oct 2026 08:39:28 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 05834606A31E
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=mgcrea.io
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mg-crea.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=mg-crea-com.20251104.gappssmtp.com header.i=@mg-crea-com.20251104.gappssmtp.com header.a=rsa-sha256 header.s=20251104 header.b=rg1j5lHg
-Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-48df54150dfso1417648f8f.0
-        for <linux-mmc@vger.kernel.org>; Mon, 26 Oct 2026 01:39:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=mg-crea-com.20251104.gappssmtp.com; s=20251104; t=1793003967; x=1793608767; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=FNsk93EuVFBxLJj508WFUJM8x83vnwjCep0MYdpKjqI=;
-        b=rg1j5lHgIKe2pYctEnUSlK2gfR/BB707z/jC+v7QfZhX6VzgxZxs5z0aKmRwx9kbZL
-         ixyd4iSTbbqPzYfy8XapAwDptOtJt+8GNnzD9HPmy/99EIf6ii3UmYFWTzXcPMNYNXXd
-         gujqsxf2RTyoezpIOyMzyNuZQ0JRiySvH6S1qTephY9OxOZoH0s4k/+72RJ6Ssy/5WhS
-         RzaAbPq87Rxhvn54uLbQm9t/kzWXMFupa5HSMYU1YVbMMn5MRih0CzP6FpM81bcM/o54
-         +cIQDQJIQos50HjcBcdryfXvAurhHjB0oBs5c+Z8L4eweKXt8qRL/dE5F3FRqidRWIYu
-         9hTg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793003967; x=1793608767;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=FNsk93EuVFBxLJj508WFUJM8x83vnwjCep0MYdpKjqI=;
-        b=PdoS0duCGXU61zpklpLvreKorOvZjk9gTCqe4OJKb/ZxbVntaUxVeuRx6/t337GvNV
-         6ED5Jk2Z714GFjooEQjdvSc5bMrsGKU9pMzG9hVFCDWkMqKG95mQUpkP8j+J2cbutUUC
-         gbNquopMMejyEbVV09ik1jS6RpBKwG7Rksn729iuVcdvuhX2KkER9jwQPXoIQisDzsjK
-         WKDy8mvRVfOjE/U11dQB1kjZFJwdBoUlX5RS5EELoYuBfzhZAjtFflCNVhb34TaH/53Q
-         ACng6yLTdwhY/wJXx0JeGgf5cbt5niMsWmJNfA9KJ5EexvLssnOgflvEz14O+dF3ZFI/
-         QX1g==
-X-Forwarded-Encrypted: i=1; AKwUvBwrKS7eVQNfuGFU3XW3JJeIJ2nBPKHNUs5AB0Raz6O6qRIufynArOaNDPXs169tb8/tMmQcNgNyTaI=@vger.kernel.org
-X-Gm-Message-State: AFq9FYKgIZ7V/dd9xSmmGtpz2E895cb8NYTTFHWpDRKw8J1hNDxbE5aY
-	Da83y9cdD1hNZJZIkPgJXeBQtnnxXGOavjObQ95SxfZLkSh1GwBJl7F47/ugpG4NW9Y=
-X-Gm-Gg: AYBFou1PCu/8hD3w14cp8nngnd4J9ZX7c0j2FBFyITfON6ArFYEjHN+VXCErEQ8S+5E
-	xLWF/NkdDQDVs23GhRaU2mpLLSdW4ASsR2blapFfZV4Kqg/jwhFrw864OPjYuEN5l4/2wt/av9U
-	RZhHJdp4B0dmOhSMmIS71rMH5UKyWf/sNETvzz3ag2z1OnD3hkpP48mrNcs7j8Kgmg/uREIZcl1
-	Zz1iXv7xMVldcwBVSYfqoPqJXjN63S9Tq9BBpYOwfm4cvnN6UF+138b6UdzcK9DLRk/9KUMq7kT
-	w7+2MlyBjxrK2+UkqGEG1TvsBphFjbXOFN1KMwCeQk7MQwz3li2nMckiMxHodTfV4PlT3OsSE+T
-	HSn3/BA2L1OTWRlpc8SkIP1IX5N3JNtvKq84NSl4VYb9wx8AvUXxvtxS5lhJ0EptqHE9D3enC2N
-	4TeNdG8gq8kdziPlXwnejwxkLezRpgsxcipVimWehNEvqmMPqkrCKao8hFPRfV5AcoUHbZJyNuM
-	1Imo+pz0+93Ck/NnhCdRJRdMxYG8QJ1L98JUtrScPqPqrdazi6gXDSnQ7rWRiXU1ch67bWHNZU6
-	eidvhRppCsr5Mw==
-X-Received: by 2002:a05:6000:188b:b0:488:8bc1:a2eb with SMTP id ffacd0b85a97d-48e3eb98ee3mr11807123f8f.39.1793003967452;
-        Mon, 26 Oct 2026 01:39:27 -0700 (PDT)
-Received: from localhost.localdomain ([2a01:e0a:9d2:5a71:6dfc:5715:ead7:7540])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48e3eb8f25fsm14673690f8f.2.2026.10.26.01.39.26
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Mon, 26 Oct 2026 01:39:27 -0700 (PDT)
-From: Olivier Louvignes <olivier@mgcrea.io>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Paul Cercueil <paul@crapouillou.net>,
-	"H . Nikolaus Schaller" <hns@goldelico.com>,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-mips@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Olivier Louvignes <olivier@mgcrea.io>
-Subject: Re: [PATCH RFC 0/2] mmc: jz4740: Use the integrated DMA controller on the X1600
-Date: Mon, 26 Oct 2026 09:38:11 +0100
-Message-ID: <20261026083811.67574-1-olivier@mgcrea.io>
-X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20261025140325.73204-1-olivier@mgcrea.io>
-References: <20261025140325.73204-1-olivier@mgcrea.io>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C249606A31A;
+	Mon, 26 Oct 2026 08:42:43 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6C249606A31A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=crapouillou.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=crapouillou.net
+Message-ID: <48976ce134e26877200e8e1ef8d3f5c66f4fdcf6.camel@crapouillou.net>
+Subject: Re: [PATCH] mmc: jz4740: Remove the host before resetting the
+ controller
+From: Paul Cercueil <paul@crapouillou.net>
+To: Olivier Louvignes <olivier@mgcrea.io>, Ulf Hansson <ulfh@kernel.org>
+Cc: Lars-Peter Clausen <lars@metafoo.de>, Matt Fleming
+ <matt@console-pimps.org>, 	linux-mmc@vger.kernel.org,
+ linux-mips@vger.kernel.org, 	linux-kernel@vger.kernel.org
+Date: Mon, 26 Oct 2026 09:42:32 +0100
+In-Reply-To: <20261026083323.12301-1-olivier@mgcrea.io>
+References: <20261026083323.12301-1-olivier@mgcrea.io>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -105,27 +51,62 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-Hi Ulf,
+Hi Olivier,
 
-Please drop this RFC, both its premise and its question turned out to
-be wrong.
+Le lundi 26 octobre 2026 =C3=A0 09:33 +0100, Olivier Louvignes a =C3=A9crit=
+=C2=A0:
+> jz4740_mmc_remove() masks every interrupt and resets the controller
+> before mmc_remove_host(), which removes the card and lets the card's
+> driver send its last commands. Those commands then run on a controller
+> that was just reset, and can wait out the driver's 5 s request timeout.
+>=20
+> With an SDIO card that cost 5 s on every unbind: on a HiBy R1 (Ingenic
+> X1600, a BCM43430A1 driven by brcmfmac), the CMD52 that
+> sdio_release_irq() sends from brcmfmac's remove waited 5.1 s. The
+> command had finished (END_CMD_RES set in MSC_STAT), but MSC_IMASK read
+> 0xffffffff although the request had unmasked END_CMD_RES. MSC_STAT can
+> still show IS_RESETTING after jz4740_mmc_reset() returns, so the reset
+> most likely completed after that write and undid it.
+>=20
+> Remove the host first, then quiesce the controller, as other host
+> drivers do. On the R1, unbinding the Wi-Fi's MSC now takes 0.65 s.
+>=20
+> Fixes: 61bfbdb85687 ("MMC: Add support for the controller on JZ4740 SoCs.=
+")
+> Signed-off-by: Olivier Louvignes <olivier@mgcrea.io>
 
-The X1600's MSCs do have request lines to the system DMA controller:
-the programming manual lists PDMA request types for both (0x34 to 0x37),
-and MSC_DMAC.DMASEL picks between the two DMA paths. With dmas in the
-device tree, the existing PDMA path works on the HiBy R1, card setup
-included, and reads as fast as the integrated DMA did (23.0 to 23.5 MB/s
-against 23.5 MB/s with dd, the CPU about 20% busy for both).
+If you have a Fixes: tag, you need to Cc the stable@vger.kernel.org list.
 
-And DMA_DATA_DONE does come. jz_mmc_irq() clears the flags of masked
-interrupts, DMA_DATA_DONE among them, and on the X1600 writing that bit
-also clears DATA_TRAN_DONE and DMAEND, which most likely is why reads
-looked unfinished.
+Cheers,
+-Paul
 
-So the X1600 needs no driver change here, only dmas in its device tree
-like the other Ingenic SoCs.
-
-Sorry for the noise,
-Olivier
+> ---
+> =C2=A0drivers/mmc/host/jz4740_mmc.c | 5 +++--
+> =C2=A01 file changed, 3 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.=
+c
+> index 6a3c26b7c82d..923cf1450de5 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -1151,12 +1151,13 @@ static void jz4740_mmc_remove(struct platform_dev=
+ice
+> *pdev)
+> =C2=A0{
+> =C2=A0	struct jz4740_mmc_host *host =3D platform_get_drvdata(pdev);
+> =C2=A0
+> +	/* The card's driver may still send commands as it goes */
+> +	mmc_remove_host(host->mmc);
+> +
+> =C2=A0	timer_delete_sync(&host->timeout_timer);
+> =C2=A0	jz4740_mmc_set_irq_enabled(host, 0xff, false);
+> =C2=A0	jz4740_mmc_reset(host);
+> =C2=A0
+> -	mmc_remove_host(host->mmc);
+> -
+> =C2=A0	free_irq(host->irq, host);
+> =C2=A0
+> =C2=A0	if (host->use_dma)
+>=20
+> base-commit: fd9af27f6c2319713bb23832066585f8a59a1771
