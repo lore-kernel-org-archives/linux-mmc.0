@@ -1,54 +1,47 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=91.218.175.233
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793114466;
-	b=gzeSnJSiWQILi2GZCAklcAuV6UIlbJ1PaQEgbD07zAk+QNyVof2mJB9iCfGIfjJiciOo
-	 a3hzjXQ0I2es7cs5U5EnlRrvac3WMx9g8T7dnzkvh/h81QQvw3EXkVOM+8+9nQvU3n5LY
-	 yEUSPoeEeKyPYr9b9IcWRecy6PVm6mMt7v+Wn5Eu7MaI9xxJ8c1sR8mU2q6Oj2GX50QuW
-	 uxcIg+MO6q9Ud1SL0HhZ31QavZIFkXilwtoFlP86NUiJXISYYTa7u/azzXB38DFFj51+r
-	 3l8qh1M9WHCpu6JsRPZx2QgLXT3BK+EfzqscZy74t4J90T40IF47zMT5A+PlzpunXVQ==
+	t=1793115199;
+	b=dcVn9d0WTYRv9oKJOw+05s6oUUoQ/Xvu8BsMCS2qLAe9UOgMcLIzJYvtZDQZiqbkXnnF
+	 PFwJnjJz4H0fF6k1I4gqo+Tazx+VJWT9Ig0zeedjjoqNmh2WMihuyxLFp114YKsutvPrW
+	 C1ZFBO/zsxAdhPCR3tIYqpKGz33fsxwoOtij4UQO55qGSxCOSUX9snIPZYz64fLXxYrzR
+	 IkWhkv0g5+FQC1p35j7hgoReIDmMAU4ZRyUXnThb/yVRIgTQgyfdrEp7cWIbu5MPMSeq/
+	 n3TWSS7IbUmTAix3N8UNx5ve7aamC5xKAP3X2tAXcCJTYS9s2Gec9SQ7ZOQMOvvxMZA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793114466;
-	h=DMARC-Filter:X-Envelope-To:DKIM-Signature:X-Envelope-To:Received:
-	 X-Mizu-Trace-ID:X-Migadu-Flow:Message-ID:Date:MIME-Version:User-Agent:
-	 Cc:Subject:To:References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding;
-	bh=W6YIh/Gc0yCi5BDeh+MtSftokqchrGdjjgj9FnTKEnw=;
-	b=sXg9dhINzN2503a5IVABcKaB433WTstiS1JpH75j2knLizrykJGq3DVRuhiF/D7xtNI8
-	 nk21tTRlzdSJxOl5OYiE9/JJDjeAxCwXLO9LBpu4xcd8ECc6zuKUm7wXqXx9PbFRvpVuG
-	 x2PK4OuZMew+RVO03cXZkm4SyY9v/2b+uURCrIqn/p/ih61j6Jhoe2eKPfoxpKAUPrgZ3
-	 0w+FNutSMR8vi1UQ6EU56M/hYh/2cgSaTWxBlUuKsfk4qS87Q6c/eMTrzDNX4bjKFPpdT
-	 zvywE6sPPLXjUjWNpH7l+cSkOfjqOHikZcBbPtlF1qNKrwtcPmoINrqg88TpTxHlP3w==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793115199;
+	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:From:
+	 Subject:To:Cc:References:Content-Language:Autocrypt:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding;
+	bh=gPD1ABBQcztKO8PBjP5v5TM9by07PPxSalzCUZ2Eenk=;
+	b=b9MphFiISxWhRYp17SSocrzv16VZtHWYCnVZw7Nd4u0TH/EHuug+FdWtNyPOXcn4jKsY
+	 MtwASDfVGtgdIjg/kVk+iZJglLeCM1bU8RV0WXCC9IJ9qHxFzXDn09xadWnpuVAQaPM+F
+	 RhtPU2RtLy1XQ3Od5z3aP3/8lKntjlUFoubI5WbcqEd2ZPCuXXI2/HJRvqOlALILJo6fN
+	 Ff8eg8JMxVqTfAYrFLUpVsvyHb0lI4JZ2gj0mce0fdgA38etzz4ILF2qyDk6xU6MkJAkx
+	 cOdCkXlt6SbFRVxvlB0u2D/EN4IGSnAQs5tid7F+wIwgKXkT8b6Gymty4X8bHeccPnw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=linux.dev;
-	spf=pass smtp.mailfrom=linux.dev;
-	dkim=pass header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=C1XhmBdB;
-	arc=none smtp.remote-ip=91.218.175.233
-Received: from mta0.migadu.com (out-233.mta0.migadu.com [91.218.175.233])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Us75GCkv;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1BE6606A31A
-	for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2026 15:21:05 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B1BE6606A31A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07BBC606A31A;
+	Tue, 27 Oct 2026 15:33:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=C1XhmBdB
-X-Envelope-To: linux-mmc@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=0TlkYeKrfeawIngsI3ug0HiDUp/gJwAA57+wIvoITDU=;
- c=simple/simple; d=linux.dev;
- h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1793114463; v=1; x=1793719263;
- b=C1XhmBdBVkRsvrNktkfe41NLUvz4sosrYWcjrG1OFB3YUrTAm9IUB7vcgmHoKiD8a9ny3aKB
- k9ZHHRppA5v9oh5vDFF28qREz/W6q5J4vpm1Rlbi8gMWBvBr9xGuMxRnuo3KsUvX70HYDeoW8Kr
- QnfipvFt0ETou4S+j7Uv/IyA=
-X-Envelope-To: linux-mmc@vger.kernel.org
-Received: by smtp.migadu.com with ESMTPS id 0a2887dac71c64c3;
-	Tue, 27 Oct 2026 15:21:03 +0000
-X-Mizu-Trace-ID: 0a2887dac71c64c3
-X-Migadu-Flow: FLOW_OUT
-Message-ID: <d106e4f5-7702-4bc4-ba69-765e2050a28f@linux.dev>
-Date: Tue, 27 Oct 2026 23:20:52 +0800
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Us75GCkv
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D6CC91F01825;
+	Tue, 27 Oct 2026 15:33:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793115198;
+	bh=gPD1ABBQcztKO8PBjP5v5TM9by07PPxSalzCUZ2Eenk=;
+	h=Date:From:Subject:To:Cc:References:In-Reply-To;
+	b=Us75GCkvM+XfumAWXE7OQbdIyGcWJ/fyun3o5nCU53I/iNxgrsswY3py5WMqx0o9U
+	 SzMUR1EYca4QrE33A1DUxl0ThsGvuTxoF5B8W2u+Brs1qR78GPFdgcZhReXj1RjTGn
+	 h5ZsV7r/dSEvdHWUVneROo8K8qmbyzayynrgVUcMJtQKJKWJdNBsjlI2OSWCn5WBkQ
+	 PREyQGxMPYy6ynA9ZgQSDF9Ksx2shynj7Rj/HYyDJqNzz+9LT6PQnGUhNbkmcubuBZ
+	 TRbS9+5juTensNbBSjP0qnXyoHMFOYHWpEh/iEXYqPu93bWFeYm+SspCEykJnN52MP
+	 m+umDh7Q1USYw==
+Message-ID: <00b63b4f-053c-40cf-82db-21a86fc485c6@kernel.org>
+Date: Tue, 27 Oct 2026 16:33:15 +0100
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -59,99 +52,79 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@linux.dev, Adrian Hunter <adrian.hunter@intel.com>,
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCH v10 1/6] dt-bindings: mmc: Extend keep-power-in-suspend
+ beyond SDIO
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>, linux-mmc@vger.kernel.org,
+ Ulf Hansson <ulfh@kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
  Kamal Dasu <kamal.dasu@broadcom.com>,
  Florian Fainelli <florian.fainelli@broadcom.com>,
  Wolfram Sang <wsa+renesas@sang-engineering.com>,
- Oleksij Rempel <o.rempel@pengutronix.de>, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v10 6/6] mmc: core: Add support for resetting an eMMC at
- system resume
-To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>, linux-mmc@vger.kernel.org,
- Ulf Hansson <ulfh@kernel.org>
+ Oleksij Rempel <o.rempel@pengutronix.de>, linux-kernel@vger.kernel.org,
+ Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 References: <20261027144051.249211-1-ulf.hansson@oss.qualcomm.com>
- <20261027144051.249211-7-ulf.hansson@oss.qualcomm.com>
-From: Shawn Lin <shawn.lin@linux.dev>
-In-Reply-To: <20261027144051.249211-7-ulf.hansson@oss.qualcomm.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+ <20261027144051.249211-2-ulf.hansson@oss.qualcomm.com>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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
+In-Reply-To: <20261027144051.249211-2-ulf.hansson@oss.qualcomm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-在 2026/10/27 星期二 22:40, Ulf Hansson 写道:
-> The DT property reset-card-at-resume specifies that we need to make a reset
-> of an eMMC card at system resume, assuming it also has stayed powered on
-> during system suspend.
+On 27/10/2026 15:40, Ulf Hansson wrote:
+> From: Kamal Dasu <kamal.dasu@broadcom.com>
 > 
-> To implement support for this, let's start by parsing for the new DT
-> property and set the new bit MMC_CAP2_RESET_AT_RESUME if it's found. Based
-> on the property, we must also set MMC_PM_KEEP_POWER in the pm_flags for the
-> host, to keep the eMMC powered on during system suspend.
+> keep-power-in-suspend is currently documented as SDIO-only, but the
+> requirement it describes -- preserving card power across a
+> suspend/resume cycle -- applies just as well to any card type. Drop
+> the SDIO-only restriction so eMMC and SD platforms can use it too.
 > 
-> Finally, to manage the actual reset during system resume, let's extend
-> mmc_resume() to support the needed behaviour.
-> 
+> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+Incomplete DCO.
 
-> Signed-off-by: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-> ---
->   drivers/mmc/core/host.c  | 10 ++++++++++
->   drivers/mmc/core/mmc.c   |  5 +++++
->   include/linux/mmc/host.h |  1 +
->   3 files changed, 16 insertions(+)
-> 
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 8e9e61839198..e3daf4026cba 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -48,6 +48,14 @@ static int mmc_host_class_prepare(struct device *dev)
->   	if (host->bus_ops->pre_suspend)
->   		return host->bus_ops->pre_suspend(host);
->   
-> +	/*
-> +	 * If it's required to make a reset of the card at system resume, this
-> +	 * indirectly also means that we must keep the card powered on during
-> +	 * system suspend.
-> +	 */
-> +	if (host->caps2 & MMC_CAP2_RESET_AT_RESUME)
-> +		return mmc_set_host_pm_flags(host, MMC_PM_KEEP_POWER);
-> +
->   	return 0;
->   }
->   
-> @@ -375,6 +383,8 @@ int mmc_of_parse(struct mmc_host *host)
->   		host->pm_caps |= MMC_PM_KEEP_POWER;
->   	if (device_property_read_bool(dev, "wakeup-source"))
->   		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
-> +	if (device_property_read_bool(dev, "reset-card-at-resume"))
-> +		host->caps2 |= MMC_CAP2_RESET_AT_RESUME;
->   	if (device_property_read_bool(dev, "mmc-ddr-3_3v"))
->   		host->caps |= MMC_CAP_3_3V_DDR;
->   	if (device_property_read_bool(dev, "mmc-ddr-1_8v"))
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index d4bf0f25bd74..908d5cad304b 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -2315,6 +2315,11 @@ static int mmc_resume(struct mmc_host *host)
->   	}
->   
->   	pm_runtime_enable(&host->card->dev);
-> +
-> +	if (mmc_card_keep_power(host) &&
-> +	    host->caps2 & MMC_CAP2_RESET_AT_RESUME)
-> +		_mmc_hw_reset(host);
-> +
->   	host->pm_flags &= ~MMC_PM_KEEP_POWER;
->   	return 0;
->   }
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 032c018650e0..552873da7987 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -430,6 +430,7 @@ struct mmc_host {
->   	u32			caps2;		/* More host capabilities */
->   
->   #define MMC_CAP2_BOOTPART_NOACC	(1 << 0)	/* Boot partition no access */
-> +#define MMC_CAP2_RESET_AT_RESUME (1 << 1)	/* Reset the card at system resume */
->   #define MMC_CAP2_FULL_PWR_CYCLE	(1 << 2)	/* Can do full power cycle */
->   #define MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND (1 << 3) /* Can do full power cycle in suspend */
->   #define MMC_CAP2_HS200_1_8V_SDR	(1 << 5)        /* can support */
-
+Best regards,
+Krzysztof
