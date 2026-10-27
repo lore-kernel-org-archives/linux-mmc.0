@@ -1,67 +1,101 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=144.76.98.110
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.49
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793103865;
-	b=ZlmCq8pPE2U0lpF3kvCnWDj4t7479DX5+1Y6n1D9uUfxG4NwcR7ruqBOIEtRR6INQgiQ
-	 GErQ501GnmhhWzSKNB46qNXbmktsJlhCEJH0HkY9K3QH+Xmd47kPHzpUGhO5MiOFZEgqY
-	 WxueVu/Q0KrwiFaIRWGOd9393BO8hweq7y4Rux5cXXwwPyN9bLgwyny1IbNbK+SW4oHNh
-	 rg0s+zhYNyjXurhhAuwo+liMKwOZ58MPIMeIPIKJec2/JvhovK7L7cw72zHgDdNthsT+r
-	 +EQzaqMU5po6r9krUtwHLwvsiKCKjGoCPHZ1BeOL1ioFASPCe4rdxEDrg44EmcbNmhA==
+	t=1793112012;
+	b=qubimuCWzNgDdz/xX4kWPqpg+d/kIN5marKYHAhlTLwlDS9jlVofwtvo3AiBcc9tvTH+
+	 CSalNDe3ST1M6NhlDoLhWumj8Giy1g/E+CvUdhVXmYgiQ7GB8srbQE78tmZuG3T6X1P1e
+	 hOV0iowUdoRBLUFB7CYQLSzt9vkqMJ45g0YlVPcijMdeNf2yi2CyWDq9wcBvKmPMwKSpr
+	 no1F/Y7c+l70aAjTI6lMP3ZsFyVEjmhT87POx2YMDJkqkUpIZrPe/D9rgyEoBbRBs+zK/
+	 SOL2StRXPi5UiJRjI0OAplW5Z/dnUzeTeItC/VM9kCQAkOcr306ylkAI21i7sO2FDIg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793103865;
-	h=DMARC-Filter:DKIM-Signature:Received:From:To:Cc:Subject:Date:
-	 Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
+	a=rsa-sha256; c=relaxed/relaxed; t=1793112012;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
+	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:MIME-Version:
 	 Content-Transfer-Encoding;
-	bh=LA/hZwRt2plS57FvevLCtFCbVIQ+omT+Gp+X0asiI28=;
-	b=KC6OyDYFpbxGn641C25hho6riV7U4cypAjLIhg90LbH6vqAc7IBqiIqsKPqoTqdWNoTF
-	 pgF4l3XKiC2jFt/kraTsTdtOKFSULs053NKO6Mf75r+O8CgU4X7tbSQsTvaU1iG6mFQEx
-	 TH0d599aKZEv/1fYUTixBGVGwYl0oGtci/4vYq6aLllIPrl2fj29WWC8n34ED371sp330
-	 kUvQdbSazhMQS75UuVhsv9/qoT77lWjRI2/4qi70F7jMuYkMY+8YnaAMA5gAz2ruMx3er
-	 scY4iDMDPjhqqKquGnY6Qh/oXxEelQ/C/HiesS06a+KkVFIhfe7gHQiZ/gDQq+H4BgA==
+	bh=f+FSGmmtRncCiBbsjEjoljPu87wlMKlOjOPIMoQyEbs=;
+	b=G5+ptt+QfsVD6an3y/WVPDVtaDgUHXaU82Sv5TRUHmHAfyMztrkihNsy06dFIDs3Ihnx
+	 PZqLtGUD5U2hgEhFvJxstu/lNXgMKBEPXg/tQwrC8tQRQsQHOxHRvNb9DNIsINuzO9Fw8
+	 aAprgIeiX8sBpua3VcqwU/vs2P+Ic+eF2DYVIFllcPHkDO5m8SyzuYz+fyY2l/hb3U7OE
+	 21oAO6uRycbPRLoGhz5QAHyv0GNLswSxA+SCQj2H5mkGygZ8edA61J8qqTPM+DPAjBjmi
+	 SlCFpEaqiL7f/yoJ3uvNV7ju/doMpo8pbtY9JKbZH56l8Z0pEvPUzezvEfWU8IsohMQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=rojer.me;
-	spf=pass smtp.mailfrom=rojer.me;
-	dkim=pass header.d=rojer.me header.i=@rojer.me header.a=rsa-sha256 header.s=main header.b=BFkT9Xds;
-	arc=none smtp.remote-ip=144.76.98.110
-Received: from mail1.rojer.cloud (mail1.rojer.cloud [144.76.98.110])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=uQfYoMZM;
+	arc=none smtp.remote-ip=209.85.221.49
+Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05AA3606A32C;
-	Tue, 27 Oct 2026 12:24:23 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 05AA3606A32C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=rojer.me
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rojer.me
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3FE98606A31D
+	for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2026 14:40:12 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3FE98606A31D
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=rojer.me header.i=@rojer.me header.a=rsa-sha256 header.s=main header.b=BFkT9Xds
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rojer.me; s=main;
-	t=1793103862; bh=vjHrVzmjkeE8LPIKhW2tYsP4mzoqrIs1jcZFTmaBPZU=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=BFkT9XdsnACzp0WloTiTUsMRmfhDFG81JScAEY/khcSFzdL2ifKc0t69RdkAJLFOO
-	 vU6DpeSuyHKTcsX6AbDeZT5R5DUb8nIKY2Pv4JTDGOTMMuPjeqh5Q2sO7CcQNhcyJT
-	 7p6okqtfXaPMGPcp1O3H06E1nQ9NCawVjGUPuT/Sm31jKviH70AVkP4bBRYzrPJ3NK
-	 S45ktjlQ8FD5zeBYeaj0thfIZSA5zAEskLTPFs9E0/jQTHPq4PUdEfQO05obNZCSRs
-	 iRSTQibeoXNDx0XtWG00NIWuV+hOUotIyqu7ZSCaqbcxIpsuTe5VgKGHshytXNDTYb
-	 38AKPda8Sg0yA==
-Received: from nbf.lan (unknown [31.216.115.198])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (P-256) server-digest SHA256)
-	(No client certificate requested)
-	by mail1.rojer.cloud (Postfix) with ESMTPSA id 57B5C1271C3;
-	Tue, 27 Oct 2026 12:24:21 +0000 (UTC)
-From: Deomid rojer Ryabkov <rojer@rojer.me>
-To: ulfh@kernel.org
-Cc: linux-mmc@vger.kernel.org,
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=uQfYoMZM
+Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-48dfdd0678dso3071971f8f.0
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2026 07:40:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20260707; t=1793112010; x=1793716810; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=f+FSGmmtRncCiBbsjEjoljPu87wlMKlOjOPIMoQyEbs=;
+        b=uQfYoMZMNn1b1mHbh6BEdHCCn8DL5Aam6pau5FsCwoApvaqSWc6sLxG21oIz17BYzI
+         L0k2l7bv0VS+ZIGumi42bUm84ELP45TwdrWN3CGoU7IbX4XU9LVeg9ofwkfWCjDWWz1s
+         JNOzuoyKHh1F8uyfb3dhlzvQbJV/xEVomKgYc8DNOYZ3/WHWf95BJw1t7uF1D4XGgMWQ
+         sETGkTXXDsBUpc/3S+2vBdIWiMGUQKNj3B4bxzUjSfYAlbPnX6qrzBXFbEx42cfzsofz
+         Mi4j8QfggNhHyZhBbRiycvz1LOO+Hw7lrmym7Hv1C6DVZP7HCAQ9Ue1bh5z0yKowys24
+         SB2w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1793112010; x=1793716810;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=f+FSGmmtRncCiBbsjEjoljPu87wlMKlOjOPIMoQyEbs=;
+        b=t3geQfhgPprh5jQQ2XM9fdYXfuQQgpS3ErGz+4EMVRQm2zATobAqnkuCs1Rxfegoio
+         cbrf/ClmzMXKXQlFC9R3fBPU3jNB9HrCOdj1DmjgrYQpFEGLTCeOV2vDhcpe2EGm2OaF
+         IE53C9Nc5AjRPZHO+bpB2g85sYBPC17oyB7sv6w7Uc0JHVMHSG0z2vn8xKhanARiC88g
+         WoYaRQyshBVnokCcLSY6iG9AbMkU3k1XO4AuDOX2p3SeqWypcnRWYQkJJUhRQpL1Ls8B
+         h918857DIr9JSybLPdJgK4U8oqJqfs3mb25fj47HKDqnavdP112Ilyutxfobn5HbLEiv
+         SHRA==
+X-Forwarded-Encrypted: i=1; AKwUvBzw6rkVf9QVCOmqSX0BPzTp96s6nB+lsgKRHPzVZ3fymcBdMtH8KiaFVT9NiKBVx1cVB+1OjWOX8Ro=@vger.kernel.org
+X-Gm-Message-State: AFq9FYJY5ONCixHlkf4J773qInIYo1e0b0FBLz/1PHn17iCfk3m2UMpX
+	wMzWv4CXutv3dPqLOGpExlLUIxMgdqG/HUpN37FipHgXO2DDTfGCudhA
+X-Gm-Gg: AYBFou1C3n0VJoazOtjAi1wCBmAs1kbaGvgrcqGXVZVl7/4pSn0vAbB/Za6mlF5a7Zw
+	jnZSVQrbFoMYr8xibwHFPAUm3BOf/RkKhxJ4kMIfgZXoyW+ATvb2vVRa2lZNxOvf6PYc2fCAgKb
+	kodzqOXNFuAe5ePGwxSi+uCemcDimqXS3KrsFaq6ZlKiuL+X/sW8BGqP6do2+KCCPOEkf0ae65O
+	RmYrKzc9WxRqXkH8ddx0czWW+OkHrQk+VxQiEHAR13XxQ9tKeBj1AHntQM3TxKRkVipAkV8oHd7
+	wiVXxtXGTfHBWUfH+GFCzw6UKYT6PsqjmRr0L+DST+dwMe7QPGq3M7A67JvocptSjTl2rECBfVZ
+	PYiKf5t4LB68UKWB9wLCvm5nGTYz2pHqR9v9YE5Q8ftF+ixoJY1jM5YRXThfMOcAapOyfvGnO/1
+	Tj1d4rIg05E4IjOMKG0x/4vd2vrxmn2zevx8LlZYwtp8tDPFxnALN0NwZpJ57SV9q4PB1SLwLEu
+	eRMLUXptYxLGj2SEkijbKz9G5dRkKj/ZsEqB+iPQTdDq3OrCQiI9alMOJQFcCro1XngOw8SMRF3
+	axOnvwaaQ7JMmi0/2iYey2cYDbmE0UIghheeJ/++uoB9izIu7bgUO7Kkoi3U
+X-Received: by 2002:a05:6000:24c6:b0:48e:3cec:b852 with SMTP id ffacd0b85a97d-48e3ebb0fcdmr20256092f8f.40.1793112010059;
+        Tue, 27 Oct 2026 07:40:10 -0700 (PDT)
+Received: from Ansuel-XPS24.localdomain (93-34-92-187.ip49.fastwebnet.it. [93.34.92.187])
+        by smtp.googlemail.com with ESMTPSA id ffacd0b85a97d-48e3ebcb846sm23354151f8f.25.2026.10.27.07.40.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 27 Oct 2026 07:40:09 -0700 (PDT)
+From: Christian Marangi <ansuelsmth@gmail.com>
+To: Chaotian Jing <chaotian.jing@mediatek.com>,
+	Ulf Hansson <ulfh@kernel.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Matthias Brugger <matthias.bgg@gmail.com>,
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
+	Wenbin Mei <wenbin.mei@mediatek.com>,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
-	shawn.lin@rock-chips.com,
-	llj@rock-chips.com,
-	Deomid rojer Ryabkov <rojer@rojer.me>,
-	Jensen Huang <jensenhuang@friendlyarm.com>
-Subject: [PATCH v2 2/2] mmc: core: sdio: skip CMD11 if signalling is already 1.8V
-Date: Tue, 27 Oct 2026 14:24:17 +0200
-Message-ID: <20261027122417.954133-3-rojer@rojer.me>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20261027122417.954133-1-rojer@rojer.me>
-References: <20261027122417.954133-1-rojer@rojer.me>
+	linux-arm-kernel@lists.infradead.org,
+	linux-mediatek@lists.infradead.org
+Cc: Christian Marangi <ansuelsmth@gmail.com>
+Subject: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Document support for Airoha AN7581 SoC
+Date: Tue, 27 Oct 2026 15:40:00 +0100
+Message-ID: <20261027144002.10606-1-ansuelsmth@gmail.com>
+X-Mailer: git-send-email 2.55.0
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -73,83 +107,48 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Per the SDIO Simplified Specification Version 3.00, section 3.1.2, a card
-whose signalling is already at 1.8V must report S18A = 0 in the R4
-response, and the core relies on that: it only sends CMD11
-(SD_SWITCH_VOLTAGE) when S18A is set.
+Add dedicated compatible for Airoha AN7581 SoC integrated MMC controller.
+The MMC controller is based on the MT7988 with the difference that it does
+have a single clock controlling it.
 
-Some cards don't follow this. The Realtek RTL8822CS (as fitted on the
-FriendlyElec NanoPi R2S Plus, where the M.2 SDIO bus is wired to a fixed
-1.8V vqmmc) answers CMD5 with S18A = 1 even though the bus is already at
-1.8V. CMD11 then times out:
+Add the dedicated compatible to describe the 2 register requirement and
+permit to define only 2 clock (the main one and a fixed clock for HS)
 
-  dwmmc_rockchip ff5f0000.mmc: Unexpected CMD11 timeout
-  mmc_host mmc2: Timeout sending command (cmd 0x10202000 arg 0x0 status 0x90202000)
-  mmc2: new high speed SDIO card at address 0001
-
-and the card ends up in 50 MHz high-speed mode instead of SDR104.
-
-The SWT6621S misreports S18A the same way; there, the failed switch
-leaves the card unable to initialise at all (error -110) instead of
-falling back to high speed.
-
-When vqmmc can't do 3.3V, mmc_set_initial_signal_voltage() has already
-fallen back to 1.8V by the time CMD5 is sent, so the host knows there is
-nothing to switch. Skip CMD11 in that case. ocr keeps R4_18V_PRESENT, so
-mmc_sdio_init_uhs_card() still runs and the card is tuned to SDR104:
-
-  dwmmc_rockchip ff5f0000.mmc: Successfully tuned phase to 64
-  mmc2: new ultra high speed SDR104 SDIO card at address 0001
-
-Hosts that start at 3.3V are not affected, nor are compliant cards that
-report S18A = 0 at 1.8V. A non-compliant card that does need CMD11
-before entering UHS at 1.8V would now fail UHS init; with the previous
-patch it falls back to high-speed mode and keeps working.
-
-This relies on the fixed 1.8V supply being described as vqmmc-supply.
-vqmmc is optional: without it, the host can't tell that the bus is
-hardwired to 1.8V. Setting 3.3V then "succeeds", the core believes the
-bus is at 3.3V and CMD11 is still sent, so the patch doesn't help. Such
-boards need to describe the supply (e.g. a fixed 1.8V regulator as
-vqmmc-supply) to benefit from it.
-
-FriendlyElec's BSP for this board works around this with a card
-quirk, MMC_QUIRK_BROKEN_ROCR_S18A[1], matched on the "realtek,rtl8822cs"
-compatible, which drops the switch request whenever this chip is
-present. The misreported S18A is the card's fault, but ignoring it is
-only correct when the bus is already at 1.8V: on a board with a
-switchable vqmmc the same chip would then be run in UHS at 3.3V. A card
-quirk would need knowledge of the board's supply that it doesn't have.
-The core does know the current signal voltage, so handle it there, which
-also takes care of any other card that turns out to behave the same way.
-
-[1] https://github.com/friendlyarm/kernel-rockchip/commit/aee62cf7ae16b5ede6c6d92a8ee20e796482754e
-Cc: Jensen Huang <jensenhuang@friendlyarm.com>
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
-Tested-by: Longjian Lin <llj@rock-chips.com>
-Signed-off-by: Deomid rojer Ryabkov <rojer@rojer.me>
+Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
 ---
- drivers/mmc/core/sdio.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+Changes v2:
+- Also add compatible to restrict clock-names for source and hclk
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 6787fdf1c53..a986ee04ba2 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -737,9 +737,11 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
- 	 * 1.8v, the card sets S18A to 0 in the R4 response. So it will
- 	 * fails to check rocr & R4_18V_PRESENT,  but we still need to
- 	 * try to init uhs card. sdio_read_cccr will take over this task
--	 * to make sure which speed mode should work.
-+	 * to make sure which speed mode should work. Some cards (RTL8822CS)
-+	 * set S18A regardless, so don't send CMD11 if we are already at 1.8V.
- 	 */
--	if (rocr & ocr & R4_18V_PRESENT) {
-+	if ((rocr & ocr & R4_18V_PRESENT) &&
-+	    host->ios.signal_voltage != MMC_SIGNAL_VOLTAGE_180) {
- 		err = mmc_set_uhs_voltage(host, ocr_card);
- 		if (err == -EAGAIN) {
- 			mmc_sdio_pre_init(host, ocr_card, card);
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+index a4d032224dce..704d59360bcb 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+@@ -14,6 +14,7 @@ properties:
+   compatible:
+     oneOf:
+       - enum:
++          - airoha,an7581-mmc
+           - mediatek,mt2701-mmc
+           - mediatek,mt2712-mmc
+           - mediatek,mt6779-mmc
+@@ -182,6 +183,7 @@ allOf:
+       properties:
+         compatible:
+           enum:
++            - airoha,an7581-mmc
+             - mediatek,mt2701-mmc
+             - mediatek,mt6779-mmc
+             - mediatek,mt6795-mmc
+@@ -238,6 +240,7 @@ allOf:
+         compatible:
+           contains:
+             enum:
++              - airoha,an7581-mmc
+               - mediatek,mt7986-mmc
+               - mediatek,mt7988-mmc
+               - mediatek,mt8183-mmc
 -- 
-2.53.0
+2.55.0
 
