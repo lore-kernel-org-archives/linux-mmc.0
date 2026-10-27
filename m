@@ -1,47 +1,47 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793115199;
-	b=dcVn9d0WTYRv9oKJOw+05s6oUUoQ/Xvu8BsMCS2qLAe9UOgMcLIzJYvtZDQZiqbkXnnF
-	 PFwJnjJz4H0fF6k1I4gqo+Tazx+VJWT9Ig0zeedjjoqNmh2WMihuyxLFp114YKsutvPrW
-	 C1ZFBO/zsxAdhPCR3tIYqpKGz33fsxwoOtij4UQO55qGSxCOSUX9snIPZYz64fLXxYrzR
-	 IkWhkv0g5+FQC1p35j7hgoReIDmMAU4ZRyUXnThb/yVRIgTQgyfdrEp7cWIbu5MPMSeq/
-	 n3TWSS7IbUmTAix3N8UNx5ve7aamC5xKAP3X2tAXcCJTYS9s2Gec9SQ7ZOQMOvvxMZA==
+	t=1793115206;
+	b=AkUhl32mB16YHbRFq6F1n8xUQuGjsaiCH43Bdz0xw3xZ56nFesSaFHOJjvU72SQ6LxeF
+	 xWF1RAjcbDqEfr1QvPIntRdSPyUu/DfUsyLFthTF23kN+Ekcoy5fBUSiyStT7iaWLqgJJ
+	 CcVUZ4MrLTkBXZZSKWafeuwvDPTLa0wy1czLxuKUmHVLXIkghh8QYkSUxxiiYdAwXxoS+
+	 BLV5e5X0b+jfUEYmkg/ErUZnSKUp4mmqOZ4jUbzpXozv/stKpLribfmoEpfqvISNdMkVP
+	 LgWq0niJX+w6I8KxLjvuODpxV6aPAJ9FpnprbiCi/SEwZWox1aGRSb8X0nPM88j1VaQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793115199;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793115206;
 	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:From:
 	 Subject:To:Cc:References:Content-Language:Autocrypt:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=gPD1ABBQcztKO8PBjP5v5TM9by07PPxSalzCUZ2Eenk=;
-	b=b9MphFiISxWhRYp17SSocrzv16VZtHWYCnVZw7Nd4u0TH/EHuug+FdWtNyPOXcn4jKsY
-	 MtwASDfVGtgdIjg/kVk+iZJglLeCM1bU8RV0WXCC9IJ9qHxFzXDn09xadWnpuVAQaPM+F
-	 RhtPU2RtLy1XQ3Od5z3aP3/8lKntjlUFoubI5WbcqEd2ZPCuXXI2/HJRvqOlALILJo6fN
-	 Ff8eg8JMxVqTfAYrFLUpVsvyHb0lI4JZ2gj0mce0fdgA38etzz4ILF2qyDk6xU6MkJAkx
-	 cOdCkXlt6SbFRVxvlB0u2D/EN4IGSnAQs5tid7F+wIwgKXkT8b6Gymty4X8bHeccPnw==
+	bh=kePQCSGoUZPAj081YLFh89S7XOp8oMUOsNVfcvVBCzI=;
+	b=21AdVPDHCxBunZ/SIqyBrE4Hc1MFKvkE4S5D9/MxzThhIE7rbaQnkSIkCFwf7DVYBfTX
+	 XIXtY7pTbwsfCQ1LrqYIww5VnLRmovdtlSk7naG6nQJDMgcJw5+7tnN41B2gFZQQXIzVG
+	 NuBuPvnuMq3YbsOC93uxyXNPNZO7/Z/SI50hVLYT96RM0JS8qCiJH1a7YcAes+iv0bPzC
+	 +QoQ+VXa58DBOYro/jy0n9KkFPrOSiWAKE8PBGNLQ5EYbsd5EPvv12rUiLJ2WWk+2terT
+	 oiXx/3sYgef+h4lytfABMSH+aoGJLPz/FFtCGVfU98NE0jCDtu/TtL/EJwsOjwtpP2A==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Us75GCkv;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=JiLk4jCB;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07BBC606A31A;
-	Tue, 27 Oct 2026 15:33:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B8AA606A31B;
+	Tue, 27 Oct 2026 15:33:26 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Us75GCkv
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D6CC91F01825;
-	Tue, 27 Oct 2026 15:33:15 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=JiLk4jCB
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C04361F031E1;
+	Tue, 27 Oct 2026 15:33:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793115198;
-	bh=gPD1ABBQcztKO8PBjP5v5TM9by07PPxSalzCUZ2Eenk=;
+	s=k20260515; t=1793115205;
+	bh=kePQCSGoUZPAj081YLFh89S7XOp8oMUOsNVfcvVBCzI=;
 	h=Date:From:Subject:To:Cc:References:In-Reply-To;
-	b=Us75GCkvM+XfumAWXE7OQbdIyGcWJ/fyun3o5nCU53I/iNxgrsswY3py5WMqx0o9U
-	 SzMUR1EYca4QrE33A1DUxl0ThsGvuTxoF5B8W2u+Brs1qR78GPFdgcZhReXj1RjTGn
-	 h5ZsV7r/dSEvdHWUVneROo8K8qmbyzayynrgVUcMJtQKJKWJdNBsjlI2OSWCn5WBkQ
-	 PREyQGxMPYy6ynA9ZgQSDF9Ksx2shynj7Rj/HYyDJqNzz+9LT6PQnGUhNbkmcubuBZ
-	 TRbS9+5juTensNbBSjP0qnXyoHMFOYHWpEh/iEXYqPu93bWFeYm+SspCEykJnN52MP
-	 m+umDh7Q1USYw==
-Message-ID: <00b63b4f-053c-40cf-82db-21a86fc485c6@kernel.org>
-Date: Tue, 27 Oct 2026 16:33:15 +0100
+	b=JiLk4jCBxsqn0zHmpyB32HK5HDL1Rp5HdpnA6sP/gNldXQKwQ6q5jktGEAiysUwqC
+	 FlTI1AnLb7DYhEa6SMytmnyfnIxmiN6luHcxb3xfxlmlpOIMiv0rABpakt4PH+fA2s
+	 gHLIAcomXue/ljCtUvdz/wXg5VxrJJwS3JHXbGtEGEprzFLg0Yu/ECRMM4ue73PThP
+	 zfBArf7jJR5Y55ZU6LffrD4Iapp6rQwDVkOEiE6RpoiVHF44P+Mi4bkaMd0jpJ0Ake
+	 vEMnB6U3slaLO7Ec2KJMUFcUe2Ot0fmMO7p88Z8Bxc51t8J8d5Zpu1s5+HlMgHLdvN
+	 bu9YBbEaWK2Dw==
+Message-ID: <2a29cb8e-28eb-450a-afe9-df543f99b101@kernel.org>
+Date: Tue, 27 Oct 2026 16:33:22 +0100
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -53,8 +53,8 @@ Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: Re: [PATCH v10 1/6] dt-bindings: mmc: Extend keep-power-in-suspend
- beyond SDIO
+Subject: Re: [PATCH v10 2/6] dt-bindings: mmc: Add reset-card-at-resume
+ property
 To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>, linux-mmc@vger.kernel.org,
  Ulf Hansson <ulfh@kernel.org>
 Cc: Adrian Hunter <adrian.hunter@intel.com>,
@@ -64,7 +64,7 @@ Cc: Adrian Hunter <adrian.hunter@intel.com>,
  Oleksij Rempel <o.rempel@pengutronix.de>, linux-kernel@vger.kernel.org,
  Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 References: <20261027144051.249211-1-ulf.hansson@oss.qualcomm.com>
- <20261027144051.249211-2-ulf.hansson@oss.qualcomm.com>
+ <20261027144051.249211-3-ulf.hansson@oss.qualcomm.com>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
  xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
@@ -109,22 +109,31 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  K9bCVaboTA2T77QYkRcRJYSsO1alGX0ome/hMLD1daXlkrNUp1HWa3K4iytLRXjCSIorWiGs
  n+q3krnpXu3TFkA8qtOFZMdnIiFuiq1yLT8hptsV5xh1TA2nsVvSYiaCr3q4s4BKjS/KrLDb
  qoxzw8ISjdUp4pA85vb6YLCmb39NgidD+7PmAr65lBNveIFynTgsja1rRQ4=
-In-Reply-To: <20261027144051.249211-2-ulf.hansson@oss.qualcomm.com>
+In-Reply-To: <20261027144051.249211-3-ulf.hansson@oss.qualcomm.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 27/10/2026 15:40, Ulf Hansson wrote:
 > From: Kamal Dasu <kamal.dasu@broadcom.com>
 > 
-> keep-power-in-suspend is currently documented as SDIO-only, but the
-> requirement it describes -- preserving card power across a
-> suspend/resume cycle -- applies just as well to any card type. Drop
-> the SDIO-only restriction so eMMC and SD platforms can use it too.
+> On some platforms, firmware or other hardware accesses the card
+> during suspend/resume, before the kernel's own resume path has run,
+> leaving the card in a state the kernel can no longer assume it knows.
+> Add a flag property so such boards can tell the mmc core the card
+> needs to be reset before it can be used again.
+> 
+> This is expected to be paired with keep-power-in-suspend on boards
+> whose firmware needs the card to stay powered and live throughout
+> suspend: since the card is never power-cycled, nothing else would
+> force it back to a known state on resume.
 > 
 > Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
 > Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
-Incomplete DCO.
+Incomplete DCO, missing DT list, so not checked by automation.
+
+
+Please kindly resend and include all necessary To/Cc entries.
 
 Best regards,
 Krzysztof
