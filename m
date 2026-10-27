@@ -1,44 +1,63 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=156.224.81.90
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=57.103.73.218
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793062408;
-	b=2kPa5IRq7EJvdvjtPewsBKtrzZz6W/PIc41nKPpYlKgPJER8v0sEcGFOUub9YX1e4Elb
-	 necJqfG5Azj6x8h15DxvXe92yZq0HwpiHU6dV7xhSQfpt3MHuO8XxbdFx/lem/g7WLewc
-	 3fDtLj7ddzBJaUXESgaOJbYOC0DV2k8hfBXrU6HrFxbLTcJBJpkUt/nVnAYVQ/CJni777
-	 HPhpS/uf32WjXGktqfyMrTTI5LMEybV2UQmFeB8hDd1uotBQ5IQFFYvWo84eBh1kyakXj
-	 hcKepKE0CAfEPqhNDnwdPKWutXXD+kkMjHFioIRmLympDx01CG4F383Hgog/GIc07+g==
+	t=1793073273;
+	b=QE4OpqAKa0HK0rL24rLPmwtCQp++ApdcfdbSY0T2F+VTsaIegVbIAj+kK6CiC4bZdQKd
+	 razaJxJZrW3SofHsmqekzRD4bpFVdzT15pMnvufkx3uMSNHmxK18Mi/57ojKB/JGsBvi7
+	 YPul+4djzpMdTacu6F5lL5wlqpk+xtzTMQkxk1LlBMEvD7mDDhQUHblHjvdsA3Sp2Fk1s
+	 IT9z7F7jkf2T7yv5XXqN7IgjxrH1GOqn99Hfrnul4FKWFhiTPUU33psYcxrIyVDI0x++b
+	 N3Ir9ilOriaVj0WVGyZCJy+VFraWQpP5dJHF3criFS4/OrHO19XiLErjBpl/WjmHZZQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793062408;
-	h=DMARC-Filter:Received:Message-ID:Date:MIME-Version:User-Agent:Cc:
-	 Subject:To:References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:X-HM-Tid:X-HM-MType:X-HM-Spam-Status:
-	 DKIM-Signature;
-	bh=wghg31XooAJPKL/XTiGnCxCN5pFUy2mBUdUxi6yrLos=;
-	b=hsqc+Gv09Vibsh4zPxQF0+f1hqGEsB+xnje/B5sxXEBwklVJZTP/NAUzYwSpCEROr+kA
-	 3iOP+u1Ar1bp/EYH7+1ts8/IgloPHXyYKxP5LmSOY+1UjRC0lv+AE0F3KHlHz+n0W4Th2
-	 UjGXDRTKoIjqsU8xzcL257v5Zc4tmsGsdDsyVE+e8ivOJp9Mucud9fRZoGvL9iS60Wuwq
-	 Pxf5tFfwgM7LXxTU3EfHNOHRRVKoZ1kLOjPhNEF69gewYqa9hHjRwm6h8wAmTCJ1SbH7o
-	 OQHAVGtkWRjuoj2k2ZjA/VClm7DxoxVV2DogKQVaMmq7dFR1JJiTh3XNzJ9fIvYWD5A==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793073273;
+	h=DMARC-Filter:Received:X-ICL-RepId:X-ICL-Out-Info:Dkim-Signature:
+	 mail-alias-created-date:Received:From:Subject:To:Cc:Date:Message-ID:
+	 MIME-Version:Content-Type:Content-Transfer-Encoding:
+	 X-Authority-Info-Out:X-Proofpoint-GUID:X-Proofpoint-Spam-Details-Enc:
+	 X-Proofpoint-ORIG-GUID:X-JNJ;
+	bh=c557NJspcrYp97wcV3FzkxycYN4AmMz1y8uOKeLXX9c=;
+	b=Rqx/0bIg7MLGZOg4E8AOv5g4IC/ZaYJxUDTaeHDn3pru4oFDvy7NyEwbexWEhBfonE4a
+	 4AI3A3nvNrTMB1B8ThtYR/G87JEqoo8pk2sQHSQl8RbGtxT24QkPm27p2FZZHRbucJMlj
+	 xwUfbMwM1AinZdBlVjrWVxiH8tAXBirt+oKoZ1MMnGUM6Txg/VOz4jNE7k2zprAjPGiBz
+	 o/qAQZtRiimLaL35lIoBgXEafMe5RbnDpZiyn7G8H2HGQF+8R8CKBBGy40R7sAO4CcAOn
+	 W0/QAUyQcqbih2iBD5VzngjIaOXXdPiLb4DxA14HbaNQXx+4cCGkwXLrGZOf4OsSxqw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=rock-chips.com;
-	spf=pass smtp.mailfrom=rock-chips.com;
-	dkim=pass header.d=rock-chips.com header.i=@rock-chips.com header.a=rsa-sha256 header.s=default header.b=IJsQys7w;
-	arc=none smtp.remote-ip=156.224.81.90
-Received: from mail-m8190.xmail.ntesmail.com (mail-m8190.xmail.ntesmail.com [156.224.81.90])
+	dmarc=none header.from=manyhobbies.com;
+	spf=pass smtp.mailfrom=manyhobbies.com;
+	dkim=pass header.d=manyhobbies.com header.i=@manyhobbies.com header.a=rsa-sha256 header.s=sig1 header.b=aJh0AGum;
+	arc=none smtp.remote-ip=57.103.73.218
+Received: from outbound.ms.icloud.com (ms-2001i-snip4-7.eps.apple.com [57.103.73.218])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 320C1606A31A;
-	Tue, 27 Oct 2026 00:53:23 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 320C1606A31A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 684F0606A31E
+	for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2026 03:54:32 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 684F0606A31E
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=manyhobbies.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manyhobbies.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=rock-chips.com header.i=@rock-chips.com header.a=rsa-sha256 header.s=default header.b=IJsQys7w
-Received: from [172.16.12.48] (unknown [61.154.14.86])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 526e8ceb0;
-	Tue, 27 Oct 2026 08:53:12 +0800 (GMT+08:00)
-Message-ID: <bb38e2c8-1868-4a66-9e0d-78d9f68ab4be@rock-chips.com>
-Date: Tue, 27 Oct 2026 08:53:09 +0800
+	dkim=pass (2048-bit key, unprotected) header.d=manyhobbies.com header.i=@manyhobbies.com header.a=rsa-sha256 header.s=sig1 header.b=aJh0AGum
+Received: from outbound.ms.icloud.com (unknown [127.0.0.2])
+	by p00-icloudmta-asmtp-us-west-3a-100-percent-5 (Postfix) with ESMTPS id 288F518000AA;
+	Tue, 27 Oct 2026 03:54:28 +0000 (UTC)
+X-ICL-RepId: 01a17b7e-c94a-7c5d-b7c2-55b64c5de973
+X-ICL-Out-Info: HUtFAUMEWwJACUgBTUQeDx5WFlZNRAJCTQhPAUMGWQZeD04dXwVcEhVdRUcMWkVWH3kVUgNOA10SWxFWHhkIXR0ZHldQWgpcCVEXUQ9eDkFeWhdeTUUID0kZEFYBWFZdBU0aXBhZDxwdSlZaDlsERxQXG1wAFxtGAgQjAl8ARQJeCVYBMBcPVk1UGV0UXwRQElAdQENUBF9QVBFXUAtaBUkKSAReBlkDQA1WAFQPXQFeCEoAWgVTA0QITgBZAFkKRAFPBl93BlMeQBBcD1UCVwMXG1wACUtGCUkdDg5CGEYfVCdXAloKWx4=
+Dkim-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manyhobbies.com; s=sig1; t=1793073271; x=1824609271; bh=c557NJspcrYp97wcV3FzkxycYN4AmMz1y8uOKeLXX9c=; h=From:Subject:To:Date:Message-ID:MIME-Version:Content-Type:x-icloud-hme; b=aJh0AGumjEqUA82HLgydg7bSQii8pFGQGAywdpmcFB++chslRvqswtVMzE5ZazNKcUGMRGzKtPZJS8794b+0TYfvdYOfTWqkLt29D/uZomQOMi4t+PHKAfClCJ9pVlsOBlyRfzDFpXSGGVsJUvEtDQLyc28ZuQyAXdyP43ZXY1Inz/30xp8guqug6SQAg5ds8ARhTWj5L6oXT3TxqotmXq1crgTXnhtJw0CblRC92iU+shQ9Husp2ECB8TGQ3B/L+RsftGhY18oE6we4wdWnkoSFD654T7/J13iA48f1FNOiln3O495aMSRMMByoxB3YAHAkbO9dYgQ5T2X9VMhVvg==
+mail-alias-created-date: 1780273699991
+Received: from claude-agent.manyhobbies.internal (unknown [17.156.208.39])
+	by p00-icloudmta-asmtp-us-west-3a-100-percent-5 (Postfix) with ESMTPSA id 26068180009A;
+	Tue, 27 Oct 2026 03:54:28 +0000 (UTC)
+From: Tam Do <tam.do@manyhobbies.com>
+Subject: [PATCH] mmc: sunxi: reset the controller after an update-clock
+ timeout
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: Chen-Yu Tsai <wens@kernel.org>,
+    Jernej Skrabec <jernej.skrabec@gmail.com>,
+    Samuel Holland <samuel@sholland.org>,
+    linux-mmc@vger.kernel.org,
+    linux-sunxi@lists.linux.dev,
+    linux-arm-kernel@lists.infradead.org,
+    linux-kernel@vger.kernel.org
+Date: Tue, 27 Oct 2026 03:52:01 +0000
+Message-ID: <179307312104.39863.12372814163472848752@manyhobbies.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -48,137 +67,52 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com, linux-clk@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
- mfd@lists.linux.dev, linux-gpio@vger.kernel.org, netdev@vger.kernel.org,
- linux-pm@vger.kernel.org, linux-i2c@vger.kernel.org,
- linux-serial@vger.kernel.org, linux-mmc@vger.kernel.org,
- linux-stm32@st-md-mailman.stormreply.com, linux-phy@lists.infradead.org,
- linux-usb@vger.kernel.org
-Subject: Re: [PATCH 24/27] mmc: dw_mmc-rockchip: Keep RK3572 NVM domain
- powered
-To: 1579567540@qq.com, Stephen Boyd <sboyd@kernel.org>,
- Brian Masney <bmasney+clk@redhat.com>,
- Jerome Brunet <jbrunet+clk@baylibre.com>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>,
- Philipp Zabel <p.zabel@pengutronix.de>,
- Elaine Zhang <zhangqing@rock-chips.com>, Lee Jones <lee@kernel.org>,
- Linus Walleij <linusw@kernel.org>, Bartosz Golaszewski <brgl@kernel.org>,
- Richard Cochran <richardcochran@gmail.com>, Ulf Hansson <ulfh@kernel.org>,
- Andi Shyti <andi.shyti@kernel.org>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Jiri Slaby <jirislaby@kernel.org>, Jisheng Zhang <jszhang@kernel.org>,
- Andrew Lunn <andrew+netdev@lunn.ch>, "David S. Miller"
- <davem@davemloft.net>, Eric Dumazet <edumazet@kernel.org>,
- Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
- David Wu <david.wu@rock-chips.com>, "Rafael J. Wysocki" <rafael@kernel.org>,
- Daniel Lezcano <daniel.lezcano@kernel.org>, Zhang Rui <rui.zhang@intel.com>,
- Lukasz Luba <lukasz.luba@arm.com>,
- Maxime Chevallier <maxime.chevallier@bootlin.com>,
- Maxime Coquelin <mcoquelin.stm32@gmail.com>,
- Alexandre Torgue <alexandre.torgue@foss.st.com>,
- Vinod Koul <vkoul@kernel.org>, Neil Armstrong <neil.armstrong@linaro.org>,
- Manivannan Sadhasivam <mani@kernel.org>,
- Thinh Nguyen <Thinh.Nguyen@synopsys.com>,
- Jaehoon Chung <jh80.chung@samsung.com>
-References: <20261022-add-board-ok3572-c-v1-0-0b0fd85a31ee@qq.com>
- <20261022-add-board-ok3572-c-v1-24-0b0fd85a31ee@qq.com>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <20261022-add-board-ok3572-c-v1-24-0b0fd85a31ee@qq.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0aa17ad8d47003a4kunm11e232fa473cda
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVlDTh1CVh1KTR9CSE1LQx4fGFYVFA
-	kWGhdVEwETFhoSFyQUDg9ZV1kYEgtZQVlNSlVKTk9VSk9VQ01ZV1kWGg8SFR0UWUFZT0tIVUpLSE
-	pKQk1VSktLVUpCWQY+
-DKIM-Signature: a=rsa-sha256;
-	b=IJsQys7w6ZxV+DGACFu7tp6IC2XPPwcJXSelxQSD1vTGjhE9PoZcuZz9xwdeWJyiMmawVu+MEW+G8WAm2iMk67hmhZOiMs56Iq7OGWJB2jXbZ7rtdDSqWunDi5ua9gLF9vWCsJIjLwel7Nty1TbOGwqxXT82cvpybuOOJTauLtE=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=wghg31XooAJPKL/XTiGnCxCN5pFUy2mBUdUxi6yrLos=;
-	h=date:mime-version:subject:message-id:from;
+X-Authority-Info-Out: v=2.4 cv=fbugCkQF c=1 sm=1 tr=0 ts=6ae02076
+ cx=c_apl:c_pps:t_out a=kRaGL2Q7qLiahLf3O6OaIA==:117
+ a=kRaGL2Q7qLiahLf3O6OaIA==:17 a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=VwQbUJbxAAAA:8 a=w2OPf45SAAAA:8
+ a=OBswR2QUZwThbbyFsH0A:9 a=QEXdDO2ut3YA:10 a=-iXIJKm6ftRzmWoHelNS:22
+X-Proofpoint-GUID: y2SgpGtdZ7vHdcPuD7Ypjoc6D-Sv23Sj
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDI3MDAxNSBTYWx0ZWRfX6NLdvTed6MJk
+ NDt9+8d0rQtPMNEI7W0Sgwrwc5t34pOkSvmarHPDHtAhv3/NplmE+OYdB0qFxLm6lN3CuyCeQB/
+ BEr+gIT7FTo5/RmL7XAdxxnQA5wf2cIgL17KxQ/991O1rDI8PodIbltZ/jotFG2/umWdKCAgO5X
+ LGK5r8G5VJsf9HisuUcikkDlVONrJ2fe0ACUD6RrADoZPRXs7yZsHZAn66kAhRau7pa9gtiYtYZ
+ LtJc0kxK03QFHId6WWBlNijwmYfJOykTq/+dJScH+rDAGKucc5UqKruTuKTp4ZQDrPhIF8NGchF
+ TrRkbvLAcYEBoB4Id2EHjfrmSw1/RwbQ5tX7gKcuXHvLss9AMGP+atvsvXYdp4=
+X-Proofpoint-ORIG-GUID: y2SgpGtdZ7vHdcPuD7Ypjoc6D-Sv23Sj
+X-JNJ: AAAAAAAB97Wku43oW0onLL0nsnuVzNu/wNnoSw2Lfvo1qg77wELWKGEOx6s/vTlMnrJy1v1rTIZ++H0LHfbQEvshtbpLg80viBL3MgEw9ypfH3ljJIbppdVgA/Fog/xP0A9MocRTnVlDRBQpwYD/+0IFgai8LiK4o/RNfYpBsgUwJdgK//KsqYoOvJhQ758Sn4ksBXAalCi2OYMuetJRVetvR9qaaNCGAPT8OHhXZ9DxvNMwOpuBZyuJxppSwoI6C28PPZm4R1PPSbb0wvf5/Mp6IlA2ggC4XPsRzc3qe9bFYj3+ZduQetG7/pP1FSwbyeDKp0tGjJkOnA2Lo+cU8o0hNh1MjWDB2v22l6JgbYQVd1ypsg+qlsLL9v/ZvEwxCTyCP7RcmGud8QgI8u6JkX5iAkc2UlR+nKfi+3UdI6mrdaQOTXvNpkC1lepH2Ikdgxbbh3zO1aymZQXK/n8lzJR44sgEQyGpRdPb8j2J84brmSedvC7P24qrKrPiwRZoalpw6EVqx+hbMxSwsRwmNWlCk3mQwU0BFotv+IvvRjmfmbiPzP5crWfXHAp5Dl9BzHY7YQD06WKHSvUXwm+JDXBq6RnY1gkbNiN5HJ/0aKRA0hX82FvRBhbrJsC3jeEdY2thvPN5MlAA+Cp6kUNXgYyrw3mk1RRnNFifNcxZhLFsMbDlmpVfLR7rN7X0tNPmjYbPKGo0h7IhZuDZb3GY61ESb6+O106ySIuZooKp7L1swTQ7UmHFfskNhQFJb81vNqODACe6ocjp+tjz/R3HPwe0mEhAkKu0LiMzZfe/o/7iAHBDYkWMbugTtcz+Te8t6uJvwOc3LAAXMoxNU2rI19bm2P1qtzEhz+X4jRH3fiMtRfUgNRb96sdUDr1zHTpAKZ+M9Ma5g2gbg4RYuml6e6wfRgxq3YLZwQcX5YGeliDixu+6pTVrNfK0885TG/xxwPJQdVy1eP77R4IXBMbLj0vqajXYYu7
+ +vinsDdtAIdgHFCyqTOCA70Qy3VTY1lvl57b0LU0lwwT8zLVXRPwpNZeLEzN+mXf8rrQdHMgFdhD3fxUgFNw5Fu5Qr/IwvdmjyJvsJctIJTSbQGAfafBM9rs8R94yn2rgR4ORR2C1w+FRoZv32tscoaXhycEvYsst1HAtJqrVERdFmUeSfXN6Xvlm8D/X+ynHchM9lGTywhlFSCMaszZR/2ciaL1Op/3w0PaDEjyDOh6lbw97TR4fxDUdqAA70/qZsENOLcL9R+LCbk+jKRyg75NiN85pTaId9K+eq1yXd3Xeuh1dv5aO3RLNBzZNg0D0QJWbaZAeKWmC2RwU/7MFZ+ScKEbqzjz//yFSMpIBO+tcNZYt
 
-Hi Cunhao,
+If the clock-update command times out it stays pending in the
+controller, and every later clock update times out as well, so the
+card cannot be initialised until the next probe.
 
-在 2026/10/22 星期四 0:11, Cunhao Lu via B4 Relay 写道:
-> From: Cunhao Lu <1579567540@qq.com>
-> 
-> Power cycling the RK3572 NVM domain causes repeated SD recovery. Keep it
-> powered during runtime suspend without disabling controller runtime PM.
-> 
+This happens on an R16 board whose SDIO Wi-Fi holds DAT0 busy while
+its supply comes up during the first clock update.
 
-Before your v2 about this path, I would like to ask why you need this?
-The dw_mmc-rockchip controller is always under A power domain on every
-SoC, none of the predecessors need this kind of change. If you see
-some errors during RPM, perhaps you should have a look[1] and check your
-DTS.
+Reset the controller on timeout so the next attempt can succeed.
 
-[1] 
-https://lore.kernel.org/linux-mmc/1768524932-163929-1-git-send-email-shawn.lin@rock-chips.com/
+Fixes: 3cbcb16095f9 ("mmc: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs")
+Cc: stable@vger.kernel.org
+Signed-off-by: Tam Do <tam.do@manyhobbies.com>
+---
+ drivers/mmc/host/sunxi-mmc.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-> Signed-off-by: Cunhao Lu <1579567540@qq.com>
-> ---
->   drivers/mmc/host/dw_mmc-rockchip.c | 24 ++++++++++++++++++++++++
->   1 file changed, 24 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index 75c82ff20f177..8bc55d4b996c6 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -10,6 +10,7 @@
->   #include <linux/mmc/host.h>
->   #include <linux/of_address.h>
->   #include <linux/mmc/slot-gpio.h>
-> +#include <linux/pm_domain.h>
->   #include <linux/pm_runtime.h>
->   #include <linux/slab.h>
->   
-> @@ -528,6 +529,19 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
->   	return 0;
->   }
->   
-> +static int dw_mci_rk3572_init(struct dw_mci *host)
-> +{
-> +	int ret;
-> +
-> +	/* Power cycling the NVM domain disrupts SDMMC recovery. */
-> +	ret = dev_pm_genpd_rpm_always_on(host->dev, true);
-> +	if (ret && ret != -EOPNOTSUPP)
-> +		dev_warn(host->dev, "failed to keep power domain on: %pe\n",
-> +			 ERR_PTR(ret));
-> +
-> +	return dw_mci_rockchip_init(host);
-> +}
-> +
->   static const struct dw_mci_drv_data rk2928_drv_data = {
->   	.init			= dw_mci_rockchip_init,
->   	.parse_dt		= dw_mci_rk2928_parse_dt,
-> @@ -541,6 +555,14 @@ static const struct dw_mci_drv_data rk3288_drv_data = {
->   	.init			= dw_mci_rockchip_init,
->   };
->   
-> +static const struct dw_mci_drv_data rk3572_drv_data = {
-> +	.common_caps		= MMC_CAP_CMD23,
-> +	.set_ios		= dw_mci_rk3288_set_ios,
-> +	.execute_tuning		= dw_mci_rk3288_execute_tuning,
-> +	.parse_dt		= dw_mci_rk3576_parse_dt,
-> +	.init			= dw_mci_rk3572_init,
-> +};
-> +
->   static const struct dw_mci_drv_data rk3576_drv_data = {
->   	.common_caps		= MMC_CAP_CMD23,
->   	.set_ios		= dw_mci_rk3288_set_ios,
-> @@ -554,6 +576,8 @@ static const struct of_device_id dw_mci_rockchip_match[] = {
->   		.data = &rk2928_drv_data },
->   	{ .compatible = "rockchip,rk3288-dw-mshc",
->   		.data = &rk3288_drv_data },
-> +	{ .compatible = "rockchip,rk3572-dw-mshc",
-> +		.data = &rk3572_drv_data },
->   	{ .compatible = "rockchip,rk3576-dw-mshc",
->   		.data = &rk3576_drv_data },
->   	{},
-> 
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index fe4c0f6..439cfa4 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -688,6 +688,7 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+ 
+ 	if (rval & SDXC_START) {
+ 		dev_err(mmc_dev(host->mmc), "fatal err update clk timeout\n");
++		sunxi_mmc_init_host(host);
+ 		return -EIO;
+ 	}
+ 
+-- 
+2.39.5
 
