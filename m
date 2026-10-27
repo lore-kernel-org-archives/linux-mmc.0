@@ -1,54 +1,54 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=91.218.175.64
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=91.218.175.207
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793113988;
-	b=W8li8zcuTZN9fBPelOVvA79hM40etssYuICX/FhkAB+kMiUSlVk8BjGJkRzHDnkDsMH8
-	 9kY7x18qQbQNK7om10E2Igt2+VbJ93q+SV+27FpTIjK4i/GSxAc1KZ7RJXrvoz529BHG2
-	 62u2dFMq23kf/2OZMAadIgJkEu2TpID9tkkFBuDyWmCGtzQPiLnlZGNtHkkwgjJQhzbB7
-	 NKj/zIr/RfwgfLDjnt78gbUf27jW/k7ATPxivSCjZG3HS/CFaU/jf9JI0bIEVVDiimARQ
-	 llUnrBweiE/ecE+yAbReQgGpHOep2WunLftZAmrqVgfe/VNnUJyPsmoGT9hCIps+7qQ==
+	t=1793114380;
+	b=e/xehAanYqY6u9ay+esyeiAlEwgw8WWnibujFjGIC6QyawebrHzJ4g5mfovL3y1bBzta
+	 Z5EYHXZL2tPJoK/ROQB2WBvhBQFOeJdUs+3TfsMzGtDgKw9BaH01o+J3pfgN8lZrEUHJ6
+	 cdfP+tR6l0T4hsRaEsDsZxpReQ4fdohjYiPE0CPuSUgkNtv0iK3DD2uw0xSfVmzTV6Yz7
+	 Jee2ppEpDQq/KuSbNreRYt1Kvm2dzofyTYg2AnM3zFM3RNVuyRa5NFE/BSck2aATUqjm+
+	 3FUePB/TN1lhqfceIFmuj4pPaqpW2VkUa1r2S2JpHYkw6LxFkinkLPLc1wJx7kTJIWg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793113988;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793114380;
 	h=DMARC-Filter:X-Envelope-To:DKIM-Signature:X-Envelope-To:Received:
 	 X-Mizu-Trace-ID:X-Migadu-Flow:Message-ID:Date:MIME-Version:User-Agent:
 	 Cc:Subject:To:References:From:In-Reply-To:Content-Type:
 	 Content-Transfer-Encoding;
-	bh=A11UcNxxpBKAvqXF0gV8apwz9UitmN7B7nDEh6KsEgg=;
-	b=VmsKextXkd6IYIkrktdqV8ZzYSj16mha+0mnu3gjHlEDvtMU6ivmF4V868Oh51TkdOnn
-	 M/2iBrxe4dr3W9KnbkI6XLHcT3n/CkBZWcVREAHAG2c3o9pZx1cOISypi102bslV91vNJ
-	 fSTZSXenm4Ho6ZR+LpWDtTgRjrwkteA/NhXWd23VtcOvWTEA7xOJwh6MxtW4ewakbXPZw
-	 snmPD30BeErV9XWF2oYoqitAZpjrpnPOiX4RuolwPI7iOUWt+9xcTLdvRqwx+FoMP+Ked
-	 s8tuXRNW9WkY/u7Dbe6mYoPBI1LypYVzw/Zt74vj80lDdVgL3Ngk6mzO3mGR+6Ko5LA==
+	bh=BOU4MU9brm6f0WifX02Z/bvAfud4ks27NzG9mJq6iqw=;
+	b=Ji0pYCSlfnq/0+jIFMB+4+kzZxaLtKZM3ZyMhJ/paYZSPgSB6UJvKrnXS7/nZTMOvsVx
+	 zWyMrG9ZzY2z+Q0gTtgU9+uWzgJ0QAfoPtnPihtZX2Z019mR8jPeHPSZKOEx+4IE6I/0Z
+	 Wo7SL0bCJXjwT8wR0jhTepN64hIckEtP+Xyd/mfhwTb7+kq5PwEKT2hdHTVeUOronj+wf
+	 pzMERXq07RPddIqf7uQCulTAgCU0lh81lo5OJtLVahvZrQOmAacNmyvTBS1iloKc8cRsO
+	 InPf+6ZKUhCcxgw/JCrp0UBF7wyZDfkcOHTVwc1nqmOWoF9EC4VCLSArHpp5pxDKDRA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=linux.dev;
 	spf=pass smtp.mailfrom=linux.dev;
-	dkim=pass header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=h2zPKxj9;
-	arc=none smtp.remote-ip=91.218.175.64
-Received: from mta0.migadu.com (out-64.mta0.migadu.com [91.218.175.64])
+	dkim=pass header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b="H4sn/Js1";
+	arc=none smtp.remote-ip=91.218.175.207
+Received: from mta0.migadu.com (out-207.mta0.migadu.com [91.218.175.207])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7796606A31B
-	for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2026 15:13:06 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D7796606A31B
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A502606A31D
+	for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2026 15:19:38 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4A502606A31D
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=h2zPKxj9
+	dkim=pass (1024-bit key, unprotected) header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=H4sn/Js1
 X-Envelope-To: linux-mmc@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=Ot09Lr391s+gD9VJ0ej9HLZWHTp2K0z3o3CPA/71abg=;
+DKIM-Signature: a=rsa-sha256; bh=gRH2J9qDSbTRcBgfMtEwLxNpHEfkk15phPzF8HTAcsk=;
  c=simple/simple; d=linux.dev;
  h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1793113984; v=1; x=1793718784;
- b=h2zPKxj9hJ7iHcYoEOlylHGhe9wqrk7G6TbhNi592kKmxl11nUOM/uxiE7VVwGfy6A+YfTdm
- jR0UwC9PyVOu/vzkL5WW6OpKREhTcRCSENpZxlzsCfnaY2J3nCcmZWHkRVna9k/DYKcNXFq/Zl3
- QDoW2xSetQ2fILNwH3f+QYTY=
+ t=1793114377; v=1; x=1793719177;
+ b=H4sn/Js150C7xakz76mMDstv6j8Dak7y9kvXGSosDTU0IEFiYEJ5W6A7QH6kavZEUNv62NtD
+ dpbz4KZVpM0rQIQg0mt3+ra5+OsHj1FG+/e9zszH7pJFj92zJhGYVkuahjOfw36Qz35QSICHpPb
+ QzVp6DM8elk1NlmlAd2zv+QI=
 X-Envelope-To: linux-mmc@vger.kernel.org
-Received: by smtp.migadu.com with ESMTPS id 86b784ba5ef37df9;
-	Tue, 27 Oct 2026 15:13:04 +0000
-X-Mizu-Trace-ID: 86b784ba5ef37df9
+Received: by smtp.migadu.com with ESMTPS id 457dd02c034f76d0;
+	Tue, 27 Oct 2026 15:19:37 +0000
+X-Mizu-Trace-ID: 457dd02c034f76d0
 X-Migadu-Flow: FLOW_OUT
-Message-ID: <a005dddd-a495-45f4-ac43-7d708eea009c@linux.dev>
-Date: Tue, 27 Oct 2026 23:12:56 +0800
+Message-ID: <09d4c786-3551-4dcd-8f09-afa231d18dff@linux.dev>
+Date: Tue, 27 Oct 2026 23:19:29 +0800
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -64,82 +64,88 @@ Cc: shawn.lin@linux.dev, Adrian Hunter <adrian.hunter@intel.com>,
  Florian Fainelli <florian.fainelli@broadcom.com>,
  Wolfram Sang <wsa+renesas@sang-engineering.com>,
  Oleksij Rempel <o.rempel@pengutronix.de>, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v10 4/6] mmc: core: Split sdio_set_host_pm_flags()
+Subject: Re: [PATCH v10 3/6] mmc: core: Add option to keep an eMMC powered on
+ at system suspend
 To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>, linux-mmc@vger.kernel.org,
  Ulf Hansson <ulfh@kernel.org>
 References: <20261027144051.249211-1-ulf.hansson@oss.qualcomm.com>
- <20261027144051.249211-5-ulf.hansson@oss.qualcomm.com>
+ <20261027144051.249211-4-ulf.hansson@oss.qualcomm.com>
 From: Shawn Lin <shawn.lin@linux.dev>
-In-Reply-To: <20261027144051.249211-5-ulf.hansson@oss.qualcomm.com>
+In-Reply-To: <20261027144051.249211-4-ulf.hansson@oss.qualcomm.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 
-Hi Ulf,
-
 在 2026/10/27 星期二 22:40, Ulf Hansson 写道:
-> To prepare for a subsequent change, let's split up sdio_set_host_pm_flags()
-> allowing the second part of it to be used as an internal function for the
-> core.
+> The DT property keep-power-in-suspend, allows us to specify whether the
+> platform is capable of keeping the power to the card during system suspend.
+> Up until now, this has been restricted to be used for SDIO cards only, but
+> let's add the initial support to allow this for eMMC too.
 > 
+
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
 > Signed-off-by: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
 > ---
->   drivers/mmc/core/core.c    | 9 +++++++++
->   drivers/mmc/core/core.h    | 1 +
->   drivers/mmc/core/sdio_io.c | 7 +------
->   3 files changed, 11 insertions(+), 6 deletions(-)
+>   drivers/mmc/core/mmc.c | 24 +++++++++++++++++++++++-
+>   1 file changed, 23 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 677e445dc48c..49c0494932cc 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1422,6 +1422,15 @@ int mmc_handle_undervoltage(struct mmc_host *host)
->   	return host->bus_ops->handle_undervoltage(host);
->   }
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index a02b04938e1a..c936272bcd81 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -38,6 +38,7 @@ enum mmc_poweroff_type {
+>   	MMC_POWEROFF_SHUTDOWN,
+>   	MMC_POWEROFF_UNDERVOLTAGE,
+>   	MMC_POWEROFF_UNBIND,
+> +	MMC_NO_POWEROFF_SUSPEND,
+>   };
 >   
-> +int mmc_set_host_pm_flags(struct mmc_host *host, mmc_pm_flag_t flags)
-> +{
-> +	if (flags & ~host->pm_caps)
-> +		return -EINVAL;
-> +
-> +	host->pm_flags |= flags;
-> +	return 0;
-> +}
-> +
->   /*
->    * Assign a mmc bus handler to a host. Only one bus handler may control a
->    * host at any given time.
-> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> index 9be2875608ce..d3a2ff00b18f 100644
-> --- a/drivers/mmc/core/core.h
-> +++ b/drivers/mmc/core/core.h
-> @@ -64,6 +64,7 @@ int mmc_handle_undervoltage(struct mmc_host *host);
->   void mmc_regulator_register_undervoltage_notifier(struct mmc_host *host);
->   void mmc_regulator_unregister_undervoltage_notifier(struct mmc_host *host);
->   void mmc_undervoltage_workfn(struct work_struct *work);
-> +int mmc_set_host_pm_flags(struct mmc_host *host, mmc_pm_flag_t flags);
+>   static const unsigned int tran_exp[] = {
+> @@ -2157,6 +2158,15 @@ static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
+>   			goto out;
+>   	}
 >   
->   static inline void mmc_delay(unsigned int ms)
+> +	if (pm_type == MMC_NO_POWEROFF_SUSPEND) {
+> +		if (host->retune_period) {
+> +			mmc_retune_timer_stop(host);
+> +			mmc_retune_needed(host);
+> +		}
+> +		mmc_card_set_suspended(host->card);
+> +		goto out;
+> +	}
+> +
+>   	if (mmc_card_can_poweroff_notify(host->card) &&
+>   	    mmc_host_can_poweroff_notify(host, pm_type))
+>   		err = mmc_poweroff_notify(host->card, notify_type);
+> @@ -2193,9 +2203,15 @@ static void mmc_remove(struct mmc_host *host)
+>    */
+>   static int mmc_suspend(struct mmc_host *host)
 >   {
-> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-> index 12716ec0e35d..99f857514b63 100644
-> --- a/drivers/mmc/core/sdio_io.c
-> +++ b/drivers/mmc/core/sdio_io.c
-> @@ -726,12 +726,7 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
+> +	enum mmc_poweroff_type pm_type = MMC_POWEROFF_SUSPEND;
+>   	int err;
 >   
->   	host = func->card->host;
->   
-> -	if (flags & ~host->pm_caps)
-> -		return -EINVAL;
-> -
-> -	/* function suspend methods are serialized, hence no lock needed */
-
-This is an API for sdio function driver, should we preserve this commet 
-here?
-
-> -	host->pm_flags |= flags;
-> -	return 0;
-> +	return mmc_set_host_pm_flags(host, flags);
+> -	err = _mmc_suspend(host, MMC_POWEROFF_SUSPEND);
+> +	if (mmc_card_keep_power(host)) {
+> +		pm_runtime_resume(&host->card->dev);
+> +		pm_type = MMC_NO_POWEROFF_SUSPEND;
+> +	}
+> +
+> +	err = _mmc_suspend(host, pm_type);
+>   	if (!err) {
+>   		pm_runtime_disable(&host->card->dev);
+>   		pm_runtime_set_suspended(&host->card->dev);
+> @@ -2260,7 +2276,13 @@ static int mmc_shutdown(struct mmc_host *host)
+>    */
+>   static int mmc_resume(struct mmc_host *host)
+>   {
+> +	if (mmc_card_keep_power(host)) {
+> +		pm_runtime_set_active(&host->card->dev);
+> +		mmc_card_clr_suspended(host->card);
+> +	}
+> +
+>   	pm_runtime_enable(&host->card->dev);
+> +	host->pm_flags &= ~MMC_PM_KEEP_POWER;
+>   	return 0;
 >   }
->   EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
 >   
 
