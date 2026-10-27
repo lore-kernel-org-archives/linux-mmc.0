@@ -1,52 +1,53 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=144.76.98.110
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1793103863;
-	b=MR4P0DYLbgItTC4yWEffai1PEtFHzoi5TW6sAsAW2Tkacr9DbOjvtp46rs80FgcsD8CS
-	 4K6/yYMTslzODNCcu7EoYJtpF+WOmwALWlalop4bTAF1katSkk1MINr3pWvk/o3modXqL
-	 lbXeHgGvKdzimkDqIxFj55v14sXN3MANLcBTOi34SYbk+q8/V+SQxzCZpWeNlSaqiPZgC
-	 vygd40G5PZoXduy5jZvH3WfU1Ad4vhdaiHmyjzK4SxE6Ezvf7+0AItHGTu1wnvZfH0g47
-	 re07hG1Ur7TdzjEheeOXzhiCx7ljKa6RJJo9Mx22rShwdgp+v7EIhNwUGrWQwHJEvXw==
+	b=NBnuXUG/aFaJoP5On+uoZXcV+txCdINqBXeaqGB416EfR7+RTBPL1ZPA0f/QZdew/EDe
+	 PG3AkOdtxB/N5/Q6n0UFH8MZk1ImRuTXE9Kj1S1wx01wYX5a7aZrHnlP5wZH7r3u79KjL
+	 TDaCdXYIeYSgmh/NDyw0RPSucHupn+nBRI5FqQlH9Of5GLpArq6gHJzaomIe7v8omkdeR
+	 lC50kZs2LfTLXmJGuUwnew5/Espzjh79FaWCbfFEjXLuWxossGtSNnwhR+6fpo0E8nbhi
+	 NfT1QxJmx5TuwlPZ8UoT39vjHvmZN6dFLBQ/v1F4A3NeyBp7F0hdBt7y/jb7++QRuWQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1793103863;
 	h=DMARC-Filter:DKIM-Signature:Received:From:To:Cc:Subject:Date:
-	 Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding;
-	bh=IABBLZ2MuXH1VDlPsfrOgFYgNPbo03Fju+v8Q1KHRoY=;
-	b=vxjMGJp7ZxYoH6lkUwbtCDiCR4CM0SSyxKXNrOhFvsPgOzeKqVmgrEfmh6hTfnUPsGYf
-	 xpHj/yE2+gymGfn2+say7i0OYfeKyUNa1Q48kNSkhNj0qkLqtib6wSMeOKyXXHLMMm04F
-	 OFlcMg8VYN31E/PgMNcBX5WPQTiTq9Hcn3maBlNUph5ytnFCqlNnKZRzTv1hL/3by14G3
-	 FcmE1bEpH1rPibRUe5epbd4uFL6jlyQX6b60cs65IrgN2GDxX14UxIN3BYtKfFMKziYLH
-	 E+CkHoHoKO6K/dsVAtH89AVKjNZKPBgHyEliqQn009Rn6MVjtkAGvayMgig+ZtNB1Nw==
+	 Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
+	 Content-Transfer-Encoding;
+	bh=PTcUmOOyL/sDjI+Yim9rzbhFiBv2TQdk/UVNtMpPG38=;
+	b=4xDK+XVw48DECncpuo4MDmvtX7mdZ5wRcnDWqnc97zzi5f59tTajkXyOuiCjQvbFMcxA
+	 lrsRMtWA2FVMVt1Ftlk4jFr+LzLe5k7mp+ZW6jGf7GFH3iT65031+TxQoKPW7I1VoZEIv
+	 U3A0yfbptcnNoYySBd5LnKKJ4ervjqTlV+cPzAfpodE6/QXoAvpWgCVXfcyXkgNx7HgG3
+	 L0vtXItW52e2/7MnfZYRQqMMY8w1MMUcbWSqUUoH4TT9ULWOhpZbZfEtbQX++eQS2+b6q
+	 /U+w3leqjr3eu9TKpWJScRLcrWJaVsw6s3ypd2ZJXIz3vJMx3Ccc67jSzTFyptRw3JA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=none header.from=rojer.me;
 	spf=pass smtp.mailfrom=rojer.me;
-	dkim=pass header.d=rojer.me header.i=@rojer.me header.a=rsa-sha256 header.s=main header.b=h9DQmv0U;
+	dkim=pass header.d=rojer.me header.i=@rojer.me header.a=rsa-sha256 header.s=main header.b=lvwR5yu5;
 	arc=none smtp.remote-ip=144.76.98.110
 Received: from mail1.rojer.cloud (mail1.rojer.cloud [144.76.98.110])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24836606A31A;
-	Tue, 27 Oct 2026 12:24:21 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 24836606A31A
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92A99606A31E;
+	Tue, 27 Oct 2026 12:24:22 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 92A99606A31E
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=rojer.me
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rojer.me
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=rojer.me header.i=@rojer.me header.a=rsa-sha256 header.s=main header.b=h9DQmv0U
+	dkim=pass (2048-bit key, unprotected) header.d=rojer.me header.i=@rojer.me header.a=rsa-sha256 header.s=main header.b=lvwR5yu5
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rojer.me; s=main;
-	t=1793103859; bh=SBqYKrX22EfzC4b6zLP07G/ly6L6eXuWm9fXjlpGnSU=;
-	h=From:To:Cc:Subject:Date:From;
-	b=h9DQmv0Uepr9wNBoK454wCrAb7OoyyKhPOMGTuBMcYScd0soPNrbWe/qyBklT1W88
-	 4O/US5vsm0gisMbLffBuVVnvS5vioHj5wJyR8P2dq2vp7oCgG34NTHBgaOD3cqWtdm
-	 p/RyFvsRiu6/LhUPCb4b75U8AQWGhP+V8AVdpGSodn9PEHuGyxCIWrA/qUiUWJiPif
-	 4S+KNUnl4NJaWzfyDVFIBxl7cCtf7pjxXrZv7Im2q/sRANvF63V63ey8GUshlSf9bY
-	 VPx1XQQnm0GslBaEDB/6h5sWorO/XFsUgse5SBRkmRtD68h9+UprlznazLfVb+3lfX
-	 EvZhJ13cJOXqw==
+	t=1793103861; bh=0t9oJeZ+qvC6ntnFFDqmMrX48VxDf5pDUidCWUuWYuM=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=lvwR5yu56LrypLCygfy9SKiAcDpdHcVC4POsxMkbYdWDaDPCE0faTblrqS1gcBqQf
+	 R5JWWl57MElYXacsg3Rh/FB9eDce6DZDyFIqESVIQFcy9vkCt97G1qTxtPFH7s/vPd
+	 sOOfLd8UpXBwn80qpSp4iDHetlxQKjV9VsVlleF2lIpXW2UsyGic3DaymnlLr/n/Kp
+	 ICMy14ic0FDHLKJdln3EvDn9NsA4+Rb7jJvs+fwfI1NfiWTgWaI0c2fgqs80tl6WwW
+	 LJf+Ks/rCLNo90lr5XimUVPtZFW4JHj3km6obE/poGodYf8K4hNt1sG94sVup100ga
+	 VjpdqUiLxmE/Q==
 Received: from nbf.lan (unknown [31.216.115.198])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (P-256) server-digest SHA256)
 	(No client certificate requested)
-	by mail1.rojer.cloud (Postfix) with ESMTPSA id 2FEE21202E1;
-	Tue, 27 Oct 2026 12:24:19 +0000 (UTC)
+	by mail1.rojer.cloud (Postfix) with ESMTPSA id 2D556120499;
+	Tue, 27 Oct 2026 12:24:20 +0000 (UTC)
 From: Deomid rojer Ryabkov <rojer@rojer.me>
 To: ulfh@kernel.org
 Cc: linux-mmc@vger.kernel.org,
@@ -54,10 +55,12 @@ Cc: linux-mmc@vger.kernel.org,
 	shawn.lin@rock-chips.com,
 	llj@rock-chips.com,
 	Deomid rojer Ryabkov <rojer@rojer.me>
-Subject: [PATCH v2 0/2] mmc: core: sdio: fix UHS init with fixed 1.8V vqmmc
-Date: Tue, 27 Oct 2026 14:24:15 +0200
-Message-ID: <20261027122417.954133-1-rojer@rojer.me>
+Subject: [PATCH v2 1/2] mmc: core: sdio: retry without UHS if UHS init fails
+Date: Tue, 27 Oct 2026 14:24:16 +0200
+Message-ID: <20261027122417.954133-2-rojer@rojer.me>
 X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20261027122417.954133-1-rojer@rojer.me>
+References: <20261027122417.954133-1-rojer@rojer.me>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -69,47 +72,58 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The Realtek RTL8822CS SDIO Wi-Fi module on the FriendlyElec NanoPi R2S
-Plus (fixed 1.8V vqmmc) reports S18A = 1 in its R4 response although the
-bus is already at 1.8V, contrary to the SDIO Simplified Specification
-3.00, section 3.1.2. CMD11 then times out and the module ends up at
-50 MHz high-speed instead of SDR104. The SWT6621S behaves the same way
-and, without patch 2, doesn't come up at all.
+If mmc_sdio_init_uhs_card() fails, e.g. because tuning finds no
+working sample phase, card initialisation fails and the card is not
+usable at all, even though it would work fine in high-speed mode.
 
-Patch 1 makes SDIO init fall back to high-speed mode if UHS init fails
-(e.g. tuning), instead of failing the card altogether.
+This happens for example on the FriendlyElec NanoPi R2S Plus when the
+SDIO pins of the RTL8822CS Wi-Fi module are left at their default 4 mA
+drive strength:
 
-Patch 2 skips CMD11 when the host is already at 1.8V.
+  dwmmc_rockchip ff5f0000.mmc: All phases bad!
+  mmc2: tuning execution failed: -5
+  mmc2: error -5 whilst initialising SDIO card
+  [... repeated for every init frequency ...]
+  mmc2: Failed to initialize a non-removable card
 
-Tested on a NanoPi R2S Plus (OpenWrt 25.12, Linux 6.12.112 with these
-patches; applies to mainline as of 2026-10-22): SDR104 at 150 MHz; iperf
-as a 5 GHz VHT80 station goes from 70/29 to 123/125 Mbit/s (rx/tx). eMMC
-(HS200) and SD card on the same SoC are unaffected. Longjian tested
-patch 2 with an SWT6621S.
+There is already a fallback for a failure to read the CCCR in UHS mode:
+reset the card and restart the init sequence without R4_18V_PRESENT.
+Do the same when UHS init fails, so that the card comes up in
+high-speed mode instead:
 
-The device tree part for the R2S Plus is sent separately to
-linux-rockchip.
+  mmc2: UHS init failed (-5), retrying without UHS
+  mmc2: Skipping voltage switch
+  mmc2: new high speed SDIO card at address 0001
 
-Changes in v2:
-- 1/2: the existing CCCR fallback resets the card, it doesn't
-  power-cycle it (Shawn).
-- 2/2: note in the commit message that this relies on the fixed 1.8V
-  supply being described as vqmmc-supply (Shawn).
-- Dropped "2/2 alt", the alternative to 2/2 that kept sending CMD11.
-- Collected Reviewed-by (Shawn) and Tested-by (Longjian, 2/2; his
-  reply didn't reach the list, it was HTML).
+The fallback is taken at most once, as the retry doesn't request UHS.
 
-v1: https://lore.kernel.org/linux-mmc/20261023232813.2983368-1-rojer@rojer.me/
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Deomid rojer Ryabkov <rojer@rojer.me>
+---
+ drivers/mmc/core/sdio.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-Deomid rojer Ryabkov (2):
-  mmc: core: sdio: retry without UHS if UHS init fails
-  mmc: core: sdio: skip CMD11 if signalling is already 1.8V
-
- drivers/mmc/core/sdio.c | 16 ++++++++++++----
- 1 file changed, 12 insertions(+), 4 deletions(-)
-
-
-base-commit: 734bef548a96e8774d6eef5dfa2026c6edc4e80b
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 83085e76486..6787fdf1c53 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -867,8 +867,14 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 	/* Only if card supports 1.8v and UHS signaling */
+ 	if ((ocr & R4_18V_PRESENT) && card->sw_caps.sd3_bus_mode) {
+ 		err = mmc_sdio_init_uhs_card(card);
+-		if (err)
+-			goto remove;
++		if (err) {
++			pr_warn("%s: UHS init failed (%d), retrying without UHS\n",
++				mmc_hostname(host), err);
++			mmc_sdio_pre_init(host, ocr_card,
++					  card != oldcard ? card : NULL);
++			retries = 0;
++			goto try_again;
++		}
+ 	} else {
+ 		/*
+ 		 * Switch to high-speed (if supported).
 -- 
 2.53.0
 
