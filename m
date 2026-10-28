@@ -1,124 +1,63 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1793184219;
-	b=00PDGrU4Abga9/gQGc2GX4V+tZrOcZpxjRX5MaWoVU5prWlv2lNG5mKmbUTxxbhhVQas
-	 AyoNjdksQ2qAdTUCXZkmDF/TV7pFYXQyN/FrZ06EzrX8iRN7mfnw0ui/c7AVjqOh8y5mt
-	 0SEH/75gQMmo74JK0H1qE8Oud+O89zDzJbqbSA5CLH/1B4kEUzoov+f3FmVR0tthy9zlf
-	 DM6nzOu+s+VO3QGGwu8Zy6xBojdfpfcWKzgROINg8S5VIFc/i4Bavj7q8ses+pq7t5YQz
-	 V77Zwhenme/oFYkuvJXX2BdzA8hcTeBHLhjLUd9xkubkkeSBUbQF5rtDybVoVMZVE9w==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793184219;
-	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
-	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
-	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
-	 Cc:Content-Type:Content-Transfer-Encoding:X-Authority-Analysis:
-	 X-Proofpoint-Spam-Info:X-Proofpoint-GUID:X-Proofpoint-ORIG-GUID:
-	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-Virus-Version:
-	 X-Proofpoint-Spam-Details;
-	bh=O1Rv4j/6uvOd08Dpf/Xz0pIpfr0jYSc+eyXt5pHDHM0=;
-	b=xvxbM84bkkvSqaLoVTTCQw6A3XwRRJYIug2LvKxZHr9Yr45xJskK6QdrBFqFPhmwpXfd
-	 M0ZIed9zSJCjOOKnXPtzu3tvOBrXxLlG/w0ayuMueY/sZNnPy/1py4cRlAl5PlW127Yf/
-	 9IhgryXDfTP0XNltWMGN+D8Ef5BKzGjzsMD3Adaj743svgT42O3vE4MuUqHgcsfvm/E6K
-	 hEr/ElYfVzOqRpaVo4V95qQhEpqtNasYvmREutQ6W/MKVtHYaYC0CflYAXq9uwoyONe/O
-	 fjlkLjc1Wkdm+Fhx9TG1WjsLKiWZd2EssYJGVCXxt5MGULLpxv20ZYhFE2wWL4im48g==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=oss.qualcomm.com;
-	spf=pass smtp.mailfrom=oss.qualcomm.com;
-	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=gnfmcqMk;
-	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=I4QmHULz;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=57.103.91.143
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1793187801;
+	b=ZjAeqOiIlODHkLDzxjso7AFnjT2Ua9zf99o8DMzh9L/ZTVHrCkHSbgyBzhsgFQcpQkaz
+	 bHC7deRI3NrmLuHMCBKMomawuHeUDG+PzDSUqpRXCkGctdGLOcMEHO1OCn5cDbaroXTjZ
+	 sTxkFX2d9K2jr0gQmFakmAMsXzJFGddspC127Yg3loU2fJ21Od3qhOfok72CVDwsQhi/P
+	 f2oQeg/P0DLmzqPZhfjqWupinqC6bBBxTIxOZgnk6HK8uaH3YTRzuu+saylRxLy3/H5k1
+	 /X72u6k6q8EqwDkqNxbjjDM2H1zSi8uourI8bXzD2jjqibbBMwulhvRRWamLJcDy+lg==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793187801;
+	h=DMARC-Filter:Received:X-ICL-RepId:X-ICL-Out-Info:Dkim-Signature:
+	 mail-alias-created-date:Received:From:Subject:To:Cc:Date:Message-ID:
+	 MIME-Version:Content-Type:Content-Transfer-Encoding:
+	 X-Proofpoint-Spam-Details-Enc:X-Authority-Info-Out:
+	 X-Proofpoint-ORIG-GUID:X-Proofpoint-GUID:X-JNJ;
+	bh=OsuVkeafblGpTsXYut7m1aN/nlY5ZzIRjoB1MM1Rhx8=;
+	b=wbMXzs8v5GVKWFrPX/dI5kRDiXU52G6l+qZj9HVRg7vwX36XBcWMb6cQxXI7A7x6Ma0E
+	 9zV0wwrZAoAb9kxwNucI4wiJzbA3RxsFQvnMdCCTzqJHKPQtI5nVRtI/QopOSocI3uZc1
+	 2fPXZ5jECHuSQ6a2dazfEo7cBBr7h3d35AVKNddUadlRldt21ECYyGX2BPumJym5pXgWL
+	 NLsNnPlgTBrgw8gc4RPj/QYuRktxLuESTSbb+YxN1uaN9yzIG5q03jyT0oyZhPTRg6Id+
+	 unggvpZdDfNGCJGkuqBoqHOqVaRHY4p1zEBJfLg7qT4lH3Skf8Zij1Pp9xev+Jm4hfg==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=none header.from=manyhobbies.com;
+	spf=pass smtp.mailfrom=manyhobbies.com;
+	dkim=pass header.d=manyhobbies.com header.i=@manyhobbies.com header.a=rsa-sha256 header.s=sig1 header.b=hwNbtXvn;
+	arc=none smtp.remote-ip=57.103.91.143
+Received: from outbound.ci.icloud.com (ci-2003b-snip4-2.eps.apple.com [57.103.91.143])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F789606A31E
-	for <linux-mmc@vger.kernel.org>; Wed, 28 Oct 2026 10:43:38 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8F789606A31E
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31CC2606A31A
+	for <linux-mmc@vger.kernel.org>; Wed, 28 Oct 2026 11:43:19 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 31CC2606A31A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=manyhobbies.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manyhobbies.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=gnfmcqMk;
-	dkim=pass (2048-bit key, unprotected) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=I4QmHULz
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69S8JxTi3892482
-	for <linux-mmc@vger.kernel.org>; Wed, 28 Oct 2026 10:43:37 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	O1Rv4j/6uvOd08Dpf/Xz0pIpfr0jYSc+eyXt5pHDHM0=; b=gnfmcqMkq6lA9KVl
-	rPfmN6ahaWIQwN/5qy2ETROlTIP0r4NviPMFeUt6hs74cbawpaFJdcn7m4peLkrQ
-	MBrH4iRtdLvmVhIUE8t71rQl0bwPbJ780swqbIOk1x7eQxUKkUkxRCAz5kvXPu3q
-	TwynsCQH5luOfquuGSok0h9dqTH4Voafvj/Lm0jYSCZra0UbdM5i/vHKDndaJlpZ
-	QkkyuLgBldDR5zwmId7ULX1n1fw1DxKjf8cfZpvfuhyb6aVGH6t5GtV4+BlnPYcq
-	M7LZUAwphRTe863dJLNBi3QXLbjqI9DqSaCa5fqR4lorSe6PfH2L+hlaxQHh1GxR
-	Ia2Lwg==
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com [209.85.214.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hk6f920qe-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Wed, 28 Oct 2026 10:43:37 +0000 (GMT)
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2e832c03576so12800915ad.1
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Oct 2026 03:43:37 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1793184217; cv=none;
-        d=google.com; s=arc-20260327;
-        b=E0pOoqzxp1Egahs1ptCCb3QS5bMZwRI7uLq8xaFXDBfELHc0GOVw18LYA3FoKB4YOj
-         rZocKcgiAr1xnEMti8B3bRdD/ronjTR96lJgCkAnF1aIzGVl4c7AX8BTqH2PcxbtDWz5
-         5cWj7TP4r4wF5rEB3BIfCx2OZ0o9NZtMPCMuB/bb1iy6Y3yS2PwMPzlrqynfxN4p0rcP
-         NprkwiO4Z9eiHPcnVr4fSjKV1k99zDKpP7dq+EK8EK37Pa6gmXFUrB2UCnwHdHT69Qld
-         H30oRJ+crQ/pFxdVGUFtWkv6TyNXfbgpqhOvdRbvvEqXpc7IwqPhSIRmBVjDQilSw3J9
-         14jQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=O1Rv4j/6uvOd08Dpf/Xz0pIpfr0jYSc+eyXt5pHDHM0=;
-        fh=6HDIuwWgKG8TwulPQAUUKEM9fA48P1EqVorDGHtg0uE=;
-        b=fDG93GndfcQGrTGPlxrvPEjMTiFL1c+a1cemWz+IzEJfebWfceF8rG5h4dlyfoU+js
-         I/27Dsqg8Ru1AqRFxK0Jggv60upC1J05j1Mie/JnWCc1x/8srV5vHRsrbaXuwknyn/Zh
-         +oli5DjwHiyMjeCXm/l7A6H6h7/mkggbTxMoJaQbBCx1bPzCpBsBuuHR87Vi84GQKJov
-         7wN7jQBErPlJCudsSp3my+NGGCzYXq2mVKQseWdrMbm4r+bHhO6nYfC2W4P27aF3BjCS
-         reY50PwYgou0MbSUyACy/ij3bVVjqDJb4SBj+fcvqb5iSDPjfrN/kJmp0g8IeZF90tUE
-         Idhw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1793184217; x=1793789017; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=O1Rv4j/6uvOd08Dpf/Xz0pIpfr0jYSc+eyXt5pHDHM0=;
-        b=I4QmHULzaBThIlQ+ZScCIJ6gnflPVZV41qNw1KAoo/CSjj7NneMt6WAE2bCu9IfMNg
-         UD5uj7ijcAmu0ye//rjLbieifmAR887EoP2ujUln1Vd91AWEU9qeNtmooR8zP21BlkDt
-         +0Zf/C2vkMC1qFj4QpLsfQzERgS/0y2niLYT3wT1dNFbYe/Ah20aQYy2k8VeXHU1MwTE
-         M29LaZ9YMkFlYPX+h/gcVyn3Zp2F9+y1bc76QfpIakrjI2fBlTDEDmR4DzSkSxLAgem7
-         UI/q2e+5hnnYAopG+OjtvmD6rIXg/i3/5xxFtTUV7KpsANLnhd0+ZeXRajFKfPcOp56A
-         kN1Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793184217; x=1793789017;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=O1Rv4j/6uvOd08Dpf/Xz0pIpfr0jYSc+eyXt5pHDHM0=;
-        b=LHqoylcKuPfe4xrW7Vu09sK3bnuAB5mmduYQO9s+KB9KwnJjgGmUIWQ5BUQ8BB3zxj
-         JxZDcgKLe1bkDBm0hRXFFDO0BfTPXAzb+fCu+WYWTOH4CSTNPvlYGoy+2hrDZSFub7jA
-         N/x03AqDjJMigIDNPx5mznYUlX38FOPdiGEgaaIDZMxlZqNIi0OGls5CKHM3b24amEYH
-         LSJgoHR09MuYbtLAiDDfYY61lnZU8drgvAbDBLL/SDjdblVwIXD3+vhLB9pbYcsFG3cu
-         cHEl+UXpwlgctzzotCF9FBB7Y8uMh6vWvxeZ+v26OlS3ouc1FgQ/CotleEppCo6CYJzN
-         JDpQ==
-X-Forwarded-Encrypted: i=1; AKwUvBwXU/HGLHTPeF5lS3Y+PUVpRH4ckLJZCgeoo0t9usWPKgaLUI91DwjoqPWcMiAmfOiIAEPrTi8FcEw=@vger.kernel.org
-X-Gm-Message-State: AFq9FYLTuKsDvEFo0/vcOew04mKtjsPklYSVam2jU0IIXjwqNoVmO/ME
-	7zdHqXp24TO8s8+xQd9MKnWpQ/fbxZ002Q7WJKiI0mmbxYm+YWe3PmZMF/4xEOgsW081+FlAQQl
-	f/HoGVGoL19XZjn0n7EYKQ1jXUoByHhpganPgcCMn4MLxzlkic/Qh1vhrESA+w7SPayK/VRfe3D
-	/rUVZj1whhPegulEKJOTErWQ4Gqp8c/kKhjZiNZi5VUhcAPJUM
-X-Gm-Gg: AYBFou2pLqXnopl/ykCxuJn0jYpQ5zPt0EWCB8BB2we2QIDYE5IXUThX9xEH4/KXOg5
-	r9+tIfhl/MRBBnnseQKoF67gn8TKQx4NtbPzEGFOZBElYttpONFpkCgpeOAWZNKBzvRj3MY7eSx
-	NCA0LAn/8FKWKCYVH7WrrS+Vq5KtgCax2Nw3Bn9gXBFDgNNkcjhMfTqFbiOAlltnhVFO+xiuhDl
-	GX+QBKKM8h4K0wkLA==
-X-Received: by 2002:a17:902:f545:b0:2e8:8637:5e3 with SMTP id d9443c01a7336-2eb0052b99bmr17120055ad.34.1793184217047;
-        Wed, 28 Oct 2026 03:43:37 -0700 (PDT)
-X-Received: by 2002:a17:902:f545:b0:2e8:8637:5e3 with SMTP id
- d9443c01a7336-2eb0052b99bmr17119865ad.34.1793184216581; Wed, 28 Oct 2026
- 03:43:36 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=manyhobbies.com header.i=@manyhobbies.com header.a=rsa-sha256 header.s=sig1 header.b=hwNbtXvn
+Received: from outbound.ci.icloud.com (unknown [127.0.0.2])
+	by p00-icloudmta-asmtp-us-central-1k-100-percent-10 (Postfix) with ESMTPS id 6C1051800820;
+	Wed, 28 Oct 2026 11:43:18 +0000 (UTC)
+X-ICL-RepId: 01a18252-5d6d-7bd6-91d2-692952ce09ab
+X-ICL-Out-Info: HUtFAUMEWwJACUgBTUQeDx5WFlZNRAJCTQhPAUMGWQZeD04dXwVcEhVdRUcMWkVWH3kVUgNOA10SWxFWHhkIXR0ZHldQWgpcCVEXUQ9eDkFeWhdeTUUID0kZEFYBWFZdBU0aXBhZDxwTUFZaDlsERxQXG1wAFxtGAgQjAl8ARQJeCVYBMBcPVk1UGV0UXwRQElAdQENUBF9QVBFXUAtaBUkKSQtaAFMERglWC1wEXAdeCEkBWwRZB0gLQANZDl0DRQxLB1l3BlMeQBBcD1UCVwMXG1wACUtGCUkdDg5CGEYfVCdXAloKWx4=
+Dkim-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manyhobbies.com; s=sig1; t=1793187799; x=1824723799; bh=OsuVkeafblGpTsXYut7m1aN/nlY5ZzIRjoB1MM1Rhx8=; h=From:Subject:To:Date:Message-ID:MIME-Version:Content-Type:x-icloud-hme; b=hwNbtXvnnR59r7qgS5h1p3fS16aD5jzIeyH6FfM/P0jckDlcg/ea2roFPOaOUG3J/sb081LehV5wvctDZ/JiMRzjuh8SU/TYry5D2bxTyoPyNIiVFQNdgFJDsGrAy5E0jl6a3Ka7FE4sxX8B0I2kBApvKwhZzSkSlqogs/WjPtNceikWDst1iRwoB3qmZw4xPH1EzPUwPoPnJoTCjz0XIpvAam6R2m/B8cJZr1W5fmag0lxrjvkDJDxJIDfBOLgUQDYUPYfQpK0na1nRpHwaj5tJ4QU3NTx4UyOPY6VSvkOIKY2b9BuD0skdqxmIXQB+5RYx+6gfh73l9TCDfnDoOg==
+mail-alias-created-date: 1780273699991
+Received: from claude-agent.manyhobbies.internal (unknown [17.57.156.36])
+	by p00-icloudmta-asmtp-us-central-1k-100-percent-10 (Postfix) with ESMTPSA id 9048C1800839;
+	Wed, 28 Oct 2026 11:43:17 +0000 (UTC)
+From: Tam Do <tam.do@manyhobbies.com>
+Subject: [PATCH v3] mmc: sunxi: reset the controller after an update-clock
+ timeout
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: Chen-Yu Tsai <wens@kernel.org>,
+    Jernej Skrabec <jernej.skrabec@gmail.com>,
+    Samuel Holland <samuel@sholland.org>,
+    linux-mmc@vger.kernel.org,
+    linux-sunxi@lists.linux.dev,
+    linux-arm-kernel@lists.infradead.org,
+    linux-kernel@vger.kernel.org
+Date: Wed, 28 Oct 2026 11:43:06 +0000
+Message-ID: <179318778660.81375.11263258280496155344@manyhobbies.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -128,113 +67,99 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261027144051.249211-1-ulf.hansson@oss.qualcomm.com>
- <20261027144051.249211-2-ulf.hansson@oss.qualcomm.com> <583dc515-855c-48d6-aefb-abaef26b2564@linux.dev>
- <CAPx+jO_+P-ksGzbYp9Aky7etMyKtTUvtAZJZJpauw03Y8zP0Lg@mail.gmail.com> <5ebe0445-a111-49a5-b9cf-0185d3c3f67b@linux.dev>
-In-Reply-To: <5ebe0445-a111-49a5-b9cf-0185d3c3f67b@linux.dev>
-From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Wed, 28 Oct 2026 11:43:25 +0100
-X-Gm-Features: AclHuK-qGveGNHeghifsFMqPAZAO8a978GlTSHJA7r_OAEvgCwAoy8i3r1F71po
-Message-ID: <CAPx+jO98iHx=VRwyWgg+aQmduquLVZe9Q8FNNK4VwkizXB2A9A@mail.gmail.com>
-Subject: Re: [PATCH v10 1/6] dt-bindings: mmc: Extend keep-power-in-suspend
- beyond SDIO
-To: Shawn Lin <shawn.lin@linux.dev>
-Cc: Kamal Dasu <kamal.dasu@broadcom.com>, linux-mmc@vger.kernel.org,
-        Ulf Hansson <ulfh@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
-        Florian Fainelli <florian.fainelli@broadcom.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Oleksij Rempel <o.rempel@pengutronix.de>, linux-kernel@vger.kernel.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-X-Authority-Analysis: v=2.4 cv=frhJ914f c=1 sm=1 tr=0 ts=6ae1d1d9 cx=c_pps
- a=MTSHoo12Qbhz2p7MsH1ifg==:117 a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10
- a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=YMgV9FUhrdKAYTUUvYB2:22 a=Q-fNiiVtAAAA:8 a=XdD-yPI1Do4n0GidWpkA:9
- a=QEXdDO2ut3YA:10 a=GvdueXVYPmCkWapjIL-Q:22
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMDI4MDA0MiBTYWx0ZWRfXwFQ2wv95uFO/
- M70LIq+EoLDQjjgmEaI5C07iuJT0fgDzb0J6MMvwbeVtdJaEfMvHn+ywZJJniyJs5j3TmOYhWlZ
- zJqgTv5yyhpQ9ss6zXbADPjkKXmYwPk=
-X-Proofpoint-GUID: WC426bzBvNvlOJiW0Td05WtvrCO2XvEq
-X-Proofpoint-ORIG-GUID: WC426bzBvNvlOJiW0Td05WtvrCO2XvEq
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDI4MDA0MiBTYWx0ZWRfXxc5Wf9/lG19G
- Vf07wDYeg7jg38KNjbLhUCw0pThfCUgJ7WzbBdSPl592iTa/V0eLXtNoJ0n3zNmE4TGWTM6b0Xj
- rYJHuxN/YPRuW1iX/VdDZGFUhUGTpKktX205GEh/5fb+ikBGSn7+SZpPTzEGAJ/RBybEmag/QrB
- ZV7NYZlYjLelE+XDmpbRExmCw6bkFEiWB9Epddtv5VfjuVUGgMBUMbyvL0gk3QvCv3vhD3RJzgG
- +06yC0R5fYJPSPvs3pa0aGBfh5nJwrsmQe78lgduZixntfbWxvvyAubYQlrk4AJ48ldy1RpN4ks
- LhLxQuz4a1/ovVK2N+Fnv6q7Opi7GtgKXuvGxh3hcf/w+nFRs9LDVkTZ5blnTPkobaHsaHpOcDR
- 5KzTszWxJb1VEjdEMkuf7qOBS70Mgyp8IiTFBquuKCHzmB//SeeGkYRQ+xfO8lGDznhJnoMV4r/
- AH730eBHIyjD27+6HIQ==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
- definitions=2026-10-28_03,2026-10-21_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 clxscore=1015 suspectscore=0 adultscore=0 phishscore=0
- impostorscore=0 lowpriorityscore=0 priorityscore=1501 spamscore=0 bulkscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2610190000 definitions=main-2610280042
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDI4MDA0NiBTYWx0ZWRfX9v7vwJCZUAQh
+ cJY9YliLJf5Sj7s8z0lAbLqgy4FCJ+wmLCJ1GwC5QAur6kNEf4/BFfS6/FFWLkZxtGHz9NTkVeD
+ vBCi1Iwab93fOTroBByohOYlMa98l/5Lu9VqV4CjwBEyizskLbu9OaCmeohQoNAlf+KTJRCrBpS
+ C6zZRoQ8wGLqR7sCw6RI/3aPA2hMx6dq32DuMb36aKZe0uJiB3CHuNwS7zx2wuCc0b9Nb0oJgyt
+ DxqZQ95bkDKbBrgjyFQag6cf2O6JytdZKdd+ksQoMHocnZw2HWcROlehudyeOiPCJgyhu1Rh7LB
+ luZ+La2Hc5IEZRt92uJjS8ig8/Fvh/f2BdEVv1eMwoeo96eaIeGc1YBiF8r4+0=
+X-Authority-Info-Out: v=2.4 cv=L74QguT8 c=1 sm=1 tr=0 ts=6ae1dfd7
+ cx=c_apl:c_pps:t_out a=2G65uMN5HjSv0sBfM2Yj2w==:117
+ a=2G65uMN5HjSv0sBfM2Yj2w==:17 a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=VwQbUJbxAAAA:8 a=w2OPf45SAAAA:8
+ a=1tvfc1y3xX-o4uWKYHEA:9 a=QEXdDO2ut3YA:10 a=-iXIJKm6ftRzmWoHelNS:22
+X-Proofpoint-ORIG-GUID: VSrRne3TfcgmffBp2ODlyHQ9fNAP35cV
+X-Proofpoint-GUID: VSrRne3TfcgmffBp2ODlyHQ9fNAP35cV
+X-JNJ: AAAAAAABnZTtDZq/p55h04EW18ZZXuIli9DAQsyjrV651gPUhYbhFPONnpN4Q2l1D7zh4h
+ jrNXs/YFjDA6Bc66K1KHPplaC618Obo/QKJfRxNwzx/llyrxopXKzk1QMlJXTmC6A3JH9k
+ KOx0wC755kgtChPDKOkD9zfVh+aDbg/8iZRUD+HUldRc8IeOy+5ggKT8k8h25lj7JoAmtH
+ 5H4qEAbxEbogSP4abWSsRcR8/WqdHkjdpZqnu0QqctC9bGgWbopMNVbWXujObrwRBrGStb
+ h+uaGM7Nmre1ZIFromtNOwQkx3WddvxeN4berUVREtE0sz2y6nez4cGg5QLIpT6mnBGD6u
+ xS8LQcpp79ORU7urxKHgmCvgE7bw+0EhEFUeGipD1TFkyWEev345KJNNPKdJBiehBK1n9C
+ /n92+exJYEQDOIkxBay5BNga3YfW+uvtnYwWRsyXYEazHgyWLBHMvgZaGydwF9HtKg0bAF
+ uT2Ik9ZvHmkzzc1ce87Jf1QhSB1UUDFXrDwem6m3YPHaAbRJD8D3SaGt1JI+PRj5ydU3uT
+ ZcwLfbKQhMAVCIwYba4d07PJammAtKU+L/8wcdXtkI8XHWEtrykhPPY6JSI8bBG43vy8dG
+ kgjGdm182S0/9AhzDp0EpZ+xz0JQ1zDIVUwzfgu45ct6ZTMZoN76K928XsckRATN/C7P4H
+ eQ6nGpkmiWsppNeCnkTVH8vAYzxH770OPo9qF8UY+rA9hNt3oWLnD0J4XRQgnLc8uryHcQ
+ eGrAv6ruAjklRXg5/oms1LvE0Wih++CTw5ICWVI+aXA/n5UdJ5OHty52H0WVISDW+4tvIR
+ 8UXEmk+0s8R9TbBZwivGJHkJM7sL/CMUw/3PyopCouOgQJGHUHtX7rF6BOkrehGdJeHF7i
+ Pw/hyjOUML+QMhsnl/CEY3+q5fBreUcdfZcC9BdHNGNYkXCtQp2SI5gbHnJaN4RmfuvbOY
+ QHeDN6QPjXJymQGLcYGpMal4OZdbWCFn5tq4ptVr56UlSvCkdtadjJMTiCUjuSCVQMtHX8
+ uGAIIQBbAfuLBBxm8Ush/yw8SWT0Sn/gCtp5gf3Vzq+d+lP6WdMQ54FNDt2ZQvOPSUrHGs
+ ueoY29CwlXH1ikSbY+qDWtqlVtMFTJXXrLPxH95vdJJM5w6JKXNF3PVImepC/+D4g65U8D
+ qJhfo8VQlnloXhUlt5dfAGAsaYgJL4EOEDWxqFFYbUZJRC0aTLVbKOx3c1Vgfe4MnTv/75
+ G9owgtAxXrjrA60wSpoul5PyOywNJy4nUrGbARfutKqiBVB+kokHxYBilZDL9ZdGseisPB
+ V4Hyvm1XM=
 
-On Wed, Oct 28, 2026 at 1:37=E2=80=AFAM Shawn Lin <shawn.lin@linux.dev> wro=
-te:
->
-> =E5=9C=A8 2026/10/28 =E6=98=9F=E6=9C=9F=E4=B8=89 3:46, Ulf Hansson =E5=86=
-=99=E9=81=93:
-> > On Tue, Oct 27, 2026 at 4:02=E2=80=AFPM Shawn Lin <shawn.lin@linux.dev>=
- wrote:
-> >>
-> >> Hi
-> >>
-> >> =E5=9C=A8 2026/10/27 =E6=98=9F=E6=9C=9F=E4=BA=8C 22:40, Ulf Hansson =
-=E5=86=99=E9=81=93:
-> >>> From: Kamal Dasu <kamal.dasu@broadcom.com>
-> >>>
-> >>> keep-power-in-suspend is currently documented as SDIO-only, but the
-> >>> requirement it describes -- preserving card power across a
-> >>> suspend/resume cycle -- applies just as well to any card type. Drop
-> >>> the SDIO-only restriction so eMMC and SD platforms can use it too.
-> >>>
-> >>
-> >> I don't see how SD could use it from the following patches. Perhaps we
-> >> should still be more strict here to say SDIO and eMMC only, unless
-> >> SD part is implemented later.
-> >
-> > I didn't have the bandwidth to implement this for SD at this very
-> > moment, but the idea is to add it for SD too.
-> >
->
-> SDIO devices have a clear wake-on-host requirement, so keeping power on
-> is reasonable. eMMC and SD are passively accessed devices, making this a
-> pseudo-requirement under system freeze conditions until Broadcom chips
-> changed the situation for eMMC.
->
-> However, for the SD part, I doubt such a need exists. It would require
-> dedicated ROM code support, and unlike eMMC, SD is not used as primary
-> storage. Worse still, unlike eMMC and SDIO devices which are soldered
-> down, vendors typically have an AVL to certify board-mounted components,
-> while SD cards can be freely swapped. The compatibility of off-the-shelf
-> SD cards is relatively poor, so I question whether there is a real-world
-> scenario for SD cards here. If there is no such scenario, this is dead
-> code.
->
-> > That said, I was also thinking that maybe it would make sense to add a
-> > sysfs node to allow the behavior to be controlled by userspace.
-> > Thoughts?
-> >
->
-> Sure, regarding the sysfs node you mentioned, we already have
-> mmc_caps2_set() exposed to userspace, and we can add
-> MMC_CAP2_RESET_AT_RESUME support there
+If the clock-update command times out it stays pending in the
+controller, and every later clock update times out as well, so the
+card cannot be initialised until the next probe.
 
-The reason for the proposed user space node is not to control
-MMC_CAP2_RESET_AT_RESUME. That is a different story, specific to
-Broadcom platforms at this point.
+This happens on an R16 board whose SDIO Wi-Fi holds DAT0 busy while
+its supply comes up during the first clock update.
 
-Instead it was solely about allowing user space to keep the eMMC and
-SD card powered on during system suspend. Which may be useful for
-other reasons. Like, internal garbage collect and suspend/resume
-latency.
+Reset the controller on timeout so the next attempt can succeed. This
+runs sunxi_mmc_init_host() with the interrupt enabled for the first
+time, so write REG_IMASK from sdio_imask under host->lock, as
+sunxi_mmc_enable_sdio_irq() updates both under that lock.
 
-[...]
+Fixes: 3cbcb16095f9 ("mmc: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs")
+Cc: stable@vger.kernel.org
+Signed-off-by: Tam Do <tam.do@manyhobbies.com>
+---
+v3: take host->lock only around the REG_IMASK write in
+    sunxi_mmc_init_host(), not across the reset; v2 polled the reset on
+    jiffies with interrupts off. The return value stays unchecked, as in
+    sunxi_mmc_runtime_resume(): if the reset itself times out the
+    controller is wedged either way.
+v2: held host->lock across the reset (not posted)
+v1: https://lore.kernel.org/all/179307312104.39863.12372814163472848752@manyhobbies.com/
 
-Kind regards
-Uffe
+ drivers/mmc/host/sunxi-mmc.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index fe4c0f6d73f3..55313780d06d 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -322,6 +322,7 @@ static int sunxi_mmc_reset_host(struct sunxi_mmc_host *host)
+ 
+ static int sunxi_mmc_init_host(struct sunxi_mmc_host *host)
+ {
++	unsigned long flags;
+ 	u32 rval;
+ 
+ 	if (sunxi_mmc_reset_host(host))
+@@ -336,7 +337,9 @@ static int sunxi_mmc_init_host(struct sunxi_mmc_host *host)
+ 	/* Maximum timeout value */
+ 	mmc_writel(host, REG_TMOUT, 0xffffffff);
+ 	/* Unmask SDIO interrupt if needed */
++	spin_lock_irqsave(&host->lock, flags);
+ 	mmc_writel(host, REG_IMASK, host->sdio_imask);
++	spin_unlock_irqrestore(&host->lock, flags);
+ 	/* Clear all pending interrupts */
+ 	mmc_writel(host, REG_RINTR, 0xffffffff);
+ 	/* Debug register? undocumented */
+@@ -688,6 +691,7 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+ 
+ 	if (rval & SDXC_START) {
+ 		dev_err(mmc_dev(host->mmc), "fatal err update clk timeout\n");
++		sunxi_mmc_init_host(host);
+ 		return -EIO;
+ 	}
+ 
+-- 
+2.39.5
+
