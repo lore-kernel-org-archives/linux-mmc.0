@@ -1,63 +1,54 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=57.103.91.143
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=95.215.58.184
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793187801;
-	b=ZjAeqOiIlODHkLDzxjso7AFnjT2Ua9zf99o8DMzh9L/ZTVHrCkHSbgyBzhsgFQcpQkaz
-	 bHC7deRI3NrmLuHMCBKMomawuHeUDG+PzDSUqpRXCkGctdGLOcMEHO1OCn5cDbaroXTjZ
-	 sTxkFX2d9K2jr0gQmFakmAMsXzJFGddspC127Yg3loU2fJ21Od3qhOfok72CVDwsQhi/P
-	 f2oQeg/P0DLmzqPZhfjqWupinqC6bBBxTIxOZgnk6HK8uaH3YTRzuu+saylRxLy3/H5k1
-	 /X72u6k6q8EqwDkqNxbjjDM2H1zSi8uourI8bXzD2jjqibbBMwulhvRRWamLJcDy+lg==
+	t=1793189357;
+	b=aWPPQMZoc8zkn2z5/ftZz9D3rYkqHi0G6r6HcVMU19lSU4yY79GIx6YF2bIEWu9tFPxK
+	 QxznK0Hg46Xo3slch3phyxRc49e5AP1na/lJMtNg1MJA8IV+SKxK8cQZiUTAp8cyrplbu
+	 BKiudUbk34DFcLnUMZ5hqMF3fFMdgXx6IEM6lrmTppy501RvD6ZvkA2e1FuTTuIV3Ex4S
+	 Ll49J+9zdVwTNG0Fj7dbEv9vQAejeVy6cPCnbNFOiRGTrR5+G1Jao7KATYEYABUj4k/Bh
+	 VbSUnTzpf6gmFHuHvcWjhTVUChzPre2j8raXhWqRDqutwLlnHnUupyZQhnjekngdyQA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793187801;
-	h=DMARC-Filter:Received:X-ICL-RepId:X-ICL-Out-Info:Dkim-Signature:
-	 mail-alias-created-date:Received:From:Subject:To:Cc:Date:Message-ID:
-	 MIME-Version:Content-Type:Content-Transfer-Encoding:
-	 X-Proofpoint-Spam-Details-Enc:X-Authority-Info-Out:
-	 X-Proofpoint-ORIG-GUID:X-Proofpoint-GUID:X-JNJ;
-	bh=OsuVkeafblGpTsXYut7m1aN/nlY5ZzIRjoB1MM1Rhx8=;
-	b=wbMXzs8v5GVKWFrPX/dI5kRDiXU52G6l+qZj9HVRg7vwX36XBcWMb6cQxXI7A7x6Ma0E
-	 9zV0wwrZAoAb9kxwNucI4wiJzbA3RxsFQvnMdCCTzqJHKPQtI5nVRtI/QopOSocI3uZc1
-	 2fPXZ5jECHuSQ6a2dazfEo7cBBr7h3d35AVKNddUadlRldt21ECYyGX2BPumJym5pXgWL
-	 NLsNnPlgTBrgw8gc4RPj/QYuRktxLuESTSbb+YxN1uaN9yzIG5q03jyT0oyZhPTRg6Id+
-	 unggvpZdDfNGCJGkuqBoqHOqVaRHY4p1zEBJfLg7qT4lH3Skf8Zij1Pp9xev+Jm4hfg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793189357;
+	h=DMARC-Filter:X-Envelope-To:DKIM-Signature:X-Envelope-To:Received:
+	 X-Mizu-Trace-ID:X-Migadu-Flow:Message-ID:Date:MIME-Version:User-Agent:
+	 Cc:Subject:To:References:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding;
+	bh=4hubiP6UNKJsfIYjDwqYKPtFGEwf9AKbEUyOZBEjNMA=;
+	b=iiKVz4lXaoK79t7h2t3/Xo3F2w6SMvuppMJ5LXOTxPeEF+hf4R0lkMzhX/QhFmI1g7ck
+	 Vtvax5IGBjVIwwiST8HfL6eL8jfFbCuvGBuCKPyd/ZBnUcPL/uLAzvkUQKiYEt79q9z6+
+	 /bEF5XMIqajvTWqsienhaCHlRQIFLJCisyj6FJBMGoLift9LwJCpb7ii7JE076Csp3wp1
+	 YBqd0EdxyXBNzj3ox2ohzxLmZHyG+2ks3PfPoFUto01zogjAQPyJ138Hni7jYFCLNwJfc
+	 osmlSKyfdbIOhHS4eXDQ4NNk6ZJKOR8psQSOKKhD9bkvT1f63sxT3BQunvMG5DKKl9Q==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=manyhobbies.com;
-	spf=pass smtp.mailfrom=manyhobbies.com;
-	dkim=pass header.d=manyhobbies.com header.i=@manyhobbies.com header.a=rsa-sha256 header.s=sig1 header.b=hwNbtXvn;
-	arc=none smtp.remote-ip=57.103.91.143
-Received: from outbound.ci.icloud.com (ci-2003b-snip4-2.eps.apple.com [57.103.91.143])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	dmarc=pass header.from=linux.dev;
+	spf=pass smtp.mailfrom=linux.dev;
+	dkim=pass header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=gBCbtE6C;
+	arc=none smtp.remote-ip=95.215.58.184
+Received: from mta1.migadu.com (out-184.mta1.migadu.com [95.215.58.184])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31CC2606A31A
-	for <linux-mmc@vger.kernel.org>; Wed, 28 Oct 2026 11:43:19 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 31CC2606A31A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=manyhobbies.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manyhobbies.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A96B606A31E
+	for <linux-mmc@vger.kernel.org>; Wed, 28 Oct 2026 12:09:15 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 0A96B606A31E
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=manyhobbies.com header.i=@manyhobbies.com header.a=rsa-sha256 header.s=sig1 header.b=hwNbtXvn
-Received: from outbound.ci.icloud.com (unknown [127.0.0.2])
-	by p00-icloudmta-asmtp-us-central-1k-100-percent-10 (Postfix) with ESMTPS id 6C1051800820;
-	Wed, 28 Oct 2026 11:43:18 +0000 (UTC)
-X-ICL-RepId: 01a18252-5d6d-7bd6-91d2-692952ce09ab
-X-ICL-Out-Info: HUtFAUMEWwJACUgBTUQeDx5WFlZNRAJCTQhPAUMGWQZeD04dXwVcEhVdRUcMWkVWH3kVUgNOA10SWxFWHhkIXR0ZHldQWgpcCVEXUQ9eDkFeWhdeTUUID0kZEFYBWFZdBU0aXBhZDxwTUFZaDlsERxQXG1wAFxtGAgQjAl8ARQJeCVYBMBcPVk1UGV0UXwRQElAdQENUBF9QVBFXUAtaBUkKSQtaAFMERglWC1wEXAdeCEkBWwRZB0gLQANZDl0DRQxLB1l3BlMeQBBcD1UCVwMXG1wACUtGCUkdDg5CGEYfVCdXAloKWx4=
-Dkim-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manyhobbies.com; s=sig1; t=1793187799; x=1824723799; bh=OsuVkeafblGpTsXYut7m1aN/nlY5ZzIRjoB1MM1Rhx8=; h=From:Subject:To:Date:Message-ID:MIME-Version:Content-Type:x-icloud-hme; b=hwNbtXvnnR59r7qgS5h1p3fS16aD5jzIeyH6FfM/P0jckDlcg/ea2roFPOaOUG3J/sb081LehV5wvctDZ/JiMRzjuh8SU/TYry5D2bxTyoPyNIiVFQNdgFJDsGrAy5E0jl6a3Ka7FE4sxX8B0I2kBApvKwhZzSkSlqogs/WjPtNceikWDst1iRwoB3qmZw4xPH1EzPUwPoPnJoTCjz0XIpvAam6R2m/B8cJZr1W5fmag0lxrjvkDJDxJIDfBOLgUQDYUPYfQpK0na1nRpHwaj5tJ4QU3NTx4UyOPY6VSvkOIKY2b9BuD0skdqxmIXQB+5RYx+6gfh73l9TCDfnDoOg==
-mail-alias-created-date: 1780273699991
-Received: from claude-agent.manyhobbies.internal (unknown [17.57.156.36])
-	by p00-icloudmta-asmtp-us-central-1k-100-percent-10 (Postfix) with ESMTPSA id 9048C1800839;
-	Wed, 28 Oct 2026 11:43:17 +0000 (UTC)
-From: Tam Do <tam.do@manyhobbies.com>
-Subject: [PATCH v3] mmc: sunxi: reset the controller after an update-clock
- timeout
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: Chen-Yu Tsai <wens@kernel.org>,
-    Jernej Skrabec <jernej.skrabec@gmail.com>,
-    Samuel Holland <samuel@sholland.org>,
-    linux-mmc@vger.kernel.org,
-    linux-sunxi@lists.linux.dev,
-    linux-arm-kernel@lists.infradead.org,
-    linux-kernel@vger.kernel.org
-Date: Wed, 28 Oct 2026 11:43:06 +0000
-Message-ID: <179318778660.81375.11263258280496155344@manyhobbies.com>
+	dkim=pass (1024-bit key, unprotected) header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=gBCbtE6C
+X-Envelope-To: linux-mmc@vger.kernel.org
+DKIM-Signature: a=rsa-sha256; bh=zzD/H3Q9pIRPfiCVs5ygv2SY/cTJiKPRPiAl8d46ES0=;
+ c=simple/simple; d=linux.dev;
+ h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
+ t=1793189353; v=1; x=1793794153;
+ b=gBCbtE6C2Fa2WtHNHUkJNyZ0gTF8ERSSf3ABvV++lZ1FGMtiFC5DoZaWdA8Nh6ORoIQy3hut
+ P33twPIm51AC2J4Hh6iYWpPuKfOfgdOQtI+zDBUt1ZZqF8Cu1s5faYPWuCGqVQ77+20yhWAwpat
+ n1SYgo/1bj+vfIgttyTeereE=
+X-Envelope-To: linux-mmc@vger.kernel.org
+Received: by smtp.migadu.com with ESMTPS id 0b67904be421a6b3;
+	Wed, 28 Oct 2026 12:09:12 +0000
+X-Mizu-Trace-ID: 0b67904be421a6b3
+X-Migadu-Flow: FLOW_OUT
+Message-ID: <4b19d1b8-e799-40fd-9ee5-ca85aa3952c2@linux.dev>
+Date: Wed, 28 Oct 2026 20:08:59 +0800
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -67,99 +58,90 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@linux.dev, Kamal Dasu <kamal.dasu@broadcom.com>,
+ linux-mmc@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>,
+ Adrian Hunter <adrian.hunter@intel.com>,
+ Florian Fainelli <florian.fainelli@broadcom.com>,
+ Wolfram Sang <wsa+renesas@sang-engineering.com>,
+ Oleksij Rempel <o.rempel@pengutronix.de>, linux-kernel@vger.kernel.org,
+ Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+Subject: Re: [PATCH v10 1/6] dt-bindings: mmc: Extend keep-power-in-suspend
+ beyond SDIO
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+References: <20261027144051.249211-1-ulf.hansson@oss.qualcomm.com>
+ <20261027144051.249211-2-ulf.hansson@oss.qualcomm.com>
+ <583dc515-855c-48d6-aefb-abaef26b2564@linux.dev>
+ <CAPx+jO_+P-ksGzbYp9Aky7etMyKtTUvtAZJZJpauw03Y8zP0Lg@mail.gmail.com>
+ <5ebe0445-a111-49a5-b9cf-0185d3c3f67b@linux.dev>
+ <CAPx+jO98iHx=VRwyWgg+aQmduquLVZe9Q8FNNK4VwkizXB2A9A@mail.gmail.com>
+From: Shawn Lin <shawn.lin@linux.dev>
+In-Reply-To: <CAPx+jO98iHx=VRwyWgg+aQmduquLVZe9Q8FNNK4VwkizXB2A9A@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDI4MDA0NiBTYWx0ZWRfX9v7vwJCZUAQh
- cJY9YliLJf5Sj7s8z0lAbLqgy4FCJ+wmLCJ1GwC5QAur6kNEf4/BFfS6/FFWLkZxtGHz9NTkVeD
- vBCi1Iwab93fOTroBByohOYlMa98l/5Lu9VqV4CjwBEyizskLbu9OaCmeohQoNAlf+KTJRCrBpS
- C6zZRoQ8wGLqR7sCw6RI/3aPA2hMx6dq32DuMb36aKZe0uJiB3CHuNwS7zx2wuCc0b9Nb0oJgyt
- DxqZQ95bkDKbBrgjyFQag6cf2O6JytdZKdd+ksQoMHocnZw2HWcROlehudyeOiPCJgyhu1Rh7LB
- luZ+La2Hc5IEZRt92uJjS8ig8/Fvh/f2BdEVv1eMwoeo96eaIeGc1YBiF8r4+0=
-X-Authority-Info-Out: v=2.4 cv=L74QguT8 c=1 sm=1 tr=0 ts=6ae1dfd7
- cx=c_apl:c_pps:t_out a=2G65uMN5HjSv0sBfM2Yj2w==:117
- a=2G65uMN5HjSv0sBfM2Yj2w==:17 a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10
- a=VkNPw1HP01LnGYTKEx00:22 a=VwQbUJbxAAAA:8 a=w2OPf45SAAAA:8
- a=1tvfc1y3xX-o4uWKYHEA:9 a=QEXdDO2ut3YA:10 a=-iXIJKm6ftRzmWoHelNS:22
-X-Proofpoint-ORIG-GUID: VSrRne3TfcgmffBp2ODlyHQ9fNAP35cV
-X-Proofpoint-GUID: VSrRne3TfcgmffBp2ODlyHQ9fNAP35cV
-X-JNJ: AAAAAAABnZTtDZq/p55h04EW18ZZXuIli9DAQsyjrV651gPUhYbhFPONnpN4Q2l1D7zh4h
- jrNXs/YFjDA6Bc66K1KHPplaC618Obo/QKJfRxNwzx/llyrxopXKzk1QMlJXTmC6A3JH9k
- KOx0wC755kgtChPDKOkD9zfVh+aDbg/8iZRUD+HUldRc8IeOy+5ggKT8k8h25lj7JoAmtH
- 5H4qEAbxEbogSP4abWSsRcR8/WqdHkjdpZqnu0QqctC9bGgWbopMNVbWXujObrwRBrGStb
- h+uaGM7Nmre1ZIFromtNOwQkx3WddvxeN4berUVREtE0sz2y6nez4cGg5QLIpT6mnBGD6u
- xS8LQcpp79ORU7urxKHgmCvgE7bw+0EhEFUeGipD1TFkyWEev345KJNNPKdJBiehBK1n9C
- /n92+exJYEQDOIkxBay5BNga3YfW+uvtnYwWRsyXYEazHgyWLBHMvgZaGydwF9HtKg0bAF
- uT2Ik9ZvHmkzzc1ce87Jf1QhSB1UUDFXrDwem6m3YPHaAbRJD8D3SaGt1JI+PRj5ydU3uT
- ZcwLfbKQhMAVCIwYba4d07PJammAtKU+L/8wcdXtkI8XHWEtrykhPPY6JSI8bBG43vy8dG
- kgjGdm182S0/9AhzDp0EpZ+xz0JQ1zDIVUwzfgu45ct6ZTMZoN76K928XsckRATN/C7P4H
- eQ6nGpkmiWsppNeCnkTVH8vAYzxH770OPo9qF8UY+rA9hNt3oWLnD0J4XRQgnLc8uryHcQ
- eGrAv6ruAjklRXg5/oms1LvE0Wih++CTw5ICWVI+aXA/n5UdJ5OHty52H0WVISDW+4tvIR
- 8UXEmk+0s8R9TbBZwivGJHkJM7sL/CMUw/3PyopCouOgQJGHUHtX7rF6BOkrehGdJeHF7i
- Pw/hyjOUML+QMhsnl/CEY3+q5fBreUcdfZcC9BdHNGNYkXCtQp2SI5gbHnJaN4RmfuvbOY
- QHeDN6QPjXJymQGLcYGpMal4OZdbWCFn5tq4ptVr56UlSvCkdtadjJMTiCUjuSCVQMtHX8
- uGAIIQBbAfuLBBxm8Ush/yw8SWT0Sn/gCtp5gf3Vzq+d+lP6WdMQ54FNDt2ZQvOPSUrHGs
- ueoY29CwlXH1ikSbY+qDWtqlVtMFTJXXrLPxH95vdJJM5w6JKXNF3PVImepC/+D4g65U8D
- qJhfo8VQlnloXhUlt5dfAGAsaYgJL4EOEDWxqFFYbUZJRC0aTLVbKOx3c1Vgfe4MnTv/75
- G9owgtAxXrjrA60wSpoul5PyOywNJy4nUrGbARfutKqiBVB+kokHxYBilZDL9ZdGseisPB
- V4Hyvm1XM=
 
-If the clock-update command times out it stays pending in the
-controller, and every later clock update times out as well, so the
-card cannot be initialised until the next probe.
+在 2026/10/28 星期三 18:43, Ulf Hansson 写道:
+> On Wed, Oct 28, 2026 at 1:37 AM Shawn Lin <shawn.lin@linux.dev> wrote:
+>>
+>> 在 2026/10/28 星期三 3:46, Ulf Hansson 写道:
+>>> On Tue, Oct 27, 2026 at 4:02 PM Shawn Lin <shawn.lin@linux.dev> wrote:
+>>>>
+>>>> Hi
+>>>>
+>>>> 在 2026/10/27 星期二 22:40, Ulf Hansson 写道:
+>>>>> From: Kamal Dasu <kamal.dasu@broadcom.com>
+>>>>>
+>>>>> keep-power-in-suspend is currently documented as SDIO-only, but the
+>>>>> requirement it describes -- preserving card power across a
+>>>>> suspend/resume cycle -- applies just as well to any card type. Drop
+>>>>> the SDIO-only restriction so eMMC and SD platforms can use it too.
+>>>>>
+>>>>
+>>>> I don't see how SD could use it from the following patches. Perhaps we
+>>>> should still be more strict here to say SDIO and eMMC only, unless
+>>>> SD part is implemented later.
+>>>
+>>> I didn't have the bandwidth to implement this for SD at this very
+>>> moment, but the idea is to add it for SD too.
+>>>
+>>
+>> SDIO devices have a clear wake-on-host requirement, so keeping power on
+>> is reasonable. eMMC and SD are passively accessed devices, making this a
+>> pseudo-requirement under system freeze conditions until Broadcom chips
+>> changed the situation for eMMC.
+>>
+>> However, for the SD part, I doubt such a need exists. It would require
+>> dedicated ROM code support, and unlike eMMC, SD is not used as primary
+>> storage. Worse still, unlike eMMC and SDIO devices which are soldered
+>> down, vendors typically have an AVL to certify board-mounted components,
+>> while SD cards can be freely swapped. The compatibility of off-the-shelf
+>> SD cards is relatively poor, so I question whether there is a real-world
+>> scenario for SD cards here. If there is no such scenario, this is dead
+>> code.
+>>
+>>> That said, I was also thinking that maybe it would make sense to add a
+>>> sysfs node to allow the behavior to be controlled by userspace.
+>>> Thoughts?
+>>>
+>>
+>> Sure, regarding the sysfs node you mentioned, we already have
+>> mmc_caps2_set() exposed to userspace, and we can add
+>> MMC_CAP2_RESET_AT_RESUME support there
+> 
+> The reason for the proposed user space node is not to control
+> MMC_CAP2_RESET_AT_RESUME. That is a different story, specific to
+> Broadcom platforms at this point.
+> 
+> Instead it was solely about allowing user space to keep the eMMC and
+> SD card powered on during system suspend. Which may be useful for
+> other reasons. Like, internal garbage collect and suspend/resume
+> latency.
+> 
 
-This happens on an R16 board whose SDIO Wi-Fi holds DAT0 busy while
-its supply comes up during the first clock update.
+I got your point now, it sounds reasonable.
 
-Reset the controller on timeout so the next attempt can succeed. This
-runs sunxi_mmc_init_host() with the interrupt enabled for the first
-time, so write REG_IMASK from sdio_imask under host->lock, as
-sunxi_mmc_enable_sdio_irq() updates both under that lock.
-
-Fixes: 3cbcb16095f9 ("mmc: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs")
-Cc: stable@vger.kernel.org
-Signed-off-by: Tam Do <tam.do@manyhobbies.com>
----
-v3: take host->lock only around the REG_IMASK write in
-    sunxi_mmc_init_host(), not across the reset; v2 polled the reset on
-    jiffies with interrupts off. The return value stays unchecked, as in
-    sunxi_mmc_runtime_resume(): if the reset itself times out the
-    controller is wedged either way.
-v2: held host->lock across the reset (not posted)
-v1: https://lore.kernel.org/all/179307312104.39863.12372814163472848752@manyhobbies.com/
-
- drivers/mmc/host/sunxi-mmc.c | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index fe4c0f6d73f3..55313780d06d 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -322,6 +322,7 @@ static int sunxi_mmc_reset_host(struct sunxi_mmc_host *host)
- 
- static int sunxi_mmc_init_host(struct sunxi_mmc_host *host)
- {
-+	unsigned long flags;
- 	u32 rval;
- 
- 	if (sunxi_mmc_reset_host(host))
-@@ -336,7 +337,9 @@ static int sunxi_mmc_init_host(struct sunxi_mmc_host *host)
- 	/* Maximum timeout value */
- 	mmc_writel(host, REG_TMOUT, 0xffffffff);
- 	/* Unmask SDIO interrupt if needed */
-+	spin_lock_irqsave(&host->lock, flags);
- 	mmc_writel(host, REG_IMASK, host->sdio_imask);
-+	spin_unlock_irqrestore(&host->lock, flags);
- 	/* Clear all pending interrupts */
- 	mmc_writel(host, REG_RINTR, 0xffffffff);
- 	/* Debug register? undocumented */
-@@ -688,6 +691,7 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
- 
- 	if (rval & SDXC_START) {
- 		dev_err(mmc_dev(host->mmc), "fatal err update clk timeout\n");
-+		sunxi_mmc_init_host(host);
- 		return -EIO;
- 	}
- 
--- 
-2.39.5
+> [...]
+> 
+> Kind regards
+> Uffe
 
