@@ -1,47 +1,47 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793258825;
-	b=1DVWKKitsKqkJ5oqdrwUSckBP8dSI7h0zIdX7dZvNwDTQaDrfB/zPwxtluOeiZwB6LUv
-	 mgXms/hAbAGCRRlbewmqfFAD/xly9o6/ntmvsaD9fytrjX6X/ZNKPVJrLW7cOiVr95y7n
-	 RvPwZKkfEYAHbNjCJk65batzltQyRNMFlbeIaxMQa81Fq8SxFf8+pxdr5yN2MwOzwZMHp
-	 j+ifkcGrYeaQXx3IuAgvzR65o6ePACrNt6oaooLqIxAlgiP8TWkqX0KmsKTaj1OBCmgB0
-	 jecrzfnaLZQLgYH/VOKdoS2jmF5ELphFmSHXUCdGVMpKuOy5KYxth+OwxTLqM49Lrfw==
+	t=1793258816;
+	b=tmMczlHNW1U/j3gKwzjtDQnfH/Z1W6RQDf84+bJyQuvb6rys3vxtOcZqVw0QeKut7WlP
+	 VIMqTi0VI9JrzSVL/tVzALN/YDEheTVtmRloMjAGtHbUn9wyenes+WqQcDdukM34onOtg
+	 k0zemUDUZFxNEIbCzpVYlmyccFnVio2Z+dY5KTLgQIkT+8BK4LfAJUyOnMcYw1GeIxtZ7
+	 NZwScwZ8HNQDTZWemc6mjtzF9qTUA00TJ5FHUIzafo1p48LqwrWnv4rNvvIm+Soc1ef7Z
+	 M3TjjuMIKuZguxaWstnCZgkzY4gVPF3fa5mr/fm5o//DNQ1hV3tRiS5fc9y5vbUxg+g==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793258825;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793258816;
 	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
-	 Subject:To:References:From:Content-Language:Autocrypt:In-Reply-To:
+	 Subject:To:Cc:References:From:Content-Language:Autocrypt:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=Ynv3ES4qgVrrqHs4XJtRSvFfOR5ptSdd48Cutyq7X9o=;
-	b=BDExm9O75V23wxMAaIRoMeroQ7x5Ru4NRGelKWlDNCckF5o8dLjQraDEz2n+TA+hvtMy
-	 73d0fu1tqW/PYTzN2d4A9sugsgPxP+z9UAdQh7b382oAjMdzoB7Qioiq4iw3UFOEAfA8W
-	 HFdDbFMlDQoNBmCMX6c+0mTmqL3eP8bd0/VUAyFxLm1r+5mt74sPwyh3kKvaJBBQYn0ce
-	 cACCVGStrcJ+8qxgM1xJe0lPISYE+l1nU5DLhHHzb1C/fPaaVXKyJb888FWX2TmPRNn2i
-	 FxLbfwel0BpLiPA1FM7H76oIh7AJOA9LDuaFhHhLNUy9LntPmSoiNC6UubSduKFK45g==
+	bh=XMGPJDGIthI4qhZgaEnIIK6BEfqVenWCLzclU5O7E0E=;
+	b=vORNbIh3WJV0GmpC6K+i39khXCGgAa1iQG/5fxX2PZx7DKPUbcASqcQXKrV/o2YKnli4
+	 n7+RyNlxSzCIQus0u/i3cAkNWm3YeJCsClG7SRo5Dj7C5dM31vYs1hXU5LuYp080G7HVf
+	 jqkyGfW6YAAnyjdu2H9LTxpu9aQ04RDa7XWJL602UNk6slrgc41/UpD/1j17pI2d6R//4
+	 gmJdTsqySyAeiimm/yrHnJeeyEuz//nX7oAJNbg08tdJaItEioDXGlaWiVXHtZVtTSrEu
+	 A9JYfaWK3tDD5BDUZcX8FMW24OdGv+yJL/oWY1rZAZIwwKbaFfBQ3abKOwS2V1YrwZw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=nO8+AGHG;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ft1z2N7J;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C951C606A322;
-	Thu, 29 Oct 2026 07:27:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B31E0606A31C;
+	Thu, 29 Oct 2026 07:26:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=nO8+AGHG
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9E7971F01825;
-	Thu, 29 Oct 2026 07:27:00 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ft1z2N7J
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CF0A91F01825;
+	Thu, 29 Oct 2026 07:26:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793258824;
-	bh=Ynv3ES4qgVrrqHs4XJtRSvFfOR5ptSdd48Cutyq7X9o=;
-	h=Date:Subject:To:References:From:In-Reply-To;
-	b=nO8+AGHGo3EmJA46J+Dqn+xwFezonYLDBhShUDyRd0KkDTNnZCr8VF9smVObjEAv8
-	 1fJhlYVHYbVSUNB04FVX9n89VZas9d2f91s1Vs2QMlFu3Q83Tl/xOUFs190rHFkD7c
-	 zhPkG+Z4WSNLRgly9SdLr9zoWJm+yz9iuhptJq7lrz5nNltFKAnHO+T0WfUiiQ/ctj
-	 14OdML1KkR5ftQcDuDvtmhhw/50Z3m5pT75P3iiVhjWqMRoRTaZ/bZkcPHIt0cq6zr
-	 T+XK+1yTMXV5lAKJltbGoq6K+hkdpJDfuwY59TpgeSmx7Vt6cvd00W9V89J2njPk/M
-	 4zQnoXCiNB53A==
-Message-ID: <5421ac81-1947-424a-b4c2-6a1634ae5a99@kernel.org>
-Date: Thu, 29 Oct 2026 08:27:00 +0100
+	s=k20260515; t=1793258815;
+	bh=XMGPJDGIthI4qhZgaEnIIK6BEfqVenWCLzclU5O7E0E=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=ft1z2N7JzZD6tBinNibnLzERNsNnr5VV8cjY04boEL3b8D7AIpr8KoSUei3vKh6fP
+	 YjH/ATOM5vxy6nOS0U9VFegFjixzZB7ujsnahbm7z/WJpwZjn5qW+gNdlZ8Z0k9gxG
+	 thtMoIffsb5VN+QQmzo6A5Mc8BXYdK0dh8P5s+/Yz5jQo4z4GKUGens+Pv6+Ab7hbR
+	 QfynquNhVk95qNikI114beAydT8ScIEp03Pj+otZ1l+ElRTFI1lYud1PzyG03Xfsbq
+	 xF7lxWh6ugakKp3j8ic4NwUJE+w+8pGRWa174OKwkjm4iqSricdpjO9eiDYO3pV+ev
+	 Sm7DYnkihWZUw==
+Message-ID: <fd1d29aa-2d6d-4e15-8222-b76929fa5a53@kernel.org>
+Date: Thu, 29 Oct 2026 08:26:47 +0100
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -54,16 +54,18 @@ MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Document support for
  Airoha AN7581 SoC
-To: Christian Marangi <ansuelsmth@gmail.com>,
- Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson <ulfh@kernel.org>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Matthias Brugger
- <matthias.bgg@gmail.com>,
+To: Christian Marangi <ansuelsmth@gmail.com>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson
+ <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>,
  AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
  Wenbin Mei <wenbin.mei@mediatek.com>, linux-mmc@vger.kernel.org,
  devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org
 References: <20261027144002.10606-1-ansuelsmth@gmail.com>
+ <20261028-academic-blue-earwig-72d3d1@quoll>
+ <6ae22763.2bb6edcb.3bc160.a0e2@mx.google.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -109,27 +111,42 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  K9bCVaboTA2T77QYkRcRJYSsO1alGX0ome/hMLD1daXlkrNUp1HWa3K4iytLRXjCSIorWiGs
  n+q3krnpXu3TFkA8qtOFZMdnIiFuiq1yLT8hptsV5xh1TA2nsVvSYiaCr3q4s4BKjS/KrLDb
  qoxzw8ISjdUp4pA85vb6YLCmb39NgidD+7PmAr65lBNveIFynTgsja1rRQ4=
-In-Reply-To: <20261027144002.10606-1-ansuelsmth@gmail.com>
+In-Reply-To: <6ae22763.2bb6edcb.3bc160.a0e2@mx.google.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 27/10/2026 15:40, Christian Marangi wrote:
-> Add dedicated compatible for Airoha AN7581 SoC integrated MMC controller.
-> The MMC controller is based on the MT7988 with the difference that it does
-> have a single clock controlling it.
+On 28/10/2026 17:48, Christian Marangi wrote:
+> On Wed, Oct 28, 2026 at 01:51:16PM +0100, Krzysztof Kozlowski wrote:
+>> On Tue, Oct 27, 2026 at 03:40:00PM +0100, Christian Marangi wrote:
+>>> Add dedicated compatible for Airoha AN7581 SoC integrated MMC controller.
+>>> The MMC controller is based on the MT7988 with the difference that it does
+>>> have a single clock controlling it.
+>>>
+>>> Add the dedicated compatible to describe the 2 register requirement and
+>>> permit to define only 2 clock (the main one and a fixed clock for HS)
+>>>
+>>> Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
+>>> ---
+>>> Changes v2:
+>>> - Also add compatible to restrict clock-names for source and hclk
+>>>  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 +++
+>>>  1 file changed, 3 insertions(+)
+>>>
+>>
+>> Your driver part suggests it's fully compatible with other variant. Why
+>> not expressing it with fallback?
+>>
 > 
-> Add the dedicated compatible to describe the 2 register requirement and
-> permit to define only 2 clock (the main one and a fixed clock for HS)
+> You mean something like 
 > 
-> Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
-> ---
-> Changes v2:
-> - Also add compatible to restrict clock-names for source and hclk
->  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 +++
->  1 file changed, 3 insertions(+)
+>    compatible = "airoha,an7581-mmc", "mediatek,mt7988-mmc";
 > 
+> ? (my concern is if this would be problematic with the current if
+> conditions in the schema)
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+I see, the first "if:then:" would be tricky to convert to "contains" for
+the compatible, without bringing a few more conditional blocks. I guess
+it's fine here.
 
 Best regards,
 Krzysztof
