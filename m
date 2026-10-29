@@ -1,123 +1,136 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1793273524;
-	b=AbfEohk6UTq9WDVhFBCxtmXowk1bj535tQ1TzRXfHr7klyhEBlsBqjP7F89EUvP/iM2K
-	 fbu+m+UVetcaQFJ0KZZdYme+qCmQAti3/jh8Ml8ZPBe4OQD4EmeJdfa7PNgVE1NH0PMBo
-	 vLcGf+x6bjNQifeqaLqqlNPPa+Wr+GeTFKdwMnPZCGMm1MCCJcPeqxFQIf1j96mxpWRHV
-	 18lScdzzCkmoqjnoZJe1GLARWInLxFcWBjM2LQgvGe/Z/F2eDwv1XAf+6PzD3rOcW+Ys2
-	 /2xv7wDUwBi6FUWOlW7KYoJhUz4MW7mYbEG2Sw2oT8I+ZbvJA50B7IyMpggdXrtpVOQ==
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.remote-ip=198.175.65.11
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=fail;
+	t=1793280314;
+	b=io+UC8DQzBgkzH+hHidkh+K/0DHeeH/4B21ZvneAQFtS0xliwV2zCCVY+mCsQexA0/aa
+	 pVbPVkUMwTKGR2Lq/8WKVQp3m9QXOul7SO+2p6o5hH7CmISApHjRiPh43a+U3/KCyKvim
+	 lL63NJ/sRg27ey0YE1P739jQgZAupwi6ot2Yv1yUuPGQAyhti6DSEo6YCdecXHopFNLrU
+	 GY8RAjRKCGurmesD54FBZYU4X5F+Cfpkr2yTJC/BQChRPxniQq/hYpsNeaIi3cWqg6Oyu
+	 fs7iF4BcxdXrd3BOi2Ey3RzLxkHkzh0uruZuzvS1rdpcUTWHvUeNQTZdJxCISefslPQ==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793273524;
-	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
-	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
-	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
-	 Cc:Content-Type:Content-Transfer-Encoding:X-Proofpoint-Spam-Info:
-	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-ORIG-GUID:
-	 X-Proofpoint-GUID:X-Authority-Analysis:X-Proofpoint-Virus-Version:
-	 X-Proofpoint-Spam-Details;
-	bh=SmeG8eDrUww7PbplsIcYx6wyVdH7rGxQXJYVetL1ZLk=;
-	b=Z08BAa9JOn4x11BU+InP3maVMJrshcrt7nRLjDJoyjG0RVreP1CJjZsv7SFrjzaEXvbA
-	 e39JEIvYTaq+jhdVW7NN8PItaCV7W8RwZ17T8RVhhL0HoPZrXY4SzTpYciAg9db11mu6b
-	 4d69IHgeKMQ08rISlDt0vZ9jqN6WycEu2b71ZwX5OwNEfsmC5EA/0nILnRQwe8jBUC4E4
-	 RUAhp6oELoewSEKn+pzPorHeJNnTPfSIGEpdjKHakb1ExjIa0i+eKlSxybyLOn+G11J3B
-	 vPyi0lZDi4fHWxDJtbP44cfN5H9KAzHi9o8xCoa0p9uk/GAzpnFdkvufP+nNtPhgNOQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793280314;
+	h=DMARC-Filter:DKIM-Signature:X-CSE-ConnectionGUID:X-CSE-MsgGUID:
+	 X-IronPort-AV:X-IronPort-AV:Received:X-CSE-ConnectionGUID:
+	 X-CSE-MsgGUID:X-ExtLoop1:X-IronPort-AV:Received:Received:Received:
+	 Received:Received:Received:Message-ID:Date:User-Agent:Subject:To:
+	 References:Content-Language:From:Organization:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding:X-ClientProxiedBy:MIME-Version:
+	 X-MS-PublicTrafficType:X-MS-TrafficTypeDiagnostic:
+	 X-MS-Office365-Filtering-Correlation-Id:X-LD-Processed:
+	 X-MS-Exchange-SenderADCheck:X-MS-Exchange-AntiSpam-Relay:
+	 X-Microsoft-Antispam:X-Microsoft-Antispam-Message-Info:
+	 X-Forefront-Antispam-Report:
+	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
+	 X-MS-Exchange-AntiSpam-MessageData-0:X-Exchange-RoutingPolicyChecked:
+	 X-MS-Exchange-CrossTenant-Network-Message-Id:
+	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
+	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
+	 X-MS-Exchange-CrossTenant-FromEntityHeader:
+	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
+	 X-MS-Exchange-CrossTenant-UserPrincipalName:
+	 X-MS-Exchange-Transport-CrossTenantHeadersStamped:X-OriginatorOrg;
+	bh=htuj56gqd+oZdr3rbWMV3CoQfrFVMo9vSUu/WYm0EzI=;
+	b=PKtZ8p7COfqaMWbB3DCNcWVG80UZR9oaumq93qWhSEY031x6oX3b9hX1Tn3tKBAJEUtd
+	 0UkFL1yz/sjhXBIlfjlMpaiVLaIfNeQchmmx1DpFuF1sVfswIIVd8xA41QpgWp3FBImCu
+	 InS0dCIcIc9EUCdtQH53mK1dPacsiyIe/nwgZ4CPXkVjdtGsq+YXy0kfO3Rmt3WkVZTdZ
+	 0OMl9/dF+i04hQ0HZo3V4y54uubKIw54V3e2MqwxU5UQPPuShOas6s7XDyxUOmtXBRDSH
+	 D7VicW66WogRZDKXih0JfXkovgN3bgKzdST8wwQ+5ztsaL6hJs8XJMIWXCfIpR9mwwg==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=oss.qualcomm.com;
-	spf=pass smtp.mailfrom=oss.qualcomm.com;
-	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=N2ulyUq2;
-	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=d7DpF0c0;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dmarc=pass header.from=intel.com;
+	spf=pass smtp.mailfrom=intel.com;
+	dkim=pass header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=EoknjCm8;
+	arc=fail smtp.remote-ip=198.175.65.11
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.11])
+	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A8EB606A31A
-	for <linux-mmc@vger.kernel.org>; Thu, 29 Oct 2026 11:32:03 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8A8EB606A31A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1DAF0606A31A;
+	Thu, 29 Oct 2026 13:25:12 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 1DAF0606A31A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=N2ulyUq2;
-	dkim=pass (2048-bit key, unprotected) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=d7DpF0c0
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69T8vDqd3824956
-	for <linux-mmc@vger.kernel.org>; Thu, 29 Oct 2026 11:32:03 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	SmeG8eDrUww7PbplsIcYx6wyVdH7rGxQXJYVetL1ZLk=; b=N2ulyUq2zQlxC4vG
-	5LBSt97dCkUvPpTIWLM9QzF/oTONOlYpjFHqdGTYm/5FjOqreU8Gj34ek14PzYb3
-	Lj5hkgh+a5XBCPXxUFpDwKi/Buwkja1XEMgaBUkL1PLDXzrjBpzGpSFXTLYcI9SL
-	FLAlPCIIebAXBDGkAamNdvf/gzgnSGXkxCLP7c9hrypgtAZ8mhpWlQHZLibDjNTX
-	JltAweSlnEZVoEdeXkk8y5rsNAO9r6uq3XvLNJetGafOJymdV093csowGjjv0qkw
-	cTn/3wHGsmafNGn96owgFSRCsQCsIT2cm5aCoCS7Gre5eibWb3xznWMQh1oX3JPb
-	xtXJ8w==
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com [209.85.215.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hkut3j52s-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 29 Oct 2026 11:32:02 +0000 (GMT)
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-cd68b8579f2so932652a12.3
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Oct 2026 04:32:02 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1793273522; cv=none;
-        d=google.com; s=arc-20260327;
-        b=bvJP6df301nc+ntLyVxZ+U+rDCuxt37YNfUrmgF/08Nx6QNwax1vUSxEdOhbcPnvBg
-         pzWyqj8CQ6Dd6/7rOJOXyftOv0q5WSDNceSfs8RSqQ0uKHwIOdeIgI5Z+zfrl+8i6wm4
-         3AVD3XO/XlaGMIwIsHuADibkt/gKNUbJtRfVQOhNCCDawWhv1zEjSl/yKu+NzFWDLg6q
-         LfwRrocIQ/OonxJwSENm/7tItLy+pd98rfGKy6G26LViQ0dS6gHtfQoBAtA64yE9WFL4
-         oLrOfY9l0F8C1S94KN+eRDo0QG8r8KY18cbfOdvMd0klSgIbLcc6yFex8ZDFK21aByL3
-         v2Dw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=SmeG8eDrUww7PbplsIcYx6wyVdH7rGxQXJYVetL1ZLk=;
-        fh=ahvEAKEnuq93kDuM0A81+T2DoIF18gnxVqoW+98fcSw=;
-        b=VSgSfFqVer7BtLFR55AG4CLeTdp7BfC3JNv8RkuatlQptC27W8UJMHx8uDkB143wCj
-         MGd0LmYwLK2LXRM3yRk4xL/Dsse2tL+ojvXoUKy9fAMiG8Nd8QIa9lFkmjxQj4VkP+9f
-         dza0d9i+H/PBqa4QPqF122vretUmbiykEiXBRQ415iAE1hefGaZ2nVkLZB1nFc5E1n8P
-         yPDTD6AB8fJu9vBEowWxPI2SNV7XYsgCu6d7NIcS27cJqynA99yYbvZFyfEewvkkjPEb
-         6rQZZqFtG2ebZW/hRlz04ZbCyckXo7uAoKdIxSbdUei2cHNIIAoPsAStNsfRlZ1khlzo
-         qtbw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1793273522; x=1793878322; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=SmeG8eDrUww7PbplsIcYx6wyVdH7rGxQXJYVetL1ZLk=;
-        b=d7DpF0c0rs9IOOvUsK93M+q5cZ/FiFC7hJiVDVPTt4Dvtzo+hL6S6kbayP3n5+BGhN
-         X7ObYWDpHTq6Ss3Z2ybt6SpkkS6+dilCZ5FE16u7wplabp85zUdNqClZ3aMG/a0xVYiv
-         pOHFI9O5aMqYHr5kRjbtUFzyc2SpPh61oKBVDvEbCLq7UXeATinAtz6sQPEc8q4aux5e
-         FU9wl2VuSymXNOHWAtDv3JN4LDG27juyeIJ4cDluBUPwDaRAm3t3vhd1g9/7CxzKAIan
-         xj8LqUxNoiGHlwvdQu6yuN2Lmt1OQMbzw8M7PrN157v5oFYUvM69u5Vcs4/Oqvi5qKpg
-         39/A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793273522; x=1793878322;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=SmeG8eDrUww7PbplsIcYx6wyVdH7rGxQXJYVetL1ZLk=;
-        b=MVSMS48PjrznJycjKH9E36EejIiY/yR0MZcQKIEMNIlFA9wxCRJlog2dEBQvYL6Y/9
-         iRHXqCgMwrud3pnDrKFv3aLlF7FqEDDOKQbdqQJEpw3ETdhUrsctTOnp6Rl05zZPauXj
-         wfnsSfF4xfDZZbv/m4idbhs8LLuOEku4tniDEIAWPJNr4Eee42bN9qwmqF9lrVgRs16F
-         xivv7VPsl5cNaE/31BPKhTgjLnNf27m7PV7aobbndZONjyHYlyICfiGJEg+WFljNUoUM
-         FPMkAmX10GDyOfZxtbnJ1ryKu5ImQ0ZExPf+t/Z6p8/z8lSEQlibmGAhw4FLnh9JmzZj
-         EpuA==
-X-Forwarded-Encrypted: i=1; AKwUvBz9kiiyTxcLwrULas0NXwXiMfler0lOTWZ/y+SoauObkGrlmf+bBspUczqYnl7jLat8J2YOpfdHVA0=@vger.kernel.org
-X-Gm-Message-State: AFq9FYKqMs3sCc9aGsosJPCZr4ByYK2TK9QF1H/yg4sjrwNz9ooUxb6Q
-	i1rUiBUa4Xe6+vqviLjMcG6cUDyJojWY8Y2+uyR7gzpOiFeY2M7bF1NWiqmALz5Dld5aSlqLHjD
-	f3mO2xeJVTd5G9ssOMlcizf4XNL5sFrdBVa7LU2h3+BBqvMtR4en9ayxIt6K99bg2fizwrYkrGG
-	HXZU+lP94fDOShDFgawDIJ11OQM25SsNixp3ahCQ==
-X-Gm-Gg: AYBFou0Bd0MiPcM8Jt4S3GFEoIi7Po+aVCIFxXZt+BlzMqQfVdIxpCsQyOR2VcTy9QN
-	8zAFkWuuOmqyI0em2/7Mv7sZUKvM0ofmoLDT1+rqALQl8FlFcNZACc+y3uUIpqpb+UYfoT7a0+q
-	7wdUKCcVi7yo0gWwoqJtAYUMDsGPJlLssZCKM7KN/LKuNejrY8BBdF+dq6GA==
-X-Received: by 2002:a17:902:ec8b:b0:2e9:69ef:ff38 with SMTP id d9443c01a7336-2eb0046897cmr53687825ad.55.1793273521892;
-        Thu, 29 Oct 2026 04:32:01 -0700 (PDT)
-X-Received: by 2002:a17:902:ec8b:b0:2e9:69ef:ff38 with SMTP id
- d9443c01a7336-2eb0046897cmr53687425ad.55.1793273521275; Thu, 29 Oct 2026
- 04:32:01 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=EoknjCm8
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1793280314; x=1824816314;
+  h=message-id:date:subject:to:references:from:in-reply-to:
+   content-transfer-encoding:mime-version;
+  bh=3pm/nZcTdlsoleYL9Bqbs+LpAySeIck8gE7IhHEpAJ8=;
+  b=EoknjCm8kA2ek5WJy+PNc1Ga/nEubqBUGILAycf+9+C8EF68ShqbzSNN
+   WGugWYtorYgl83OUpHUnABLPyCIrx0e0gMMO4MWEJMaXCd6QOIEoDd+1M
+   lFE8yX3M2bdTHY9S8g0ulfB9t10CT+NFcwIvFfslKLgaaNsAfgZE8PZ3/
+   TZDsKmHXpAEzes8cB2wDAa2jFe/WNnbJV7ZS3nyFggjTwM0kenBzUkilf
+   PPUNfsD9PvfpVaZrQLYMpre89PhcXQuFltMDy2wK8bEDUX79WAyiJzc/n
+   d7gcqj8SvAhRt5tsB5dTEoK2M7IZO7f+zQ+6wh/Dr11G27HcrP9s8lluD
+   g==;
+X-CSE-ConnectionGUID: 5Uk3o6b+RzGEbJ4j1QFqYg==
+X-CSE-MsgGUID: ecG/sqJHQZKY765GkVE03A==
+X-IronPort-AV: E=McAfee;i="6800,10657,11949"; a="1905506"
+X-IronPort-AV: E=Sophos;i="6.27,184,1787036400"; 
+   d="scan'208";a="1905506"
+Received: from orviesa002.jf.intel.com ([10.64.159.142])
+  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Oct 2026 06:25:13 -0700
+X-CSE-ConnectionGUID: hfbBv2CISIKl9z5mrSJJGQ==
+X-CSE-MsgGUID: E0uhXu7JR+6BqoR1EhtP7g==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.27,184,1787036400"; 
+   d="scan'208";a="5156628"
+Received: from orsmsx903.amr.corp.intel.com ([10.22.229.25])
+  by orviesa002.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Oct 2026 06:25:13 -0700
+Received: from ORSMSX903.amr.corp.intel.com (10.22.229.25) by
+ ORSMSX903.amr.corp.intel.com (10.22.229.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.56; Thu, 29 Oct 2026 06:25:12 -0700
+Received: from ORSEDG901.ED.cps.intel.com (10.7.248.11) by
+ ORSMSX903.amr.corp.intel.com (10.22.229.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.56 via Frontend Transport; Thu, 29 Oct 2026 06:25:12 -0700
+Received: from MW6PR02CU001.outbound.protection.outlook.com (52.101.48.16) by
+ edgegateway.intel.com (134.134.137.111) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.56; Thu, 29 Oct 2026 06:25:11 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=g1uuHAIXl2C/YeGTmAE1LzEItWg2BsQ48vqHQgmalD1Zw6aWliLhd81HPqPbTVyoVq6uMylPLETUkFLd5ympQBgbMMw7sa9as6MRhBZlL8z8mfKA2v2TDdfguIl6vV7M6C4FaD6BY5g3yYt8ybrS+AtgAv3YOQmWap5fZnoa5aJoBhPjFrXzv0yV+aUvNZaU7vHT5IM81S9ZaIpQu0pYDHbPm1PJ0Bqpt0Ow+doumO+fvmTdYSE1dZS+u3YPp8eEeWxQ5VdSBwmTHCH0hXxtnx/VcOeCOru9j6/urmhhkg/+EF3WrL3n6S8Ya7DX1fwZ+pvsnO4M9nTcimWkUV50EQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=htuj56gqd+oZdr3rbWMV3CoQfrFVMo9vSUu/WYm0EzI=;
+ b=P9bnCXAuu+Pe6w0PuO63u7a9mbDFFVa2PxP8/uR5WKbs6abpwGe4EsYHCsOUqGXBOccfX9KE2podaFjySpkQpRKInPwZgHE/8m4C2rvmw5o40iZibu0esmsJh5wksQjo2rfYYVAN6yvXuV+QYl/6w8jrDvA7rXDT5hyVrmUI0XbCryEpgvRmIWJJDWTK2IMClSPc4rqDTt/Nz08y9RVVRh0bDYb8mnObdJQWXytb6pSCzkNaSoT9ul5SD/wXSSH98aNR8TxnhJeH0pawn76ZiUt8ebHnrkM0TJjjS2d+o2zfwigbmDthyKROuWwUioryMUjooSSoOI8arc8FO6YFnA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
+ dkim=pass header.d=intel.com; arc=none
+Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=intel.com;
+Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
+ by SJ1PR11MB6180.namprd11.prod.outlook.com (2603:10b6:a03:459::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.569.8; Thu, 29 Oct
+ 2026 13:25:07 +0000
+Received: from IA1PR11MB7198.namprd11.prod.outlook.com
+ ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
+ ([fe80::2c4e:e92a:4fa:a456%3]) with mapi id 15.21.0569.007; Thu, 29 Oct 2026
+ 13:25:07 +0000
+Message-ID: <16c32323-0869-40b2-aabe-81727c87bf35@intel.com>
+Date: Thu, 29 Oct 2026 15:25:02 +0200
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 4/4] mmc: sdhci-cadence6: read SD6HC DDR50 tuning from
+ device tree
+To: <tze.yee.ng@altera.com>, Tanmay Kathpalia <tanmay.kathpalia@altera.com>,
+	<linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>, Rob Herring
+	<robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+	<conor+dt@kernel.org>, <devicetree@vger.kernel.org>
+References: <cover.1791459448.git.tze.yee.ng@altera.com>
+ <295b570ed26d727c4bd4ce943b723c6cc959ca71.1791459448.git.tze.yee.ng@altera.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
+ 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
+ 4, Domiciled in Helsinki
+In-Reply-To: <295b570ed26d727c4bd4ce943b723c6cc959ca71.1791459448.git.tze.yee.ng@altera.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: DU7P194CA0008.EURP194.PROD.OUTLOOK.COM
+ (2603:10a6:10:553::25) To IA1PR11MB7198.namprd11.prod.outlook.com
+ (2603:10b6:208:419::15)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -127,219 +140,231 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261014202619.715573-1-aubin.constans@microchip.com>
-In-Reply-To: <20261014202619.715573-1-aubin.constans@microchip.com>
-From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Thu, 29 Oct 2026 12:31:49 +0100
-X-Gm-Features: AclHuK8ocQ4ZyIc2NMN2E2foJvz0KUaZfpo5I8Tv2CJSYssB2wGKDJkhP3QujAQ
-Message-ID: <CAPx+jO-fyYy9ZX_O9UQ-tSnOG7LCd0rZ8SNn307hFWLbUAqBRw@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-of-at91: disable selectively clocks on pm runtime
-To: Aubin Constans <aubin.constans@microchip.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
-        Eugen Hristev <ehristev@kernel.org>,
-        Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-        Romain Sioen <romain.sioen@microchip.com>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Robert Marko <robert.marko@sartura.hr>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Ryan Wanner <ryan.wanner@microchip.com>, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMDI5MDA0NCBTYWx0ZWRfX0H/P/KtlVxAt
- MsLoSLNlEwFMHu2pmGiv+CzI18i/PZRbAP5lurVvHMNOYs3gAalZMqLvL2AL5eTpETZxkF854NV
- V2zyT9JJQKhNa0IbNm5LMcRQKMqL3jE=
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDI5MDA0NCBTYWx0ZWRfX3qxLSyTTa2t0
- rA8scerJjWsjwEQWyLLhBO6Ws2BvkDWTadDSnVaDPAu9LhqHv7e8QOP4qAso0gqtHWsJ+dDzsCo
- PzSNH7FiZlMnQTiPg9TwPPHqwOEoXhAZpWq2dEiMlFTteBHc4CVQ6GO7iJBrvG1iNyvFHRH7isA
- kBWRk9cxBNmP/npALLxDN/VIQ5DMXx0FmeF3uPpcGQHMl02/2aqis2cVeMUastanF0+7zkgRUnz
- GFLAxvHoTOkiWrLhcrnJk6rhreR9vJ2Of59cRGZidBb12SquXrKme47uUNDVpwkdwGhcZ7RDRzi
- EhqmNnYn6ZQ6pA+EITlYTpPtZLDlSH5liSGIjRh1iHmOR/04N0k/3ujtzA/0RF++Y0bNRIH2iJt
- eLS0etVoVMYmsuFFiraaJUzNshs6kuN/WTDe2cJUq/oTRG6lMrbfNPqxwKkFBAS4A3uj342ZMcT
- tII/CvRED1ZLwRa3ijg==
-X-Proofpoint-ORIG-GUID: ZttUiH75dnivPoj3uMUix8HxFqYpMwhn
-X-Proofpoint-GUID: ZttUiH75dnivPoj3uMUix8HxFqYpMwhn
-X-Authority-Analysis: v=2.4 cv=HYSB3SE8 c=1 sm=1 tr=0 ts=6ae32eb2 cx=c_pps
- a=Oh5Dbbf/trHjhBongsHeRQ==:117 a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10
- a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=yOCtJkima9RkubShWh1s:22 a=VwQbUJbxAAAA:8 a=XYAwZIGsAAAA:8
- a=Newhmvhl9Q1cYdYltlgA:9 a=QEXdDO2ut3YA:10 a=_Vgx9l1VpLgwpw_dHYaR:22
- a=E8ToXWR_bxluHZ7gmE-Z:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
- definitions=2026-10-29_03,2026-10-21_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 priorityscore=1501 adultscore=0 suspectscore=0 clxscore=1015
- spamscore=0 lowpriorityscore=0 impostorscore=0 malwarescore=0 bulkscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2610190000 definitions=main-2610290044
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|SJ1PR11MB6180:EE_
+X-MS-Office365-Filtering-Correlation-Id: 1f3e43c8-ff86-455a-6fb4-08df35c00cc7
+X-LD-Processed: 46c98d88-e344-4ed4-8496-4ed7712e255d,ExtAddr
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|23010399003|376014|11063799006|4143699003|56012099006|261009223027099003|261021123027099003|261026121527099003|261021121427099003|10067099003|261022075727099003|22082099003|18002099003|3023799007;
+X-Microsoft-Antispam-Message-Info: UkCnrqvO8iglJv7ZFf29EdxTjNJ2HB3R/n3y4frzkMD7L+aVXp8sOjKY/Ca15aYteVN0ddvjL13zBlVX1lVmBV6/HfVsRk2sZafzZuwQ7Y6eMniQIWadp00jEVOUjfXjTuf2dkHWZOFdVOdp5pP1HokHnyVE6W89wviPSVQWE75NM8Defq6zqozXY+YcPxdP5XOPu+mkcr1o1sPX9YVUo0gbZ264tOxiXLGA7L+Cvq6kO2cHMTuYfukMdpEdgR4FzQ5YSfHFdrOi4WhKkXE8Ov2znujEP9hrPDEJyYulRwytD75Zh5gYfwhGOISpVA2cYj2d6GHBarAZX7mlzHZ84eAKpEJfV5cULB1kdigimeri33LDZofCx+yEoN4kcmWfi2YwxKWzJU2tnsYKyz9cAESlHCyEHOqGIuqbeGdcy4ORPvMHaI3zybh0ds/tlz7oOJGGIhbHmQq2bp1mNOtB7wF0AoOiWZ/CpWHiMmr+9FzHMpOa2MySn1bqdL7l42TW7ticXfJz+30IKwwaHlkvS5yswfFoPfYz0fEXLOXZEUOlDcZjx400obUWZI3kZ68YjlQTgld8Bu8nU3MLMaNBQSKT0VTkNEBh33fUIOT6xQon56MJLDZO1hL/QfSiqKNRZTxtzplQRYMKXC9Y/i78DOMnt52pH8mFikqRjGnfjZg=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(23010399003)(376014)(11063799006)(4143699003)(56012099006)(261009223027099003)(261021123027099003)(261026121527099003)(261021121427099003)(10067099003)(261022075727099003)(22082099003)(18002099003)(3023799007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?aUozMmVZRHJDSmZrNUd6cEpDNERkYW9sQlJtR2Nrbmh5MVZhWGJKOTBZUWF2?=
+ =?utf-8?B?NXI1bXlxSDJ4VlhWSHJzYk5KcW5RNWtERld5UG55L1VnODQ4RThQYTdtT0FE?=
+ =?utf-8?B?QjlHVndPdW5pRi9iREdYWHFNeGh5R3c1QUp1U0thbkh5cVNvV3M5K1I5L2hW?=
+ =?utf-8?B?SStBWkFFdlZNTElmMS9KVGJwN2NKU0ZKOWlXV3B1cm5YVy9ZU2NYNDRlcUI0?=
+ =?utf-8?B?MHFYNWxGNG5IUDJWMTloTk4ycnpOZjVKSjU2THZocUVlNjN3Y3RZZmJCaU1x?=
+ =?utf-8?B?ZTJZNk9KMkVCQmplQU94RVdaSHU5WDArUHo4bGV1ZitpUkRDVTdsalFkaGZ5?=
+ =?utf-8?B?OWRLYmdzakQ0L3grQjd2SUdydHg2eWp0bkM3aG1nRDVSQWgwWWxmR0xYREFy?=
+ =?utf-8?B?OE4vamFyTjlkMm5Ec1FTWHhFanhLc0RWMEcvRklRTXZieTJGNklrK1hNd2N3?=
+ =?utf-8?B?S0hlU3JRSFdZeUpOcDlpMHBqNktuUnF0NlJBcUEreTNESnVXWXdxNmVNRmlr?=
+ =?utf-8?B?WEU1alhxcTJ5a09Hb0hYQW0rNEx1SDBwbXZTTkw2M1pWV2JFQU9NR3oxN3Qx?=
+ =?utf-8?B?OVNNL1IvVHUreUt4eCtILzd2VUV2YmUzOFBQc3prSTVjZmdWSytDc1doeVBQ?=
+ =?utf-8?B?SFg0RHVDQTVjaWVKTmRIaDM4NHp0WVNxQUsrbE5ySC94a2pyam5ZSkM5bXdB?=
+ =?utf-8?B?Z2ZaN2FscEFYWEJyblFGc2U3dDNBT0dzSzQ4K3F4Ym41L1BoZVN5MzJVb3hs?=
+ =?utf-8?B?M0FpSCtuSDhRUWhIbXN3eGwxcG5veG5FSUkweGZMODVuVFNXRTZkWHVpaTA2?=
+ =?utf-8?B?NTZQM01xbmJSMlBKVExHOG10RC94UDQyZGY2R0VvM0NFOWgySVRzZWVJRUJh?=
+ =?utf-8?B?cmNLKy9lLzY0SE1ZMWJGR01DMG84bGF3R3B6MHlnQnFXcHUzazNUSzVwbzJE?=
+ =?utf-8?B?dWJpZUNXa0Eya0gwcy8wNE1UTW11QlJCSHZmU2d1c3JWZnhIOTJ6NW9aR25D?=
+ =?utf-8?B?MzdKcEVHV08zcSt3THVuQWkvamFCOS9xTTZVNlA3UGNjYWcyMVpnRmtBYjky?=
+ =?utf-8?B?Z2JRaUtBa0hkUzU4cDZPQ1ZCNlhBWWRMeng4MWgwMnlmMGsrY1NFSjJ2WUZV?=
+ =?utf-8?B?bUd6eGI3OHhhOUoyaTlkaFF3VTVWdERxZVYzYmhwMWtjVCtWSDFSRHJvMEZt?=
+ =?utf-8?B?clpwcUV3Q1g1QytHK1A3TC9RMWRCU3RtSGp5TGM3RU15VDNsUm1CUmwxcHlz?=
+ =?utf-8?B?L2todWdKZUE3ejdDYTg5bGZNNmVHSmRsVUxzNjhzRjhmOHZSZlFtY01saVdE?=
+ =?utf-8?B?d09scG5Ucys5eVpmMEdKWG9DdEVjcU5JZEM2bHBmdThjeEJpYWpYS2JncWYv?=
+ =?utf-8?B?SUZldXd5ZGVvN25FRDRCSG9vRVRIckptSnNucDNvSGdDVXpzdWU3TWM1R3BQ?=
+ =?utf-8?B?SXVmdUVweit4TmVHQ3ExMmFzYlBqKzJMNjdDb0dpY3NsRDE4TmR6TE5aU2ZX?=
+ =?utf-8?B?VFZyQzhYNTZMN2duOTYyWGFpTG9VbXRJeGxMSnhVcGhJbXA4dDFsNzdVUkpv?=
+ =?utf-8?B?YStPanlBNUZQSmFEVC9VSkpSeUluWmhaWTREV3VDREZpRk5jK3I5WWNEUWIx?=
+ =?utf-8?B?dXM4bnQ5b1g0OUhlemNPUXdFbk1OWTFNdUttWmZYQmVFZEZVS1ZRRE5FZ21T?=
+ =?utf-8?B?bHgxWXhrM0J0UDNnbmpXbXlZak1PcGc3NThFLzhMUVRaRmlTNWsrMlFwbjk0?=
+ =?utf-8?B?c2N3V3VySURGS0ErMEx6T2h5Kys4M2ZwcXRFSC9JWEZQdDhDc2w1RzNoUlcr?=
+ =?utf-8?B?cFVQWmF0UkNhS2pOckFtRXlqSmFFM25hM1pNZEZjTkQxVGVjeHJYOUxsR1Yw?=
+ =?utf-8?B?TTBWdFgrSnNibXdDRGI2UU5qTDErSTlvQ29HUFl4OUJsSU1FWFlnaXo3RjRQ?=
+ =?utf-8?B?RjgzeDJMNFNpc1pnMm13dVV2VWJPYWlCcXdoUmVCSEpQV3E4MzlYb1hMcTdR?=
+ =?utf-8?B?RWp1RGFxZnczWmNFNENwSmlQdk4vM2RVSnoxci9UeGhrUytyZGIrSEdLVjZx?=
+ =?utf-8?B?bklMQ3FRc2Zid2pZZm0wbXNsM1hNNWNZM3kyeXpEcWE0alhzRXNRckUyMzBE?=
+ =?utf-8?B?RUJyTUFBeE1hTS9idWk3VDRLVEhObG94MzBTVk1CRWo0bGZFelBhVXNURzRS?=
+ =?utf-8?B?bElvUUFoY0VlWTZ4MDZWNy90N1VvWGUvb2xKM3FmenhUQ09hcHc4Y05MYnRY?=
+ =?utf-8?B?MnExUGxtaWlWUTRnQWUrSXowME5qRXN4ZlY4SjZyaFhhQnFyWTBaUzROTXUy?=
+ =?utf-8?B?ZXpTRHNPQnhzR3JZajkvem9PVnBqWGxpKzJiL2x6emw0QWx1aVhBR1I4TGkr?=
+ =?utf-8?Q?U5QInrwFrX95GOh4=3D?=
+X-Exchange-RoutingPolicyChecked: SWc9TcUTTZ1IX3EBHp7qNtl/kkexXrE2G6s7PigZeR09aiyIM4d99iLJWDoctEWwyKHihVFEIbNZS9+W52XKmMFADCzVLyGqjU75R8L9en50Dr0IPYt97dmvclwK2mYK9imp7Hp4kd6dAZuSkCslknj2SO1QLxqs/J4Nj3dUTCWydBSNJ7Xc9HW4vxLoH1WEAaoynsN7IwAUwr28z5v1s7EDqXEiMz4kxEo8NgLmMWK2204sXe6KwDad3lFLFatUCogZst70zGZYMS/CvbJFt027otV3gJ1x0r+EiZ5+G527NVDAg5Mon/7b+73cqD0L9MYVw653nLzsGw9MfSXPgQ==
+X-MS-Exchange-CrossTenant-Network-Message-Id: 1f3e43c8-ff86-455a-6fb4-08df35c00cc7
+X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Oct 2026 13:25:07.7253
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: FHHWEULwLwy/E5+TsmWtVyA16sWZ4C2l5KQqmNH8mhPZsAEc6D/dhWtpSqGOKph3BU3Vv6Ppygvn9bqWhihWFw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ1PR11MB6180
+X-OriginatorOrg: intel.com
 
-On Wed, Oct 14, 2026 at 10:28=E2=80=AFPM Aubin Constans
-<aubin.constans@microchip.com> wrote:
->
-> From: Claudiu Beznea <claudiu.beznea@microchip.com>
->
-> SDMMC run-time clock disabling is not supported in newer SoCs, including
-> SAMA7G54, SAMA7D65 and LAN969x.
-
-That sounds a bit vague to me. Exactly why can't the clocks be
-disabled? It seems like the clocks are still being used on these newer
-SoCs.
-
->
-> Make the clock disabling scenario conditional:
-> - still enabled for the sama5d2 and sam9x60 compatibles (which are all
->   those implemented at present),
-> - otherwise avoided by default, for subsequent SoC families.
->
-> Signed-off-by: Claudiu Beznea <claudiu.beznea@microchip.com>
-> [Romain: Fix unbalanced clock activation/deactivation]
-> Co-developed-by: Romain Sioen <romain.sioen@microchip.com>
-> Signed-off-by: Romain Sioen <romain.sioen@microchip.com>
-> [Aubin: Rebase before sama7g5 support and edit the commit msg]
-> Signed-off-by: Aubin Constans <aubin.constans@microchip.com>
-> Tested-by: Robert Marko <robert.marko@sartura.hr>
-
-Kind regards
-Uffe
-
+On 09/10/2026 05:14, tze.yee.ng@altera.com wrote:
+> From: Tze Yee Ng <tze.yee.ng@altera.com>
+> 
+> DDR50 has no CMD19 tuning, so the SD6HC read path relies on static PHY
+> settings that need board/SoC characterisation. Read the read-DQS delay,
+> read-DQS source and phony DQS assertion timing from the new
+> cdns,ddr-read-dqs-delay-ps, cdns,ddr-no-lpbk-dqs and
+> cdns,ddr-phony-dqs-timing DT properties at PHY probe and apply them in
+> the extended-read DDR modes (DDR50 and DDR52). The read-DQS delay is
+> given in picoseconds and converted to delay elements with
+> cdns,delay-element-ps; since that quotient depends on the element size,
+> it is clamped to the 8-bit PHY field maximum (255) to avoid wrap-around.
+> 
+> Loopback DQS is the recommended read-capture path and stays the default;
+> cdns,ddr-no-lpbk-dqs lets a board fall back to the fabricated phony DQS.
+> When a property is absent the driver-computed value is kept - for the
+> phony DQS timing, the value derived from the RE# pulse width
+> (REBAR_PULSE_CYCLES-1).
+> 
+> Signed-off-by: Tze Yee Ng <tze.yee.ng@altera.com>
 > ---
 > Changes in v2:
-> - Edit the commit msg to say the patch prepares SAMA7G54/SAMA7D65/LAN969x
->   SoC support w/o immediate change.
->   Also, move and summarize Romain's own commit msg close to its sign-off.
-> - Restore Claudiu's author and sign-off email to the microchip.com addres=
-s
->   he had upon writing the patch.
-> - Link to v1: https://lore.kernel.org/r/20260918153414.909333-1-aubin.con=
-stans@microchip.com
->
->  drivers/mmc/host/sdhci-of-at91.c | 36 ++++++++++++++++++++++++--------
->  1 file changed, 27 insertions(+), 9 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of=
--at91.c
-> index 7c4ac65f247d..399856643e57 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -39,6 +39,7 @@ struct sdhci_at91_soc_data {
->         const struct sdhci_pltfm_data *pdata;
->         bool baseclk_is_generated_internally;
->         unsigned int divider_for_baseclk;
-> +       bool pm_runtime_disable_clks;
->  };
->
->  struct sdhci_at91_priv {
-> @@ -149,12 +150,14 @@ static const struct sdhci_pltfm_data sdhci_sama5d2_=
-pdata =3D {
->  static const struct sdhci_at91_soc_data soc_data_sama5d2 =3D {
->         .pdata =3D &sdhci_sama5d2_pdata,
->         .baseclk_is_generated_internally =3D false,
-> +       .pm_runtime_disable_clks =3D true,
->  };
->
->  static const struct sdhci_at91_soc_data soc_data_sam9x60 =3D {
->         .pdata =3D &sdhci_sama5d2_pdata,
->         .baseclk_is_generated_internally =3D true,
->         .divider_for_baseclk =3D 2,
-> +       .pm_runtime_disable_clks =3D true,
->  };
->
->  static const struct of_device_id sdhci_at91_dt_match[] =3D {
-> @@ -164,7 +167,7 @@ static const struct of_device_id sdhci_at91_dt_match[=
-] =3D {
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
->
-> -static int sdhci_at91_set_clks_presets(struct device *dev)
-> +static int sdhci_at91_set_clks_presets(struct device *dev, bool start_cl=
-ks)
->  {
->         struct sdhci_host *host =3D dev_get_drvdata(dev);
->         struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> @@ -174,7 +177,14 @@ static int sdhci_at91_set_clks_presets(struct device=
- *dev)
->         unsigned int                    gck_rate, clk_base_rate;
->         unsigned int                    preset_div;
->
-> -       clk_prepare_enable(priv->hclock);
-> +       /*
-> +        * Manage clock prepare/enable procedure depending on if the boar=
-d
-> +        * support runtime clock disabling and if we come from the probin=
-g
-> +        * or restoring procedure (for backup+self refresh).
-> +        */
-> +       if (start_clks)
-> +               clk_prepare_enable(priv->hclock);
+> - Updated patch title to "mmc: sdhci-cadence6:" since it touches only the
+>   v6 PHY.
+> - Renamed the properties to cdns,ddr-*.
+> - Read cdns,ddr-read-dqs-delay-ps in ps and convert it to delay elements 
+>   (dividing by cdns,delay-element-ps), clamping that quotient to the 8-bit
+>   PHY field. (Krzysztof Kozlowski)
+> - Read cdns,ddr-no-lpbk-dqs via of_property_read_bool(). (Krzysztof Kozlowski)
+> - Dropped the v1 per-property range checks and redundant FIELD_MAX() write
+>   masks. (Adrian Hunter)
+> - Apply the overrides in both DDR50 and DDR52.
+> ---
+>  drivers/mmc/host/sdhci-cadence-phy-v6.c | 59 ++++++++++++++++++++++++-
+>  1 file changed, 58 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-cadence-phy-v6.c b/drivers/mmc/host/sdhci-cadence-phy-v6.c
+> index 8d6a9c26c139..2b1b7256731a 100644
+> --- a/drivers/mmc/host/sdhci-cadence-phy-v6.c
+> +++ b/drivers/mmc/host/sdhci-cadence-phy-v6.c
+> @@ -129,6 +129,11 @@ struct sdhci_cdns6_phy {
+>  	/* Active delay element (ps); doubled when one SDMCLK requires > 256 steps */
+>  	u32 delay_element;
+>  
+> +	/* DDR read-path overrides (SoC-specific) */
+> +	u32 ddr_read_dqs_delay_ps;
+> +	bool ddr_no_lpbk_dqs;
+> +	s32 ddr_phony_dqs_timing;
 > +
->         caps0 =3D readl(host->ioaddr + SDHCI_CAPABILITIES);
->         caps1 =3D readl(host->ioaddr + SDHCI_CAPABILITIES_1);
->
-> @@ -223,8 +233,11 @@ static int sdhci_at91_set_clks_presets(struct device=
- *dev)
->         writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->                host->ioaddr + SDHCI_PRESET_FOR_DDR50);
->
-> -       clk_prepare_enable(priv->mainck);
-> -       clk_prepare_enable(priv->gck);
-> +       /* Same clock management as for hclock */
-> +       if (start_clks) {
-> +               clk_prepare_enable(priv->mainck);
-> +               clk_prepare_enable(priv->gck);
-> +       }
->
->         return 0;
->  }
-> @@ -254,9 +267,11 @@ static int sdhci_at91_runtime_suspend(struct device =
-*dev)
->         if (host->tuning_mode !=3D SDHCI_TUNING_MODE_3)
->                 mmc_retune_needed(host->mmc);
->
-> -       clk_disable_unprepare(priv->gck);
-> -       clk_disable_unprepare(priv->hclock);
-> -       clk_disable_unprepare(priv->mainck);
-> +       if (priv->soc_data->pm_runtime_disable_clks) {
-> +               clk_disable_unprepare(priv->gck);
-> +               clk_disable_unprepare(priv->hclock);
-> +               clk_disable_unprepare(priv->mainck);
-> +       }
->
->         return 0;
->  }
-> @@ -269,7 +284,7 @@ static int sdhci_at91_runtime_resume(struct device *d=
-ev)
->         int ret;
->
->         if (priv->restore_needed) {
-> -               ret =3D sdhci_at91_set_clks_presets(dev);
-> +               ret =3D sdhci_at91_set_clks_presets(dev, priv->soc_data->=
-pm_runtime_disable_clks);
->                 if (ret)
->                         return ret;
->
-> @@ -277,6 +292,9 @@ static int sdhci_at91_runtime_resume(struct device *d=
-ev)
->                 goto out;
->         }
->
-> +       if (!priv->soc_data->pm_runtime_disable_clks)
-> +               goto out;
+>  	/* PHY_DLL_SLAVE_CTRL register fields */
+>  	u8 cp_read_dqs_cmd_delay;	/* bits [31:24] */
+>  	u8 cp_clk_wrdqs_delay;		/* bits [23:16] */
+> @@ -145,6 +150,7 @@ struct sdhci_cdns6_phy {
+>  	/* PHY_DQS_TIMING register fields */
+>  	bool cp_use_phony_dqs;		/* bit [20] */
+>  	bool cp_use_phony_dqs_cmd;	/* bit [19] */
+> +	bool cp_use_lpbk_dqs;		/* bit [21] */
+>  
+>  	/* PHY_CTRL register fields */
+>  	u32 cp_phony_dqs_timing;
+> @@ -523,6 +529,16 @@ static void sdhci_cdns6_phy_calc_dat_in(struct sdhci_cdns6_phy *phy)
+>  	if (phy->mode == MMC_TIMING_MMC_HS200)
+>  		phy->cp_read_dqs_delay = phy->hs200_tune_val;
+>  
+> +	if ((phy->mode == MMC_TIMING_UHS_DDR50 ||
+> +	     phy->mode == MMC_TIMING_MMC_DDR52) && phy->ddr_read_dqs_delay_ps) {
+
+The same (phy->mode == MMC_TIMING_UHS_DDR50 || phy->mode == MMC_TIMING_MMC_DDR52)
+appears 4 times.  Might be neater to assign it to a local variable.
+
+> +		u32 steps = phy->ddr_read_dqs_delay_ps / phy->delay_element_org;
+> +		u32 max_steps = FIELD_MAX(SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_DELAY);
 > +
->         ret =3D clk_prepare_enable(priv->mainck);
->         if (ret) {
->                 dev_err(dev, "can't enable mainck\n");
-> @@ -344,7 +362,7 @@ static int sdhci_at91_probe(struct platform_device *p=
-dev)
->                 return dev_err_probe(&pdev->dev, PTR_ERR(priv->gck),
->                                      "failed to get multclk\n");
->
-> -       ret =3D sdhci_at91_set_clks_presets(&pdev->dev);
-> +       ret =3D sdhci_at91_set_clks_presets(&pdev->dev, true);
->         if (ret)
->                 return ret;
->
-> --
-> 2.43.0
->
+> +		phy->cp_read_dqs_delay = min_t(u32, steps, max_steps);
+> +	}
+> +
+> +	phy->cp_use_lpbk_dqs = 1;
+> +
+>  	if (phy->sdhc_extended_rd_mode &&
+>  	    (phy->mode == MMC_TIMING_UHS_DDR50 ||
+>  	     phy->mode == MMC_TIMING_MMC_DDR52))
+> @@ -530,6 +546,23 @@ static void sdhci_cdns6_phy_calc_dat_in(struct sdhci_cdns6_phy *phy)
+>  	else
+>  		phy->cp_phony_dqs_timing = 0;
+>  
+> +	/*
+> +	 * Loopback DQS is the recommended read-capture path; allow boards that
+> +	 * need the fabricated phony DQS instead to opt out in the DDR modes.
+> +	 */
+> +	if ((phy->mode == MMC_TIMING_UHS_DDR50 ||
+> +	     phy->mode == MMC_TIMING_MMC_DDR52) && phy->ddr_no_lpbk_dqs)
+> +		phy->cp_use_lpbk_dqs = 0;
+> +
+> +	/*
+> +	 * The computed phony DQS timing above is derived from the RE# pulse
+> +	 * width. Allow a DT override for boards whose flight time shifts the
+> +	 * returning DDR data relative to the fabricated strobe.
+> +	 */
+> +	if ((phy->mode == MMC_TIMING_UHS_DDR50 ||
+> +	     phy->mode == MMC_TIMING_MMC_DDR52) && phy->ddr_phony_dqs_timing >= 0)
+> +		phy->cp_phony_dqs_timing = phy->ddr_phony_dqs_timing;
+> +
+>  	if (strobe_dat) {
+>  		/* dqs loopback input via IO cell */
+>  		hcsdclkadj += phy->iocell_input_delay;
+> @@ -693,10 +726,11 @@ int sdhci_cdns6_phy_init(struct sdhci_cdns_priv *priv)
+>  	sdhci_cdns6_dll_reset(priv, true);
+>  
+>  	reg = sdhci_cdns6_read_phy_reg(priv, SDHCI_CDNS6_PHY_DQS_TIMING_REG);
+> +	reg &= ~SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS;
+>  	reg &= ~SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS;
+>  	reg &= ~SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS_CMD;
+>  	reg |= SDHCI_CDNS6_PHY_DQS_TIMING_USE_EXT_LPBK_DQS;
+> -	reg |= SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS;
+> +	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS, phy->cp_use_lpbk_dqs);
+>  	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS, phy->cp_use_phony_dqs);
+>  	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS_CMD, phy->cp_use_phony_dqs_cmd);
+>  	sdhci_cdns6_write_phy_reg(priv, SDHCI_CDNS6_PHY_DQS_TIMING_REG, reg);
+> @@ -878,6 +912,7 @@ int sdhci_cdns6_phy_probe(struct platform_device *pdev, struct sdhci_cdns_priv *
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_cdns6_phy *phy;
+>  	unsigned long val;
+> +	u32 prop;
+>  	int ret;
+>  
+>  	phy = devm_kzalloc(dev, sizeof(*phy), GFP_KERNEL);
+> @@ -916,6 +951,28 @@ int sdhci_cdns6_phy_probe(struct platform_device *pdev, struct sdhci_cdns_priv *
+>  
+>  	phy->delay_element_org = phy->delay_element;
+>  
+> +	/*
+> +	 * Optional read-path tuning for the extended-read DDR modes (SD DDR50,
+> +	 * eMMC DDR52).
+> +	 */
+> +	phy->ddr_read_dqs_delay_ps = 0;
+> +	of_property_read_u32(dev->of_node, "cdns,ddr-read-dqs-delay-ps",
+> +			     &phy->ddr_read_dqs_delay_ps);
+> +	if (phy->ddr_read_dqs_delay_ps / phy->delay_element_org >
+> +	    FIELD_MAX(SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_DELAY))
+
+This is still effectively validating the firmware values
+
+> +		dev_warn(dev,
+> +			 "cdns,ddr-read-dqs-delay-ps %u too large, clamping to %lu elements\n",
+> +			 phy->ddr_read_dqs_delay_ps,
+> +			 (unsigned long)FIELD_MAX(SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_DELAY));
+> +
+> +	phy->ddr_no_lpbk_dqs = of_property_read_bool(dev->of_node,
+> +						     "cdns,ddr-no-lpbk-dqs");
+
+Unneeded line wrapping - can use 100 cols
+
+> +
+> +	phy->ddr_phony_dqs_timing = -1;
+> +	if (!of_property_read_u32(dev->of_node, "cdns,ddr-phony-dqs-timing",
+> +				  &prop))
+
+Unneeded line wrapping - can use 100 cols
+
+> +		phy->ddr_phony_dqs_timing = prop;
+> +
+>  	priv->phy = phy;
+>  
+>  	return 0;
+
