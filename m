@@ -1,123 +1,63 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1793368842;
-	b=K2EEVwM4wMsYxLKdB/KTS7wwvW59ZyvoZrkXTWLLjHvG4689MxZwqErqPUNn/C/JIbiJ
-	 3UMtg0eXO0fhOU+hTB4CJryzZX1WnlsFWAYr1INnNvuF33Dlnk6o0cFMqYAsl/1ZqZRq/
-	 1UU61k1Wk7Z+MpL3KIn55DYqmXXEJyxFBkthJFeQhu0ulN4w2hUsCwv2PaN7o7PDp5ZOX
-	 83Gwicu+OuqBfBEqyii8VYaWC01fHjW99bQERyHsQnSWH/CRcAqHcR2AWvrbifHHcFtIC
-	 hCOdXSNFPSGUrghIOHzrmGcsXZdgfCeG81urAcJvEDFPob2JlM2uAAIuI7twZFYlvNw==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793368842;
-	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
-	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
-	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
-	 Cc:Content-Type:Content-Transfer-Encoding:X-Proofpoint-GUID:
-	 X-Proofpoint-ORIG-GUID:X-Proofpoint-Spam-Details-Enc:
-	 X-Authority-Analysis:X-Proofpoint-Spam-Info:
-	 X-Proofpoint-Virus-Version:X-Proofpoint-Spam-Details;
-	bh=OuitTymSSoEUqo8wxOrof9T+ZUTGPTidse28qGJb34o=;
-	b=rYZRlIJyruCC+fcOWMUqTeXt+jgOdwBGYiicQj3tlukzAoqfRkPBHGvrULARqkCZkX7u
-	 8JLFmUq/ZemfEtlJXX35PJRFif0copQ3McuCSYcIyREtYTLFVme2CjiWUskfgfbTmjS2X
-	 u4j9vgGJ+RcmH+r2chPikwjOpiJaNFCFLrSL6djclpaTKrSGfX7wOsp5we0bYFVsAlen1
-	 lgUDKy4HzD/9NcT9POlYJvyMeiskzHqe4VGHSRNX8jciPPMQ3qE6J9rEn2Tzy8+LcL+DL
-	 rIsqgaxSxn8zDSV5RCgzTOGBlkH7cRcWd+PGVGhvYWWg21S0lN6Jg64FXWhmRdvXF3w==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=oss.qualcomm.com;
-	spf=pass smtp.mailfrom=oss.qualcomm.com;
-	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=IHDI6toP;
-	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=MjD6nwdg;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=88.99.92.76
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1793369387;
+	b=xrIzvy9cWKxwrnPYbqU17REau1lsZevLdv7ikmn/c/BkUSIIL0GXnO/MWqOMQ1dchOoX
+	 w8LsV8RxvFAfck2HKAqcCOTcaFaLR5ThJQ4t/ZWalm99iYJQoS9BjFrH3j2NT6KqO84WU
+	 S4kCfMh4CZjvxvpVAb0zzhQYJ75R91J/1OTTkWldxFA83JVeMlwI90udIecWgP7ciDCGY
+	 EMRF8uIkSXDY27gqCfuciq0GDoiXe0R7ZXEkwagpoj6RKUtX0mk1xdW1uczDf2oFxR37H
+	 PL/5lqQoQ8NN8fqiGvy1hs3k+h/94bMlnxQpOeWC9XFkbpXkpA0BtYY29PxOpyR6Flg==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793369387;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:X-Forwarded-Encrypted:
+	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
+	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
+	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
+	bh=WmS+CVCzuvxVoE760Ui7VRLzK1RM3gMsHjnco6tBH0o=;
+	b=eDA85jMEuBizxqF1vAjOty2w1TeYi2ij/SFZ3JMSn+l8gbb9M4Q1eQojQcHA0sWGG+SD
+	 mXgx64mK31F1vV4walgYREUdcQPEhGkhaeMACkiWaHHJWYG8SZhJ1VbDAFtI8YDpUhOFS
+	 KHsp54fGPZ2780f2y9kk1ftthoX69+S2+/7Xl+UzFE5bGXvM+55vKrRJf8DR1aBB8Ba8G
+	 K32/OilJqfshLLXnCvLba5m2N/rU7WLYNlR3txNnyn9V7LurkBbwvTdAaFqX58dfhzfuU
+	 jrVGCoiw0uM2/g0CwtzwOe6ToKa7GDrCK7SvFp4lSkZxQra61V+9i/8D6qZbe4lzOsw==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=none header.from=rojer.me;
+	spf=pass smtp.mailfrom=rojer.me;
+	dkim=pass header.d=rojer.me header.i=@rojer.me header.a=rsa-sha256 header.s=main header.b=V0Mkl8Gh;
+	arc=none smtp.remote-ip=88.99.92.76
+Received: from mail1.rojer.cloud (mail1.rojer.cloud [88.99.92.76])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF4F0606A31C
-	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 14:00:41 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org DF4F0606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D1E2606A31E
+	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 14:09:45 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4D1E2606A31E
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=rojer.me
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rojer.me
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=IHDI6toP;
-	dkim=pass (2048-bit key, unprotected) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=MjD6nwdg
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69UDneGc4057690
-	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 14:00:40 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	OuitTymSSoEUqo8wxOrof9T+ZUTGPTidse28qGJb34o=; b=IHDI6toPVOYrtJFP
-	z1ZskiucSL9zaQF1sOyXvlzXXmXLcY6WxvfQOn8yxwZ/hYxEfwFWQ/xNVWoXwEAw
-	pi2RJnDNfhF1UY3r1JVkL39V2aGWfVLebudH4SncyDQbgusv+q053AUMKyXiydcu
-	Xuuds3tuDj36SZThVwg7WNX+iTMThoNIdbLdehPh7qg+SsNrAl41CZj8mGPab3aC
-	IzSvs1s97jhg8gczI1Lc967TPUvwZW3AZO3Od2RD79WhwlAtEum8sDjTCmqLUOnB
-	b2ChyMvzXr5LPhJDFH+YAD9wCpqfVYMRl17krS0QAmuFPTV0YMDCQfCTL3T781mK
-	o4VBYw==
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com [209.85.210.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hme6quawa-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 14:00:38 +0000 (GMT)
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-8a0589ff620so592030b3a.1
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 07:00:38 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1793368838; cv=none;
-        d=google.com; s=arc-20260327;
-        b=WF14ZHfcEui5nCIvtf2huuGiW71PW0K1+XXFVvcFR7k93awk9JLTMVq9kDHicSN6bf
-         JYvurhKqcxn76UWHacOua//FTyXhRal/x71TWPjQDJAad1oYF7Shz8rfHW/riD6JaqPp
-         K7t9wzpp3x6Us2u+ih5dkO9hsNmrcDAe9hgxqLgbQ1PJOh923EsWXu5r17B1ENu67oE2
-         1EmMFwy+E8OXn1pHfhSjrimxOWE4N63rOaZmDVRNhCMQRk1UU76mYXuCrRasn6t61l8Y
-         EC7Vo6yLnUshg9GK9D/RqDP74q777S5fkbLVLYMO7XeBqckLs+/kVOXRZ/gtLYO+v0vS
-         Bb+g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=OuitTymSSoEUqo8wxOrof9T+ZUTGPTidse28qGJb34o=;
-        fh=Tv4hMmE280WIscBKqNBOqi2TxBQZqqPTNcHWRDAieTo=;
-        b=M6aEnbgZovH6uNZRqW7lGMg6Ek+rvfnk9dgC8dzodj7zhT01YSSVZfIKk6LECu6Ci1
-         2hlJ+NR94dKD7yaRs7fY3RJzX0yxWHYVTumsh54n1liCQsME0pJqi9eS3dB0PPUybjIG
-         niUCp5ciQu1LXBRN2Mdh34nJkrHVMwoPJnlmEXkvMv2drP3WNSECz18pOa8eLizxxkRO
-         2md7pBmZHWUDtlxV90853gKgGz/7llNh3UyvTiNMhXBsJDbpa7iXfC2hwzfbBzNikPvP
-         B1bJcgt1t1lFSAtZOKRiUrxd1SQlb1RLaMWmfpgbRIA1B9TCseNZjptirqxWVKbIDeIB
-         3LLg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1793368838; x=1793973638; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=OuitTymSSoEUqo8wxOrof9T+ZUTGPTidse28qGJb34o=;
-        b=MjD6nwdg2r4v5CtB7SpyZww9+rFGXGXGLgChJOhpGoDd1wA0PYjuGZ0dWdhlgwz3VX
-         VkCZM6TC54vEDOUQkYhf5eP+69UkLtusS0s7buLHITEh/dvLlfSfHwd5sJhGV0/GLt91
-         lY3MKfo82pkJ+DPoBVssigvpHuXtvqDLgYgXdSGJiyH1n8q+Ouh1tNlgETWTHuy83s6B
-         KJeKSWWIKfbmf6GPonHyeAwMbRC/cqJioPOMAIWXkez29Xk3bzn83fFmmybqXTK8P1dZ
-         AephpsfXbARjROX/UwDiYr12XNgP3/W5gqf3OXPAhL9DEAi+0Z3jdLbwDBRbmfX9Wfmn
-         jRLA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793368838; x=1793973638;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=OuitTymSSoEUqo8wxOrof9T+ZUTGPTidse28qGJb34o=;
-        b=E6JW5LUY1lA5i2FUFrsawz3FbZJSWg23xFrmPZR9zSo8FXcdIVsVGNp9w9YmdJJyp5
-         e3HS76WUe64balgqvysgITpdmKnn6EtpcxisnCuiRU32hdQWJcImAczaMGvzHY6MAD4i
-         FB3G1LwfPSzG8SW6SrOvlX2Sd3ULt77YiNv7PDtd0ALrgdMn/We0X8oJcb0lq7jQ+nfW
-         6meeZEkH4HiEs51ihv20sYiQcceW0sTyv4Df9uXtR8ETY9whfI3fBuKtaas752Xt8NpF
-         IwLe4QpsLpGk8iFwZDZMDmK0LBzb4VvEj2tNszfLmSKzyKVbfXSj7sFYDl64JVJ+LWoZ
-         VEUw==
-X-Forwarded-Encrypted: i=1; AKwUvBymhf5vUPwnmRUBrRXWmzKlNaHa+lPi+OHwcaJXqfqZIkxF9sYxzzJvpvJGNK838gLt/2y5PLLw/NA=@vger.kernel.org
-X-Gm-Message-State: AFq9FYJN0nYqmJJTUXRB0ChQPfshAgCUSlVGSGD8CG/JZnZXN8p2rykJ
-	z5xf/IdUUBcDrEZqf4b/JIA9qn4nsIdBR4a8uzucsqa08EMo5r8rVJae9Rkdxp7SGy5pL4d670A
-	hZFqB823C2BqC09yc3d+bjR+2Rp6qm1NM/CwvTfBDg5lXXYJ8cAN7UReCk9BKXIO1nwkcFrom+c
-	++kSAe7ViqztdZ7F2FppQTJgy/K+ThQw1qlpWeLmqheAE7kA==
-X-Gm-Gg: AYBFou33sLr1bXQG+szLTFVAM+xfevlrl9TE4YkAWZrOScPngoWrHhwdS3UW03iTyUe
-	8X2dkVuQ7OnwYOMljXLucnHV5o1WPlzrjK2iQGiyBY2TL8vdl9uj/5p6Fqd8q4cSh+2DevI3Ty0
-	5n8YzfisyCI3PTByNjlxPQGmTrefqbsa866JkGMWKo1kaDqYzRdjHs+PsX+w==
-X-Received: by 2002:a05:6a00:1c91:b0:89e:584:bb77 with SMTP id d2e1a72fcca58-8a9c098ab29mr2174607b3a.58.1793368836873;
-        Fri, 30 Oct 2026 07:00:36 -0700 (PDT)
-X-Received: by 2002:a05:6a00:1c91:b0:89e:584:bb77 with SMTP id
- d2e1a72fcca58-8a9c098ab29mr2174559b3a.58.1793368836406; Fri, 30 Oct 2026
- 07:00:36 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=rojer.me header.i=@rojer.me header.a=rsa-sha256 header.s=main header.b=V0Mkl8Gh
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rojer.me; s=main;
+	t=1793369378; bh=NipbTtAjrLg4RMpGQO/RHv1pYjokrJm5L1BpWTaf3GM=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=V0Mkl8Ghdd2HNA6zHhz65BdcmVQ3oYhm5osD02nZiuvK4cB+MDBtixGN1vzm8JZo4
+	 p57AMRO5w2r2WovVlOq55cZUeS0KRvk9mDSqse62BP2PZlKOPMRFtSM+WYqZb4zyNt
+	 aCLYZgHMzfd43b9684pUG0F9U2klCT0SnhLMWX6DDk1GqZuoOyBzWodjgCvPhHtTqD
+	 /SnpbDqRbbVvfGORD7VwTqE3gVeJTv0MHFdw3PEaD6bsv/DF0CZeNAF81yyt0Rb9Vn
+	 tjY3fd1Ti8NB3qFkF7Nfe1V5QNIcJKUx3S5uB08bctpI/qj9MfppjXH5+ZvYGjHGjv
+	 pLEjWx0vKgHMg==
+Received: from mail-oi1-f182.google.com (mail-oi1-f182.google.com [209.85.167.182])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange x25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	(No client certificate requested)
+	by mail1.rojer.cloud (Postfix) with ESMTPSA id 7603F21662
+	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 14:09:38 +0000 (UTC)
+Received: by mail-oi1-f182.google.com with SMTP id 5614622812f47-53a448f86e0so479857b6e.1
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 07:09:38 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AKwUvBwumLERyvwLacYjKSYgNBT8AaovRrJ/0y8/PtcodE28x54id/MVsHhI0JP9X5qIRQKWe/KgnaGZgxQ=@vger.kernel.org
+X-Gm-Message-State: AFq9FYKW2TpZMcim/lT133K92sQsP9ltcs9/2PwKfmc7pNgPCQdirAUh
+	flYj1F8uwvbSBXFz8/eYZXUboI6NLwISq+as93wzq+wYU5YLXCx4OJhTvQaya81BH3g6k9+kKNQ
+	J6aAdEd1o+riiBeubPRRVOOXtV/Pe9g==
+X-Received: by 2002:a05:6808:6404:b0:4f2:4d2f:7ba with SMTP id
+ 5614622812f47-5640d953debmr1796710b6e.8.1793369376966; Fri, 30 Oct 2026
+ 07:09:36 -0700 (PDT)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -127,108 +67,111 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261027144002.10606-1-ansuelsmth@gmail.com>
-In-Reply-To: <20261027144002.10606-1-ansuelsmth@gmail.com>
-From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Fri, 30 Oct 2026 15:00:21 +0100
-X-Gm-Features: AclHuK-MTjfwt2OQzyBtwa_iraZJVoORJ1j_v3oQYZTa5jWvtZ6sOZH5C5h4Bak
-Message-ID: <CAPx+jO-TT=UAhH5=5DEPuu1XtVvvE_QA_1V=9qw1moZJoPUU-Q@mail.gmail.com>
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Document support for
- Airoha AN7581 SoC
-To: Christian Marangi <ansuelsmth@gmail.com>
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson <ulfh@kernel.org>,
-        Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org
+References: <20261027122417.954133-1-rojer@rojer.me> <20261027122417.954133-2-rojer@rojer.me>
+ <CAPx+jO-SrC-8DKEfOC9KTMY=zHyiNVqNwiZyf7ipvX1=ZzZ1iw@mail.gmail.com>
+In-Reply-To: <CAPx+jO-SrC-8DKEfOC9KTMY=zHyiNVqNwiZyf7ipvX1=ZzZ1iw@mail.gmail.com>
+From: "Deomid \"rojer\" Ryabkov" <rojer@rojer.me>
+Date: Fri, 30 Oct 2026 16:09:25 +0200
+X-Gmail-Original-Message-ID: <CABFmFwoXejC7p_i4i4nctsqJ5e+CUP8tN5LnJ=5LVtuQPiCPhQ@mail.gmail.com>
+X-Gm-Features: AclHuK8qEgLA1GddyFvod5CZ6IsCRLe_wzw9sQ6U-TsEP2z-vAr9UYuIT3oUqm8
+Message-ID: <CABFmFwoXejC7p_i4i4nctsqJ5e+CUP8tN5LnJ=5LVtuQPiCPhQ@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] mmc: core: sdio: retry without UHS if UHS init fails
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Cc: ulfh@kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	shawn.lin@rock-chips.com, llj@rock-chips.com
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-GUID: tcB0Ha01qaGTuCCbPj6NtxWCNVTdifHp
-X-Proofpoint-ORIG-GUID: tcB0Ha01qaGTuCCbPj6NtxWCNVTdifHp
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDMwMDA1NCBTYWx0ZWRfX4MPd0dSpjzvK
- fRWphXwoepci0i3us6pOg6QoV/uwgGtiZ5PPv4bi1khXiYCilJBtma19sI2JEoJ/zCU1YHyTHLU
- v8kbQddES8WUS5WgSIxo10JT+U8Bw9Hoq/c3zRVxC5z0P+7t+dDpI9A6hOLIdW7eq1W6vFBcYnR
- wPhuUpPoP4F+KL2sZjGQYFWkGLbBj+oO0hL0nYbUr59+oh0d3RMMjtx/QrvI7h97PTIkHeg+7jC
- 9ypBto0Dynw4scbDH6ZT3yfvxWJhhteCUqj4etZwEE88gc3hQhtlK5sQ8GAl+XXrA4WNoEzzj5T
- ixLXhTAMnfgr2XG+ROgWT+eWbDY4tE46d/wdqF4ddodPocsi/pMA9hbmRgGXSDrqueQDbGgSZCx
- hdFPEqGx0i1CaxY2GTFTeVdO6A7eqYqL2mPsZIB+WwavnDGFwnOi1NuiQJD2oAFM3CAYpWNmG8B
- 50JLxUKxpAozJFzN5Tg==
-X-Authority-Analysis: v=2.4 cv=dPgzC+Zb c=1 sm=1 tr=0 ts=6ae4a306 cx=c_pps
- a=rEQLjTOiSrHUhVqRoksmgQ==:117 a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10
- a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=3WHJM1ZQz_JShphwDgj5:22 a=pGLkceISAAAA:8 a=5vCY4yJ5Sko5zDJxFQEA:9
- a=QEXdDO2ut3YA:10 a=2VI0MkxyNR6bbpdq8BZq:22
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMDMwMDA1NCBTYWx0ZWRfX0cqtlx6gHvd5
- ttzOrFLb5DFX/HVbQp4Dz/ejgZiy/C/aldSTv9QKwDDDaJd9zqIoWeSludQUTa/KMD7r23W8lYM
- f4ul7m2CGGOfLug5FMKipSJTyk/+7Is=
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
- definitions=2026-10-30_04,2026-10-21_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- adultscore=0 impostorscore=0 spamscore=0 malwarescore=0 clxscore=1015
- priorityscore=1501 lowpriorityscore=0 phishscore=0 bulkscore=0 suspectscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2610190000 definitions=main-2610300054
 
-On Tue, Oct 27, 2026 at 3:40=E2=80=AFPM Christian Marangi <ansuelsmth@gmail=
-.com> wrote:
->
-> Add dedicated compatible for Airoha AN7581 SoC integrated MMC controller.
-> The MMC controller is based on the MT7988 with the difference that it doe=
-s
-> have a single clock controlling it.
->
-> Add the dedicated compatible to describe the 2 register requirement and
-> permit to define only 2 clock (the main one and a fixed clock for HS)
->
-> Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
+Hi Ulf,
 
-Applied for next, thanks!
+it's not wrong: after the "Read the common CIS tuples" and the
+subsequent vendor check the only two outcomes can be oldcard =3D=3D NULL
+or card =3D=3D oldcard.
+but your way is clearer, i will send v3 with it.
+thanks for the review!
 
-Kind regards
-Uffe
-
-
-> ---
-> Changes v2:
-> - Also add compatible to restrict clock-names for source and hclk
->  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 +++
->  1 file changed, 3 insertions(+)
+On Fri, 30 Oct 2026 at 16:10, Ulf Hansson <ulf.hansson@oss.qualcomm.com> wr=
+ote:
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Document=
-ation/devicetree/bindings/mmc/mtk-sd.yaml
-> index a4d032224dce..704d59360bcb 100644
-> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> @@ -14,6 +14,7 @@ properties:
->    compatible:
->      oneOf:
->        - enum:
-> +          - airoha,an7581-mmc
->            - mediatek,mt2701-mmc
->            - mediatek,mt2712-mmc
->            - mediatek,mt6779-mmc
-> @@ -182,6 +183,7 @@ allOf:
->        properties:
->          compatible:
->            enum:
-> +            - airoha,an7581-mmc
->              - mediatek,mt2701-mmc
->              - mediatek,mt6779-mmc
->              - mediatek,mt6795-mmc
-> @@ -238,6 +240,7 @@ allOf:
->          compatible:
->            contains:
->              enum:
-> +              - airoha,an7581-mmc
->                - mediatek,mt7986-mmc
->                - mediatek,mt7988-mmc
->                - mediatek,mt8183-mmc
-> --
-> 2.55.0
+> On Tue, Oct 27, 2026 at 1:24=E2=80=AFPM Deomid rojer Ryabkov <rojer@rojer=
+.me> wrote:
+> >
+> > If mmc_sdio_init_uhs_card() fails, e.g. because tuning finds no
+> > working sample phase, card initialisation fails and the card is not
+> > usable at all, even though it would work fine in high-speed mode.
+> >
+> > This happens for example on the FriendlyElec NanoPi R2S Plus when the
+> > SDIO pins of the RTL8822CS Wi-Fi module are left at their default 4 mA
+> > drive strength:
+> >
+> >   dwmmc_rockchip ff5f0000.mmc: All phases bad!
+> >   mmc2: tuning execution failed: -5
+> >   mmc2: error -5 whilst initialising SDIO card
+> >   [... repeated for every init frequency ...]
+> >   mmc2: Failed to initialize a non-removable card
+> >
+> > There is already a fallback for a failure to read the CCCR in UHS mode:
+> > reset the card and restart the init sequence without R4_18V_PRESENT.
+> > Do the same when UHS init fails, so that the card comes up in
+> > high-speed mode instead:
+> >
+> >   mmc2: UHS init failed (-5), retrying without UHS
+> >   mmc2: Skipping voltage switch
+> >   mmc2: new high speed SDIO card at address 0001
+> >
+> > The fallback is taken at most once, as the retry doesn't request UHS.
+> >
+> > Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+> > Signed-off-by: Deomid rojer Ryabkov <rojer@rojer.me>
+> > ---
+> >  drivers/mmc/core/sdio.c | 10 ++++++++--
+> >  1 file changed, 8 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> > index 83085e76486..6787fdf1c53 100644
+> > --- a/drivers/mmc/core/sdio.c
+> > +++ b/drivers/mmc/core/sdio.c
+> > @@ -867,8 +867,14 @@ static int mmc_sdio_init_card(struct mmc_host *hos=
+t, u32 ocr,
+> >         /* Only if card supports 1.8v and UHS signaling */
+> >         if ((ocr & R4_18V_PRESENT) && card->sw_caps.sd3_bus_mode) {
+> >                 err =3D mmc_sdio_init_uhs_card(card);
+> > -               if (err)
+> > -                       goto remove;
+> > +               if (err) {
+> > +                       pr_warn("%s: UHS init failed (%d), retrying wit=
+hout UHS\n",
+> > +                               mmc_hostname(host), err);
+> > +                       mmc_sdio_pre_init(host, ocr_card,
+> > +                                         card !=3D oldcard ? card : NU=
+LL);
 >
+> Is this really correct?
+>
+> If there is an oldcard we should *not* pass the card (since it would
+> be equal to oldcard) to mmc_sdio_pre_init() as it would remove it.
+>
+> If there is no oldcard (oldcard =3D=3D NULL), we should pass the card to
+> mmc_sdio_pre_init() to make it remove it.
+>
+> In other words, how about just:
+> "oldcard ? NULL : card"
+>
+> > +                       retries =3D 0;
+> > +                       goto try_again;
+> > +               }
+> >         } else {
+> >                 /*
+> >                  * Switch to high-speed (if supported).
+> > --
+> > 2.53.0
+> >
+>
+> Kind regards
+> Uffe
+
+
+
+--=20
+Deomid "rojer" Ryabkov
+rojer@rojer.me
