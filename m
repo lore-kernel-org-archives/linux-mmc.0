@@ -1,117 +1,91 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.222.97
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793383894;
-	b=vlZyT8Rlo0V9g0xV9Bd6Npvf7sdDka7XxQXKM222aqdbB63s2J7A6mv+aVaJlInzf6vy
-	 EaIGKMjG/Xb+wPFNWx2XkhX7aTXRHqwW3XjpfuH7zOdPIl36Vo+JQUfAV3P0WJlsPWWPy
-	 DpAay8WB3CrrNR3DHyuC3w1ljkYWFxD3oHMmUY91aIWko4+NH3k4kGBEaTa14DvuhmheX
-	 2+yE+XwQFgAtpnzdJ1X78UsN7SlaxByAK3HbFTrTU+XluCHlgaywFrtVr6rGWFfkb2IZO
-	 6lRx++ttSVDamjAbaiC7L9TWSiL6zYHg+h3eoAasjqtC0edA1ZnHBJPjhst3D0le/8Q==
+	t=1793384101;
+	b=VXwPFvO1TliYH4NGQykiLezwRusN9vlppwNonQOp+yvI1z3WRBMbfHvyu+xeXppBWnkR
+	 Rmcm9omcAgDmoQOiRplm0QzMy6TzDecXQ8LE740DXcIiulaeuDiWD0Za4jV0XXaHLWv6+
+	 q+zPuuHzFKTY/3H4pNGaz5Mmb8KuYz07MpqUhYPsYm5wOULnrKHg57A5dvG2aG0mPAUkI
+	 tK83eVYtddNs6LT/qsf+fbNsJNWpk6XU5SFUghPg1au7k+H6w3J8WbxMi6UdbxHjhePv5
+	 1RvJta039NZ4vHbLo7gyBd6TuHE4b2rw1U7wqOkFQ2AIApgH3/KrnGlixa2DzV0LngA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793383894;
-	h=DMARC-Filter:Received:X-Google-DKIM-Signature:X-Gm-Message-State:
-	 X-Gm-Gg:X-Received:Received:X-Relaying-Domain:X-CFilter-Loop:Received:
-	 DKIM-Signature:X-Received:X-Received:Received:From:To:Cc:Subject:Date:
-	 Message-Id:X-Mailer:In-Reply-To:References:MIME-Version:
-	 Content-Transfer-Encoding:X-DetectorID-Processed;
-	bh=+fmQH2G4+P7KftvrZHK9RuK3II+Le+LmlAkO9aH36u8=;
-	b=SOB/UevKZ60yHylhxXnGqdkw6esoTtxX1/Dfjxwd+on0IkTbYBZUtOnIwV8TEIBiBRhe
-	 oIWR23eQKmyG13p3hR0RTgjcJ2//6e6oBUVZcBXieZl3LnCBFgYQG7DnoXSR9te1rqAIl
-	 Q6cCA6Zp61r6mkAQrRRCYuO30Qtd4myiZm5AbBtsPNWFplhSSsIiMRhNEZsnJr5bpXg+4
-	 72q7bK9sMscUNRID9tJMsVmXK/ZYyQuUrw1nZRzY6GDSF2OvGWVnI/FgwIUKrQygxYL6x
-	 PRCWc1+vqPaxH7Epwb+dMdFfbnqgn+SXPqFIV81PTGJbc4WTxgLe4qtzvZBOKrNwvJg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793384101;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
+	bh=xX4+/ngw10imxtV7Qx0M5QC+PH9quwicLxr3n+FYyZc=;
+	b=sTdecuee0XxpDhGWs+28QaNmJDIPPLzZx2OmCKGBTmabZIebnv/A7NNCABZyUBUYXdt3
+	 cMtbYVjmhVye3E9neX9frVV9RUPOg4nOVG0PWwsikFmBz+Puf2BS7x6U3ywxqRAIB0CNB
+	 4oJCcC31nDmB33eiuRjYSCkJwsrdUx6TxYBCB4lhfm/DceBFmMPClyjBJQpK6v8e3Pz1M
+	 RNRP+lrvRjS9cgqs57bz9wZxbDKRmMejmLur7Xub+HrmHcI9fENztUPv8eT5h6Sxja82k
+	 ma/gircrU3D23K4Kbix8lJt6ycuO2x/dGRAh7TJNsmYkELw2uVtaokgeTeSSssqIl3A==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=broadcom.com;
-	spf=fail smtp.mailfrom=broadcom.com;
-	dkim=pass header.d=broadcom.com header.i=@broadcom.com header.a=rsa-sha256 header.s=google header.b=f1xbbqKr;
-	arc=none smtp.remote-ip=209.85.222.97
-Received: from mail-ua1-f97.google.com (mail-ua1-f97.google.com [209.85.222.97])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=U+rTn4qL;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4415660A2601
-	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 18:11:20 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4415660A2601
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E9AD606A31A;
+	Fri, 30 Oct 2026 18:15:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=broadcom.com header.i=@broadcom.com header.a=rsa-sha256 header.s=google header.b=f1xbbqKr
-Received: by mail-ua1-f97.google.com with SMTP id a1e0cc1a2514c-9828fee1b4bso282026241.3
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 11:11:19 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793383879; x=1793988679;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:dkim-signature:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=+fmQH2G4+P7KftvrZHK9RuK3II+Le+LmlAkO9aH36u8=;
-        b=vSscSUilS1uqljS8fEQ5BXZbRFMIn19VJuP2ANx5uZyBuup8labwz/eXIrqSlJuQt0
-         eVLfWRa5n9v9Ag7hl/ZG0i1z/xLKRrha1xS7zWN0sVaFy6RLbHUemleeR3fHLOAPLlNk
-         Ll2PJxoBPENEPXvQ8bT1M4NLAcE+Vzd8HDgcmQQ/HCArujJcQcy32dI3o68V5txSgTUB
-         Qwn7fuGq6vGS5NhRaesVmDQ+WkwskvC5w80v+b+EWn+Z8Uf04GlpSUaPphmMwnzWCljl
-         xiAhyB5gdzVKOexwTpbGbaaPXYs3jlTSEpbuYeXf/DlNOIuK1NOz1UIuIiFOnMJS8kCi
-         4F5g==
-X-Gm-Message-State: AFq9FYLCc0Jq/ofdePo7T1ZqInianNkGog8/u1/nq3EEOIqOf1rABkHc
-	ow8EhvtskS9DWxAxqTGndo8XXz5nSgnRk1VVynQgBaRsOqpvfgC25a1Et343s4Co4pLBvzVaDV0
-	jIUzF9rpFumqP5rSyuJ+w2rpp8Snw3FG7X5hKbdGfW7CUaEPpX5fGGa35Q9ASmyko+gEUBffHHF
-	g6HQESimKNCIzG0lm8Vfs2GnFofKkAhg0w5Oy8oJYmg6btYn83ibY0a88+GtRhtzVdVapX3PvfC
-	Cm+6f3re+Jz
-X-Gm-Gg: AYBFou1B83YKmAQXrnvldO4lwM3tO/KF2st6nz4BKvy+YG0RYrcxWSif8i+JGiNPkpi
-	PqKka9mKQQbP9nuwXtdEwOWLhx9dLcZT2tja/Z3A9RuR7RjRpDYjn8ON9LbfN40N2qRJAOzUAKk
-	k/id1ZeCZ0yDnT85/NTgkjAwcBuhrSvcJqgQoGHhixKeTzt2cyPjSunRurlPmE5coweWOsCVqVO
-	nlNWz5tqLNbTTe9hoks8hLFJj3ZYYyTyjalxztwpK8mJiBZap+hKuyJyfxn4RAAqutE19b8u7Dp
-	M53FCCQUK/DV/48vim1Fvjx93JmsyBGwAKRMHY3oGKg/h3SfZeCk5wZYar8W2ROpfHLhcKvrg3N
-	q/CnKc3mSJMG+MQnF7otqCy6vdNSkSYd8+GnbCyZT82BX9MrOd+zZwr6ALaYsyOawLdehppMD51
-	f3RYGudFFf4rlETYhiUFepNLF6PYXSVnpc
-X-Received: by 2002:a05:6102:50a1:b0:7bf:74c1:b606 with SMTP id ada2fe7eead31-7d07269b10cmr1630043137.34.1793383878981;
-        Fri, 30 Oct 2026 11:11:18 -0700 (PDT)
-Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-13.dlp.protect.broadcom.com. [144.49.247.13])
-        by smtp-relay.gmail.com with ESMTPS id a1e0cc1a2514c-992ee4186e9sm110500241.12.2026.10.30.11.11.18
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 30 Oct 2026 11:11:18 -0700 (PDT)
-X-Relaying-Domain: broadcom.com
-X-CFilter-Loop: Reflected
-Received: by mail-dy1-f199.google.com with SMTP id 5a478bee46e88-30bcb065bfdso1823503eec.0
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 11:11:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1793383878; x=1793988678; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=+fmQH2G4+P7KftvrZHK9RuK3II+Le+LmlAkO9aH36u8=;
-        b=f1xbbqKrzozmHU/o50WWafFcelqr71majZcEtQY8OBGXLUIQLd/wNgDZlB9xZ1ump9
-         NLzQQhGkg58b809MQ5EkxYv6AwxiXF4QY44LL5zm02t+lgB15yQbzjmSATDHTgUKSotJ
-         MWQq134951FSrzbh9ij4abDoenkhn+MmM15Xk=
-X-Received: by 2002:a05:7022:120c:b0:15a:4155:3d9a with SMTP id a92af1059eb24-1ac609808c6mr3766309c88.47.1793383876245;
-        Fri, 30 Oct 2026 11:11:16 -0700 (PDT)
-X-Received: by 2002:a05:7022:120c:b0:15a:4155:3d9a with SMTP id a92af1059eb24-1ac609808c6mr3766262c88.47.1793383875256;
-        Fri, 30 Oct 2026 11:11:15 -0700 (PDT)
-Received: from mail.broadcom.net ([192.19.144.250])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-1ac193b8179sm9974062c88.11.2026.10.30.11.11.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 30 Oct 2026 11:11:14 -0700 (PDT)
-From: Kamal Dasu <kamal.dasu@broadcom.com>
-To: linux-mmc@vger.kernel.org,
-	Ulf Hansson <ulfh@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@oss.qualcomm.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Oleksij Rempel <o.rempel@pengutronix.de>,
-	linux-kernel@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	Rob Herring <robh@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=U+rTn4qL
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6BB531F000C1;
+	Fri, 30 Oct 2026 18:15:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793384100;
+	bh=xX4+/ngw10imxtV7Qx0M5QC+PH9quwicLxr3n+FYyZc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=U+rTn4qL9aKfAqK24WGz11+2HZDRD7OcmjFhcTHsKLHulDk+qJB0jX6OIJTW5dqv5
+	 bhAyVUPKMK5g5OPQw6v67tHcs41p3Qz95LDNO30NKVSfbbZD3eI2o6lUAs/JOVicYD
+	 Jm0Z882bafmmMiLZkzflj4+qaNReXe8iCQ1DYeO0aFA02mNWCQWjQM4qUDOMCG/1Yc
+	 i4G5qRJBWOQ6Tw1D2duEbyG8JIHXPNE4NpMDtyiQ+5vL92riH/rmmdy7Aj9yoY7pcg
+	 1wcV0QkSPPYD2Ly9j0vwfbdlNEfnC5IKQFK7Np4Z5BtOmYmlRL2ViMFzgMbRwTJvRF
+	 UTUaSSI8/Gxxg==
+Date: Fri, 30 Oct 2026 13:14:56 -0500
+From: "Rob Herring (Arm)" <robh@kernel.org>
+To: Cunhao Lu <1579567540@qq.com>
+Cc: Andi Shyti <andi.shyti@kernel.org>, linux-gpio@vger.kernel.org,
+	linux-phy@lists.infradead.org,
+	"David S. Miller" <davem@davemloft.net>,
+	Bartosz Golaszewski <brgl@kernel.org>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Eric Dumazet <edumazet@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+	Andrew Lunn <andrew+netdev@lunn.ch>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Richard Cochran <richardcochran@gmail.com>,
+	linux-clk@vger.kernel.org,
+	Daniel Lezcano <daniel.lezcano@kernel.org>,
+	linux-usb@vger.kernel.org, Lee Jones <lee@kernel.org>,
+	mfd@lists.linux.dev, Jiri Slaby <jirislaby@kernel.org>,
+	Stephen Boyd <sboyd@kernel.org>, devicetree@vger.kernel.org,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>,
-	Shawn Lin <shawn.lin@linux.dev>
-Subject: [PATCH v11 4/6] mmc: core: Split sdio_set_host_pm_flags()
-Date: Fri, 30 Oct 2026 14:10:31 -0400
-Message-Id: <20261030181034.3811225-5-kamal.dasu@broadcom.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20261030181034.3811225-1-kamal.dasu@broadcom.com>
-References: <20261030181034.3811225-1-kamal.dasu@broadcom.com>
+	Vinod Koul <vkoul@kernel.org>, netdev@vger.kernel.org,
+	Maxime Chevallier <maxime.chevallier@bootlin.com>,
+	linux-i2c@vger.kernel.org, linux-pm@vger.kernel.org,
+	Alexandre Torgue <alexandre.torgue@foss.st.com>,
+	Elaine Zhang <zhangqing@rock-chips.com>,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	Brian Masney <bmasney+clk@redhat.com>,
+	Conor Dooley <conor+dt@kernel.org>,
+	David Wu <david.wu@rock-chips.com>, linux-kernel@vger.kernel.org,
+	Zhang Rui <rui.zhang@intel.com>, linux-serial@vger.kernel.org,
+	linux-rockchip@lists.infradead.org,
+	Philipp Zabel <p.zabel@pengutronix.de>, linux-mmc@vger.kernel.org,
+	Lukasz Luba <lukasz.luba@arm.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Thinh Nguyen <Thinh.Nguyen@synopsys.com>,
+	linux-stm32@st-md-mailman.stormreply.com,
+	Jerome Brunet <jbrunet+clk@baylibre.com>,
+	Jakub Kicinski <kuba@kernel.org>,
+	Neil Armstrong <neil.armstrong@linaro.org>,
+	Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+	Ulf Hansson <ulfh@kernel.org>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	linux-arm-kernel@lists.infradead.org,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Heiko Stuebner <heiko@sntech.de>, Linus Walleij <linusw@kernel.org>
+Subject: Re: [PATCH 05/27] dt-bindings: pinctrl: rockchip: Add RK3572
+Message-ID: <179338409611.1169964.10654719461707272138.robh@kernel.org>
+References: <20261022-add-board-ok3572-c-v1-0-0b0fd85a31ee@qq.com>
+ <20261022-add-board-ok3572-c-v1-5-0b0fd85a31ee@qq.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -121,74 +95,19 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20261022-add-board-ok3572-c-v1-5-0b0fd85a31ee@qq.com>
 
-From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
 
-To prepare for a subsequent change, let's split up sdio_set_host_pm_flags()
-allowing the second part of it to be used as an internal function for the
-core.
+On Thu, 22 Oct 2026 00:11:02 +0800, Cunhao Lu wrote:
+> Add the RK3572 pinctrl compatible.
+> 
+> Signed-off-by: Cunhao Lu <1579567540@qq.com>
+> ---
+>  Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+> 
 
-Signed-off-by: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
----
- drivers/mmc/core/core.c    | 10 ++++++++++
- drivers/mmc/core/core.h    |  1 +
- drivers/mmc/core/sdio_io.c |  7 +------
- 3 files changed, 12 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 677e445dc48c..6cbb5ee6200c 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1422,6 +1422,16 @@ int mmc_handle_undervoltage(struct mmc_host *host)
- 	return host->bus_ops->handle_undervoltage(host);
- }
- 
-+int mmc_set_host_pm_flags(struct mmc_host *host, mmc_pm_flag_t flags)
-+{
-+	if (flags & ~host->pm_caps)
-+		return -EINVAL;
-+
-+	/* function suspend methods are serialized, hence no lock needed */
-+	host->pm_flags |= flags;
-+	return 0;
-+}
-+
- /*
-  * Assign a mmc bus handler to a host. Only one bus handler may control a
-  * host at any given time.
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 9be2875608ce..d3a2ff00b18f 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -64,6 +64,7 @@ int mmc_handle_undervoltage(struct mmc_host *host);
- void mmc_regulator_register_undervoltage_notifier(struct mmc_host *host);
- void mmc_regulator_unregister_undervoltage_notifier(struct mmc_host *host);
- void mmc_undervoltage_workfn(struct work_struct *work);
-+int mmc_set_host_pm_flags(struct mmc_host *host, mmc_pm_flag_t flags);
- 
- static inline void mmc_delay(unsigned int ms)
- {
-diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-index 12716ec0e35d..99f857514b63 100644
---- a/drivers/mmc/core/sdio_io.c
-+++ b/drivers/mmc/core/sdio_io.c
-@@ -726,12 +726,7 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
- 
- 	host = func->card->host;
- 
--	if (flags & ~host->pm_caps)
--		return -EINVAL;
--
--	/* function suspend methods are serialized, hence no lock needed */
--	host->pm_flags |= flags;
--	return 0;
-+	return mmc_set_host_pm_flags(host, flags);
- }
- EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
- 
--- 
-2.34.1
+Acked-by: Rob Herring (Arm) <robh@kernel.org>
 
