@@ -1,123 +1,122 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1793368116;
-	b=OfEYV0ypAZEXPuM99LfJOEfh31MPcPqhaa3nvo7r5mFf75bEjJHY4mhVSGSyZpW1Kp+9
-	 MOuLaoHESKy3eLHdwGljA1/jK909x+iLqWAAj2gX7nqoOFwCrgFKZIDn/xZourMh9r+JG
-	 2LBvc8a099n0POtaSnubPaFyo5+lmTc6oLQsmv49MiR1UJV7E+SpHr5F1qngfjp7cdubi
-	 R7T0dRZcfUbJF6jGqYKOdX+dYpTNX7eG14VlJhN938sPIsJZXxwQo1vxMCFFOUWwV0qfC
-	 5P7o3CA4ORPPHXXlkNSyUelyFV3eVaM6AbFTUS+Y3MzPdReIn4+621W1I65O7OLkY6w==
+	t=1793368826;
+	b=Ak+0NN/2qMjUHvBlh31zOcigJ2WfTu4bLR6SBTRMcAfCtJHLpof78PYvZemdtpLTkUv2
+	 5KD+5w/l4nxDlyOULK+pNoaySCEl7Gw5eEaUi1TQQHfg3KdZFQT2jbVMmtMNz31BdzXX8
+	 faNJq5jZcgfLqdaTVWGy7InAMLPvE6g+tWk0gz0KSrvgWzCmNRtPwaKFAzntuJviAptyd
+	 ceDkChE168EIzqYxX8QXnRTbtnLscRcRn5eAA+X5pKTbH70HtObpHFXF7Xwma2zfsGyZ6
+	 /0N3jOU3T8rxGbLKrUVDBzeG/MaT7aoUov6z8HkBm5b+/3f6ObmX9SHXK2qdLOhqGUw==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793368116;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793368826;
 	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
-	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
-	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
-	 Cc:Content-Type:Content-Transfer-Encoding:X-Proofpoint-GUID:
-	 X-Proofpoint-Spam-Info:X-Proofpoint-Spam-Details-Enc:
-	 X-Proofpoint-ORIG-GUID:X-Authority-Analysis:
+	 DKIM-Signature:X-Google-DKIM-Signature:X-Gm-Message-State:X-Gm-Gg:
+	 X-Received:X-Received:MIME-Version:References:In-Reply-To:From:Date:
+	 X-Gm-Features:Message-ID:Subject:To:Cc:Content-Type:
+	 Content-Transfer-Encoding:X-Proofpoint-ORIG-GUID:
+	 X-Proofpoint-Spam-Info:X-Authority-Analysis:
+	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-GUID:
 	 X-Proofpoint-Virus-Version:X-Proofpoint-Spam-Details;
-	bh=SmUXIOYlZlxH85m2DVy0bxyeuAHl0OHWFMsew9sjAhY=;
-	b=vLMW0hiWmbBl6gfwcc8o9NiQ2zmG2S9xFbPaAC/6SW6MLW/eYX56U3jpvF2zzeRZAK0r
-	 cihYcQ39goMV+Q5wdHl3a4Ddf//lmufhwaz5VX/Bb8JifJeG09egyfMHhE3CsogoHvIsk
-	 BgL5bj8Gk5d8f7SpPv+kFVcWpbUX4YVL8M3ycF/N9QqjglDXafmcC6kVJJThNjxrt6OiM
-	 9XouRBHe9ubzs0U1qR9cyoyv6KvDEvPkeRSirKpTvuvLarg2dRt/dX62AhOeBkxYqitVX
-	 G8BHkKUWXqx30ZmTQ/jNUCsId8ljR+5Q6rgfsOGIqs0EISH4nVwk5ygrFUWmemsnpkA==
+	bh=4VlQE/YYM104mVCz3Alg3Tfd4LRV98KYdYooP6VbpO0=;
+	b=qpWg36oBiMgrJPrSsxd5Kjz5KNA5o61y+NTL7Y7LKTwCd9m/rZAFGwaIgWtjwC4vVJKp
+	 qoAaAkFb9hPIvsS1dMrghRmZugEpGnAary6IPq7dmQZg/BZAjz44plaXN2NgD5Kj5fPTE
+	 ZuVFaKQCz8/PVIuPnnhacgLH5rRZDfAsLGPe/1Mc26+TU2HzRcSVQNlO7rhmAWBEb+LcL
+	 Aj+pcZN9JbqCCuGJjc9yOoeRSky+RsP1jbdA8DecDfOofNkLSkI/XAot3tGWyNV2zsf7a
+	 qxjoQ4EvXrHQtxC9SxiOExisZg9oegZwpTFEalMQivnIKT+LsL6tqDOjPNe0dW/tcnA==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=oss.qualcomm.com;
 	spf=pass smtp.mailfrom=oss.qualcomm.com;
-	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b="c/DM/FsE";
-	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b="PHP/3giT";
-	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=DoOjte4O;
+	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b="VRgAR/W9";
+	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD3FD606A31D
-	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 13:48:35 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org DD3FD606A31D
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9980D606A327
+	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 14:00:25 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 9980D606A327
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=c/DM/FsE;
-	dkim=pass (2048-bit key, unprotected) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=PHP/3giT
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69UBG4cd3142141
-	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 13:48:35 GMT
+	dkim=pass (2048-bit key, unprotected) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=DoOjte4O;
+	dkim=pass (2048-bit key, unprotected) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=VRgAR/W9
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69UDnAFD263333
+	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 14:00:24 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	SmUXIOYlZlxH85m2DVy0bxyeuAHl0OHWFMsew9sjAhY=; b=c/DM/FsE/PvGatCB
-	uHka36ASu+RBqlZXDh5c8v44vLCvMz2Fnr+EuIlLGWP2mMLccbfKE+cOMDb3uuQz
-	JtFSPlJv57t9N87udPL5JGi5jaQVD37tfqZsJVQSJzfgyp9yKJpmhaJH0pT2ndzF
-	S7A2M1SDtNhxRq8PXeAw23yGyoLTMp3sfAWaCWi/ZurIet2YDe0WmR68qfxlJ+XS
-	bgrGbP522PgSkVI85u73Z60H3ULAg2bgQ8e+a75pK4Dlisjw1S9yAkZO0jRgNEex
-	ZY5Nrsi/BKmyhc49WC5EQl+1lyMzNnRdz1I1yn9zSusITE5lyA0PEOH9neHB4RVX
-	BGsZ1g==
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com [209.85.210.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hme6qk99f-1
+	4VlQE/YYM104mVCz3Alg3Tfd4LRV98KYdYooP6VbpO0=; b=DoOjte4Oh2y3nnAu
+	iO3a45AMuu/BW/C6VaK1G13K48ZoINrjmtGsOjI+ajmSuZqrjzt3cHOIdvSnVLKB
+	QqWg/g9f87E5UHLCaPlgeBTvlasOtpD0KfeeevxFHCa7tf2gjo5RGrWCJDszgZZG
+	WLxN0+aHN1fuBF/zyqQU8YESrVw+N/zY5OzkU/6BJ976cFXNQHnvIUs2R1YKGfAI
+	4+wh10A8ndE1vM3nm4fSFkmhbvt1rqCYyCsD855dWN5RmFfrXnF+vSDhJTbCc9H/
+	mzjAKuIk/FuRLI3vWgVDiABuRxHbYjwrgrshklGenps/XdwT2qCNInV0Dt9MeY92
+	4uIYCg==
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com [209.85.215.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hme6rkf6b-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 13:48:34 +0000 (GMT)
-Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-8a0619b1fe5so615018b3a.3
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 06:48:34 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1793368114; cv=none;
+	for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 14:00:24 +0000 (GMT)
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-cd66551e02cso759877a12.2
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2026 07:00:24 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1793368824; cv=none;
         d=google.com; s=arc-20260327;
-        b=PCpbhV4oMH8DkNym7PbMhwYdnOOZdv3x+VWU6HzhlkxEdOVUmSbRZ4Wr0VRUdmzSc0
-         5HpqYJb5peBlA8L2buS8xX4smun/AQZepYgn6DYs4frSwNXHMXzsbMmeRhHy+hVGNF1+
-         24CC9jmTYHA5sEQSZbk6rR3D730VHuU4jxpOaajmcOUsdrQTKmnavX5AbpLELzFmBsKR
-         WGMIGIiSRNI3c4svZXxNRkZeAvfj/gVFg7Oil0rwicWREIOC/C60wlXoV9NESrhG6ZA7
-         gNiXmA9E8GBPijxfzGAubDdy+bR32k2BUW14TzmL13UBopPfILKvrLTwnpw00xfeF92E
-         EG8A==
+        b=jm7vF90Xz1KpXpr8jRH2HO2ChN9U4AMOVIUUCjGllQZ3DeeO/M0wWDSa2NgxC6UARE
+         B3tftlNtRf+mXLHxoh57KHJ+gDI0vudZkPgraqEutSLyD5Vgnz9pwK/WzWUd6gfFrmQ/
+         3JZzvRKufEQAGJXKfiv4M2vyX4se+SBeWUdq0YJfsdM/vG9ikiApMV9jLn46ziPIq/Nw
+         Y1g9BwWmSMO1/WAINTL90kAbYTovG46g9yCZkQf54/hnZy8+z6n0uMm1NAK094NM/UMY
+         TLT1tMr3Nk/YF+MQrSQqcNK4YlcBsrVcXH40On0FJijpCq9YDr1WXKjoMAKSE98W9Vuy
+         uKTw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=SmUXIOYlZlxH85m2DVy0bxyeuAHl0OHWFMsew9sjAhY=;
-        fh=dXdVEiz5lpMT1KSbB24g66Ep3xQlBUXzcrR0W6FsE5A=;
-        b=OaORVXvpp2Esw9ggE0XiAK1074cyr3Ok0BE3sD35WGZxvqhbJOMNSAClvI5urGsKmI
-         ufsYAAgGXu55LakPuy/pCuGr2vqlGXAVAsgUGKimVu99tQkfr8HNhbOcWCuXpO48bLmu
-         tviVLgn1tD2McbLs3hJZg60tlKy+JqDwQX+inWlts6Qt7iGXe9O1socuWXLdzj6cOQfz
-         s1mAE3Ao07xH+5Uep6PMkANMhfNiqVJihw5DXpPckFtYVMz47g/FufDTHgy7A0eQDTDZ
-         QRP/pdVaQdYSAOcMg09f6HE2sAhHtWzsiA809ZL/rH5XtnGw44TL9AR2S4+msiYrZuGl
-         m2mg==;
+        bh=4VlQE/YYM104mVCz3Alg3Tfd4LRV98KYdYooP6VbpO0=;
+        fh=2BDAeg89D3YRyYj1rapQxPg+BypMzZwPTB2hZnRXRyQ=;
+        b=rpIs4QkJ7+XE4Mdf5z7IjtOOY8qTTZi58z6s7N26f04wW2iw3GNt8SsPFmgP8nCbvM
+         1kAGVLTZBiV6igrhmEmQ0SaQp//vd7MJhjel4yOstfsBB02ZA7jJMQxhyl3q32qCBb4k
+         0IvpcxW7CWM6gUQ6wSH/ymKO6pw4x+3LlA9W61c2A3t/rVIwtRuogtgXwuLDl0BcLE2q
+         c3w9pw35rr4acy6iKRCEWGu5bBOxbh+38SwNTGiBzY2kBwbWqp3iC+esHj0ZHp3/wgu0
+         UYKIAT6tyKlPOAaZcwUKMTZMtDV4iPwQsA4daZyu5wu1ajN0wlhF3WqivoyMu7pNzfrM
+         cSLA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1793368114; x=1793972914; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1793368824; x=1793973624; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=SmUXIOYlZlxH85m2DVy0bxyeuAHl0OHWFMsew9sjAhY=;
-        b=PHP/3giTjMF7lKWza8bh+CiK/BFOIvtrR+339gILA4p1/LALnjUX2e4K7B6LcXSlVM
-         R+G/uh+XluMWaYMFmZT904UKTJvGWDd+lEvapAKIdNf+8/UP3l9lfor2sr4zSpaLEJAL
-         LcDr63kqNW5OY+xig4kbPGqOfwBaddFNRVBshFx/J2IWVmKfYVaR2rKcscVCrtQdB8Nd
-         wrE4LpTyKZFWHrCgmUSsNVjuv9XUpVTrTqXm3B97Ca+BxggO+W8RJhBCYSP27aIOoPrX
-         52zTkFCP8LZ8N4AiN1Wv2EAJvJ4E9HsCD75TKbOJlCtN3hPUSn/l3miVbRBfH/X28hMT
-         0Q8Q==
+        bh=4VlQE/YYM104mVCz3Alg3Tfd4LRV98KYdYooP6VbpO0=;
+        b=VRgAR/W9hGMManKl8/hD5zch4Lj/a2311C4yfU3MMiwy+Wc0Dzw1L7rbfRlBOa7aW7
+         VaypeAHoPhYnoEQvSSK46yibQMxOJaiVE3LgkdrDZf6+eSp9+hem6sowQliUCOE8AGrk
+         qlNQ4MhA3XEZn7Gmd8bv4rOIMeQdb8CfN6Qgc6YGaEpH8c4qKpU+sPlxDWU3ptwZEM3W
+         PdlZjrC9LMXxDQDG1/HluI10hkkstT9xMhtoLm4NE5iwYmx+SbPNglAz4N67Tvq0iFEZ
+         Zc6LTjRf3egCsPvXORUXENZWbeMg+en7D5fnOxGeW39xAuG1wB2Vwx6vHnbBMktxi7P6
+         OFUg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793368114; x=1793972914;
+        d=1e100.net; s=20260707; t=1793368824; x=1793973624;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=SmUXIOYlZlxH85m2DVy0bxyeuAHl0OHWFMsew9sjAhY=;
-        b=x8NYfpgyPCIB5DnZbeMyEzhil3+1cPDuE1fschCWX+qw+/kEPw0YrLMvVkWxmeOAvn
-         NqZ0t9GcTpIqg8EVhDQeiwf+kb5PBYsaQ6ZUl8zIe8Ii8J+WUgIepJIiCQaneqt65Aks
-         JqfriouEo8wEub/OZEJimfnyzR5nue76kANmhh9RqGpvJaNR7EOZZgCdbWlkaEfphjEP
-         ZhB6sj0DM3yBBzE08/WEaJ4gCWOFXxaKgccPPSSFcG/h/2sEZpH7k3uUI429mT2QitkY
-         LQFLNdPw8mKr7PP1iQAAxRH6/mL+LCCs9Jv+WwDOgYxUm5S490yJR/0dqHBFwZ6FCC9L
-         uW6Q==
-X-Forwarded-Encrypted: i=1; AKwUvBwU7Oi6sm/dVVdHQaQ6+an7Lhzyji/ywThpIBMMdY8n9bA0FvrugTiWTLsJROAQP37lgH2sTtZpkYM=@vger.kernel.org
-X-Gm-Message-State: AFq9FYIhr4Irgwxo/BD8xZUQn/wYKRrB/cxx51KxtaP0q8ALU8PIHZnV
-	3P8GitJ8icKJeeNG17ooeGXyn7WbknRD62V5K7ZeW7jpCGhn42Mt3cQR2miFCZ6ct+ZR6ZtKi/z
-	9Uom+InteQCGOpKW9ZYPGDugOXYDKWI1HNNR2879m/qvsvTfU1Re6jA76C+55iDjgeYQSCiiPN9
-	W8X1VxCnL7BDwabACnDeapplgFXu01qB/UCOrxtQ==
-X-Gm-Gg: AYBFou2QqfM69kd/G5ReZwdNEftTaPzaprXDvOYQCpOfePMehrVLwMo2eeGXcRGk6Jl
-	qS7wB5BwZs8iwfxmRZCHF3i2Nk35pOgvLuC2nYWpVKA5jIcdSIxhUXkFTXGbqMw/259J6MLrcW4
-	Y2mEgJ5dwsYXG8otJOWVhICnJCsgZJ4ueo7gyEmQfkoVO4puYPjTrK5HkHyQ==
-X-Received: by 2002:a05:6a00:419a:b0:89e:e781:eec8 with SMTP id d2e1a72fcca58-8a9bea6ab26mr1853279b3a.27.1793368113554;
-        Fri, 30 Oct 2026 06:48:33 -0700 (PDT)
-X-Received: by 2002:a05:6a00:419a:b0:89e:e781:eec8 with SMTP id
- d2e1a72fcca58-8a9bea6ab26mr1853252b3a.27.1793368112912; Fri, 30 Oct 2026
- 06:48:32 -0700 (PDT)
+        bh=4VlQE/YYM104mVCz3Alg3Tfd4LRV98KYdYooP6VbpO0=;
+        b=KFHfFGkBR+qllCcYlHNgJDnnp/dsZ36CZMwmPwSqgEqcWsWCPBsOtk6QdUXOOYJvlT
+         CgNzoSdpMSLyeP43+J0GlDO1v923uyu5Xqg9j4rgYCemUidv1sK8hYLh2Wdr3egD3UTK
+         fpuoEU9MJh/xWNXttKJMB4VcWLQAGPjUFe5PKuZJ+p3hIlxuTkZlFA/SlOn6dICUkydm
+         Gxd+Jtjn1PH0UCuTX9GUi3XyouCO4kdG2Tlv6bErwCLpIuark+/h7M5i0C85XCAhuK0J
+         JiZzEBMH59vrdN+DxunebgTmVBSmHW7PQ6IO4+mvTx8v74bcPSJ16PnJg6Zp/mW4fTR9
+         ZTHQ==
+X-Gm-Message-State: AFq9FYKux2rr9EkXCNMd9WcpV7NOiaOmjVBMJwQt+HiHZK93GE/hJMVf
+	PWSXO2lLSq7cG3v7f+exNtdZcpDrnBbSmubgWpH+GIkBw/WGlopYVjnYYUGHPvGzamUx1xkcNwt
+	oGu4WMZgLhGSdISvr8cFe9XBXAgrAiueS3fD/3xCZhSjefBkL721BdrJz2imEDevpD/DhwgOZM6
+	a2yPa8TEbLRiAEm6HErPrFv1UYnESygeTeI1I8BCxhA8nrWQ==
+X-Gm-Gg: AYBFou0QSza/uAIpoEKGG67dIBGldNKsoRaFS7kh8eLQgfITM18aQQJZZ6y05CAB2IN
+	pxUUeitF7MFjSwHUQN/7Fd9KdAW+A5DyyQtWrYsSYE+ciSvBZ8K7xdddueqqJeOvXHVmjGe9ouU
+	Q4748MZds+PyRY72DbA+N+to234si97J/hRATY9MrS2m0VZLg3LCP6VpM6Bg==
+X-Received: by 2002:a05:6a20:244e:b0:3e2:3c7:7754 with SMTP id adf61e73a8af0-3e928a7e407mr2600779637.65.1793368823833;
+        Fri, 30 Oct 2026 07:00:23 -0700 (PDT)
+X-Received: by 2002:a05:6a20:244e:b0:3e2:3c7:7754 with SMTP id
+ adf61e73a8af0-3e928a7e407mr2600707637.65.1793368823033; Fri, 30 Oct 2026
+ 07:00:23 -0700 (PDT)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -127,127 +126,148 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <179318778660.81375.11263258280496155344@manyhobbies.com>
-In-Reply-To: <179318778660.81375.11263258280496155344@manyhobbies.com>
+References: <20261008-do-io-unsigned-counter-v1-1-744fa81f0a0a@canonical.com>
+In-Reply-To: <20261008-do-io-unsigned-counter-v1-1-744fa81f0a0a@canonical.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Fri, 30 Oct 2026 14:48:19 +0100
-X-Gm-Features: AclHuK9CCkGJy9uu3I3U-z2HN0uRBI4HDWUAxzxMZ9SG5mkVVBtQ_beC3L-ge70
-Message-ID: <CAPx+jO_VxJctXCZMVdzeq4CX-Ru7ACM6=wQ7GMdG2+4F1pOcBQ@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: sunxi: reset the controller after an update-clock timeout
-To: Tam Do <tam.do@manyhobbies.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Chen-Yu Tsai <wens@kernel.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Samuel Holland <samuel@sholland.org>, linux-mmc@vger.kernel.org,
-        linux-sunxi@lists.linux.dev, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
+Date: Fri, 30 Oct 2026 15:00:11 +0100
+X-Gm-Features: AclHuK8fAEUMl-isKxxK8xIIk6oC9sIpl5AFM_8tQr8lBITxVJVMfetP17h9RRE
+Message-ID: <CAPx+jO9K+tE1_A9J0+M8RPNOpGF0wkQ_EOCgzAM_-UQL9dJS7Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc-utils: Use an unsigned byte counter in DO_IO()
+To: sebastien.bacher@canonical.com
+Cc: linux-mmc@vger.kernel.org, ulfh@kernel.org,
+        Sebastien Bacher <seb128@ubuntu.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-GUID: k9A6ThYSjV5Nk1OKr_TZ6En9Dy7wxMfo
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMDMwMDA1NCBTYWx0ZWRfX1TZhefXP+/2t
- kqnUWZ4hsChpdbdo1tgNEBJtGzHpaz99O85Pw/6OPj6wf1XBJgqho7vPRUcneMDNKiGfqhJyroh
- 0V+5UStdRNJE3Xiw11eshffyTQXfQck=
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDMwMDA1NCBTYWx0ZWRfX5V3pekxAiOAc
- 9yVdGECHBhmJ8m2EsWu+5uZy4GcBUHXMy5jkzeAATL3Vlp5kL523/XSRLy0mdLq9I59CRt0nQ8Z
- m5h9yqKJSW1ZSA2hv5xHpJgCHui2VyVAYqPwK0LbN3EfKTVgw7lt3xAg4XZ0caisPbflkyjHIwX
- fdu+nx33yZWdsflS8xS/DeaEfuOiPlSRbGvBIcu+0NIafyfN7mY2t3tMd2fsXNhHbYdtVg+n/l4
- IDmTM4tMbATOdKTFGCGO1xJIdhS30yLKiDLGLVmaSYu1fK1KRmwIqdblEJErzEtSLxJ0+GfMvtt
- 7lvdKrZtu9kPeveBE3ZKaqXD0nWooTKUsUtg7yt0B9ssKxIoHNFTTXEBYOHrlQJD3wqbaspKrdx
- G5XMqkukEGjhYAPHxK5GopKYCHTXueCoFDhOTiHUBt20F352tnPA2FhMnwTt7EO2XwCYKTICxrV
- mY+p7qmBGMUEQGJgdnw==
-X-Proofpoint-ORIG-GUID: k9A6ThYSjV5Nk1OKr_TZ6En9Dy7wxMfo
-X-Authority-Analysis: v=2.4 cv=TpVzFzXh c=1 sm=1 tr=0 ts=6ae4a032 cx=c_pps
- a=WW5sKcV1LcKqjgzy2JUPuA==:117 a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10
+X-Proofpoint-ORIG-GUID: 0DDj-hOcEXcBGZ0465usphVqUhU9L1nN
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMDMwMDA1NCBTYWx0ZWRfXy5co7JhKqBrC
+ 9EoNCkfNRJeDDRONySex+NzE4s/KZH6MCV+HaTthnCZsvZ+L5Itvo5r+PTF+QgfozCkbuiOtrCw
+ 211pU0Rfg171IPYvbGN4xZa9iOjNCxU=
+X-Authority-Analysis: v=2.4 cv=PIqaavqC c=1 sm=1 tr=0 ts=6ae4a2f8 cx=c_pps
+ a=Qgeoaf8Lrialg5Z894R3/Q==:117 a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=rJkE3RaqiGZ5pbrm-msn:22 a=VwQbUJbxAAAA:8 a=w2OPf45SAAAA:8
- a=BQrJblB4Y1Zt2l009CUA:9 a=QEXdDO2ut3YA:10 a=OpyuDcXvxspvyRM73sMx:22
- a=-iXIJKm6ftRzmWoHelNS:22
+ a=eoimf2acIAo5FJnRuUoq:22 a=VwQbUJbxAAAA:8 a=fxJcL_dCAAAA:8 a=DfNHnWVPAAAA:8
+ a=rrAZ_aJRX1qqUfewUWIA:9 a=QEXdDO2ut3YA:10 a=x9snwWr2DeNwDh03kgHS:22
+ a=rjTVMONInIDnV1a_A2c_:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDMwMDA1NCBTYWx0ZWRfX1hzBzu5in/l2
+ QmkQN35Wf2zw4OtCJRAAHRmFQpi5F7PiEh2pUSPMMgz67G6iKhTergFyUCqUnr5n2NAt2Z5XYQr
+ qd/DZ0mw9GpXT2rnOvaBUzWXeE8GH0mYBWVRj7BrY1Z3I2yXzXkBJiPz3GPG9mQjQfBOTsKNXZw
+ ypJubvrH7hHYWfnn9lHWDf5JkJkVIj2Kt3i8iEQCNZxFQVHNEcFoCjGGwHuSxHNwjuZKOviO3V9
+ zKtwlZJj6JSLWmXWzPA40awaq5hr9N/CsW67rcW7G6In6Ap3i/Q7iGjDDjgbllx1Eq5aj/GYfCb
+ irfjUvD1dpCRXam+mnHwOW9/B6mH9BdNZBoABBc6g0Toi4lURkwt5xd2uW7LKnYFsizs90z0R8Y
+ enatsEnuWScENrQPKDRtGSr+kqSFuie510y3wkPbcFgHQj1PmvyFtv/+jZgpI3y+dJH56qgfbkW
+ 8+IIPVBofS87R+ZRxIQ==
+X-Proofpoint-GUID: 0DDj-hOcEXcBGZ0465usphVqUhU9L1nN
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
  definitions=2026-10-30_04,2026-10-21_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 lowpriorityscore=0 bulkscore=0 phishscore=0 priorityscore=1501
- impostorscore=0 adultscore=0 suspectscore=0 clxscore=1015 spamscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2610190000 definitions=main-2610300054
+ clxscore=1015 malwarescore=0 bulkscore=0 impostorscore=0 spamscore=0
+ lowpriorityscore=0 suspectscore=0 phishscore=0 adultscore=0
+ priorityscore=1501 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2610190000
+ definitions=main-2610300054
 
-On Wed, Oct 28, 2026 at 12:43=E2=80=AFPM Tam Do <tam.do@manyhobbies.com> wr=
-ote:
+On Thu, Oct 8, 2026 at 11:02=E2=80=AFPM Sebastien Bacher via B4 Relay
+<devnull+sebastien.bacher.canonical.com@kernel.org> wrote:
 >
-> If the clock-update command times out it stays pending in the
-> controller, and every later clock update times out as well, so the
-> card cannot be initialised until the next probe.
+> From: Sebastien Bacher <seb128@ubuntu.com>
 >
-> This happens on an R16 board whose SDIO Wi-Fi holds DAT0 busy while
-> its supply comes up during the first clock update.
+> DO_IO() tracks the number of bytes already transferred in a signed
+> ssize_t, which is also used to report errors. When building with
+> _FORTIFY_SOURCE=3D3 and LTO, gcc 15 can't prove that "nbyte - ret" stays
+> within the destination buffer, and the build fails on the RPMB data read
+> in do_rpmb_write_block():
+>
+>   In function 'read',
+>       inlined from 'do_rpmb_write_block' at mmc_cmds.c:...
+>   bits/unistd.h:32:10: error: '__read_alias' writing 484 or more bytes
+>   into a region of size 256 overflows the destination
+>   [-Werror=3Dstringop-overflow=3D]
+>
+> The loop can't actually overflow, so this is a false positive. Track the
+> progress with a size_t, which can't go negative inside the loop, and only
+> convert to the ssize_t return value at the end. The behaviour is
+> unchanged: EINTR is retried, other errors return -1, and EOF returns the
+> short count.
+>
+> This is the default hardening configuration on Ubuntu, so mmc-utils
+> currently fails to build there.
+>
+> Signed-off-by: Sebastien Bacher <seb128@ubuntu.com>
 
-It would be nice if you could elaborate a bit more on what goes on here.
-
-I assume it's sunxi_mmc_oclk_onoff() that is being called and it's the
-loop in there that times out. The question is then, under what
-circumstances are sunxi_mmc_oclk_onoff() being called when we are also
-waiting for the SDIO card to release the busy indication on DAT0?
-
->
-> Reset the controller on timeout so the next attempt can succeed. This
-> runs sunxi_mmc_init_host() with the interrupt enabled for the first
-> time, so write REG_IMASK from sdio_imask under host->lock, as
-> sunxi_mmc_enable_sdio_irq() updates both under that lock.
->
-> Fixes: 3cbcb16095f9 ("mmc: sunxi: Add driver for SD/MMC hosts found on Al=
-lwinner sunxi SoCs")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Tam Do <tam.do@manyhobbies.com>
+Applied for master to mmc-utils, thanks!
 
 Kind regards
 Uffe
 
 > ---
-> v3: take host->lock only around the REG_IMASK write in
->     sunxi_mmc_init_host(), not across the reset; v2 polled the reset on
->     jiffies with interrupts off. The return value stays unchecked, as in
->     sunxi_mmc_runtime_resume(): if the reset itself times out the
->     controller is wedged either way.
-> v2: held host->lock across the reset (not posted)
-> v1: https://lore.kernel.org/all/179307312104.39863.12372814163472848752@m=
-anyhobbies.com/
+> Signed-off-by: Sebastien Bacher <sebastien.bacher@canonical.com>
+> ---
+>  mmc_cmds.c | 19 +++++++++++--------
+>  1 file changed, 11 insertions(+), 8 deletions(-)
 >
->  drivers/mmc/host/sunxi-mmc.c | 4 ++++
->  1 file changed, 4 insertions(+)
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 2d9069f..8e21a25 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -2207,18 +2207,21 @@ int do_sanitize(int nargs, char **argv)
 >
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index fe4c0f6d73f3..55313780d06d 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -322,6 +322,7 @@ static int sunxi_mmc_reset_host(struct sunxi_mmc_host=
- *host)
+>  #define DO_IO(func, fd, buf, nbyte)                                    \
+>         ({                                                               =
+                               \
+> -               ssize_t ret =3D 0, r;                                    =
+                 \
+> +               size_t done =3D 0;                                       =
+                 \
+> +               ssize_t r;                                               =
+                       \
+>                 do {                                                     =
+                       \
+> -                       r =3D func(fd, buf + ret, nbyte - ret);   \
+> -                       if (r < 0 && errno !=3D EINTR) {                 =
+ \
+> -                               ret =3D -1;                              =
+                         \
+> +                       r =3D func(fd, (char *)(buf) + done,             =
+ \
+> +                                (nbyte) - done);                        =
+               \
+> +                       if (r < 0) {                                     =
+               \
+> +                               if (errno =3D=3D EINTR)                  =
+                   \
+> +                                       continue;                        =
+                       \
+> +                               done =3D (size_t)-1;                     =
+                 \
+>                                 break;                                   =
+                       \
+>                         }                                                =
+                               \
+> -                       else if (r > 0)                                  =
+               \
+> -                               ret +=3D r;                              =
+                         \
+> -               } while (r !=3D 0 && (size_t)ret < nbyte);        \
+> +                       done +=3D (size_t)r;                             =
+                 \
+> +               } while (r !=3D 0 && done < (size_t)(nbyte));     \
+>                                                                          =
+                               \
+> -               ret;                                                     =
+                       \
+> +               (ssize_t)done;                                           =
+               \
+>         })
 >
->  static int sunxi_mmc_init_host(struct sunxi_mmc_host *host)
->  {
-> +       unsigned long flags;
->         u32 rval;
+>  #define RPMB_MULTI_CMD_MAX_CMDS 3
 >
->         if (sunxi_mmc_reset_host(host))
-> @@ -336,7 +337,9 @@ static int sunxi_mmc_init_host(struct sunxi_mmc_host =
-*host)
->         /* Maximum timeout value */
->         mmc_writel(host, REG_TMOUT, 0xffffffff);
->         /* Unmask SDIO interrupt if needed */
-> +       spin_lock_irqsave(&host->lock, flags);
->         mmc_writel(host, REG_IMASK, host->sdio_imask);
-> +       spin_unlock_irqrestore(&host->lock, flags);
->         /* Clear all pending interrupts */
->         mmc_writel(host, REG_RINTR, 0xffffffff);
->         /* Debug register? undocumented */
-> @@ -688,6 +691,7 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host=
- *host, u32 oclk_en)
+> ---
+> base-commit: c6692d5f9bf1ab6fbf5694a0b61477621cc4d016
+> change-id: 20261008-do-io-unsigned-counter-568a63baef5c
 >
->         if (rval & SDXC_START) {
->                 dev_err(mmc_dev(host->mmc), "fatal err update clk timeout=
-\n");
-> +               sunxi_mmc_init_host(host);
->                 return -EIO;
->         }
->
+> Best regards,
 > --
-> 2.39.5
+> Sebastien Bacher <sebastien.bacher@canonical.com>
+>
 >
