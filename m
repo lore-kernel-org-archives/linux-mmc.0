@@ -1,88 +1,90 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793382806;
-	b=ONsdjWfmniPzIvLlMvYsRq4xsHBpJ81xnWoONiNZAwjXeKD0cT4siW1fl1PzNQzX3Wse
-	 L62KTpSCDY7wVNGJFQRNxBVcjIEKgoDEJcAXyuqgxIQNAKMa9Ho/GymwNqT38bZ1qrFot
-	 y14ULLV3ETo6dnRHejhVDABUSOARU8AP2rH1h3/dPTFySehqNKNpeE0ZCbgoVLhKFuKyM
-	 x2fhdSDjmB7lON6F9gbNGbwgHQ4JnOZ0BJyMUytYnLWWu3TbWNDxBdgaqcpn8Qtn/U+5R
-	 Il1MEvDSdnVQP0gWfvCLvpum+jOBGbtHM0vYQ/k4TNFWqDEhwScDSiyL3BbCjOciKtQ==
+	t=1793382862;
+	b=4l+hX+BntNUWdFxS+SARucmUSJJr5MMUJ1BQvnZ3Gp97HGdLy7CyxZulhTgvcFweK3MB
+	 rEEZ8xG7iIZA/YWq/zIyjys32no3uwxfJgWNV+xINXUdTPq4jpWFe31C7vlUpJdKMdkBS
+	 84Qj1upPYdTHtsAHTTZOqkfMDXBSFJdUonZbYAmSjxp4CBpCSzJRGDSUwOx/SBKfzXdsm
+	 sx+t+jIeOIqnKjzOM/oo3v4CMiKwgdx87oKLwd96GwuhFrpMTV7/0ERfoVBgjWgi5hrf3
+	 69i2oNULQF3eUvaMtFk8YmUkqjNGdxr+/88KC2H/WvN/U5edyNBxLOIXvCflNx/34Pg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793382806;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793382862;
 	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
 	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
-	bh=qAHbjk8CdSYMrdXZz4m+f6oiU/FYO+zPJ4vMCM6876U=;
-	b=Hp1np5j4BKLTDg/+2ndVwtNUcjdEDYuPU/eQOTlarlIzpuTKn+APWxqmCQe8jY2Ps5AZ
-	 i4fxW4tb6SuoqKLEyFVpyDbGwgexJWD9okOU4IyJXPIr/SA7LpKOQxRlsgQeELQG+AYdy
-	 JRFQe8FC2ZlSYPfM7Rqj6fT5xaz+FNFj9zqC95QZ06ghpSVXhMOUDOA3yG6LnEAi1WKxM
-	 l/5078uaMjQDEvW66xrflhUCge+bHebBVEG655D5ZZtVld0p2N9NQkPQbZTjC4GQk9zEA
-	 hlUckgurqxgVBpmRUJRfADE+ztZ+l8Bz4zIFgY8AmG+Hq3mfok0p4zxHWFT07ubyQfw==
+	bh=ofYepfLWGmWwLQwuVQyBDsj69K2Ei2/q9XqZv+jRkos=;
+	b=PT0uhrF8t6NM+TQFpaaPszz+mkM2Axsjy6LbryMcrJg6mAoE1Usx2CROcu4TWodWYG7u
+	 ruHhZPBT09SisjeZOWGB0M7XqtSs7xt6KDnCP14ffWcNw66zCyR9jlBl3LDB6tOsrXPc4
+	 VT7K631FQfY8KTpLmRXUxCBnCAQ8QfQbbhw5bdhfsIOq4oZpNbaJ5wKBo1uf1Lu27h9ec
+	 J7dQ75exrLcDCI2eDOX82V6x1E2ZRkBvGxMVZGmRIDMwnLYXe5wSB86iu5Lhn9f7EfxB/
+	 zwWLDpgPY4E7w8gl49sO+8l3AiPDQNpjoLK6lAL87UaJ3fdsOJ1/bX/FnL9keddRBPA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=HrOY1TXt;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mTUwbBoX;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 00800606A31C;
-	Fri, 30 Oct 2026 17:53:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F168606A31A;
+	Fri, 30 Oct 2026 17:54:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=HrOY1TXt
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E70991F000C1;
-	Fri, 30 Oct 2026 17:53:24 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mTUwbBoX
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 56CA51F00A18;
+	Fri, 30 Oct 2026 17:54:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793382805;
-	bh=qAHbjk8CdSYMrdXZz4m+f6oiU/FYO+zPJ4vMCM6876U=;
+	s=k20260515; t=1793382861;
+	bh=ofYepfLWGmWwLQwuVQyBDsj69K2Ei2/q9XqZv+jRkos=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=HrOY1TXtar5XJSzJGmiWQiDfcAMm2pqpGIRjWapPMz+cBBiZ29zDZ7b4qK38g5JgH
-	 gdpsGXDVTNA17RjnCFg4MDmZ3vDHWX2brR5PTmzPjHFdaw1Okptji2gIgR3mi+Ce4b
-	 PUcITCSURdx4PD5i4myqkfz3yQmO4wi8LhK4gNzV3byoKQkxaVnbHkL4mZ/pzdFH1E
-	 VdiKgu24ohq9yEaZb+98JlM4IpCPr/QXYDFiCmc6MT5yN/oVvWFRqLVeFGAG/o0S94
-	 hf5kyAZQ25+tNqH6pezcger4d2NhlnEC7Hk2AdIehgSJ2TxxsqZppaizU2olmE37+P
-	 HojWzxsgkZrng==
-Date: Fri, 30 Oct 2026 12:53:21 -0500
+	b=mTUwbBoX2F2BEoFWM1svESWoPutzqIVDXGy5rbc2beDz2TNMpie8iOSq/Jk9UoqMT
+	 vb28Lr4mQcYzMzgJZ/nRg+S1CjWFAZsAw7rdNVIdLourlHpWzxThwR+EWeyrtiCHzi
+	 veetsBeHMAUwwEPUFau84GaoJl2cwmNd2qqkv4mHu5yB6ckOWqNXMx6H9MPOGzIkA1
+	 jcrDtorzsFDc5l7baBuakCuQ5St7COgkLx+yfEjGtFYB9CebcoduvrFyXLFnrimGs6
+	 rrpVEUAOxK2FsVkHqAbKvLPU5kpj5dMuUODIh0ZhuTzLGGmZKLJweAkWy6YLLWYUex
+	 Ztl8mfTpXyZ2Q==
+Date: Fri, 30 Oct 2026 12:54:19 -0500
 From: "Rob Herring (Arm)" <robh@kernel.org>
 To: Cunhao Lu <1579567540@qq.com>
-Cc: Alexandre Torgue <alexandre.torgue@foss.st.com>,
-	Lukasz Luba <lukasz.luba@arm.com>,
-	Maxime Chevallier <maxime.chevallier@bootlin.com>,
-	mfd@lists.linux.dev, Andrew Lunn <andrew+netdev@lunn.ch>,
-	linux-i2c@vger.kernel.org, linux-usb@vger.kernel.org,
-	Conor Dooley <conor+dt@kernel.org>, linux-pm@vger.kernel.org,
-	"Rafael J. Wysocki" <rafael@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Jisheng Zhang <jszhang@kernel.org>,
-	Andi Shyti <andi.shyti@kernel.org>, Lee Jones <lee@kernel.org>,
-	Richard Cochran <richardcochran@gmail.com>,
-	Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-	Bartosz Golaszewski <brgl@kernel.org>,
-	Stephen Boyd <sboyd@kernel.org>, linux-mmc@vger.kernel.org,
-	linux-stm32@st-md-mailman.stormreply.com,
-	Philipp Zabel <p.zabel@pengutronix.de>,
-	Thinh Nguyen <Thinh.Nguyen@synopsys.com>,
-	linux-rockchip@lists.infradead.org, Ulf Hansson <ulfh@kernel.org>,
-	Vinod Koul <vkoul@kernel.org>, David Wu <david.wu@rock-chips.com>,
+Cc: Eric Dumazet <edumazet@kernel.org>, linux-kernel@vger.kernel.org,
+	linux-serial@vger.kernel.org,
 	Jerome Brunet <jbrunet+clk@baylibre.com>,
-	linux-gpio@vger.kernel.org, Jiri Slaby <jirislaby@kernel.org>,
-	Jakub Kicinski <kuba@kernel.org>,
+	linux-stm32@st-md-mailman.stormreply.com,
+	Alexandre Torgue <alexandre.torgue@foss.st.com>,
 	Shawn Lin <shawn.lin@rock-chips.com>,
-	Heiko Stuebner <heiko@sntech.de>,
+	"Rafael J. Wysocki" <rafael@kernel.org>, devicetree@vger.kernel.org,
+	Elaine Zhang <zhangqing@rock-chips.com>,
+	Jiri Slaby <jirislaby@kernel.org>, Zhang Rui <rui.zhang@intel.com>,
+	Paolo Abeni <pabeni@redhat.com>,
+	Philipp Zabel <p.zabel@pengutronix.de>, mfd@lists.linux.dev,
+	linux-arm-kernel@lists.infradead.org,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, linux-i2c@vger.kernel.org,
+	Richard Cochran <richardcochran@gmail.com>,
+	Maxime Chevallier <maxime.chevallier@bootlin.com>,
+	Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+	linux-mmc@vger.kernel.org, Thinh Nguyen <Thinh.Nguyen@synopsys.com>,
+	linux-gpio@vger.kernel.org, Vinod Koul <vkoul@kernel.org>,
+	Andrew Lunn <andrew+netdev@lunn.ch>,
 	Manivannan Sadhasivam <mani@kernel.org>,
-	linux-phy@lists.infradead.org, Linus Walleij <linusw@kernel.org>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@kernel.org>, linux-serial@vger.kernel.org,
-	linux-clk@vger.kernel.org, Paolo Abeni <pabeni@redhat.com>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Zhang Rui <rui.zhang@intel.com>, linux-kernel@vger.kernel.org,
+	linux-phy@lists.infradead.org,
 	Neil Armstrong <neil.armstrong@linaro.org>,
-	Elaine Zhang <zhangqing@rock-chips.com>, netdev@vger.kernel.org,
-	Jaehoon Chung <jh80.chung@samsung.com>,
+	Jakub Kicinski <kuba@kernel.org>, linux-usb@vger.kernel.org,
+	"David S. Miller" <davem@davemloft.net>,
+	Bartosz Golaszewski <brgl@kernel.org>, Lee Jones <lee@kernel.org>,
+	netdev@vger.kernel.org,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Stephen Boyd <sboyd@kernel.org>, David Wu <david.wu@rock-chips.com>,
+	Andi Shyti <andi.shyti@kernel.org>,
+	Heiko Stuebner <heiko@sntech.de>,
+	Conor Dooley <conor+dt@kernel.org>,
+	linux-rockchip@lists.infradead.org,
+	Jaehoon Chung <jh80.chung@samsung.com>, linux-pm@vger.kernel.org,
 	Brian Masney <bmasney+clk@redhat.com>,
-	linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
-	Daniel Lezcano <daniel.lezcano@kernel.org>
-Subject: Re: [PATCH 01/27] dt-bindings: clock: rockchip: Add RK3572 CRU
-Message-ID: <179338280056.1028517.4147995505996173358.robh@kernel.org>
+	Ulf Hansson <ulfh@kernel.org>,
+	Daniel Lezcano <daniel.lezcano@kernel.org>,
+	Linus Walleij <linusw@kernel.org>, linux-clk@vger.kernel.org,
+	Lukasz Luba <lukasz.luba@arm.com>,
+	Jisheng Zhang <jszhang@kernel.org>
+Subject: Re: [PATCH 13/27] dt-bindings: mmc: rockchip: Add RK3572 controllers
+Message-ID: <179338285864.1034428.5820071698056740457.robh@kernel.org>
 References: <20261022-add-board-ok3572-c-v1-0-0b0fd85a31ee@qq.com>
- <20261022-add-board-ok3572-c-v1-1-0b0fd85a31ee@qq.com>
+ <20261022-add-board-ok3572-c-v1-13-0b0fd85a31ee@qq.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -94,20 +96,18 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20261022-add-board-ok3572-c-v1-1-0b0fd85a31ee@qq.com>
+In-Reply-To: <20261022-add-board-ok3572-c-v1-13-0b0fd85a31ee@qq.com>
 
 
-On Thu, 22 Oct 2026 00:10:58 +0800, Cunhao Lu wrote:
-> The CRU uses the PMU0 GRF for PLL status and the AUPLL reference mux.
-> Describe the controller and define its clock and reset IDs.
+On Thu, 22 Oct 2026 00:11:10 +0800, Cunhao Lu wrote:
+> Add the RK3572 SD and eMMC compatibles using the RK3576 fallbacks.
 > 
 > Signed-off-by: Cunhao Lu <1579567540@qq.com>
 > ---
->  .../bindings/clock/rockchip,rk3572-cru.yaml        |  57 ++
->  include/dt-bindings/clock/rockchip,rk3572-cru.h    | 560 ++++++++++++++++
->  include/dt-bindings/reset/rockchip,rk3572-cru.h    | 713 +++++++++++++++++++++
->  3 files changed, 1330 insertions(+)
+>  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml   | 1 +
+>  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 3 +++
+>  2 files changed, 4 insertions(+)
 > 
 
-Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
+Acked-by: Rob Herring (Arm) <robh@kernel.org>
 
