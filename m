@@ -1,55 +1,54 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.67.36.66
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793448435;
-	b=poP0D2jTw/o7zDhTpVY7vSxt5H8HzKvDZAQffU2pQ/GJw2j3UlMafzmZxMXN0Iym51f4
-	 UMJg2GLxub9nxCxHMjhYcIxfjiCMyR/3FhWk+vWpSNYALiGYEQkJsySv6tu15rKzR0O+A
-	 1Cnyyn8yRi2xis6HeJtH2F2dqPiOf6o6zw0k2zoYdnF0qEkkWDhemJ6RnZhYrfMRai/QX
-	 LnmwqVapzHSCuiAXoXi1aaysOF0R9es4BNlwdLKpINxdxAeoGJ3DAGerT68ildrWVtJr9
-	 ZFhktdPPKKM5dB68+xS7nsvdmpdSWEB6l9exd5RKDU4t6MbUOUas73ytdQjNuPygEdg==
+	t=1793448433;
+	b=uwqMpoG+AHFrluuk+5xZR+57NU6N2hec+aKSjjtHJlgH3S9KrGdWqqIcm8yHxoOSrTZl
+	 JmhXBT8pBCzvtREjbkCNjGGz0MCmXhB2NtSTOkJfGVhHnrZ3IlqLqzSDfnRjvI7f3vyJv
+	 F4hMgallsS5sHdfn810M3jwYHvg17EdN6HTSj7OmSufzkc9KmU4Rs7uS/6vvQw0uM7T05
+	 Cqr0cQ/+CYm5YMOv6lUwU1qW031bDQBcCPNVPTcLC7DsPJUSU2bThSwocpdnfJqLcu2+2
+	 B6tpLVAd1q8J+zYHm3072PtI4pDx5iQjMQr0D05HZ9Kru4uWTvdkQam8u5sAKV79VyA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793448435;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793448433;
 	h=DMARC-Filter:Received:DKIM-Signature:Received:From:To:Cc:Subject:
-	 Date:Message-ID:In-Reply-To:References:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=jyk3rgi6eH2uBTITUiOecFzmCK/Ol922slxYpE+PPRs=;
-	b=tEohJhOXTVLLbuouUHTuOik7qpv4mfWIZrHTc5btRXqNOUs5U6yrLWAR1ie/oaGD1Fa5
-	 1xI03iiTpK+PG7n6zYfLA9lmUis3o0ZsLIJ2RuL60uWPmi5a+rAwHQAga/kTxFZ+bjycB
-	 YStUcIQisN/PJezzkDx1kciVC5sQfPnVSFmB8jUj5he2r8Z4Rbh7WH1hMAcKTEzrC6BOA
-	 lBIKmOAHfOa0DrLWSBl9JJRfnlPfNy5LpeaZ1cpNDaQEZnJ8DQiHkektax1ui5OIXwclC
-	 iOxMqaJQ+e5YEN2tW2qZMJsxtI9IfLl+bfK3FzJ6ju58XzNDuh5Lxub+R0pEmWY0XtQ==
+	 Date:Message-ID:MIME-Version:Content-Transfer-Encoding;
+	bh=lTgc+hlrMA7SA2m7qbx65V/vbNGlC27/LFtg4t8ezHc=;
+	b=bv5iqNQb5dk0uUlZEVqYc4+a2P9KG9NKaxd+e2nOe4IyC0WOg0oREJrJ/4I7xJMEASGl
+	 9xYZ9CkNW1rCvGg8AurHhudjrhV96KpZPwqi9L4bx4BSg9Dcb1IKDZxTRSy7pPVxWkjTq
+	 6nJmok7kFfIcrAvzrJ1PgeF+1A9yA2S00zKT/4AFtpwxXeJxQM17TvhD0qB6BN1E7/7T8
+	 Yl/ED7e07Bgoym19RhGv60WPf9rRSQ+UpM214iJL9RHnzqOajk113VjalB1E+P7eI5Kr6
+	 BjcsieKpzt8VoSG4wSVKiswgquXpZo5r5eGY1K4fkBNlMS2KGKA3vpGHZkAUjmqVs+g==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=posteo.net;
 	spf=pass smtp.mailfrom=posteo.net;
-	dkim=pass header.d=posteo.net header.i=@posteo.net header.a=rsa-sha256 header.s=1984.8680eb header.b=dMplOwLY;
+	dkim=pass header.d=posteo.net header.i=@posteo.net header.a=rsa-sha256 header.s=1984.8680eb header.b="D+/7ANfo";
 	arc=none smtp.remote-ip=185.67.36.66
 Received: from mout02.posteo.de (mout02.posteo.de [185.67.36.66])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF2F8606A32D
-	for <linux-mmc@vger.kernel.org>; Sat, 31 Oct 2026 12:07:14 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org CF2F8606A32D
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38E01606A31C
+	for <linux-mmc@vger.kernel.org>; Sat, 31 Oct 2026 12:07:11 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 38E01606A31C
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=posteo.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=posteo.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=posteo.net header.i=@posteo.net header.a=rsa-sha256 header.s=1984.8680eb header.b=dMplOwLY
+	dkim=pass (2048-bit key, unprotected) header.d=posteo.net header.i=@posteo.net header.a=rsa-sha256 header.s=1984.8680eb header.b=D+/7ANfo
 Received: from submission (posteo.de [185.67.36.169]) 
-	by mout02.posteo.de (Postfix) with ESMTPS id 4A9C3240137
-	for <linux-mmc@vger.kernel.org>; Sat, 31 Oct 2026 13:07:13 +0100 (CET)
+	by mout02.posteo.de (Postfix) with ESMTPS id 4B49F240126
+	for <linux-mmc@vger.kernel.org>; Sat, 31 Oct 2026 13:07:10 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=posteo.net;
-	s=1984.8680eb; t=1793448433;
-	bh=jyk3rgi6eH2uBTITUiOecFzmCK/Ol922slxYpE+PPRs=;
+	s=1984.8680eb; t=1793448430;
+	bh=lTgc+hlrMA7SA2m7qbx65V/vbNGlC27/LFtg4t8ezHc=;
 	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:
 	 Content-Transfer-Encoding:From;
-	b=dMplOwLY0aDJxLldmkgQcF+xhl9AGuLGcEQamfFFe4Y5i5Il9SE0PX128i4v/oUt3
-	 89JYyQjemRG79JHTl7kpwn965bn5mVrr+FTLhwbkJzJPnJf9SaK6mX7whWon5q6CpV
-	 P/3FbNxLvfjLLB3tZkKVJWdVFc/LlxKL5DmXzvmYooSd1N+afa7nqQvGDWhiIPhBZB
-	 tbUOFvxFdlbM1yYCvgGMx0Lu38/CuCkeSw+bIMF02SlbboZ7gkPl0QRK3k8xadBAa0
-	 6mbkLG7XpqHnlwoC2uU0zKnieWK6wHvls/5ZDPPuoCygkbT51oGSW5JddYMv9gQb7+
-	 9BhKrVEa+/Djg==
+	b=D+/7ANfoPgNWuIBqa5drXTlcwoucEr21uwnxSd5pTTtaCB4rC0+cvdK3Z5Emby1aq
+	 VgewqquMXOsd4QUSXT+iNuVrKZO4E7rUOo8j1kJybzU5dlCnsotKo/sAmIxgM1Q6XB
+	 QEkUq319pTJ9o0+W2x6d+6P4MAZ3l4INPhJGEGSw7MQUnEqq3BqAiQnciVWtT7j//7
+	 H66XtD714TOOHQnoZapBLmi2tSnv/IEyuqzvSobAiz/UafmJMOJM6ZeloHoCGeGoYj
+	 gfgmvzenGNIt5mHAHHEWliI+2sCPFjmriJB3GwhLpEzgIioeS5yIMy8BbxLQYaVUWR
+	 V5yZXqoOyaBuw==
 Received: from customer (localhost [127.0.0.1])
-	by submission (posteo.de) with ESMTPSA id 4jGxXv3CL4z6v1f;
-	Sat, 31 Oct 2026 13:07:11 +0100 (CET)
+	by submission (posteo.de) with ESMTPSA id 4jGxXr2zyTz6txs;
+	Sat, 31 Oct 2026 13:07:08 +0100 (CET)
 From: Mateusz Nowicki <mateusz.nowicki@posteo.net>
 To: Ulf Hansson <ulfh@kernel.org>,
 	linux-mmc@vger.kernel.org
@@ -62,13 +61,10 @@ Cc: Christophe Kerello <christophe.kerello@foss.st.com>,
 	Alexandre Torgue <alexandre.torgue@foss.st.com>,
 	linux-stm32@st-md-mailman.stormreply.com,
 	linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org
-Subject: [PATCH 2/3] mmc: mmci: stm32: do not use NEGEDGE in HS200 mode
-Date: Sat, 31 Oct 2026 12:07:12 +0000
-Message-ID: <20261031120700.42576-3-mateusz.nowicki@posteo.net>
-In-Reply-To: <20261031120700.42576-1-mateusz.nowicki@posteo.net>
-References: <20261031120700.42576-1-mateusz.nowicki@posteo.net>
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 0/3] mmc: mmci: stm32: silent data corruption and HS200 fixes
+Date: Sat, 31 Oct 2026 12:07:09 +0000
+Message-ID: <20261031120700.42576-1-mateusz.nowicki@posteo.net>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -80,46 +76,25 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-RM0457 marks NEGEDGE as not applicable in HS200. With a clock divider it
-corrupts multi-block writes: on the STM32MP257F-DK (st,neg-edge, 200 MHz
-kernel clock, HS200 at 100 MHz) written data read back different. The
-same writes are correct without NEGEDGE.
+The eMMC of the STM32MP257F-DK in HS200 returned stale data and lost
+writes without any error. Patch 1 makes data CRC errors visible to the
+core again, patches 2 and 3 remove the causes seen on the DK.
 
-Fixes: 36240ef8665b ("mmc: mmci: add hs200 support for stm32 sdmmc")
-Cc: stable@vger.kernel.org
-Signed-off-by: Mateusz Nowicki <mateusz.nowicki@posteo.net>
----
-RM0457 describes HS200 only without a divider. If HS200 through a
-divider should not be used at all, the alternatives for the DK are:
+Tested on the STM32MP257F-DK (eMMC in HS200 at 100 and 150 MHz) with a
+v7.3-rc6 based kernel whose mmci files match this series. Build tested
+on master. Not tested on STM32MP1x.
 
-- Drop mmc-hs200-1_8v from the DK device tree. DDR52 is tested and only
-  about 5% slower than HS200 at 100 MHz (read/write 78/66 MiB/s against
-  82/68 MiB/s).
-- Drop st,neg-edge from the DK device tree. This also changes DDR52,
-  which was not tested without NEGEDGE.
-- Set the SDMMC2 kernel clock to 150 MHz in the firmware (OP-TEE). HS200
-  then runs without a divider (tested, 119/86 MiB/s).
+Mateusz Nowicki (3):
+  mmc: mmci: do not count a data CRC error as a complete transfer
+  mmc: mmci: stm32: do not use NEGEDGE in HS200 mode
+  mmc: mmci: stm32: lock the STM32MP25 delay block again before tuning
 
-Which way is preferred?
+ drivers/mmc/host/mmci.c             |  5 +++--
+ drivers/mmc/host/mmci_stm32_sdmmc.c | 18 ++++++++++++++++--
+ 2 files changed, 19 insertions(+), 4 deletions(-)
 
- drivers/mmc/host/mmci_stm32_sdmmc.c | 4 ++++
- 1 file changed, 4 insertions(+)
 
-diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-index 9dc51859c2e5..d74efdff6ac2 100644
---- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-+++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-@@ -342,6 +342,10 @@ static void mmci_sdmmc_set_clkreg(struct mmci_host *host, unsigned int desired)
- 	clk |= host->clk_reg_add;
- 	clk |= ddr;
- 
-+	/* NEGEDGE is not applicable in HS200 (RM0457), with a divider it corrupts writes */
-+	if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200)
-+		clk &= ~MCI_STM32_CLK_NEGEDGE;
-+
- 	if (host->mmc->ios.timing >= MMC_TIMING_UHS_SDR50)
- 		clk |= MCI_STM32_CLK_BUSSPEED;
- 
+base-commit: 36aad21d50d1af3f6954bb0c988257a908202477
 -- 
 2.56.0
 
