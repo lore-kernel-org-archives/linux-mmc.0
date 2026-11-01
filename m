@@ -1,90 +1,93 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.216.43
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.214.174
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793515048;
-	b=Q8XjPI1VNUtZEL8U3M3yrt13VkopeMEEWkyAoLjk/gmcvHM04kE3CDK0FXSW52LumlwJ
-	 iB/iQh8HOHJNr3id6g8px036GLU5KWtebVFdwdWvII3jUCsJxGIQjBmSe7gJyMuzvCTJZ
-	 56yqlAOFkvPTYIeCviFmhmbP8G0gxmWwHpR9Z2/HGb9Lv0tGK1HVTgP4Asdzprz2kWANt
-	 yna5JULAJMSCZM2BWO7y8zhkIJyOOJLIVEEGxhZ341dRX4t8RhA2aiGxLCsK+PJX8MHWY
-	 +XsAsK4v6GuJYhL1v4RpMYvwLugpQtuKLRlQJKXPA8kvoHXgc/6Vpo/5m23DI9SOpKA==
+	t=1793515067;
+	b=Zn1aCIq1tOSLqxcV+KhQnfPHzBnu1q3xvxb+Sc+LKiWJ0P42IO7W5c0NeNw3W/iJ+vtq
+	 G7VvU2Rrbs0MNwwGRwgmZ6L8vlqkc3wzB7BGaMcCZsTVVKcLU6+UX168Ac3HEBKR7b65L
+	 KZWqf3fHNtzd6YFqSRm0JXODnWOaLGVEX0fsZyyDUtwERHQAlnW1bowySfq/QiBcyPh4b
+	 Didc6lxmNjU9CypMMW9z4aaCOANXzif6KE4gr+b7u6dOsfU5kkxiR5ezBuC6pOP6Ufdcp
+	 q2AX4GlmYOOPBFkTbG/Kfi5urgh8rXNByjjvXBnDFVojldt3mQVewOY2i8yEl9VCOYA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793515048;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793515067;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
 	 Date:Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding;
-	bh=kaRMUeDRl+naPmm3qUT+oBT7oJDOZeWGKzT1v2c6cow=;
-	b=Rv1cJAjha1D4Ow3nj7eH6n68S1LZzrCQAjrRguFM9ItK0i6v4wxVPT3ugQAs0lX40cKA
-	 XqWP4/OzzCRwJ/itAQhaGGBYlb7hhTBcr0PXil7xx5AoQpcKqbk8MAzw7Mdf38SF7mh2L
-	 JjOnSgO3PYgL2/VtFc7U6ohIgzqPuEWC8c9T4pZaVbQy5HRGWFMZ5aOZ/Tkk4KEuQUwOq
-	 pxQ/5Iq4leNHl89mUk6hZW94EO6vJVFNnaCBCsje8AZjT/UQBe1DdpnQAJq2onkAlRGMP
-	 GX+iPA7uWNY0bUzc510Ci0QUd1ipJ65XtdJX5kqRP1FZ1vpGnIZqcBwDDoavt6/+CwQ==
+	bh=jk+Iv7E50Op3JEPwALwZ9u6FV2ftF6XFRcZ7NgdVWFo=;
+	b=Oc4fWlvZroH8L3yIrix/Qoe24Sm3VnVyQWazRLrpLcDjecWlZYmLo+WWnYmxra4f2a6+
+	 hBGnWe74sm0XpqQwCSPLeQFdx5VXxWUU90rktfK5gB/3254foP9DRMtpKKkYKUu16rVQO
+	 7q1GhhjMlXlIgoKLVVAgg3AwAeME4RdeR60HMy4nJcWP/U2MqiJ3tOYaFpv0WbJCtrJw2
+	 uZyn00Ta5ybbj1Q4yRbtUJ4WWQhNCw+lxr4l5Nk90aOpfbndHA5Z++VF/ZFFQF8JX736v
+	 vAd/2Xx4/piZxWcSKE0aspunY4yz1ReDj8L0kV1VPq/21YF/YcVh2Kq2kelSh6OBoWw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=0VlN2uOp;
-	arc=none smtp.remote-ip=209.85.216.43
-Received: from mail-pj1-f43.google.com (mail-pj1-f43.google.com [209.85.216.43])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=zhQPQbUU;
+	arc=none smtp.remote-ip=209.85.214.174
+Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B423606A326
-	for <linux-mmc@vger.kernel.org>; Sun,  1 Nov 2026 06:37:28 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3B423606A326
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67CB2606A327
+	for <linux-mmc@vger.kernel.org>; Sun,  1 Nov 2026 06:37:47 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 67CB2606A327
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=0VlN2uOp
-Received: by mail-pj1-f43.google.com with SMTP id 98e67ed59e1d1-3ac78f4c10bso889396a91.1
-        for <linux-mmc@vger.kernel.org>; Sat, 31 Oct 2026 23:37:28 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=zhQPQbUU
+Received: by mail-pl1-f174.google.com with SMTP id d9443c01a7336-2ea7190aea1so9497055ad.1
+        for <linux-mmc@vger.kernel.org>; Sat, 31 Oct 2026 23:37:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1793515047; x=1794119847; darn=vger.kernel.org;
+        d=gmail.com; s=20260707; t=1793515067; x=1794119867; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=kaRMUeDRl+naPmm3qUT+oBT7oJDOZeWGKzT1v2c6cow=;
-        b=0VlN2uOpa2rBfHqz+P34UFeI4XmM/oV6fVJXakdvt5wrQMb1FoS5ag3HPzYt85TOH1
-         xa6XLyiYexXf+CY0aD+FHXC0HjFxalWv0GNXi8z8taU/5lMat5legdx73GyDwsIa+Wwo
-         FG00l+6/zUs0jtBM+nZTM5E9sXDhFmSCCyiIGoMmXxp5ge5Y3T5NAVBs54cjUpiuGSLN
-         /W24FxFL7gLyTt5rkjN7e69qdPGzGQe9eTSDW7V3p0qGRYB3Urd3L/wtCdMm51jB8UNO
-         w3mruK/a7WrXjU6mIzmjM0EO1DnVVHiyI/VyO3TVlvqWixy4dfvia1QSdhs9MYcJSrM3
-         NAsw==
+        bh=jk+Iv7E50Op3JEPwALwZ9u6FV2ftF6XFRcZ7NgdVWFo=;
+        b=zhQPQbUUhCYQFoTxvL8ZHBMO96oNrXROIr4p5ptS2/BMhHSy7+unGTDNoxZL7y+CpH
+         aCUMkZFs7uwjg0LU+wIt3SSdjhm8qYaGqv0zLKFbrJGofDnBPFWyhuMUxc0FQUF3kuml
+         xj8Sj1Fh6y/iEh2p+nPAHb3FwgaGz2tn28dSbOa6vpG5PO87zXCa49pBhgmZlCtPpA4f
+         yrSliOz1yG+L5b7v1F4hCkn9eb266rcddg6ryjPhDkvjodoODsQXtNEVyHG9aOsVAXP7
+         5a5VVJXFl5HRFanN5VzsV2jvfh1v7uJ4zF5DXFuGhUhpr9LjSxdNx5ALv+7TNOazvy4V
+         ZX4Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793515047; x=1794119847;
+        d=1e100.net; s=20260707; t=1793515067; x=1794119867;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=kaRMUeDRl+naPmm3qUT+oBT7oJDOZeWGKzT1v2c6cow=;
-        b=L7DarIbz+1TlArnwGOh+coaiRpWMgQoFOSmPJBYxHW2oDlXvpjq0gOrNCWzPVTcXRm
-         Ot7t5TPH+05ng75IrXVVIq0mDeJwSj3bnA8ngmdimN4NeWM2cLG4Z6hXovYIOR/VS+OX
-         xRBc/ENK2IKvvDPwiE5vjgw3mRQUTvQ1mGWPYEQlyNWSiq3lKxuQBlbettVVBnc96UIW
-         Q3WbbIq1gh9ZNuf0GCBxWwR4vBlInTvA1og65hYwwA3cu8a0FQD2dYId7DWyFGaEh0j8
-         F0nAxrtH7gCtW0toPJ91nym3PZRbn2o+KxO/RK3U8Jw3lS577OSWW9mdud2LZ367vN0r
-         jNIg==
-X-Gm-Message-State: APuU4Z/RoHhU1Rm2otgk9k/CGam+tQNokELkKbzeSEw8Z5n4XDG+OcRC
-	8VAp2FssbqxtcOTt9Z4fL6K/sR/is48d153p+/TVvwBhnSnQ2oTZYOP2
-X-Gm-Gg: AYBFou05J4L70mX7UPYK4lCcNIRHrassitqVXJz1MKPCSY2IcyeoRMwgRMEJKKE6TXY
-	UilQvPrsqMIWA4DSxmRxPYfXspaSRAWE3u2/eo+eySv6VKz47kn0tnJ4rM2lim5sK5fQ2+jd4U7
-	bYxr9SxXJbmMF/KpCWXnmzb6v3cJcegsZK0h/Gbv5FTb88Ds3TpQUEmG1I9/P8JXltvGxWbCzmE
-	yE5yzDFUV2dVHkqjhmZ25mSUUBb4WFZngoMwmAApXBl6EcxJhYlKBle4lsNXDMlrZU836ZbDtwZ
-	jFg91wZOo/LmCI/VFOV+h5D/w7HisVQTAtnNBDYN7B0whnqC11bplf2LqW68gLSFqcYbKg4yceW
-	kdlj+V3IawGf76cd7NlRtSZGcTuhoM1zIy11NmUeGBv1rX1iFAK5X2CjTOI5hvDHJT9gjz1K5s9
-	NLBMrppYit06Vu8wTA+Wa0DIdxuh1HaMH3blKmMUAKRcfe+8TKWG1XFrF7NUWcrgH+Wp9Oh+eFh
-	fvcYLngZGOTh7+i2DrhPSQNpU0fV30CUPOPYTlMYUtNa2+cCzIwdyYUk77sleS6Hl0wA5mq3vc6
-	gVbL+BMhPWHa3nSPEQAXgEmgn0vigRP1aAV2EHE+Kiuasg8=
-X-Received: by 2002:a17:90b:268a:b0:3ac:7c52:faeb with SMTP id 98e67ed59e1d1-3ae89769d66mr5583408a91.41.1793515047409;
-        Sat, 31 Oct 2026 23:37:27 -0700 (PDT)
+        bh=jk+Iv7E50Op3JEPwALwZ9u6FV2ftF6XFRcZ7NgdVWFo=;
+        b=cNzPISOaXP0BL2Z/E+9DrQ1uNtNL07phC4Ww0bu00Jx4LWmNaqdBefQP2yAulUKChA
+         YAMU+uq09lKTDnPZ/foR0dhzqO51LuSrWsNkufAV5pO/L++Suf/JgvPaGf27OSuncApU
+         xlr7Ow3oi2ADsrjmH2VkQVpVHsiUKhWRpYjau/lbO99FwWzoJzXkGzVGVw4UxtIE6E6I
+         wgc411OtZPmEuroe+0j8uxDM7Al0XmtGZyCiHWkUB5uCtw7vPNS1VvHTHgY3bfAZ/SOK
+         z1g6bZEDOZiKJrucu7B3CUZFsVnXBEr50iuTDi9Hrd1L7FbxYtcIuRTGj+TrqVPM306p
+         IBUw==
+X-Gm-Message-State: APuU4Z/RbNEL/BNKIwJFVjTGSucnQjMHJdgXS6kImJ53grn9Rp7FGv7N
+	uhvEWviLW3OjreHzzCzQ+pW+yx8poaJcdYOzLhj0ztEWT2hIAQNc1gLX
+X-Gm-Gg: AYBFou2hJr5Juuy9K/ooNlhuc4aIcMnzR2uoKEzCJxiaczP7fxJwZyuN5GDJofIkj+W
+	2BFNlP8Ha5IQUhb+PaDS3itbzxy6Do4aSZlaMEfGOTMqMxyZPBEy1gL2AA098GJERguvVgXiqV6
+	XwdHI7iXFYs83i/F/q8IxulZRYG4TH3gVQD71fBToIXM5541+B+xKEoARzdi3YYzXTnA7Uf7w+x
+	6to/NQJGSMaZsXy/oMAxwOIB9RTwX5EUER7Rt4H7+gtSmGaVvXxaZydAwJgnW54///CiDhdootX
+	h6dCxOxuzq4uLvdCDU1Ra4vQMbXIYSxmxCb4+zFMbGrWiyegHr6I6+3OwlCTqnQ+sPW27F82DAG
+	vHqFs+Xzft/mXXGgUIgXTdDG+VvYq7gXzn/XsSdhNJfGACfh+kZzqNOJfGlcPdewVjzaQuaZ2Nd
+	1G7dO1f4E4UUYTK/cJUE8NwWCSKLsg5NVWjV3HxLwtliW1bxN8cP29e3k6Wg0X6soQrIqIhxnBn
+	KETjpcYAJIGcMmFsWMRlwVfcc9L3bbpdXel3op8vxj8+iXl6SIT0DItJkLgOQm1UytRyUl8Zpuk
+	+ZVnOpvVt5axDDITK/7/UKH/sfdaQSctmpjHc/XqM6y//ksELGwKQmQEy0+Jy/u70BKM
+X-Received: by 2002:a17:90b:5807:b0:3ab:be66:ddbf with SMTP id 98e67ed59e1d1-3ae8981dd4dmr5417304a91.54.1793515066743;
+        Sat, 31 Oct 2026 23:37:46 -0700 (PDT)
 Received: from ubuntu24.vpn.host.chaitin.net ([124.77.157.93])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3ae85f3e087sm5465907a91.1.2026.10.31.23.37.25
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3ae6e2a703esm14120742a91.0.2026.10.31.23.37.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 31 Oct 2026 23:37:27 -0700 (PDT)
+        Sat, 31 Oct 2026 23:37:46 -0700 (PDT)
 From: BeaCox <0xbeac@gmail.com>
-To: Jaehoon Chung <jh80.chung@samsung.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>,
-	Ulf Hansson <ulfh@kernel.org>
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Ulf Hansson <ulfh@kernel.org>,
+	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
+	Masami Hiramatsu <mhiramat@kernel.org>
 Cc: linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
 	linux-kernel@vger.kernel.org,
 	stable@vger.kernel.org
-Subject: [RFC PATCH] mmc: dw_mmc: disable bh_work and stop timers on remove
-Date: Sun,  1 Nov 2026 14:37:19 +0800
-Message-ID: <20261101063719.88570-1-0xbeac@gmail.com>
+Subject: [RFC PATCH] mmc: tmio: disable dma_issue work before releasing DMA
+Date: Sun,  1 Nov 2026 14:37:39 +0800
+Message-ID: <20261101063739.89331-1-0xbeac@gmail.com>
 X-Mailer: git-send-email 2.43.0
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -97,53 +100,99 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-dw_mci_remove() does not drain bh_work before the driver core releases
-the devm-managed host. The interrupt handler, watchdog, fault-injection
-timer and DMA completion path can queue that work, whose callback
-accesses the host and MMC request state.
+tmio_mmc_host_remove() drains done and delayed_reset_work, but leaves
+dma_issue pending or running when it releases the DMA resources. Its
+backend callback accesses the host, controller registers and DMA state.
 
-After removing the MMC host and masking controller interrupts, drain
-the interrupt handler and disable bh_work synchronously. Disabling the
-work also rejects later queue attempts, unlike cancellation alone.
-Stop both timers after the work callback has finished so that it cannot
-rearm a timer after teardown has cancelled it.
+Disable dma_issue synchronously before releasing DMA. This also rejects
+late queue attempts from an interrupt handler that is still running;
+cancel_work_sync() alone does not provide that guarantee.
+
+Some DMA backends fall back to PIO before initializing dma_issue. Move
+their work initialization ahead of the fallible setup so the work is
+always initialized when a DMA backend is present. Skip the disable call
+when no DMA backend is configured.
 
 The analysis, patch and validation were assisted by OpenAI Codex.
 
-Fixes: 921c87ba3893 ("mmc: Convert from tasklet to BH workqueue")
+Fixes: 85683fb39d9b ("mmc: sdhi: Convert from tasklet to BH workqueue")
 Cc: stable@vger.kernel.org
 Signed-off-by: BeaCox <0xbeac@gmail.com>
 ---
-Testing: x86_64 object build with gcc 13.3 and W=1, with
-CONFIG_FAULT_INJECTION enabled and disabled. A userspace model of the
-extracted remove function checks pending work and modeled late IRQ/timer
-queue attempts. It is an ordering check, not a kernel reproducer.
+Testing: x86_64 COMPILE_TEST object builds with gcc 13.3 and W=1 for
+tmio_mmc_core, renesas_sdhi_core, both Renesas DMA backends and
+uniphier-sd. A userspace model of the extracted remove function checks
+the no-DMA case and modeled late queue attempts before DMA release.
+It does not simulate real IRQ/DMA concurrency or backend hardware.
 
 No matching hardware, kernel crash trace or demonstrated unprivileged
-trigger is available. Please review the MMC shutdown assumptions and
-external DMA callback lifetime. This is an RFC for a teardown fix; no
-privilege-escalation or CVE eligibility claim is made.
+trigger is available. Please review DMA-to-PIO fallback, probe failure
+and teardown on Renesas and UniPhier. The initialization changes cover
+backends that can return before setting up DMA. Other work items and
+the wider IRQ teardown remain outside this patch.
 
- drivers/mmc/host/dw_mmc.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c | 4 ++--
+ drivers/mmc/host/tmio_mmc_core.c         | 2 ++
+ drivers/mmc/host/uniphier-sd.c           | 4 ++--
+ 3 files changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index ff0b25d287..cc5e163ee7 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3406,6 +3406,12 @@ void dw_mci_remove(struct dw_mci *host)
- 	mci_writel(host, RINTSTS, 0xFFFFFFFF);
- 	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index 426308b73b..45e34d57ab 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -340,6 +340,8 @@ static void renesas_sdhi_sys_dmac_request_dma(struct tmio_mmc_host *host,
+ {
+ 	struct renesas_sdhi *priv = host_to_priv(host);
  
-+	synchronize_irq(host->irq);
-+	/* Stop the work before cancelling timers that it can rearm. */
-+	disable_work_sync(&host->bh_work);
-+	dw_mci_stop_fault_timer(host);
-+	hrtimer_cancel(&host->wd_timer);
++	INIT_WORK(&host->dma_issue, renesas_sdhi_sys_dmac_issue_work_fn);
 +
- 	/* disable clock to CIU */
- 	mci_writel(host, CLKENA, 0);
- 	mci_writel(host, CLKSRC, 0);
+ 	/* We can only either use DMA for both Tx and Rx or not use it at all */
+ 	if (!host->pdev->dev.of_node &&
+ 	    (!pdata->chan_priv_tx || !pdata->chan_priv_rx))
+@@ -402,8 +404,6 @@ static void renesas_sdhi_sys_dmac_request_dma(struct tmio_mmc_host *host,
+ 			goto ebouncebuf;
+ 
+ 		init_completion(&priv->dma_priv.dma_dataend);
+-		INIT_WORK(&host->dma_issue,
+-			  renesas_sdhi_sys_dmac_issue_work_fn);
+ 	}
+ 
+ 	renesas_sdhi_sys_dmac_enable_dma(host, true);
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 775e0d9353..d0d3dd05a0 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1272,6 +1272,8 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+ 	dev_pm_qos_hide_latency_limit(&pdev->dev);
+ 
+ 	mmc_remove_host(mmc);
++	if (host->dma_ops)
++		disable_work_sync(&host->dma_issue);
+ 	cancel_work_sync(&host->done);
+ 	cancel_delayed_work_sync(&host->delayed_reset_work);
+ 	tmio_mmc_release_dma(host);
+diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
+index 1eae2f4b6c..cd0fdffa30 100644
+--- a/drivers/mmc/host/uniphier-sd.c
++++ b/drivers/mmc/host/uniphier-sd.c
+@@ -187,6 +187,8 @@ static void uniphier_sd_external_dma_request(struct tmio_mmc_host *host,
+ 	struct uniphier_sd_priv *priv = uniphier_sd_priv(host);
+ 	struct dma_chan *chan;
+ 
++	INIT_WORK(&host->dma_issue, uniphier_sd_external_dma_issue);
++
+ 	chan = dma_request_chan(mmc_dev(host->mmc), "rx-tx");
+ 	if (IS_ERR(chan)) {
+ 		dev_warn(mmc_dev(host->mmc),
+@@ -198,8 +200,6 @@ static void uniphier_sd_external_dma_request(struct tmio_mmc_host *host,
+ 	priv->chan = chan;
+ 	host->chan_rx = chan;
+ 	host->chan_tx = chan;
+-
+-	INIT_WORK(&host->dma_issue, uniphier_sd_external_dma_issue);
+ }
+ 
+ static void uniphier_sd_external_dma_release(struct tmio_mmc_host *host)
 
 base-commit: cbbddb6b08cc9900a87cccaa9b22bbe06aa4f50a
 -- 
