@@ -1,100 +1,91 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=74.125.224.44
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1793481460;
-	b=Qbq2TGxr5soec7bEpg00cB8iM1bTwdMnIRVP6xHSSb6ztMMSs3hvgehch+J2MOpTIdnT
-	 ag3lrvjexy7r0wNTcw9T93qQ1HKF0W0PlWo0dawWfSd7vYq+LYnMjemcAmK0r/vAuLkbt
-	 8ErV7GNtGxpTO6WDY20px+s07y9IRJ6zcaTyZlctyvr2UK7WSvy3akPPVGdEgAnW2mCcp
-	 dEFcVyfLD4NiLmgPXzREGxDu26aJ00b4m9gaekU+zD3itf+1rATBN8s48vwOrhRIBcAE3
-	 NEoZIm12mKwAEQwlDjllpkX9L+wgDe2/hHBTLcZaNs4xEY6s5WcskF4+laiElWspdUQ==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793481460;
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.216.43
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1793515048;
+	b=Q8XjPI1VNUtZEL8U3M3yrt13VkopeMEEWkyAoLjk/gmcvHM04kE3CDK0FXSW52LumlwJ
+	 iB/iQh8HOHJNr3id6g8px036GLU5KWtebVFdwdWvII3jUCsJxGIQjBmSe7gJyMuzvCTJZ
+	 56yqlAOFkvPTYIeCviFmhmbP8G0gxmWwHpR9Z2/HGb9Lv0tGK1HVTgP4Asdzprz2kWANt
+	 yna5JULAJMSCZM2BWO7y8zhkIJyOOJLIVEEGxhZ341dRX4t8RhA2aiGxLCsK+PJX8MHWY
+	 +XsAsK4v6GuJYhL1v4RpMYvwLugpQtuKLRlQJKXPA8kvoHXgc/6Vpo/5m23DI9SOpKA==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793515048;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:MIME-Version:References:
-	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:Cc:
-	 Content-Type:Content-Transfer-Encoding;
-	bh=cXCPp3YOjVOMEYnPkFXhZpoDSfPXdwR+BZnSniJGgXU=;
-	b=EpxUuDlr1qhM0Bm6/9zBWOy55MImsqXzUnqf2RMkNV0LCtedzwVFvs0cOtkluaKENYVP
-	 SpBYWGDTp8MNSj7xSTzMjlEHwATxf6gYhzOzmJh9ED4fhbsRyqG/Ltwle5/yBFcoGq+r9
-	 rc+nPRkc47vfOzgx+cJRXZ28sgG4qtnSUfemNmSR77XKLiqHaeexRTAmavPopQg9xTaEr
-	 qsLk0mvo9oy0dEsHRXOyS3IQkVRuxPFtcP2gwfVAFLvZjXIKvIWq2rtP/l4XMurzlGoIf
-	 9bpC5GCLHqAqEsTI5i0CZM1T1WzB1wOatIMeizflpol1S4XyoV8fNaurpHQfOm/ZNuw==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=googlemail.com;
-	spf=pass smtp.mailfrom=googlemail.com;
-	dkim=pass header.d=googlemail.com header.i=@googlemail.com header.a=rsa-sha256 header.s=20260707 header.b=GMctS9Xh;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=74.125.224.44
-Received: from mail-yx1-f44.google.com (mail-yx1-f44.google.com [74.125.224.44])
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
+	 Date:Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding;
+	bh=kaRMUeDRl+naPmm3qUT+oBT7oJDOZeWGKzT1v2c6cow=;
+	b=Rv1cJAjha1D4Ow3nj7eH6n68S1LZzrCQAjrRguFM9ItK0i6v4wxVPT3ugQAs0lX40cKA
+	 XqWP4/OzzCRwJ/itAQhaGGBYlb7hhTBcr0PXil7xx5AoQpcKqbk8MAzw7Mdf38SF7mh2L
+	 JjOnSgO3PYgL2/VtFc7U6ohIgzqPuEWC8c9T4pZaVbQy5HRGWFMZ5aOZ/Tkk4KEuQUwOq
+	 pxQ/5Iq4leNHl89mUk6hZW94EO6vJVFNnaCBCsje8AZjT/UQBe1DdpnQAJq2onkAlRGMP
+	 GX+iPA7uWNY0bUzc510Ci0QUd1ipJ65XtdJX5kqRP1FZ1vpGnIZqcBwDDoavt6/+CwQ==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=0VlN2uOp;
+	arc=none smtp.remote-ip=209.85.216.43
+Received: from mail-pj1-f43.google.com (mail-pj1-f43.google.com [209.85.216.43])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02AD3606A31A
-	for <linux-mmc@vger.kernel.org>; Sat, 31 Oct 2026 21:17:39 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 02AD3606A31A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B423606A326
+	for <linux-mmc@vger.kernel.org>; Sun,  1 Nov 2026 06:37:28 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3B423606A326
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=googlemail.com header.i=@googlemail.com header.a=rsa-sha256 header.s=20260707 header.b=GMctS9Xh
-Received: by mail-yx1-f44.google.com with SMTP id 956f58d0204a3-675617e81f9so1597889d50.3
-        for <linux-mmc@vger.kernel.org>; Sat, 31 Oct 2026 14:17:39 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1793481459; cv=none;
-        d=google.com; s=arc-20260327;
-        b=lT7yuhMrDrCsY6EEGT7YzpvdyuyjlMNHCtFZf8LOWtAEk4INhGTGUX1ZxB5DuVNME/
-         vULvYb4s7XjHnxLp1n8zvHtIaXZEdJB8EaH55Bc60WOyDRI0AlRD/+l7rsvUSbIs+x73
-         AUsRydqK3BJYt986fZFYfbXI9wgiB9aFbNywcaStvKzkm0ASii1ZgR6qyfW56z+n4jz/
-         sNHB6xqX4ucg7jlHwkybaNmwQpjwX2zcTs5+O+BDBXF5FbVp8xeF8tfcv5gr4rf/seMK
-         aHQLlPx4LMbur0fiGlNMDYp4u1lr3D+PtsYU7rxmawrmCM34VUk4liB73zJZuNxPfk4U
-         Bt9Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=cXCPp3YOjVOMEYnPkFXhZpoDSfPXdwR+BZnSniJGgXU=;
-        fh=3dIu3iym8dVQkkCJ1804/Ctvj/22RJyeeknU2nLBSHo=;
-        b=Ruc9olgVqWQzRs20msPXpS0g5suKbNy5lsM6KNGToiUa/DTONvX4gpveuMEvQlnMbE
-         C6qzVwg64i43+vkZLcIIXOqy6PzxKY9FVXFds5cOOtCW/9SsyW7IRrIFT3ui+Xf9otlP
-         dlH7e9oxtweGeW2FtVd0tFwltGcvkKAreCYSvOiKe0C+SdQM7GVvz9Ky8muwoCrWtaLy
-         i+zhFejsi4H7kByelOOx1Uhe2E8oVtcDkS4YAynilUCruSkEfhyErj9lJgoRCUu6Rcbl
-         5cRiOdeg+38CPOAy7qw8FVRG1d0+sjtIi9emEudYcdUlrlsGBqgYqbPCR2Y86xLdHxEM
-         FrPA==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=0VlN2uOp
+Received: by mail-pj1-f43.google.com with SMTP id 98e67ed59e1d1-3ac78f4c10bso889396a91.1
+        for <linux-mmc@vger.kernel.org>; Sat, 31 Oct 2026 23:37:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20260707; t=1793481459; x=1794086259; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=cXCPp3YOjVOMEYnPkFXhZpoDSfPXdwR+BZnSniJGgXU=;
-        b=GMctS9XhyvIuaGAhiGhTuzsHLGM4BRlCyXy4/1QS8nYiZWiCLMUIFgfMR+R0rN1xJS
-         nAg85Hh0cQko6Dn5rR4MwhrBJulQYEobDq6H2lJMCKjWGPQRo4el3NxlsWtGuPDJjF8G
-         LQNQhnRReFbjQ2W57Meswjet/fxq2pn8RatEpTsdhHlRP5w/QJAe1OkNpnJsQS4MUb5x
-         /YP4GhxKH/itsEHM4V86UdhbG2CxeMB9+lN6Vwk8BtGWFc/3qx6nzL2DByMHq2iZ0m82
-         5Z06TE6fd6JL+FHbQf0qh9kMXqkDOZGOuUmlpE7CPIfqpL1zH9VfcNs+91JVgyWL6q2X
-         PAQA==
+        d=gmail.com; s=20260707; t=1793515047; x=1794119847; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=kaRMUeDRl+naPmm3qUT+oBT7oJDOZeWGKzT1v2c6cow=;
+        b=0VlN2uOpa2rBfHqz+P34UFeI4XmM/oV6fVJXakdvt5wrQMb1FoS5ag3HPzYt85TOH1
+         xa6XLyiYexXf+CY0aD+FHXC0HjFxalWv0GNXi8z8taU/5lMat5legdx73GyDwsIa+Wwo
+         FG00l+6/zUs0jtBM+nZTM5E9sXDhFmSCCyiIGoMmXxp5ge5Y3T5NAVBs54cjUpiuGSLN
+         /W24FxFL7gLyTt5rkjN7e69qdPGzGQe9eTSDW7V3p0qGRYB3Urd3L/wtCdMm51jB8UNO
+         w3mruK/a7WrXjU6mIzmjM0EO1DnVVHiyI/VyO3TVlvqWixy4dfvia1QSdhs9MYcJSrM3
+         NAsw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793481459; x=1794086259;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=cXCPp3YOjVOMEYnPkFXhZpoDSfPXdwR+BZnSniJGgXU=;
-        b=vrv9korQSn+AHdbeVI1yuDLqBYgadh0KudmxP2CrxJNHTc4M5/oZJRd8dhrXpl6B9Z
-         0FTyY51zm1sZBD41fk2t1gYFTRCyLqR5SbRXqE6GKox2lga/J1eU8c3SWKDwfrMW4VXE
-         merp4N8X2qHxe9muGOt+UdZnpVV3ngkEQzY4kYQv0fFac9oY1+15q7UjzuWoN4/f/bmt
-         9uxtzuVTTyZHlwuMqFB1wfVrp/T2hD/FWi9BEhsJdkjQNCz/77AuQELb8bKsa89wpLKe
-         SJqUgucpHRCuU4yMXZdtepMTNqLHkWroEwJDjktLlGOS0kjKmMvp1/a2h6aYkWchZf07
-         wsew==
-X-Gm-Message-State: APuU4Z+cDjF9BbIlzNXNuZlyYY6hljuHddGjam0WRWXFXXQFTx6Z1z5m
-	RGP0BIjQP+rUyMyq9jw/XxvIbD0kpYWVDtHNSBja6g2JQEld24McU9IKi0Bl9BD80mThgrYw23A
-	MS2QHpEtKPsaqw8AChH8Gh9gtW3nJMeE=
-X-Gm-Gg: AYBFou1ARXIkPhR4Vfd2gLAaSLottZAkiE8drJ2P57IDypsY8kqO3ZlLBIDWhc50yyp
-	/AmfDE7Ak5t5A1cfwlWt6oJWI52BZERrLP+YikyQCUC44lScpqG7S/8HL8nfRO47ueCiSAI5EHq
-	UbNleI/HABTCEcq4GzuoeAw958WwaqwXJuI6hrgd5JUG+HigkvDUYMusH/8PiID70Hi0dtmKhO0
-	Tydgx06u+Ut9Sasn43yWxfqJ7MbK/4sNeVw9aJNiAH39HkSLLrN3Yk42mv0N1fYrhgQlQHdpNmp
-	9wJZsEPqcBym4jw96tcxVIeAX3VoT9VoY6Z7WQQoDD+eVrxbYyUbneP9JuYMscrAwh5PAavJb6j
-	kKRvIz+sU032cvfUschOiOvVAcFeR/nsWVHh01xVjjHhHQ4aaVYgka1d2Xsp+VZTGudhiA1ssmW
-	i/Dw30u+cQC4yyjOs=
-X-Received: by 2002:a05:690e:dcb:b0:679:ad95:8ef8 with SMTP id
- 956f58d0204a3-67ba4f44351mr3951527d50.62.1793481458984; Sat, 31 Oct 2026
- 14:17:38 -0700 (PDT)
+        d=1e100.net; s=20260707; t=1793515047; x=1794119847;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=kaRMUeDRl+naPmm3qUT+oBT7oJDOZeWGKzT1v2c6cow=;
+        b=L7DarIbz+1TlArnwGOh+coaiRpWMgQoFOSmPJBYxHW2oDlXvpjq0gOrNCWzPVTcXRm
+         Ot7t5TPH+05ng75IrXVVIq0mDeJwSj3bnA8ngmdimN4NeWM2cLG4Z6hXovYIOR/VS+OX
+         xRBc/ENK2IKvvDPwiE5vjgw3mRQUTvQ1mGWPYEQlyNWSiq3lKxuQBlbettVVBnc96UIW
+         Q3WbbIq1gh9ZNuf0GCBxWwR4vBlInTvA1og65hYwwA3cu8a0FQD2dYId7DWyFGaEh0j8
+         F0nAxrtH7gCtW0toPJ91nym3PZRbn2o+KxO/RK3U8Jw3lS577OSWW9mdud2LZ367vN0r
+         jNIg==
+X-Gm-Message-State: APuU4Z/RoHhU1Rm2otgk9k/CGam+tQNokELkKbzeSEw8Z5n4XDG+OcRC
+	8VAp2FssbqxtcOTt9Z4fL6K/sR/is48d153p+/TVvwBhnSnQ2oTZYOP2
+X-Gm-Gg: AYBFou05J4L70mX7UPYK4lCcNIRHrassitqVXJz1MKPCSY2IcyeoRMwgRMEJKKE6TXY
+	UilQvPrsqMIWA4DSxmRxPYfXspaSRAWE3u2/eo+eySv6VKz47kn0tnJ4rM2lim5sK5fQ2+jd4U7
+	bYxr9SxXJbmMF/KpCWXnmzb6v3cJcegsZK0h/Gbv5FTb88Ds3TpQUEmG1I9/P8JXltvGxWbCzmE
+	yE5yzDFUV2dVHkqjhmZ25mSUUBb4WFZngoMwmAApXBl6EcxJhYlKBle4lsNXDMlrZU836ZbDtwZ
+	jFg91wZOo/LmCI/VFOV+h5D/w7HisVQTAtnNBDYN7B0whnqC11bplf2LqW68gLSFqcYbKg4yceW
+	kdlj+V3IawGf76cd7NlRtSZGcTuhoM1zIy11NmUeGBv1rX1iFAK5X2CjTOI5hvDHJT9gjz1K5s9
+	NLBMrppYit06Vu8wTA+Wa0DIdxuh1HaMH3blKmMUAKRcfe+8TKWG1XFrF7NUWcrgH+Wp9Oh+eFh
+	fvcYLngZGOTh7+i2DrhPSQNpU0fV30CUPOPYTlMYUtNa2+cCzIwdyYUk77sleS6Hl0wA5mq3vc6
+	gVbL+BMhPWHa3nSPEQAXgEmgn0vigRP1aAV2EHE+Kiuasg8=
+X-Received: by 2002:a17:90b:268a:b0:3ac:7c52:faeb with SMTP id 98e67ed59e1d1-3ae89769d66mr5583408a91.41.1793515047409;
+        Sat, 31 Oct 2026 23:37:27 -0700 (PDT)
+Received: from ubuntu24.vpn.host.chaitin.net ([124.77.157.93])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3ae85f3e087sm5465907a91.1.2026.10.31.23.37.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 31 Oct 2026 23:37:27 -0700 (PDT)
+From: BeaCox <0xbeac@gmail.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Ulf Hansson <ulfh@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	stable@vger.kernel.org
+Subject: [RFC PATCH] mmc: dw_mmc: disable bh_work and stop timers on remove
+Date: Sun,  1 Nov 2026 14:37:19 +0800
+Message-ID: <20261101063719.88570-1-0xbeac@gmail.com>
+X-Mailer: git-send-email 2.43.0
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -104,73 +95,57 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261031200925.3364-1-yuanzhenpeng210@gmail.com>
-In-Reply-To: <20261031200925.3364-1-yuanzhenpeng210@gmail.com>
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date: Sat, 31 Oct 2026 22:17:28 +0100
-X-Gm-Features: AclHuK9aT_AtsyMcO-RHgeZfhZoWmnaHOU2QYfBUHDRz-4_ywAKOHyMlNGOtG-I
-Message-ID: <CAFBinCBo0C=KABcg5ueDTRSJhF9vmWnPwYHbaMGTOYppOsabwA@mail.gmail.com>
-Subject: Re: [RFC PATCH] mmc: meson-mx-sdhc: add DMA bounce buffer support
-To: ZHENPENG YUAN <yuanzhenpeng210@gmail.com>
-Cc: linux-mmc@vger.kernel.org, ulfh@kernel.org, neil.armstrong@linaro.org, 
-	khilman@baylibre.com, jbrunet@baylibre.com, linux-amlogic@lists.infradead.org, 
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-Hi,
+dw_mci_remove() does not drain bh_work before the driver core releases
+the devm-managed host. The interrupt handler, watchdog, fault-injection
+timer and DMA completion path can queue that work, whose callback
+accesses the host and MMC request state.
 
-Thank you for this patch!
+After removing the MMC host and masking controller interrupts, drain
+the interrupt handler and disable bh_work synchronously. Disabling the
+work also rejects later queue attempts, unlike cancellation alone.
+Stop both timers after the work callback has finished so that it cannot
+rearm a timer after teardown has cancelled it.
 
-On Sat, Oct 31, 2026 at 9:09=E2=80=AFPM ZHENPENG YUAN <yuanzhenpeng210@gmai=
-l.com> wrote:
->
-> The Meson MX SDHC controller uses a single DMA address for each
-> transfer. Since the driver leaves max_segs at the MMC core default
-> of 1, large I/O requests are split into single-segment requests,
-> typically 4 KiB each.
->
-> On an Amlogic S805, this limits eMMC sequential read throughput
-> to approximately 15 MiB/s despite using HS200 timing.
->
-> Add a 128 KiB DMA bounce buffer for multi-segment requests and
-FWIW, while reviewing your patch I found that Amlogic actually uses a
-512KiB bounce buffer in their downstream driver: [0]
+The analysis, patch and validation were assisted by OpenAI Codex.
 
-> advertise up to 64 scatterlist segments. Single-segment requests
-> continue to use direct DMA. If buffer allocation fails, fall back
-> to the original single-segment limit.
->
-> Testing on a Xunlei OneCloud (Meson8b, Samsung 8GME4R eMMC)
-> running Linux 7.3.1:
->
->   Block size       Before       After
->   4 KiB            14.47        14.69 MiB/s
->   64 KiB           15.06        63.21 MiB/s
->   128 KiB          15.08        75.13 MiB/s
->   1 MiB            15.07        75.93 MiB/s
->
-> For a 128 MiB sequential read, block requests decreased from
-> 32768 to 1024.
-That's a nice performance improvement!
+Fixes: 921c87ba3893 ("mmc: Convert from tasklet to BH workqueue")
+Cc: stable@vger.kernel.org
+Signed-off-by: BeaCox <0xbeac@gmail.com>
+---
+Testing: x86_64 object build with gcc 13.3 and W=1, with
+CONFIG_FAULT_INJECTION enabled and disabled. A userspace model of the
+extracted remove function checks pending work and modeled late IRQ/timer
+queue attempts. It is an ordering check, not a kernel reproducer.
 
-> Direct I/O SHA256 readback verification and fio CRC32C write
-> verification passed. No MMC errors were observed.
->
-> Assisted-by: LLM
-> Signed-off-by: ZHENPENG YUAN <yuanzhenpeng210@gmail.com>
-Could you please compare your patch to simply setting mmc->caps2 |=3D
-MMC_CAP2_MERGE_CAPABLE; ?
-From what I understand this will allow physically contiguous SG
-entries to be merged by mmc core.
+No matching hardware, kernel crash trace or demonstrated unprivileged
+trigger is available. Please review the MMC shutdown assumptions and
+external DMA callback lifetime. This is an RFC for a teardown fix; no
+privilege-escalation or CVE eligibility claim is made.
 
-Ulf: the code here looks similar to the sdhci.c implementation. I'm
-wondering if there were any plans to somehow move this to MMC core.
+ drivers/mmc/host/dw_mmc.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index ff0b25d287..cc5e163ee7 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3406,6 +3406,12 @@ void dw_mci_remove(struct dw_mci *host)
+ 	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+ 	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
+ 
++	synchronize_irq(host->irq);
++	/* Stop the work before cancelling timers that it can rearm. */
++	disable_work_sync(&host->bh_work);
++	dw_mci_stop_fault_timer(host);
++	hrtimer_cancel(&host->wd_timer);
++
+ 	/* disable clock to CIU */
+ 	mci_writel(host, CLKENA, 0);
+ 	mci_writel(host, CLKSRC, 0);
 
-Best regards,
-Martin
+base-commit: cbbddb6b08cc9900a87cccaa9b22bbe06aa4f50a
+-- 
+2.43.0
 
-
-[0] https://github.com/endlessm/linux-meson/blob/d6e13c220931110fe676ede6da=
-69fc61a7cb04b6/arch/arm/mach-meson8/include/mach/sd.h#L627
