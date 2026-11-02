@@ -1,44 +1,54 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=103.129.254.86
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=95.215.58.99
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793586897;
-	b=oZlYOJuz0eRpDd3jUps3FIm0PJrIe6yxmESPe6ljVaFNuz4fr/Ivfk0c8jQIS3kgOpWi
-	 0o1OqPblXG3HkE5ZQHqdlZr0uVDzehKQLEz1SxbCbRTS6GgTEsC8gEp6OHAsoSSDVm+mz
-	 /OnPlJB7gichp37TaKffzAkTsg6JwQ6wjxEnAtMFplG7Mo0aCHYuB0/aaDU5yWFA52yku
-	 O+9KNI1GxGBYBqkLtfpAlgNtZxOJ3ggcLNe84Yu3SPGrxcOR+gUXpTtunRC7Vl8EB6D7X
-	 dq/Bar0y8l3kuonNu3Zsjic6O3JO8RvihsGoTfHhrSdFyCG02k22LhOyULRch1oXduA==
+	t=1793602372;
+	b=Qn4eAQquuCJqChDzntSIL52lCZ95/MBR6DJTUW0PZ5rvmJ2M7IT0NQ4mCz0LPA4NRvcq
+	 dItteJrbXuV9uTcMcpD66p6DOYsJQDxUzGJMfQ3K/1j2vHqlyd4wAD+qR6mCQt0XfsBBE
+	 jSI5Ltpsy2Lv2vTN21f0HUl+NyybRfqkSW9bbkOS9JS9gO4mmSksXymrPM7SZY9lzIrGH
+	 lVIs2CSPNLMPPiinFP08O+sIIGwkM1q0rQ356zKYqxd1Y7Z40ia6cUEJxtjnl7ZwRfGEU
+	 7T7xjxfYGL4DcaNZbVq5d8oTitVEr2tC17lwjgkeFQzPTHvmEz90j0bhb+3AcaX4N/w==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793586897;
-	h=DMARC-Filter:Received:Message-ID:Date:MIME-Version:User-Agent:Cc:
-	 Subject:To:References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:X-HM-Tid:X-HM-MType:X-HM-Spam-Status:
-	 DKIM-Signature;
-	bh=Ozi2LOrnfMzfr2XgM6WUa40W6bNP+UNS1xcJtLzM+XY=;
-	b=XTihuserL1eQyFRE5JbVBn5tM0dImdGud6ZTB6ANxWfGcGgyxQ11RU2CpRUNgb07hP8t
-	 /pKaicKgHO4yDbia64M1CjiQJ0tYCnHZxhYe/o5WoIMmdXTq/dmLPJOBfDdI2S8EcQfVh
-	 1Te1Qbb3vZ8Db5vUUT3RjXISk9hW5OV95CLuMAUK103CKGLGyzy1T11s3kcSeyxit/ybH
-	 xtI6Ylb7CylFRIu+hQFPZ1upXMAq09WTGp5lVEmpspGxChy5tJOK7n1lpAEAvdKrWQPFI
-	 LbF1L2QdGdEeoRXRjvv8DbkslmOL7qm7cKH3HfMNybdruhxBPgEbNFekpQbEJU5wj8w==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793602372;
+	h=DMARC-Filter:X-Envelope-To:DKIM-Signature:X-Envelope-To:Received:
+	 X-Mizu-Trace-ID:X-Migadu-Flow:Message-ID:Date:MIME-Version:User-Agent:
+	 Cc:Subject:To:References:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding;
+	bh=bMXZ0dgVH4WoOSFJpLmJHiq7X2F+yW/TzcS8zHyoUHU=;
+	b=S/V4yeqKo/Ll4eBIZYHiDp4WgcBOXhh3B8yRNT+Wz9wNuvdwp+5WlUnT9Wau8sgLvPz1
+	 p1WD4N9fRQgdCWy1LAEwbvCgQDHOPg+py+Sqkg3DP6ZklTN3XL+0/MlDCTSfdiLf6VuIa
+	 fBVkSWaq/HsPi7+g7flrOOoHDefzLtOI7Fzs+bU5Vgwcnx9fVgfffHpJe+8vOo8bpp2Qd
+	 B1otYwwkN3R5tMxsa+VTxedawpnrxsK7OScDRC463Zf/jEUVaFXzG4nWlZxwXS4Fi8jV4
+	 3F9YvtpODDHmPUpdduhKOiUXnglHXuK+zpVj77UqdTFgcPCPysMP0KTesNjiICkfV4A==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=rock-chips.com;
-	spf=pass smtp.mailfrom=rock-chips.com;
-	dkim=pass header.d=rock-chips.com header.i=@rock-chips.com header.a=rsa-sha256 header.s=default header.b=iYBDJmdI;
-	arc=none smtp.remote-ip=103.129.254.86
-Received: from mail-m25486.xmail.ntesmail.com (mail-m25486.xmail.ntesmail.com [103.129.254.86])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	dmarc=pass header.from=linux.dev;
+	spf=pass smtp.mailfrom=linux.dev;
+	dkim=pass header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=DVcZvFMg;
+	arc=none smtp.remote-ip=95.215.58.99
+Received: from mta1.migadu.com (out-99.mta1.migadu.com [95.215.58.99])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3679E606A324;
-	Mon,  2 Nov 2026 02:34:54 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3679E606A324
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2810B606A326
+	for <linux-mmc@vger.kernel.org>; Mon,  2 Nov 2026 06:52:49 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2810B606A326
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=rock-chips.com header.i=@rock-chips.com header.a=rsa-sha256 header.s=default header.b=iYBDJmdI
-Received: from [172.16.12.48] (unknown [61.154.14.86])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 531ca0e2e;
-	Mon, 2 Nov 2026 10:34:46 +0800 (GMT+08:00)
-Message-ID: <245f5261-6795-430f-820c-015a6f4eaa6c@rock-chips.com>
-Date: Mon, 2 Nov 2026 10:34:45 +0800
+	dkim=pass (1024-bit key, unprotected) header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=DVcZvFMg
+X-Envelope-To: linux-mmc@vger.kernel.org
+DKIM-Signature: a=rsa-sha256; bh=5hCLGLGXWdd30qKe7976AVeC000uZPY7d4C8iQIIm24=;
+ c=simple/simple; d=linux.dev;
+ h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
+ t=1793602368; v=1; x=1794207168;
+ b=DVcZvFMgTh3vVE6FmYOznLQU4BXxwXV5ZoPkXInacPSY2LC+3bHKV1e2efcGLcBZp+G9yu45
+ VpYH3dsMZrGR8MJz+Gb/9Q3qrKjZElY9AEMdkHOPAGteOEeINKHmvOBSsPADug43zRH7YYwBAWL
+ 6m3IBZHpDtB3TsB+8j8NOH0o=
+X-Envelope-To: linux-mmc@vger.kernel.org
+Received: by smtp.migadu.com with ESMTPS id 11fb00a865b394d4;
+	Mon, 02 Nov 2026 06:52:48 +0000
+X-Mizu-Trace-ID: 11fb00a865b394d4
+X-Migadu-Flow: FLOW_OUT
+Message-ID: <98fae1e9-58e8-4564-b4f2-18e7a77b2abb@linux.dev>
+Date: Mon, 2 Nov 2026 14:52:38 +0800
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -49,72 +59,93 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Subject: Re: [RFC PATCH v2 1/2] mmc: dw_mmc: drain bh_work on host removal
-To: BeaCox <0xbeac@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>,
+Cc: shawn.lin@linux.dev, Ulf Hansson <ulf.hansson@oss.qualcomm.com>,
+ Adrian Hunter <adrian.hunter@intel.com>,
+ Florian Fainelli <florian.fainelli@broadcom.com>,
+ Wolfram Sang <wsa+renesas@sang-engineering.com>,
+ Oleksij Rempel <o.rempel@pengutronix.de>, linux-kernel@vger.kernel.org,
+ devicetree@vger.kernel.org, Rob Herring <robh@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+Subject: Re: [PATCH v11 4/6] mmc: core: Split sdio_set_host_pm_flags()
+To: Kamal Dasu <kamal.dasu@broadcom.com>, linux-mmc@vger.kernel.org,
  Ulf Hansson <ulfh@kernel.org>
-References: <20261101063719.88570-1-0xbeac@gmail.com>
- <20261102022924.51343-1-0xbeac@gmail.com>
- <20261102022924.51343-2-0xbeac@gmail.com>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <20261102022924.51343-2-0xbeac@gmail.com>
+References: <20261030181034.3811225-1-kamal.dasu@broadcom.com>
+ <20261030181034.3811225-5-kamal.dasu@broadcom.com>
+From: Shawn Lin <shawn.lin@linux.dev>
+In-Reply-To: <20261030181034.3811225-5-kamal.dasu@broadcom.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0aa19a1bf77b03a4kunmbb2aee643af948
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVlCGktKVhlDTBkfHh9CSx1PS1YVFA
-	kWGhdVEwETFhoSFyQUDg9ZV1kYEgtZQVlNSlVKTk9VSk9VQ01ZV1kWGg8SFR0UWUFZT0tIVUpLSU
-	9PT0hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=iYBDJmdIBQzR4bXq7jox4SoklcoR0hlj6GL3jYBWh1wk+oRLlpmsleSdoBOR7T9XXGh1u7fOBd13YOGPJyuDws9jYHywI8crdHH4OauTBIfTp2voiKdxIcymXFUpn3CkjYD4+EIdfgfmIrGg8sE8PdxfDL5LmEF/vPQLmPnR0Jo=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=Ozi2LOrnfMzfr2XgM6WUa40W6bNP+UNS1xcJtLzM+XY=;
-	h=date:mime-version:subject:message-id:from;
 
-在 2026/11/02 星期一 10:29, BeaCox 写道:
-> dw_mci_remove() does not drain bh_work before the driver core releases
-> the devm-managed host.  The interrupt handler, the fault-injection timer
-> and the DMA completion path can queue that work, and its callback
-> accesses the host and MMC request state.  A work item that is still
-> pending or running after remove returns dereferences freed memory.
+
+在 2026/10/31 星期六 2:10, Kamal Dasu 写道:
+> From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
 > 
-> This is not a regression from the tasklet-to-BH-workqueue conversion.
-> The tasklet that bh_work replaced was never killed in dw_mci_remove()
-> either, going back to the original driver.  Commit 921c87ba3893
-> ("mmc: Convert from tasklet to BH workqueue") only replaced
-> tasklet_schedule() with queue_work().
-> 
-> After removing the MMC host and masking controller interrupts, drain
-> the interrupt handler and disable the work synchronously.  Disabling
-> the work also rejects later queue attempts, unlike cancellation alone.
-> Stop the fault-injection timer after the work callback has finished so
-> that it cannot rearm the timer after teardown has cancelled it.
+> To prepare for a subsequent change, let's split up sdio_set_host_pm_flags()
+> allowing the second part of it to be used as an internal function for the
+> core.
 > 
 
 Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-> Fixes: f95f3850f7a9 ("mmc: dw_mmc: Add Synopsys DesignWare mmc host driver")
-> Cc: stable@vger.kernel.org # 6.11+
-> Signed-off-by: BeaCox <0xbeac@gmail.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
 > ---
->   drivers/mmc/host/dw_mmc.c | 5 +++++
->   1 file changed, 5 insertions(+)
+>   drivers/mmc/core/core.c    | 10 ++++++++++
+>   drivers/mmc/core/core.h    |  1 +
+>   drivers/mmc/core/sdio_io.c |  7 +------
+>   3 files changed, 12 insertions(+), 6 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index ff0b25d..5b47643 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -3406,6 +3406,11 @@ void dw_mci_remove(struct dw_mci *host)
->   	mci_writel(host, RINTSTS, 0xFFFFFFFF);
->   	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 677e445dc48c..6cbb5ee6200c 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1422,6 +1422,16 @@ int mmc_handle_undervoltage(struct mmc_host *host)
+>   	return host->bus_ops->handle_undervoltage(host);
+>   }
 >   
-> +	synchronize_irq(host->irq);
-> +	/* Stop the work before the timer that it can rearm. */
-> +	disable_work_sync(&host->bh_work);
-> +	dw_mci_stop_fault_timer(host);
+> +int mmc_set_host_pm_flags(struct mmc_host *host, mmc_pm_flag_t flags)
+> +{
+> +	if (flags & ~host->pm_caps)
+> +		return -EINVAL;
 > +
->   	/* disable clock to CIU */
->   	mci_writel(host, CLKENA, 0);
->   	mci_writel(host, CLKSRC, 0);
+> +	/* function suspend methods are serialized, hence no lock needed */
+> +	host->pm_flags |= flags;
+> +	return 0;
+> +}
+> +
+>   /*
+>    * Assign a mmc bus handler to a host. Only one bus handler may control a
+>    * host at any given time.
+> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+> index 9be2875608ce..d3a2ff00b18f 100644
+> --- a/drivers/mmc/core/core.h
+> +++ b/drivers/mmc/core/core.h
+> @@ -64,6 +64,7 @@ int mmc_handle_undervoltage(struct mmc_host *host);
+>   void mmc_regulator_register_undervoltage_notifier(struct mmc_host *host);
+>   void mmc_regulator_unregister_undervoltage_notifier(struct mmc_host *host);
+>   void mmc_undervoltage_workfn(struct work_struct *work);
+> +int mmc_set_host_pm_flags(struct mmc_host *host, mmc_pm_flag_t flags);
+>   
+>   static inline void mmc_delay(unsigned int ms)
+>   {
+> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+> index 12716ec0e35d..99f857514b63 100644
+> --- a/drivers/mmc/core/sdio_io.c
+> +++ b/drivers/mmc/core/sdio_io.c
+> @@ -726,12 +726,7 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
+>   
+>   	host = func->card->host;
+>   
+> -	if (flags & ~host->pm_caps)
+> -		return -EINVAL;
+> -
+> -	/* function suspend methods are serialized, hence no lock needed */
+> -	host->pm_flags |= flags;
+> -	return 0;
+> +	return mmc_set_host_pm_flags(host, flags);
+>   }
+>   EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
+>   
 
