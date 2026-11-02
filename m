@@ -1,95 +1,135 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.53
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793639794;
-	b=H5jQi173oE//t0oOvqmy6/FSRdaPZN1rCTA05uMhX6+/h2FdxSot2rr62peLZQcPC4o+
-	 kkKaMjGcuZGPMWPXJwmVd+Z20wPY5hACAOkxIEnvbyJdvwQhItQdZmoTf5CNTe5/txXss
-	 TTxWQBY0lG6jue2elFEpSCdSmfNhgM1YfhclLEgD/HlGrVVes3PDLVuKfKWVUAYvflLRE
-	 PLiv8mVcD3xMH63XirYl843Gyc1RRcQJg2P3jXh2AqdnFNcXYjU2DHVkRLKbmMKNB1jWs
-	 1xr7RRkkBzULdNg4JEFVBySr5c6Ykv9QlB13agiONlUqG0NTKZsj2eKQT1pPe1avz5w==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793639794;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
-	 MIME-Version:Content-Transfer-Encoding;
-	bh=zgqD89lKzgLBL1PbvkWlYvj9CPZh0ai5gQikgbqBdYY=;
-	b=DQDyYgpWX5x3IeNTpFsFVSYngnaRC1XXaLrmysM7s2UMCjm14r1xzXJtksdgjIxMey0k
-	 U+EoEti/wW9HywzvPQl8MYVzFxEv0q1w89wRe2h3Vyy2tw50ssEJ4h1eJIfzYUfuwzk6l
-	 9HgNhmsHJNumA9/7nnBNafzXCOl+R9y3DRrKl0P30zFXVI30WlTBGWt9CDwQ2eb2DJsfb
-	 i4nx7bh1PdAXoZ3PceF/BCoYv1wfdqdtNVa/AC+I8p4/xSEBnbs5Q6sIylmU7q+qWPEp+
-	 FJVJmzuyI7GvUnSktHQkVO+dmwhgRu8aHTZ/rUgU4Hj5qiQRNMZ53krw4jYf6zwZstg==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=QqudYOnO;
-	arc=none smtp.remote-ip=209.85.221.53
-Received: from mail-wr1-f53.google.com (mail-wr1-f53.google.com [209.85.221.53])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.70.69
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1793640099;
+	b=VEORZpxaOE7IG6SCZy5tLKxDxtdtI3/hZHXf0A97gTJ7gv416oyAj/g4FUGQFOoUXVfF
+	 sejths7n4mqkDmCBQM7RvWQK9KiPa7+XSbePFAgWCw3R3uPBx6JV2dbiD7hrlTVjaugP1
+	 qAjLoTO6ghk1UNMcJ0mUs7o/U+05f3AJn/zDWXrgxy1MvDHKRPZZht9PnaYkzJeZncdM7
+	 fj16/+0st36ztCgdrajrF/iXf562zDrPAOb2UwR1ig5mEyzlr+wuAOgruDGwviY8kxfy5
+	 q0yoTXgsIg8HakEZ6Osjs0NZ1HuODdz1js9yqlGPPfOv7uqfGNztLq9/2GkNoKjKu4Q==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793640099;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:From:To:Cc:Subject:
+	 Date:Message-ID:X-Mailer:Content-Transfer-Encoding:Content-Type:
+	 X-ClientProxiedBy:MIME-Version:X-MS-PublicTrafficType:
+	 X-MS-TrafficTypeDiagnostic:X-MS-Office365-Filtering-Correlation-Id:
+	 X-MS-Exchange-SenderADCheck:X-MS-Exchange-AntiSpam-Relay:
+	 X-Microsoft-Antispam:X-Microsoft-Antispam-Message-Info:
+	 X-Forefront-Antispam-Report:
+	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
+	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
+	 X-MS-Exchange-CrossTenant-Network-Message-Id:
+	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
+	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
+	 X-MS-Exchange-CrossTenant-FromEntityHeader:
+	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
+	 X-MS-Exchange-CrossTenant-UserPrincipalName:
+	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
+	bh=bPO5rapN4v6Y8cI5tKdEKxZsiCrSBEDoAFlejyIoEbw=;
+	b=UtICoI2ttHObQGZnVhl1XnAMLy7cUywN43GOKFnIo6NfscVcSBV2HE5igzlq6iMmVo6/
+	 VGdMU/EfaNdNyQuNLztd84uXmkiVX1EZS2QUdWvfRxLbEZOJ/JOz5Jnq6/lCOp0CHqsz9
+	 5CLHfyWYa3ZlRfOHq3q9qXhWCG8x4ED86V1cGZxjrIKwm+6uIG/ii+6VNunhiatG1oFEm
+	 bPf6H2zJwvG/n4ajtaj73EhLuQXx738ZO7Raz7KDDfjv8CpnInplfH+6o6TnPRowFy9wN
+	 WxW5DEc/VUIHJ4z5T1CoZTQ7dqF/l0U80tl5UNJSnqiUSv3tpkfBhne+Z5Rhea+Azmg==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=oss.nxp.com;
+	spf=pass smtp.mailfrom=oss.nxp.com;
+	dkim=pass header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.a=rsa-sha256 header.s=selector1-NXP1-onmicrosoft-com header.b=FOj+RuJv;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.70.69
+Received: from AS8PR04CU009.outbound.protection.outlook.com (mail-westeuropeazon11011069.outbound.protection.outlook.com [52.101.70.69])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 896BB6072ED0
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Nov 2026 17:16:33 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 896BB6072ED0
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D0E8606B1D0;
+	Mon,  2 Nov 2026 17:21:38 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5D0E8606B1D0
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=QqudYOnO
-Received: by mail-wr1-f53.google.com with SMTP id ffacd0b85a97d-48afbd2c386so1926137f8f.3
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Nov 2026 09:16:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1793639792; x=1794244592; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=zgqD89lKzgLBL1PbvkWlYvj9CPZh0ai5gQikgbqBdYY=;
-        b=QqudYOnOCpcbBJnhdewmbg8YNVY0Dz9Y18MavUWzV6bqGuoNjJx0lthzn9j6GEBpG0
-         R+ttT3nCFqAMfgrAAdRcVftG7SYrWjLX4P3BEk/NuV2aWcADTKxh6uLaDeEYdz4ELNmi
-         Nf9xPbjHA7cNmUI2IKP2qGXFH6333q4lKNKnsRdGTkL08mPt0/IYd3mIXDh/NqAj+SzE
-         d4Boidixiv9lQV2fSeEvQdVKsc1aSKTzKx8heg9QX3zmBAvJu0mlXwF36njrxyy0AZvm
-         qJsR1bV1jm0OuC46/l57zjYiooTxbRcDveH0eu5gnsB5nHTc5V9xAN1UAugUhjgmSOsR
-         ctYQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793639792; x=1794244592;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=zgqD89lKzgLBL1PbvkWlYvj9CPZh0ai5gQikgbqBdYY=;
-        b=FVBmxuKB2gu3HmrVFVFahXKW+4mMkO8S6mB9N6AmGLsqfTxtHPZPiZy4/y3LmUdJRz
-         EYT21yVeapeAz97G1wu+0mXr5hE19c2RiixzUdOFWyGAstlwzXALNDRdGLBXKM2+pwqt
-         BW9gnE54B1hGJxhkm96WjgbNtmVudD8ZqGEzF3/rIxipo9YZxCJVKSFpFydQz4YYN8oP
-         NX1A4gbiNa39Fh2JczvFcw2l2/5EUR4s7r8CEfb+89d4iAur7ZD1Y36TUysxDogiUhbr
-         lUZCSXiQXh/UX5PmE5KOvd9NtZaM5Nt00Mt9JqbU2BrsaF0geFnPJ6D/UHoMNRmCUPDx
-         cnvg==
-X-Forwarded-Encrypted: i=1; AKwUvBwfO2frS/zHa8RyNXx5kCdYTh+3MQo9OS1OpX8NgcD0YuyqPGerJ9QLuEybh38E4UzMt8UCCcDFX6U=@vger.kernel.org
-X-Gm-Message-State: APuU4Z8sDwmq8KNmjM1CkWdW/jckZdrhr1NWASObfgCz97kNO04SAf1P
-	kDKMonCZjQEIkWQo5yzOhhczD8Y4hBavhixrzWWbhLZwRcO16rUnSerH
-X-Gm-Gg: AYBFou26mst6rEPDih8LtjLO5+sV1hG/qUx+jPC24TSKGeIPhJm+hXDklrPFjqgp7ON
-	viddTbZJ2+/L4rKqW07h2LbOUTh6FCisOT3x5ZLx59/UITo3dLxSyvSxF9SnsbvCT4/XucnyFzN
-	u5US24WPqgYydly4H3DzXclhaKetP9s/1VuRQFv7WEeD7EOdrJljhPBLRrBo+0Y0fHKznvzhy6R
-	U7UxKesIPRNGrpxTm7N4pg3BbDOZFMZf+Y9KoDlhuXOJaqGOlLWjut7YOajwvPEMzaYAEtbUw3Z
-	jdQFYzbubXX6NlPuCXbwvmVipf4vgEfjq0k0poondqfgqxhq8EGMsoIvLWXXAMDThFuah153caw
-	7ZF/U77Sbz5bQTWSP+dqxIg0pDhfYxLMuLsSSX6vtD6dGO6PWapZVLH1oBNT/oeV3Wwxl7CuSzj
-	9vxIjBeavDr3SJvik6oEbGRCK9nvu4nopTw+EMm+DSFqf5sNYnMvhOJmjxVvK6ScKZmnTgCNnx8
-	0pFRM9lg4ph60H3wiKAIF9hFQvUzMmAGgHT0hyAQ1vtP/Q0/e+2kQydDxoYnhRiH0WHIF2Tw/jX
-	0GaGdn0U07R644j0NUEkfR2w1jYnJ8Xe6fziOwGtjp52YzBNM1KG/C7ex4NR+4w=
-X-Received: by 2002:a5d:6208:0:b0:48d:ecba:3cf8 with SMTP id ffacd0b85a97d-48e6e4f8bc8mr19150385f8f.43.1793639791919;
-        Mon, 02 Nov 2026 09:16:31 -0800 (PST)
-Received: from debian (ip-78-137-176-146.broadband.digiweb.ie. [78.137.176.146])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48e71a4d3e9sm23598760f8f.6.2026.11.02.09.16.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 02 Nov 2026 09:16:31 -0800 (PST)
-From: Pablo Mazzini <pmazzini@gmail.com>
-To: linux-wireless@vger.kernel.org
-Cc: Pablo Mazzini <pmazzini@gmail.com>,
+	dkim=pass (2048-bit key, unprotected) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.a=rsa-sha256 header.s=selector1-NXP1-onmicrosoft-com header.b=FOj+RuJv
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=koMkJXBvJvTPCgOtUAxFt8ak6UhB8T6MnWx1LYnzdWqon6jXdUNBxvJ/O/ezgplBjONWVS1nfu+z/qzczewV0wbebGjs4ybhzwFYX23WTV9xJXmgwAT8qzfT1oHqKPWji4ghHep3pKrm9cWTDpSINs71XbfbCvBljDblmOqI8Zpx3E17h4VpauHOpdI8CGuBhT+LQoutxCbDMsJ7Lm9zgBTt+erraVw8YZc5j5+YOl+KV4R59vuJwhO1rin7isO4QFZvVsiLO1a196+PElVuET/3pnyBQxeU7mihwC660bSx+ySaCaN370Jc8ieRp6EQeJ8R8Upta7Ixw50aL5aJ4Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=bPO5rapN4v6Y8cI5tKdEKxZsiCrSBEDoAFlejyIoEbw=;
+ b=WwipYQhzTOaQ2ZEncO5eCgreW2D68PhRQnfu5vlarhn0VLKbUmtnUnf5A4GiRqS03N0/P9mp/m61zB+n4t8faGLOUndhuv3fdTE0SqFZuvJFelcfmLi9ha5B7XqvGq/E6S4/Hy9PkcAz4ocTYl2yHX314E+1YEcTAYczld2VzARlVu8OJqCMMkpWxXJ3knTmkpblUdj2JkjyNORQFw6Ae+/fKT2ETlpFKy4kkvJpzjMUfQJtDTDRhorNg1b/dr4P6M/W1rt6hA6xgCN1/FXmJpH17IWdt3vXkfYeXmf/Be9svaeKYtxuXyJFrlkNArOBFNnxa0BWuoPHyFpgTUQqcQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
+ dkim=pass header.d=oss.nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
+ s=selector1-NXP1-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=bPO5rapN4v6Y8cI5tKdEKxZsiCrSBEDoAFlejyIoEbw=;
+ b=FOj+RuJvWiuxQZyz+oz6KUlLGD5yDvDNIMvkF5hfH0degvo/1ZT/8GZfjg0KspzdkOxKm5f3pE3hwtfZb2B9mfDLi+EttXVjW8p+OF6u75Y+OMfQ9CaLcAhWXM1ShZUCAYyfPvmHIyuxhm+/NK2kJ8YYCADEgZCSeElnDB5ye1t6B1648xDx1NYRLuKB4QgBxCNV8A+XqC/UThbeO6zYtqGOg0XEZ2RSQ3PVDxsDA+xdBowg1Wl+Bmvsj0He60X18JoJ2vXDfJhIT3yy050gGXuptXIzw3+eKkDHk9AOY9mnJtMKFyZ7dpCHsJU/JkihbUVyYoYz5PNRjAORvGZHkQ==
+Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=oss.nxp.com;
+Received: from MI3PR04MB12438.eurprd04.prod.outlook.com (2603:10a6:290:76::14)
+ by PA3PR04MB11204.eurprd04.prod.outlook.com (2603:10a6:102:4aa::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.569.12; Mon, 2 Nov
+ 2026 17:21:33 +0000
+Received: from MI3PR04MB12438.eurprd04.prod.outlook.com
+ ([fe80::c715:c32:8bb1:b70b]) by MI3PR04MB12438.eurprd04.prod.outlook.com
+ ([fe80::c715:c32:8bb1:b70b%6]) with mapi id 15.21.0569.011; Mon, 2 Nov 2026
+ 17:21:33 +0000
+From: Frank.Li@oss.nxp.com
+To: Aubin Constans <aubin.constans@microchip.com>,
 	Ulf Hansson <ulfh@kernel.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH wireless-next 4/4] wifi: cw1200: add XRadio XR819 support
-Date: Mon,  2 Nov 2026 17:16:03 +0000
-Message-ID: <20261102171603.368298-5-pmazzini@gmail.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20261102171603.368298-1-pmazzini@gmail.com>
-References: <20261102171603.368298-1-pmazzini@gmail.com>
+	Nicolas Ferre <nicolas.ferre@microchip.com>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>,
+	Scott Branden <sbranden@broadcom.com>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Frank Li <Frank.Li@nxp.com>,
+	Sascha Hauer <s.hauer@pengutronix.de>,
+	Pengutronix Kernel Team <kernel@pengutronix.de>,
+	Fabio Estevam <festevam@gmail.com>,
+	Aaro Koskinen <aaro.koskinen@iki.fi>,
+	=?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
+	Masami Hiramatsu <mhiramat@kernel.org>,
+	Jesper Nilsson <jesper.nilsson@axis.com>,
+	Lars Persson <lars.persson@axis.com>,
+	John Garry <john.garry@linux.dev>,
+	Hemanth Selam <hemanth.selam@gmail.com>,
+	Pengpeng Hou <pengpeng@iscas.ac.cn>,
+	Rosen Penev <rosenp@gmail.com>,
+	Fan Wu <fanwu01@zju.edu.cn>,
+	Marco Crivellari <marco.crivellari@suse.com>,
+	Pan Chuang <panchuang@vivo.com>,
+	Zhan Xusheng <zhanxusheng1024@gmail.com>,
+	Rakuram Eswaran <rakuram.e96@gmail.com>,
+	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>,
+	Ethan Nelson-Moore <enelsonmoore@gmail.com>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	Runyu Xiao <runyu.xiao@seu.edu.cn>,
+	linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND...),
+	linux-arm-kernel@lists.infradead.org (moderated list:ARM/Microchip (AT91) SoC support),
+	linux-kernel@vger.kernel.org (open list),
+	linux-rpi-kernel@lists.infradead.org (moderated list:BROADCOM BCM2711/BCM2835 ARM ARCHITECTURE),
+	imx@lists.linux.dev (open list:ARM/FREESCALE IMX / MXC / LAYERSCAPE ARM ARCHIT...),
+	linux-omap@vger.kernel.org (open list:OMAP MMC SUPPORT),
+	linux-actions@lists.infradead.org (moderated list:ARM/ACTIONS SEMI ARCHITECTURE),
+	linux-renesas-soc@vger.kernel.org (open list:TMIO/SDHI MMC DRIVER),
+	linux-arm-kernel@axis.com (open list:ARM/ARTPEC MACHINE SUPPORT)
+Cc: imx@lists.linux.dev,
+	vkoul@kernel.org
+Subject: [PATCH 1/1] mmc: use dmaengine_desc_set_callback()
+Date: Mon,  2 Nov 2026 12:21:03 -0500
+Message-ID: <20261102172126.3890568-1-Frank.Li@oss.nxp.com>
+X-Mailer: git-send-email 2.43.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: PH1PEPF00013306.namprd07.prod.outlook.com
+ (2603:10b6:518:1::13) To MI3PR04MB12438.eurprd04.prod.outlook.com
+ (2603:10a6:290:76::14)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -99,215 +139,319 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: MI3PR04MB12438:EE_|PA3PR04MB11204:EE_
+X-MS-Office365-Filtering-Correlation-Id: 4648b49e-7710-429c-4b6e-08df3905be21
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|7416014|1800799024|366016|376014|23010399003|19092799006|18002099003|56012099006|261102123227099003|10067099003|261009223027099003|921020|261022105027099003|261021123027099003|261021121427099003|11063799006|261028144727099003|261026140227099003|261026121527099003;
+X-Microsoft-Antispam-Message-Info:
+	ilb/HuJu4myw2uUYDDEhG24ksGmWXHV8RewKTjtgR/RHyg38tkl20udGIvc97o0YkNydYNpoMYf4UVifa3tdfqtEcUlsrdaqT1sYd0mm52CSFamB344FN1J0lFjBo/yTMWwlh9QtNgILyokrEhBvbbus9Om/ibqnxbmtB5suXErQHnKU4wI3H2LnSAUD3x1f5C2Qh5HY3FEv9TM1btURqGD8928y+YTonUoAqzY7e/4pPQzp9NL2gjW6/3KSKR6esDgqeXNGRBu3YfaPp79as+8v+KHj5H7xQy4RZrjvApz4f245UbuX/YFsqWhrMciP7KcXOnCAEi6PYic1aSS5UESXuoH48YQaI6sOM4KRLP2RaDEZL8qWY2udg53ETPqv/qXFCK0JReHWX7HmlfEzKNdgCD0V8MXCpwCMfXXebB3OpL5ntLWNSzOeu950RaxMGuHH0fNTSZwDu5/3iOEwv+LJK/V2iZjTFHeKAn7KkNebtVraDFaZLEbjOm9fNwG4CtaANpVpgQH93hl0HBjub03uvzQ6QSlk8c/DMTBmQRdA9v78pIKzSBYOAswEUgdfomE8oTEgk3Am+wUpbdoRgs9/KjiUvnXeyaScJJs0+ZyzyLbRInywMpjglRoI05aCOlUCwFeXreXfevmRtsUVWGb7+BkvOapKOPrVoOeRLFpViB/zxa2Sg8n16mE+fXKtNANv1y6r2fwyOfXpXReHIw==
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MI3PR04MB12438.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(1800799024)(366016)(376014)(23010399003)(19092799006)(18002099003)(56012099006)(261102123227099003)(10067099003)(261009223027099003)(921020)(261022105027099003)(261021123027099003)(261021121427099003)(11063799006)(261028144727099003)(261026140227099003)(261026121527099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?a3vIbI9ddhZAuIbhf+OxiUTLDr3CHEpE7kqCzYQBiRFEGm2tYVJj78mBwyZC?=
+ =?us-ascii?Q?NAL/AZyXvuWVa7PX46Xxk9W7FT/y9IcRGdom6euiortyqQiiP8VKx7itbIxr?=
+ =?us-ascii?Q?ijab6qwIDA/gxiUxxlcIelJLWHfrLnn4Ggan9ycXYCBK2Su2er7Bgrkza7mX?=
+ =?us-ascii?Q?qmJaSoZGSC/Yvs97+IavPmwz8C/gJfJ0T4hfFDUVQUbhf+DxVQCW8cdJayVW?=
+ =?us-ascii?Q?rN0RzYs1nPgpAoUxMU7xi3XQgAlldlcE/aEzlywGCuYsSoKV38WZ8HCBPXSo?=
+ =?us-ascii?Q?+28YLpdnDj6d/k9TwcIvJCFKvBeqS03wipzU29+B6FbQ/pC2k8xbj1YQUj0f?=
+ =?us-ascii?Q?L8A2d3q5ZkFNrEAECBTymYNBHgIzn45rVQdhbcgaqgMu708GqO1Q6vXWpGPJ?=
+ =?us-ascii?Q?acRRSBs7xY6KyHFYFGaaIBrEVBfW6lXxjO7/xBELFkb7mcGi/pCakuNBEH2y?=
+ =?us-ascii?Q?mraFGLEhUSErnV9MGC3e5Ucxtvsq/KP7JzeiDOsccrnbBd9Jk62Mn7bjcfkb?=
+ =?us-ascii?Q?RZhHAw/HHcz4o6krxdTCAEHYJlBPc3MNztLR9QoUfbLUEYUZ9C8h5NaBXnS3?=
+ =?us-ascii?Q?nXqKIQ/jF4J0dbgCPlrQlC1jln1g/edHWQW061zKsgUmONgMK7BvFIuMjCBe?=
+ =?us-ascii?Q?/TzZGrH8p+BOcpE6B0092NnsP+JZQZDD+NUU6Thg7acTqsuY4TwZMI3JNFLh?=
+ =?us-ascii?Q?Oh1gKaNqLPydVUbrX5mpMy5K4wlhyi3b1rQOx4XhGNsygr06OV9mBnA2KJgN?=
+ =?us-ascii?Q?4bbln9d1PBqTmojBdZfMLH/r93Mt3E7x7tY7QowAYB7xFwayZlcDCo4cGvmp?=
+ =?us-ascii?Q?zTAJLFmES2XGMNxIPwv6WVHpaFo6dQN6eiBmI1H9tDZ6Rlbj7m5j+DzCwvjr?=
+ =?us-ascii?Q?/lQFpBo5fKl05/8FGfHEbRNlS+XfVecKC5lJ8LKnMJLeh3FcG4fXQe7JfiM/?=
+ =?us-ascii?Q?geQnC+Zy9HkdSJWz2HB2jtHBFy6s7nlTFYsJ6tukNe0u1rdlwaCj+Z+8bqvS?=
+ =?us-ascii?Q?0XkP0za3Karfc6zgtBwotb2u+COxsB6x3BA9Q6bFOeHufNycUYMDo0bUJdti?=
+ =?us-ascii?Q?xDTI5pG+5TYOKcbsadiOkamvUzyqII4hbPP0lNCYW/ncd92oazvhmDKMjUAV?=
+ =?us-ascii?Q?gltKimmn0EB1TIYrZbcK/Q79NOiBsRuuO5o2NRvHjBWXpx6vaVAUqUW+QrH4?=
+ =?us-ascii?Q?T18gEkpgi9FMjLi4laD9NPFmhfKyDXGmZ3hoo5yWBAibco0TehVU+cChR9Zl?=
+ =?us-ascii?Q?dG6bfaz6ZsLOw/XP0KEnuiHzU82u4SRLKwjXjQ8ZbyQLDsFCPUN/pz3CEBl7?=
+ =?us-ascii?Q?87RL5pvEJmB3od6lfkIUrXFgQpHyNSeCi0/GF34VQK6tlZpRAxuZ2v78Zt7v?=
+ =?us-ascii?Q?FetMsblsRH6YsBeEsy/8hGZ0GeHQ614XVNSMqgmjTKltSEtcvMC7aHFeAUzS?=
+ =?us-ascii?Q?PhZV+/T6a2QG7RkK26F315CyqgK0gfcnr5whBqkOH8byDavoOnxOlAr7FJ/P?=
+ =?us-ascii?Q?iqcB/hNmyzxl+xoQADJp+S0IHiDWAaTtyzwYG9rRyfkZs/d8+kqmzVPPeMeb?=
+ =?us-ascii?Q?1z2xWZKRVP/tifu5BjSXkefFcENmQAzB+VDMTI4lXTKVJH9gtdeags4HFQxy?=
+ =?us-ascii?Q?vu2TSvn/AYol6bCvjhpvkn3I10dRLQ4bMxvsS59JOSvG8sZa3KrV5QUemeR+?=
+ =?us-ascii?Q?0/slONkTa5LcG+w8X4tA+X0qedDW+ER/z5cEF2sbmJtXs3xHsgDelb396ry8?=
+ =?us-ascii?Q?52PbyahGy2lHx2LVxXgNUb04uXoaIU8=3D?=
+X-OriginatorOrg: oss.nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4648b49e-7710-429c-4b6e-08df3905be21
+X-MS-Exchange-CrossTenant-AuthSource: MI3PR04MB12438.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Nov 2026 17:21:33.8035
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: A+FwQH8bNAwLPY1+2DX25NUlNmPUEwU5c+mDfoIooGlPigTKzIT6TyiqTd7ocWUkUaT3GIkGMsm75+MIngoB/552ROUtLmkEstwMyl+b4lkZ5J3qKZr1EtYu4yYO9oss
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA3PR04MB11204
 
-The XR819 uses the ST-E SDIO vendor ID with device ID 0x2281 and
-reports itself as a CW1x60. It starts from a bootloader written into
-its memory, then takes the usual firmware download. Its modules run
-from a 24 MHz reference clock.
+From: Frank Li <Frank.Li@nxp.com>
 
-Give the CW1x60 entry the XR819 bootloader and firmware, and load the
-bootloader instead of the NOP instruction.
+Replace open-coded assignments to callback and callback_param fields
+of struct dma_async_tx_descriptor with calls to the
+dmaengine_desc_set_callback() helper across MMC host drivers.
 
-Signed-off-by: Pablo Mazzini <pmazzini@gmail.com>
+No functional change intended. Prepare make to struct
+dma_async_tx_descriptor private to the DMA engine.
+
+Signed-off-by: Frank Li <Frank.Li@nxp.com>
 ---
- drivers/net/wireless/st/cw1200/Kconfig       |  3 +-
- drivers/net/wireless/st/cw1200/cw1200_sdio.c | 13 ++++-
- drivers/net/wireless/st/cw1200/fwio.c        | 58 ++++++++++++++++----
- drivers/net/wireless/st/cw1200/fwio.h        |  7 ++-
- include/linux/mmc/sdio_ids.h                 |  1 +
- 5 files changed, 66 insertions(+), 16 deletions(-)
+ drivers/mmc/host/atmel-mci.c             | 3 +--
+ drivers/mmc/host/bcm2835.c               | 3 +--
+ drivers/mmc/host/dw_mmc.c                | 3 +--
+ drivers/mmc/host/moxart-mmc.c            | 3 +--
+ drivers/mmc/host/mxcmmc.c                | 3 +--
+ drivers/mmc/host/mxs-mmc.c               | 3 +--
+ drivers/mmc/host/omap.c                  | 3 +--
+ drivers/mmc/host/omap_hsmmc.c            | 3 +--
+ drivers/mmc/host/owl-mmc.c               | 3 +--
+ drivers/mmc/host/pxamci.c                | 3 +--
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c | 6 ++----
+ drivers/mmc/host/sdhci.c                 | 3 +--
+ drivers/mmc/host/sh_mmcif.c              | 6 ++----
+ drivers/mmc/host/uniphier-sd.c           | 3 +--
+ drivers/mmc/host/usdhi6rol0.c            | 3 +--
+ 15 files changed, 17 insertions(+), 34 deletions(-)
 
-diff --git a/drivers/net/wireless/st/cw1200/Kconfig b/drivers/net/wireless/st/cw1200/Kconfig
-index 03575e9894bb..9404e318137c 100644
---- a/drivers/net/wireless/st/cw1200/Kconfig
-+++ b/drivers/net/wireless/st/cw1200/Kconfig
-@@ -3,7 +3,8 @@ config CW1200
- 	tristate "CW1200 WLAN support"
- 	depends on MAC80211 && CFG80211
- 	help
--	  This is a driver for the ST-E CW1100 & CW1200 WLAN chipsets.
-+	  This is a driver for the ST-E CW1100 & CW1200 and the XRadio
-+	  XR819 WLAN chipsets.
- 	  This option just enables the driver core, see below for
- 	  specific bus support.
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 98933be5f1744..de4ef7a675892 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -1172,8 +1172,7 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ 		goto unmap_exit;
  
-diff --git a/drivers/net/wireless/st/cw1200/cw1200_sdio.c b/drivers/net/wireless/st/cw1200/cw1200_sdio.c
-index 2b6afe221268..3db937785cab 100644
---- a/drivers/net/wireless/st/cw1200/cw1200_sdio.c
-+++ b/drivers/net/wireless/st/cw1200/cw1200_sdio.c
-@@ -35,6 +35,12 @@ static struct cw1200_platform_data_sdio sagrad_109x_evk_platform_data = {
- 	.sdd_file = "sdd_sagrad_1091_1098.bin",
- };
+ 	host->dma.data_desc = desc;
+-	desc->callback = atmci_dma_complete;
+-	desc->callback_param = host;
++	dmaengine_desc_set_callback(desc, atmci_dma_complete, NULL, host);
  
-+/* XRadio XR819 modules, with a 24 MHz reference clock */
-+static const struct cw1200_platform_data_sdio xr819_platform_data = {
-+	.ref_clk = 24000,
-+	.have_5ghz = false,
-+};
-+
- /* Allow platform data to be overridden */
- static struct cw1200_platform_data_sdio *global_plat_data = &sagrad_109x_evk_platform_data;
+ 	return iflags;
+ unmap_exit:
+diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+index efd1903c3ccd4..9a2c995577d46 100644
+--- a/drivers/mmc/host/bcm2835.c
++++ b/drivers/mmc/host/bcm2835.c
+@@ -506,8 +506,7 @@ void bcm2835_prepare_dma(struct bcm2835_host *host, struct mmc_data *data)
+ 		return;
+ 	}
  
-@@ -51,6 +57,8 @@ struct hwbus_priv {
+-	desc->callback = bcm2835_dma_complete;
+-	desc->callback_param = host;
++	dmaengine_desc_set_callback(desc, bcm2835_dma_complete, NULL, host);
+ 	host->dma_desc = desc;
+ 	host->dma_chan = dma_chan;
+ 	host->dma_dir = dir_data;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index ff0b25d287a94..15c65aeea8030 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -884,8 +884,7 @@ static int dw_mci_edmac_start_dma(struct dw_mci *host,
+ 	}
  
- static const struct sdio_device_id cw1200_sdio_ids[] = {
- 	{ SDIO_DEVICE(SDIO_VENDOR_ID_STE, SDIO_DEVICE_ID_STE_CW1200) },
-+	{ SDIO_DEVICE(SDIO_VENDOR_ID_STE, SDIO_DEVICE_ID_STE_XR819),
-+	  .driver_data = (kernel_ulong_t)&xr819_platform_data },
- 	{ /* end: all zeroes */			},
- };
- MODULE_DEVICE_TABLE(sdio, cw1200_sdio_ids);
-@@ -295,7 +303,10 @@ static int cw1200_sdio_probe(struct sdio_func *func,
+ 	/* Set dw_mci_dmac_complete_dma as callback */
+-	desc->callback = dw_mci_dmac_complete_dma;
+-	desc->callback_param = (void *)host;
++	dmaengine_desc_set_callback(desc, dw_mci_dmac_complete_dma, NULL, (void *)host);
+ 	dmaengine_submit(desc);
  
- 	func->card->quirks |= MMC_QUIRK_LENIENT_FN0;
+ 	/* Flush cache before write */
+diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+index 28aed13549a64..15689717c76bf 100644
+--- a/drivers/mmc/host/moxart-mmc.c
++++ b/drivers/mmc/host/moxart-mmc.c
+@@ -289,8 +289,7 @@ static void moxart_transfer_dma(struct mmc_data *data, struct moxart_host *host)
  
--	self->pdata = global_plat_data; /* FIXME */
-+	if (id->driver_data)
-+		self->pdata = (const void *)id->driver_data;
-+	else
-+		self->pdata = global_plat_data; /* FIXME */
- 	self->func = func;
- 	sdio_set_drvdata(func, self);
- 	sdio_claim_host(func);
-diff --git a/drivers/net/wireless/st/cw1200/fwio.c b/drivers/net/wireless/st/cw1200/fwio.c
-index 1a68ef6ed2fa..6b885fd717db 100644
---- a/drivers/net/wireless/st/cw1200/fwio.c
-+++ b/drivers/net/wireless/st/cw1200/fwio.c
-@@ -66,9 +66,10 @@ static const struct cw1200_chip cw1200_chips[] = {
- 		.firmware = FIRMWARE_CUT22,
- 		.sdd = SDD_FILE_22,
- 	}, {
--		.revision = CW1X60_HW_REV,
--		.firmware = FIRMWARE_CW1X60,
--		.sdd = SDD_FILE_CW1X60,
-+		.revision = CW1X60_HW_REV,	/* XRadio XR819 */
-+		.bootloader = BOOTLOADER_XR819,
-+		.firmware = FIRMWARE_XR819,
-+		.sdd = SDD_FILE_XR819,
- 		.sync_join = true,
- 		.no_switch_channel = true,
- 	},
-@@ -85,6 +86,38 @@ static const struct cw1200_chip *cw1200_find_chip(int revision)
- 	return NULL;
- }
+ 	if (desc) {
+ 		host->tx_desc = desc;
+-		desc->callback = moxart_dma_complete;
+-		desc->callback_param = host;
++		dmaengine_desc_set_callback(desc, moxart_dma_complete, NULL, host);
+ 		dmaengine_submit(desc);
+ 		dma_async_issue_pending(dma_chan);
+ 	}
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 097498a3f8ff4..e6271d67b6f6c 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -394,8 +394,7 @@ static int mxcmci_start_cmd(struct mxcmci_host *host, struct mmc_command *cmd,
  
-+/* The bootloader is written word by word into the AHB memory */
-+static int cw1200_load_bootloader(struct cw1200_common *priv)
-+{
-+	const struct firmware *bootloader;
-+	const __le32 *data;
-+	u32 addr = 0x08000000;
-+	size_t i;
-+	int ret;
-+
-+	ret = request_firmware(&bootloader, priv->chip->bootloader, priv->pdev);
-+	if (ret) {
-+		pr_err("Can't load bootloader file %s.\n", priv->chip->bootloader);
-+		return ret;
-+	}
-+
-+	data = (const __le32 *)bootloader->data;
-+	for (i = 0; i < bootloader->size / 4; i++, addr += 4) {
-+		ret = cw1200_reg_write_32(priv, ST90TDS_SRAM_BASE_ADDR_REG_ID,
-+					  addr);
-+		if (!ret)
-+			ret = cw1200_reg_write_32(priv, ST90TDS_AHB_DPORT_REG_ID,
-+						  le32_to_cpu(data[i]));
-+		if (ret) {
-+			pr_err("Can't write bootloader.\n");
-+			break;
-+		}
-+	}
-+
-+	release_firmware(bootloader);
-+	return ret;
-+}
-+
- static int cw1200_load_firmware_cw1200(struct cw1200_common *priv)
- {
- 	int ret, block, num_blocks;
-@@ -136,6 +169,12 @@ static int cw1200_load_firmware_cw1200(struct cw1200_common *priv)
- 	if (!priv->sdd_path)
- 		priv->sdd_path = priv->chip->sdd;
+ 	if (mxcmci_use_dma(host)) {
+ 		if (host->dma_dir == DMA_FROM_DEVICE) {
+-			host->desc->callback = mxcmci_dma_callback;
+-			host->desc->callback_param = host;
++			dmaengine_desc_set_callback(host->desc, mxcmci_dma_callback, NULL, host);
+ 		} else {
+ 			int_cntr |= INT_WRITE_OP_DONE_EN;
+ 		}
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 7c7c52d9e8e72..6a2b3e6d9a207 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -234,8 +234,7 @@ static struct dma_async_tx_descriptor *mxs_mmc_prep_dma(
+ 	desc = dmaengine_prep_slave_sg(ssp->dmach,
+ 				sgl, sg_len, ssp->slave_dirn, flags);
+ 	if (desc) {
+-		desc->callback = mxs_mmc_dma_irq_callback;
+-		desc->callback_param = host;
++		dmaengine_desc_set_callback(desc, mxs_mmc_dma_irq_callback, NULL, host);
+ 	} else {
+ 		if (data)
+ 			dma_unmap_sg(mmc_dev(host->mmc), data->sg,
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index 527b89a5ed707..4e72e57d11971 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -1050,8 +1050,7 @@ mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
  
-+	if (priv->chip->bootloader) {
-+		ret = cw1200_load_bootloader(priv);
-+		if (ret)
-+			return ret;
-+	}
-+
- 	/* Initialize common registers */
- 	APB_WRITE(DOWNLOAD_IMAGE_SIZE_REG, DOWNLOAD_ARE_YOU_HERE);
- 	APB_WRITE(DOWNLOAD_PUT_REG, 0);
-@@ -143,9 +182,11 @@ static int cw1200_load_firmware_cw1200(struct cw1200_common *priv)
- 	APB_WRITE(DOWNLOAD_STATUS_REG, DOWNLOAD_PENDING);
- 	APB_WRITE(DOWNLOAD_FLAGS_REG, 0);
+ 		OMAP_MMC_WRITE(host, BUF, buf);
  
--	/* Write the NOP Instruction */
--	REG_WRITE(ST90TDS_SRAM_BASE_ADDR_REG_ID, 0xFFF20000);
--	REG_WRITE(ST90TDS_AHB_DPORT_REG_ID, 0xEAFFFFFE);
-+	/* Write the NOP Instruction, unless the bootloader runs instead */
-+	if (!priv->chip->bootloader) {
-+		REG_WRITE(ST90TDS_SRAM_BASE_ADDR_REG_ID, 0xFFF20000);
-+		REG_WRITE(ST90TDS_AHB_DPORT_REG_ID, 0xEAFFFFFE);
-+	}
+-		tx->callback = mmc_omap_dma_callback;
+-		tx->callback_param = host;
++		dmaengine_desc_set_callback(tx, mmc_omap_dma_callback, NULL, host);
+ 		dmaengine_submit(tx);
+ 		host->brs_received = 0;
+ 		host->dma_done = 0;
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index de5a3b70107d8..ba60b81560fbd 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1279,8 +1279,7 @@ static int omap_hsmmc_setup_dma_transfer(struct omap_hsmmc_host *host,
+ 		return -1;
+ 	}
  
- 	/* Release CPU from RESET */
- 	REG_READ(ST90TDS_CONFIG_REG_ID, val32);
-@@ -483,11 +524,6 @@ int cw1200_load_firmware(struct cw1200_common *priv)
+-	tx->callback = omap_hsmmc_dma_callback;
+-	tx->callback_param = host;
++	dmaengine_desc_set_callback(tx, omap_hsmmc_dma_callback, NULL, host);
  
- 	switch (priv->hw_type)  {
- 	case HIF_8601_SILICON:
--		if (priv->hw_revision == CW1X60_HW_REV) {
--			pr_err("Can't handle CW1160/1260 firmware load yet.\n");
--			ret = -ENOTSUPP;
--			goto out;
--		}
- 		ret = cw1200_load_firmware_cw1200(priv);
- 		break;
- 	default:
-diff --git a/drivers/net/wireless/st/cw1200/fwio.h b/drivers/net/wireless/st/cw1200/fwio.h
-index 9925d4bcedda..fb66d564c304 100644
---- a/drivers/net/wireless/st/cw1200/fwio.h
-+++ b/drivers/net/wireless/st/cw1200/fwio.h
-@@ -14,13 +14,13 @@
- #ifndef FWIO_H_INCLUDED
- #define FWIO_H_INCLUDED
+ 	/* Does not fail */
+ 	dmaengine_submit(tx);
+diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
+index d5b8a110267b8..8e0520d338c47 100644
+--- a/drivers/mmc/host/owl-mmc.c
++++ b/drivers/mmc/host/owl-mmc.c
+@@ -329,8 +329,7 @@ static int owl_mmc_prepare_data(struct owl_mmc_host *owl_host,
  
--#define BOOTLOADER_CW1X60       "boot_cw1x60.bin"
--#define FIRMWARE_CW1X60		"wsm_cw1x60.bin"
-+#define BOOTLOADER_XR819	"xr819/boot_xr819.bin"
-+#define FIRMWARE_XR819		"xr819/fw_xr819.bin"
- #define FIRMWARE_CUT22		"wsm_22.bin"
- #define FIRMWARE_CUT20		"wsm_20.bin"
- #define FIRMWARE_CUT11		"wsm_11.bin"
- #define FIRMWARE_CUT10		"wsm_10.bin"
--#define SDD_FILE_CW1X60		"sdd_cw1x60.bin"
-+#define SDD_FILE_XR819		"xr819/sdd_xr819.bin"
- #define SDD_FILE_22		"sdd_22.bin"
- #define SDD_FILE_20		"sdd_20.bin"
- #define SDD_FILE_11		"sdd_11.bin"
-@@ -28,6 +28,7 @@
+ 	owl_host->data = data;
  
- struct cw1200_chip {
- 	int revision;
-+	const char *bootloader;	/* NULL: write the NOP instruction */
- 	const char *firmware;
- 	const char *sdd;
- 	bool sync_join;		/* no asynchronous join */
-diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-index dfffda3d8002..35789be747a5 100644
---- a/include/linux/mmc/sdio_ids.h
-+++ b/include/linux/mmc/sdio_ids.h
-@@ -27,6 +27,7 @@
+-	owl_host->desc->callback = owl_mmc_dma_complete;
+-	owl_host->desc->callback_param = (void *)owl_host;
++	dmaengine_desc_set_callback(owl_host->desc, owl_mmc_dma_complete, NULL, (void *)owl_host);
+ 	data->error = 0;
  
- #define SDIO_VENDOR_ID_STE			0x0020
- #define SDIO_DEVICE_ID_STE_CW1200		0x2280
-+#define SDIO_DEVICE_ID_STE_XR819		0x2281
+ 	return 0;
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index f8427f071c009..06483f7355206 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -212,8 +212,7 @@ static void pxamci_setup_data(struct pxamci_host *host, struct mmc_data *data)
+ 	}
  
- #define SDIO_VENDOR_ID_INTEL			0x0089
- #define SDIO_DEVICE_ID_INTEL_IWMC3200WIMAX	0x1402
+ 	if (!(data->flags & MMC_DATA_READ)) {
+-		tx->callback = pxamci_dma_irq;
+-		tx->callback_param = host;
++		dmaengine_desc_set_callback(tx, pxamci_dma_irq, NULL, host);
+ 	}
+ 
+ 	host->dma_cookie = dmaengine_submit(tx);
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index 426308b73b490..e5ef3bae88d59 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -196,8 +196,7 @@ static void renesas_sdhi_sys_dmac_start_dma_rx(struct tmio_mmc_host *host)
+ 
+ 	if (desc) {
+ 		reinit_completion(&priv->dma_priv.dma_dataend);
+-		desc->callback = renesas_sdhi_sys_dmac_dma_callback;
+-		desc->callback_param = host;
++		dmaengine_desc_set_callback(desc, renesas_sdhi_sys_dmac_dma_callback, NULL, host);
+ 
+ 		cookie = dmaengine_submit(desc);
+ 		if (cookie < 0) {
+@@ -272,8 +271,7 @@ static void renesas_sdhi_sys_dmac_start_dma_tx(struct tmio_mmc_host *host)
+ 
+ 	if (desc) {
+ 		reinit_completion(&priv->dma_priv.dma_dataend);
+-		desc->callback = renesas_sdhi_sys_dmac_dma_callback;
+-		desc->callback_param = host;
++		dmaengine_desc_set_callback(desc, renesas_sdhi_sys_dmac_dma_callback, NULL, host);
+ 
+ 		cookie = dmaengine_submit(desc);
+ 		if (cookie < 0) {
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index efb4c7742fe21..18aca84834fb6 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1298,8 +1298,7 @@ static int sdhci_external_dma_setup(struct sdhci_host *host,
+ 	if (!desc)
+ 		return -EINVAL;
+ 
+-	desc->callback = NULL;
+-	desc->callback_param = NULL;
++	dmaengine_desc_set_callback(desc, NULL, NULL, NULL);
+ 
+ 	cookie = dmaengine_submit(desc);
+ 	if (dma_submit_error(cookie))
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 8bd9cdedafa4d..9fe49fa8f372f 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -299,8 +299,7 @@ static void sh_mmcif_start_dma_rx(struct sh_mmcif_host *host)
+ 	}
+ 
+ 	if (desc) {
+-		desc->callback = sh_mmcif_dma_complete;
+-		desc->callback_param = host;
++		dmaengine_desc_set_callback(desc, sh_mmcif_dma_complete, NULL, host);
+ 		cookie = dmaengine_submit(desc);
+ 		sh_mmcif_bitset(host, MMCIF_CE_BUF_ACC, BUF_ACC_DMAREN);
+ 		dma_async_issue_pending(chan);
+@@ -349,8 +348,7 @@ static void sh_mmcif_start_dma_tx(struct sh_mmcif_host *host)
+ 	}
+ 
+ 	if (desc) {
+-		desc->callback = sh_mmcif_dma_complete;
+-		desc->callback_param = host;
++		dmaengine_desc_set_callback(desc, sh_mmcif_dma_complete, NULL, host);
+ 		cookie = dmaengine_submit(desc);
+ 		sh_mmcif_bitset(host, MMCIF_CE_BUF_ACC, BUF_ACC_DMAWEN);
+ 		dma_async_issue_pending(chan);
+diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
+index 1eae2f4b6c1f9..d75ac6abd853c 100644
+--- a/drivers/mmc/host/uniphier-sd.c
++++ b/drivers/mmc/host/uniphier-sd.c
+@@ -158,8 +158,7 @@ static void uniphier_sd_external_dma_start(struct tmio_mmc_host *host,
+ 	if (!desc)
+ 		goto unmap_sg;
+ 
+-	desc->callback_result = uniphier_sd_external_dma_callback;
+-	desc->callback_param = host;
++	dmaengine_desc_set_callback(desc, NULL, uniphier_sd_external_dma_callback, host);
+ 
+ 	cookie = dmaengine_submit(desc);
+ 	if (cookie < 0)
+diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+index 3bccf800339ba..8b2bb44e2f86a 100644
+--- a/drivers/mmc/host/usdhi6rol0.c
++++ b/drivers/mmc/host/usdhi6rol0.c
+@@ -592,8 +592,7 @@ static int usdhi6_dma_setup(struct usdhi6_host *host, struct dma_chan *chan,
+ 	}
+ 
+ 	if (desc) {
+-		desc->callback = usdhi6_dma_complete;
+-		desc->callback_param = host;
++		dmaengine_desc_set_callback(desc, usdhi6_dma_complete, NULL, host);
+ 		cookie = dmaengine_submit(desc);
+ 	}
+ 
 -- 
-2.52.0
+2.43.0
 
