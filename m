@@ -1,85 +1,86 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.41
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793730652;
-	b=rj2vTEqQ2rfC0BRbcHGPTFp8NiaHk3K4Wt0Mks0CX/fIVZHDbveutkG6xWl1Cfwt0BeL
-	 VMww1n/qZhduCit5iMN2OK5CEyZ+KmohEd+xcuj1xHyPLcWLXxgnTb660fEQDoqpG83om
-	 qqa3SO+QRl3hvGMvlDETqCpfuVWgsyHpXXXQkyrgE4DjD+MBEmL7J4UM7/TclNg04Yc85
-	 XJ9dqQCKshAUBP5PVUSLDNyI91Bli4y+kzjYv0bdAJkTwyWCYU1U6KhspieJYhFsvki1g
-	 lQC+/qgcO2LFvFInenNoil7b+Kl2PO/7t0FyfYTNvi2CzokpucPHaRcFPj7n4LcYs7A==
+	t=1793730653;
+	b=drUXo/5qknRsiP9Qhql4ta9aKeEIl9wuRDZ/dYMTBW2A+LnIWom8ZDmAHxrx1ZXeasCW
+	 oMl8Yuqq2i0Fe4wHZWmIefUmP9wGDOV3L9qoql7sk3zakpioPh7LfCY3wx2eWDi3h7igE
+	 vrLuFPe8M132OMseHcUKlo7HZswnI+UdHsqayJf7lX+/6zrIAltU77SvAoBNeW2Pqrn3R
+	 0Tj4cwKEOgj1owjcUo4Jm2pgLhPq+M75b2/6U458/oBy/uzZkJKZdv6S06l916Dxezu03
+	 c/dl+cRhIhLJLHN3R+zRyIebztbNxCLCmJPtgNcaeTsq1PybzGP+8j2/Yd1cD3gvdWA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793730652;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793730653;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=/iod9oXhgsGpyGcJPFTu5fqKBMIMVHyACTtYwHQfVM0=;
-	b=pig/Vn5iX9mIAcfheZkXPcMUVIRooX1JhKRjXWOuzsHJfMlFdtCBAqslwFeq7h7o+NAK
-	 PGH5GGwm3V5M+ZvJIOate+8qSmfNKtgwPLTuFd5BgqmdR4JqI4EHfzKNjti6rPmbL4L0+
-	 9rG0RQj+DYTqq2zO1FQW/r0tfkVyHFRh1Tkk4ScorKC8R+x55u85YCZKQeD6b+n9O0+SY
-	 0k5atZEOq6GPFHqAf3SXU6k5QZ18px5X7nJ0g8SpbHltGJ2tW+9V2RfV3txpKej7BL+eu
-	 UbUzTbfegHjoTp0dCadR/nbaUo134TdtEFE3dRMVQcaV0JpwxPqCKlbGJDu7QEe4OFQ==
+	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
+	 MIME-Version:Content-Transfer-Encoding;
+	bh=3GsiDmClXUsZuQhYM79SYeH9oaXJBKEF/AnaKpHO+KY=;
+	b=MDX7Xd2QodVv+byUf8HqltAffkRAZlVPx2Pz8TnxkszOQEdiJl3PHS3I07Qk6BRqOcGQ
+	 yWsfnlFA6GYKjbWe44iJx6gwoI4wb+LCe0l6NTHVO2VjoHmrIUKOtmmRO9QrV+tGt7M1S
+	 e23ODc4BS8nncPkMAY8OE82v9oiEsOIvWTUjOgxF7VXGGIKnWcVWpL61TZtkRVn+QnZcy
+	 mlPnH1ovh1D7YbhSIU/qehm20R0RMHyXEsQIngcplG6lvYTTCMP4vaVnGTXDWooqvpHDq
+	 anxQw027gQqsJ/N+sFg4geYzXls/DtU8HvkWwK/cBztAkFtyFYCEzl35eZlpBTdS6yQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=oTE0Ftyd;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=d2796FpU;
 	arc=none smtp.remote-ip=209.85.128.41
 Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DDC2606A32C
-	for <linux-mmc@vger.kernel.org>; Tue,  3 Nov 2026 18:30:52 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6DDC2606A32C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8CC29606A32C
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Nov 2026 18:30:53 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8CC29606A32C
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=oTE0Ftyd
-Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-4a20bdaf39cso50242015e9.1
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Nov 2026 10:30:52 -0800 (PST)
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=d2796FpU
+Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-4a208d93758so48074405e9.3
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Nov 2026 10:30:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1793730651; x=1794335451; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=/iod9oXhgsGpyGcJPFTu5fqKBMIMVHyACTtYwHQfVM0=;
-        b=oTE0Ftyd1ftHdx/k4ZvP62rvGiEotVrlyVzG8K8lXiQB0n7GOL/Ivt6ERRZJspNbDU
-         woWFmaXITSpmezb4vI1eSBO3vKdT1L9ObUomyL6sBzkYAJDTzjhK3NWmArSJdE0pjM58
-         nGjaDDgROXLR92862kuVIr/UqW8GGxTErnhpJraKIRKCxjns0+TbHFajys4PwFsp6m4p
-         NKlz2SyLsfJKDpWRSTsMHAgbEwrHAwhiWiXCxmfvYmTqqnRwgithsHO5R3YU9o4MU9yO
-         RYJhaWzyqaq4HSD1PhvLPXGrnzTnRtnwrqTIcPw3oXyaNKfxaz4HpZC33TGZY0yRmH+p
-         4OkA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793730651; x=1794335451;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20260707; t=1793730652; x=1794335452; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=/iod9oXhgsGpyGcJPFTu5fqKBMIMVHyACTtYwHQfVM0=;
-        b=cpNO2lniXnSR57NNa6RK7PSWPzKB/AS7DLbYRqBQHwRbsHFVLMdylnzsAer0+ObC7F
-         bD1KamrXgxAAZtXTZcOAlfP99+mVItb1gzgR61S/Mu56QcYN+RVy6jMXjPWuWp5Iiosb
-         63QbPE/dvx4zpCA335nJlC1Kvs5cJexeKGTxyTkvrPKJsAXODClzleJ+NRu0jJf9/dfn
-         5N6E7uA/rSSN/tjnuOlNQN+By7t6SBBVeX+mgiA4Dz0un1ITNTaJhqyUHe373y/hDN0+
-         CEay7Hf96yWeI9ia/JVSgNUeaWcajC6PSjCVmdFYjrLOBi13v+Xq4MNlZzJzNMXVwAZC
-         oOng==
-X-Forwarded-Encrypted: i=1; AKwUvBziDS3FGyhvYT5WD9ctertyVNL168odIP+bpiroponFW+RpewaGIKZru5eHusEVeiPl7/MJWNTDD+0=@vger.kernel.org
-X-Gm-Message-State: APuU4Z+vqfaR/uRh9zFCMU1i1dIBLLeA3CZ5OIx7PBagHbGytrGPhwtZ
-	ciZ8/JdV5brEG9LIzf/y3yvQd/Z5YgfWTA83NHrpHmG6unGjQ6+cpbxA
-X-Gm-Gg: AYBFou1Tfs7eWGn/gyphWHHZKmGxFun86VTM0V9XDL91hyPKj8o5DbJmiozvrdRM0aj
-	In6v+r2/MZ0CkiOtRB3yEqEM13DV4uPFH7SjMULsN/JpRrx89wITd08qUnQsFrAWkM1r9ePcOoF
-	Yppb0ugHnT6ZKRkMWzCpanvv5YTJGeNiXNuB+weYinz5b06RPketwDJ/i5VLLMUI0BW23+nhjtS
-	jnqfK9Lxf+PzQzzF4+wNgTS2mTMv0eyMhj7f4Ru407FvDMacD7rNlz4xWsNMoBcrz5aREtlhjgj
-	Le2Zqhw1kOhs7DsjnQ7pAalmv8Q1F5avXJLwI8of+kPRQUgjZfy4B9ja7puwIkRE/mTmulW7IYY
-	L+nYTrHl48xM79pyFLyxBOc6kFnF4AjwTLUK3Dt3XWXZZSWdGMrTbpuwdyyk+H0tBK0xO+2upsx
-	ldI9KVpIHgrwIlHz7pUSCowe+KoEBnvwKIk32YQgwMwjIYhz0EzC76NG6mA6knQshv+bjwp52S9
-	tO70m5fW8bvxK73qNyKFUBW8QXS9Oi91FxPHpbfpjg0eLVwGLE2gC3QcdFhNiZhiFtQU2mNmjzb
-	twzlrk4TnMgmtA5SpyTUSrCWKCjt6tTPY68dud8m0lm7p9lSXcrB2EwRsMER7u4kphgL/l5ECri
-	Eb2L1hnM6RBMI3Do7gga0AWq5ZjMe9ceGujhhNN4PcPKcKxUFVhmZtN4n6U6Ue7ihf6PMVvVLz7
-	Gdv74VApJq9TSh/xxDCQP1mOQMJyXqY45yNxK4k2Sd/AKOI5FUhIk137CKmCOZ/ndrhTF9XROhX
-	wYDgXK9h1A1kwOc6nJ/i7FIx0v73LfPKhizyi9uZznoW2UNmZi2yxHa7mAF7q4uTN6onTk=
-X-Received: by 2002:a05:600c:3f10:b0:4a7:9025:5c3b with SMTP id 5b1f17b1804b1-4ac1889cc2fmr303664565e9.19.1793730650716;
-        Tue, 03 Nov 2026 10:30:50 -0800 (PST)
+        bh=3GsiDmClXUsZuQhYM79SYeH9oaXJBKEF/AnaKpHO+KY=;
+        b=d2796FpU5fg7+pPLgDfZuaHg0vWJESQuG7eQifI/1ZPOBFdkWQ0rjuYLc8vkVZLg69
+         tpT8e/G92EeQw+Xo2gMF0SrE2BU152EYO1VxuVt6is/sQa+huMcsafMf6ErjQ5qDYura
+         XHPu9inmeYSQr3YAjdvU8Nz/fvGFH3HRXisW70RWAH6Fx8PaIoafhBfSgPN7ZjR/Wcrb
+         yJFSe/Ko0vItmIZYukLKg4J7noxCvr1ZygvpuDhN7oNz8eUPdytB5NzNsBEwtW4nExxV
+         vipdSwT3IsAy38FIyhg6yoEeRjZ+E6gGwNnL0OlHBsc+o1GWjTKxtnFVFJ6a6s3hWbo6
+         Y1oQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1793730652; x=1794335452;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=3GsiDmClXUsZuQhYM79SYeH9oaXJBKEF/AnaKpHO+KY=;
+        b=0jLqaE3dwy/z2ZAa34lt0ZHU0xyhXEy33tOZSmWkLJjqHr6G9iCw5XqkdK7fBMu0P2
+         UmssLjszIwuwQFv/2pVIZMqIyEA/ic2bEXtdNaiErHt4V1RlbrROlDq1AxzMPfUu2thw
+         55qbnAAQ7KqqN/Z8ZR9bbag7KUlYo+dA6g0Rp7Syxc9IzzCXSm+2YyGqfKd6T7h43fT5
+         NqTEpzEo0tkOKD3Lc7zivY9KGue6IveoHeyK2ne+6PYb8gQcLcMCuRUNMEi3KPCEsjm8
+         QRTy4T1ZrSLTHQiLl1pOvJhjA8PJ0w7oRjhNuRYOr0MODwXyyslAV23oeeISYqzOoYgG
+         vl8g==
+X-Forwarded-Encrypted: i=1; AKwUvByIVibMvFXlMQ6cr2Q7T7g/UWteenr88sOCeFpcOfuD+gi/dC4AbH+0XNH9JWicQ4ud+N+0GDVS2xI=@vger.kernel.org
+X-Gm-Message-State: APuU4Z/FDQWmGtYQBDynTDsRR/gQZt/N/y2X8GcG08mVBF2AFz/n13jh
+	ZlkyTlHXATTj107Zj4Cv2vJNRLebbJqv1JtClYBcf/biDsw9NIWzNMe2
+X-Gm-Gg: AYBFou1hTyA5aSrYAjI42vqfpO9zquYj1ctlkahCktuOp8Btzc0cF2Kb3blq4BfSwxZ
+	pXWRDRkTAmkEhkRbkg1Uwzadn60MQBpReXL7rd8tOsJ4F2lV/WJ4ZDrFgg5VGUAXDrGe0XsMrvz
+	3RM4MigUzK6frQtZRpfwGcrogd041IKvA0Ut1FTRqDysoyQ6Nfb+O6p7DkOt3Yo3Ieb/YSnO943
+	yqJw+QmQEi6st40WWJFrvQB/He3+Tt+rOiXZxb3RRM/erM7VXsQYAuLEHR7Yid8z7fO0XXyYl5w
+	oykwFNZXgXNCn/tfynoufuocz5me8zDnbyguQ7Asn0N49AeLPpOXKhRQMJ2nHkDd2n6WmMkW/rU
+	vCAKxfAOjWDErULGL2CvDspOIkACJgttgRgEFVgkaVgdorWyDyQBL6PegwEakuHmcM55PYsPvG/
+	fBwlHdgpSTlSmD8RkGpg/rHX27VvnBnE6yGN5ppBRX9OG837VkrSeHmzSHZ73813m4pW8rHn6fX
+	+em5ZFt6xrR15XRXOw7jeZcCxft8TfkezjDOqEx4iiP0Q5W7o2YkgnhshX3HETNCpJ4atZcSQd2
+	SUklLK4WHj5svWuvDNZi6s0P7xlgO0V9wlu0TxB6W/yXNzb13xvTWQDm9DVFLpoN+2nWgx9CB/9
+	o2zsmYoFxqMivj3tyfJhKo4rNa5d2WGD1CaRPgvovheEk21kvXclgP5a9mXvZv2S8OQUiyyUw2Q
+	WY6UpiInK5MR5wwg+7xoF3aiXQdeyPK3wXZ8v5XxDQn/wfsYZ2l+s2SY+W8loGJK9GodMt0XXVI
+	QY2OcfMZL0dTYkzbrJPFARkWwj7yI14xLebq7VCQ8bKYT0bRg==
+X-Received: by 2002:a05:600c:1d29:b0:4a5:5fb9:5d35 with SMTP id 5b1f17b1804b1-4ac187a7678mr340616585e9.21.1793730651873;
+        Tue, 03 Nov 2026 10:30:51 -0800 (PST)
 Received: from jernej-laptop (194-152-27-116.dynamic.telemach.net. [194.152.27.116])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4b2ab00ff3dsm146339785e9.14.2026.11.03.10.30.49
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4b2ab00ff3dsm146339785e9.14.2026.11.03.10.30.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 03 Nov 2026 10:30:50 -0800 (PST)
+        Tue, 03 Nov 2026 10:30:51 -0800 (PST)
 From: Jernej Skrabec <jernej.skrabec@gmail.com>
 To: Ulf Hansson <ulfh@kernel.org>
 Cc: Chen-Yu Tsai <wens@kernel.org>,
@@ -91,10 +92,12 @@ Cc: Chen-Yu Tsai <wens@kernel.org>,
 	linux-sunxi@lists.linux.dev,
 	linux-kernel@vger.kernel.org,
 	Jernej Skrabec <jernej.skrabec@gmail.com>
-Subject: [PATCH 0/4] mmc: sunxi: fixes and preparation for A523 UHS support
-Date: Tue,  3 Nov 2026 19:30:26 +0100
-Message-ID: <20261103183030.81078-1-jernej.skrabec@gmail.com>
+Subject: [PATCH 1/4] mmc: sunxi: Report manual stop errors correctly
+Date: Tue,  3 Nov 2026 19:30:27 +0100
+Message-ID: <20261103183030.81078-2-jernej.skrabec@gmail.com>
 X-Mailer: git-send-email 2.56.0
+In-Reply-To: <20261103183030.81078-1-jernej.skrabec@gmail.com>
+References: <20261103183030.81078-1-jernej.skrabec@gmail.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -106,43 +109,47 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This series fixes a bug in the sunxi-mmc driver and paves the way for
-SD card UHS-I support on the A523, which will follow in a later series
-together with the A523 clock phases, delay-chain tuning and the PF bank
-supply switch.
+When a data transfer fails, sunxi_mmc_finalize_request() sets the stop
+command error to -ETIMEDOUT and the threaded interrupt handler sends a
+manual stop command. This has two problems:
 
-Patch 1 fixes the manual stop command error reporting: a successful
-manual stop command is still reported as failed, while a failed one
-stores the error in its response instead.
+- If the manual stop command succeeds, its response is stored, but the
+  provisional -ETIMEDOUT error is left in place. The request thus
+  completes with a stop command error that didn't happen, and as the
+  block layer only checks the card status in the stop response when
+  the stop command didn't fail, errors reported there are ignored.
+- If the manual stop command fails, -ETIMEDOUT is stored in the
+  response instead of in the error field. The block layer then decodes
+  it as an R1 card status with random error bits set.
 
-The remaining patches improve the DMA setup and error reporting, which
-the UHS-I work builds upon: a DMA mask matching the shifted IDMA
-addresses, IDMA descriptors built from the mapped DMA segments as the
-DMA API requires, and CRC errors reported as -EILSEQ instead of
--ETIMEDOUT, so the MMC core can request retuning.
+Store the error of a failed stop command in the error field, and clear
+the provisional error when the manual stop command succeeds.
 
-The series is based on mmc next, but depends on commit 5e32202f532d
-("mmc: sunxi: fix clock and runtime PM leaks on probe failure") from
-mmc fixes, which adds the error_disable_mmc label used by patch 2.
+Fixes: 3cbcb16095f9 ("mmc: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs")
+Signed-off-by: Jernej Skrabec <jernej.skrabec@gmail.com>
+---
+ drivers/mmc/host/sunxi-mmc.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-Tested on H3, H6 and H616 SoCs, on multiple boards, including Tanix TX6
-and OrangePi Plus2E.
-
-Best regards,
-Jernej
-
-Jernej Skrabec (4):
-  mmc: sunxi: Report manual stop errors correctly
-  mmc: sunxi: Set the IDMA DMA mask
-  mmc: sunxi: Build IDMA descriptors from mapped SG list
-  mmc: sunxi: Distinguish CRC and timeout errors
-
- drivers/mmc/host/sunxi-mmc.c | 122 +++++++++++++++++++++++------------
- 1 file changed, 81 insertions(+), 41 deletions(-)
-
-
-base-commit: fd9af27f6c2319713bb23832066585f8a59a1771
-prerequisite-patch-id: 8d600908a2eb84acfcd034482dd6e345242f1464
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index fe4c0f6d73f3..9744b6b860ac 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -470,10 +470,12 @@ static void sunxi_mmc_send_manual_stop(struct sunxi_mmc_host *host,
+ 	if (!(ri & SDXC_COMMAND_DONE) || (ri & SDXC_INTERRUPT_ERROR_BIT)) {
+ 		dev_err(mmc_dev(host->mmc), "send stop command failed\n");
+ 		if (req->stop)
+-			req->stop->resp[0] = -ETIMEDOUT;
++			req->stop->error = -ETIMEDOUT;
+ 	} else {
+-		if (req->stop)
++		if (req->stop) {
+ 			req->stop->resp[0] = mmc_readl(host, REG_RESP0);
++			req->stop->error = 0;
++		}
+ 	}
+ 
+ 	mmc_writel(host, REG_RINTR, 0xffff);
 -- 
 2.43.0
 
