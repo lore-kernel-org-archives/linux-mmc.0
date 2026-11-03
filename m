@@ -1,100 +1,100 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.41
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793724233;
-	b=dn/1I+U6XLUkQkX2fw54FPLrwD7VTRAo4bOdZxuEuRNP+h6PAeOaYeFthhheuNVP+yPi
-	 7cNpqLYI/xtTVnG3vX7psPFOs/Ty9UrCcK7U3U3fHaXF95D4RjTpdLhJDpfLDB/gQkB+G
-	 adZMgIDB+pNXErCgma2Dgv9W0sJ9gdizgJJPmJYNHINeykn7Lkrt7kgejLA0frGCuBkuG
-	 rbvZy77RDxeHEfqHEmSCm1gA2WNic7je72iRn0CknR+ffIXl8wGojY8ISwk/HCBwiH/8v
-	 VihyBwj0lI8/2ix7TNfGjkdNW95n2BWtZrJcPTSRtztfpB8P6DYl+XI5lmVHcV3r62w==
+	t=1793730652;
+	b=rj2vTEqQ2rfC0BRbcHGPTFp8NiaHk3K4Wt0Mks0CX/fIVZHDbveutkG6xWl1Cfwt0BeL
+	 VMww1n/qZhduCit5iMN2OK5CEyZ+KmohEd+xcuj1xHyPLcWLXxgnTb660fEQDoqpG83om
+	 qqa3SO+QRl3hvGMvlDETqCpfuVWgsyHpXXXQkyrgE4DjD+MBEmL7J4UM7/TclNg04Yc85
+	 XJ9dqQCKshAUBP5PVUSLDNyI91Bli4y+kzjYv0bdAJkTwyWCYU1U6KhspieJYhFsvki1g
+	 lQC+/qgcO2LFvFInenNoil7b+Kl2PO/7t0FyfYTNvi2CzokpucPHaRcFPj7n4LcYs7A==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793724233;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:X-UD-Smtp-Session:Date:
-	 From:To:Cc:Subject:Message-ID:References:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To;
-	bh=W8xCoWoLLQfSq8i5Qi+fm11gUA6qTjPeDx6DMi+PVBo=;
-	b=MkBffHCpWlItbd6ElxfduTT2oQqmDiyL0B7dqctyRv96QSnaSjaet41M1HUqMDcW1GBu
-	 xoHrqR0N+uD6Lv123wG0rZnFWkhlYekIsrTHccO1EvNHGDZ1jvYkIqWPVRM9wN2Fc9BC/
-	 j1f9vd8iR3LLwMWI27LELd7FswkAfh+vi+PHMM66OQlUcLpi8CCM4G4QTlujg889AvI6Q
-	 j5O3aW5zGUnvOV13un8gWkjj628+qrL8pBUZCCyEnGIAH4SoEoVU9o1pTR5MV2OUiafF6
-	 HgiDrLZTngRXVnIugmUKBUzwBBoJMwtW7tTGS/azn29iCk2QUOOVtHNP2hwitkVXo+w==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793730652;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
+	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:MIME-Version:
+	 Content-Transfer-Encoding;
+	bh=/iod9oXhgsGpyGcJPFTu5fqKBMIMVHyACTtYwHQfVM0=;
+	b=pig/Vn5iX9mIAcfheZkXPcMUVIRooX1JhKRjXWOuzsHJfMlFdtCBAqslwFeq7h7o+NAK
+	 PGH5GGwm3V5M+ZvJIOate+8qSmfNKtgwPLTuFd5BgqmdR4JqI4EHfzKNjti6rPmbL4L0+
+	 9rG0RQj+DYTqq2zO1FQW/r0tfkVyHFRh1Tkk4ScorKC8R+x55u85YCZKQeD6b+n9O0+SY
+	 0k5atZEOq6GPFHqAf3SXU6k5QZ18px5X7nJ0g8SpbHltGJ2tW+9V2RfV3txpKej7BL+eu
+	 UbUzTbfegHjoTp0dCadR/nbaUo134TdtEFE3dRMVQcaV0JpwxPqCKlbGJDu7QEe4OFQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=sang-engineering.com;
-	spf=pass smtp.mailfrom=sang-engineering.com;
-	dkim=pass header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=Te7IK0u9;
-	arc=none smtp.remote-ip=194.117.254.33
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=oTE0Ftyd;
+	arc=none smtp.remote-ip=209.85.128.41
+Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 876A6606EEAE
-	for <linux-mmc@vger.kernel.org>; Tue,  3 Nov 2026 16:43:51 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 876A6606EEAE
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DDC2606A32C
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Nov 2026 18:30:52 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6DDC2606A32C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=Te7IK0u9
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=W8xC
-	oWoLLQfSq8i5Qi+fm11gUA6qTjPeDx6DMi+PVBo=; b=Te7IK0u9c1h6hR0DRAlT
-	FHjZyxJ1laoT4G8FkfVwZjVlHMu50gT88cv110WjLlQ44adjFxv1ha0DI274kN6z
-	bS1xF6dxbHI7u9hB3i45B/hgOSt+hEJWF/fUt1hHfpJFts5v++IlTs+6EjKtcaiN
-	uE7bzFTOVNRxgPJwAe9ZU3K6YQVWbSTe8ewEv3cEEtQishyVYT6Ab37Z9wZfM3Oy
-	kzvQMMF3hxCxWoT28eo+kzdCZlJRLmFMLNvZVLYw9k6CmArdhYIShEIJuMDtLNyu
-	L0m3E/KJXnZ8MPGcWyUxMv0essagc9gDJ/MloPUwbiiNjFU2QN5WDBOpKChAvr0u
-	NA==
-Received: (qmail 357587 invoked from network); 3 Nov 2026 17:43:45 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Nov 2026 17:43:45 +0100
-X-UD-Smtp-Session: l3s3148p1@jzFJ92FfgJTAwtcC
-Date: Tue, 3 Nov 2026 18:43:45 +0200
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Frank.Li@oss.nxp.com
-Cc: Aubin Constans <aubin.constans@microchip.com>,
-	Ulf Hansson <ulfh@kernel.org>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>,
-	Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>, Frank Li <Frank.Li@nxp.com>,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>,
-	Fabio Estevam <festevam@gmail.com>,
-	Aaro Koskinen <aaro.koskinen@iki.fi>,
-	Andreas =?utf-8?Q?F=C3=A4rber?= <afaerber@suse.de>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>,
-	Jesper Nilsson <jesper.nilsson@axis.com>,
-	Lars Persson <lars.persson@axis.com>,
-	John Garry <john.garry@linux.dev>,
-	Hemanth Selam <hemanth.selam@gmail.com>,
-	Pengpeng Hou <pengpeng@iscas.ac.cn>, Rosen Penev <rosenp@gmail.com>,
-	Fan Wu <fanwu01@zju.edu.cn>,
-	Marco Crivellari <marco.crivellari@suse.com>,
-	Pan Chuang <panchuang@vivo.com>,
-	Zhan Xusheng <zhanxusheng1024@gmail.com>,
-	Rakuram Eswaran <rakuram.e96@gmail.com>,
-	Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>,
-	Ethan Nelson-Moore <enelsonmoore@gmail.com>,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	Runyu Xiao <runyu.xiao@seu.edu.cn>,
-	"open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>,
-	"moderated list:ARM/Microchip (AT91) SoC support" <linux-arm-kernel@lists.infradead.org>,
-	open list <linux-kernel@vger.kernel.org>,
-	"moderated list:BROADCOM BCM2711/BCM2835 ARM ARCHITECTURE" <linux-rpi-kernel@lists.infradead.org>,
-	"open list:ARM/FREESCALE IMX / MXC / LAYERSCAPE ARM ARCHIT..." <imx@lists.linux.dev>,
-	"open list:OMAP MMC SUPPORT" <linux-omap@vger.kernel.org>,
-	"moderated list:ARM/ACTIONS SEMI ARCHITECTURE" <linux-actions@lists.infradead.org>,
-	"open list:TMIO/SDHI MMC DRIVER" <linux-renesas-soc@vger.kernel.org>,
-	"open list:ARM/ARTPEC MACHINE SUPPORT" <linux-arm-kernel@axis.com>,
-	vkoul@kernel.org
-Subject: Re: [PATCH 1/1] mmc: use dmaengine_desc_set_callback()
-Message-ID: <auoPQVa1LMvluoYM@shikoro>
-References: <20261102172126.3890568-1-Frank.Li@oss.nxp.com>
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=oTE0Ftyd
+Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-4a20bdaf39cso50242015e9.1
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Nov 2026 10:30:52 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20260707; t=1793730651; x=1794335451; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=/iod9oXhgsGpyGcJPFTu5fqKBMIMVHyACTtYwHQfVM0=;
+        b=oTE0Ftyd1ftHdx/k4ZvP62rvGiEotVrlyVzG8K8lXiQB0n7GOL/Ivt6ERRZJspNbDU
+         woWFmaXITSpmezb4vI1eSBO3vKdT1L9ObUomyL6sBzkYAJDTzjhK3NWmArSJdE0pjM58
+         nGjaDDgROXLR92862kuVIr/UqW8GGxTErnhpJraKIRKCxjns0+TbHFajys4PwFsp6m4p
+         NKlz2SyLsfJKDpWRSTsMHAgbEwrHAwhiWiXCxmfvYmTqqnRwgithsHO5R3YU9o4MU9yO
+         RYJhaWzyqaq4HSD1PhvLPXGrnzTnRtnwrqTIcPw3oXyaNKfxaz4HpZC33TGZY0yRmH+p
+         4OkA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1793730651; x=1794335451;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=/iod9oXhgsGpyGcJPFTu5fqKBMIMVHyACTtYwHQfVM0=;
+        b=cpNO2lniXnSR57NNa6RK7PSWPzKB/AS7DLbYRqBQHwRbsHFVLMdylnzsAer0+ObC7F
+         bD1KamrXgxAAZtXTZcOAlfP99+mVItb1gzgR61S/Mu56QcYN+RVy6jMXjPWuWp5Iiosb
+         63QbPE/dvx4zpCA335nJlC1Kvs5cJexeKGTxyTkvrPKJsAXODClzleJ+NRu0jJf9/dfn
+         5N6E7uA/rSSN/tjnuOlNQN+By7t6SBBVeX+mgiA4Dz0un1ITNTaJhqyUHe373y/hDN0+
+         CEay7Hf96yWeI9ia/JVSgNUeaWcajC6PSjCVmdFYjrLOBi13v+Xq4MNlZzJzNMXVwAZC
+         oOng==
+X-Forwarded-Encrypted: i=1; AKwUvBziDS3FGyhvYT5WD9ctertyVNL168odIP+bpiroponFW+RpewaGIKZru5eHusEVeiPl7/MJWNTDD+0=@vger.kernel.org
+X-Gm-Message-State: APuU4Z+vqfaR/uRh9zFCMU1i1dIBLLeA3CZ5OIx7PBagHbGytrGPhwtZ
+	ciZ8/JdV5brEG9LIzf/y3yvQd/Z5YgfWTA83NHrpHmG6unGjQ6+cpbxA
+X-Gm-Gg: AYBFou1Tfs7eWGn/gyphWHHZKmGxFun86VTM0V9XDL91hyPKj8o5DbJmiozvrdRM0aj
+	In6v+r2/MZ0CkiOtRB3yEqEM13DV4uPFH7SjMULsN/JpRrx89wITd08qUnQsFrAWkM1r9ePcOoF
+	Yppb0ugHnT6ZKRkMWzCpanvv5YTJGeNiXNuB+weYinz5b06RPketwDJ/i5VLLMUI0BW23+nhjtS
+	jnqfK9Lxf+PzQzzF4+wNgTS2mTMv0eyMhj7f4Ru407FvDMacD7rNlz4xWsNMoBcrz5aREtlhjgj
+	Le2Zqhw1kOhs7DsjnQ7pAalmv8Q1F5avXJLwI8of+kPRQUgjZfy4B9ja7puwIkRE/mTmulW7IYY
+	L+nYTrHl48xM79pyFLyxBOc6kFnF4AjwTLUK3Dt3XWXZZSWdGMrTbpuwdyyk+H0tBK0xO+2upsx
+	ldI9KVpIHgrwIlHz7pUSCowe+KoEBnvwKIk32YQgwMwjIYhz0EzC76NG6mA6knQshv+bjwp52S9
+	tO70m5fW8bvxK73qNyKFUBW8QXS9Oi91FxPHpbfpjg0eLVwGLE2gC3QcdFhNiZhiFtQU2mNmjzb
+	twzlrk4TnMgmtA5SpyTUSrCWKCjt6tTPY68dud8m0lm7p9lSXcrB2EwRsMER7u4kphgL/l5ECri
+	Eb2L1hnM6RBMI3Do7gga0AWq5ZjMe9ceGujhhNN4PcPKcKxUFVhmZtN4n6U6Ue7ihf6PMVvVLz7
+	Gdv74VApJq9TSh/xxDCQP1mOQMJyXqY45yNxK4k2Sd/AKOI5FUhIk137CKmCOZ/ndrhTF9XROhX
+	wYDgXK9h1A1kwOc6nJ/i7FIx0v73LfPKhizyi9uZznoW2UNmZi2yxHa7mAF7q4uTN6onTk=
+X-Received: by 2002:a05:600c:3f10:b0:4a7:9025:5c3b with SMTP id 5b1f17b1804b1-4ac1889cc2fmr303664565e9.19.1793730650716;
+        Tue, 03 Nov 2026 10:30:50 -0800 (PST)
+Received: from jernej-laptop (194-152-27-116.dynamic.telemach.net. [194.152.27.116])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4b2ab00ff3dsm146339785e9.14.2026.11.03.10.30.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 03 Nov 2026 10:30:50 -0800 (PST)
+From: Jernej Skrabec <jernej.skrabec@gmail.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: Chen-Yu Tsai <wens@kernel.org>,
+	Samuel Holland <samuel@sholland.org>,
+	Andre Przywara <andre.przywara@arm.com>,
+	Anfernee Cao <anferneemelokc5@gmail.com>,
+	linux-mmc@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-sunxi@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	Jernej Skrabec <jernej.skrabec@gmail.com>
+Subject: [PATCH 0/4] mmc: sunxi: fixes and preparation for A523 UHS support
+Date: Tue,  3 Nov 2026 19:30:26 +0100
+Message-ID: <20261103183030.81078-1-jernej.skrabec@gmail.com>
+X-Mailer: git-send-email 2.56.0
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -104,18 +104,45 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261102172126.3890568-1-Frank.Li@oss.nxp.com>
+Content-Transfer-Encoding: 8bit
+
+This series fixes a bug in the sunxi-mmc driver and paves the way for
+SD card UHS-I support on the A523, which will follow in a later series
+together with the A523 clock phases, delay-chain tuning and the PF bank
+supply switch.
+
+Patch 1 fixes the manual stop command error reporting: a successful
+manual stop command is still reported as failed, while a failed one
+stores the error in its response instead.
+
+The remaining patches improve the DMA setup and error reporting, which
+the UHS-I work builds upon: a DMA mask matching the shifted IDMA
+addresses, IDMA descriptors built from the mapped DMA segments as the
+DMA API requires, and CRC errors reported as -EILSEQ instead of
+-ETIMEDOUT, so the MMC core can request retuning.
+
+The series is based on mmc next, but depends on commit 5e32202f532d
+("mmc: sunxi: fix clock and runtime PM leaks on probe failure") from
+mmc fixes, which adds the error_disable_mmc label used by patch 2.
+
+Tested on H3, H6 and H616 SoCs, on multiple boards, including Tanix TX6
+and OrangePi Plus2E.
+
+Best regards,
+Jernej
+
+Jernej Skrabec (4):
+  mmc: sunxi: Report manual stop errors correctly
+  mmc: sunxi: Set the IDMA DMA mask
+  mmc: sunxi: Build IDMA descriptors from mapped SG list
+  mmc: sunxi: Distinguish CRC and timeout errors
+
+ drivers/mmc/host/sunxi-mmc.c | 122 +++++++++++++++++++++++------------
+ 1 file changed, 81 insertions(+), 41 deletions(-)
 
 
->  drivers/mmc/host/renesas_sdhi_sys_dmac.c | 6 ++----
->  drivers/mmc/host/sdhci.c                 | 3 +--
->  drivers/mmc/host/sh_mmcif.c              | 6 ++----
->  drivers/mmc/host/uniphier-sd.c           | 3 +--
->  drivers/mmc/host/usdhi6rol0.c            | 3 +--
-
-For those:
-
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com> # Renesas related drivers
+base-commit: fd9af27f6c2319713bb23832066585f8a59a1771
+prerequisite-patch-id: 8d600908a2eb84acfcd034482dd6e345242f1464
+-- 
+2.43.0
 
