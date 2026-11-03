@@ -1,92 +1,66 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.171.202.116
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793696767;
-	b=Pozdurcg535vjH+02tyhRk1e2UTRWSgGcroZ284JE406sC/kJL52tc9R0O3BqmAn8cbI
-	 TNehY1dggtLuKPNP9pKX3PseEHMy/8KuzwIUqV8edBkKhS6MJ3WXrcioduOzKulXn3+uB
-	 0VFHK7q29aB3q7Bz/4Fuecf/+TGaUeed1Y8SGN3TOhkkv4EH2t5EMMJEnAfYk8vZo1LU1
-	 SqycZL1NFAXdc+Kt2189KguoJNIXny1zjQg7kNr1b2/0viYDUDZhmDseup+acc/SjBi6b
-	 YZIXglBZAYnJHBCwAz13RQ4jEDDjvetXDdC9B5nW8JznihamsfxkiMMP0e1GVPQwZDQ==
+	t=1793698521;
+	b=EjtXJc8XHMTJrS7W+TLfR+J819NsYdxR/MK9RJRtbSbnrYmYZF3K7VawbDCwWit6xCsz
+	 axT1tsyr7iCIdR7EQC6DMddYdYyM9m8+kfj9v6ft0nR7HPQ5r1Eeq+Ux5fHyFkIVSSoWb
+	 kP5RFGAi6OiKbyj4/rGO2trrkg7ocQBjyPwfjAh04OpVTUW98G1kcLhFKVSLNgL4g+3r4
+	 z6i0qRrgx4gmJX0Ci+YEydXTXHMOJPYKQilmdgUnjR9Euu3Ykg3iJZagg3Ncrs43Oo/3d
+	 oD671bgRzONUAN8wG/3f3Av46VUQtvxn7POOPzYL6AteWpgdFILyaZH0iTFTom51Xcg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793696767;
-	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
-	bh=/vrFL4kHP2eDGtJUZKQrjQzSBAgnCJvrdrlUYTMMEeA=;
-	b=sBmzypmCQMUV40Gg8fgRRi7qYkEKehTtJBWSWCuwSnH0eq6krdNl4qgTO0B8CkrtxnhS
-	 ZmjbbKsqLDj+2MpaBUpMUtd1uDX7iQ4jM9xMLCqL9q6Vylijd5k/ylORA0/Z/p+gBwPj3
-	 POIWP5TqNeaI1qBkvSFJedAqMNDkNDp8VJvY1BnkFrWgwCKH9UvWFlWZWn0qfPSeNsuil
-	 Ol+KmZ4LKUvgFvjNqxDdiDorp+rFqhlzPb2MvtxnnEe0etSOLp8+5Qa6rO+pfRg6XRJrC
-	 kF4Yr8mJR7U24MXZtXv8mmHHKGdxbSIwERIwyn0jwpSnzqWRJG1qqEDmTceSrqpzEdQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793698521;
+	h=DMARC-Filter:Received:Received:Received:DKIM-Signature:From:To:Cc:
+	 Subject:Date:Message-ID:X-Mailer:MIME-Version:
+	 Content-Transfer-Encoding:X-Last-TLS-Session-Version;
+	bh=6o537cHF3ZsBsyeLBKkxyQxJxv6nVsc5mI6mjoRRjxc=;
+	b=J6IpIBPPn7uBrbXOHeav0gIPa3EZr5zt/MwvsUVUdBEUncKVLd6jqXMXZ6XECOBEYc9i
+	 N5O//cOffTjN5fjgCGd+sW6SmXsT3zhw4kPfv9NxGufS6VOndb/8ub2vUSKX3wk+OvED/
+	 BJSzC6mGAqCTT2Z6qpFa7oG2ifzQ7KPn9wArYnW03iZgGarL1cK8p7oTg7waVF+gfNULZ
+	 NlHVvK1akM0vcZO82ayN39KNY4rTx/+GeBEgx4S3XD+f8BH93SrtsKyW2ZkYnsEsOAuwH
+	 NeyxDj+WQAFoysqsrNe92gzjb1lRQTwpVzn7sgAESPlKDFscJMlz0n2RPq1RkZd00Ag==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=WbvQOE91;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	dmarc=pass header.from=bootlin.com;
+	spf=pass smtp.mailfrom=bootlin.com;
+	dkim=pass header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=nNuECPAC;
+	arc=none smtp.remote-ip=185.171.202.116
+Received: from smtpout-04.galae.net (smtpout-04.galae.net [185.171.202.116])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with UTF8SMTPS id 0A370606A324;
-	Tue,  3 Nov 2026 09:06:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44089606A327
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Nov 2026 09:35:20 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 44089606A327
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=WbvQOE91
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id AD1DC1F000C1;
-	Tue,  3 Nov 2026 09:06:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793696766;
-	bh=/vrFL4kHP2eDGtJUZKQrjQzSBAgnCJvrdrlUYTMMEeA=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=WbvQOE91Giayv3gYkrmhqO5vJ0WQM4qO9mwZJnSz/8a3bL30Z4BHDdOJlgP4YvIg3
-	 RR58S8IKpAuzUQOF1QCyf1hydtyNga6de5toJbtka98Ry74X9X62Tcsl90HhW1U9K8
-	 drOO9aHMv/T/Duej2QQohkw6k/Ue1hU9/4ojMa9w9vIiNL+mkB40o9tP9Q8TRyDoOW
-	 eFoarQWHgGxyseGO9ThB75JrIM4cAj9QeeVPuZkRE1+If0ubkcjH388NIs8Gkl66lO
-	 zxQ02VuUF7xP22Myc+A5hgZIwV4Tlp3gC9tV30bGC8ybKy2UrOOrhUGWE99jlqYNJ7
-	 XFIt/QM1TVreQ==
-Date: Tue, 3 Nov 2026 10:05:58 +0100
-From: Bartosz Golaszewski <brgl@kernel.org>
-To: "Rob Herring (Arm)" <robh@kernel.org>
-Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
-	Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>, 
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Vadim Fedorenko <vadim.fedorenko@linux.dev>, Arkadiusz Kubalewski <arkadiusz.kubalewski@intel.com>, 
-	Jiri Pirko <jiri@resnulli.us>, Ivan Vecera <ivecera@redhat.com>, 
-	Benson Leung <bleung@chromium.org>, Guenter Roeck <groeck@chromium.org>, 
-	Linus Walleij <linusw@kernel.org>, Frank Li <Frank.Li@nxp.com>, 
-	Sascha Hauer <s.hauer@pengutronix.de>, Pengutronix Kernel Team <kernel@pengutronix.de>, 
-	Fabio Estevam <festevam@gmail.com>, Jonathan Cameron <jic23@kernel.org>, 
-	David Lechner <dlechner@baylibre.com>, Nuno =?utf-8?B?U8Oh?= <nuno.sa@analog.com>, 
-	Andy Shevchenko <andy@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, 
-	Alexandre Torgue <alexandre.torgue@foss.st.com>, Olivier Moysan <olivier.moysan@foss.st.com>, 
-	Arnaud Pouliquen <arnaud.pouliquen@foss.st.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
-	Thierry Reding <thierry.reding@kernel.org>, Jonathan Hunter <jonathanh@nvidia.com>, 
-	Fabrice Gasnier <fabrice.gasnier@foss.st.com>, Lee Jones <lee@kernel.org>, 
-	Srinivas Kandagatla <srini@kernel.org>, Ekansh Gupta <ekansh.gupta@oss.qualcomm.com>, 
-	Ulf Hansson <ulfh@kernel.org>, Hans Ulli Kroll <ulli.kroll@googlemail.com>, 
-	Andrew Lunn <andrew+netdev@lunn.ch>, "David S. Miller" <davem@davemloft.net>, 
-	Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>, 
-	Paolo Abeni <pabeni@redhat.com>, Vinod Koul <vkoul@kernel.org>, 
-	Neil Armstrong <neil.armstrong@linaro.org>, Manivannan Sadhasivam <mani@kernel.org>, 
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, 
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Kunihiko Hayashi <hayashi.kunihiko@socionext.com>, 
-	Masami Hiramatsu <mhiramat@kernel.org>, Liam Girdwood <lgirdwood@gmail.com>, 
-	Mark Brown <broonie@kernel.org>, "Rafael J. Wysocki" <rafael@kernel.org>, 
-	Daniel Lezcano <daniel.lezcano@kernel.org>, Zhang Rui <rui.zhang@intel.com>, 
-	Lukasz Luba <lukasz.luba@arm.com>, Orson Zhai <orsonzhai@gmail.com>, 
-	Baolin Wang <baolin.wang@linux.alibaba.com>, Chunyan Zhang <zhang.lyra@gmail.com>, 
-	Paul Kocialkowski <paul.kocialkowski@bootlin.com>, Shawn Guo <shawnguo@kernel.org>, 
-	Chanh Nguyen <chanh@os.amperecomputing.com>, Alistair Francis <alistair@alistair23.me>, 
-	Julius Werner <jwerner@chromium.org>, Paul Cercueil <paul@crapouillou.net>, 
-	Dmitry Osipenko <digetx@gmail.com>, Florian Fainelli <f.fainelli@gmail.com>, 
-	Thierry Reding <thierry.reding@gmail.com>, Ray Jui <ray.jui@broadcom.com>, 
-	Scott Branden <scott.branden@broadcom.com>, Krzysztof Kozlowski <krzk@kernel.org>, 
-	dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	netdev@vger.kernel.org, chrome-platform@lists.linux.dev, linux-gpio@vger.kernel.org, 
-	imx@lists.linux.dev, linux-arm-kernel@lists.infradead.org, 
-	linux-hwmon@vger.kernel.org, linux-iio@vger.kernel.org, 
-	linux-stm32@st-md-mailman.stormreply.com, linux-sound@vger.kernel.org, linux-input@vger.kernel.org, 
-	linux-tegra@vger.kernel.org, mfd@lists.linux.dev, linux-arm-msm@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-phy@lists.infradead.org, linux-pm@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: Use hex unit address patterns
-Message-ID: <f3sq3awr2byfetufiuuh47bi5qf5kqtthqxwopumwsfpx46cx4@uiq7dvmvutvh>
-References: <20261102135330.2493332-1-robh@kernel.org>
+	dkim=pass (2048-bit key, unprotected) header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=nNuECPAC
+Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
+	by smtpout-04.galae.net (Postfix) with ESMTPS id CD6B9C4FEE1;
+	Tue,  3 Nov 2026 09:36:22 +0000 (UTC)
+Received: from mail.galae.net (mail.galae.net [212.83.136.155])
+	by smtpout-01.galae.net (Postfix) with ESMTPS id 4F93A6046C;
+	Tue,  3 Nov 2026 09:35:18 +0000 (UTC)
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 0DEDB10328C5E;
+	Tue,  3 Nov 2026 10:35:15 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
+	t=1793698517; h=from:subject:date:message-id:to:cc:mime-version:
+	 content-transfer-encoding; bh=6o537cHF3ZsBsyeLBKkxyQxJxv6nVsc5mI6mjoRRjxc=;
+	b=nNuECPACV+cGKmPfxJhqKNk7MK/aKdFSJwRREPIFUAYzyMsUAVdqXl14Ey7ijgjRfjWTdm
+	wDvJePyaAGHPefamMXBytyWpCXIoosdDVl4CiC0FPuaNoFT9tcWlDJ6p86vKbCAlFm/jFo
+	s8LEalw8+fL2QhA+O+f59W4KZnwffpqkfd0lU7KlMDMJmUQtyX3yxr9ahn9CcjbHSlVx4J
+	KsXeA6/3ll4T1oAQye1WI0Yw18RCunwC7jZEP25PeC4MyctaB5j+p/PXqlynBxfr/m86yh
+	P+RksDFY5JrxEImLKO8IdcqSWOjRwWXANhrUYr8pXSov2Shrxe+qJrD+iztRow==
+From: Paul Cercueil <paul.cercueil@bootlin.com>
+To: Tanmay Kathpalia <tanmay.kathpalia@altera.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulfh@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
+	Paul Cercueil <paul.cercueil@bootlin.com>
+Subject: [PATCH] mmc: sdhci-cadence: enable probing from ACPI
+Date: Tue,  3 Nov 2026 10:35:00 +0100
+Message-ID: <20261103093501.218232-1-paul.cercueil@bootlin.com>
+X-Mailer: git-send-email 2.47.3
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -96,21 +70,144 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261102135330.2493332-1-robh@kernel.org>
+Content-Transfer-Encoding: 8bit
+X-Last-TLS-Session-Version: TLSv1.3
 
-On Mon, Nov 02, 2026 at 07:53:22AM -0600, Rob Herring (Arm) wrote:
-> Unit-addresses by default (and most commonly) are hexadecimal. There's a
-> number of cases using decimal patterns. Fix all of them, limiting the
-> pattern to match the 'reg' limits if there are any.
-> 
-> Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
-> ---
->  .../bindings/display/xylon,logicvc-display.yaml      |  2 +-
->  .../devicetree/bindings/dpll/dpll-device.yaml        |  2 +-
->  .../bindings/embedded-controller/google,cros-ec.yaml |  4 ++--
->  .../intel,ixp4xx-network-processing-engine.yaml      |  2 +-
->  Documentation/devicetree/bindings/gpio/gpio-mxs.yaml |  4 ++--
+Use the device property API instead of the OF-specific property API.
+This way, the driver will also probe from ACPI.
 
-Acked-by: Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
+Note the change in the core's probe function for SD6HC. We can't have
+named clocks in ACPI.
+
+Signed-off-by: Paul Cercueil <paul.cercueil@bootlin.com>
+---
+ drivers/mmc/host/sdhci-cadence-core.c   | 22 ++++++++++++----------
+ drivers/mmc/host/sdhci-cadence-phy-v6.c | 10 +++++-----
+ 2 files changed, 17 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-cadence-core.c b/drivers/mmc/host/sdhci-cadence-core.c
+index 745455743b01..c5a4fa8e2fc6 100644
+--- a/drivers/mmc/host/sdhci-cadence-core.c
++++ b/drivers/mmc/host/sdhci-cadence-core.c
+@@ -5,6 +5,7 @@
+  * Copyright (C) 2026 Altera Corporation
+  */
+ 
++#include <linux/acpi.h>
+ #include <linux/bitfield.h>
+ #include <linux/bits.h>
+ #include <linux/dma-mapping.h>
+@@ -145,26 +146,26 @@ static int sdhci_cdns4_write_phy_reg(struct sdhci_cdns_priv *priv, u8 addr, u8 d
+ 	return ret;
+ }
+ 
+-static unsigned int sdhci_cdns4_phy_param_count(struct device_node *np)
++static unsigned int sdhci_cdns4_phy_param_count(struct device *dev)
+ {
+ 	unsigned int count = 0;
+ 	int i;
+ 
+ 	for (i = 0; i < ARRAY_SIZE(sdhci_cdns4_phy_cfgs); i++)
+-		if (of_property_present(np, sdhci_cdns4_phy_cfgs[i].property))
++		if (device_property_present(dev, sdhci_cdns4_phy_cfgs[i].property))
+ 			count++;
+ 
+ 	return count;
+ }
+ 
+-static void sdhci_cdns4_phy_param_parse(struct device_node *np, struct sdhci_cdns4_phy *phy)
++static void sdhci_cdns4_phy_param_parse(struct device *dev, struct sdhci_cdns4_phy *phy)
+ {
+ 	struct sdhci_cdns4_phy_param *p = phy->phy_params;
+ 	u32 val;
+ 	int ret, i;
+ 
+ 	for (i = 0; i < ARRAY_SIZE(sdhci_cdns4_phy_cfgs); i++) {
+-		ret = of_property_read_u32(np, sdhci_cdns4_phy_cfgs[i].property, &val);
++		ret = device_property_read_u32(dev, sdhci_cdns4_phy_cfgs[i].property, &val);
+ 		if (ret)
+ 			continue;
+ 
+@@ -204,7 +205,7 @@ static int sdhci_cdns_set_dma_mask(struct sdhci_host *host)
+ 	struct device *dev = mmc_dev(host->mmc);
+ 	int ret;
+ 
+-	data = of_device_get_match_data(dev);
++	data = device_get_match_data(dev);
+ 	if (!data || !data->dma_mask)
+ 		return 0;
+ 
+@@ -649,13 +650,13 @@ static int sdhci_cdns4_phy_probe(struct platform_device *pdev, struct sdhci_cdns
+ 	struct sdhci_cdns4_phy *phy;
+ 	unsigned int nr_phy_params;
+ 
+-	nr_phy_params = sdhci_cdns4_phy_param_count(dev->of_node);
++	nr_phy_params = sdhci_cdns4_phy_param_count(dev);
+ 	phy = devm_kzalloc(dev, struct_size(phy, phy_params, nr_phy_params), GFP_KERNEL);
+ 	if (!phy)
+ 		return -ENOMEM;
+ 
+ 	phy->nr_phy_params = nr_phy_params;
+-	sdhci_cdns4_phy_param_parse(dev->of_node, phy);
++	sdhci_cdns4_phy_param_parse(dev, phy);
+ 	priv->phy = phy;
+ 
+ 	return sdhci_cdns4_phy_init(priv);
+@@ -673,7 +674,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	struct device *dev = &pdev->dev;
+ 	static const u16 version = SDHCI_SPEC_400 << SDHCI_SPEC_VER_SHIFT;
+ 
+-	if (of_device_is_compatible(dev->of_node, "cdns,sd6hc")) {
++	/* Note: ACPI only provides one unnamed clock */
++	if (!has_acpi_companion(dev) && device_is_compatible(dev, "cdns,sd6hc")) {
+ 		clk = devm_clk_get_enabled(dev, "ciu");
+ 		if (IS_ERR(clk))
+ 			return dev_err_probe(dev, PTR_ERR(clk), "failed to enable ciu clock\n");
+@@ -687,7 +689,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 			return PTR_ERR(clk);
+ 	}
+ 
+-	data = of_device_get_match_data(dev);
++	data = device_get_match_data(dev);
+ 	if (!data)
+ 		return dev_err_probe(dev, -EINVAL, "missing platform driver data\n");
+ 
+@@ -723,7 +725,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	 * For SD6HC, sdhci_add_host() will automatically read capabilities
+ 	 * and version from the host controller registers.
+ 	 */
+-	if (of_device_is_compatible(dev->of_node, "cdns,sd4hc")) {
++	if (device_is_compatible(dev, "cdns,sd4hc")) {
+ 		__sdhci_read_caps(host, &version, NULL, NULL);
+ 		ret = sdhci_cdns4_phy_probe(pdev, priv);
+ 		if (ret)
+diff --git a/drivers/mmc/host/sdhci-cadence-phy-v6.c b/drivers/mmc/host/sdhci-cadence-phy-v6.c
+index 22d56bb46d75..551a0e3b58ad 100644
+--- a/drivers/mmc/host/sdhci-cadence-phy-v6.c
++++ b/drivers/mmc/host/sdhci-cadence-phy-v6.c
+@@ -880,17 +880,17 @@ int sdhci_cdns6_phy_probe(struct platform_device *pdev, struct sdhci_cdns_priv *
+ 	 * Cadence-recommended defaults (2500 ps IO-cell delays, 24 ps DLL
+ 	 * delay element) that are valid for typical SoC packaging.
+ 	 */
+-	ret = of_property_read_u32(dev->of_node, "cdns,iocell-input-delay-ps",
+-				   &phy->iocell_input_delay);
++	ret = device_property_read_u32(dev, "cdns,iocell-input-delay-ps",
++				       &phy->iocell_input_delay);
+ 	if (ret)
+ 		phy->iocell_input_delay = SDHCI_CDNS6_PHY_DEFAULT_IOCELL_DELAY;
+ 
+-	ret = of_property_read_u32(dev->of_node, "cdns,iocell-output-delay-ps",
+-				   &phy->iocell_output_delay);
++	ret = device_property_read_u32(dev, "cdns,iocell-output-delay-ps",
++				       &phy->iocell_output_delay);
+ 	if (ret)
+ 		phy->iocell_output_delay = SDHCI_CDNS6_PHY_DEFAULT_IOCELL_DELAY;
+ 
+-	ret = of_property_read_u32(dev->of_node, "cdns,delay-element-ps", &phy->delay_element);
++	ret = device_property_read_u32(dev, "cdns,delay-element-ps", &phy->delay_element);
+ 	if (ret) {
+ 		phy->delay_element = SDHCI_CDNS6_PHY_DEFAULT_DELAY_ELEMENT;
+ 	} else if (!phy->delay_element) {
+-- 
+2.47.3
+
