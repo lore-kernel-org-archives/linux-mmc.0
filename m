@@ -1,13 +1,13 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=139.219.17.125
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1793791638;
-	b=qv5fUlh9fG0D2NS/ekzX6dEhUxWeK/5EnzQe1N+SAZWf8uqUyZcS25SBsM17DUdtfj8E
-	 qXXR9SW8QW6Qji7xPfyP3SzxvtX8IM/rCH2gbnA5TQBOfqX4VQ4p7ACCsHCkX2f6DmmGs
-	 CsFGU1Xxeo3mAsphyrjj60jKeyCgqrT994vzHwAH7IE2dUAOXMNvUKKnqcnuGvZ+NRVdu
-	 7M8oZdgDXlZyknBBrvmbtIZWOaH8nSggz0lE8YHjWJnF9RDF5Phs/IwaDHwhN/pWGBF8J
-	 jEoGsY0BEawMd6vspXKj75z9/sIBg3ZRb59tzkCjFxpAK9rmHOc26Qm3tBihAfz3gew==
+	t=1793791643;
+	b=1ACVVmJc4ibmTP72zeRy+0PzGleNvnRyX/Th/LCxtzkXv6E6OqP+9p359ojh5zQ7cAOT
+	 qQMFq2sOYY5GRAZ3WW3gngpVkoer4/sPwasAln29oWQ+0gVtzukfWstWrEcjNyRteUF1d
+	 1cHnoyD8Vn/iExz058Tv4yPQfL5RFDnNCl502HjGeL+XalPGs6riTnL97a0Xbr26mPLXH
+	 xJzX6vXt0hE4Nwwn8BctziuR+u3tp+ciPikk9HbpFaHRVYNMVoZm3SthbeJ87DuysGsr4
+	 o9yeFCGq9M48q9pikco+jy97R12yn7/Eu4vyFLyBFmFilcp4Pkz06Zz3iIHth2QyKUA==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793791638;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793791643;
 	h=DMARC-Filter:Received:Received:From:To:Cc:Subject:Date:Message-Id:
 	 X-Mailer:In-Reply-To:References:Content-Transfer-Encoding:
 	 Content-Type:X-ClientProxiedBy:MIME-Version:X-MS-PublicTrafficType:
@@ -23,12 +23,12 @@ ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
 	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
 	 X-MS-Exchange-CrossTenant-UserPrincipalName:
 	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=ZovylRKUFyiyHrd/t/3o20JsLIV7zntoLWxrPHl2MqY=;
-	b=UZdtk4bEFQzI+W1fgZXtL8CGhrFndVfW2+8aurU9SI3n5RqvB92lPdtuHqUkKV3hWZNz
-	 18D/EKIMEYFXNCyInvdmWpXObr0RTyOQtKTVkZxvo/t7czz4lIVuokA0PRrprFJKuoWXt
-	 Zgyju/6XlziMjd+REYIssXt1if7lAuPo1V8dt4JnlDzY16V6dk5AvIRTlPpcKmcT8+UaW
-	 2H/kBiIEQV8JFA9dHD+DxJxIddQqfhK/tHMNqIpDKlpSu7zCnvX0IyFWJtL2gfNA5/yaS
-	 1341jIPouVhRdCxC51Udm7oz1weW/3k037rdtJ/lNnyQJbb+ifKrcrMdsIsu/FcsFLQ==
+	bh=719IE6IGPTurqyYMntECg3euF+3obwPsa9T6X/oN+mQ=;
+	b=WQF0NVLsw1lJTW73eFHRni4+9ykm937CXmlb5hzE3CMIIusqLljPlWndOPGlqFQABz/X
+	 wPPWi7myW799iciDvUjoC5mbf1wLeGmkH4JZJolxLcst51/zTEP1YllNzEYPn2FMveRaI
+	 /Qyu7/+jcMpj6opRMjnXlpdwRadAyUkI6ZHDO/G7gdkFRJ1IBDMaYw5ePaJNx1H3xk3NG
+	 jU/6zl3+9ftFuyzWxI+wZI1vXwv9YkbBPxAR2v0YvW+GFbEhk7l7p9xCZWup8pksinIJE
+	 aX0jG9z6xfA2zoSCNvQ7Eby0ykxSHe/7TrpV/6Jb66A8P0/qrFieRqlyI+eYwWB5IZQ==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=starfivetech.com;
 	spf=pass smtp.mailfrom=starfivetech.com;
@@ -36,18 +36,18 @@ ARC-Authentication-Results: i=2; smtp.subspace.kernel.org;
 Received: from CHN02-BJS-obe.outbound.protection.partner.outlook.cn (mail-bjschn02on2125.outbound.protection.partner.outlook.cn [139.219.17.125])
 	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D26C2606A33A;
-	Wed,  4 Nov 2026 11:27:16 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D26C2606A33A
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A6D6606D814;
+	Wed,  4 Nov 2026 11:27:18 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 0A6D6606D814
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=starfivetech.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starfivetech.com
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=jwlPL0Io0DI53q5FxrfXIK/OxK642g34CEEEivqUd6gEOeT0RWhCh+PVShWMaQzM15ldtsRvmZZCFuK1a7OHpm1yRhJeH5ZIDYd9GVlBJU7aQgaz1DZIp3w8Ww/hPBjetW8Ho2mlVinHpKqXnd8yV/clNNEfsLcJO6ZYHKyoo2tcsJe9eE0gv7HKdNIxHzrcL+1puaDerSDnYKumAcfrlrLihjVGDkQd4PjNsWQfctayALp196EgeQXeGdPMTx31x+N6BdOAjkclzbC57+I/IBl65Thr3yVVYPWo9DT1DrIkZp9KzcRd0Gr1CiahNOljxoXiZC1wL3Z8Vaoj93rk3A==
+ b=JAip5a7MHUaclqW+kqG6UeOlY6A+JiOjtyNSs3UUFwbVrGFhDh0ZQwVO7B2O2l65qYijB9cu1cBSrbSzKx36zvtdudooy8P1mtAjCCTECtb/zMZ42dPlXee2AVzUuvxXVOSQppU7H2XKbF7Kt+S3FvQJVocKx7vZNpwpAOsNSJphnin6R399tcFtlt/4HTdItdUAe6CgPNcvYZwPpU4zWaeAZ50ffKX1ptrKzspKCd3ETCdbEZU1pnE3BMDIxu8pwkfHouWs4MT3JzDCFDxYAbqERaQmx/pFJAJjG/8UoXJdsTMce+6pIUuRIXCL/P3f6uWfnEG26SZvfvEYgPZBZw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ZovylRKUFyiyHrd/t/3o20JsLIV7zntoLWxrPHl2MqY=;
- b=gfXZ94LPT9HB3l7aTczmmi6Xc4DYi4a6bGp1RwMbbh6ZEcEfRs94FFdXcC/qJnY0RJhx9dPTSv5xnosY92mg84roTzxLA/oWeBnjTVzhqnul3bMJqStleZcAzV9En27D1rx6RCiYpZkcabDlgai//y0mfDNOI+HCVODZeX76PtNV/HI4tOiAJVjXPG2fUXpxSNrB9AlOPv9HwELLnukosEVbEKn2rgQ8DPZq+V2r0gZz9mfVoFd68Fg5mF5CmaxRV1TyIIDu2prDFwAyrKthYErfgChlvt6K13SNLJ/7u5l5TSxQlAE8Ly29ZWORwv3V/NJlgeEJrBGNPi+RD7YH2g==
+ bh=719IE6IGPTurqyYMntECg3euF+3obwPsa9T6X/oN+mQ=;
+ b=jnBYk99v9lR6lUkft7LhGQNfHKrf9rVdHbElcTwtPt0xKvDamJaozr8ypBX2xfRWJ0zD4/Nuxh8sqf1rIzMsJSINFyhKkDaUZkL7HkxCAVYZXcfLH6I95rThPyV8rLSrXrL5NI57MaFDEZOKmCMT+Dewv/mQKEVAzsgereWe78GXy/df91h72yjz5LxQD17mMogLO8rLSjSbZ2iBfMDiXxxjQgp96uIZblXJa3c5NCi+iO+lti6gX6sKmH0yZkWreXYPQsRfOL8P17D9QXm92OaJs9NSvENq3vuuLR9BJ8BJXZ/nblkNH1Jo5vJQd1e1EckFpoGBcmCFYelq9N27xA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=starfivetech.com; dmarc=pass action=none
  header.from=starfivetech.com; dkim=pass header.d=starfivetech.com; arc=none
@@ -71,9 +71,9 @@ To: Asutosh Das <quic_asutoshd@quicinc.com>,
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	Changhuang Liang <changhuang.liang@starfivetech.com>
-Subject: [PATCH v2 1/2] mmc: cqhci: Add support for setting command idle time in nanoseconds
-Date: Wed,  4 Nov 2026 03:26:56 -0800
-Message-Id: <20261104112657.110536-2-changhuang.liang@starfivetech.com>
+Subject: [PATCH v2 2/2] mmc: sdhci-of-dwcmshc: Set CQHCI command idle time for StarFive JHB100
+Date: Wed,  4 Nov 2026 03:26:57 -0800
+Message-Id: <20261104112657.110536-3-changhuang.liang@starfivetech.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20261104112657.110536-1-changhuang.liang@starfivetech.com>
 References: <20261104112657.110536-1-changhuang.liang@starfivetech.com>
@@ -93,216 +93,128 @@ Precedence: list
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: ZQ4PR01MB1202:EE_|ZQ4PR01MB1218:EE_
-X-MS-Office365-Filtering-Correlation-Id: 14b034e6-3393-4b7f-2c9b-08df3a668dcb
+X-MS-Office365-Filtering-Correlation-Id: d41a810d-7092-4114-7a10-08df3a668e46
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|23010399003|376014|52116014|1800799024|6133799003|10067099003|18002099003|22082099003|38350700014|56012099006|261026121527099003|261022075727099003|261022105027099003|261102130727099003|261026140227099003|261028144727099003|261021121427099003|261009223027099003|261102123227099003;
+	BCL:0;ARA:13230040|366016|23010399003|376014|52116014|1800799024|10067099003|18002099003|22082099003|38350700014|56012099006|261026121527099003|261021123027099003|261021121427099003|261009223027099003|261102123227099003;
 X-Microsoft-Antispam-Message-Info:
-	jIxZfQfdp/F7V+QDFqnl0SCYkRHs77+3NJmvB8orSDX4M0VGwjSPMWuRDuPF1yuoqC+qSMJxp15I5+/A8Jt9Fs9AVAw8o24Mea5o71rPiOMoIepYrjEtZxAqErFZjle6GwMl/sRoY7i0P+bhOMnWLLnoMyCQ092zipyt0hG5XRCt6+J9LOX7vVm6EGlpEXuhuBeNuTLDQPFto7+HzVyakQOGZObL0RjVV6R4jyD45Yi/PjoRzRpBmwCl1jOe7Ic3dfRNIp4oXGSU4ctBNg8IYitP1tqa+ewEk930j7YMHWR/oitMORMG0F2tYLWghcMfdUMPLWDhs+ZliWhQ2k2gjXtXXTQAqblNnFp9cI6p/HGj5xvy25AepwA16SpmsWIlbFr6qEU/+UduoG94SLLN8qI5WOTnFM0eB0a4u2+BBhekDwZYriog6ut2KionyQdz7RN7V2Xji1n8YZ/aUUgkQRr1Nj137bgquXbuP6H79QX1vkFDjRJGrNFANau2HjzKyhW791iWxAsGlu/TNaPWeI8DGOY+JAML/wqWmFzVwbIpU54b2V573hV8z/MDi8W1
+	cfaaP6m3ZJFOg0JqrJQOSrpCoWXqgE206tY3zsM6dDu1OX4/eo17/XQYSpM+Z+utn0B+/OAWqkK1pQnS/kuhNv6wIc/vrOwrqo2LLvNukHFN+lyA5/hoMaNAH/bHJE1a9NCCEC5gdIprtYyhSquLh3GxyonVoYnFUWgeCcM9T5PeHtlnPBdkqRVHfFmozSXDMc1MICOlTSHk3gRQOuIjH1UzteUwovSTk9ZdidowSk3rNOYez1GocC2CdXjoh5x8fviRREWmIyhQJyRnHQcpfu4AWTan/jiPhqWAllOQvVgNtV7M700INsPuLgk+hf5/8YG6IHLgAyQaWIYoYd6ytd3zDx4XOci/Sechzp+XY1Gub0ovJzO8uNXTl2moib1DrkC9V2UU1rbiB8vIgZpmmDaEmyMm00e+oeAG+H01/xJmRhxsOcPhd9yKi2bpvWyV4WgGJKNk/GE9wlnJ5A3iFpenijtnXcShuwaCERp3C3904w+3pc18i4rRcJo65xwh8d4TlXSjkS2TSHCeCsbIbklFriAxGXH2epb4Ega99E/uuWhSC++CkDYay/KZF0vW
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn;PTR:;CAT:NONE;SFS:(13230040)(366016)(23010399003)(376014)(52116014)(1800799024)(6133799003)(10067099003)(18002099003)(22082099003)(38350700014)(56012099006)(261026121527099003)(261022075727099003)(261022105027099003)(261102130727099003)(261026140227099003)(261028144727099003)(261021121427099003)(261009223027099003)(261102123227099003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn;PTR:;CAT:NONE;SFS:(13230040)(366016)(23010399003)(376014)(52116014)(1800799024)(10067099003)(18002099003)(22082099003)(38350700014)(56012099006)(261026121527099003)(261021123027099003)(261021121427099003)(261009223027099003)(261102123227099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?C4mrk2XV+bfFfDD/SX+G5RKa2xFKNiFu78DmuRcZ6NOk/JD/tyKpMJBGdl86?=
- =?us-ascii?Q?7FlhCNzTuR12XIuAG9GwE8+vvv1Z66z9ThegShXXHlwby9W82/JNjKfzTcE/?=
- =?us-ascii?Q?1dM3rryVtoLk+eX45qBea0187Fss4IF8fd8jdiRFdjicfLxzp5+khdhbzICn?=
- =?us-ascii?Q?tlA6RNCd1AQBD3venSFCxG0HxZSllw6qUuODQ0IUgXfkNdFIBX3P7JwRCnNf?=
- =?us-ascii?Q?NMo0eTwjLtAk9BKa77V4nWOFTdpVKTvjuCLWJUcyvFJrXKkS6y3CsYXDdnoA?=
- =?us-ascii?Q?bDtsx4mH66qb3m3zSd/eqp+QxeVlgz+v3J0q20ErvF27/M/GPfUwTB9ShWKD?=
- =?us-ascii?Q?k2NMrF/jHW0AnJq5381JqCe836CyzxlY7y2+NbITiVfbC1kBGhFJZZATyfiP?=
- =?us-ascii?Q?m0h6+4zdQSBHiqt9/3lBc+cnrDhscsE0grGzMtKxxOfUMOkI1AnZcvrdxhcQ?=
- =?us-ascii?Q?BTH/L1x1uYjEPIT3tEFQfj7P5FIcSo1+DiCLLtjGJweI8MHXBW4jyful8MPi?=
- =?us-ascii?Q?JjKdhHGAGmuBuJ9jhN6k4WOBmj5ULXJ/uHIXpCDXB6M6zcs9mdnELTvLaOep?=
- =?us-ascii?Q?2qC4hIu78tQJbr3k3UKZHu0QhIXTUpciTlq2L6nbNUvaqSu/fNl/DRp7f4GW?=
- =?us-ascii?Q?UyGx1v8IaRPYyCyKoQd1uXN1zuoVlxcw6zPjyIMGvpRrWSn1QhquC5mJXIdo?=
- =?us-ascii?Q?8R6M2pw5tlFUz/I1e9cWFFJvewVwUkWfkEgNsBjVLOEep+EB4Yk0OW5ZakYb?=
- =?us-ascii?Q?c7k8sNKMj/gXKC8uTo7W8i7rTOgKSHx3xUKBHtJyPSPTlk2mYqf6DlGt+7r8?=
- =?us-ascii?Q?1kDd5bbpVJi98CSTjzwChQFC6n17HxTQ6UX7yPAT7x3k+zHRO25pDKwzbibA?=
- =?us-ascii?Q?i+pm500cu7V8pYE013t2gSRBHxtkE0f1dG38TajHIdBuR/PhD7nVy6Tne4mH?=
- =?us-ascii?Q?xHxnLD1wpM/KL2W7n+omliLMSepHlJ06QYc+6EVTCDo0Zw+8eLWZfzSu8h2U?=
- =?us-ascii?Q?u44/sLl0/bCTJLI7BCteycYjAFkxW5HCgP76TmQ6uYgL3mA65COJtxYGAh4g?=
- =?us-ascii?Q?rnY3+PJhhfX254tQ+x3Dm6mb1fFedfoUzmhxCCQQdKZ0teFeEaZuuWFYaBi1?=
- =?us-ascii?Q?faRuh9pUcCdTMG95ms9MaURZS+252Y91/c3XbKl7GtqKaryIe7YQSE31WpzM?=
- =?us-ascii?Q?UGGfruD9FxipbNuA9ftKljSCK+ySds9tSV9eNFM9syFlKDAxXOhbpPcID9KJ?=
- =?us-ascii?Q?yRZQTCO1As80dX14jhgfG6vYEHaEpGoHRINvO5JcuN/nF67qoKcPnkB+RdRu?=
- =?us-ascii?Q?SNEPaNE2tRo7K2ZD6eBgb2FG0xgzrb9+GLvA6CWEfN1W0U/vHU89YtQ5iDyH?=
- =?us-ascii?Q?kf5fJnd/pIklHpyUOOUKCujIu+d/aesAaRNWUQ0ks5EJ5106BFFfJqyDy3jf?=
- =?us-ascii?Q?7lQFJVOlI8lMan05qGL8bw6qiUQ0wvW6NKZ9NTxD7+WnhkOymTSeQDBQuovb?=
- =?us-ascii?Q?9jKiX2VOIlxvvzQEK/6JOnIh38QIUuIvH54y0Rmgo5BaSpWqUeCyVRIutJaH?=
- =?us-ascii?Q?eU3V2k/wVJqCyHR1cvGyTcki42djfcycXCPBXIid88lSIOHaUNEHLo7U849A?=
- =?us-ascii?Q?G5X+g0fvQqjOXv3MGQDj1W1f3Bv2RCFiG6xgpF3Q6fuPWM0zEPNOj0ETnIeR?=
- =?us-ascii?Q?lIilVxK4kdKXWYE8DsjGqfGhGCvaLE+tA0w3drmLijWwAVnq67wn1d2yNeeH?=
- =?us-ascii?Q?5YbUy1NabXP8GU4cn4YQy/740yG3uL7Q+TnRS+9DyA0CrXwrbedg?=
+	=?us-ascii?Q?DSbtvh05VsB3iq63EMVybUkXc60r2wYm8HjvGcECdQbpN6SZe1UoTcbaSl8b?=
+ =?us-ascii?Q?PVG8FBsqzBYCBr0U/epgU9ydMu3eC/5fZzE9T9jh2/cfA8n7K1i/fhS39+BB?=
+ =?us-ascii?Q?z0nzCQXgMGDXfvcQqOQg/8BNVG6Ah6cbHfXl2BvRhNHIqGPwdOVyCRlUw6G+?=
+ =?us-ascii?Q?Ul0FxI3IEfcT+zgKdWDiuf6UoOSUithb/hRrunVSYxuZyTC50PpN2XIHusPD?=
+ =?us-ascii?Q?/AT3cGOady69UqAFM2v0+PIQSzE54dH8S5FOiEs8pDWhSKgisRFjBeLKuozQ?=
+ =?us-ascii?Q?BoDP26SLjE22THZwNI1m0Y84KCfcy2ciEY5Ix7kRE9NVUAmmbsp4YfsLEGRI?=
+ =?us-ascii?Q?/ppxd0aEwPeqwZ0aRJ5dADQ7WD2iHFZb92yr7SqBlUU1l/YEzocIa910scac?=
+ =?us-ascii?Q?S2uIwvs60VIgfRxImryc3HLrkiXBQqZVJr8Yb5x80ro2ICP3YGx8+4AOE2kX?=
+ =?us-ascii?Q?nA0Gf+Ca852BkqtfM7ex07WXTuQmGsiSI4l5M6iqnllrQI9WRZbWqbtIQg4M?=
+ =?us-ascii?Q?zhsHa0UJF8Pm92jYv1T0U7sth0HtXvC00rYqstEe7KH8TqXOGK7w7EpvKEPg?=
+ =?us-ascii?Q?Jw8gEZvXobEq/sY8T5uFSM3CDe79eHhJYS5TgwsU8cCiqJzZxD66DCJ8edon?=
+ =?us-ascii?Q?F8EDGRQeB09E+M9ZUyQWIsLijpSGqlSGVZbQ/9PDept8CocUIypf2k62itFj?=
+ =?us-ascii?Q?bBMWfXYKXjcoyCe/iNuIY1kmR2as7M39tj2NtfS65fZf1bQymNQqM4WHihSv?=
+ =?us-ascii?Q?r1ADUQj1IlY4eyDzApUrF2f2PmeuVCnN+oXsDYp32g2N7dSpv1CpG86gL+bB?=
+ =?us-ascii?Q?Sy05bo9CW/y04Bv/4TuFCZiqATUs2WkHAI00BokiFFIdm4NSRcYz+Jn3VkjO?=
+ =?us-ascii?Q?LsGm69XV4vzwNh0EbCh/6FFUZ8u6KzIvUyiCwy90qakS/3BekGUDUmDK0RVo?=
+ =?us-ascii?Q?2hIRPUehp9Taj/kdt+m5TuHQB2sDVifoIWkxnUrgUe/R1VKvuBuGWOZsgins?=
+ =?us-ascii?Q?N52WZokTPxeqpHYGMsBRcb5HgJyeZeAZFn6rMGc2tU+otEQ/LYPogWF4Csj3?=
+ =?us-ascii?Q?lZ8GnH2nks5UBKl8QgOkkyK6uvjuG50RL3Tu316VbsxD5zmHQRO5qMlg29nY?=
+ =?us-ascii?Q?mqZ164jZNgNUADceUAs/RE5iEV6XtPZ9YVZrkZZnSb93xELjno6Vf/rsz2e1?=
+ =?us-ascii?Q?OtkJyflrxkU6ulwS1pkD7uv1caTGfnhvmQ8qN6+zj6bHWsOmgIEGUbUrsITU?=
+ =?us-ascii?Q?dCngS+TBP5Z26en+ze4L6QJLlhCqm6PmI+909pQRtaasKgZKAFPdydp0Jb9e?=
+ =?us-ascii?Q?JGLy5xTnqVkY065HFTNI5WhfqCQxasaYCo6LpAGyKx/HgGBzZ6Ckq967HQvd?=
+ =?us-ascii?Q?5SFPPFRoiii/hZ88JVQqCq3gUKh8FVbeRxf3UlgNtTiXpDgeJXPxA5eH6sj/?=
+ =?us-ascii?Q?IBwf4a81X4ct/8qgOi+IHsdcF10miciiwGNKd8F2tTsJ2bWo+bxn5faGynAo?=
+ =?us-ascii?Q?HimTnXAtJi4dyfBxuF/gUW3tR4rRyVQfViIf+X49On4swbTN6JjdHV1xZwSZ?=
+ =?us-ascii?Q?7o7wezcn5AWVuLJW2xexxSJob1IpUcYWLdG3GMwliGgtyd92/NLpTwfsHB+2?=
+ =?us-ascii?Q?jTjvDgBXESVt1FMQ2Hlad90IJDpCo/h0c6mZxeiXgDh8DFvjU4eWRm8dzY46?=
+ =?us-ascii?Q?3Zt5OJKdOP1sTO+5VpX97MuFg0+SihR8TEjdCQIhHdpl/vS4Chmgix51QFVb?=
+ =?us-ascii?Q?X8TD4w0iYjqcIET8tbcQfiJrwW4H/Q9G5pITYYCYic15rmcs+jxS?=
 X-OriginatorOrg: starfivetech.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 14b034e6-3393-4b7f-2c9b-08df3a668dcb
+X-MS-Exchange-CrossTenant-Network-Message-Id: d41a810d-7092-4114-7a10-08df3a668e46
 X-MS-Exchange-CrossTenant-AuthSource: ZQ4PR01MB1202.CHNPR01.prod.partner.outlook.cn
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Nov 2026 11:27:05.1303
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Nov 2026 11:27:05.8922
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 06fe3fa3-1221-43d3-861b-5a4ee687a85c
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: c8gPxhA1yM4Ee3Hst1bzw+Z7NwCDv9296BomN3oPTgmpir7L8nLOUFEDQMa8EPjmOPI6rskEQl+59IdOyNwTilWkCyWIlWHzarsf2vMf3pa87tBh+TwfQlBAcSmJWHCA
+X-MS-Exchange-CrossTenant-UserPrincipalName: in1JB0ybdbHlOuWJSxXnC30EfQio4FSYJCo3ly3Ss2rHUgoIwgH3katFN1nfV/FRaS+RhkosMsF2tQFGMINK0+qSFvnOIBq068P/+BLlGzpa8jPU4kfND0+0Ua/BRXUi
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: ZQ4PR01MB1218
 
-Add a helper that derives the internal timer clock frequency (ITCF) of
-the CQE from the ITCFMUL and ITCFVAL fields of the CQHCI capabilities
-register, and export cqhci_set_cmd_idle_time() to let host drivers
-program the Send Status Command Idle Timer (CIT) in CQHCI_SSC1 using a
-value in nanoseconds.
+Add a cqhci_cit_ns member to struct dwcmshc_pltfm_data so that platforms
+can set the CQHCI Send Status Command Idle Timer (CIT). When it is set,
+dwcmshc_cqhci_init() passes it to cqhci_set_cmd_idle_time() after
+cqhci_init(), and the CQHCI core programs it every time the CQE is
+enabled.
 
-The CIT defines how long the bus has to be idle, in internal timer clock
-cycles, before the CQE issues CMD13 to poll the Queue Status Register.
-Its reset value is controller specific and can be far from optimal, so
-host drivers may need to tune it for their platform. Doing the
-conversion in the core avoids every host driver re-implementing the
-ITCFMUL/ITCFVAL decoding.
+Use it to set the CIT to 320 ns on StarFive JHB100 to improve eMMC CQE
+performance. Before/after dd results:
 
-The requested time is rounded up to whole clock cycles so that the
-programmed idle time is never shorter than requested. The helper returns
--EOPNOTSUPP when the controller does not report a usable ITCF and
--ERANGE when the result does not fit the 16-bit CIT field, so callers
-can report the failure instead of silently running with the reset
-default.
+before:
+dd if=/dev/mmcblk0 of=/dev/null bs=1M count=800
+838860800 bytes (839 MB, 800 MiB) copied, 9.38511 s, 89.4 MB/s
+dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=800
+838860800 bytes (839 MB, 800 MiB) copied, 12.2127 s, 68.7 MB/s
 
-Record the cit value in cqhci_set_cmd_idle_time(), and if cit is non-zero,
-program it into the register on every call to __cqhci_enable().
+after:
+dd if=/dev/mmcblk0 of=/dev/null bs=1M count=800
+838860800 bytes (839 MB, 800 MiB) copied, 3.19472 s, 263 MB/s
+dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=800
+838860800 bytes (839 MB, 800 MiB) copied, 10.7587 s, 78.0 MB/s
 
 Signed-off-by: Changhuang Liang <changhuang.liang@starfivetech.com>
 ---
- drivers/mmc/host/cqhci-core.c | 64 +++++++++++++++++++++++++++++++++++
- drivers/mmc/host/cqhci.h      |  8 +++++
- 2 files changed, 72 insertions(+)
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-index a466cd88b043..bfa5d8b79145 100644
---- a/drivers/mmc/host/cqhci-core.c
-+++ b/drivers/mmc/host/cqhci-core.c
-@@ -12,6 +12,7 @@
- #include <linux/scatterlist.h>
- #include <linux/platform_device.h>
- #include <linux/ktime.h>
-+#include <linux/units.h>
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 249055f14162..afd392393ef5 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -283,6 +283,9 @@
+ #define PHY_DELAY_CODE_SD		0x55
+ #define PHY_DELAY_CODE_SDIO		0x29
  
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/host.h>
-@@ -279,6 +280,14 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
- 	cqhci_writel(cq_host, upper_32_bits(cq_host->desc_dma_base),
- 		     CQHCI_TDLBAU);
- 
-+	if (cq_host->cit) {
-+		u32 ssc1 = cqhci_readl(cq_host, CQHCI_SSC1);
++/* CIT for the JHB100 SoC */
++#define JHB100_CQHCI_CIT_NS		320
 +
-+		ssc1 &= ~CQHCI_SSC1_CIT_MASK;
-+		ssc1 |= FIELD_PREP(CQHCI_SSC1_CIT_MASK, cq_host->cit);
-+		cqhci_writel(cq_host, ssc1, CQHCI_SSC1);
-+	}
-+
- 	cqhci_writel(cq_host, cq_host->rca, CQHCI_SSC2);
- 
- 	cqhci_set_irqs(cq_host, 0);
-@@ -1163,6 +1172,59 @@ struct cqhci_host *cqhci_pltfm_init(struct platform_device *pdev)
- }
- EXPORT_SYMBOL(cqhci_pltfm_init);
- 
-+static u64 cqhci_itcfmul_to_hz(u32 itcfmul)
-+{
-+	/* CQHCI_CAP.ITCFMUL: 0 = 1 kHz, 1 = 10 kHz, ..., 4 = 10 MHz, others reserved */
-+	if (itcfmul > 4)
-+		return 0;
-+
-+	return HZ_PER_KHZ * int_pow(10, itcfmul);
-+}
-+
-+static void cqhci_itcf_init(struct cqhci_host *cq_host)
-+{
-+	u32 cap = cqhci_readl(cq_host, CQHCI_CAP);
-+	u64 itcf;
-+
-+	itcf = cqhci_itcfmul_to_hz(CQHCI_ITCFMUL(cap)) * CQHCI_ITCFVAL(cap);
-+	if (!itcf || itcf > U32_MAX) {
-+		pr_debug("%s: cqhci: internal timer clock frequency not available (CAP 0x%08x)\n",
-+			 mmc_hostname(cq_host->mmc), cap);
-+		return;
-+	}
-+
-+	cq_host->itcf_hz = itcf;
-+}
-+
-+/**
-+ * cqhci_set_cmd_idle_time - program the Send Status Command Idle Timer (CIT)
-+ * @cq_host: CQHCI host
-+ * @ns: idle time in nanoseconds
-+ *
-+ * Set the number of internal timer clock cycles the CQE waits on an idle bus
-+ * before issuing CMD13 to poll the Queue Status Register. The cycle count is
-+ * rounded up so that the resulting idle time is never shorter than @ns.
-+ *
-+ * Return: 0 on success, -EOPNOTSUPP if the controller does not report its
-+ * internal timer clock frequency, or -ERANGE if @ns does not fit the CIT field.
-+ */
-+int cqhci_set_cmd_idle_time(struct cqhci_host *cq_host, u32 ns)
-+{
-+	u64 cit;
-+
-+	if (!cq_host->itcf_hz)
-+		return -EOPNOTSUPP;
-+
-+	cit = DIV_ROUND_UP_ULL((u64)cq_host->itcf_hz * ns, NSEC_PER_SEC);
-+	if (!cit || cit > FIELD_MAX(CQHCI_SSC1_CIT_MASK))
-+		return -ERANGE;
-+
-+	cq_host->cit = cit;
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL(cqhci_set_cmd_idle_time);
-+
- static unsigned int cqhci_ver_major(struct cqhci_host *cq_host)
- {
- 	return CQHCI_VER_MAJOR(cqhci_readl(cq_host, CQHCI_VER));
-@@ -1207,6 +1269,8 @@ int cqhci_init(struct cqhci_host *cq_host, struct mmc_host *mmc,
- 		goto out_err;
+ struct rk35xx_priv {
+ 	struct reset_control *reset;
+ 	u8 txclk_tapnum;
+@@ -322,6 +325,7 @@ struct dwcmshc_priv {
+ struct dwcmshc_pltfm_data {
+ 	const struct sdhci_pltfm_data pdata;
+ 	const struct cqhci_host_ops *cqhci_host_ops;
++	u32 cqhci_cit_ns; /* CQHCI Send Status Command Idle Timer */
+ 	int (*init)(struct device *dev, struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
+ 	void (*deinit)(struct dwcmshc_priv *dwc_priv);
+ 	void (*postinit)(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
+@@ -2412,6 +2416,7 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_jhb100_pdata = {
+ 		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+ 		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	},
++	.cqhci_cit_ns = JHB100_CQHCI_CIT_NS,
+ 	.init = dwcmshc_starfive_jhb100_init,
+ 	.deinit = dwcmshc_starfive_jhb100_deinit,
+ };
+@@ -2471,6 +2476,13 @@ static void dwcmshc_cqhci_init(struct sdhci_host *host, struct platform_device *
+ 		goto int_clock_disable;
  	}
  
-+	cqhci_itcf_init(cq_host);
++	if (pltfm_data->cqhci_cit_ns) {
++		err = cqhci_set_cmd_idle_time(cq_host, pltfm_data->cqhci_cit_ns);
++		if (err)
++			dev_warn(mmc_dev(host->mmc),
++				 "Unable to set CQHCI command idle time: %d\n", err);
++	}
 +
- 	spin_lock_init(&cq_host->lock);
+ 	dev_dbg(mmc_dev(host->mmc), "CQE init done\n");
  
- 	init_completion(&cq_host->halt_comp);
-diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-index 8fbbc48c3f85..e6840a8f4798 100644
---- a/drivers/mmc/host/cqhci.h
-+++ b/drivers/mmc/host/cqhci.h
-@@ -26,6 +26,8 @@
- #define CQHCI_CAP_CS			0x10000000 /* Crypto Support */
- #define CQHCI_CAP_ITCFMUL		GENMASK(15, 12)
- #define CQHCI_ITCFMUL(x)		FIELD_GET(CQHCI_CAP_ITCFMUL, (x))
-+#define CQHCI_CAP_ITCFVAL		GENMASK(9, 0)
-+#define CQHCI_ITCFVAL(x)		FIELD_GET(CQHCI_CAP_ITCFVAL, (x))
- 
- /* configuration */
- #define CQHCI_CFG			0x08
-@@ -234,6 +236,11 @@ struct cqhci_host {
- 	int num_slots;
- 	int qcnt;
- 
-+	/* Internal Timer Clock Frequency (Hz), 0 if not reported by CQHCI_CAP */
-+	u32 itcf_hz;
-+	/* Send Status Command Idle Timer in ITCF cycles, 0 keeps the default */
-+	u16 cit;
-+
- 	u32 dcmd_slot;
- 	u32 caps;
- #define CQHCI_TASK_DESC_SZ_128		0x1
-@@ -318,6 +325,7 @@ struct platform_device;
- irqreturn_t cqhci_irq(struct mmc_host *mmc, int cmd_error, int data_error);
- int cqhci_init(struct cqhci_host *cq_host, struct mmc_host *mmc, bool dma64);
- struct cqhci_host *cqhci_pltfm_init(struct platform_device *pdev);
-+int cqhci_set_cmd_idle_time(struct cqhci_host *cq_host, u32 ns);
- int cqhci_deactivate(struct mmc_host *mmc);
- void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end, bool dma64);
- static inline int cqhci_suspend(struct mmc_host *mmc)
+ 	return;
 -- 
 2.25.1
 
