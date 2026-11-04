@@ -1,72 +1,91 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.171.202.116
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793809110;
-	b=OZ/Ij9hdNCEFR3c3zSCgvDTmfJy8NQ2H4JF/syHP0o27nv+FqnCiREJuHjWCIChAFOKW
-	 iSU33wq4Mzluhnz1RH24MethMjJceMMJXX2sbJ0rj9SqdEzmZvaE9MI/GUtaYSxFE9Kf3
-	 LdAEqLjIARuIXQphnvEiHC2aPpidZnVF5TS8dYFNHSneoplBE3MhsNBw1at7P/LarNmFj
-	 ZNj6T/noDX2cqY/h89O4qpXfGYAsp2x4+OuMnug1QFdqAXumzip6kkeeSNylahQ1IuXOM
-	 X5EcHLFcTdmLWTVTZwqhMCK6WBbzSUG1+n5d5K6gDkgUpkWJlA5CxljlWlgKV2QFkmQ==
+	t=1793813567;
+	b=OG4FThYxbcgKrcTUs/6t6I66RSL4wlgKQvdy1FX43Kc833hDGEyRKyQd2jRTW3DVxT8D
+	 Hvbnns89kZD7z0kKcUg2DARTZgH8lomNuqld5wROpLQ2YqnLbBvx+BuX/WwoOdirgVwZg
+	 A8ZTzoOMT6H/7A6+fUKBRyaxTrlhnqVroQnNSuhdpwLdO3492e1DeCM0PB7gpXuHfLHnx
+	 +1yJzsCyettmnRaOE4JzLYk2GAHRQaMUS+tjHEGR24FWU0lXicnM/WbSmGEO2vwcOGizp
+	 4QMDVQGyo5c8R5bPVxvqtJp+VC9a6fafeGdXrpe4T1QnmxdOOcBpuxkdDVCcHrfzoHQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793809110;
-	h=DMARC-Filter:Received:Received:Received:DKIM-Signature:Message-ID:
-	 Subject:From:To:Cc:Date:In-Reply-To:References:Content-Type:
-	 Content-Transfer-Encoding:User-Agent:MIME-Version:
-	 X-Last-TLS-Session-Version;
-	bh=oSfws3W30fOYudbmrQezA5vgk29hrsCEgX3XIqUkwoQ=;
-	b=iMeACzxiySZAl2HW2YnITWORrkgf5j3h3odyfT54RB69vjrqZFpKVOpu58I6sqxUlfEa
-	 n6NEdv/DBq+7t3lb5t/03qQ397e/o0gcFHb4IvZJOra4LHjIVA1BxRJvrzFpaWPHTPeda
-	 AAYc1gw/rluymOAzQTDLOHxdggwj7mipW8UEfBraBgMDH9jJIDbgkufy2OfwBMHG2J4PR
-	 q6jB9JBfUxrksCicAOUzYKE8rkbDajHmv25oP8wU0TQE6LC9r1A2g9xBA2VvYWQrr7eei
-	 HxJnSmjAGbD2eB41admNhLmSxu4CajunjOJcd0jMVBoRmdc80KNGw+QGtgCFfZVYjWQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793813567;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
+	bh=4KWh+pCjEY3BH9ZXJBW3B3/Mt0CuTTrjLcItJI+O2b0=;
+	b=LGKzGTAo4SGnH3OPaA6NQ/5xryuvPIiKTcAJrx3bP+3N30nqjZt6NPIqXKmLV9+mK6tj
+	 tYM70qVb2sXiGN8fmEnRNCYBy30yIva6Sw1OQrgHTMSGau+YKiBqhH55Qd9NhGzKO+vL9
+	 XLfPs09dY/eD9r5nTEOSubC67yDIGWIiHDL8rtfIsAPf/TDAorHSemmk52wqK5XzpuVoG
+	 f0JC4dpV/SRj7XjrqsEFqOed90Y1EQpbj+tcRYyfko1q5zskmnYU0GwTMwXpvQ18/EdHO
+	 Y7hIrnbEC6GK5m7y7oVus3eg6v0P5OQnSLmNAqcpmaLWoZVp7mXQDqwT+eWdKmE7bnw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=bootlin.com;
-	spf=pass smtp.mailfrom=bootlin.com;
-	dkim=pass header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=fiV8FBWD;
-	arc=none smtp.remote-ip=185.171.202.116
-Received: from smtpout-04.galae.net (smtpout-04.galae.net [185.171.202.116])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=EmoIkpga;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6320860A5BC9
-	for <linux-mmc@vger.kernel.org>; Wed,  4 Nov 2026 16:18:28 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6320860A5BC9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 649A0606B903;
+	Wed,  4 Nov 2026 17:32:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=fiV8FBWD
-Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
-	by smtpout-04.galae.net (Postfix) with ESMTPS id 9F18CC49F62
-	for <linux-mmc@vger.kernel.org>; Wed,  4 Nov 2026 16:19:31 +0000 (UTC)
-Received: from mail.galae.net (mail.galae.net [212.83.136.155])
-	by smtpout-01.galae.net (Postfix) with ESMTPS id 69CF960770;
-	Wed,  4 Nov 2026 16:18:26 +0000 (UTC)
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 42897103291FD;
-	Wed,  4 Nov 2026 17:18:23 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
-	t=1793809105; h=from:subject:date:message-id:to:cc:mime-version:content-type:
-	 content-transfer-encoding:in-reply-to:references;
-	bh=oSfws3W30fOYudbmrQezA5vgk29hrsCEgX3XIqUkwoQ=;
-	b=fiV8FBWDpx5QcgNQ/9XNu+R88Az0OSeLN0zKlNqdCZ5Rn84ykN3DgxsJO17APexg5YwPY8
-	3VVBWs5KR6edjF1oRFKQvtZAcD0aJltb4cI/kqwDhk5UZ0iYx1WmXhhSNDlFF9Pkp+xyx0
-	WnpH7B1QNDm4iQeeQcBJvT0q/fihds1StaUUqU3ogBJ1KSlv3S1tWDwxM5AftIGqMyrClN
-	W+yUmUUauqS6PGgb4sUY4Cp/mT/VcwSZR6UeiMCeC1POucJrN5eigh16G4jO0qqDAcbCwn
-	qwt3tuPyCxOQNa18me0RkD8L9UK9pL3n5l8fJQklt+GAFOvaDCY0XkbEWXyesw==
-Message-ID: <5496704ade7e7f2ea2d7bedf2a68e31daa76518c.camel@bootlin.com>
-Subject: Re: [PATCH] mmc: sdhci-cadence: enable probing from ACPI
-From: Paul Cercueil <paul.cercueil@bootlin.com>
-To: Adrian Hunter <adrian.hunter@intel.com>, Tanmay Kathpalia
-	 <tanmay.kathpalia@altera.com>, Ulf Hansson <ulfh@kernel.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Thomas
- Petazzoni	 <thomas.petazzoni@bootlin.com>
-Date: Wed, 04 Nov 2026 17:18:21 +0100
-In-Reply-To: <d9a9f45c-931f-4799-8c17-3f39bf4dc50d@intel.com>
-References: <20261103093501.218232-1-paul.cercueil@bootlin.com>
-	 <c8dc0612-7ba2-45f0-9aa9-5e312fc8aab4@intel.com>
-	 <21015d0ab9c99bbe8b187792836ecd267e02d4dd.camel@bootlin.com>
-	 <d9a9f45c-931f-4799-8c17-3f39bf4dc50d@intel.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.56.2-0+deb13u1 
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=EmoIkpga
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DBDFF1F000C1;
+	Wed,  4 Nov 2026 17:32:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793813567;
+	bh=4KWh+pCjEY3BH9ZXJBW3B3/Mt0CuTTrjLcItJI+O2b0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=EmoIkpga02mtSmXYZVQn9du3LHYfYYz+585s/PS+UgjsXg/FCvOmrZxU5rFUHZ4Kc
+	 RW4rhqpS4n3dFfRKO8x+a/rqSXZeMNtqoJk/PAMvtTPHidldiR0RNWuPhkUl5Udryh
+	 K0OZRedSeEqK4PfWHQTrv308SVTAoSNO8pALhkzOLoGRqIxAXKmzlYLtjaaWK21Afk
+	 g9ZdhfQJD7HMHHghQ3kYgQdyrMOv9/7V31ENvoFGNFW4fLM8UomjBlAwSX6CbB6Whr
+	 eQxEIfy92LUpsJv+hK5fIokNxiCsnOkTzS6xufVPBmdQ1YFlhlqo+6SIaWZWwTuraz
+	 PbT3jpG2TrNIg==
+Date: Wed, 4 Nov 2026 18:32:43 +0100
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: "Rob Herring (Arm)" <robh@kernel.org>
+Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+	Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, 
+	Simona Vetter <simona@ffwll.ch>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Vadim Fedorenko <vadim.fedorenko@linux.dev>, 
+	Arkadiusz Kubalewski <arkadiusz.kubalewski@intel.com>, Jiri Pirko <jiri@resnulli.us>, Ivan Vecera <ivecera@redhat.com>, 
+	Benson Leung <bleung@chromium.org>, Guenter Roeck <groeck@chromium.org>, 
+	Linus Walleij <linusw@kernel.org>, Bartosz Golaszewski <brgl@kernel.org>, 
+	Frank Li <Frank.Li@nxp.com>, Sascha Hauer <s.hauer@pengutronix.de>, 
+	Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, 
+	Jonathan Cameron <jic23@kernel.org>, David Lechner <dlechner@baylibre.com>, 
+	Nuno =?utf-8?B?U8Oh?= <nuno.sa@analog.com>, Andy Shevchenko <andy@kernel.org>, 
+	Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@foss.st.com>, 
+	Olivier Moysan <olivier.moysan@foss.st.com>, Arnaud Pouliquen <arnaud.pouliquen@foss.st.com>, 
+	Dmitry Torokhov <dmitry.torokhov@gmail.com>, Thierry Reding <thierry.reding@kernel.org>, 
+	Jonathan Hunter <jonathanh@nvidia.com>, Fabrice Gasnier <fabrice.gasnier@foss.st.com>, 
+	Lee Jones <lee@kernel.org>, Srinivas Kandagatla <srini@kernel.org>, 
+	Ekansh Gupta <ekansh.gupta@oss.qualcomm.com>, Ulf Hansson <ulfh@kernel.org>, 
+	Hans Ulli Kroll <ulli.kroll@googlemail.com>, Andrew Lunn <andrew+netdev@lunn.ch>, 
+	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
+	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, Vinod Koul <vkoul@kernel.org>, 
+	Neil Armstrong <neil.armstrong@linaro.org>, Manivannan Sadhasivam <mani@kernel.org>, 
+	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, 
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Kunihiko Hayashi <hayashi.kunihiko@socionext.com>, 
+	Masami Hiramatsu <mhiramat@kernel.org>, Liam Girdwood <lgirdwood@gmail.com>, 
+	Mark Brown <broonie@kernel.org>, "Rafael J. Wysocki" <rafael@kernel.org>, 
+	Daniel Lezcano <daniel.lezcano@kernel.org>, Zhang Rui <rui.zhang@intel.com>, 
+	Lukasz Luba <lukasz.luba@arm.com>, Orson Zhai <orsonzhai@gmail.com>, 
+	Baolin Wang <baolin.wang@linux.alibaba.com>, Chunyan Zhang <zhang.lyra@gmail.com>, 
+	Paul Kocialkowski <paul.kocialkowski@bootlin.com>, Shawn Guo <shawnguo@kernel.org>, 
+	Chanh Nguyen <chanh@os.amperecomputing.com>, Alistair Francis <alistair@alistair23.me>, 
+	Julius Werner <jwerner@chromium.org>, Paul Cercueil <paul@crapouillou.net>, 
+	Dmitry Osipenko <digetx@gmail.com>, Florian Fainelli <f.fainelli@gmail.com>, 
+	Thierry Reding <thierry.reding@gmail.com>, Ray Jui <ray.jui@broadcom.com>, 
+	Scott Branden <scott.branden@broadcom.com>, dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, netdev@vger.kernel.org, chrome-platform@lists.linux.dev, 
+	linux-gpio@vger.kernel.org, imx@lists.linux.dev, linux-arm-kernel@lists.infradead.org, 
+	linux-hwmon@vger.kernel.org, linux-iio@vger.kernel.org, 
+	linux-stm32@st-md-mailman.stormreply.com, linux-sound@vger.kernel.org, linux-input@vger.kernel.org, 
+	linux-tegra@vger.kernel.org, mfd@lists.linux.dev, linux-arm-msm@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-phy@lists.infradead.org, linux-pm@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: Use hex unit address patterns
+Message-ID: <20261104-vigorous-flat-dingo-3e5bd2@quoll>
+References: <20261102135330.2493332-1-robh@kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -76,62 +95,59 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-X-Last-TLS-Session-Version: TLSv1.3
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20261102135330.2493332-1-robh@kernel.org>
 
-Le mercredi 04 novembre 2026 =C3=A0 18:05 +0200, Adrian Hunter a =C3=A9crit=
-=C2=A0:
-> On 04/11/2026 16:38, Paul Cercueil wrote:
-> > Hi Adrian,
-> >=20
-> > Le mercredi 04 novembre 2026 =C3=A0 16:30 +0200, Adrian Hunter a =C3=A9=
-crit=C2=A0:
-> > > On 03/11/2026 11:35, Paul Cercueil wrote:
-> > > > Use the device property API instead of the OF-specific property API=
-.
-> > > > This way, the driver will also probe from ACPI.
-> > > >=20
-> > > > Note the change in the core's probe function for SD6HC. We can't ha=
-ve
-> > > > named clocks in ACPI.
-> > >=20
-> > > Do you mean in the future?=C2=A0 ACPI does not provide clocks at all
-> > > at the moment does it?=C2=A0 Otherwise, clocks registered directly by
-> > > clk_register_clkdev() can have names.=C2=A0 Maybe I misunderstand,
-> > > but perhaps clarify the commit message.
-> >=20
-> > I sent another patch in parallel of this one, that adds basic support f=
-or
-> > clock
-> > resources introduced in ACPI 6.5:
-> >=20
-> > https://lore.kernel.org/linux-acpi/20261103084718.8222-1-paul.cercueil@=
-bootlin.com/T/#u
-> >=20
-> Would have been worth mentioning that in a cover letter.
->=20
-> Seems like it gives the clock a name
->=20
-> +		snprintf(name, sizeof(name), "%s-clk%u", dev_name(dev), data-
-> >idx++);
-> +
-> +		err =3D devm_clk_hw_register_clkdev(dev, clk, name,
-> dev_name(dev));
->=20
-> =C2=A0but clk_find() doesn't look like it would match then - the comment =
-says:
-> =C2=A0*=C2=A0 An entry with a NULL ID is assumed to be a wildcard.
-> =C2=A0*=C2=A0 If an entry has a device ID, it must match
-> =C2=A0*=C2=A0 If an entry has a connection ID, it must match	<------
+On Mon, Nov 02, 2026 at 07:53:22AM -0600, Rob Herring (Arm) wrote:
+> Unit-addresses by default (and most commonly) are hexadecimal. There's a
+> number of cases using decimal patterns. Fix all of them, limiting the
+> pattern to match the 'reg' limits if there are any.
+> 
+> Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
+> ---
+>  .../bindings/display/xylon,logicvc-display.yaml      |  2 +-
+>  .../devicetree/bindings/dpll/dpll-device.yaml        |  2 +-
+>  .../bindings/embedded-controller/google,cros-ec.yaml |  4 ++--
+>  .../intel,ixp4xx-network-processing-engine.yaml      |  2 +-
+>  Documentation/devicetree/bindings/gpio/gpio-mxs.yaml |  4 ++--
+>  .../devicetree/bindings/hwmon/maxim,max31790.yaml    |  2 +-
+>  .../devicetree/bindings/iio/adc/st,stm32-adc.yaml    |  2 +-
+>  .../bindings/iio/adc/st,stm32-dfsdm-adc.yaml         |  6 +++---
+>  .../bindings/input/touchscreen/cypress,tt21000.yaml  |  2 +-
+>  .../memory-controllers/ddr/jedec,sdram-channel.yaml  | 12 ++++++------
+>  .../bindings/memory-controllers/ingenic,nemc.yaml    |  2 +-
+>  .../memory-controllers/nvidia,tegra20-emc.yaml       |  4 ++--
+>  .../devicetree/bindings/mfd/st,stm32-lptimer.yaml    |  2 +-
+>  .../devicetree/bindings/mfd/st,stm32-timers.yaml     |  2 +-
+>  .../devicetree/bindings/misc/qcom,fastrpc.yaml       |  2 +-
+>  .../bindings/mmc/mmc-controller-common.yaml          |  2 +-
+>  .../bindings/net/cortina,gemini-ethernet.yaml        |  2 +-
+>  .../bindings/phy/brcm,cygnus-pcie-phy.yaml           |  2 +-
+>  .../devicetree/bindings/phy/brcm,sata-phy.yaml       |  2 +-
+>  .../bindings/phy/socionext,uniphier-usb2-phy.yaml    |  2 +-
+>  .../devicetree/bindings/sound/qcom,q6asm-dais.yaml   |  2 +-
+>  .../bindings/sound/qcom,q6dsp-lpass-ports.yaml       |  2 +-
+>  .../devicetree/bindings/thermal/sprd-thermal.yaml    |  2 +-
+>  23 files changed, 33 insertions(+), 33 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/display/xylon,logicvc-display.yaml b/Documentation/devicetree/bindings/display/xylon,logicvc-display.yaml
+> index 76b804b7c880..3dd54636d23d 100644
+> --- a/Documentation/devicetree/bindings/display/xylon,logicvc-display.yaml
+> +++ b/Documentation/devicetree/bindings/display/xylon,logicvc-display.yaml
+> @@ -123,7 +123,7 @@ properties:
+>          const: 0
+>  
+>      patternProperties:
+> -      "^layer@[0-9]+$":
+> +      "^layer@[0-9a-f]+$":
 
-You're missing part 3 ;)
+These two lines are looking good.
 
-https://lore.kernel.org/linux-arm-kernel/20261103084915.8405-1-paul.cercuei=
-l@bootlin.com/T/#u
+Andy, it's okay if I give Rb tag?
 
-I also considered not giving them a name (which wouldn't require the clkdev
-patch), but thought that there's probably some ACPI tables out there that
-provide more than one fixed clock for the same device, so it felt like the
-safest option.
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
-Cheers,
--Paul
+Best regards,
+Krzysztof
+
