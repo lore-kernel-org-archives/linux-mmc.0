@@ -1,49 +1,44 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=162.243.164.118
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=47.88.81.242
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793779662;
-	b=2AXHTvhJQcq3yztj0l5+Cmv9LrhEL1uTjRmI4hc7nfRxBP8v4KAxMp/R3DyZyT1gFHUF
-	 KQNBtqdfPSFDwXIEQIqlhST0T3Wtpo4vnUXKB5eEurUfPyfYJ1sZ3hg9GFbqxAdYHTegH
-	 pyeiFy0XOfVu18SrQWAG3cERcyVugRt2wmraReg6LcjdAA6xwh3zZ/Quh/84mDqLTrcFK
-	 eDD72VX72AgIWpsijh5MOa/OB+Bx77ck+pgqWsytGEnEv+i1zABcYcacbeJJ92vacKDSp
-	 qq2j1LJi6A34tYuAlce4kUpXKRM2OPJhQ1EEAuHWgljBanne8YDTzWDGPRqnCTdWICA==
+	t=1793779703;
+	b=mPv2le4h4Fy484p/Pra8TDt4NpQ6uBrBpRjSykzLiq+dbk98+Ubu0+u7vRrgRFl2tI5v
+	 F89L5+e9+hOgJS8sH63a4JI39/HjSyqjJBD9F2EcTJDJA/bggeW3yZaFLB4JliRfO+h6J
+	 MTrZ4zmTN5x6FNfVH3DpSvTmwcBGbDJhji0Ist4sVn1+FRkIFhNHQsVociECM5AlHvbds
+	 FfBeUnDhexpLvNL4X4IHvwGKJQid8XbqewE3jtIBiepI4k1tqhvcoXl4JRhbKZYdfYuVo
+	 Scb+u0fQXV5mkZO++7DwP+Zn6N9wHsQjUR4xmaiKeHT5ypRy1g2ZkvCgy4r3oV7m3ZQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793779662;
-	h=DMARC-Filter:Received:Received:From:To:Cc:Subject:Date:Message-ID:
-	 X-Mailer:MIME-Version:Content-Transfer-Encoding:X-CM-TRANSID:
-	 X-CM-SenderInfo:X-Coremail-Antispam;
-	bh=mH56HqaEwD+XdDX+wKUFDeUx3ALtmiaCbYyEE6bI0yM=;
-	b=EVbVpPEn8WZ3gfpzICURIA3pUa1QiFEp7Xp4RY0lljEAUyvOj9TmOA4UsKg2MoNSSPvD
-	 PT7m7JnCzjvWyVQGKvfEogk8wdsOD5PwvWHgrGx+8ntc4R0Y+cSFnpjrOOIX12a884ask
-	 B1S9ek9KdS4f5sFZh2mRGgRA14HRKbjVROKVm6qZFmTEUY+f3BM7U0RQemIetuDpv+5MT
-	 Ki9opLCOYV8jUsTzyXMY3nnrsr7qcKIyhrIFAIKZKAP3tByLblRYFiB/xYKEFMVZYY0fg
-	 1tNw4BxbDlVgIlNxPEkYsMkWmjh7wCk0qj/pAk+fe+NMtt7zNaOQ0y1V+ooGFVNnQ4w==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793779703;
+	h=DMARC-Filter:Received:Message-ID:Date:MIME-Version:User-Agent:Cc:
+	 Subject:To:References:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding:X-HM-Tid:X-HM-MType:X-HM-Spam-Status:
+	 DKIM-Signature;
+	bh=6lrDaoLYIefaqcIrn787JgDk6gdj2N5+Qhpdebuqtk4=;
+	b=MjG9NFrKHVb8iUs2XOp3XSMFegPbBqFTJUOCJ4q7TYmNY0w+dHWcUYGDvck57U8TN3+g
+	 AtDPmGXRZHPRv5HNT3l8+wn3PM8bhsFjygyLq2NUdlE4FQ46Auxy7UK7DZx6kSpsN0azL
+	 C1zUd+2S+JZ62o+qd801l2Pi/M8vnGtIfT7lAdL9QbWTRQqgPP4pXm8YfMk6lNaFMXWwU
+	 FHfCWMt9k8JuSF8uOhJ/g2Uvb4X2fK2W9ghIwsZ2r7uuKGpE/mZGbmLp1FJdIac1Hlvtb
+	 goWSRdV/5QROLy0wftGviCQF9vRuX0WpK1wF9kV9XrQnf1EehjAL6uvADaNjhycPmsQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=phytium.com.cn;
-	spf=pass smtp.mailfrom=phytium.com.cn;
-	arc=none smtp.remote-ip=162.243.164.118
-Received: from zg8tmtyylji0my4xnjqumte4.icoremail.net (zg8tmtyylji0my4xnjqumte4.icoremail.net [162.243.164.118])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id B795F606A330;
-	Wed,  4 Nov 2026 08:07:37 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B795F606A330
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=phytium.com.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=phytium.com.cn
-Received: from prodtpl.icoremail.net (unknown [10.12.1.20])
-	by hzbj-icmmx-7 (Coremail) with UTF8SMTP id AQAAfwCXn6e55+pq981pBQ--.3092S2;
-	Wed, 04 Nov 2026 16:07:21 +0800 (CST)
-Received: from WIN-B62RPRBL2BM.localdomain (unknown [218.76.62.144])
-	by mail (Coremail) with SMTP id AQAAf8DwBXS15+pqWnz1AA--.23333S3;
-	Wed, 04 Nov 2026 16:07:17 +0800 (CST)
-From: Zhu Ling <zhuling2709@phytium.com.cn>
-To: ulfh@kernel.org
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	fengjun@phytium.com.cn,
-	wangyinfeng@phytium.com.cn,
-	Zhu Ling <zhuling2709@phytium.com.cn>
-Subject: [PATCH] mmc: block: Mark the end of a truncated scatterlist
-Date: Wed,  4 Nov 2026 16:07:05 +0800
-Message-ID: <20261104080705.103689-1-zhuling2709@phytium.com.cn>
-X-Mailer: git-send-email 2.43.0
+	dmarc=pass header.from=rock-chips.com;
+	spf=pass smtp.mailfrom=rock-chips.com;
+	dkim=pass header.d=rock-chips.com header.i=@rock-chips.com header.a=rsa-sha256 header.s=default header.b="YLP/EzPN";
+	arc=none smtp.remote-ip=47.88.81.242
+Received: from mail-m81242.netease.com (mail-m81242.netease.com [47.88.81.242])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB0F1606A326;
+	Wed,  4 Nov 2026 08:08:19 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org AB0F1606A326
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key, unprotected) header.d=rock-chips.com header.i=@rock-chips.com header.a=rsa-sha256 header.s=default header.b=YLP/EzPN
+Received: from [172.16.12.48] (unknown [61.154.14.86])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 537471aba;
+	Wed, 4 Nov 2026 16:08:10 +0800 (GMT+08:00)
+Message-ID: <67019236-90c0-40d2-8b2b-798366c23a72@rock-chips.com>
+Date: Wed, 4 Nov 2026 16:08:08 +0800
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -53,61 +48,135 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v1 2/2] mmc: sdhci-of-dwcmshc: Set CQHCI command idle time
+ for StarFive JHB100
+To: Adrian Hunter <adrian.hunter@intel.com>,
+ Changhuang Liang <changhuang.liang@starfivetech.com>,
+ Asutosh Das <quic_asutoshd@quicinc.com>,
+ Ritesh Harjani <ritesh.list@gmail.com>, Ulf Hansson <ulfh@kernel.org>
+References: <20261014121222.31385-1-changhuang.liang@starfivetech.com>
+ <20261014121222.31385-3-changhuang.liang@starfivetech.com>
+ <1db96e86-8f70-4b72-a2e4-a251c41fb1e3@intel.com>
+ <35d05298-9e72-4b7d-bb2d-832f44725d82@rock-chips.com>
+ <a811d789-713b-4c4e-9e68-402cf6c49b6d@intel.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <a811d789-713b-4c4e-9e68-402cf6c49b6d@intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:AQAAf8DwBXS15+pqWnz1AA--.23333S3
-X-CM-SenderInfo: x2kxzxlqjsliuz6sx5pwlxzhxfrphubq/1tbiAQAEAWrjns4DngAFsF
-Authentication-Results: hzbj-icmmx-7; spf=neutral smtp.mail=zhuling270
-	9@phytium.com.cn;
-X-Coremail-Antispam: 1Uk129KBjvJXoW7AFWrGw45tr1DGr1UuFy7GFg_yoW8Cr1fpF
-	WrK34jvF4DKF1xZa48AF4UWFWjka4fWFWUGryFg3s5Zrs8KFy2v3yvya4YqFyj9rs7WFsa
-	vrsIg3yrCFyDZFJanT9S1TB71UUUUUDqnTZGkaVYY2UrUUUUj1kv1TuYvTs0mT0YCTnIWj
-	DUYxn0WfASr-VFAU7a7-sFnT9fnUUIcSsGvfJ3UbIYCTnIWIevJa73UjIFyTuYvj4RJUUU
-	UUUUU
+X-HM-Tid: 0aa1a599ea1503a4kunm133f948ea7a93
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVlCSh8dVkIYSUlNSEIYS0oYGlYVFA
+	kWGhdVEwETFhoSFyQUDg9ZV1kYEgtZQVlNSlVKTk9VSk9VQ01ZV1kWGg8SFR0UWUFZT0tIVUpLSU
+	9PT0hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=YLP/EzPNaEksJdsclpqxy/M6Qk2BSkxdD2yhMEGUazMw67GHQQ9GDi6fPVvtVfzgBWLdoaQH8OIeF95OqD1QixUzew9q+BUGkgVp4EBDlrLUtWf3c4E/NIHq+jczTzXmjxiZSvDOoQpeZXASIAmQcg1uWRA6xfy7a6pxJx/wIgs=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=6lrDaoLYIefaqcIrn787JgDk6gdj2N5+Qhpdebuqtk4=;
+	h=date:mime-version:subject:message-id:from;
 
-mmc_blk_data_prep() maps the remaining block request before trimming the
-scatterlist to the size of the current transfer, for example during
-single-block error recovery.
+在 2026/11/04 星期三 15:29, Adrian Hunter 写道:
+> On 04/11/2026 03:40, Shawn Lin wrote:
+>> 在 2026/10/31 星期六 0:45, Adrian Hunter 写道:
+>>> + Shawn
+>>>
+>>> On 14/10/2026 15:12, Changhuang Liang wrote:
+>>>> Add a cqhci_host_ops for the StarFive JHB100 platform that sets the
+>>>> CQHCI command idle time (CIT) to 320 ns during pre_enable.
+>>>>
+>>>> Setting the command idle time improves eMMC performance on this
+>>>> platform. Before/after dd results:
+>>>>
+>>>> before:
+>>>> dd if=/dev/mmcblk0 of=/dev/null bs=1M count=800
+>>>> 838860800 bytes (839 MB, 800 MiB) copied, 9.38511 s, 89.4 MB/s
+>>>> dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=800
+>>>> 838860800 bytes (839 MB, 800 MiB) copied, 12.2127 s, 68.7 MB/s
+>>>>
+>>>> after:
+>>>> dd if=/dev/mmcblk0 of=/dev/null bs=1M count=800
+>>>> 838860800 bytes (839 MB, 800 MiB) copied, 3.19472 s, 263 MB/s
+>>>> dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=800
+>>>> 838860800 bytes (839 MB, 800 MiB) copied, 10.7587 s, 78.0 MB/s
+>>>>
+>>>> Signed-off-by: Changhuang Liang <changhuang.liang@starfivetech.com>
+>>>> ---
+>>>>    drivers/mmc/host/sdhci-of-dwcmshc.c | 22 ++++++++++++++++++++++
+>>>>    1 file changed, 22 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>> index 249055f14162..36628b44f78b 100644
+>>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>> @@ -283,6 +283,8 @@
+>>>>    #define PHY_DELAY_CODE_SD        0x55
+>>>>    #define PHY_DELAY_CODE_SDIO        0x29
+>>>>    +/* CIT for the JHB100 SoC */
+>>>> +#define JHB100_CQHCI_CIT_NS    320
+>>>>    struct rk35xx_priv {
+>>>>        struct reset_control *reset;
+>>>>        u8 txclk_tapnum;
+>>>> @@ -2340,6 +2342,25 @@ static const struct sdhci_ops starfive_jhb100_ops = {
+>>>>        .platform_execute_tuning = th1520_execute_tuning,
+>>>>    };
+>>>>    +static void dwcmshc_starfive_jhb100_pre_enable(struct mmc_host *mmc)
+>>>> +{
+>>>> +    struct cqhci_host *cq_host = mmc->cqe_private;
+>>>> +    int ret;
+>>>> +
+>>>> +    ret = cqhci_set_cmd_idle_time(cq_host, JHB100_CQHCI_CIT_NS);
+>>>
+>>> Currently doing this from ->pre_enable() leaves a gap.  It needs:
+>>>
+>>> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+>>> index a466cd88b043..e1bf6d50e8eb 100644
+>>> --- a/drivers/mmc/host/cqhci-core.c
+>>> +++ b/drivers/mmc/host/cqhci-core.c
+>>> @@ -283,6 +283,9 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
+>>>          cqhci_set_irqs(cq_host, 0);
+>>>    +    if (cq_host->ops->pre_enable)
+>>> +        cq_host->ops->pre_enable(mmc);
+>>> +
+>>>        cqcfg |= CQHCI_ENABLE;
+>>>          cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+>>>
+>>> which is probably:
+>>>
+>>> Fixes: 79cf71c0b177 ("mmc: sdhci-of-dwcmshc: reduce CIT for better performance")
+>>>
+>>> Shawn?
+>>>
+>>
+>> The window between CQHCI_ENABLE and the first request has no queued
+>> commands for the idle timer to apply to, and pre_enable() re-runs on
+>> every cqe_off -> cqe_on transition (recovery, resume), so the value gets
+>> rewritten even if the registers were reset in between.
+> 
+> Might be worth checking.
+> 
+> At card init, cqhci_enable() calls __cqhci_enable(), which sets mmc->cqe_on =
+> true (cqhci-core.c) and never calls ->pre_enable(). cqhci_request() only calls
+> ->pre_enable() when !mmc->cqe_on (cqhci-core.c). So the first request skips it,
+> and so do all the requests after it. CIT is first written only after something
+> runs a non-CQE command, because mmc_start_request() then calls cqe_off()
+> (core.c). Examples: a CMD6 partition switch, a discard, an ioctl, or a flush
+> without DCMD. Until that happens, real CQE I/O runs with the default CIT.
+> 
 
-When the transfer needs fewer SG entries, the trimming updates sg_len and
-the length of the final retained entry but leaves SG_END on the original
-last entry. A host calling sg_last(data->sg, data->sg_len) on this list
-will hit its end-marker assertion.
+Indeed. If Changhuang is going to configure cit in __cqhci_enable, I
+could prepare a patch on top to improve it for rockchip platforms.
 
-This assertion was reported during read recovery with a Phytium host
-driver in a vendor Linux 6.6 kernel. The same trimming logic is present in
-mainline.
-
-Mark the final retained entry as the end of the scatterlist. Subsequent
-blk_rq_map_sg() calls can still extend the list: blk_next_sg() clears
-premature end markers before advancing to the next entry.
-
-Fixes: 6a79e391df29 ("mmc_block: ensure all sectors that do not have errors are read")
-Signed-off-by: Zhu Ling <zhuling2709@phytium.com.cn>
----
-1. I could not find an MMC-specific statement explicitly permitting an
-   unterminated SG prefix. Feedback from MMC maintainers on this
-   interpretation would be appreciated.
-
-2. bcm2835_prepare_dma() checks sg_is_last() before dma_map_sg().
-   No failure has been reproduced with that driver.
-
-3. A userspace metadata reproducer triggers the sg_last() assertion with
-   the original trimming loop. With this change, 120 flat-SG cases and
-   36 chained-SG cases pass, including truncation boundaries and rebuilding
-   a longer list.
-
- drivers/mmc/core/block.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1506,6 +1506,7 @@
- 			data_size -= sg->length;
- 			if (data_size <= 0) {
- 				sg->length += data_size;
-+				sg_mark_end(sg);
- 				i++;
- 				break;
- 			}
+> For Resume: cqhci_suspend() → cqhci_deactivate() → __cqhci_disable() clears both
+> cqe_on and activated. The first request after resume takes the !activated path
+> into __cqhci_enable(), which sets cqe_on = true again. The !cqe_on branch is
+> then skipped and ->pre_enable() is not called.
+> 
+> RESET_ALL: same problem. rk35xx_sdhci_reset() on SDHCI_RESET_ALL calls
+> cqhci_deactivate() and also asserts the reset_control, so SSC1 is certainly back
+> to its default. CIT then stays at the default after resume until the next
+> cqe_off.
+> 
+> 
 
