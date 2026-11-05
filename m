@@ -1,64 +1,60 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=54.204.34.129
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.70.43.167
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793846394;
-	b=hEGgkSkJGIKqXlLJjbfF4KPJPMsiBZskgrYkmDDVPQ5OBpUn24eZIomHDpyQs/W6DSVg
-	 JgEJEnSBFr3avpge9WHLBP7Kyp8XYZl4sR+QP2lckG7N6slS7JCTem/o8/4BP/K2/i6ui
-	 Q1wt/ffmDKX5hIupCtGTmBcITJKNH3ZeqZp4boFdN61tQXRL8Hq92oYhJTq77uiAg7h42
-	 /QV6q/PdaRF+ogkealsHS52bcdGN4nfK4Ss0wxGL9YpYdShd11sdoJWLy7dVDXGFe8FjV
-	 vSgyr0o2yW2dg0jMqELxU5oNb+o1QA4SCh9sdL4tkK/9zDyR8XjcYrt959cpqu9lRKg==
+	t=1793849580;
+	b=IAUpYASy60mNd98HvwHtBn4OSReUh24FBkxn4FF+pUHk9UyD3/n19T/4woCwnP7XSCwD
+	 wh5QSGkNmWn/Z0j2JnegqFHyur/GYE6klZP46IqKxZhO5q5oeE3wXhkKBcLQlOvCd8NmQ
+	 uTgx701IpZwX2cYU1QQeRSdwLpqX2ZwNIAG5/sgVEtokvy+NDuBl4idr2YzO3loS/XY9n
+	 IfG+YJFtdletULrZbj2mOnUkg/wSE+Hu+Ei/FKa0KUfGSf6as6Jk9pYc993YiGF3zF4sw
+	 lwkXl6yX7K1ONXKoQbBNCInJHXhY6xCu3/YXdfDSOyLHLTK9nY3SVnbWyPfJAVBWNzw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793846394;
-	h=DMARC-Filter:DKIM-Signature:X-QQ-mid:X-QQ-Originating-IP:Received:
-	 X-QQ-SSF:X-QQ-GoodBg:X-BIZMAIL-ID:Received:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
-	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
-	 Subject:To:Cc:Content-Type:X-QQ-SENDSIZE:Feedback-ID:X-QQ-XMAILINFO:
-	 X-QQ-XMRINFO:X-QQ-RECHKSPAM;
-	bh=8nHg2KK9YdUFsDyCN5OyhUk3RMp8EQBW/fDZ8x8OirA=;
-	b=ov/Eo9lvEKcrLIf8L13gCDlIqoUJYQLCzK0gIfPuibF80cNwf9Suzcgn1Bvjp3lFL+Fj
-	 B+/n3N+VqwI+BGxgx0sTwHHDLM+U1D1lt5DxJiWUJRs2Mcs+gGohuUgqoaVFl9wxK8Wnu
-	 g+hhVUywN25VH0T3EpsaxSz7JFGBiktgdGOOisji2BCn8lmYnoEpVu6AmlQXffgnaNSVQ
-	 FKOkAYOqKOAItarqJlE6hfEsbYT1KrOAXCxMrjli3lBBDGH6i2JGzfkoqba33Jf25buTZ
-	 gqwYVOUV4gUXT7dcKOPPCKdTce4EVKOT7MXqxSGYyBB5KOrxrk6oSJPXgdDV/99IMhw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793849580;
+	h=DMARC-Filter:DKIM-Signature:Date:To:From:Cc:Subject:Message-ID:
+	 In-Reply-To:References:Feedback-ID:X-Pm-Message-ID:MIME-Version:
+	 Content-Type:Content-Transfer-Encoding;
+	bh=jIzkVeBI9b3PEm/Tr6PfIipXlg8et2MLSXZyIQ53oIE=;
+	b=5shcsBPXOZGvOQhGso2QkMn65bf6CkYEBkz8oxf5Vxbr3qWJXV9HULZbWGluvKIWGg6B
+	 yvWITBwa0dKjGWi0+5l0bfrjexg4Odq73IQg8HQMJUiMFUjARW4j/JsUYfeBO2HlporSk
+	 y2OT3rF2gmKm0tavR8Ic9Jnlt7nOgFQcvRfq+dmZcSEelP0tRLS+BCbzcfQSu4BVDXqG4
+	 jpn/EIW7QX6Rl2Y6Se3ADpSHMEA1Bdv7ptu5RTiEE1jWp7Us8hvn0HUOXRQtpRZHL5wN5
+	 MzQmTmECVSbirLwyuahYc7VFcY+b5eXgBfchC6CLx5bGMbNacy0dK2wZ5KjENU2GoLw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=linux.spacemit.com;
-	spf=none smtp.mailfrom=linux.spacemit.com;
-	dkim=pass header.d=linux.spacemit.com header.i=@linux.spacemit.com header.a=rsa-sha256 header.s=mxsw2412 header.b=CQnGzt4E;
-	arc=none smtp.remote-ip=54.204.34.129
-Received: from smtpbguseast1.qq.com (smtpbguseast1.qq.com [54.204.34.129])
-	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
+	dmarc=pass header.from=protonmail.com;
+	spf=pass smtp.mailfrom=protonmail.com;
+	dkim=pass header.d=protonmail.com header.i=@protonmail.com header.a=rsa-sha256 header.s=protonmail3 header.b=lwFiiNKB;
+	arc=none smtp.remote-ip=185.70.43.167
+Received: from mail-43167.protonmail.ch (mail-43167.protonmail.ch [185.70.43.167])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85CB6606A336
-	for <linux-mmc@vger.kernel.org>; Thu,  5 Nov 2026 02:39:52 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 85CB6606A336
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux.spacemit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.spacemit.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4CBA606A31B
+	for <linux-mmc@vger.kernel.org>; Thu,  5 Nov 2026 03:32:59 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A4CBA606A31B
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=protonmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=protonmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=linux.spacemit.com header.i=@linux.spacemit.com header.a=rsa-sha256 header.s=mxsw2412 header.b=CQnGzt4E
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.spacemit.com;
-	s=mxsw2412; t=1793846389;
-	bh=8nHg2KK9YdUFsDyCN5OyhUk3RMp8EQBW/fDZ8x8OirA=;
-	h=MIME-Version:From:Date:Message-ID:Subject:To;
-	b=CQnGzt4EeAAhH/jwaRdpQJnd6r1AQ8SOk2uk93YTZ3teRIvNdW4uYlmwAXhG7wYFS
-	 d6IiLv4hUfLnFd02MWzgJjb2zGh1Wt6Sfa6yv9Uz/F9j7vK1vUB6thl64r+Ubn1laK
-	 jfuqPzwsb86Uc9U7Je2CFhCWkO4NNj2gj/+Rzc3w=
-X-QQ-mid: zesmtpsz9t1793846385t352cee6d
-X-QQ-Originating-IP: xZhIJze9Fel9ZaeE4at0oG3vLMtjGfDqnhsl0hfYKTs=
-Received: from mail-pj1-f52.google.com ( [209.85.216.52])
-	by bizesmtp.qq.com (ESMTP) with SMTP id 0
-	for <linux-mmc@vger.kernel.org>; Thu, 05 Nov 2026 10:39:43 +0800 (CST)
-X-QQ-SSF: 0000000000000000000000000000000
-X-QQ-GoodBg: 0
-X-BIZMAIL-ID: 10315641731782962756
-Received: by mail-pj1-f52.google.com with SMTP id 98e67ed59e1d1-3b0a519049aso697642a91.1
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Nov 2026 18:39:44 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AKwUvBxkfAQfpKN2HOvGZO6SdvJDULinR2o9D9pau3EQIwE8Mgsb5rkKzEgq2OGF977sJmRZheg11t0t/QQ=@vger.kernel.org
-X-Gm-Message-State: APuU4Z/XR/zvmZ2ECljVRZ0iLKZyK9l0FaozVqohFz5HrNehJxS5jMJ8
-	zaGAFR1lgAOE8/tZmITHJRLmpBxWa7UDyyjKG2uqgXUY3LPlsQ0/MgNlHxVo+Q+k3lpXuPUzJSg
-	Z588Wq91krMRNtyo9/OQuyCx64rfZvEo=
-X-Received: by 2002:a17:90b:562d:b0:3ad:a462:f07f with SMTP id
- 98e67ed59e1d1-3ae8982c1ffmr16206466a91.45.1793846382617; Wed, 04 Nov 2026
- 18:39:42 -0800 (PST)
+	dkim=pass (2048-bit key, unprotected) header.d=protonmail.com header.i=@protonmail.com header.a=rsa-sha256 header.s=protonmail3 header.b=lwFiiNKB
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=protonmail.com;
+	s=protonmail3; t=1793849576; x=1794108776;
+	bh=jIzkVeBI9b3PEm/Tr6PfIipXlg8et2MLSXZyIQ53oIE=;
+	h=Date:To:From:Cc:Subject:Message-ID:In-Reply-To:References:
+	 Feedback-ID:From:To:Cc:Date:Subject:Reply-To:Feedback-ID:
+	 Message-ID:BIMI-Selector;
+	b=lwFiiNKBs+wTOTOekItXMHg+620VO3If6nc9oABez1PyHXOZNYoMFQz9a1D+YilRe
+	 N2tsOooKbaLFpTa3OvMNA0oD/ZuphvcB/qNOM4/+9tUaw/cXZt3M3ycSQ4Dgeusysm
+	 +D6UE9xLk7qaJ8RCusMdArzoNblhhBEnSrMip24WMpTpx7m46AfAnNiLrl2Aaj03ut
+	 2NV7mybIcLBPfJBo0D8s0N8HNC93JoADYXSxfHOABXEoxicv5efOGwjWwR7LroNI2E
+	 uWzgj7pYcvvMEwqs+qFIY38SqQEAzsfdGImScwHSSmXfUGbpQ9FhkJZ7zfofTqzI7H
+	 LeAGk8vJrv6eQ==
+Date: Thu, 05 Nov 2026 03:32:49 +0000
+To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "bhelgaas@google.com" <bhelgaas@google.com>, "rafael@kernel.org" <rafael@kernel.org>
+From: Kyle Baedke <kylebaedke@protonmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: Re: [BUG] Genesys GL9750 (17a0:9750) does not respond after its PCIe  slot is powered back on from D3cold, on s2idle resume and at runtime  (ASUS Vivobook 14 Flip TP3407SA, kernel 7.3.1)
+Message-ID: <vqOfI4cXijz1Ft480-_mX3XkrTT_-oQ78Xy6CPrXD_r5R06i7H03y3szJFA7JAVs9YsW93_hUQ0hz5bTYItb7RUml3cGwxPmW9gPFIcNY-8=@protonmail.com>
+In-Reply-To: <x4G_0cgWnHWJtmgP4iX3hFfwwbWDyVuO9Ps8Pv_Rnq4VguufBRLzZex1IxGuTtaYfU7tS7U8RbKjB2I54HxfEmPk3gzKWvYDAyuZXrtWbDU=@protonmail.com>
+References: <x4G_0cgWnHWJtmgP4iX3hFfwwbWDyVuO9Ps8Pv_Rnq4VguufBRLzZex1IxGuTtaYfU7tS7U8RbKjB2I54HxfEmPk3gzKWvYDAyuZXrtWbDU=@protonmail.com>
+Feedback-ID: 212527205:user:proton
+X-Pm-Message-ID: e3f05f633c40ddf18529b7d5aa15b834ff41ae80
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -68,104 +64,170 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261102135330.2493332-1-robh@kernel.org>
-In-Reply-To: <20261102135330.2493332-1-robh@kernel.org>
-From: Chunyan Zhang <chunyan.zhang@linux.spacemit.com>
-Date: Thu, 5 Nov 2026 10:39:06 +0800
-X-Gmail-Original-Message-ID: <872B2B4EAE847E62+CAAfSe-uD=s0RpuqQ_h+_fErcEC+G=N_LA6e=p_sXJ=iG7jMc3Q@mail.gmail.com>
-X-Gm-Features: AclHuK-lEE7dv-iC1Lsio6aPGOufL5hgelB1hFojisk2-zoMsjC0hhsp9HraOXA
-Message-ID: <CAAfSe-uD=s0RpuqQ_h+_fErcEC+G=N_LA6e=p_sXJ=iG7jMc3Q@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: Use hex unit address patterns
-To: "Rob Herring (Arm)" <robh@kernel.org>
-Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
-	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Vadim Fedorenko <vadim.fedorenko@linux.dev>, 
-	Arkadiusz Kubalewski <arkadiusz.kubalewski@intel.com>, Jiri Pirko <jiri@resnulli.us>, 
-	Ivan Vecera <ivecera@redhat.com>, Benson Leung <bleung@chromium.org>, 
-	Guenter Roeck <groeck@chromium.org>, Linus Walleij <linusw@kernel.org>, 
-	Bartosz Golaszewski <brgl@kernel.org>, Frank Li <Frank.Li@nxp.com>, 
-	Sascha Hauer <s.hauer@pengutronix.de>, Pengutronix Kernel Team <kernel@pengutronix.de>, 
-	Fabio Estevam <festevam@gmail.com>, Jonathan Cameron <jic23@kernel.org>, 
-	David Lechner <dlechner@baylibre.com>, =?UTF-8?B?TnVubyBTw6E=?= <nuno.sa@analog.com>, 
-	Andy Shevchenko <andy@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, 
-	Alexandre Torgue <alexandre.torgue@foss.st.com>, Olivier Moysan <olivier.moysan@foss.st.com>, 
-	Arnaud Pouliquen <arnaud.pouliquen@foss.st.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
-	Thierry Reding <thierry.reding@kernel.org>, Jonathan Hunter <jonathanh@nvidia.com>, 
-	Fabrice Gasnier <fabrice.gasnier@foss.st.com>, Lee Jones <lee@kernel.org>, 
-	Srinivas Kandagatla <srini@kernel.org>, Ekansh Gupta <ekansh.gupta@oss.qualcomm.com>, 
-	Ulf Hansson <ulfh@kernel.org>, Hans Ulli Kroll <ulli.kroll@googlemail.com>, 
-	Andrew Lunn <andrew+netdev@lunn.ch>, "David S. Miller" <davem@davemloft.net>, 
-	Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
-	Vinod Koul <vkoul@kernel.org>, Neil Armstrong <neil.armstrong@linaro.org>, 
-	Manivannan Sadhasivam <mani@kernel.org>, Ray Jui <rjui@broadcom.com>, 
-	Scott Branden <sbranden@broadcom.com>, 
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, 
-	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>, Masami Hiramatsu <mhiramat@kernel.org>, 
-	Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, 
-	"Rafael J. Wysocki" <rafael@kernel.org>, Daniel Lezcano <daniel.lezcano@kernel.org>, 
-	Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>, 
-	Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linux.alibaba.com>, 
-	Paul Kocialkowski <paul.kocialkowski@bootlin.com>, Shawn Guo <shawnguo@kernel.org>, 
-	Chanh Nguyen <chanh@os.amperecomputing.com>, Alistair Francis <alistair@alistair23.me>, 
-	Julius Werner <jwerner@chromium.org>, Paul Cercueil <paul@crapouillou.net>, 
-	Dmitry Osipenko <digetx@gmail.com>, Florian Fainelli <f.fainelli@gmail.com>, 
-	Thierry Reding <thierry.reding@gmail.com>, Ray Jui <ray.jui@broadcom.com>, 
-	Scott Branden <scott.branden@broadcom.com>, Krzysztof Kozlowski <krzk@kernel.org>, 
-	dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, netdev@vger.kernel.org, 
-	chrome-platform@lists.linux.dev, linux-gpio@vger.kernel.org, 
-	imx@lists.linux.dev, linux-arm-kernel@lists.infradead.org, 
-	linux-hwmon@vger.kernel.org, linux-iio@vger.kernel.org, 
-	linux-stm32@st-md-mailman.stormreply.com, linux-sound@vger.kernel.org, 
-	linux-input@vger.kernel.org, linux-tegra@vger.kernel.org, mfd@lists.linux.dev, 
-	linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-phy@lists.infradead.org, linux-pm@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-X-QQ-SENDSIZE: 520
-Feedback-ID: zesmtpsz:linux.spacemit.com:qybglogicsvrsz:qybglogicsvrsz3b-0
-X-QQ-XMAILINFO: Mp831pdh2MvzqXsx3U2Ku+P69w2eEibPjhr17i7Cnrc93DtlN4QUGvOt
-	pPxw1ApeaUF2WaOMw8U9sKMO1OqwxtXnsRakkYh8yApC3Re3lg2TDh3hJQDXfDUIjUgtmb1
-	M3YV1QyuB9y8eVAMshpg5NnxYnh6VDIi8Y0VdLc/9M8Q54R2H26USXsIbhSzb7MdedQ/KIn
-	NwDyrtgugPlJmvYnnD4SNdJNsi4zbmrh1AOGD7V5YbWVorgQkT/T3duzQn2Dr3n8sSG9VN7
-	MDmIiidHyv7FAn0g922W+SJXEOaOjwT3wf7Ozz+muBPAo5akCJUKrlIGgYRRgT6q8lKp+Np
-	ngJN3YdkABlDmP6x9zp2yxrBTn21SRitJKATz3727JbvQje2J1PcBmrhWTrOZ+hPC/1jEIi
-	jqrN04nLzrMA8SNy6Pf/xMth6dGAuKMZIiuXRm7Af4S8rox53nsb+VpJl5wrRoQKOdP3pCS
-	Lf3NTq9Wr1CaAY4fVbamXLga2rEDlWEozn8FXE9dcfvmqD0q8TBV5b1i7p0tdf9hBo2VNwg
-	mdI/SRhSiHKRSyAObcTq9fW96JMBv3Br6eSWAmVJtyek31gKwBHgG6Dt4JcVmR7VuV/u2Q6
-	DhGccTxchCIIeTV42x/21GjlSxqOOgNQkJmoeidEQz9PL4CEEHutv0XNpOCL9Dfcmz0eOnV
-	HP5SYRVc9mIm29YSCmJCnDIAglXpcyRnVT8ETA2d3Y9/mYVCyC2EsTMIJQsITgYub/hk5i3
-	1/mkBHKm1LeZOopTVY0WzxeAfen2J7zZId3Qef2/w2rCEqa/7qOC+0f1kGPEVet/Ejxz3T/
-	M7dqeMuj9cR+epsWj4XxudOMiHwUgn14dIvCEdamhKZG8pkMwkEhe8Cm0nStQPJJG89+y8W
-	Rsn8sXz3qAO/yk7u17POHJ7FMtByy+3gbSLcyuPRxla3XoWPX4utOoRjSoKpuoPHAMuGN4m
-	9TVJ1trh0r10VqMSQAOz9zbTW6QYjUb5EVfxpckLoq0zDxFKpE0CBDkRUo5KatclAXOe0v4
-	UW8RB7k4IBL04manZqTHHCuqQ4bLE9n43YepCbQ4ynS7YxJ78X
-X-QQ-XMRINFO: NS+P29fieYNwqS3WCnRCOn9D1NpZuCnCRA==
-X-QQ-RECHKSPAM: 0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, 2 Nov 2026 at 21:53, Rob Herring (Arm) <robh@kernel.org> wrote:
->
-> Unit-addresses by default (and most commonly) are hexadecimal. There's a
-> number of cases using decimal patterns. Fix all of them, limiting the
-> pattern to match the 'reg' limits if there are any.
->
-> Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
-> ---
 
-[snip]
 
-> diff --git a/Documentation/devicetree/bindings/thermal/sprd-thermal.yaml b/Documentation/devicetree/bindings/thermal/sprd-thermal.yaml
-> index afa551f6185f..222d70baef1e 100644
-> --- a/Documentation/devicetree/bindings/thermal/sprd-thermal.yaml
-> +++ b/Documentation/devicetree/bindings/thermal/sprd-thermal.yaml
-> @@ -47,7 +47,7 @@ properties:
->      const: 0
->
->  patternProperties:
-> -  "^([a-z]*-)?sensor(-section)?@[0-9]+$":
-> +  "^([a-z]*-)?sensor(-section)?@[0-9a-f]+$":
-
-Reviewed-by: Chunyan Zhang <zhang.lyra@gmail.com>
-
-Thanks,
-Chunyan
+On Wednesday, November 4th, 2026 at 2:52 PM, Kyle Baedke <kylebaedke@proton=
+mail.com> wrote:
+First copy was in html mode this should be in plaintext
+> The GL9750 SD host controller in my laptop is dead after its PCIe slot ha=
+s
+> been powered off and back on through the root port's ACPI power resource.
+> This happens on resume from s2idle, and I can also reproduce it at runtim=
+e
+> with no sleep involved. In both cases the link below the root port never
+> comes up, so the device reads as all-ones. The sdhci errors are a
+> consequence of that. I'm writing to the sdhci maintainers because the
+> device is driven by sdhci-pci-gli, but the failure occurs before the
+> driver can talk to the device.
+>=20
+> =3D=3D System =3D=3D
+>=20
+> =C2=A0 Laptop: =C2=A0 =C2=A0ASUS Vivobook 14 Flip TP3407SA
+> =C2=A0 BIOS: =C2=A0 =C2=A0 =C2=A0TP3407SA.308, 03/05/2026 (the latest ava=
+ilable)
+> =C2=A0 Kernel: =C2=A0 =C2=A07.3.1 (NixOS 26.11), x86_64
+> =C2=A0 Device: =C2=A0 =C2=A00000:2c:00.0 =C2=A0Genesys Logic GL9750 [17a0=
+:9750] rev 1,
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0subsystem 1043:202f
+> =C2=A0 Upstream: =C2=A0root port 0000:00:1c.4 (ACPI \_SB.PC00.RP05), link=
+ 2.5GT/s x1
+> =C2=A0 Cmdline: =C2=A0 intel_iommu=3Don iommu=3Dpt pcie_aspm.policy=3Dpow=
+ersave
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0(the relevant parameters)
+> =C2=A0 Sleep: =C2=A0 =C2=A0 /sys/power/mem_sleep =3D [s2idle] deep. Selec=
+ting "deep" (S3)
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0hangs the machine and nee=
+ds power to be cut to recover, so
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0s2idle is the only usable=
+ sleep mode.
+>=20
+> The root port's ACPI node has power resources (power_resources_D0 and
+> power_resources_D3hot in sysfs). The endpoint's ACPI node has none.
+>=20
+> Other firmware/kernel messages seen at boot:
+>=20
+> =C2=A0 ACPI: \_SB_.PEPD: Duplicate LPS0 _DSM functions (mask: 0x1)
+> =C2=A0 pci 0000:00:1c.4: mask Replay Timer Timeout Correctable Errors due=
+ to
+> =C2=A0 =C2=A0 =C2=A0 0000:2c:00.0 hardware defect
+>=20
+> =3D=3D Symptom =3D=3D
+>=20
+> After the slot is powered back on, config space reads of the device retur=
+n
+> ffff, the port's Link Status stays 0x1011 (Data Link Layer Link Active =
+=3D 0,
+> not training), and sdhci reports:
+>=20
+> =C2=A0 mmc0: sdhci: Version: 0x0000ffff =C2=A0 (register dump is all 0xff=
+)
+> =C2=A0 mmc0: enable PCI MSI failed, error=3D-22
+> =C2=A0 mmc0: Reset 0x1 never completed.
+> =C2=A0 mmc0: 3.3V regulator output did not become stable
+> =C2=A0 mmc0: Controller never released inhibit bit(s).
+>=20
+> On a healthy boot the port's Link Status is 0x3011.
+>=20
+> =3D=3D Resume trace =3D=3D
+>=20
+> Captured with rtcwake -m mem -s 15 (s2idle), pm_debug_messages=3D1 and
+> dynamic debug enabled for drivers/pci/*, drivers/acpi/power.c and
+> drivers/acpi/device_pm.c:
+>=20
+> =C2=A0 [ =C2=A0145.370215] sdhci-pci 0000:2c:00.0: PCI PM: Suspend power =
+state: D3hot
+> =C2=A0 [ =C2=A0145.406917] ACPI: \_SB_.PC00.RP05.PXP_: ACPI: PM: Power re=
+source turned off
+> =C2=A0 [ =C2=A0145.406948] pcieport 0000:00:1c.4: PCI PM: Suspend power s=
+tate: D3cold
+> =C2=A0 ...
+> =C2=A0 [ =C2=A0159.865842] ACPI: \_SB_.PC00.RP05: PM: Power state change:=
+ D3cold -> D0
+> =C2=A0 [ =C2=A0160.263869] ACPI: \_SB_.PC00.RP05.PXP_: ACPI: PM: Power re=
+source turned on
+> =C2=A0 [ =C2=A0160.264234] ACPI: \_SB_.PC00.RP05: PM: Power state changed=
+ to D0
+> =C2=A0 [ =C2=A0160.264241] pcieport 0000:00:1c.4: power state changed by =
+ACPI to D0
+> =C2=A0 [ =C2=A0160.276459] pcieport 0000:00:1c.4: ready 0ms after power u=
+p D3hot->D0uninitialized
+> =C2=A0 [ =C2=A0160.276866] pcieport 0000:00:1c.4: waiting 100 ms for down=
+stream link, after activation
+> =C2=A0 [ =C2=A0161.297053] pcieport 0000:00:1c.4: Data Link Layer Link Ac=
+tive not set in 100 msec
+> =C2=A0 [ =C2=A0161.303943] sdhci-pci 0000:2c:00.0: restore config 0x3c: 0=
+xffffffff -> 0x000001ff
+> =C2=A0 [ =C2=A0161.321478] mmc0: enable PCI MSI failed, error=3D-22
+> =C2=A0 [ =C2=A0161.421611] mmc0: Reset 0x1 never completed.
+> =C2=A0 [ =C2=A0161.741170] mmc0: 3.3V regulator output did not become sta=
+ble
+>=20
+> The slot was off for about 15 s (145.407 to 160.264), so this is not a
+> short-off-time problem.
+>=20
+> =3D=3D Reproduction without suspend =3D=3D
+>=20
+> From a healthy boot (device alive, no SD card inserted):
+>=20
+> =C2=A0 echo 1 =C2=A0 =C2=A0> /sys/bus/pci/devices/0000:2c:00.0/remove
+> =C2=A0 echo 1 =C2=A0 =C2=A0> /sys/bus/pci/devices/0000:00:1c.4/d3cold_all=
+owed
+> =C2=A0 echo auto > /sys/bus/pci/devices/0000:00:1c.4/power/control
+> =C2=A0 # the root port's power_state reached D3cold after about 2 s
+> =C2=A0 sleep 1
+> =C2=A0 echo on =C2=A0 > /sys/bus/pci/devices/0000:00:1c.4/power/control
+> =C2=A0 # port is D0 again, but its Link Status is 0x1011 (DLActive =3D 0)
+> =C2=A0 echo 1 =C2=A0 =C2=A0> /sys/bus/pci/rescan =C2=A0 =C2=A0 # repeated=
+ once per second for 15 s
+>=20
+> The device never reappears, and Link Status stays 0x1011 for the whole
+> 15 s. This uses only a 1 s off time.
+>=20
+> =3D=3D What I tried =3D=3D
+>=20
+> Suspend variants, each run with rtcwake -m mem -s 15 (s2idle), no SD card
+> inserted. All of these failed on the first cycle:
+>=20
+> =C2=A0 - no changes
+> =C2=A0 - endpoint power/control=3Don
+> =C2=A0 - root port power/control=3Don
+> =C2=A0 - endpoint link/l1_2_aspm and link/l1_2_pcipm set to 0
+> =C2=A0 - endpoint link/l1_aspm, l1_1_aspm, l1_2_aspm, l1_1_pcipm, l1_2_pc=
+ipm
+> =C2=A0 =C2=A0 all set to 0
+> =C2=A0 - endpoint removed before suspend, rescanned after resume
+>=20
+> This one passed 10/10 cycles (device alive 2 s and 8 s after resume, port
+> Link Status 0x3011 each time):
+>=20
+> =C2=A0 - d3cold_allowed=3D0 on both the endpoint and the root port, set j=
+ust
+> =C2=A0 =C2=A0 before suspend and restored to 1 right after resume
+>=20
+> Recovery attempted after a failed resume, with the root port held in D0
+> (power/control=3Don) and the rescan polled for 15 s per stage. None broug=
+ht
+> the device back, and Link Status stayed 0x1011 throughout:
+>=20
+> =C2=A0 - remove + rescan
+> =C2=A0 - secondary bus reset on the root port, then rescan
+> =C2=A0 - Link Disable / enable on the root port, then rescan
+>=20
+> =3D=3D Questions =3D=3D
+>=20
+> 1. Is this a known issue with this device or this platform's slot power-o=
+n
+> =C2=A0 =C2=A0method?
+> 2. What additional tracing would help (ACPI AML debugging, GPIO/pinctrl
+> =C2=A0 =C2=A0state before and after the power resource turns on, anything=
+ else)?
+>=20
+> I can build and test patches on this machine.
+>=20
+> Thanks,
+> Kyle
+>=20
+> Sent with Proton Mail secure email.
