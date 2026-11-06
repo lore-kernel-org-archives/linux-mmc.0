@@ -1,47 +1,47 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793963871;
-	b=23WxUhopYzsYuawOHieEegb20x+uHAzF53ZdfGXpjw9u0rbuNKAVkhFy97VY3er9+4tm
-	 IquDmMY35yWzdjmJ+xOJunTcKUI2gnzuY+jSw6VszW92Phcav8dK3KXcp4784QeL9WO7K
-	 QXP6VQEvHjLbGL1P5vSK4GswnDaAzUrzC0FmyvuuGRIzwjyMrMP7y58BX3gN4zjP2SD2P
-	 nKoeqfJx0Z5DuS2Wn7WkNU5QtnpmSBunYrytMg5eNRscsiVfuxix/NXmRj9uHFB5UaPyt
-	 4lW6SDV+uh7zKrhIdlWpqeijy+zfGRfCc4qd/cDnCL91fHVuRKWGGPTnn06ikohNylg==
+	t=1793963980;
+	b=nCNF3R+aRTJap337syEY0jff9dheIn+j5G89mpQBpXmoecylrxdjodbA8HcQ8pof3ABK
+	 Es4YYuSyYZ5fbk/QtaiNSlQElthD/i6QZAdg+ZAO7tovjhf2GC2Q6zAooIH8spLCt/gTE
+	 EmfjIByq+G6Isv5T/M7zwWps0B/I08+ZTUwUL/CxvaAK0+ef26flTyVKLX8QlGyeoTAjo
+	 xFj7xiL0uG4rFbR4goKKaS4xUcUcyNItCu5eL16zcxqNU0NwNcDRVLf3UzuE/Kx39xKeZ
+	 1ti9ufJL+m3JZseUmUpVynM18kCjejPOlWzphflEVrolXdrUE/lyUIj8hluwY6mWGsA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793963871;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793963980;
 	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
 	 Subject:To:Cc:References:From:Content-Language:Autocrypt:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=GLljgsFb+uq1WnBVQNd/kB4psS5lcjdUky3hJeBp6wQ=;
-	b=vcg0yp24KltbsjPK38a/i4Gwu9WtTD7WyPUUyj56yd30U6TAuBcvHmeWdtDBUSpo0zXj
-	 uHi8yHqclF26fAeAapkQ7QRdUQuZ6RKcirYg/b11/81SY+gVW4aCP6mpPD7OALR95O/tg
-	 3Dz27VrDC+8ovyUMwu49a7e7718nVtigFdVl4ZX2alb6p9zhVl7MNrqypM0uDB/Pn7oGR
-	 kaSHnLr3FXxqPzRIyp/ugWdda8v+0rMT8FZrVTplMx96AOt0tLCJPx82qMeeYu9Gc5l5w
-	 16nr0Vgo14ElL91dgw2U/K8cEUp1pfJT2euzOz9ItTQZtqkNGJJ/+EQYlyZ0bFAYCGA==
+	bh=7mBW4lJGLBpT83Ks77i3nnl59t9W1hBFJkArWpdIOLU=;
+	b=Ik8pv5S2P4fsJxcxKMSXQKX4jsS6Mkd7Pskr9+sbFQkb2cbPv1AQd4C+i+qQacNNfY3r
+	 PkIL79tAKsZ2QZs2yDwmCfusvf6DHtldfOTOHWG5JZjyscLVy9X1hv5SL12aBUN1xJg2V
+	 CF9mZfBQXKAgOAXySEf0DsfnIvKOLhEnBNZdMUJkv0y0GdDlyMa4FUxZpBvxhH8d63Pz8
+	 F7tFy9HPwOEBBrMApX3761TnRNSftxmKOuU6XOeRsBw3XHXZNHY0EkBbEghYxyu4v8cUF
+	 948O+ufssNxT3xOGU0+kw8t20hVH2mpkSdJlYWs63orIRz0X5sY+j83h850uPqWMX3Q==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="kAhx4lL/";
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=jpm3oQjv;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C345D606D831;
-	Fri,  6 Nov 2026 11:17:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9D8A606A32C;
+	Fri,  6 Nov 2026 11:19:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=kAhx4lL/
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 549681F0089F;
-	Fri,  6 Nov 2026 11:17:37 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=jpm3oQjv
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E78211F0089F;
+	Fri,  6 Nov 2026 11:19:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793963870;
-	bh=GLljgsFb+uq1WnBVQNd/kB4psS5lcjdUky3hJeBp6wQ=;
+	s=k20260515; t=1793963979;
+	bh=7mBW4lJGLBpT83Ks77i3nnl59t9W1hBFJkArWpdIOLU=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=kAhx4lL/R21fNX6YNThXGOnMvrmYvMWZ5GCoFYLiZ0UX5nb1HoQ0cq2xcmJ5zEg4d
-	 zjyeGkPbak0AviJEbYHsEZ/udWrjjEFPUEglv5rgT0VRx3TlAyKZogbjy/vHYKPL7v
-	 ElF1p6yVDnoT9U6wRfKZJlLeAU3KhAKX94nghRnxoD70amgmRuJtwq9ycVrypSuV6h
-	 ODxJBvPXL/LbmHWgTzRgK5S/nl0ANxKznmQ/Atw7gMf4MCTh+HGO/fmRvz8kVFgUyx
-	 zWXY93gXUd2Es4ZoEQALLsrB+AtpuSx3xQyHIzvTn85X4bi8Q2W75BdoIwSIesYhfd
-	 tzMm5C+x9bNCw==
-Message-ID: <8c625e53-7944-47df-9b91-268d0cdced48@kernel.org>
-Date: Fri, 6 Nov 2026 12:17:36 +0100
+	b=jpm3oQjvW6luIZxjWQATfkOQOtP2k3BcFIbdvWB2G23GvkyoCh97UiwyzDpBk08qP
+	 3OHD0x05JOuVaie5zKswdypm/WFLWDIYWIbCHcSQ+9ZMPtgPHsVtcQwpnYyrouAdCN
+	 Xu44qddCDJLf4B+WNMRiHv5/Kw+fJqWjUjBZwzM3l2QC25BmyqcgS8EpDIU9Vlp9Np
+	 ggSt2ciBX4uRAz/BhapvIDgBPc+soOZFPteED7HhcxpGhQjAFzKhs6abcbGezgTKzP
+	 uQi7RC4LPd2sJHuepgfFCaj/lzVbqhmjbAlDOBAfNskcjTrAfM7UIUGhzfHBaR2RBf
+	 /WVtThkL3dTsQ==
+Message-ID: <c19be967-8909-48e9-8a89-3906264eed07@kernel.org>
+Date: Fri, 6 Nov 2026 12:19:22 +0100
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -52,8 +52,7 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 01/25] dt-bindings: vendor-prefixes: add Metanoia
- Communications
+Subject: Re: [PATCH 03/25] dt-bindings: reset: add Metanoia MT2824
 To: =?UTF-8?Q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>,
  Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
  Conor Dooley <conor+dt@kernel.org>, Jun Chang <jun.chang@metanoia-comm.com>,
@@ -83,7 +82,7 @@ Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
  linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
  linux-watchdog@vger.kernel.org
 References: <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
- <20261106-mt2824-v1-1-86087eaf5af4@bootlin.com>
+ <20261106-mt2824-v1-3-86087eaf5af4@bootlin.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -129,21 +128,36 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  K9bCVaboTA2T77QYkRcRJYSsO1alGX0ome/hMLD1daXlkrNUp1HWa3K4iytLRXjCSIorWiGs
  n+q3krnpXu3TFkA8qtOFZMdnIiFuiq1yLT8hptsV5xh1TA2nsVvSYiaCr3q4s4BKjS/KrLDb
  qoxzw8ISjdUp4pA85vb6YLCmb39NgidD+7PmAr65lBNveIFynTgsja1rRQ4=
-In-Reply-To: <20261106-mt2824-v1-1-86087eaf5af4@bootlin.com>
+In-Reply-To: <20261106-mt2824-v1-3-86087eaf5af4@bootlin.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-On 06/11/2026 10:29, Benoît Monin wrote:
-> Add the vendor prefix for Metanoia Communications Inc., a fabless
-> semiconductor company specializing in wireline and 5G radio access
-> networking chips.
-> 
-> Link: https://metanoia-comm.com/about-us/company-overview/
-> 
-> Originally-by: Jun Chang <jun.chang@metanoia-comm.com>
+On 06/11/2026 10:30, Benoît Monin wrote:
+> +  - compatible
+> +  - reg
+> +  - "#reset-cells"
+> +
+> +additionalProperties: false
+> +
+> +examples:
+> +  - |
+> +    rst: rst-controller@1000000c {
 
-We do not have such tag (because we are not TIP). Drop everywhere,
-except for subsystems which explicitly accept it.
+Node names should be generic. See also an explanation and list of
+examples (not exhaustive) in DT specification:
+https://devicetree-specification.readthedocs.io/en/latest/chapter2-devicetree-basics.html#generic-names-recommendation
+If you cannot find a name matching your device, please check in kernel
+sources for similar cases or you can grow the spec (via pull request to
+DT spec repo).
+
+Also drop unused label.
+
+> +        compatible = "metanoia,mt2824-reset";
+> +        reg = <0x1000000c 0x4>;
+
+I don't think one word of registers is a device. You split one device
+into several fake subparts, that's not correct.
+
 
 Best regards,
 Krzysztof
