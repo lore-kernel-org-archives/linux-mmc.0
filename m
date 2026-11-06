@@ -1,47 +1,47 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793963980;
-	b=nCNF3R+aRTJap337syEY0jff9dheIn+j5G89mpQBpXmoecylrxdjodbA8HcQ8pof3ABK
-	 Es4YYuSyYZ5fbk/QtaiNSlQElthD/i6QZAdg+ZAO7tovjhf2GC2Q6zAooIH8spLCt/gTE
-	 EmfjIByq+G6Isv5T/M7zwWps0B/I08+ZTUwUL/CxvaAK0+ef26flTyVKLX8QlGyeoTAjo
-	 xFj7xiL0uG4rFbR4goKKaS4xUcUcyNItCu5eL16zcxqNU0NwNcDRVLf3UzuE/Kx39xKeZ
-	 1ti9ufJL+m3JZseUmUpVynM18kCjejPOlWzphflEVrolXdrUE/lyUIj8hluwY6mWGsA==
+	t=1793964116;
+	b=z+vZUWyQmY75VlmvDjOcXI51QtGXMr+1WudueZCQ9pjRe7odKhKLAixHz/eG1CpgZXnA
+	 +FlrwMPi+deYxgPZeWyaR4YrZw3isXJ0GNAsYvSkBTUgl3+PdKGX8Pl5bWakMy9Jaiiq/
+	 3HTNdXxVYMpwyTD/lg5F+hMcnb8JRBTMiVWx/TGuXC1cN8KwrfrvaXyDoyiPGezt40i8o
+	 GcgPLIHVVzL8hDH3XVYMo+8UMU5G9RrlM6UaBlay9NmhaqwOH+/wEo4zABQiDnvWCbU5x
+	 TCd04cLGKoxDSbd5kOnI6PdN22xPqY4ZSTo/sOyQMObT+srj992vNT63K5K1HWQ8Gug==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793963980;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793964116;
 	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
 	 Subject:To:Cc:References:From:Content-Language:Autocrypt:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=7mBW4lJGLBpT83Ks77i3nnl59t9W1hBFJkArWpdIOLU=;
-	b=Ik8pv5S2P4fsJxcxKMSXQKX4jsS6Mkd7Pskr9+sbFQkb2cbPv1AQd4C+i+qQacNNfY3r
-	 PkIL79tAKsZ2QZs2yDwmCfusvf6DHtldfOTOHWG5JZjyscLVy9X1hv5SL12aBUN1xJg2V
-	 CF9mZfBQXKAgOAXySEf0DsfnIvKOLhEnBNZdMUJkv0y0GdDlyMa4FUxZpBvxhH8d63Pz8
-	 F7tFy9HPwOEBBrMApX3761TnRNSftxmKOuU6XOeRsBw3XHXZNHY0EkBbEghYxyu4v8cUF
-	 948O+ufssNxT3xOGU0+kw8t20hVH2mpkSdJlYWs63orIRz0X5sY+j83h850uPqWMX3Q==
+	bh=z7aW3+opSiH7y0XqRuy6at87FK5gKoz43cEXHGVwj4I=;
+	b=VDhJ/nE2CX5gs1SwX7VQZ6dBfGCDt82wb4vaHJUjALLfa+WOAbaMN2jXnLtpqji59lZs
+	 Dmvu9MPKJ8TWmQOc+xewn4bSwr97RP08JEsuVCYvRYo2QQ1OJIsybko5K8CEYhZAXreBw
+	 QK5NjoA19hrzPWiF1YLx7C+6DZIzWXPXXXUe66f3jtDJZ+ZCg+U6M372iixZryZAhw2W9
+	 YQsOgCnx9+QDDErHezerSyGQAhLnZ7RIqk8mw+2ozL4ab2zV+hrTcvHvdBO7+wdhrUMrS
+	 jw1WKAe5AxOUTzzntHMPrf9YBHspGB6scYXad0tIQDsrSx7k5ZVY59S92k9jB+m7G9g==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=jpm3oQjv;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=kWgRMBfI;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9D8A606A32C;
-	Fri,  6 Nov 2026 11:19:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0E42606A326;
+	Fri,  6 Nov 2026 11:21:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=jpm3oQjv
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E78211F0089F;
-	Fri,  6 Nov 2026 11:19:25 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=kWgRMBfI
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CC8471F008A1;
+	Fri,  6 Nov 2026 11:21:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793963979;
-	bh=7mBW4lJGLBpT83Ks77i3nnl59t9W1hBFJkArWpdIOLU=;
+	s=k20260515; t=1793964115;
+	bh=z7aW3+opSiH7y0XqRuy6at87FK5gKoz43cEXHGVwj4I=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=jpm3oQjvW6luIZxjWQATfkOQOtP2k3BcFIbdvWB2G23GvkyoCh97UiwyzDpBk08qP
-	 3OHD0x05JOuVaie5zKswdypm/WFLWDIYWIbCHcSQ+9ZMPtgPHsVtcQwpnYyrouAdCN
-	 Xu44qddCDJLf4B+WNMRiHv5/Kw+fJqWjUjBZwzM3l2QC25BmyqcgS8EpDIU9Vlp9Np
-	 ggSt2ciBX4uRAz/BhapvIDgBPc+soOZFPteED7HhcxpGhQjAFzKhs6abcbGezgTKzP
-	 uQi7RC4LPd2sJHuepgfFCaj/lzVbqhmjbAlDOBAfNskcjTrAfM7UIUGhzfHBaR2RBf
-	 /WVtThkL3dTsQ==
-Message-ID: <c19be967-8909-48e9-8a89-3906264eed07@kernel.org>
-Date: Fri, 6 Nov 2026 12:19:22 +0100
+	b=kWgRMBfICz/KGL0LPa6FKWNca5OHfggwd5woJwFqwHuhXPWPHcF44TydWhSYhQEI3
+	 f0iXsXQO61f2Hu6MqnrwbLLzW3CAeA52xJ6yof4l7Qbt3cnqCTjSVqsOVGVgXtNvE5
+	 VqbcGK3wHcW91ZhlCc7T6tl7J+DNfexArWOD2szT/vMSq4XKjg0HbZmcdfqg9B+rxc
+	 8yoQs2z+7JO2d2FhX3SGvq5J+mePC3O7cKqwa/L8U6whDLFYHbsJmYI/+Ees4jzSX8
+	 jeayfgA4FFVfLyuUqHHzBTSc4qEhfUgTKNK5iyK2RicG/pjeubmPhIOiM9gfeiKlM9
+	 d2FDxwB8fOORw==
+Message-ID: <0b4e0483-2aee-4201-af48-96042944ee85@kernel.org>
+Date: Fri, 6 Nov 2026 12:21:41 +0100
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -52,7 +52,8 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 03/25] dt-bindings: reset: add Metanoia MT2824
+Subject: Re: [PATCH 24/25] riscv: add Metanoia MT2824 SoC and MT5824 EVB
+ support
 To: =?UTF-8?Q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>,
  Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
  Conor Dooley <conor+dt@kernel.org>, Jun Chang <jun.chang@metanoia-comm.com>,
@@ -82,7 +83,7 @@ Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
  linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
  linux-watchdog@vger.kernel.org
 References: <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
- <20261106-mt2824-v1-3-86087eaf5af4@bootlin.com>
+ <20261106-mt2824-v1-24-86087eaf5af4@bootlin.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -128,35 +129,237 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  K9bCVaboTA2T77QYkRcRJYSsO1alGX0ome/hMLD1daXlkrNUp1HWa3K4iytLRXjCSIorWiGs
  n+q3krnpXu3TFkA8qtOFZMdnIiFuiq1yLT8hptsV5xh1TA2nsVvSYiaCr3q4s4BKjS/KrLDb
  qoxzw8ISjdUp4pA85vb6YLCmb39NgidD+7PmAr65lBNveIFynTgsja1rRQ4=
-In-Reply-To: <20261106-mt2824-v1-3-86087eaf5af4@bootlin.com>
+In-Reply-To: <20261106-mt2824-v1-24-86087eaf5af4@bootlin.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 On 06/11/2026 10:30, Benoît Monin wrote:
-> +  - compatible
-> +  - reg
-> +  - "#reset-cells"
+> Add the device tree for the Metanoia MT2824, a dual-core Andes
+> AX45MP-based SoC, and for the MT5824 evaluation board.
+> 
+> The SoC device tree describes the CPUs and their L2 cache, the PLIC,
+> PLICSW and PLMT, the reset controller, the reboot controller, the
+> watchdog, two UARTs, the QSPI and eight SPI controllers, the DWC
+> MSHC MMC controller, and the USB2 controller.
+> 
+> The MT5824 EVB enables the watchdog, the two UARTs, the MMC
+> controller, the QSPI port with its SPI-NOR flash, the first three SPI
+> controllers, and the USB controller.
+> 
+> Originally-by: Jun Chang <jun.chang@metanoia-comm.com>
+> Signed-off-by: Benoît Monin <benoit.monin@bootlin.com>
+> ---
+>  arch/riscv/boot/dts/Makefile                |   1 +
+>  arch/riscv/boot/dts/metanoia/Makefile       |   2 +
+>  arch/riscv/boot/dts/metanoia/mt2824.dtsi    | 330 ++++++++++++++++++++++++++++
+>  arch/riscv/boot/dts/metanoia/mt5824-evb.dts |  81 +++++++
+>  4 files changed, 414 insertions(+)
+> 
+> diff --git a/arch/riscv/boot/dts/Makefile b/arch/riscv/boot/dts/Makefile
+> index 69d8751fb17c..8e1e987ea089 100644
+> --- a/arch/riscv/boot/dts/Makefile
+> +++ b/arch/riscv/boot/dts/Makefile
+> @@ -4,6 +4,7 @@ subdir-y += andes
+>  subdir-y += anlogic
+>  subdir-y += canaan
+>  subdir-y += eswin
+> +subdir-y += metanoia
+>  subdir-y += microchip
+>  subdir-y += renesas
+>  subdir-y += sifive
+> diff --git a/arch/riscv/boot/dts/metanoia/Makefile b/arch/riscv/boot/dts/metanoia/Makefile
+> new file mode 100644
+> index 000000000000..7a685798d5a4
+> --- /dev/null
+> +++ b/arch/riscv/boot/dts/metanoia/Makefile
+> @@ -0,0 +1,2 @@
+> +# SPDX-License-Identifier: GPL-2.0
+> +dtb-$(CONFIG_ARCH_METANOIA) += mt5824-evb.dtb
+> diff --git a/arch/riscv/boot/dts/metanoia/mt2824.dtsi b/arch/riscv/boot/dts/metanoia/mt2824.dtsi
+> new file mode 100644
+> index 000000000000..5f73c6d3760b
+> --- /dev/null
+> +++ b/arch/riscv/boot/dts/metanoia/mt2824.dtsi
+> @@ -0,0 +1,330 @@
+> +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+> +/*
+> + * Copyright (C) 2026 Metanoia Communications Inc.. All rights reserved.
+> + */
 > +
-> +additionalProperties: false
+> +#include <dt-bindings/interrupt-controller/irq.h>
 > +
-> +examples:
-> +  - |
-> +    rst: rst-controller@1000000c {
+> +/ {
+> +	#address-cells = <0x02>;
+> +	#size-cells = <0x02>;
+> +	compatible = "metanoia,mt2824";
+> +
+> +	cpus: cpus {
+> +		#address-cells = <0x01>;
+> +		#size-cells = <0x00>;
+> +		timebase-frequency = <20000000>;
+> +
+> +		cpu0: cpu@0 {
+> +			device_type = "cpu";
+> +			reg = <0x00>;
+> +			compatible = "andestech,ax45mp", "riscv";
+> +			riscv,isa-base = "rv64i";
+> +			riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+> +					       "zicntr", "zicsr", "zifencei",
+> +					       "zihpm", "xandespmu";
+> +			mmu-type = "riscv,sv39";
+> +			clock-frequency = <900000000>;
+> +			i-cache-size = <0x8000>;
+> +			i-cache-sets = <0x100>;
+> +			i-cache-line-size = <0x40>;
+> +			i-cache-block-size = <0x40>;
+> +			d-cache-size = <0x8000>;
+> +			d-cache-sets = <0x80>;
+> +			d-cache-line-size = <0x40>;
+> +			d-cache-block-size = <0x40>;
+> +			next-level-cache = <&l2_cache>;
+> +
+> +			cpu0intc: interrupt-controller {
+> +				#interrupt-cells = <0x01>;
+> +				interrupt-controller;
+> +				compatible = "andestech,cpu-intc", "riscv,cpu-intc";
+> +			};
+> +		};
+> +
+> +		cpu1: cpu@1 {
+> +			device_type = "cpu";
+> +			reg = <0x01>;
+> +			compatible = "andestech,ax45mp", "riscv";
+> +			riscv,isa-base = "rv64i";
+> +			riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+> +					       "zicntr", "zicsr", "zifencei",
+> +					       "zihpm", "xandespmu";
+> +			mmu-type = "riscv,sv39";
+> +			clock-frequency = <900000000>;
+> +			i-cache-size = <0x8000>;
+> +			i-cache-sets = <0x100>;
+> +			i-cache-line-size = <0x40>;
+> +			i-cache-block-size = <0x40>;
+> +			d-cache-size = <0x8000>;
+> +			d-cache-sets = <0x80>;
+> +			d-cache-line-size = <0x40>;
+> +			d-cache-block-size = <0x40>;
+> +			next-level-cache = <&l2_cache>;
+> +
+> +			cpu1intc: interrupt-controller {
+> +				#interrupt-cells = <0x01>;
+> +				interrupt-controller;
+> +				compatible = "andestech,cpu-intc", "riscv,cpu-intc";
+> +			};
+> +		};
+> +	};
+> +
+> +	clocks {
+> +		ext_clk: ext-clk {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +			clock-frequency = <20000000>;
+> +			clock-output-names = "ext-clk";
+> +		};
+> +
+> +		pclk_div4: platform-clock-div4 {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +			clock-frequency = <225000000>;
+> +			clock-output-names = "platform-clock-div4";
+> +		};
+> +
+> +		pll_soc_out3: pll-soc-out3 {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +			clock-frequency = <180000000>;
+> +			clock-output-names = "pll-soc-out3";
+> +		};
+> +
+> +		usb_otg_ahb_clk: clock-usb-otg-ahb {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +			clock-frequency = <60000000>;
+> +			clock-output-names = "otg";
+> +		};
+> +	};
+> +
+> +	soc: soc {
+> +		#address-cells = <0x02>;
+> +		#size-cells = <0x02>;
+> +		compatible = "simple-bus";
+> +		interrupt-parent = <&plic>;
+> +		ranges;
+> +
+> +		usb0: usb@4000000 {
+> +			compatible = "metanoia,mt2824-usb", "snps,dwc2";
+> +			reg = <0x0 0x04000000 0x0 0x100000>;
+> +			interrupts = <7 IRQ_TYPE_LEVEL_HIGH>;
+> +			clocks = <&usb_otg_ahb_clk>;
+> +			clock-names = "otg";
+> +			dr_mode = "host";
+> +			resets = <&rst 19>, <&rst 20>;
+> +			reset-names = "dwc2", "dwc2-ecc";
+> +			phys = <&usb2phy>;
+> +			phy-names = "usb2-phy";
+> +			hnp-disable;
+> +			srp-disable;
+> +			disable-over-current;
+> +			status = "disabled";
+> +		};
+> +
+> +		mmcsd: mmc@4100000 {
+> +			compatible = "metanoia,mt2824-dwcmshc";
+> +			clocks = <&pll_soc_out3>;
+> +			clock-names = "core";
+> +			reg = <0x0 0x04100000 0x0 0x00100000>;
 
-Node names should be generic. See also an explanation and list of
-examples (not exhaustive) in DT specification:
-https://devicetree-specification.readthedocs.io/en/latest/chapter2-devicetree-basics.html#generic-names-recommendation
-If you cannot find a name matching your device, please check in kernel
-sources for similar cases or you can grow the spec (via pull request to
-DT spec repo).
+Please follow coding style and dt-checkstyle.
 
-Also drop unused label.
+Also 0x00100000 is 0x100000
 
-> +        compatible = "metanoia,mt2824-reset";
-> +        reg = <0x1000000c 0x4>;
+Anywya, look at size of address space. 0x100000, right?
 
-I don't think one word of registers is a device. You split one device
-into several fake subparts, that's not correct.
+...
+
+> +		reboot: reboot@10000004 {
+> +			compatible = "metanoia,mt2824-reboot";
+> +			reg = <0x0 0x10000004 0x0 0x08>;
+
+Now look here - 0x8
+
+> +		};
+> +
+> +		rst: reset-controller@1000000c {
+> +			#reset-cells = <1>;
+
+Random coding style.
+
+> +			compatible = "metanoia,mt2824-reset";
+> +			reg = <0x0 0x1000000c 0x0 0x04>;
+
+and 0x4.
+
+Do you see the problem?
+
+Why do you pad some numbers?
+
+> +		};
+> +
+> +		watchdog: watchdog@10090000 {
+> +			compatible = "metanoia,mt2824-wdt", "andestech,ae350-wdt";
+> +			reg = <0x0 0x10090000 0x0 0x10000>;
+> +			clocks = <&ext_clk>;
+> +			andestech,clock-source = <0>;
+> +			timeout-sec = <10>;
+> +			status = "disabled";
+
+Why? It's always there, no?
+
+
+> +
+> +	usb2phy: usb2-phy {
+
+Follow DTS coding style.
 
 
 Best regards,
