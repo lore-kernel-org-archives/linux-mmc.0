@@ -1,47 +1,47 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793964151;
-	b=HdtSLZz1CiHgM5bOHqtocNTxUVY9g09sE9+PClfoyN6cy2s/mhTfNobs0+bV2SBpanl6
-	 sikKdvEvwMKHxRNhjN+BMDXFtHTTP/cBD3kqAq0FlWff/IefMUCdMqCkgKk4EOqrnFyrE
-	 zswYakH/lDq4cr/T8sjas/8BzX8oaJUtij+KEK4GYC7Kz3XbTPxkfHleD4gNwqEIjvzG8
-	 E3/56ss1Pu1SJZfYWaI1drRAnmkoyLCpVIZMewEdMpL841tfan0xBxF5Hfhrflv+ug/64
-	 /UY0j21/OIbV+zsDzLKSX/MawfrzmO+F8C7R4lRaTBiqUmOfA+3obZ6qNljWfYhixtA==
+	t=1793964211;
+	b=q0HF6/r/lwRY3nXIFlvaVnYoVU7kg4fxuXFZld7EIrHFE4yKFYXOWzUzfEyyFHewF2b7
+	 IcITSkV5fq5e75v/Cc3qjsvevgwEYfM/w31gRrh7kHRmnyfGg5aclbtYLwFLbCcnDOIaP
+	 /0t02JXMwHML9CE6ZPpUMM5nY0E6HILMbyLPFWA7HibUn7lZ9s8b5bgvaTEhiwRnJUAOm
+	 jtXVYEeIZJeo8c6+mNg2n5/FVZElHNM9Tj4XiSqBKhC28dLlLTZOH+Jrx0oZ514kne8Dx
+	 zIshpEbSxAsf//9cqHRtVzE+zV2LhR4mQ8uGjnRGiA5A7T1MxFeK/xmyZdLdqdnrOlA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793964151;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793964211;
 	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
 	 Subject:To:Cc:References:From:Content-Language:Autocrypt:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=1SJvXdR9B8C22Oe5tHH9Z7Qn9s3LSfGUpIZXJCfQuqg=;
-	b=RkMRpWzERc/dVzndOUZajWgvPWKxGj7wdCWQxsniDtf91YKmPBjyNcNoIbzQ7H2kGDtV
-	 U5URM5WpuS9EaNeEVtJV/3WDsI9VokdgFpLyW0TInjiPaRvimI4XeE2VDFzL19AzoDjAE
-	 Uj85wFETyDhWJusX1nxD9GoTUAh5Q1Hmo1yUx/7n1+fhL/lHG6pdMumDueiELWopgB673
-	 sFb84CJDwoqsIpHzukyWKoFDsk0XWd8bSbqv0Ba2PhK6++mU0DgJ/kcI4L6k3T14McyZI
-	 2kjgfrwsJQJcsfIi0IOof34VkKlvBoLWtRahggN3uCy4jh3OVx2hLI1dmSlHjwWfJMw==
+	bh=ZC97gP+71La8dh+fmuThPo+yYNGatDg8EP+Bb8cfY8M=;
+	b=ZdcNDnlrGpyxZrGDTjLbsvg94uSfyVmqwx97M0XnOkrD+jm7yz8gDfh3iYUa3xBEFUSf
+	 AlOYb6OnN28b8oSyxkh7TjNOONenNkY9k2Tuopm0SNA4g0AnlutqMygL6jnFBTkcF8v+8
+	 EznjB027DR9/T+2atRD02gdoY7A7yPlK6WcJnhea+ctVHS7VZuyeGqgpre+w+ReuOgU7Z
+	 ycP1dSAsN+/xn2Fgr51Zi2OoJSkCBkw968hv4c3BUueYmZ8d08L7ac/bR5oT+vfasWnv4
+	 UpVKCv118hbTRqtwZgE7Q+KCibm6I2vuN57lSrG1Gj6XvvufgkODXQcbtoOLt8HQgHA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Bfd7JWLI;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=EjRqTQ+K;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55DB4606A333;
-	Fri,  6 Nov 2026 11:22:31 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCA51606A329;
+	Fri,  6 Nov 2026 11:23:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Bfd7JWLI
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B87A1F008A2;
-	Fri,  6 Nov 2026 11:22:17 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=EjRqTQ+K
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DE1B91F0089F;
+	Fri,  6 Nov 2026 11:23:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793964150;
-	bh=1SJvXdR9B8C22Oe5tHH9Z7Qn9s3LSfGUpIZXJCfQuqg=;
+	s=k20260515; t=1793964210;
+	bh=ZC97gP+71La8dh+fmuThPo+yYNGatDg8EP+Bb8cfY8M=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=Bfd7JWLI+lC5cU8W67WQSGOM4aMg4R8Kgg99fB9EiVem2y3MUBt2OJuCPJv8kcRar
-	 xBThkjSfcrkGcwGDM18zdey+7znkvDIj7nlt4fFGJRqnUJrgoxXqfIdBYAgydpU0Wi
-	 KMxC6TCZ1pfgzuklk/PoyUv1W8rTl08B/K5uOdoXIn2+uLLyQJEAAWpJYUHZb6001B
-	 Vsp93y6ZzFsbDAWc5CFW14oH08Rr43PE5Xm+5NMnvUnUEeqGYR2M+yOdpZIJ7GPRdP
-	 Kr9WbLlADI2Lhxl12su9U7b0h1dVqxDwEDMcge+zdJpGPoLZnuXNfvPaCzBptnTAk6
-	 Kdf/bCnLrMdpA==
-Message-ID: <4f1e52d9-0788-4601-8f67-898256a776b4@kernel.org>
-Date: Fri, 6 Nov 2026 12:22:15 +0100
+	b=EjRqTQ+KLTKlC2shUJFhzMID6RGCvBWjVIFK3LTzmmsPKi8XNgdkcVh+WfN9nE5m7
+	 RvD+WAwYVf4lTvn+ZHmawQwM5ZVufYo3k/l8oqGjHOaU8DMZ00dSjaTLA0EERA3MdL
+	 8Bh/O63iaoicA8TpBm1Odbb4VD46SQRFVCfi4ueU3PQjnOTQB9L5UrlEaZrDOCoR8q
+	 KuZY11d7p4yY76mF+0K3aNvUBPUO2gb3b7bHuw5sIF28Oc7sMUScUGglH8Ww0SAOkZ
+	 +UMSs//C2spHV7nSVtFpNixoij1uV51WC9MyRrIB5+VrzZlyZiP59EkmFF8XADfB03
+	 Megloye1s0hpA==
+Message-ID: <833cc1d5-7968-4d45-9b59-976a3eaea5a7@kernel.org>
+Date: Fri, 6 Nov 2026 12:23:18 +0100
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -52,7 +52,8 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 25/25] MAINTAINERS: add RISC-V Metanoia SoC support
+Subject: Re: [PATCH 04/25] dt-bindings: power: reset: add Metanoia MT2824
+ reboot
 To: =?UTF-8?Q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>,
  Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
  Conor Dooley <conor+dt@kernel.org>, Jun Chang <jun.chang@metanoia-comm.com>,
@@ -82,7 +83,7 @@ Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
  linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
  linux-watchdog@vger.kernel.org
 References: <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
- <20261106-mt2824-v1-25-86087eaf5af4@bootlin.com>
+ <20261106-mt2824-v1-4-86087eaf5af4@bootlin.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -128,33 +129,63 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  K9bCVaboTA2T77QYkRcRJYSsO1alGX0ome/hMLD1daXlkrNUp1HWa3K4iytLRXjCSIorWiGs
  n+q3krnpXu3TFkA8qtOFZMdnIiFuiq1yLT8hptsV5xh1TA2nsVvSYiaCr3q4s4BKjS/KrLDb
  qoxzw8ISjdUp4pA85vb6YLCmb39NgidD+7PmAr65lBNveIFynTgsja1rRQ4=
-In-Reply-To: <20261106-mt2824-v1-25-86087eaf5af4@bootlin.com>
+In-Reply-To: <20261106-mt2824-v1-4-86087eaf5af4@bootlin.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 On 06/11/2026 10:30, Benoît Monin wrote:
-> Add a maintainer entry for the Metanoia MT2824 SoC, covering the
-> SoC-specific DT bindings, the SoC and the evaluation board device trees,
-> and the phy driver.
+> Document the Metanoia MT2824 reboot register, which the firmware writes
+> in machine mode to perform a warm system reboot. OpenSBI has a system
+> reset driver for it.
 > 
 > Originally-by: Jun Chang <jun.chang@metanoia-comm.com>
 > Signed-off-by: Benoît Monin <benoit.monin@bootlin.com>
 > ---
->  MAINTAINERS | 11 +++++++++++
->  1 file changed, 11 insertions(+)
+>  .../bindings/power/reset/metanoia,reboot.yaml      | 34 ++++++++++++++++++++++
+>  1 file changed, 34 insertions(+)
 > 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 93abbb315065..310544f96204 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -24072,6 +24072,17 @@ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/iommu/linux.git
->  F:	Documentation/devicetree/bindings/iommu/riscv,iommu.yaml
->  F:	drivers/iommu/riscv/
->  
-> +RISC-V METANOIA SoC SUPPORT
-> +M:	Jun Chang <jun.chang@metanoia-comm.com>
+> diff --git a/Documentation/devicetree/bindings/power/reset/metanoia,reboot.yaml b/Documentation/devicetree/bindings/power/reset/metanoia,reboot.yaml
+> new file mode 100644
+> index 000000000000..2670fe7ab93f
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/power/reset/metanoia,reboot.yaml
+> @@ -0,0 +1,34 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/power/reset/metanoia,reboot.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Metanoia MT2824 Reboot Controller
+> +
+> +maintainers:
+> +  - Jun Chang <jun.chang@metanoia-comm.com>
+> +
+> +description:
+> +  The Metanoia MT2824 reboot controller provides a system warm reboot through
+> +  a memory-mapped register. It is used by the firmware in machine mode.
+> +
+> +properties:
+> +  compatible:
+> +    const: metanoia,mt2824-reboot
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +
+> +additionalProperties: false
+> +
+> +examples:
+> +  - |
+> +    reboot: reboot@10000004 {
+> +      compatible = "metanoia,mt2824-reboot";
+> +      reg = <0x10000004 0x8>;
 
-So Jun will handle the patches? Can we get an Ack for this?
+Two words is also not a device, especially that rest of your devices are
+at aligned to 0x10000.
 
 
 Best regards,
