@@ -1,71 +1,56 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793966055;
-	b=Rhy5WPr7U/T+1Syj0ACZNisxq6nYYEILtFyu9IKXaX4uqOy8l1w0b/kZ9SQrC8OjbDsM
-	 wCYMK+qCShCLZhSp5GS4T0QNe4xQAlsxpvu7ty141bS5HPPcuV/da4rQuClfxC2sX8nPO
-	 UtYX9s91FqSeTZ0A4VX8mHFPEf5duTdx5EAI8BHLK2V4biQjbE+4yluHwmyxvYTlgpmPg
-	 soiS6blvIf9CfQX7QDDlC7I85hUgrr9XRz6gNDZn1L+afzpjpf8lQmqwAicoHYOW0HMGq
-	 b1JJYkkWN3QcTVtVJERKSF+CIgWbQRpvGB6pLAuwaOeuBd56x0t+aoR5IWz7bzNmG5Q==
+	t=1793968836;
+	b=43+T46lVhkBwJR9kn9PPhM3HoH43Z1CH0IPraq/0dBjvQ+oAgUX1elg91hS6W4DGkggR
+	 SaX/WgdgLRc8fdYOhf8DGdQpbp4FeyvWBixMNPQxgmHYMGO4WqhKYNlTzfnztCnVjHwX/
+	 7Ofkhw4SPaG3rQDgeWxeVQ/t+rAsL4LvzQcizSwn6c3BkmJbUg0LsxB5IVd5KT05P49jJ
+	 ddjHmBNkd/WTpCgrAIpD8sWrovuCtycPjSRgGMm66Qr6Cy+VWDL7de69YC+G/IqM10PyN
+	 M2jkCIndL3WG/lhN7hKaJ2Ea0Gnzvc7JwZPN+dgiEV5sqAC8f3fOAMDVjkg0aQUDYOg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793966055;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793968836;
 	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 References:MIME-Version:Content-Type:Content-Disposition:
-	 Content-Transfer-Encoding:In-Reply-To;
-	bh=zeUGkAr+dd5pvA9ddLYxv09ZmZOzgKimQinHuYdcXGY=;
-	b=nD944bRzJtD01Czk8LogNd0ovrkOzknjFr/iqGF72spuChB8nmnNHScqjt/VPcNrmKtT
-	 rocvj/HvKXDUdKydAVHqQASrZCftPk0B8ziPi7gfYqCpDjL0g/13TGDd/t/xEsdF9SqTU
-	 33yxlA/bxmaoUZtom1a7kpv5cbJUzVU6WMrhmmkl2pPvJXM5S3rsGE6KFE54ti1ElDZ7a
-	 9OQpnBKxhRIiB0nVa+hdWUHzDEJrMErbphH5HMGugFJAx8kgoNzlPZTnVWxpcwEswjTg8
-	 zRzhm9T4Zy07Zr0PiRqL/irM8MdysJOJv/BQ0WjtwKTmXaxvvZSMVJrMs4wD61Mqgzw==
+	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
+	bh=NWTVNpqYWoyFPbzwn51K4jNXuRKcTGDmTErIM7JBOtw=;
+	b=ir6I1mqKG1Tp3TGmLsYo8/lKUkNd83O7rRtTKC+K0jzZI03L3qS/wxIid8cEyJhk+qXE
+	 LXKhnhdTuprp8HJU+QPZgMXpLdqTtflA/u9Au3FeWnLERU97O0gkHyqMFlr7pcLu1HKp8
+	 m0S1Ise01nbzBXQVefXPjSbWHj9palLPG3IBDY939oYiZcqytyihtIGYh11R+Y1F39Zy8
+	 kKH+xgijVHAQpo8dP/1VmpV9eExIj4Lf2fQwXy2YPWA99hISOBS05IOYHT+fj+HgZfUl2
+	 yin14SPAfK9VKdDVxg9VdmWtkPKH9wCY4tqUA8u549oDk5h+NGYGEkmcy2Ojs/N9SuA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=DRtzz8Ow;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="YB/ksS/R";
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF392606A32D;
-	Fri,  6 Nov 2026 11:54:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75D7F606A333;
+	Fri,  6 Nov 2026 12:40:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=DRtzz8Ow
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6A36C1F008A1;
-	Fri,  6 Nov 2026 11:54:13 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=YB/ksS/R
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 32A3F1F008A4;
+	Fri,  6 Nov 2026 12:40:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793966054;
-	bh=zeUGkAr+dd5pvA9ddLYxv09ZmZOzgKimQinHuYdcXGY=;
+	s=k20260515; t=1793968836;
+	bh=NWTVNpqYWoyFPbzwn51K4jNXuRKcTGDmTErIM7JBOtw=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=DRtzz8OwVZ8h54GrjlHTDasRVBAtPcFhfr0YDhT28zp43jVnv922ia2GefpiSxLaP
-	 yJXFCDtltMQPVRqKI9XDeUNQsQFV2xMb9f3OCVoNPlwI38PEUXRH+kADoZWdAgOsK5
-	 Bn+IngDuAfKSFPhD+fzi3S3NK4SMCmXifiAivN6Cm7tvLub7p769OUi04UjLkAj4Jc
-	 vTSVJ0E76oZyp9PUYzhzqHCSQHGHz9R0kOSBm/lYfSzttPRp3SiPh+J1Q0SyMHCR4j
-	 5ysZKp2SKvW9jfZOfQ8/bOogtll/OOaT4woBxUVwTacfXodHtYRkjWtlBIRJDHa9iN
-	 zdKoYNy5p7M5w==
-Date: Fri, 6 Nov 2026 12:54:10 +0100
+	b=YB/ksS/RwDFYawBxeO7gbvYf+9ohUedW6BI0ro/++Do1Q+fO6BMgaD0/ixTTDY47q
+	 9wqpTCEZY/uAQ37ELFQwtFWrqbNOL5pBbN6WJhKEVV/YwneuYrGQUCj8HSASwPHXjG
+	 lpj6VgZkuqks6rp42Bg9KN+Ja1zUNFcF39TqI4wWRJlopO4ka0zfpKf2iEVSzzEBp3
+	 cx7a/RA/cvynCAXqoEuO1dZBYce7AvwnwHRfWLQh1GvEqMw9H9QrtHQ6cJK/gBB3ek
+	 Bo62o82ZaUJZ/MTJGjrHbSn1yzpHAQXlJDw4TUk2Tfwb5KbDRa0axbfvA29yrMtC1k
+	 uHsW4MZ0lKsbQ==
+Date: Fri, 6 Nov 2026 13:40:32 +0100
 From: Krzysztof Kozlowski <krzk@kernel.org>
-To: =?utf-8?Q?Beno=C3=AEt?= Monin <benoit.monin@bootlin.com>
-Cc: Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Jun Chang <jun.chang@metanoia-comm.com>, Paul Walmsley <pjw@kernel.org>, 
-	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
-	Alexandre Ghiti <alex@ghiti.fr>, Philipp Zabel <p.zabel@pengutronix.de>, 
-	Sebastian Reichel <sre@kernel.org>, Vinod Koul <vkoul@kernel.org>, 
-	Neil Armstrong <neil.armstrong@linaro.org>, Manivannan Sadhasivam <mani@kernel.org>, 
-	Conor Dooley <conor@kernel.org>, Jonathan Cameron <jic23@kernel.org>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, Thomas Gleixner <tglx@kernel.org>, Radu Rendec <radu@rendec.net>, 
-	Samuel Holland <samuel.holland@sifive.com>, Ben Zong-You Xie <ben717@andestech.com>, 
-	Daniel Lezcano <daniel.lezcano@kernel.org>, Ulf Hansson <ulfh@kernel.org>, 
-	Jisheng Zhang <jszhang@kernel.org>, CL Wang <cl634@andestech.com>, Mark Brown <broonie@kernel.org>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Wim Van Sebroeck <wim@linux-watchdog.org>, 
-	Guenter Roeck <linux@roeck-us.net>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Minas Harutyunyan <hminas@synopsys.com>, Thomas Petazzoni <thomas.petazzoni@bootlin.com>, 
-	Randolph Sheng-Kai =?utf-8?B?TGluKOael+iBluWHsSk=?= <randolph@andestech.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-riscv@lists.infradead.org, linux-pm@vger.kernel.org, linux-phy@lists.infradead.org, 
-	Paul Walmsley <paul.walmsley@sifive.com>, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, 
-	linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH 13/25] dt-bindings: usb: dwc2: add Metanoia MT2824
-Message-ID: <20261106-dexterous-predictable-pelican-ae2094@quoll>
-References: <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
- <20261106-mt2824-v1-13-86087eaf5af4@bootlin.com>
+To: tze.yee.ng@altera.com
+Cc: Tanmay Kathpalia <tanmay.kathpalia@altera.com>, 
+	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, devicetree@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>
+Subject: Re: [PATCH v3 3/4] dt-bindings: mmc: cdns,sd6hc: add SD6HC DDR50
+ read-path tuning
+Message-ID: <20261106-handsome-dandelion-piculet-349c18@quoll>
+References: <20261106-sd_cadence_ddr50_v3-v3-0-cb50afece614@altera.com>
+ <20261106-sd_cadence_ddr50_v3-v3-3-cb50afece614@altera.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -77,45 +62,32 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <20261106-mt2824-v1-13-86087eaf5af4@bootlin.com>
+In-Reply-To: <20261106-sd_cadence_ddr50_v3-v3-3-cb50afece614@altera.com>
 
-On Fri, Nov 06, 2026 at 10:30:10AM +0100, Beno=C3=AEt Monin wrote:
-> Document the metanoia,mt2824-usb compatible, which falls back to the
-> generic snps,dwc2 binding, so that the DWC2 USB controller on the Metanoia
-> MT2824 SoC can be described in device trees.
-
-This is completely redundant commit msg. You repeat subject and diff, so
-obvious things, while completely skipping non-obvious part - why do you
-thing they are compatible.
-
->=20
-> Originally-by: Jun Chang <jun.chang@metanoia-comm.com>
-
-Please drop (or read submitting patches if you need other tags)
-
-> Signed-off-by: Beno=C3=AEt Monin <benoit.monin@bootlin.com>
+On Fri, Nov 06, 2026 at 02:16:54PM +0800, tze.yee.ng@altera.com wrote:
+> From: Tze Yee Ng <tze.yee.ng@altera.com>
+> 
+> DDR50 has no CMD19 tuning, so the SD6HC read path must be centred by
+> static, board/SoC-characterised PHY settings. Add three optional SD6HC
+> properties for the extended-read DDR modes (SD DDR50 and eMMC DDR52):
+> 
+>   - cdns,ddr-read-dqs-delay:    read-DQS delay as a count of DLL delay
+>     elements (0-255), each cdns,delay-element-ps wide, that centres the
+>     read eye (default 0).
+>   - cdns,ddr-no-lpbk-dqs:       disable the loopback DQS read strobe and
+>     use the fabricated phony DQS instead. Loopback DQS is the recommended
+>     default; set this only on boards that need the phony DQS read path.
+>   - cdns,ddr-phony-dqs-timing:  PHY_CTRL[9:4] phony DQS assertion timing.
+>     The driver derives this from the RE# pulse width; this property
+>     overrides the computed value for boards whose flight time shifts the
+>     DDR data return.
+> 
+> Signed-off-by: Tze Yee Ng <tze.yee.ng@altera.com>
 > ---
->  Documentation/devicetree/bindings/usb/dwc2.yaml | 1 +
->  1 file changed, 1 insertion(+)
->=20
-> diff --git a/Documentation/devicetree/bindings/usb/dwc2.yaml b/Documentat=
-ion/devicetree/bindings/usb/dwc2.yaml
-> index 6c3a10991b8b..898c83e57843 100644
-> --- a/Documentation/devicetree/bindings/usb/dwc2.yaml
-> +++ b/Documentation/devicetree/bindings/usb/dwc2.yaml
-> @@ -55,6 +55,7 @@ properties:
->                - amlogic,meson-g12a-usb
->                - amlogic,meson-a1-usb
->                - intel,socfpga-agilex-hsotg
-> +              - metanoia,mt2824-usb
->            - const: snps,dwc2
+> Changes in v3:
 
-Is it then compatible with DWC2? Your driver code suggests not.
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
->        - const: amcc,dwc-otg
->        - const: apm,apm82181-dwc-otg
->=20
-> --=20
-> 2.56.0
->=20
+Best regards,
+Krzysztof
+
