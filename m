@@ -1,82 +1,123 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793989840;
-	b=RgTXTaH8HQS6//GTP52KhK87L0P+VQYo+qUmrI7MvDHvGDeuLh7M9yy4Q9soDPFAZQ8l
-	 rDOIvk3HcO8q4P99ykz2B8FSzz/YDdWCOogqkRd78NwQEddxeUQVgpLYk9fUB+GT+N0yW
-	 UgSDv/UwHhTybqnS2TqsXg1mfKvFCMhfmZQdAIB5/Mqbpl7KPqzbNEOrf9eU13UyvUHzE
-	 wtHzn70kR8YE7BEHxNmdQ87Zs8AWUcInMANl/tbdt0YNO7ffkYF/aAuQg4O5lgdJodlD7
-	 n+KybqxVH/0JRHQqf+bPeeDDD5rqv6Kea9OCRl12p5WGMt7ZUlNEvkZvHDQ1PrGYCrQ==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793989840;
-	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
-	bh=jN+SIR2+8EH7AFSQyftGGlUBzcqrVp7rY3xpDZWw1iA=;
-	b=f3kj5zG7bsLB1AzQuWc32z+vMJRKdwxjRk5oc0G+NuqHHqDILL/7wf8cgZK/e8YA6t2h
-	 jO/2CPmRQp76zZJrdL0nBmvtusbOV03nDuAm4w6SmXag2o9pm1LOhINA26S9l26zA1ct3
-	 Y3uPdlzuUwGaGUDGiaFMtUHi3CB87q16uAVnN+qEzJrl2izZcnC5ptqCH3eYdzOXLQ4ov
-	 ksFqftLu7fwBOqJGeoQx2pvRthkS9XEHdipE+5FiUq0NKMBi+3kpxqVSayr7HhMcRBqbf
-	 woaFmvul02EhXuOqSFTxNbYTyA7vL+4vqHQLafSSof+6dUgNQOVGUN8HRor9JAbQKhw==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=AnBXyQOK;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1793990498;
+	b=Gt1C5bebJhOqLAtsckCnE32PKF6yWtRoNN6Q5huTBP7rdpiHQMJSrVJ1Ar6OF/p9dDRP
+	 SABJRqOEbtYuCGrrK0CQDHk0GNbwHpzxrZ5Lv3Yisj/yu5OsQJ9rtTZ81QrWFLbJ/UFdd
+	 JP88HyzkBk2m/mUSPJ74aiSH4nydmiGXApyKUwJeTjRxlg9hMLSn/vrAeTI0MVUwYOFBi
+	 NFcR/RIuTRYEgLwQrmyOitzpgxiv+BGOy5NIsg7jvIZR4/k1vqoUMFmA4cvS3gvUWxJ65
+	 GJgYv/8B1qUFXTq3yaL2Ouqgw5sRiKBL1Fkzxk+Q0Am+1IFh4lcnhTx8NIFuKra1r9Q==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793990498;
+	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
+	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
+	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
+	 Cc:Content-Type:Content-Transfer-Encoding:
+	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-Spam-Info:
+	 X-Proofpoint-GUID:X-Authority-Analysis:X-Proofpoint-ORIG-GUID:
+	 X-Proofpoint-Virus-Version:X-Proofpoint-Spam-Details;
+	bh=CUMcAVyOirUSnIO4z8+9Oid/43N5zWiqbL31INqDBvs=;
+	b=Mt5cb6vHC/JOwSPzFI59PuBJXPv/6FxAVH59HTm9M39FpGOP6kkjg7Ingc/uOHJ8r7rx
+	 MK7noSQm33s0y+UMbGf2R+f8diWmEgGC6iDIOGQ2gZqA1ZaHLodSmq102fiXpgVSv1V6Y
+	 rLOb+4a6w5JC04Wmb1Ngb1vZ7IptvqN2yzWMjJW7BsXfBINQr+P97t/leyfGpRuFslCTO
+	 FwKmLCeIpPk79xtQ4CRDue9/fHg0yihQyMEj+gOM6PrO0ZL7r0Fmi1aZu5MpxIh/ilaGt
+	 uT5iBit/APOw1RJ6L8ofsKJCnBz2FZJBPueqlzz1AJ+6azjeqZ9+ZFb4sPw7HwMly4g==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=oss.qualcomm.com;
+	spf=pass smtp.mailfrom=oss.qualcomm.com;
+	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=c7OqdLX3;
+	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=f7DVpUc7;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 43E02606A326;
-	Fri,  6 Nov 2026 18:30:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51D3E606A32F
+	for <linux-mmc@vger.kernel.org>; Fri,  6 Nov 2026 18:41:38 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 51D3E606A32F
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=AnBXyQOK
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5BF601F0089F;
-	Fri,  6 Nov 2026 18:30:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793989839;
-	bh=jN+SIR2+8EH7AFSQyftGGlUBzcqrVp7rY3xpDZWw1iA=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=AnBXyQOKrP/zbbQW9KfIjdIXhrT+R6/JiAFOXixdvx+32awVrrUjr/01Gg1pIarfS
-	 4xyhnd+UO9+7fuYB4kZH2/tnHfriCCnsIZxNhjdL/kzvVOY4UBXwIHwAem8wQV+8Ry
-	 BOgb7K7zl8c7PCt3ZW7zWOBmGRScqNKOwVOXQ2+gAlnnfxms8fvs03s1/YcXOrIZNw
-	 tijMqy1C32QHM4FJo6Q8s8v3I4awlRSlNbOiPqnauOD2C4fQ/eeX11AWMsOeSxlUG2
-	 u4g3Z8h4HXQPkwBIK6hisbbrawdMMnz9wGVYApWqzwx9DEh0jLBq0wXurtP71VBj8C
-	 bzxdFsFEttZrQ==
-Date: Fri, 6 Nov 2026 18:30:30 +0000
-From: Conor Dooley <conor@kernel.org>
-To: =?iso-8859-1?Q?Beno=EEt?= Monin <benoit.monin@bootlin.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Jun Chang <jun.chang@metanoia-comm.com>,
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
-	Philipp Zabel <p.zabel@pengutronix.de>,
-	Sebastian Reichel <sre@kernel.org>, Vinod Koul <vkoul@kernel.org>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Jonathan Cameron <jic23@kernel.org>,
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Thomas Gleixner <tglx@kernel.org>, Radu Rendec <radu@rendec.net>,
-	Samuel Holland <samuel.holland@sifive.com>,
-	Ben Zong-You Xie <ben717@andestech.com>,
-	Daniel Lezcano <daniel.lezcano@kernel.org>,
-	Ulf Hansson <ulfh@kernel.org>, Jisheng Zhang <jszhang@kernel.org>,
-	CL Wang <cl634@andestech.com>, Mark Brown <broonie@kernel.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Wim Van Sebroeck <wim@linux-watchdog.org>,
-	Guenter Roeck <linux@roeck-us.net>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Minas Harutyunyan <hminas@synopsys.com>,
-	Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
-	Randolph Sheng-Kai =?utf-8?B?TGluKOael+iBluWHsSk=?= <randolph@andestech.com>,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-riscv@lists.infradead.org, linux-pm@vger.kernel.org,
-	linux-phy@lists.infradead.org,
-	Paul Walmsley <paul.walmsley@sifive.com>, linux-mmc@vger.kernel.org,
-	linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
-	linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH 24/25] riscv: add Metanoia MT2824 SoC and MT5824 EVB
- support
-Message-ID: <20261106-starter-chowtime-7799df8249fa@spud>
-References: <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
- <20261106-mt2824-v1-24-86087eaf5af4@bootlin.com>
+	dkim=pass (2048-bit key, unprotected) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=c7OqdLX3;
+	dkim=pass (2048-bit key, unprotected) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=f7DVpUc7
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6A6HtI3M1100827
+	for <linux-mmc@vger.kernel.org>; Fri, 6 Nov 2026 18:41:37 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	CUMcAVyOirUSnIO4z8+9Oid/43N5zWiqbL31INqDBvs=; b=c7OqdLX3Uj+TBpdC
+	oqL865Tb2uVszHJk3qkJYH6kLQvGw/yVPe6PI9eIRv15udAcLLqG6UR0v9x34VPd
+	rqOFHoWdX+ilvD3r5k7pEYe1VI5n7B3aAYZKqLOE6Up552R/UgXhV6aSMi9iR0yA
+	yXzoSy3dAHKYFyDGYsjF0bFbKFzX4bSWKc4hAqH+2ALaFsFQFLjcpV1DtQ72eo+9
+	qTjYx7a+EgbYBZorVurnW67Rzb+RnfTxqD2C91mr/i5oAQvuO5qVl3Xc774QSeV5
+	+Vgo10VEpHJG4XtK3CxlUVQaishxG9jh3seF7r1am1bVcchbbT5EwlshXAn8bfsy
+	ytBfMA==
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com [209.85.210.197])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hs3pav6r7-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Fri, 06 Nov 2026 18:41:37 +0000 (GMT)
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-8a06da65d92so714005b3a.0
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Nov 2026 10:41:37 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1793990496; cv=none;
+        d=google.com; s=arc-20260327;
+        b=lnMt1rsIMTy2CshROyzS8XZzby7aYjfsRlPo6WnQ4z9rSinSPgrZbedmdVekBi+km3
+         aTqtOvhw3bho3s7X1r4K5zYkbm5sid3oR9hR1D/LoBX+HK0dRspoikCO26Jpq7tsSuXn
+         l1nx2dttQgDu2/hVk7Sn1J3pJcaqSAm3GPAHF2TcYUBFwIVx589dXBQHWTXCe/J2cm5L
+         7CG3RDfPPOglUblOY5h96wMrCf6VwTB9exTwGeKH3TAL3gMmn+M/MP0pdBjq1x1aiOf4
+         m4AsbsR0aJMErciIPpxJZItHTdeEV4i5bE3cpdIflJHSqNr9QnCfuZ60Mi58DnwuVzzk
+         aDfA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=CUMcAVyOirUSnIO4z8+9Oid/43N5zWiqbL31INqDBvs=;
+        fh=fq82BfcEqCZbF0nO1/Ylw6/8DcIirLzbEH/HZSinNXY=;
+        b=q551J8E6WQu+jVUzl10gZEKXINUNoBwoHJT+cQQasBM6Jc0RCdVf2RdwFgdniygeoi
+         EPnE9ylFoYJ8/C8hTg7E/uhhsmAsI7riyBD8M7FCTFe+a9BCzu8KPuSh3K9u8geTH1XH
+         TyelsXlCrcAjhqzxR8R6/obhym8TGYcTO86H2/V0MyKFQdd+NlCqLkxjaV/wDfDglvGi
+         wznAEzFFI1MvYd3wEYpmFwQcLfgaBRnmUN12ppGY9jgZ/GBqT1mBEx0VWHPfCb8E1M9G
+         Se3k1ar7Z0lj7J97RQpwYb3Mr8D/qAj0nRp9BvhSydqFOM96h2lUt1hytPTtZMZuC1k9
+         GZ7A==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1793990496; x=1794595296; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=CUMcAVyOirUSnIO4z8+9Oid/43N5zWiqbL31INqDBvs=;
+        b=f7DVpUc7TvmBk/GlEqTwwF5Fjd0F4WISWb4EdXmwCQ3SX5+AXNnFeMkj8RJ4/yPZ/M
+         I+v+Jzl2ngCP3dDtqTEHahs53ZsHjSlKehAizG8Mq7zaEa2nQYmJYrjg22Q5tRmxiqs3
+         +SVNV52HhmqFWTWFAkE3T6INy2CvS90tNzfemE3XP0p2UhhaQcoQjbzi0Y6yfAbGQ/El
+         +0BKjYm2pEPgG0u0J9394c7qY84rOVDrrpJ8/eat5vRrR4x/TcAqf38hD3s5idnK/VXy
+         PKFGjmzFBKCWO1FAW+0SfezAoWr+Lbj/yUAxak44wk1to3/WoJMd+r2MUHPB7ez4nRU3
+         RGOA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1793990496; x=1794595296;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=CUMcAVyOirUSnIO4z8+9Oid/43N5zWiqbL31INqDBvs=;
+        b=gJ/6n0cjS/zLO1p2a29cq/KaDHebISdoDX3Z9hYKUz6nKXnv16fqSESeBkcR3frMUx
+         WHtUqdNIDA+74ofCkxcFBHBGbojAiO88NnK/2nOp7W9gwJjXgXd9apWl6qRKVhHOq6ea
+         EXKS6kQ7AFRS3JvI02QTbcxp+1JPiJF0a5/p5RUtyYhhfHpWO2M04uOSNZEMAvF5HC46
+         ugk8YXyRUiDWZePgtVEjV+OdZlQwNOt6a3K3MgwMvoCyE5GnRBVueOZmnO4Wx1w/7h2K
+         6KN7WTzneaBQLm4ztuPveZ7bf/Lx2WDB7F6Nue7CbJxd4jdNrpynZ17W0f1JTtUD8fKB
+         KTjg==
+X-Forwarded-Encrypted: i=1; AKwUvByCSYL5+uSlF3RanUYz5dOlTINBLLxdhx8fv8rOB9OAxdpTwX6O4l8hY6Md0FaA+TdOR0DibS44BUM=@vger.kernel.org
+X-Gm-Message-State: APuU4Z8HxhbQ18gIzWrzJOwhuQs5VRibZ6ynpTYFegDkBOlUSmbjtmXL
+	o79tp4RL7BnQopH3O46i0xeTOjyAX+QAOqE5JCeR0LvmogSdLBYFMqG25Rxt1Jz2XC/Wc2R5hYY
+	ReEU4EjInBeJ2fOFvmOxQHCx6g4dfzRIDjXzkTitrNKHPSltYsYyAGjSjALW8wUerotIq8U3DxV
+	9KcqjveHfn4/dQuKI9yQ/99lgxwKT6gD38CjVfeQ==
+X-Gm-Gg: AYBFou3FCL4TxT+MjPhWAKOb3gfc2WoD9V9cItUsHH4vaSPOcCQPpvp57ji+ipQ6rtD
+	WqEWdc/1rwyT3WR3RUNoOyjvDOjeGvIGATfJtkhw+NVTGVgB/SgoR+CvXpulsp4tClhz1J+gnjM
+	8ADJERLVlKPU9QsaiQUTAS8zFGxffCTKyompBj6kloRrTB0xGtLINN+Oo6gA==
+X-Received: by 2002:a05:6a00:3d0b:b0:881:9f52:ca00 with SMTP id d2e1a72fcca58-8b37bd5461emr2936014b3a.42.1793990496141;
+        Fri, 06 Nov 2026 10:41:36 -0800 (PST)
+X-Received: by 2002:a05:6a00:3d0b:b0:881:9f52:ca00 with SMTP id
+ d2e1a72fcca58-8b37bd5461emr2935994b3a.42.1793990495661; Fri, 06 Nov 2026
+ 10:41:35 -0800 (PST)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -86,528 +127,238 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="gVj6kT/nEeV7IrJz"
-Content-Disposition: inline
-In-Reply-To: <20261106-mt2824-v1-24-86087eaf5af4@bootlin.com>
-
---gVj6kT/nEeV7IrJz
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+References: <20261102-block-as-nvmem-v12-0-f4a2a681087d@oss.qualcomm.com> <20261102-block-as-nvmem-v12-1-f4a2a681087d@oss.qualcomm.com>
+In-Reply-To: <20261102-block-as-nvmem-v12-1-f4a2a681087d@oss.qualcomm.com>
+From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Date: Fri, 6 Nov 2026 19:41:24 +0100
+X-Gm-Features: AclHuK9emUwSj3_sGAuhi1FbbmSEvMQZ92eVANQc1PZljiIDDYIawbYL0H56MVQ
+Message-ID: <CAPx+jO9Hwqn__vdZn_2yCAy9nuMHR2=8shjjQdWQ4S9JWUknQQ@mail.gmail.com>
+Subject: Re: [PATCH v12 1/2] block: partitions: of: Attach partition fwnode to
+ the block device
+To: Loic Poulain <loic.poulain@oss.qualcomm.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>, Jens Axboe <axboe@kernel.dk>,
+        Johannes Berg <johannes@sipsolutions.net>,
+        Jeff Johnson <jjohnson@kernel.org>,
+        Bartosz Golaszewski <brgl@kernel.org>,
+        Marcel Holtmann <marcel@holtmann.org>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Balakrishna Godavarthi <quic_bgodavar@quicinc.com>,
+        Rocky Liao <quic_rjliao@quicinc.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+        Simon Horman <horms@kernel.org>,
+        Srinivas Kandagatla <srini@kernel.org>, Andrew Lunn <andrew@lunn.ch>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Saravana Kannan <saravanak@kernel.org>,
+        Christian Marangi <ansuelsmth@gmail.com>,
+        Eric Dumazet <edumazet@kernel.org>, Abel Vesa <abelvesa@kernel.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-block@vger.kernel.org, linux-wireless@vger.kernel.org,
+        ath10k@lists.infradead.org, linux-bluetooth@vger.kernel.org,
+        netdev@vger.kernel.org, daniel@makrotopia.org,
+        Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>,
+        Christoph Hellwig <hch@lst.de>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTA2MDA3NCBTYWx0ZWRfXyq5DzfpacGKq
+ Xf8d+/JdNtxLq9y4f6PQQN5LkSfBu/1ENmUcQP7G5H3tPSShMG39JHn6FXNTubsRppF+YFtHL8k
+ C7AKlc5UaR8oGYaGaBX+uATCfy2I+aRLCQqSltER7zzM6HPyHFPYW8t00CFaRmPR6B0R4l1mk6W
+ Y3S9F/SEwmUHh2mYmyB7HSIpsnf4d9lbvidmYvQKo3/8qwmyzRst/2Sp79rkSQZHLbrAy134xVQ
+ gimO0ysg+2BIc4j5PnUb0T+1QIaz0csHao4w1y3YoJHnTUQZMnp/oUYPocTu9BwRvDYAELxyDdY
+ x3iuoLDCQQ32XXfjdqRrqQXqv4Z5gkLXobLD0tl1Ed1KAl1T/am5uLPOKK0d6p4wWoVcZQilI2s
+ DmEpSFJjjaPCDEmiqzG0Nj8N7ekcBFsHfM2Lf+C4OYJlDq3+4WoOue5s0Px33rhRzqMvYysE/Jm
+ xZS2sF8zuIOagr3X7KA==
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTA2MDA3NCBTYWx0ZWRfX3ysqvle2kwHL
+ zP6OUGhfG9YaQvBqEDYU7uY2Yh4LEd3L+LaHGoAY0wiEu7qhpyq1uv/I/zKBZkttkLvFEPDP3tg
+ DAgPck+I+TeJ3mHX9xdXS7H5rcMRsYk=
+X-Proofpoint-GUID: JCQ4eDrrpotxHLFGakevk8Tm7eG4OEHd
+X-Authority-Analysis: v=2.4 cv=P4ivFSAu c=1 sm=1 tr=0 ts=6aee1f61 cx=c_pps
+ a=rEQLjTOiSrHUhVqRoksmgQ==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
+ a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
+ a=3WHJM1ZQz_JShphwDgj5:22 a=EUspDBNiAAAA:8 a=VwQbUJbxAAAA:8
+ a=YqnSXwVskR_DcSjeyREA:9 a=QEXdDO2ut3YA:10 a=2VI0MkxyNR6bbpdq8BZq:22
+X-Proofpoint-ORIG-GUID: JCQ4eDrrpotxHLFGakevk8Tm7eG4OEHd
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
+ definitions=2026-11-06_06,2026-11-06_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ adultscore=0 clxscore=1015 spamscore=0 phishscore=0 suspectscore=0
+ bulkscore=0 malwarescore=0 lowpriorityscore=0 priorityscore=1501
+ impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2611040001
+ definitions=main-2611060074
 
-On Fri, Nov 06, 2026 at 10:30:21AM +0100, Beno=EEt Monin wrote:
-> Add the device tree for the Metanoia MT2824, a dual-core Andes
-> AX45MP-based SoC, and for the MT5824 evaluation board.
->=20
-> The SoC device tree describes the CPUs and their L2 cache, the PLIC,
-> PLICSW and PLMT, the reset controller, the reboot controller, the
-> watchdog, two UARTs, the QSPI and eight SPI controllers, the DWC
-> MSHC MMC controller, and the USB2 controller.
->=20
-> The MT5824 EVB enables the watchdog, the two UARTs, the MMC
-> controller, the QSPI port with its SPI-NOR flash, the first three SPI
-> controllers, and the USB controller.
->=20
-> Originally-by: Jun Chang <jun.chang@metanoia-comm.com>
-> Signed-off-by: Beno=EEt Monin <benoit.monin@bootlin.com>
+On Mon, Nov 2, 2026 at 5:27=E2=80=AFPM Loic Poulain
+<loic.poulain@oss.qualcomm.com> wrote:
+>
+> The OF partition parser reads offset, size and label from each
+> "fixed-partitions" child node but does not associate that node with the
+> resulting partition block device. As a result a partition has no
+> of_node, unlike the whole-disk device which gets its firmware node via
+> add_disk_fwnode().
+>
+> Carry the partition's device tree node through the parser and attach it
+> to the partition's block device with device_set_node(), mirroring the
+> whole-disk case. This lets consumers describe per-partition properties
+> in the device tree (for example an NVMEM layout on a partition node) and
+> look them up through the partition device.
+>
+> No functional change for existing users, partitions without a matching
+> device tree node simply get a NULL fwnode.
+>
+> Reviewed-by: Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
+
+Reviewed-by: Ulf Hansson <ulfh@kernel.org>
+
+Kind regards
+Uffe
+
 > ---
->  arch/riscv/boot/dts/Makefile                |   1 +
->  arch/riscv/boot/dts/metanoia/Makefile       |   2 +
->  arch/riscv/boot/dts/metanoia/mt2824.dtsi    | 330 ++++++++++++++++++++++=
-++++++
->  arch/riscv/boot/dts/metanoia/mt5824-evb.dts |  81 +++++++
->  4 files changed, 414 insertions(+)
->=20
-> diff --git a/arch/riscv/boot/dts/Makefile b/arch/riscv/boot/dts/Makefile
-> index 69d8751fb17c..8e1e987ea089 100644
-> --- a/arch/riscv/boot/dts/Makefile
-> +++ b/arch/riscv/boot/dts/Makefile
-> @@ -4,6 +4,7 @@ subdir-y +=3D andes
->  subdir-y +=3D anlogic
->  subdir-y +=3D canaan
->  subdir-y +=3D eswin
-> +subdir-y +=3D metanoia
->  subdir-y +=3D microchip
->  subdir-y +=3D renesas
->  subdir-y +=3D sifive
-> diff --git a/arch/riscv/boot/dts/metanoia/Makefile b/arch/riscv/boot/dts/=
-metanoia/Makefile
-> new file mode 100644
-> index 000000000000..7a685798d5a4
-> --- /dev/null
-> +++ b/arch/riscv/boot/dts/metanoia/Makefile
-> @@ -0,0 +1,2 @@
-> +# SPDX-License-Identifier: GPL-2.0
-> +dtb-$(CONFIG_ARCH_METANOIA) +=3D mt5824-evb.dtb
-> diff --git a/arch/riscv/boot/dts/metanoia/mt2824.dtsi b/arch/riscv/boot/d=
-ts/metanoia/mt2824.dtsi
-> new file mode 100644
-> index 000000000000..5f73c6d3760b
-> --- /dev/null
-> +++ b/arch/riscv/boot/dts/metanoia/mt2824.dtsi
-> @@ -0,0 +1,330 @@
-> +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-> +/*
-> + * Copyright (C) 2026 Metanoia Communications Inc.. All rights reserved.
-> + */
+>  block/partitions/check.h |  1 +
+>  block/partitions/core.c  | 20 +++++++++++++++++---
+>  block/partitions/of.c    |  3 +++
+>  3 files changed, 21 insertions(+), 3 deletions(-)
+>
+> diff --git a/block/partitions/check.h b/block/partitions/check.h
+> index b0997467b61a54a8a621b9c155c8329289649460..326081499d9a6be730dbd659c=
+110449cfa06921f 100644
+> --- a/block/partitions/check.h
+> +++ b/block/partitions/check.h
+> @@ -17,6 +17,7 @@ struct parsed_partitions {
+>                 int flags;
+>                 bool has_info;
+>                 struct partition_meta_info info;
+> +               struct fwnode_handle *fwnode;
+>         } *parts;
+>         int next;
+>         int limit;
+> diff --git a/block/partitions/core.c b/block/partitions/core.c
+> index b5c59b79ca7cbb28d4d93478ee1c80908f76ee9f..eee954df1ac6ef7dd4f02ad5c=
+9d49aed778bf015 100644
+> --- a/block/partitions/core.c
+> +++ b/block/partitions/core.c
+> @@ -11,6 +11,7 @@
+>  #include <linux/sysfs.h>
+>  #include <linux/ctype.h>
+>  #include <linux/vmalloc.h>
+> +#include <linux/property.h>
+>  #include <linux/raid/detect.h>
+>  #include "check.h"
+>
+> @@ -110,8 +111,17 @@ static struct parsed_partitions *allocate_partitions=
+(struct gendisk *hd)
+>         return state;
+>  }
+>
+> +static void drop_partitions_fwnodes(struct parsed_partitions *state)
+> +{
+> +       for (int i =3D 0; i < state->limit; i++) {
+> +               fwnode_handle_put(state->parts[i].fwnode);
+> +               state->parts[i].fwnode =3D NULL;
+> +       }
+> +}
 > +
-> +#include <dt-bindings/interrupt-controller/irq.h>
+>  static void free_partitions(struct parsed_partitions *state)
+>  {
+> +       drop_partitions_fwnodes(state);
+>         vfree(state->parts);
+>         kfree(state);
+>  }
+> @@ -139,6 +149,7 @@ static struct parsed_partitions *check_partition(stru=
+ct gendisk *hd)
+>
+>         i =3D res =3D err =3D 0;
+>         while (!res && check_part[i]) {
+> +               drop_partitions_fwnodes(state);
+>                 memset(state->parts, 0, state->limit * sizeof(state->part=
+s[0]));
+>                 res =3D check_part[i++](state);
+>                 if (res < 0) {
+> @@ -247,6 +258,7 @@ static const struct attribute_group *part_attr_groups=
+[] =3D {
+>
+>  static void part_release(struct device *dev)
+>  {
+> +       fwnode_handle_put(dev_fwnode(dev));
+>         put_disk(dev_to_bdev(dev)->bd_disk);
+>         bdev_drop(dev_to_bdev(dev));
+>  }
+> @@ -294,7 +306,8 @@ static const DEVICE_ATTR(whole_disk, 0444, whole_disk=
+_show, NULL);
+>   */
+>  static struct block_device *add_partition(struct gendisk *disk, int part=
+no,
+>                                 sector_t start, sector_t len, int flags,
+> -                               struct partition_meta_info *info)
+> +                               struct partition_meta_info *info,
+> +                               struct fwnode_handle *fwnode)
+>  {
+>         dev_t devt =3D MKDEV(0, 0);
+>         struct device *ddev =3D disk_to_dev(disk);
+> @@ -343,6 +356,7 @@ static struct block_device *add_partition(struct gend=
+isk *disk, int partno,
+>         pdev->class =3D &block_class;
+>         pdev->type =3D &part_type;
+>         pdev->parent =3D ddev;
+> +       device_set_node(pdev, fwnode_handle_get(fwnode));
+>
+>         /* in consecutive minor range? */
+>         if (bdev_partno(bdev) < disk->minors) {
+> @@ -449,7 +463,7 @@ int bdev_add_partition(struct gendisk *disk, int part=
+no, sector_t start,
+>         }
+>
+>         part =3D add_partition(disk, partno, start, length,
+> -                       ADDPART_FLAG_NONE, NULL);
+> +                       ADDPART_FLAG_NONE, NULL, NULL);
+>         ret =3D PTR_ERR_OR_ZERO(part);
+>  out:
+>         mutex_unlock(&disk->open_mutex);
+> @@ -564,7 +578,7 @@ static bool blk_add_partition(struct gendisk *disk,
+>         }
+>
+>         part =3D add_partition(disk, p, from, size, state->parts[p].flags=
+,
+> -                            &state->parts[p].info);
+> +                            &state->parts[p].info, state->parts[p].fwnod=
+e);
+>         if (IS_ERR(part)) {
+>                 if (PTR_ERR(part) !=3D -ENXIO) {
+>                         printk(KERN_ERR " %s: p%d could not be added: %pe=
+\n",
+> diff --git a/block/partitions/of.c b/block/partitions/of.c
+> index 53664ea06b6540e3d1155141adaafac7286f2d21..4fc7c80c407de42b2b31be2c8=
+2e0e6bc2a30c9e3 100644
+> --- a/block/partitions/of.c
+> +++ b/block/partitions/of.c
+> @@ -3,6 +3,7 @@
+>  #include <linux/blkdev.h>
+>  #include <linux/major.h>
+>  #include <linux/of.h>
+> +#include <linux/property.h>
+>  #include <linux/string.h>
+>  #include "check.h"
+>
+> @@ -62,6 +63,8 @@ static void add_of_partition(struct parsed_partitions *=
+state, int slot,
+>                 partname =3D of_get_property(np, "name", &len);
+>         strscpy(info->volname, partname, sizeof(info->volname));
+>
+> +       state->parts[slot].fwnode =3D fwnode_handle_get(of_fwnode_handle(=
+np));
 > +
-> +/ {
-> +	#address-cells =3D <0x02>;
-> +	#size-cells =3D <0x02>;
-> +	compatible =3D "metanoia,mt2824";
-> +
-> +	cpus: cpus {
-> +		#address-cells =3D <0x01>;
-> +		#size-cells =3D <0x00>;
-
-Non-hex here please.
-
-> +		timebase-frequency =3D <20000000>;
-> +
-> +		cpu0: cpu@0 {
-> +			device_type =3D "cpu";
-> +			reg =3D <0x00>;
-
-0x0 etc
-
-> +			compatible =3D "andestech,ax45mp", "riscv";
-> +			riscv,isa-base =3D "rv64i";
-> +			riscv,isa-extensions =3D "i", "m", "a", "f", "d", "c",
-> +					       "zicntr", "zicsr", "zifencei",
-> +					       "zihpm", "xandespmu";
-> +			mmu-type =3D "riscv,sv39";
-> +			clock-frequency =3D <900000000>;
-> +			i-cache-size =3D <0x8000>;
-> +			i-cache-sets =3D <0x100>;
-> +			i-cache-line-size =3D <0x40>;
-> +			i-cache-block-size =3D <0x40>;
-> +			d-cache-size =3D <0x8000>;
-> +			d-cache-sets =3D <0x80>;
-> +			d-cache-line-size =3D <0x40>;
-> +			d-cache-block-size =3D <0x40>;
-> +			next-level-cache =3D <&l2_cache>;
-> +
-> +			cpu0intc: interrupt-controller {
-> +				#interrupt-cells =3D <0x01>;
-> +				interrupt-controller;
-> +				compatible =3D "andestech,cpu-intc", "riscv,cpu-intc";
-> +			};
-> +		};
-> +
-> +		cpu1: cpu@1 {
-> +			device_type =3D "cpu";
-> +			reg =3D <0x01>;
-> +			compatible =3D "andestech,ax45mp", "riscv";
-> +			riscv,isa-base =3D "rv64i";
-> +			riscv,isa-extensions =3D "i", "m", "a", "f", "d", "c",
-> +					       "zicntr", "zicsr", "zifencei",
-> +					       "zihpm", "xandespmu";
-> +			mmu-type =3D "riscv,sv39";
-> +			clock-frequency =3D <900000000>;
-> +			i-cache-size =3D <0x8000>;
-> +			i-cache-sets =3D <0x100>;
-> +			i-cache-line-size =3D <0x40>;
-> +			i-cache-block-size =3D <0x40>;
-> +			d-cache-size =3D <0x8000>;
-> +			d-cache-sets =3D <0x80>;
-> +			d-cache-line-size =3D <0x40>;
-> +			d-cache-block-size =3D <0x40>;
-> +			next-level-cache =3D <&l2_cache>;
-> +
-> +			cpu1intc: interrupt-controller {
-> +				#interrupt-cells =3D <0x01>;
-> +				interrupt-controller;
-> +				compatible =3D "andestech,cpu-intc", "riscv,cpu-intc";
-> +			};
-> +		};
-> +	};
-> +
-> +	clocks {
-> +		ext_clk: ext-clk {
-> +			compatible =3D "fixed-clock";
-> +			#clock-cells =3D <0>;
-> +			clock-frequency =3D <20000000>;
-> +			clock-output-names =3D "ext-clk";
-> +		};
-
-Is the frequency here actually set by the soc, or actually by the board?
-If it says "ext", I assume it's not part of the soc.
-
-> +
-> +		pclk_div4: platform-clock-div4 {
-> +			compatible =3D "fixed-clock";
-> +			#clock-cells =3D <0>;
-> +			clock-frequency =3D <225000000>;
-> +			clock-output-names =3D "platform-clock-div4";
-> +		};
-> +
-> +		pll_soc_out3: pll-soc-out3 {
-> +			compatible =3D "fixed-clock";
-> +			#clock-cells =3D <0>;
-> +			clock-frequency =3D <180000000>;
-> +			clock-output-names =3D "pll-soc-out3";
-> +		};
-> +
-> +		usb_otg_ahb_clk: clock-usb-otg-ahb {
-> +			compatible =3D "fixed-clock";
-> +			#clock-cells =3D <0>;
-> +			clock-frequency =3D <60000000>;
-> +			clock-output-names =3D "otg";
-> +		};
-
-I'd much rather this not be merged until things like this are replaced
-by an actual clock controller, lest it appear in u-boot etc and then
-have the support break because it got swapped out for a clock
-controller.
-
-> +	};
-> +
-> +	soc: soc {
-> +		#address-cells =3D <0x02>;
-> +		#size-cells =3D <0x02>;
-> +		compatible =3D "simple-bus";
-> +		interrupt-parent =3D <&plic>;
-> +		ranges;
-> +
-> +		usb0: usb@4000000 {
-> +			compatible =3D "metanoia,mt2824-usb", "snps,dwc2";
-> +			reg =3D <0x0 0x04000000 0x0 0x100000>;
-> +			interrupts =3D <7 IRQ_TYPE_LEVEL_HIGH>;
-> +			clocks =3D <&usb_otg_ahb_clk>;
-> +			clock-names =3D "otg";
-> +			dr_mode =3D "host";
-> +			resets =3D <&rst 19>, <&rst 20>;
-> +			reset-names =3D "dwc2", "dwc2-ecc";
-> +			phys =3D <&usb2phy>;
-> +			phy-names =3D "usb2-phy";
-> +			hnp-disable;
-> +			srp-disable;
-> +			disable-over-current;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		mmcsd: mmc@4100000 {
-> +			compatible =3D "metanoia,mt2824-dwcmshc";
-> +			clocks =3D <&pll_soc_out3>;
-> +			clock-names =3D "core";
-> +			reg =3D <0x0 0x04100000 0x0 0x00100000>;
-
-ordering should be compatible -> reg
-
-> +			interrupts =3D <5 IRQ_TYPE_LEVEL_HIGH>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		l2_cache: cache-controller@a000000 {
-> +			compatible =3D "metanoia,mt2824-ax45mp-cache",
-> +				     "andestech,ax45mp-cache", "cache";
-> +			reg =3D <0x0 0x0a000000 0x0 0x40000>;
-> +			interrupts =3D <1 IRQ_TYPE_LEVEL_HIGH>;
-> +			cache-line-size =3D <64>;
-> +			cache-level =3D <2>;
-> +			cache-sets =3D <1024>;
-> +			cache-size =3D <0x40000>;
-> +			cache-unified;
-> +		};
-> +
-> +		plic: interrupt-controller@c000000 {
-> +			compatible =3D "metanoia,mt2824-plic", "andestech,nceplic100";
-> +			reg =3D <0x0 0x0c000000 0x0 0x400000>;
-> +			interrupts-extended =3D <&cpu0intc 0x0b>, <&cpu0intc 0x09>,
-> +					      <&cpu1intc 0x0b>, <&cpu1intc 0x09>;
-> +			interrupt-controller;
-> +			#address-cells =3D <0x00>;
-> +			#interrupt-cells =3D <0x02>;
-> +			riscv,ndev =3D <0x47>;
-> +		};
-> +
-> +		plmt: timer@c400000 {
-> +			compatible =3D "metanoia,mt2824-plmt", "andestech,plmt0";
-> +			reg =3D <0x0 0x0c400000 0x0 0x00400000>;
-> +			interrupts-extended =3D <&cpu0intc 0x07>,
-> +					      <&cpu1intc 0x07>;
-> +		};
-> +
-> +		plicsw: interrupt-controller@c800000 {
-> +			compatible =3D "metanoia,mt2824-plicsw", "andestech,plicsw";
-> +			reg =3D <0x0 0x0c800000 0x0 0x400000>;
-> +			interrupts-extended =3D <&cpu0intc 0x03>,
-> +					      <&cpu1intc 0x03>;
-> +		};
-> +
-
-> +		reboot: reboot@10000004 {
-> +			compatible =3D "metanoia,mt2824-reboot";
-> +			reg =3D <0x0 0x10000004 0x0 0x08>;
-> +		};
-> +
-> +		rst: reset-controller@1000000c {
-> +			#reset-cells =3D <1>;
-> +			compatible =3D "metanoia,mt2824-reset";
-> +			reg =3D <0x0 0x1000000c 0x0 0x04>;
-> +		};
-
-As pointed out, these are probably part of a syscon that I would imagine
-also includes some clocks or other features.
-
-By and large I think this is fine though..
-
-Thanks,
-Conor.
-
-> +
-> +		watchdog: watchdog@10090000 {
-> +			compatible =3D "metanoia,mt2824-wdt", "andestech,ae350-wdt";
-> +			reg =3D <0x0 0x10090000 0x0 0x10000>;
-> +			clocks =3D <&ext_clk>;
-> +			andestech,clock-source =3D <0>;
-> +			timeout-sec =3D <10>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		serial0: serial@100e0000 {
-> +			compatible =3D "ns16550a";
-> +			reg =3D <0x0 0x100e0000 0x0 0x1000>;
-> +			interrupts =3D <17 IRQ_TYPE_LEVEL_HIGH>;
-> +			clocks =3D <&pclk_div4>;
-> +			current-speed =3D <115200>;
-> +			reg-shift =3D <0x02>;
-> +			reg-offset =3D <0x20>;
-> +			reg-io-width =3D <0x04>;
-> +			no-loopback-test;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		serial1: serial@100f0000 {
-> +			compatible =3D "ns16550a";
-> +			reg =3D <0x0 0x100f0000 0x0 0x1000>;
-> +			interrupts =3D <18 IRQ_TYPE_LEVEL_HIGH>;
-> +			clocks =3D <&pclk_div4>;
-> +			current-speed =3D <115200>;
-> +			reg-shift =3D <0x02>;
-> +			reg-offset =3D <0x20>;
-> +			reg-io-width =3D <0x04>;
-> +			no-loopback-test;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		qspi: spi@10120000 {
-> +			compatible =3D "metanoia,mt2824-spi", "andestech,ae350-spi";
-> +			reg =3D <0x0 0x10120000 0x0 0x10000>;
-> +			interrupts =3D <13 IRQ_TYPE_LEVEL_HIGH>;
-> +			#address-cells =3D <0x01>;
-> +			#size-cells =3D <0x00>;
-> +			num-cs =3D <0x01>;
-> +			clocks =3D <&pll_soc_out3>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		spi0: spi@10130000 {
-> +			compatible =3D "metanoia,mt2824-spi", "andestech,ae350-spi";
-> +			reg =3D <0x0 0x10130000 0x0 0x10000>;
-> +			#address-cells =3D <0x01>;
-> +			#size-cells =3D <0x00>;
-> +			num-cs =3D <0x01>;
-> +			clocks =3D <&pll_soc_out3>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		spi1: spi@10140000 {
-> +			compatible =3D "metanoia,mt2824-spi", "andestech,ae350-spi";
-> +			reg =3D <0x0 0x10140000 0x0 0x10000>;
-> +			interrupts =3D <19 IRQ_TYPE_LEVEL_HIGH>;
-> +			#address-cells =3D <0x01>;
-> +			#size-cells =3D <0x00>;
-> +			num-cs =3D <0x01>;
-> +			clocks =3D <&pll_soc_out3>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		spi2: spi@10150000 {
-> +			compatible =3D "metanoia,mt2824-spi", "andestech,ae350-spi";
-> +			reg =3D <0x0 0x10150000 0x0 0x10000>;
-> +			#address-cells =3D <0x01>;
-> +			#size-cells =3D <0x00>;
-> +			num-cs =3D <0x01>;
-> +			clocks =3D <&pll_soc_out3>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		spi3: spi@10160000 {
-> +			compatible =3D "metanoia,mt2824-spi", "andestech,ae350-spi";
-> +			reg =3D <0x0 0x10160000 0x0 0x10000>;
-> +			#address-cells =3D <0x01>;
-> +			#size-cells =3D <0x00>;
-> +			num-cs =3D <0x01>;
-> +			clocks =3D <&pll_soc_out3>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		spi4: spi@10170000 {
-> +			compatible =3D "metanoia,mt2824-spi", "andestech,ae350-spi";
-> +			reg =3D <0x0 0x10170000 0x0 0x10000>;
-> +			#address-cells =3D <0x01>;
-> +			#size-cells =3D <0x00>;
-> +			num-cs =3D <0x01>;
-> +			clocks =3D <&pll_soc_out3>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		spi5: spi@10180000 {
-> +			compatible =3D "metanoia,mt2824-spi", "andestech,ae350-spi";
-> +			reg =3D <0x0 0x10180000 0x0 0x10000>;
-> +			#address-cells =3D <0x01>;
-> +			#size-cells =3D <0x00>;
-> +			num-cs =3D <0x01>;
-> +			clocks =3D <&pll_soc_out3>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		spi6: spi@10190000 {
-> +			compatible =3D "metanoia,mt2824-spi", "andestech,ae350-spi";
-> +			reg =3D <0x0 0x10190000 0x0 0x10000>;
-> +			#address-cells =3D <0x01>;
-> +			#size-cells =3D <0x00>;
-> +			num-cs =3D <0x01>;
-> +			clocks =3D <&pll_soc_out3>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		spi7: spi@101a0000 {
-> +			compatible =3D "metanoia,mt2824-spi", "andestech,ae350-spi";
-> +			reg =3D <0x0 0x101a0000 0x0 0x10000>;
-> +			#address-cells =3D <0x01>;
-> +			#size-cells =3D <0x00>;
-> +			num-cs =3D <0x01>;
-> +			clocks =3D <&pll_soc_out3>;
-> +			status =3D "disabled";
-> +		};
-> +	};
-> +
-> +	usb2phy: usb2-phy {
-> +		compatible =3D "metanoia,mt2824-usb2-phy";
-> +		#phy-cells =3D <0>;
-> +		resets =3D <&rst 18>;
-> +		reset-names =3D "usb2-phy";
-> +	};
-> +
-> +	reserved-memory {
-> +		#address-cells =3D <0x2>;
-> +		#size-cells =3D <0x2>;
-> +		ranges;
-> +
-> +		/* for the DSPs, configured as non-cacheable in openSBI */
-> +		rsc_table: rsc-table@81000000 {
-> +			reg =3D <0x0 0x81000000 0x0 0x10000>;
-> +			no-map;
-> +		};
-> +	};
-> +};
-> diff --git a/arch/riscv/boot/dts/metanoia/mt5824-evb.dts b/arch/riscv/boo=
-t/dts/metanoia/mt5824-evb.dts
-> new file mode 100644
-> index 000000000000..d0e8eb0a49a4
-> --- /dev/null
-> +++ b/arch/riscv/boot/dts/metanoia/mt5824-evb.dts
-> @@ -0,0 +1,81 @@
-> +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-> +/*
-> + * Copyright (C) 2026 Metanoia Communications Inc.. All rights reserved.
-> + */
-> +
-> +/dts-v1/;
-> +
-> +#include "mt2824.dtsi"
-> +
-> +/ {
-> +	model =3D "Metanoia MT5824 EVB";
-> +	compatible =3D "metanoia,mt5824-evb", "metanoia,mt2824";
-> +
-> +	aliases {
-> +		uart0 =3D &serial0;
-> +		uart1 =3D &serial1;
-> +		spi0 =3D &spi0;
-> +		spi1 =3D &spi1;
-> +		spi2 =3D &spi2;
-> +	};
-> +
-> +	chosen {
-> +		stdout-path =3D "uart0:115200n8";
-> +	};
-> +
-> +	memory@80000000 {
-> +		device_type =3D "memory";
-> +		reg =3D <0x0 0x80000000 0x0 0x80000000>,
-> +		      <0x1 0x00000000 0x0 0x80000000>;
-> +	};
-> +};
-> +
-> +&usb0 {
-> +	status =3D "okay";
-> +};
-> +
-> +&mmcsd {
-> +	bus-width =3D <8>;
-> +	mmc-ddr-1_8v;
-> +	mmc-hs200-1_8v;
-> +	mmc-hs400-1_8v;
-> +	no-sdio;
-> +	disable-wp;
-> +	cap-mmc-hw-reset;
-> +	status =3D "okay";
-> +};
-> +
-> +&watchdog {
-> +	status =3D "okay";
-> +};
-> +
-> +&serial0 {
-> +	status =3D "okay";
-> +};
-> +
-> +&serial1 {
-> +	status =3D "okay";
-> +};
-> +
-> +&qspi {
-> +	status =3D "okay";
-> +	flash@0 {
-> +		compatible =3D "jedec,spi-nor";
-> +		spi-rx-bus-width =3D <0x4>;
-> +		spi-tx-bus-width =3D <0x4>;
-> +		spi-max-frequency =3D <100000000>;
-> +		reg =3D <0x0>;
-> +	};
-> +};
-> +
-> +&spi0 {
-> +	status =3D "okay";
-> +};
-> +
-> +&spi1 {
-> +	status =3D "okay";
-> +};
-> +
-> +&spi2 {
-> +	status =3D "okay";
-> +};
->=20
-> --=20
-> 2.56.0
->=20
-
---gVj6kT/nEeV7IrJz
-Content-Type: application/pgp-signature; name=signature.asc
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCau4cxgAKCRB4tDGHoIJi
-0owRAP95exaOo/pmlWS1vJaLTUgL7WEsc8vCXRQ+o6aUNvXW3wEA5DDwcNTzyqSd
-KtDAtgukopwz3ahW3I8SJ/bIZDQyMww=
-=r1sH
------END PGP SIGNATURE-----
-
---gVj6kT/nEeV7IrJz--
+>         seq_buf_printf(&state->pp_buf, "(%s)", info->volname);
+>  }
+>
+>
+> --
+> 2.34.1
+>
