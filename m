@@ -1,60 +1,59 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.171.202.116
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793957594;
-	b=ZsaXUlSlhuy3mHx5wQchTV/F7gFUDTzwhBiU3cD5EUELiuz65Axr1f4XiG+UCVMYD0Ve
-	 SA9F3GC1vpJ4ck/4fjjsafBveqO6x3qFtfSBJTX7ohOAjN1Vgu081U2+WkAmEz9bRbaAU
-	 pqqZGyMKbBZTfxMNs+5uaql5ZuB2sv2FJOZ+gD0hlrXd5tTjT/CE9yfqRQ/HmFCkEZ5Br
-	 gR7TzLL9RpTSgOnQ5vaco6aNtkhpd1z42w+694qi2JjtBpIWLvVgl2/2jWv/ywosDxeuu
-	 G6+JhIUbH0y3E0MuPPrw/O2W5JnyjEZbVLnMBDsxtxOfh8aN7GOx1g0oOFWOfEE8YJw==
+	t=1793957600;
+	b=IXW6xuXaF2p9Zz7XLwBzX9QZhpxGc0jUj0N3ZRm8L9j773a+8PYsKIkqwWMEl+B+3Rwi
+	 As5zy+4hPA7jo1QfcsWUUlqIW7HsLjNsZvUtdBgEWvNGT+q2ZBIWA4T6JwOprZCA2NM7M
+	 xKc+ISL5oItHjrmaWgxqurTYcQO6sbq4EO18u0rgvqai19HEis6+tZLz3ysQ/1blSVMsZ
+	 6rCxmBIVfG7GvFLZ1UswnMh6xYTwJtgjgCXynnHdjj0X9yrZn9jd8WO4acjrVbPy4Tnmh
+	 42wLtwj2r6rAeJbE+Bnxyj6v1bhbwH+aq86/mhvtIlqKf6QSXfBJRrzTfNYJ/G6lquw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793957594;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793957600;
 	h=DMARC-Filter:Received:Received:Received:DKIM-Signature:From:Date:
 	 Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:
 	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
 	 X-Last-TLS-Session-Version;
-	bh=4oXcJbpFaFWcJH0ZN0EO/TEMAwFip7EhrX7KwRsA0so=;
-	b=ZvdeaD0Ca4E/xz2L01O3TwHsAbq21kxuZa/WZ6JlhaTNVcl5cnRhS14x3FiH3g1XCIny
-	 EgK+TNNPLG7tifoPoqrPYPbe4wmmg1QLbT4k8VQLXDzmRoEdrQAlnZy2Tx2JYDu6pt4ya
-	 3XQkBrN6QC0a9mKKeUFn7vGxBfTFOHzqw1yA6bilfEQAaN6qg7IuNLiS5MWKPO0gvmXTO
-	 ojQWR68ew3a4WqAHruBpaLg+TocCC79gFvD0/xdEt2HBmQDO9B2DiOrv7NVb5c/TocN1u
-	 /CmTyaC339BYB80TmXRsv42VkaBvs8OmPz/wUXXEX0EzK4LyNJfmdYUguon7a7ihU4A==
+	bh=xNxhGNlUd/QAYjwS9+p2YRVic4RXKhAhrhTTLAcBT1A=;
+	b=Yriywgh6qWGc0kELpEEsxP48h1HNVLWjd/sSNCYiYUdVWNFCcQL7ACWSAnbBn47bMMEU
+	 O2tkFgw+lYM5nJvx50f3pdp+JKFtVLjfgIVaMIoNMi5CYhoUcUyq4MMWzEaK0nF3tEhNX
+	 o88MIodVke0r6L6bzwlkk3HfcmHECedvo0ob6GVXPxsR4qaUwdshc8jXQHu96LgrSZeVu
+	 n+RMSf6Ennuo8DPmstc0CNMuUnc1mBeLOb1Usp+E/xRcXGXLXvTrsxfhnaSSHAQY6QtGx
+	 +uGM11VUeGUdDv9bYYkXLqFoxqj+laZfugm2h9VzNp0TRvdfvvIkbXZxQm7XRledYAw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=bootlin.com;
 	spf=pass smtp.mailfrom=bootlin.com;
-	dkim=pass header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=jw07in8c;
+	dkim=pass header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=qzjngm6W;
 	arc=none smtp.remote-ip=185.171.202.116
 Received: from smtpout-04.galae.net (smtpout-04.galae.net [185.171.202.116])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A4B7606A33B
-	for <linux-mmc@vger.kernel.org>; Fri,  6 Nov 2026 09:33:13 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7A4B7606A33B
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA634606D83D;
+	Fri,  6 Nov 2026 09:33:19 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org BA634606D83D
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=jw07in8c
+	dkim=pass (2048-bit key, unprotected) header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=qzjngm6W
 Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
-	by smtpout-04.galae.net (Postfix) with ESMTPS id BA7AAC69166;
-	Fri,  6 Nov 2026 09:33:11 +0000 (UTC)
+	by smtpout-04.galae.net (Postfix) with ESMTPS id 253DEC69168;
+	Fri,  6 Nov 2026 09:33:18 +0000 (UTC)
 Received: from mail.galae.net (mail.galae.net [212.83.136.155])
-	by smtpout-01.galae.net (Postfix) with ESMTPS id 3DF715FFBC;
-	Fri,  6 Nov 2026 09:33:12 +0000 (UTC)
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 7D356103292CA;
-	Fri,  6 Nov 2026 10:33:01 +0100 (CET)
+	by smtpout-01.galae.net (Postfix) with ESMTPS id 843B35FFBC;
+	Fri,  6 Nov 2026 09:33:18 +0000 (UTC)
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id A2CAD10329258;
+	Fri,  6 Nov 2026 10:33:08 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
-	t=1793957587; h=from:subject:date:message-id:to:cc:mime-version:content-type:
+	t=1793957595; h=from:subject:date:message-id:to:cc:mime-version:content-type:
 	 content-transfer-encoding:in-reply-to:references;
-	bh=4oXcJbpFaFWcJH0ZN0EO/TEMAwFip7EhrX7KwRsA0so=;
-	b=jw07in8cOM6edpDXpac+TOB1S+MYgY9J0ufP42QvJnEowAbsHOB7ODDxz5VWYtRMgNOoFJ
-	g4+nhS4PRwXqjBUxk2Pg/mt/ndvLvYzB6LlJBQwtkS3x3toyW0ig0PnQ5zjE6nO9wlGi4W
-	sR5vBO7HBacK0KjXumJG1PHc3RXCLSlTgJW+ZlmS4/P28zssfAqNBGbc3H76NV17HnCvXR
-	vlZq5efzcBzhyIJA7gJ19HTWiw7a1Pp7xp9/+ZRPr8Ks+kY1tyBcf1Il4jpWon6Rj7ZtLX
-	rP1T3BqCHWh3uN+HKOjY24cLEoIUGNIYEhhXNWrj8JyxoiLG50RwDkKnHWoDxg==
+	bh=xNxhGNlUd/QAYjwS9+p2YRVic4RXKhAhrhTTLAcBT1A=;
+	b=qzjngm6WnCz2RSJjNd87zanbSOH2E4/m7iNJaRu8O8NApdI6HB0JwSC9zihCXzReroWlBy
+	YbEr4t/R5C8POfP7mahglsIZLkb/jgbiht0kTGtezBFmH62HZx8bBVObq9zEUSYr2uCKn7
+	OPsvspCzw7u0i+M5RJygf1N7C+c/GORrrW5f0oREYTS7xvfuFqeluPN0vC9w7IBImagl1I
+	tvWtXPB6yRp/oxW/Z3wF3A41LIHDsu9DvFr7FvQTpdWc3eYenyQiltaVyrB9ADHBI8jAxK
+	miLKg/TcH/bOQIYypD7IvoCCmyertaDVNtwFs3eR+bX+MJM+qpe1zItVfCFxrg==
 From: =?utf-8?q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>
-Date: Fri, 06 Nov 2026 10:30:18 +0100
-Subject: [PATCH 21/25] mmc: sdhci-of-dwcmshc: add MT2824 tuning and HS400
- support
+Date: Fri, 06 Nov 2026 10:30:19 +0100
+Subject: [PATCH 22/25] phy: metanoia: add USB2 PHY driver
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -66,7 +65,7 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-Message-Id: <20261106-mt2824-v1-21-86087eaf5af4@bootlin.com>
+Message-Id: <20261106-mt2824-v1-22-86087eaf5af4@bootlin.com>
 References: <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
 In-Reply-To: <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
 To: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
@@ -99,288 +98,169 @@ Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
 X-Mailer: b4 0.16.0
 X-Last-TLS-Session-Version: TLSv1.3
 
-The MT2824 databook names SDR104 and HS200 as the modes that need
-tuning. The controller has a 128-tap sampling delay line, so scan every
-center phase code, find the longest run of phases that return a good
-tuning block, and select the middle phase. Do not tune at DDR50, where
-the scan fails at every phase and the fixed sampling clock works.
-
-During the scan, a CMD19 timeout at a bad phase can be followed by a
-data CRC interrupt after the request has completed. Drop data interrupts
-that arrive with no data request while scanning.
-
-HS400 needs the PHY DLL locked on the card clock. Configure and enable
-the DLL by hand after the clock is set, and reset the CMD and DATA
-lines.
+Add a minimal reset-only PHY provider for the Metanoia MT2824 USB2 PHY.
+It deasserts the PHY reset required by the DWC2 USB controller on init
+and asserts it again on exit.
 
 Originally-by: Jun Chang <jun.chang@metanoia-comm.com>
 Signed-off-by: Benoît Monin <benoit.monin@bootlin.com>
 ---
- drivers/mmc/host/sdhci-of-dwcmshc.c | 201 +++++++++++++++++++++++++++++++++++-
- 1 file changed, 200 insertions(+), 1 deletion(-)
+ drivers/phy/Kconfig             |  1 +
+ drivers/phy/Makefile            |  1 +
+ drivers/phy/metanoia/Kconfig    | 16 ++++++++
+ drivers/phy/metanoia/Makefile   |  3 ++
+ drivers/phy/metanoia/phy-usb2.c | 88 +++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 109 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index cb248fc572e2..324ae93295af 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -10,6 +10,7 @@
- #include <linux/acpi.h>
- #include <linux/arm-smccc.h>
- #include <linux/bitfield.h>
-+#include <linux/bitmap.h>
- #include <linux/clk.h>
- #include <linux/clk-provider.h>
- #include <linux/dma-mapping.h>
-@@ -86,8 +87,12 @@
- #define CV18XX_TUNE_STEP			1
- #define CV18XX_RETRY_TUNING_MAX			50
- 
--/* Metanoia MT2824: HOST_CTRL3 sampling edge and PHY pad settings */
-+/* Metanoia MT2824: HOST_CTRL3 sampling edge bits and software tuning */
- #define MT2824_HOST_CTRL3_NEGEDGE_DATAOUT	BIT(1)
-+#define MT2824_AT_STAT_CENTER_PH_MASK		GENMASK(6, 0)
-+#define MT2824_TUNING_PHASES			128	/* DWC_MSHC_DL_CW = 7 */
-+/* narrowest passing window accepted, ~8 % of the 128-tap delay line */
-+#define MT2824_TUNING_MIN_WINDOW		10
- /* 1.8 V eMMC probe attempts before falling back to the SD slot */
- #define MT2824_PROBE_ATTEMPTS			2
- /* PHY pad settings of the MT2824 pad ring */
-@@ -98,6 +103,10 @@
- #define MT2824_PHY_TXSLEW_P_STROBE		0x3
- #define MT2824_PHY_SMPLDL_CNFG			0x0c
- #define MT2824_PHY_ATDL_CNFG			0x0c
-+#define MT2824_PHY_DLL_CNFG1			0x20
-+#define MT2824_PHY_DLLDL_CNFG			0x60
-+#define MT2824_PHY_DLL_LOCKED			BIT(0)
-+#define MT2824_PHY_DLL_LOCK_ERR			BIT(1)
- 
- /* Rockchip specific Registers */
- #define DWCMSHC_EMMC_DLL_CTRL		0x800
-@@ -245,6 +254,7 @@
- #define DLL_ERROR_STS			BIT(1)
- 
- #define FLAG_IO_FIXED_1V8	BIT(0)
-+#define FLAG_SW_TUNING		BIT(1)	/* MT2824: tuning scan in progress */
- 
- #define BOUNDARY_OK(addr, len) \
- 	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
-@@ -2271,6 +2281,38 @@ static int mt2824_phy_init(struct sdhci_host *host, bool v1v8)
- 	return 0;
- }
- 
-+/* HS400 needs the PHY DLL locked on the card clock; lock it by hand */
-+static void mt2824_set_dll(struct sdhci_host *host)
-+{
-+	u16 clk;
-+	u8 status;
-+	int ret;
+diff --git a/drivers/phy/Kconfig b/drivers/phy/Kconfig
+index 105fbe408aa2..73ef61f1f53d 100644
+--- a/drivers/phy/Kconfig
++++ b/drivers/phy/Kconfig
+@@ -184,6 +184,7 @@ source "drivers/phy/intel/Kconfig"
+ source "drivers/phy/lantiq/Kconfig"
+ source "drivers/phy/marvell/Kconfig"
+ source "drivers/phy/mediatek/Kconfig"
++source "drivers/phy/metanoia/Kconfig"
+ source "drivers/phy/microchip/Kconfig"
+ source "drivers/phy/motorola/Kconfig"
+ source "drivers/phy/mscc/Kconfig"
+diff --git a/drivers/phy/Makefile b/drivers/phy/Makefile
+index c6dd02003bbe..57991b50978c 100644
+--- a/drivers/phy/Makefile
++++ b/drivers/phy/Makefile
+@@ -36,6 +36,7 @@ obj-$(CONFIG_GENERIC_PHY)		+= allwinner/	\
+ 					   lantiq/	\
+ 					   marvell/	\
+ 					   mediatek/	\
++					   metanoia/	\
+ 					   microchip/	\
+ 					   motorola/	\
+ 					   mscc/	\
+diff --git a/drivers/phy/metanoia/Kconfig b/drivers/phy/metanoia/Kconfig
+new file mode 100644
+index 000000000000..b8a49085bb95
+--- /dev/null
++++ b/drivers/phy/metanoia/Kconfig
+@@ -0,0 +1,16 @@
++# SPDX-License-Identifier: GPL-2.0-only
++#
++# Phy drivers for Metanoia platforms
++#
 +
-+	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	clk &= ~SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++config PHY_METANOIA_USB2
++	tristate "Metanoia USB2 PHY reset support"
++	depends on OF && (ARCH_METANOIA || COMPILE_TEST)
++	depends on RESET_CONTROLLER
++	select GENERIC_PHY
++	help
++	  Enable this to support the USB2 PHY reset block that is part
++	  of Metanoia SoCs.
 +
-+	sdhci_writeb(host, MT2824_PHY_DLL_CNFG1, PHY_DLL_CNFG1_R);
-+	sdhci_writeb(host, MT2824_PHY_DLLDL_CNFG, PHY_DLLDL_CNFG_R);
++	  This driver only toggles the reset line of the PHY needed by
++	  the DWC2 USB controller.
+diff --git a/drivers/phy/metanoia/Makefile b/drivers/phy/metanoia/Makefile
+new file mode 100644
+index 000000000000..ce1b5f8af15d
+--- /dev/null
++++ b/drivers/phy/metanoia/Makefile
+@@ -0,0 +1,3 @@
++# SPDX-License-Identifier: GPL-2.0
 +
-+	sdhci_enable_clk(host, clk);
-+	usleep_range(10, 20);
-+
-+	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
-+	ret = read_poll_timeout(sdhci_readb, status,
-+				status & MT2824_PHY_DLL_LOCKED, 10, 150000,
-+				false, host, PHY_DLL_STATUS_R);
-+	if (ret) {
-+		dev_err(mmc_dev(host->mmc), "PHY DLL did not lock: 0x%02x\n",
-+			status);
-+		return;
-+	}
-+
-+	if (status & MT2824_PHY_DLL_LOCK_ERR)
-+		dev_err(mmc_dev(host->mmc), "PHY DLL locked with error: 0x%02x\n",
-+			status);
-+}
-+
- static bool mt2824_wait_clk_stable(struct sdhci_host *host, u16 *clk,
- 				   const char *what)
- {
-@@ -2332,6 +2374,11 @@ static void mt2824_set_clock(struct sdhci_host *host, unsigned int clock)
- 	if (clock)
- 		mt2824_enable_clk(host, sdhci_calc_clk(host, clock,
- 						       &mmc->actual_clock));
-+
-+	if (clock && host->timing == MMC_TIMING_MMC_HS400) {
-+		mt2824_set_dll(host);
-+		dwcmshc_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+	}
- }
- 
- /* The controller must know that the card is an eMMC (EMMC_CTRL_R, 16 bit) */
-@@ -2460,6 +2507,156 @@ static void mt2824_hw_reset(struct sdhci_host *host)
- 	sdhci_enable_clk(host, clk);
- }
- 
++obj-$(CONFIG_PHY_METANOIA_USB2)	+= phy-usb2.o
+diff --git a/drivers/phy/metanoia/phy-usb2.c b/drivers/phy/metanoia/phy-usb2.c
+new file mode 100644
+index 000000000000..b06d423eada7
+--- /dev/null
++++ b/drivers/phy/metanoia/phy-usb2.c
+@@ -0,0 +1,88 @@
++// SPDX-License-Identifier: GPL-2.0-only
 +/*
-+ * Software tuning: try every center phase code of the tuning delay line,
-+ * find the longest run of phases that return a good tuning block and
-+ * select its middle. The sampling clock only follows the delay line while
-+ * SAMPLE_CLK_SEL (SDHCI_CTRL_TUNED_CLK) is set, so set it for the scan and
-+ * keep it; SW_TUNE_EN also stays set, so the selected phase code stays in
-+ * control of the delay line.
++ * Copyright (C) 2026 Metanoia Communications Inc.
++ *
++ * Author: Jun Chang <jun.chang@metanoia-comm.com>
 + */
-+static int mt2824_set_center_phase(struct sdhci_host *host, u32 at_stat_reg,
-+				   unsigned int phase)
++
++#include <linux/module.h>
++#include <linux/of.h>
++#include <linux/phy/phy.h>
++#include <linux/platform_device.h>
++#include <linux/reset.h>
++
++struct metanoia_usb2phy {
++	struct reset_control *reset;
++};
++
++static int metanoia_usb2phy_init(struct phy *phy)
 +{
-+	u32 at_stat;
++	struct metanoia_usb2phy *priv = phy_get_drvdata(phy);
 +	int ret;
-+	u16 clk;
 +
-+	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	clk &= ~SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+
-+	at_stat = sdhci_readl(host, at_stat_reg);
-+	at_stat &= ~MT2824_AT_STAT_CENTER_PH_MASK;
-+	at_stat |= FIELD_PREP(MT2824_AT_STAT_CENTER_PH_MASK, phase);
-+	sdhci_writel(host, at_stat, at_stat_reg);
-+	/*
-+	 * This configuration has no DL2 busy flag: read the phase code back,
-+	 * then wait for the worst case of 180 hclk cycles of the delay line
-+	 * (2 us covers an hclk of 90 MHz or more).
-+	 */
-+	ret = read_poll_timeout(sdhci_readl, at_stat,
-+				FIELD_GET(MT2824_AT_STAT_CENTER_PH_MASK, at_stat) == phase,
-+				0, 100, false, host, at_stat_reg);
++	ret = reset_control_deassert(priv->reset);
 +	if (ret)
-+		dev_err(mmc_dev(host->mmc), "tuning phase %u not taken\n", phase);
-+	udelay(2);
-+
-+	sdhci_enable_clk(host, clk);
++		dev_err(&phy->dev, "failed to reset phy: %d\n", ret);
 +
 +	return ret;
 +}
 +
-+static int mt2824_execute_tuning(struct sdhci_host *host, u32 opcode)
++static int metanoia_usb2phy_exit(struct phy *phy)
 +{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
-+	u32 at_ctrl_reg = dwc_priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL;
-+	u32 at_stat_reg = dwc_priv->vendor_specific_area1 + DWCMSHC_AT_STAT;
-+	DECLARE_BITMAP(good, MT2824_TUNING_PHASES);
-+	unsigned int start, end, phase, best_start = 0, best_len = 0;
-+	u32 at_ctrl;
-+	u16 ctrl2;
-+	int ret;
++	struct metanoia_usb2phy *priv = phy_get_drvdata(phy);
 +
-+	/*
-+	 * The controller databook names SDR104 (and HS200) as the modes that
-+	 * need tuning. At DDR50 the scan fails at every phase on this
-+	 * controller, while the fixed sampling clock works: do not tune.
-+	 */
-+	if (host->timing == MMC_TIMING_UHS_DDR50)
-+		return 0;
-+
-+	WRITE_ONCE(dwc_priv->flags, dwc_priv->flags | FLAG_SW_TUNING);
-+
-+	sdhci_reset_tuning(host);
-+	bitmap_zero(good, MT2824_TUNING_PHASES);
-+
-+	/*
-+	 * AT_CTRL_R must not be written while SAMPLE_CLK_SEL is set: enable
-+	 * software tuning first, then select the tuned sampling clock.
-+	 */
-+	at_ctrl = sdhci_readl(host, at_ctrl_reg);
-+	sdhci_writel(host, at_ctrl | AT_CTRL_SW_TUNE_EN, at_ctrl_reg);
-+	ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	sdhci_writew(host, ctrl2 | SDHCI_CTRL_TUNED_CLK, SDHCI_HOST_CONTROL2);
-+	/*
-+	 * That HOST_CONTROL2 write breaks the response of the next command:
-+	 * send one tuning command for nothing before the scan.
-+	 */
-+	mmc_send_tuning(host->mmc, opcode, NULL);
-+	host->ops->reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+
-+	for (phase = 0; phase < MT2824_TUNING_PHASES; phase++) {
-+		ret = mt2824_set_center_phase(host, at_stat_reg, phase);
-+		if (ret)
-+			goto fail;
-+		if (!mmc_send_tuning(host->mmc, opcode, NULL))
-+			set_bit(phase, good);
-+		host->ops->reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+	}
-+
-+	/* the sample delay line is linear, so the phase codes do not wrap */
-+	for_each_set_bitrange(start, end, good, MT2824_TUNING_PHASES) {
-+		if (end - start > best_len) {
-+			best_start = start;
-+			best_len = end - start;
-+		}
-+	}
-+	if (best_len < MT2824_TUNING_MIN_WINDOW) {
-+		dev_err(mmc_dev(host->mmc), "tuning failed, best window %u\n",
-+			best_len);
-+		ret = -EIO;
-+		goto fail;
-+	}
-+	phase = best_start + best_len / 2;
-+	/* a window at an end of the delay line may be wider than measured */
-+	if (!best_start || best_start + best_len == MT2824_TUNING_PHASES)
-+		dev_dbg(mmc_dev(host->mmc), "tuning window %u+%u ends at the delay line end\n",
-+			best_start, best_len);
-+
-+	ret = mt2824_set_center_phase(host, at_stat_reg, phase);
-+	if (ret)
-+		goto fail;
-+	dev_dbg(mmc_dev(host->mmc), "tuning phase %u (window %u+%u), AT_STAT %08x\n",
-+		phase, best_start, best_len, sdhci_readl(host, at_stat_reg));
-+	sdhci_end_tuning(host);
-+	WRITE_ONCE(dwc_priv->flags, dwc_priv->flags & ~FLAG_SW_TUNING);
-+
-+	return 0;
-+
-+fail:
-+	/* clear SAMPLE_CLK_SEL before AT_CTRL_R is written again */
-+	sdhci_reset_tuning(host);
-+	sdhci_writel(host, at_ctrl, at_ctrl_reg);
-+	host->ops->reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+	sdhci_end_tuning(host);
-+	WRITE_ONCE(dwc_priv->flags, dwc_priv->flags & ~FLAG_SW_TUNING);
-+	return ret;
++	return reset_control_assert(priv->reset);
 +}
 +
-+/*
-+ * A tuning command at a bad phase can time out while the card still sends
-+ * the tuning block. Its data interrupt then comes when no data transfer is
-+ * in progress (host->data is NULL); once the request reset cleared
-+ * pending_reset, sdhci counts it as an unexpected interrupt. Drop such
-+ * data interrupts while the tuning scan runs. A late interrupt that comes
-+ * after the next tuning command started fails that phase only.
-+ */
-+static u32 mt2824_irq(struct sdhci_host *host, u32 intmask)
++static const struct phy_ops metanoia_usb2phy_ops = {
++	.init = metanoia_usb2phy_init,
++	.exit = metanoia_usb2phy_exit,
++	.owner = THIS_MODULE,
++};
++
++static int metanoia_usb2phy_probe(struct platform_device *pdev)
 +{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
-+	u32 stray = intmask & SDHCI_INT_DATA_MASK;
++	struct phy_provider *phy_provider;
++	struct device *dev = &pdev->dev;
++	struct metanoia_usb2phy *priv;
++	struct phy *phy;
 +
-+	if (!(READ_ONCE(dwc_priv->flags) & FLAG_SW_TUNING) || host->data || !stray)
-+		return intmask;
++	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
++	if (!priv)
++		return -ENOMEM;
 +
-+	sdhci_writel(host, stray, SDHCI_INT_STATUS);
++	priv->reset = devm_reset_control_get_exclusive(dev, "usb2-phy");
++	if (IS_ERR(priv->reset))
++		return dev_err_probe(dev, PTR_ERR(priv->reset),
++				     "failed to get usb2-phy reset\n");
 +
-+	return intmask & ~stray;
++	phy = devm_phy_create(dev, NULL, &metanoia_usb2phy_ops);
++	if (IS_ERR(phy))
++		return dev_err_probe(dev, PTR_ERR(phy),
++				     "failed to create usb2 phy\n");
++
++	phy_set_drvdata(phy, priv);
++
++	phy_provider = devm_of_phy_provider_register(dev, of_phy_simple_xlate);
++
++	return PTR_ERR_OR_ZERO(phy_provider);
 +}
 +
- /*
-  * With no card type from the DT, look for an eMMC only, at 1.8 V: an eMMC
-  * answers CMD1, an SD card does not, so no 3.3 V signal reaches an eMMC.
-@@ -2672,6 +2869,8 @@ static const struct sdhci_ops sdhci_dwcmshc_mt2824_ops = {
- 	.reset			= mt2824_reset,
- 	.hw_reset		= mt2824_hw_reset,
- 	.adma_write_desc	= dwcmshc_adma_write_desc,
-+	.platform_execute_tuning = mt2824_execute_tuning,
-+	.irq			= mt2824_irq,
- };
- 
- static const struct dwcmshc_pltfm_data sdhci_dwcmshc_mt2824_pdata = {
++static const struct of_device_id metanoia_usb2phy_of_match[] = {
++	{ .compatible = "metanoia,mt2824-usb2-phy" },
++	{}
++};
++MODULE_DEVICE_TABLE(of, metanoia_usb2phy_of_match);
++
++static struct platform_driver metanoia_usb2phy_driver = {
++	.probe = metanoia_usb2phy_probe,
++	.driver = {
++		.name = "metanoia-usb2-phy",
++		.of_match_table = metanoia_usb2phy_of_match,
++	},
++};
++module_platform_driver(metanoia_usb2phy_driver);
++
++MODULE_DESCRIPTION("Metanoia USB2 PHY driver");
++MODULE_AUTHOR("Jun Chang <jun.chang@metanoia-comm.com>");
++MODULE_LICENSE("GPL");
 
 -- 
 2.56.0
