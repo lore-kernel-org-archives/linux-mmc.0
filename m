@@ -1,59 +1,60 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.246.85.4
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793957569;
-	b=lEqmWmovTttaBfK5O/ugIh3r9pNBmvvzXjgz6yb+23Yz3S/SySAIyMBpbTK+NLqynKBq
-	 /UxEYAfUTO6L9aSg2QLKg+tJ+sK+jppPbNJfRgvmqXCV9IQU5IHnExKidBalQy/6L0p4B
-	 guFT3tp6Ihs0ncNzgNT0hXoyv/kjm1WrRc/t+f05ei5Q5fr6LT0fIGJ30lhFbBI2LVp0R
-	 Drcl8yF5CWnZUSfphGiPEcJxWRzbROiYI77GPzSh2WIqTTxPfH57BTq7YTlNNb5piydnn
-	 n/TwlcN40b9aY7misdAW/vaujyuTk5/06nR917kRDyfdxE90gy04E13W54TdBz2R4rg==
+	t=1793957578;
+	b=J9pCUDxHy43aU7YsI7/3vkAZYbAON0kqahQg42SLEUoVk5B9HoaXpPJIWmjaj5jyE4hS
+	 SO3EouXRBY35Z23QkhNE1ZNbrpnyIN6ASnc3xjVkKnQCTXBl6KwsrIcB855yyjKkZYWOO
+	 HBb2cdIp87lRNYF5MhSFjYHPubWN2O/tbL76ZplSI3HSzzppdr0BBKn3crUS8NkHaaJpy
+	 HgXn0SPgjwdCkmhiKoBbeqRFeI8OLwfbWZEJSe5S0BLVRU4p1QGjWC20TRAFJJBw3jaHF
+	 vRk1+uuuatxVgrb2nisNn9e1Q/5go5nVkBlz6+zrtxgajoOIOSA2Od7yfcxh8Pgfc/g==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793957569;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793957578;
 	h=DMARC-Filter:Received:Received:Received:DKIM-Signature:From:Date:
 	 Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:
 	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
 	 X-Last-TLS-Session-Version;
-	bh=Ol6OqvAnjB6xNfgKd5K3xVXQwuxfqgePZ/x70MPMbZ0=;
-	b=Rg1CAU2T8nYiBCrUjyX5OtcM7uFMPh8iQPV12rbbP7Yq64jnpLFmyOOjynM/v0I2u+ih
-	 u8V1I5dV04tk79mlfOXOVqlfyCYPZjIitZcRutK8qkrQQ0to0BY87bKOCylp+se2FGabW
-	 BM7zmWx5YTcqN6ifiZw/c3oo1jiI92qR8Ht+BQeTfQHd0QCXEhGQI2C7Nj7oPWhMY6ff8
-	 P6RjLxXQ6KYbNaE9WKK5Qu5vbOkEVdfGJTYiMInNYYPsQDu1FBgu2iuZOoWXzHQnKoZTJ
-	 /Zzmw9UR/HA+CbzcaadoBjXXTp3tjxPwGXuBMV4lM0/5pqPSGRXSCmoxzdCpCY6fgtA==
+	bh=2eLb4/hEalOsNDyuK5k3PlmAjtiGDb2pfVtc2bnmxwo=;
+	b=WIrKX8k5Mi9h9nn0RihMOfRNGREjgaHEPx1fVZeZsK7WI3B/9PJU7eGCHenocVb/tmdH
+	 mV79Diclos+gANEA/sO/x/yvSajLaiuCfJIm0eMo3lgSEjCuq9nXVjs7LGZTSRqtCT26m
+	 wCv/uRbWmjhyP//WvmxTtXVn52UFj0DIa0+0RjDbdaNGSwNnd0Xk/siMRQ+7hy6H3L5J6
+	 BMXq0cU/FE/KhftG2uZc1umFyZiGtTRbvSoS/FjMupTp4JE5yxznObwDQ5N+yfE65/Mfo
+	 JlNEw72pUxVB4D36wWKMzJHA0M+0WCcpA4HVj/Io+d7IQtQEt32xTq/asbSIf4gQ33g==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=bootlin.com;
 	spf=pass smtp.mailfrom=bootlin.com;
-	dkim=pass header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=sAClafF5;
+	dkim=pass header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=Aii6yZfC;
 	arc=none smtp.remote-ip=185.246.85.4
 Received: from smtpout-03.galae.net (smtpout-03.galae.net [185.246.85.4])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44B2C606EE8F;
-	Fri,  6 Nov 2026 09:32:49 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 44B2C606EE8F
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41D34606EE80;
+	Fri,  6 Nov 2026 09:32:57 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 41D34606EE80
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=sAClafF5
+	dkim=pass (2048-bit key, unprotected) header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=Aii6yZfC
 Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
-	by smtpout-03.galae.net (Postfix) with ESMTPS id E04C44E413E9;
-	Fri,  6 Nov 2026 09:32:47 +0000 (UTC)
+	by smtpout-03.galae.net (Postfix) with ESMTPS id 00CAD4E413E9;
+	Fri,  6 Nov 2026 09:32:56 +0000 (UTC)
 Received: from mail.galae.net (mail.galae.net [212.83.136.155])
-	by smtpout-01.galae.net (Postfix) with ESMTPS id AD7745FFBC;
-	Fri,  6 Nov 2026 09:32:47 +0000 (UTC)
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 47C34103292D4;
-	Fri,  6 Nov 2026 10:32:35 +0100 (CET)
+	by smtpout-01.galae.net (Postfix) with ESMTPS id C88D65FFBC;
+	Fri,  6 Nov 2026 09:32:55 +0000 (UTC)
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id D245F103292DE;
+	Fri,  6 Nov 2026 10:32:43 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
-	t=1793957562; h=from:subject:date:message-id:to:cc:mime-version:content-type:
+	t=1793957571; h=from:subject:date:message-id:to:cc:mime-version:content-type:
 	 content-transfer-encoding:in-reply-to:references;
-	bh=Ol6OqvAnjB6xNfgKd5K3xVXQwuxfqgePZ/x70MPMbZ0=;
-	b=sAClafF5dOAezz7dC47i/OrkTOw5xuRmEWg/B2Tb0Xvd159zH95MYBixLzaDBC5N5mNhQT
-	jstSxmvOV2z04dn6vh4WiExtwmuhvBHzQ4X3FtduoPQrh1M00nwCBYh28Nw6mp1gYQDMBN
-	VyxHbCINp7inn+84os5RZPoj2oPnsGTwdKWn3bAgci6/H2GBKZr7UCRr9/k7CyudIHU6BS
-	wNiR2yp+fnOPHqXd7QQyQLcgr6s5uggxpexyKbwbTV3GV5NjIqigpjI4+IQlZ/rVpb0pbY
-	EaUPEDnchwYltFiX1832wqGLFlmUEg3U47Oa6N6ydbP3PuvZAvZsLFSZnNuhgA==
+	bh=2eLb4/hEalOsNDyuK5k3PlmAjtiGDb2pfVtc2bnmxwo=;
+	b=Aii6yZfCIFCI0GXPg8OhujaaRz8LvHYfq/WVQY8kq/0GFAavkecQEl59l9jBcTVDT/7y1T
+	bgRfKxIE91ytduKR40xbBUZ72QfMzZI0gv0z7A2iiwLqC8z0Y2bTTIARIRTdmtkf0J380M
+	XWFj37mrCCfsxxZ/u9O0qSwwlwubRG+10r35mMAaSM0gHJ4rkjiN8O8Bsic1jvQBQoDcgZ
+	C0o8c5xi4LsQS27x/tV7lQ+fqwnOhA8b816EUHw6+DGCIvrDES5BO7wdIoXrtaRlVx7bpr
+	buyhkvgx16/PDWR6uAP+2Rf2SwoIfPJXBaMdPGmZCOLvhRXc/AlSKb3RuKRoyA==
 From: =?utf-8?q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>
-Date: Fri, 06 Nov 2026 10:30:15 +0100
-Subject: [PATCH 18/25] spi: atcspi200: allow building for Metanoia SoCs
+Date: Fri, 06 Nov 2026 10:30:16 +0100
+Subject: [PATCH 19/25] watchdog: atcwdt200: allow building for Metanoia
+ SoCs
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -65,7 +66,7 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-Message-Id: <20261106-mt2824-v1-18-86087eaf5af4@bootlin.com>
+Message-Id: <20261106-mt2824-v1-19-86087eaf5af4@bootlin.com>
 References: <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
 In-Reply-To: <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
 To: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
@@ -98,28 +99,28 @@ Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
 X-Mailer: b4 0.16.0
 X-Last-TLS-Session-Version: TLSv1.3
 
-The Metanoia MT2824 integrates the Andes ATCSPI200 SPI controller. Allow
-the driver to be built for ARCH_METANOIA.
+The Metanoia MT2824 integrates the Andes ATCWDT200 watchdog. Allow the
+driver to be built for ARCH_METANOIA.
 
 Originally-by: Jun Chang <jun.chang@metanoia-comm.com>
 Signed-off-by: Benoît Monin <benoit.monin@bootlin.com>
 ---
- drivers/spi/Kconfig | 2 +-
+ drivers/watchdog/Kconfig | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/spi/Kconfig b/drivers/spi/Kconfig
-index 49088e5886d3..f8188de1b802 100644
---- a/drivers/spi/Kconfig
-+++ b/drivers/spi/Kconfig
-@@ -152,7 +152,7 @@ config SPI_ARMADA_3700
+diff --git a/drivers/watchdog/Kconfig b/drivers/watchdog/Kconfig
+index f7d0a0c2c0ef..2499a6612f85 100644
+--- a/drivers/watchdog/Kconfig
++++ b/drivers/watchdog/Kconfig
+@@ -2148,7 +2148,7 @@ config WATCHDOG_RTAS
  
- config SPI_ATCSPI200
- 	tristate "Andes ATCSPI200 SPI controller"
+ config ATCWDT200_WATCHDOG
+ 	tristate "Andes ATCWDT200 Watchdog support"
 -	depends on ARCH_ANDES || COMPILE_TEST
 +	depends on ARCH_ANDES || ARCH_METANOIA || COMPILE_TEST
  	help
- 	  SPI driver for Andes ATCSPI200 SPI controller.
- 	  ATCSPI200 controller supports DMA and PIO modes. When DMA
+ 	  Driver for the Andes ATCWDT200 watchdog timer. It provides access to
+ 	  programmable reset and interrupt counters with clock-source dependent
 
 -- 
 2.56.0
