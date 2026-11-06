@@ -1,59 +1,59 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.171.202.116
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.246.84.56
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793957600;
-	b=IXW6xuXaF2p9Zz7XLwBzX9QZhpxGc0jUj0N3ZRm8L9j773a+8PYsKIkqwWMEl+B+3Rwi
-	 As5zy+4hPA7jo1QfcsWUUlqIW7HsLjNsZvUtdBgEWvNGT+q2ZBIWA4T6JwOprZCA2NM7M
-	 xKc+ISL5oItHjrmaWgxqurTYcQO6sbq4EO18u0rgvqai19HEis6+tZLz3ysQ/1blSVMsZ
-	 6rCxmBIVfG7GvFLZ1UswnMh6xYTwJtgjgCXynnHdjj0X9yrZn9jd8WO4acjrVbPy4Tnmh
-	 42wLtwj2r6rAeJbE+Bnxyj6v1bhbwH+aq86/mhvtIlqKf6QSXfBJRrzTfNYJ/G6lquw==
+	t=1793957607;
+	b=Xmt6S6wu4AWGrKK09D6qs+e90RYHzXlMPZMsOzAAFRM8FMs2NhFlMlrF6OKabiNZ/mr3
+	 /08XVRBqM3CNcntj5DECTYzkrRoTNXIsyB5Hp+6Bp4/FrFH5wYhXO9D8u7OG0guRvEBB+
+	 GA5P45LoeK/EWrYbyAmco6wpZA2VmVP/jllyjLokfciigqK3Vuq4yKN1UCUjydkiYuVen
+	 x3OjrsjK4i05Dc1Cw643HgGDCG4fip8mDjA37fnztMr09D01nTX4J8073xxewPb5KsRFC
+	 xNBjfPgYJzWCkAgjDO73V7l8Sa8w4VL8Mhmyf51Plwdq9S8utKQtUl/ZjsVPuQ8PoZA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793957600;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793957607;
 	h=DMARC-Filter:Received:Received:Received:DKIM-Signature:From:Date:
 	 Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:
 	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
 	 X-Last-TLS-Session-Version;
-	bh=xNxhGNlUd/QAYjwS9+p2YRVic4RXKhAhrhTTLAcBT1A=;
-	b=Yriywgh6qWGc0kELpEEsxP48h1HNVLWjd/sSNCYiYUdVWNFCcQL7ACWSAnbBn47bMMEU
-	 O2tkFgw+lYM5nJvx50f3pdp+JKFtVLjfgIVaMIoNMi5CYhoUcUyq4MMWzEaK0nF3tEhNX
-	 o88MIodVke0r6L6bzwlkk3HfcmHECedvo0ob6GVXPxsR4qaUwdshc8jXQHu96LgrSZeVu
-	 n+RMSf6Ennuo8DPmstc0CNMuUnc1mBeLOb1Usp+E/xRcXGXLXvTrsxfhnaSSHAQY6QtGx
-	 +uGM11VUeGUdDv9bYYkXLqFoxqj+laZfugm2h9VzNp0TRvdfvvIkbXZxQm7XRledYAw==
+	bh=0RogQ1G8sFuPL4PUjnb7jbOVpQtH3Ea/HTCj2EHRcDU=;
+	b=4PDKfXtm6a+AIFS/UFi0msxhvDMjqBrUgjN5XVvAqEWk6gnZm2wVIIOUVub3UF+o7kU4
+	 nW61cCGj5VEnqwBYXwzdcvDnJEVQ4WMGdqX5+AQ+qrxT5PuHpQ1n+pfB4m6LcO9d+WcMD
+	 /cuCtEOtfufPTh4MtBtiLxJrdFI0XTmD9dmQktevqlKrghJS/Nb2dS9xcNi2UMxiJRqOg
+	 yttCINs9HrUEMOJO1MayDq3l7NmQmMq0okv9uhBgdaLIzXFsi8yu4yd82Zwu6rVNInB2S
+	 TK6px6EKqxxGsd7hFpvHcLdz1uetg8gCi/HJdhtokJos4ggZpBDM44fIDG6VpmY9cxw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=bootlin.com;
 	spf=pass smtp.mailfrom=bootlin.com;
-	dkim=pass header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=qzjngm6W;
-	arc=none smtp.remote-ip=185.171.202.116
-Received: from smtpout-04.galae.net (smtpout-04.galae.net [185.171.202.116])
+	dkim=pass header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=Uaf1vubf;
+	arc=none smtp.remote-ip=185.246.84.56
+Received: from smtpout-02.galae.net (smtpout-02.galae.net [185.246.84.56])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA634606D83D;
-	Fri,  6 Nov 2026 09:33:19 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org BA634606D83D
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6721D606D801;
+	Fri,  6 Nov 2026 09:33:27 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6721D606D801
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=qzjngm6W
+	dkim=pass (2048-bit key, unprotected) header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=Uaf1vubf
 Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
-	by smtpout-04.galae.net (Postfix) with ESMTPS id 253DEC69168;
-	Fri,  6 Nov 2026 09:33:18 +0000 (UTC)
+	by smtpout-02.galae.net (Postfix) with ESMTPS id 25F7B1A0C32;
+	Fri,  6 Nov 2026 09:33:26 +0000 (UTC)
 Received: from mail.galae.net (mail.galae.net [212.83.136.155])
-	by smtpout-01.galae.net (Postfix) with ESMTPS id 843B35FFBC;
-	Fri,  6 Nov 2026 09:33:18 +0000 (UTC)
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id A2CAD10329258;
-	Fri,  6 Nov 2026 10:33:08 +0100 (CET)
+	by smtpout-01.galae.net (Postfix) with ESMTPS id E4EFA5FFBC;
+	Fri,  6 Nov 2026 09:33:25 +0000 (UTC)
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id B3588103292D0;
+	Fri,  6 Nov 2026 10:33:15 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
-	t=1793957595; h=from:subject:date:message-id:to:cc:mime-version:content-type:
+	t=1793957601; h=from:subject:date:message-id:to:cc:mime-version:content-type:
 	 content-transfer-encoding:in-reply-to:references;
-	bh=xNxhGNlUd/QAYjwS9+p2YRVic4RXKhAhrhTTLAcBT1A=;
-	b=qzjngm6WnCz2RSJjNd87zanbSOH2E4/m7iNJaRu8O8NApdI6HB0JwSC9zihCXzReroWlBy
-	YbEr4t/R5C8POfP7mahglsIZLkb/jgbiht0kTGtezBFmH62HZx8bBVObq9zEUSYr2uCKn7
-	OPsvspCzw7u0i+M5RJygf1N7C+c/GORrrW5f0oREYTS7xvfuFqeluPN0vC9w7IBImagl1I
-	tvWtXPB6yRp/oxW/Z3wF3A41LIHDsu9DvFr7FvQTpdWc3eYenyQiltaVyrB9ADHBI8jAxK
-	miLKg/TcH/bOQIYypD7IvoCCmyertaDVNtwFs3eR+bX+MJM+qpe1zItVfCFxrg==
+	bh=0RogQ1G8sFuPL4PUjnb7jbOVpQtH3Ea/HTCj2EHRcDU=;
+	b=Uaf1vubft392vPUEjlPdiMsZOXqUx6YcjaNdJ6p3x71SBq3oR9yiRAxW4XuNGO2+I3cy5/
+	xCdXEiUPFsvXH+DW4t1Q0nVTKI9mTypDWwM2zzwnaZgSAl0YYQ4VEifZekZUbUwnYQ4I/t
+	t/R9ycpAa+PqV1atzdc2SUaTRMl0AptT7KA/9SVgDXHIggncDS00AgGu3ewNW+2vXz8OKl
+	7IBsjqnUA+9nOiMGrKu4PHINaP4cUqqWD58XXdw3HIYHRPXLziVVsXEB+GjZ++K9z9cowm
+	2PCEOJ1VF7VPFaM//4fa+tRwJu4VfJh5vDEne/AYyFqPXTzqIUCURQPX36MINA==
 From: =?utf-8?q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>
-Date: Fri, 06 Nov 2026 10:30:19 +0100
-Subject: [PATCH 22/25] phy: metanoia: add USB2 PHY driver
+Date: Fri, 06 Nov 2026 10:30:20 +0100
+Subject: [PATCH 23/25] usb: dwc2: add support for Metanoia MT2824
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -65,7 +65,7 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-Message-Id: <20261106-mt2824-v1-22-86087eaf5af4@bootlin.com>
+Message-Id: <20261106-mt2824-v1-23-86087eaf5af4@bootlin.com>
 References: <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
 In-Reply-To: <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
 To: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
@@ -98,169 +98,46 @@ Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
 X-Mailer: b4 0.16.0
 X-Last-TLS-Session-Version: TLSv1.3
 
-Add a minimal reset-only PHY provider for the Metanoia MT2824 USB2 PHY.
-It deasserts the PHY reset required by the DWC2 USB controller on init
-and asserts it again on exit.
+Add core parameters for the Metanoia MT2824 DWC2 controller: high-speed
+UTMI PHY, no host DMA, and no OTG HNP/SRP support.
 
 Originally-by: Jun Chang <jun.chang@metanoia-comm.com>
 Signed-off-by: Benoît Monin <benoit.monin@bootlin.com>
 ---
- drivers/phy/Kconfig             |  1 +
- drivers/phy/Makefile            |  1 +
- drivers/phy/metanoia/Kconfig    | 16 ++++++++
- drivers/phy/metanoia/Makefile   |  3 ++
- drivers/phy/metanoia/phy-usb2.c | 88 +++++++++++++++++++++++++++++++++++++++++
- 5 files changed, 109 insertions(+)
+ drivers/usb/dwc2/params.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/drivers/phy/Kconfig b/drivers/phy/Kconfig
-index 105fbe408aa2..73ef61f1f53d 100644
---- a/drivers/phy/Kconfig
-+++ b/drivers/phy/Kconfig
-@@ -184,6 +184,7 @@ source "drivers/phy/intel/Kconfig"
- source "drivers/phy/lantiq/Kconfig"
- source "drivers/phy/marvell/Kconfig"
- source "drivers/phy/mediatek/Kconfig"
-+source "drivers/phy/metanoia/Kconfig"
- source "drivers/phy/microchip/Kconfig"
- source "drivers/phy/motorola/Kconfig"
- source "drivers/phy/mscc/Kconfig"
-diff --git a/drivers/phy/Makefile b/drivers/phy/Makefile
-index c6dd02003bbe..57991b50978c 100644
---- a/drivers/phy/Makefile
-+++ b/drivers/phy/Makefile
-@@ -36,6 +36,7 @@ obj-$(CONFIG_GENERIC_PHY)		+= allwinner/	\
- 					   lantiq/	\
- 					   marvell/	\
- 					   mediatek/	\
-+					   metanoia/	\
- 					   microchip/	\
- 					   motorola/	\
- 					   mscc/	\
-diff --git a/drivers/phy/metanoia/Kconfig b/drivers/phy/metanoia/Kconfig
-new file mode 100644
-index 000000000000..b8a49085bb95
---- /dev/null
-+++ b/drivers/phy/metanoia/Kconfig
-@@ -0,0 +1,16 @@
-+# SPDX-License-Identifier: GPL-2.0-only
-+#
-+# Phy drivers for Metanoia platforms
-+#
-+
-+config PHY_METANOIA_USB2
-+	tristate "Metanoia USB2 PHY reset support"
-+	depends on OF && (ARCH_METANOIA || COMPILE_TEST)
-+	depends on RESET_CONTROLLER
-+	select GENERIC_PHY
-+	help
-+	  Enable this to support the USB2 PHY reset block that is part
-+	  of Metanoia SoCs.
-+
-+	  This driver only toggles the reset line of the PHY needed by
-+	  the DWC2 USB controller.
-diff --git a/drivers/phy/metanoia/Makefile b/drivers/phy/metanoia/Makefile
-new file mode 100644
-index 000000000000..ce1b5f8af15d
---- /dev/null
-+++ b/drivers/phy/metanoia/Makefile
-@@ -0,0 +1,3 @@
-+# SPDX-License-Identifier: GPL-2.0
-+
-+obj-$(CONFIG_PHY_METANOIA_USB2)	+= phy-usb2.o
-diff --git a/drivers/phy/metanoia/phy-usb2.c b/drivers/phy/metanoia/phy-usb2.c
-new file mode 100644
-index 000000000000..b06d423eada7
---- /dev/null
-+++ b/drivers/phy/metanoia/phy-usb2.c
-@@ -0,0 +1,88 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * Copyright (C) 2026 Metanoia Communications Inc.
-+ *
-+ * Author: Jun Chang <jun.chang@metanoia-comm.com>
-+ */
-+
-+#include <linux/module.h>
-+#include <linux/of.h>
-+#include <linux/phy/phy.h>
-+#include <linux/platform_device.h>
-+#include <linux/reset.h>
-+
-+struct metanoia_usb2phy {
-+	struct reset_control *reset;
-+};
-+
-+static int metanoia_usb2phy_init(struct phy *phy)
+diff --git a/drivers/usb/dwc2/params.c b/drivers/usb/dwc2/params.c
+index 091bfcfef753..d6a6a581d021 100644
+--- a/drivers/usb/dwc2/params.c
++++ b/drivers/usb/dwc2/params.c
+@@ -303,6 +303,17 @@ static void dwc2_set_stm32mp15_hsotg_params(struct dwc2_hsotg *hsotg)
+ 	p->hird_threshold_en = false;
+ }
+ 
++static void dwc2_set_metanoia_mt2824_params(struct dwc2_hsotg *hsotg)
 +{
-+	struct metanoia_usb2phy *priv = phy_get_drvdata(phy);
-+	int ret;
++	struct dwc2_core_params *p = &hsotg->params;
 +
-+	ret = reset_control_deassert(priv->reset);
-+	if (ret)
-+		dev_err(&phy->dev, "failed to reset phy: %d\n", ret);
-+
-+	return ret;
++	p->otg_caps.hnp_support = false;
++	p->otg_caps.srp_support = false;
++	p->speed = DWC2_SPEED_PARAM_HIGH;
++	p->host_dma = false;
++	p->phy_type = DWC2_PHY_TYPE_PARAM_UTMI;
 +}
 +
-+static int metanoia_usb2phy_exit(struct phy *phy)
-+{
-+	struct metanoia_usb2phy *priv = phy_get_drvdata(phy);
-+
-+	return reset_control_assert(priv->reset);
-+}
-+
-+static const struct phy_ops metanoia_usb2phy_ops = {
-+	.init = metanoia_usb2phy_init,
-+	.exit = metanoia_usb2phy_exit,
-+	.owner = THIS_MODULE,
-+};
-+
-+static int metanoia_usb2phy_probe(struct platform_device *pdev)
-+{
-+	struct phy_provider *phy_provider;
-+	struct device *dev = &pdev->dev;
-+	struct metanoia_usb2phy *priv;
-+	struct phy *phy;
-+
-+	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
-+	if (!priv)
-+		return -ENOMEM;
-+
-+	priv->reset = devm_reset_control_get_exclusive(dev, "usb2-phy");
-+	if (IS_ERR(priv->reset))
-+		return dev_err_probe(dev, PTR_ERR(priv->reset),
-+				     "failed to get usb2-phy reset\n");
-+
-+	phy = devm_phy_create(dev, NULL, &metanoia_usb2phy_ops);
-+	if (IS_ERR(phy))
-+		return dev_err_probe(dev, PTR_ERR(phy),
-+				     "failed to create usb2 phy\n");
-+
-+	phy_set_drvdata(phy, priv);
-+
-+	phy_provider = devm_of_phy_provider_register(dev, of_phy_simple_xlate);
-+
-+	return PTR_ERR_OR_ZERO(phy_provider);
-+}
-+
-+static const struct of_device_id metanoia_usb2phy_of_match[] = {
-+	{ .compatible = "metanoia,mt2824-usb2-phy" },
-+	{}
-+};
-+MODULE_DEVICE_TABLE(of, metanoia_usb2phy_of_match);
-+
-+static struct platform_driver metanoia_usb2phy_driver = {
-+	.probe = metanoia_usb2phy_probe,
-+	.driver = {
-+		.name = "metanoia-usb2-phy",
-+		.of_match_table = metanoia_usb2phy_of_match,
-+	},
-+};
-+module_platform_driver(metanoia_usb2phy_driver);
-+
-+MODULE_DESCRIPTION("Metanoia USB2 PHY driver");
-+MODULE_AUTHOR("Jun Chang <jun.chang@metanoia-comm.com>");
-+MODULE_LICENSE("GPL");
+ const struct of_device_id dwc2_of_match_table[] = {
+ 	{ .compatible = "brcm,bcm2835-usb", .data = dwc2_set_bcm_params },
+ 	{ .compatible = "hisilicon,hi6220-usb", .data = dwc2_set_his_params },
+@@ -347,6 +358,8 @@ const struct of_device_id dwc2_of_match_table[] = {
+ 	  .data = dwc2_set_stm32mp15_hsotg_params },
+ 	{ .compatible = "intel,socfpga-agilex-hsotg",
+ 	  .data = dwc2_set_socfpga_agilex_params },
++	{ .compatible = "metanoia,mt2824-usb",
++	  .data = dwc2_set_metanoia_mt2824_params },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, dwc2_of_match_table);
 
 -- 
 2.56.0
