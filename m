@@ -1,83 +1,79 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=192.198.163.9
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=198.175.65.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794258519;
-	b=ISBL30VZ4sjwBVbISxtWQ4/G73y3f+ClKccIMLNG82sDa3TSZk3eiawFSMywzhY7oxj2
-	 NPg5qk4+5j8H81Q0AwFQtdEdvhwGHH5dCXB3T4LX9gFrSty+BQCFGXDz9R8eTwQ71x+b0
-	 VA2bIb7B38/RdMEKoAThJImH4OKdYVk9WMBQ6pTFsd4/k8M27QqMLkYxGcLYGiWDP51l1
-	 Ytit8dYLbRje9CjI4Q6T29eGlhiwQmCuzWGam0MvYp/cXOXVlCzOXnZDR0bJP1MtJfAQD
-	 KO0H+3QnF2sI+eSlAyxcbsZRsMjLKSfT9s0LLiT4BV975Ntg4Wn8yWRmnYew2hPNzOg==
+	t=1794258535;
+	b=5ck1IZWzXH0fwrWx8/+e/WXZAEMGQsR8xvaUEPdjfpRC+gi46nMMJsICeL+C/znTA2k+
+	 EBb6cNooZP0Ii83GSFv6L4bKXKNjPcImGhKzNTGt3YCrn0OeWxIaugrBq1MyrKeJqzlrw
+	 4Ytw2Q65+LOabxAgl5m/uJZXnW05pYOCA0sdR+TlBspvoOtJyWjWje9PmvE484L3k1p+2
+	 iTcrbjOfmcADpBZtFh8izcfF/6RjDbWm1+V1+OH7dw4x/tmJHQsDJx6PT9CQ4eALoHMQY
+	 qJAJKV9Y/Swdh0hXIaP7iBrIb2hpHgoG9rEniTzeQ6k5EhfHHvkfsLOXntxt/ly7JZQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794258519;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794258535;
 	h=DMARC-Filter:DKIM-Signature:X-CSE-ConnectionGUID:X-CSE-MsgGUID:
 	 X-IronPort-AV:X-IronPort-AV:Received:X-CSE-ConnectionGUID:
 	 X-CSE-MsgGUID:X-ExtLoop1:X-IronPort-AV:Received:From:To:Cc:Subject:
 	 Date:Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=Pq+rUe2h6lwne59EbimzJsOTsSFWdwJecoD7SnDlf28=;
-	b=ekG5WRtqrZfmRs9Gc1xfiIlfJBJLzGoKFcM2N3vbVm5vy+FzVBHl949PISn2h41HX00F
-	 weaTEmYkvCE+IDkjuSr03l8Xc6JaDUUdeI5/DH+3HYb9pxL3ItcPlfguQelyhFGOMwIBM
-	 g6NJ2msKUCqll72jJgkQanrmGs/xpbpFJPQnRpDS10BHmztuf4ittVws3eofhoX5VsDDV
-	 kmpumV2olgyVKOyA9sNTCj7FcGq3gwFY+4woovOBMiYh12UcrzIQnK+iHJX/sCgoFoF1H
-	 q+UFOiqpJNUaoW2N8IbIqxPZXJET3ZVAjEg6ngNM1iS+F2JLBbYJCZL9Xq3yfhhVJhQ==
+	bh=nJXpT9iXdx94yXelr2/lcrtGyQw9Dx0QS5S60pLVPxc=;
+	b=XgSD9nySPjbVn0/HBKSZvcNGA3oKsbjlg/bGBY3QP3GrUalqOeWWOWyBDSqDgdonrMSr
+	 MTL4O+1jSFHA+AO+93Up4Tanzj1BoOVJ4b77KLEVteaxasMB4CfGOdQ3LXH+Ed1OWNnxg
+	 X7sWP9xBngFqKQE+nWzdRTJhsC8bAIPsNgG9R6Fq46C8AQwWPGYZcX6/csKR6qIOvVTTw
+	 Z2EmgLsBEf3UVz1LN6cxQOiee5VywaEsnIPFcTCVYgOwGE/e+ANnyJm6ZH5D0mMTSeUE7
+	 BUC0xJD86TORJcCXT2t0MzsNphBXEf6rXwisgsKHZfZkmcbvrlt0GV+GKqK0zMDmhpQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=linux.intel.com;
 	spf=pass smtp.mailfrom=linux.intel.com;
-	dkim=pass header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=Kk0vqNR9;
-	arc=none smtp.remote-ip=192.198.163.9
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
+	dkim=pass header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=jclOP7MP;
+	arc=none smtp.remote-ip=198.175.65.18
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
 	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA37C606A334;
-	Mon,  9 Nov 2026 21:08:38 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org DA37C606A334
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D2D760A261F;
+	Mon,  9 Nov 2026 21:08:55 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4D2D760A261F
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=Kk0vqNR9
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=jclOP7MP
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1794258519; x=1825794519;
+  t=1794258535; x=1825794535;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=BuusNMbZxO+ErFUdpf9Ul1RNEs8Z0V6p6exb7dpC0MQ=;
-  b=Kk0vqNR9GGeSqZFtaTxSSg1FcWAPsjSl8epug+dR+ALYI8v+lA0PAtso
-   qdG67cnKxfHloL8W4gm8Svq7GlD9uBatiPwmqkUkNKMuwEC613O5C5Qb7
-   NegrAu4v2HlILP0cJU8EFgjzONX2xr7KoNlFvlKt5PAP3qypqWuquUQyc
-   v1EgmlzmGrZyglAv4gDIspXAjk7Nu2ixsCc5OhSqbTBTgouDM6hgk6hqf
-   gz/C4IOCvd7n6vT7C0lCap1oPxP8aimYHc8eIsv5aAKsjArEZQweGPJbj
-   sEbzGPDRxvSgBJTtixwSAIdABA4oRxrKJjQz7Ra0rogj+j8otveYbPopp
+  bh=GJSEzZmICoPE/wW6tSgVwwNOD9tll7j5fgf72H9u2Bo=;
+  b=jclOP7MP01IquL4V2uCkKuy+tYKDWJKAGqsY853nAxTzGIvS3VBiu/XS
+   vhgJVbxKGh1oBO6QaLZkO1Y6MSfM63QW7D4Rlpxz6PkPfVZW/5I1q6hSd
+   Vi5lXvR4kG7hlhsE48+FBtqK+1iob6ZqLvwylffyH1rT0k5OuS+4Pxlh0
+   fo70now/oYbfBvoXn9q0gNFxkC47l0zFY6H+CAVDfA90OWNvRbNkQvGln
+   0zrzl0q7sEHTWpYveGi53TSd72YBB6P+DjOMEMO8rTVAwUWDDxHkx249i
+   mzajH94EwgR6Zti7TO9pXEG5VBuIJImnxybBecCcgp0xynaYTeuaqqNWS
    A==;
-X-CSE-ConnectionGUID: +ZW4pc4eSL+Er5hON+ZB+A==
-X-CSE-MsgGUID: /H6Fz6epSWeP2iWlJ+yKQw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11961"; a="2874579"
+X-CSE-ConnectionGUID: hwba+UV/TIKtc3f+2FilFQ==
+X-CSE-MsgGUID: tyeAUBxfTHaQ6BhnqJJD+Q==
+X-IronPort-AV: E=McAfee;i="6800,10657,11961"; a="3004820"
 X-IronPort-AV: E=Sophos;i="6.27,204,1787036400"; 
-   d="scan'208";a="2874579"
-Received: from orviesa004.jf.intel.com ([10.64.159.144])
-  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2026 13:08:38 -0800
-X-CSE-ConnectionGUID: dLo04yZBReOn+4Azaw0BTg==
-X-CSE-MsgGUID: /9SIhAK9SgGKVVAJpyu1yQ==
+   d="scan'208";a="3004820"
+Received: from fmviesa011.fm.intel.com ([10.60.135.151])
+  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2026 13:08:55 -0800
+X-CSE-ConnectionGUID: YXmaD0cCRv221kbduNrunQ==
+X-CSE-MsgGUID: YhzI90G9QVeJ7E8zK6HsLg==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.27,204,1787036400"; 
-   d="scan'208";a="7838187"
+   d="scan'208";a="9747008"
 Received: from ijarvine-mobl1.ger.corp.intel.com (HELO localhost) ([10.245.244.139])
-  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2026 13:08:34 -0800
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2026 13:08:51 -0800
 From: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
 To: linux-pci@vger.kernel.org,
 	Bjorn Helgaas <bhelgaas@google.com>,
 	"Maciej W. Rozycki" <macro@orcam.me.uk>,
 	linux-kernel@vger.kernel.org
 Cc: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
-	Dominik Brodowski <linux@dominikbrodowski.net>,
+	Maxim Levitsky <maximlevitsky@gmail.com>,
 	Ulf Hansson <ulfh@kernel.org>,
 	Adrian Hunter <adrian.hunter@intel.com>,
-	Takashi Sakamoto <o-takashi@sakamocchi.jp>,
-	Alex Dubov <oakad@yahoo.com>,
-	Maxim Levitsky <maximlevitsky@gmail.com>,
-	linux-mmc@vger.kernel.org,
-	linux1394-devel@lists.sourceforge.net
-Subject: [RFC PATCH 08/11] PCI: Move CardBus device setup to setup-cardbus.c
-Date: Mon,  9 Nov 2026 23:07:08 +0200
-Message-ID: <20261109210714.3862-9-ilpo.jarvinen@linux.intel.com>
+	linux-mmc@vger.kernel.org
+Subject: [RFC PATCH 10/11] PCI: Move Ricoh RL5C476 MMC quirk to setup-cardbus.c
+Date: Mon,  9 Nov 2026 23:07:10 +0200
+Message-ID: <20261109210714.3862-11-ilpo.jarvinen@linux.intel.com>
 X-Mailer: git-send-email 2.47.3
 In-Reply-To: <20261109210714.3862-1-ilpo.jarvinen@linux.intel.com>
 References: <20261109210714.3862-1-ilpo.jarvinen@linux.intel.com>
@@ -93,137 +89,127 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-CardBus support can be disabled with CONFIG_CARDBUS, but
-pci_setup_device() still sets up CardBus bridges regardless of it. This
-inconsistency leads to a few corner cases in the resource sizing and
-assignment algorithm where CardBus bridges are treated like normal PCI
-devices.
+ricoh_mmc_fixup_rl5c476() disables the proprietary MMC controller of the
+Ricoh RL5C476 through Function 0 of the chip, which is a CardBus bridge.
+When CONFIG_CARDBUS is not set, CardBus bridges are ignored and, as
+Function 0 is then missing, pci_scan_slot() does not enumerate the other
+Functions of the chip either. The quirk has nothing to do in that case.
 
-Move the CardBus-specific part of pci_setup_device() into
-pci_setup_cardbus_device() in setup-cardbus.c and ignore CardBus bridges
-when CARDBUS is not set.
+Move the quirk to setup-cardbus.c so it is only built with CARDBUS.
+CARDBUS defaults to y when CONFIG_PCCARD is enabled, so existing configs
+for systems with these chips should mostly keep the quirk.
 
-If a CardBus bridge that is Function 0 of a Multi-Function Device is
-ignored, pci_scan_slot() does not enumerate the other Functions either.
-Without CARDBUS, this makes the other Functions of CardBus combo chips
-unusable, e.g., the SD controller of the Ricoh RL5C476 (sdhci-pci), and
-the FireWire (firewire-ohci), Flash Media (tifm_7xx1), and SD
-(sdhci-pci) controllers of the TI PCIxx21. Making those drivers depend
-on CARDBUS would force CardBus also on users of chips without CardBus,
-e.g., the SD controller of the Ricoh R5C832 family, where Function 0 is
-a FireWire controller.
-
-CARDBUS defaults to y if CONFIG_PCCARD is enabled and the yenta_socket
-driver (CONFIG_YENTA) selects it, so CARDBUS=n on hardware with a
-CardBus slot is most likely an intentional choice. It seems reasonable
-to require users with such an exceptional config to enable CARDBUS to
-keep using the drivers above with this legacy hardware.
+CONFIG_MMC_RICOH_MMC is an option of the SDHCI PCI card reader driver
+(CONFIG_MMC_SDHCI_PCI), which drives the SD controller of both the
+RL5C476 and the R5C832 family. On the R5C832 family, the MMC controller
+is disabled through the FireWire Function, which does not need CardBus.
+Thus, do not make MMC_RICOH_MMC depend on CARDBUS.
 
 Signed-off-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
 ---
 
-Cc: "Maciej W. Rozycki" <macro@orcam.me.uk>
-Cc: Dominik Brodowski <linux@dominikbrodowski.net>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>
 Cc: Ulf Hansson <ulfh@kernel.org>
 Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Takashi Sakamoto <o-takashi@sakamocchi.jp>
-Cc: Alex Dubov <oakad@yahoo.com>
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>
 Cc: linux-mmc@vger.kernel.org
-Cc: linux1394-devel@lists.sourceforge.net
 
- drivers/pci/pci.h           |  6 ++++++
- drivers/pci/probe.c         | 13 +++++++------
- drivers/pci/setup-cardbus.c | 13 +++++++++++++
- 3 files changed, 26 insertions(+), 6 deletions(-)
+ drivers/pci/quirks.c        | 32 -----------------------------
+ drivers/pci/setup-cardbus.c | 41 +++++++++++++++++++++++++++++++++++++
+ 2 files changed, 41 insertions(+), 32 deletions(-)
 
-diff --git a/drivers/pci/pci.h b/drivers/pci/pci.h
-index 798b31c31ae4..057c8a2c7ee7 100644
---- a/drivers/pci/pci.h
-+++ b/drivers/pci/pci.h
-@@ -425,6 +425,7 @@ static inline bool pci_is_cardbus_bridge(const struct pci_dev *dev)
- }
- #ifdef CONFIG_CARDBUS
- unsigned long pci_cardbus_resource_alignment(const struct resource *res);
-+int pci_setup_cardbus_device(struct pci_dev *dev);
- int pci_bus_size_cardbus_bridge(struct pci_bus *bus,
- 				struct list_head *realloc_head);
- int pci_cardbus_scan_bridge_extend(struct pci_bus *bus, struct pci_dev *dev,
-@@ -437,6 +438,10 @@ static inline unsigned long pci_cardbus_resource_alignment(const struct resource
- {
- 	return 0;
- }
-+static inline int pci_setup_cardbus_device(struct pci_dev *dev)
-+{
-+	return -EOPNOTSUPP;
-+}
- static inline int pci_bus_size_cardbus_bridge(struct pci_bus *bus,
- 					      struct list_head *realloc_head)
- {
-@@ -528,6 +533,7 @@ bool pci_bus_generic_read_dev_vendor_id(struct pci_bus *bus, int devfn, u32 *pl,
- 					int rrs_timeout);
- 
- int pci_setup_device(struct pci_dev *dev);
-+void pci_read_irq(struct pci_dev *dev);
- void __pci_size_stdbars(struct pci_dev *dev, int count,
- 			unsigned int pos, u32 *sizes);
- int __pci_read_base(struct pci_dev *dev, enum pci_bar_type type,
-diff --git a/drivers/pci/probe.c b/drivers/pci/probe.c
-index a20ceaf7307a..f7afbaac723d 100644
---- a/drivers/pci/probe.c
-+++ b/drivers/pci/probe.c
-@@ -1599,7 +1599,7 @@ EXPORT_SYMBOL(pci_scan_bridge);
-  * Read interrupt line and base address registers.
-  * The architecture-dependent code can tweak these, of course.
+diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
+index 78f6df5d4d19..85b4c39617a6 100644
+--- a/drivers/pci/quirks.c
++++ b/drivers/pci/quirks.c
+@@ -3320,38 +3320,6 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_HINT, 0x0020, quirk_hotplug_bridge);
+  * #1, and this will confuse the PCI core.
   */
--static void pci_read_irq(struct pci_dev *dev)
-+void pci_read_irq(struct pci_dev *dev)
+ #ifdef CONFIG_MMC_RICOH_MMC
+-static void ricoh_mmc_fixup_rl5c476(struct pci_dev *dev)
+-{
+-	u8 write_enable;
+-	u8 write_target;
+-	u8 disable;
+-
+-	/*
+-	 * Disable via CardBus interface
+-	 *
+-	 * This must be done via function #0
+-	 */
+-	if (PCI_FUNC(dev->devfn))
+-		return;
+-
+-	pci_read_config_byte(dev, 0xB7, &disable);
+-	if (disable & 0x02)
+-		return;
+-
+-	pci_read_config_byte(dev, 0x8E, &write_enable);
+-	pci_write_config_byte(dev, 0x8E, 0xAA);
+-	pci_read_config_byte(dev, 0x8D, &write_target);
+-	pci_write_config_byte(dev, 0x8D, 0xB7);
+-	pci_write_config_byte(dev, 0xB7, disable | 0x02);
+-	pci_write_config_byte(dev, 0x8E, write_enable);
+-	pci_write_config_byte(dev, 0x8D, write_target);
+-
+-	pci_notice(dev, "proprietary Ricoh MMC controller disabled (via CardBus function)\n");
+-	pci_notice(dev, "MMC cards are now supported by standard SDHCI controller\n");
+-}
+-DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476, ricoh_mmc_fixup_rl5c476);
+-DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476, ricoh_mmc_fixup_rl5c476);
+-
+ static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
  {
- 	unsigned char irq;
- 
-@@ -2180,12 +2180,13 @@ int pci_setup_device(struct pci_dev *dev)
- 		break;
- 
- 	case PCI_HEADER_TYPE_CARDBUS:		    /* CardBus bridge header */
--		if (class != PCI_CLASS_BRIDGE_CARDBUS)
-+		err = pci_setup_cardbus_device(dev);
-+		if (err == -EOPNOTSUPP) {
-+			pci_err(dev, "CONFIG_CARDBUS not set, ignoring CardBus bridge\n");
-+			goto free_name;
-+		}
-+		if (err)
- 			goto bad;
--		pci_read_irq(dev);
--		pci_read_bases(dev, 1, 0);
--		pci_read_config_word(dev, PCI_CB_SUBSYSTEM_VENDOR_ID, &dev->subsystem_vendor);
--		pci_read_config_word(dev, PCI_CB_SUBSYSTEM_ID, &dev->subsystem_device);
- 		break;
- 
- 	default:				    /* unknown header */
+ 	u8 write_enable;
 diff --git a/drivers/pci/setup-cardbus.c b/drivers/pci/setup-cardbus.c
-index dcb8e2b3f73b..0de82d7fde68 100644
+index ef35393aca1b..33aca7b28354 100644
 --- a/drivers/pci/setup-cardbus.c
 +++ b/drivers/pci/setup-cardbus.c
-@@ -31,6 +31,19 @@ unsigned long pci_cardbus_resource_alignment(const struct resource *res)
- 	return 0;
- }
- 
-+int pci_setup_cardbus_device(struct pci_dev *dev)
+@@ -330,4 +330,45 @@ DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_ANY_ID, PCI_ANY_ID,
+ 			PCI_CLASS_BRIDGE_CARDBUS, 8, quirk_cardbus_legacy);
+ DECLARE_PCI_FIXUP_CLASS_RESUME_EARLY(PCI_ANY_ID, PCI_ANY_ID,
+ 			PCI_CLASS_BRIDGE_CARDBUS, 8, quirk_cardbus_legacy);
++
++#ifdef CONFIG_MMC_RICOH_MMC
++/*
++ * Disable the proprietary Ricoh MMC controller on chips whose function 0
++ * is a CardBus bridge. See ricoh_mmc_fixup_r5c832() in quirks.c for
++ * details.
++ */
++static void ricoh_mmc_fixup_rl5c476(struct pci_dev *dev)
 +{
-+	if (dev->class >> 8 != PCI_CLASS_BRIDGE_CARDBUS)
-+		return -EIO;
++	u8 write_enable;
++	u8 write_target;
++	u8 disable;
 +
-+	pci_read_irq(dev);
-+	pci_read_bases(dev, 1, 0);
-+	pci_read_config_word(dev, PCI_CB_SUBSYSTEM_VENDOR_ID, &dev->subsystem_vendor);
-+	pci_read_config_word(dev, PCI_CB_SUBSYSTEM_ID, &dev->subsystem_device);
++	/*
++	 * Disable via CardBus interface
++	 *
++	 * This must be done via function #0
++	 */
++	if (PCI_FUNC(dev->devfn))
++		return;
 +
-+	return 0;
++	pci_read_config_byte(dev, 0xB7, &disable);
++	if (disable & 0x02)
++		return;
++
++	pci_read_config_byte(dev, 0x8E, &write_enable);
++	pci_write_config_byte(dev, 0x8E, 0xAA);
++	pci_read_config_byte(dev, 0x8D, &write_target);
++	pci_write_config_byte(dev, 0x8D, 0xB7);
++	pci_write_config_byte(dev, 0xB7, disable | 0x02);
++	pci_write_config_byte(dev, 0x8E, write_enable);
++	pci_write_config_byte(dev, 0x8D, write_target);
++
++	pci_notice(dev, "proprietary Ricoh MMC controller disabled (via CardBus function)\n");
++	pci_notice(dev, "MMC cards are now supported by standard SDHCI controller\n");
 +}
-+
- int pci_bus_size_cardbus_bridge(struct pci_bus *bus,
- 				struct list_head *realloc_head)
- {
++DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476,
++			ricoh_mmc_fixup_rl5c476);
++DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476,
++			       ricoh_mmc_fixup_rl5c476);
++#endif /* CONFIG_MMC_RICOH_MMC */
+ #endif /* CONFIG_PCI_QUIRKS */
 -- 
 2.47.3
 
