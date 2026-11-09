@@ -1,101 +1,91 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.216.47
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.219.43
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794238763;
-	b=yba5N0cTJjL96FiAC/L66/l5aIYzUiDsKZAggDAyJ9R3rkYyfyGBBwKuXlZEhxp3Gjls
-	 4Kuc4xGK6oPA+541zsCQwHESpn3o4ULnRistyMPb949BAyohtvGRkHAcAXpwvQlXvRd9V
-	 aUTKDwh9dMkbtCqFEHGx+r7ndYMohytjXd3U3cKktFM/OG6bEyf++gWdpsRjlfu28iNRt
-	 WONr25QSyWJba569sZGiMh5+z6vMxs8oTrm6rMtL4kh3LwrEzRhDYx10Z0eJx1Unk95/l
-	 wYp15KROn1NrViGcpMLGW6NcckkeJvfbmgRzeqMqJVP6eUGpUUnt84hi5B+kI7uwZ9g==
+	t=1794246886;
+	b=kuvugf3QzqGvhJppRgbOPciu4hnrKRc3RxznCsU48Leku0+Up5ZNGRCtqu2HE8mfDEZc
+	 vVBs+n6VB3aDEDFYEK4d05fQkO0JygJqxQGIxPaZY7lypu7S3MTEt2NEmBw08KjCRE3eF
+	 1poFsIsIksoYfqNxJ34TIR+1QevGtgI92F/nrJxE6RM4U5Ec2F+mMjn1RWwrIZwhI8SFy
+	 +M+/S2AbPOvQOkhniU7a0+YVtXQR0ttzg9BVvN+A+1ofuzZZzHXch5jl5sUr4vSvnedrr
+	 HEpBk2uzWzhz6nynQUKWhaCcM4cQUDbOFkd7RgFVb6twZ3w+wUragwKJBhSiNvetbZw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794238763;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794246886;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
-	 MIME-Version:Content-Transfer-Encoding;
-	bh=nL0IF/YmuAg98DBAGyGyZcFLc0hJUD80Dr2gsrocgZo=;
-	b=ox4PfA9lJS4ecn77lBKp6Gas+3s4i0uujc7HcRsn0z3Y9eLNYQRACXKZopH0cMuiOsND
-	 /+SdsNVtwrvmcTfHIQ+A+8Hhq7U4+VebFSgpYQJW48sOdw27csVNTTwmBT2od6AFiDL7b
-	 UYEd/T5EOHva5fkAL1RaoSYKqdM+zSRt6x2gvlOWtLDYwyCaHiTwPmGQ+e9omV6y6YpKK
-	 JzpsgMZS5sOHD5j7Y/lhWhcQXR5yVo+7T8QcbFb0YsnO5iC04UiF/Y754DM8O+9oy9yJP
-	 +3ys5r9RvphIoWd7jsLeHimamG/eWTQBLwUCQipFaL5viSLl6U1xqbKHIy8/T76Em5A==
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
+	 Date:Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding;
+	bh=nwyR6TxIPEqjKF2oJPWcQncPlh2G58YufELbU9iyGxk=;
+	b=oE6w/1JanqcBZrnwHvx6VDPIYD6mmJY4UFiTKNISijIBGA2923y9LMawuLKwKdqf6uzC
+	 aOD4YwwyifWBWHCSQseuJ0ocI5oJ8dtMks+2+kZGBawNtLElQF5eFCEV4Bw0HPpYkeYTB
+	 VfFxkZ2Bs5N3/VYBfGnjTx0N78j96fJEQta8ZadSBhH/qP5yHq7v2G/bBA7Do9SrA7kvJ
+	 lYT1OXknLD51H3frSfnb/yDH1SEogVFWamcEUDu47JXdGMfxOJlfQ/8viCA2ncAKp7Y25
+	 bPOtGuhA7Ud9bW4JtqEOOXApP7XG0o822kcdeY6Iki5xbYHduXhaBu921jR/ihJ1FpQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=RdSDdijr;
-	arc=none smtp.remote-ip=209.85.216.47
-Received: from mail-pj1-f47.google.com (mail-pj1-f47.google.com [209.85.216.47])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=U+TQMMhp;
+	arc=none smtp.remote-ip=209.85.219.43
+Received: from mail-qv1-f43.google.com (mail-qv1-f43.google.com [209.85.219.43])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22036606A337
-	for <linux-mmc@vger.kernel.org>; Mon,  9 Nov 2026 15:39:22 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 22036606A337
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EBACD606A31C
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Nov 2026 17:54:45 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org EBACD606A31C
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=RdSDdijr
-Received: by mail-pj1-f47.google.com with SMTP id 98e67ed59e1d1-3b155f50c24so488903a91.3
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Nov 2026 07:39:22 -0800 (PST)
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=U+TQMMhp
+Received: by mail-qv1-f43.google.com with SMTP id 6a1803df08f44-91ebdf1c2d1so12628466d6.0
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Nov 2026 09:54:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1794238762; x=1794843562; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=nL0IF/YmuAg98DBAGyGyZcFLc0hJUD80Dr2gsrocgZo=;
-        b=RdSDdijrqnnbq00rXmYWS2nQclZ6+qsK7Tlab49IqOye5Ua9a4IsOT+wI4KPwGh5Rv
-         LHc+JKi4Woj+R3KvYNsAG7U+UshdKFar6LKClaIptGVdojiB95Vt5gZGx78aclcTRavs
-         mpBeTMd+Fl5qgRhKdrZ5R4/E18K9RGFJO+UyIHHUyR9WAgX1Exs/r2mS+VCfwt22hqsS
-         0H7UWtQ/+zI6w4yd0/V3MBtj+G8M/SRiWOa2hgSfiTdgiVyProfNaiVW7IKvkM01Bs9l
-         7L8EG+reC6uZPH+qN46R8C/X1FEkO/CtIpH6QIEKN9UKYKxmfLx10WTlWZxIVexoTrpe
-         8gvQ==
+        d=gmail.com; s=20260707; t=1794246885; x=1794851685; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=nwyR6TxIPEqjKF2oJPWcQncPlh2G58YufELbU9iyGxk=;
+        b=U+TQMMhpJVS35K6a85oGim4U4eTQTREEagwjzk4kmED+5wpKqvfzZkSFCwScXXe1m4
+         kjdAtGYjy8SWBwT2u4PHbhavJbmDDTqfK7TvfmeKgBZ/U5cXm/CvhuqkVZjLR69DDjcK
+         ho/t4IQVJ+Wt7EC4rE614AObzpSuz0fekm0vpwow6ZKSvOv9zpVyuepIdyxK4Cvo+R3z
+         dwGgOoGROo5XQvhH70PeS28gW3IsgdecGScnJ9I+bx07n43PTnQTZtjEYvWV5c92IpqK
+         AkReWxURZWUE04Jeis82SRBOtWps2iyQjnl5+FSmC23cfuBn0lMvoNY4eYa/btQYyKRh
+         zwaA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794238762; x=1794843562;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=nL0IF/YmuAg98DBAGyGyZcFLc0hJUD80Dr2gsrocgZo=;
-        b=bEG6rS0j9EejVg5qk8G7zuLywt9j3sb7U/cdq4mzkIEkGbxwJxBcvW4LFXUnChc0nc
-         pSanzrOqcIuauJFIvQ4eLRf7Y53QB/q4sVn4e/ThGyucvuv98GzoU5qpycuLusmFmZ9B
-         /fqA5aX+eyVUJlG6V9iT8pu1tC6BNr1jRHL/S/xS0r3nWExG1ApUS3R5nOYemUKPf3yV
-         2mjPhxHAwUhTiNNnTtp+rpNaxvOfmrgYrZrxUa4VW5eDyFnHGQxvbixUnB1uk91B5PeS
-         eUGQPwYOZu8Z2hXeoQUrmxqfJPNGn4HnDdqhz4BWO1xtVzndgyVlk6PCygI4hDyUt+Tr
-         OfvA==
-X-Forwarded-Encrypted: i=1; AL+hErHgL/HuDHBMCqnVCxjViEe4pktJhp3T7yOrN2U7URPp92flFQk9SCx60ENvlvS83AAb+0zNfKkHNHE=@vger.kernel.org
-X-Gm-Message-State: APuU4Z+x4iqjsjeOLvSbWDeDCfF/5egN6UderYQm8TOg4bY5XbG7PrTQ
-	PYx3akEXheB0Oj4V2hzSQsIaNLQ4stmTFmaF2retX6r+hrpor/kmxeNB
-X-Gm-Gg: AYBFou0tbBx3Z5XdOzmYV9Iq6Rf+924Z2k1jNxAdLeKp4C4QmqqxD45dp8lO4VTOPD9
-	Wjoo60325dRVN4i0+RJYq9yloKrEVyDMWz6Hl2PxNL/QYINTB893bCgDIZWTG9HyObJDNJsPy01
-	wCgzYMJ9utAU9QVd7veApQpZphlaSxAgffmtave/peZ2+N3guAkEQWgSZVlKhcXc1hZ4pCQh95A
-	ddlIhoPHY3QBp9AXi+IOX2AFnyQUloiOGm/dMRn3McM7bqX3HB8LhaM1w4ZbxKNPAY2emsY6eoi
-	xfOrS/I+z5mETvd/OKHYXvDhvbxQymQf/wBhQs8DTZRM9UGnBOk/UMXotqaYBTfpBGL4ucqPfH4
-	WCDJNVVfUun4nqxd9FU0CexjqbNHffQo67v+D5y9l3wcXF2SG6j4rMSxw7JNXRpVfpYXBGJDSIU
-	/5HUEzX/hPJLdd0LISljR5byd3PFcAKUGAQ8TVGv7Zn/eZrJB15oNOBqXxmnQGs1mR0hFp4jugL
-	g2JSBUJq6qVwsqDxvXO8MgT1nXdc5aUkcj9LKNj9aAI4wXK2E7q5HdI6axNecLQ5Uy4Ly9u7okL
-	EpqhV7HV8+VFg936z4IrlVum2KzsVMaFrDk1bYA1tAUcPn/A3dv+IVRSqXRX+VceU18fj/1Zz2n
-	ql4p6gpNHm+cdSJfg4kh6A/9C
-X-Received: by 2002:a17:90b:554f:b0:3a8:10e2:ad08 with SMTP id 98e67ed59e1d1-3b12d51f0b3mr4293568a91.48.1794238761542;
-        Mon, 09 Nov 2026 07:39:21 -0800 (PST)
-Received: from 0.0.4.7.1.0.4.2.ip6.arpa ([2401:7400:c804:b668:b272:9904:c32b:2ee5])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3b1054a53e4sm11062029a91.0.2026.11.09.07.39.18
+        d=1e100.net; s=20260707; t=1794246885; x=1794851685;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=nwyR6TxIPEqjKF2oJPWcQncPlh2G58YufELbU9iyGxk=;
+        b=BFyxH7E5/jnaaypcecmUPzyFBJQoeugJr+fXmP20PJLpnEFNN6UOtMGwjx9JCnOJoz
+         ASrfzX4gPmrujgFu6hKajLZON33ew0iKS51my6Ch5YYwjz1xa8pOWINgGwwf37H17Hsk
+         OZnBmS6e/NPsby+LPEx6/Eq5RDiHC2Nyi0VkS/DFvytXYjy3trSGVkrwjQA6wRn9RU11
+         Ri18FKg1SpvhhDYX9W9QHbwSiHCE3ngHe+gpbX4hCNG08/W22PE1XeFYl9KHBKOeaXAm
+         Jsrcmb+bglhwnF4wiWtU/9zsn4YEgnxGUvPzJ6iHhi4bqrdg1Naet8ki+i31MXSKNHeP
+         6sEQ==
+X-Gm-Message-State: APuU4Z9pR6vRDXSUNOjM2+v2MpP/8IzUSIaTlz6Ju5TZiOBvctOvh+gO
+	WkNDh52OJDNKS4vP672TGvU51QghBm5/X6SUCvyQBaqqY3kKvSyu7JuF
+X-Gm-Gg: AYBFou1Lx5wNiqdJZqoEtY0xc8M13MatAvfw/rc/OUaUg3ojORcfP0BIYGdJOxCRmpK
+	at9O1B/D8fCV3ad2rMQNwPt1Y3zVB4hjkX7xqFLJs59mne4pPxtj9YeJl8ZbjFlynYIBsWaDyLf
+	sr5pcmfeSYyLTgtbk3aOtxCJ9Klt7NonHLvB7Fg4K8lqPV+Zr1aTl8XN8FEVgN2vXj9ClkWbJp8
+	PnQed0nhSu7gTTE158O49vfKB9OFh5mgv8KO33j+0kP1thqTuU7WVRbuUd3NkVqL7jh9gy6PgwR
+	VqrNskVBylQKt6zhHdLDk+2kYO9fLkZciy/1CS5Z86dAXp/M0iNI9Htb1G0hvi3t49LR3+i9uXF
+	VXxnyzRhrIlYsITDmpuT5p0p+xRy2kiWrlJV1HPUAI5GKwVpv6o2mZKLJmKiYCYO/qad8jvg0g1
+	utHrxSg94g+4UM1Gv12zBAu6heFJJq800+PNhTOjUrzzmVlhVGUZu8yE3KM5hITw2r/Ed1NtmE4
+	sf3oUawmkM3cgxljxbkhxDyvFdYzR5ysoNWyEl3cdqe+Jo0jcTw3c9N24zDYJImOVzLMXJu3O1v
+	xirKr4uy3DzpJYyXkg==
+X-Received: by 2002:a05:620a:4509:b0:93e:fa30:f1da with SMTP id af79cd13be357-9479f33c0damr31442385a.45.1794246884777;
+        Mon, 09 Nov 2026 09:54:44 -0800 (PST)
+Received: from linux.. ([8.34.174.240])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-9479e7dc398sm25843685a.35.2026.11.09.09.54.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 09 Nov 2026 07:39:21 -0800 (PST)
-From: Ho Jie Feng <hjf3108@gmail.com>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>,
+        Mon, 09 Nov 2026 09:54:44 -0800 (PST)
+From: Changyul Lee <lcy8047@gmail.com>
+To: Maxim Levitsky <maximlevitsky@gmail.com>,
 	Alex Dubov <oakad@yahoo.com>,
-	linux-mmc@vger.kernel.org,
+	Ulf Hansson <ulfh@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
-	Ho Jie Feng <hjf3108@gmail.com>,
-	Maoyi Xie <maoyixie.tju@gmail.com>,
-	Yifei Gao <gyf161023@gmail.com>,
-	Hemanth Selam <hemanth.selam@gmail.com>,
-	Andrew Morton <akpm@linux-foundation.org>
-Subject: [PATCH 5/5] memstick: ms_block: add the missing newline to the parallel switch error
-Date: Mon,  9 Nov 2026 23:38:04 +0800
-Message-ID: <20261109153832.7377-5-hjf3108@gmail.com>
-X-Mailer: git-send-email 2.56.0
-In-Reply-To: <20261109153510.7161-1-hjf3108@gmail.com>
-References: <20261109153510.7161-1-hjf3108@gmail.com>
+	Changyul Lee <lcy8047@gmail.com>
+Subject: [PATCH] memstick: core: Remove the host ID after device_del()
+Date: Mon,  9 Nov 2026 12:54:41 -0500
+Message-ID: <20261109175441.1180468-1-lcy8047@gmail.com>
+X-Mailer: git-send-email 2.43.0
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -107,28 +97,49 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Allow printk to finalize the record immediately instead of waiting
-for the next message with a newline.
+memstick_remove_host() removes the host ID from memstick_host_idr
+before device_del() removes the "memstick<N>" device. A host added in
+between, for example by another card reader being probed, can get the
+same ID, and its device_add() fails:
 
-Fixes: 0ab30494bc4f ("memstick: add support for legacy memorysticks")
-Signed-off-by: Ho Jie Feng <hjf3108@gmail.com>
+  sysfs: cannot create duplicate filename '/class/memstick_host/memstick0'
+
+Remove the ID after device_del(), as the error path of
+memstick_add_host() already does.
+
+Fixes: baf8532a147d ("memstick: initial commit for Sony MemoryStick support")
+Signed-off-by: Changyul Lee <lcy8047@gmail.com>
 ---
- drivers/memstick/core/ms_block.c | 2 +-
+Found with a static analysis tool we are developing.
+
+Reproduced in QEMU (x86_64) with a test module that runs two kthreads
+for 20 seconds. Each kthread allocates, adds, removes and frees a host
+in a loop, under its own platform device as the parent. Without this
+patch, device_add() failed with the error above 3713 to 4442 times per
+run in three runs. With it, it never failed in three runs.
+Not tested on MemoryStick hardware.
+
+ drivers/memstick/core/memstick.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
-index 66672235a4584..7237a6789e0ca 100644
---- a/drivers/memstick/core/ms_block.c
-+++ b/drivers/memstick/core/ms_block.c
-@@ -778,7 +778,7 @@ static int msb_switch_to_parallel(struct msb_data *msb)
+diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
+index 0d15f48ef51d..98057ffa1bf7 100644
+--- a/drivers/memstick/core/memstick.c
++++ b/drivers/memstick/core/memstick.c
+@@ -562,10 +562,10 @@ void memstick_remove_host(struct memstick_host *host)
+ 	host->set_param(host, MEMSTICK_POWER, MEMSTICK_POWER_OFF);
+ 	mutex_unlock(&host->lock);
  
- 	error = msb_run_state_machine(msb, h_msb_parallel_switch);
- 	if (error) {
--		pr_err("Switch to parallel failed");
-+		pr_err("Switch to parallel failed\n");
- 		msb->regs.param.system &= ~MEMSTICK_SYS_PAM;
- 		msb_reset(msb, true);
- 		return -EFAULT;
++	device_del(&host->dev);
+ 	spin_lock(&memstick_host_lock);
+ 	idr_remove(&memstick_host_idr, host->id);
+ 	spin_unlock(&memstick_host_lock);
+-	device_del(&host->dev);
+ }
+ EXPORT_SYMBOL(memstick_remove_host);
+ 
+
+base-commit: 7475ea8b58616b33c04afb976cf0fbaad9dd63fb
 -- 
-2.56.0
+2.43.0
 
