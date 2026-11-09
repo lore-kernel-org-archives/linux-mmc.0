@@ -1,85 +1,82 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=198.175.65.19
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=192.198.163.12
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794258449;
-	b=LNAuBXqb1zFH2iTlmOiT1nYzlC+G5AH9TGOcvFL99naAkI8el0XbQbBUjV4vUmnJouNK
-	 6XL6O9geX/mOatpDJwaJ8Ge86o7fhYBrn6/iAlVJk/3SC3od25v9ohT5duKPccxBE3jP6
-	 7ZhRdrYxD5BdwsbweVwoyDaqxjb/0ctsV3KK2Jxp2RytH5610bNjmIoxXwzH7o7bDME8L
-	 FVrTGPdZO3SFHUKr0O/D3E/Z/zC4JtKDAUDDAKcqGUe++WZvL2eB6tuO50NYlEkoXEt6F
-	 3UpxLMyPWOQ54ki+V4nrEoMXVpRdykEf2GnlzxZSByUdwBR77xvoLwmGYxWOxVFIJJg==
+	t=1794258500;
+	b=e5BQqaHPDQvUANq1CG/rENGUOWsHNMIims9JSZbeHfIj9dBZhVABi+tRdUf+8QYPr4BT
+	 IIQG2i+CG/NwWbdJ7ozo2Iqxo0RFNlcOXOAopCJ2FqoDqT6HVsWEaT/+SYAmXwh35wG8a
+	 wnzS16khomtQlolN2a/epmgNIIo6Uj2ojmwaOF6nxuPjdvRHM150aRd9UwN+QiKnZqET8
+	 YuMz/p5Hkot5WddBwMI8Iai+TrYWbEcakfBDu+RiP/9ofnx8TTZnslZXyw5ZbHyXD55S1
+	 /OyrKlAnFuNoGrmWbAGQTRg+xdx4AE+/kzQORabLOc2V2piKsdE5pvNHDBfMlureKRw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794258449;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794258500;
 	h=DMARC-Filter:DKIM-Signature:X-CSE-ConnectionGUID:X-CSE-MsgGUID:
 	 X-IronPort-AV:X-IronPort-AV:Received:X-CSE-ConnectionGUID:
 	 X-CSE-MsgGUID:X-ExtLoop1:X-IronPort-AV:Received:From:To:Cc:Subject:
-	 Date:Message-ID:X-Mailer:MIME-Version:Content-Type:
-	 Content-Transfer-Encoding;
-	bh=Pi4d1jhVjeIsKSNz4TOd+Xp7PZN8pD3GR0ZnU4K+Xp4=;
-	b=WvYBzVzTPTDRwcLnv0DMC8KKHo6VK2Xo38BvkEHFIsiXf7TfSoqgYOg39uUtEq/dmv6f
-	 OcKch4boTZAd0onNIwlW2SoGadW0AqXs0u6JoFtGjPCgMaMRM+ZvaT5zqEyIWRUp1DBkZ
-	 w0Ob1R1rsjl7QbJGjKFMRWTGwuegXJ5Rt5MFumF4SZue1pxvJLpDMFs/tlD2eORa00ksf
-	 pf5phfwzX0HWsvS8WZH2mBlU853WqRVrWo1Y5FMkV7LfOGMPb+YDNpCwYPmgRdznmmcTx
-	 q4RuUkl2TcXnahC4jWSbXMixB2jE6WfzgpZ5qpG0dZZRFXFkYwgmagaUIbD4kiLNwEw==
+	 Date:Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
+	 Content-Type:Content-Transfer-Encoding;
+	bh=cK/zJ1sJKQ5yQdh+zt2LnSGFJVOFWUPJvvgMgntohAk=;
+	b=eKsI2+fiskvpBJFZAdbG/s6BgvaGME/ZIhAXzPTUao2oQW3mFX0O+6xPJErplNf/Y/Bn
+	 foP8gm6SLI/jHkFKe4HrpOQXi6zNwFeU6CM3TC4He57wYevJ/p2s53p2jdm86sTWVNAgA
+	 MAtkLXyHfOYBn8yCOKd+5aSkXrf3/J45GgaAC0T3QpP/goMI1Fpxnsy90g5dpgLV3OPjy
+	 2IHWIzvemQXZihX6+c5DLznmlqAOkamKnWXm9RrV8EU5+tXrd1rbhRib27Z9WurNqkryE
+	 RkJLIHf4fVbJfjD/tmbnCAV6/3Vt6cGXuLfRHRkl6GTe7EX0yo7MtSqSyHlGBMcKYqw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=linux.intel.com;
 	spf=pass smtp.mailfrom=linux.intel.com;
-	dkim=pass header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=TUcycrNm;
-	arc=none smtp.remote-ip=198.175.65.19
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.19])
+	dkim=pass header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b="JR681R/z";
+	arc=none smtp.remote-ip=192.198.163.12
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
 	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A5295606A31C;
-	Mon,  9 Nov 2026 21:07:28 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A5295606A31C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE082606A326;
+	Mon,  9 Nov 2026 21:08:19 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org CE082606A326
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=TUcycrNm
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=JR681R/z
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1794258449; x=1825794449;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=ivcJLgWRf9WaB/XC5kG7Xryo9Ff6vIdKf+WqsmnlQjw=;
-  b=TUcycrNmlY6jaP053PF4xomCKcMkS0lreBllegGzELG6edwlVcPTE9tK
-   rjyBbPsToqIPlDp7N2E8zTW6VkpwDENbFB3x38LO1SC+lG7rF2hUmPD+D
-   OcBEQVDwVYALM7/w/SQIT2WxlO8XgcbI5uPDSgL0vW3AR5m8JLj0h93bn
-   +pTqBkJEVFwyBAAUavRY4QcABppxsWscgUj4maSgipzjeRYlQuNoaLQt6
-   4huPyM1spORavQzkuhX9AGIEzHyfVyD7vwVTGM6ESig5FpF5Z67ctm06C
-   HHr/tQ5lSr2FYFJ60cxlpPyN/b+pqNIS7zhEn2M4B2qOHlq8sQD2LY4dA
-   g==;
-X-CSE-ConnectionGUID: gGWZiWGKRTqhneh5qzHDnQ==
-X-CSE-MsgGUID: Et8s3/ZVSu6Win8Izy0vAA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11961"; a="3029279"
+  t=1794258501; x=1825794501;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=RP9NoegeDXBjDaQf3T6siXXLnLMadN6eylhtNbINs/E=;
+  b=JR681R/zNCTsAdUYpQePW2B+33ymU3H7SogI6oTTQAAAI2hUn0wc/bRY
+   PjoGyWJqdLTZPXT1qOLlYmvT92bjg8gfzbkGoin0giTZfrqy1j/k9iQXw
+   ZiXNOoKYS6vpdg25VHL32DQ1DqEyhUNMyTCvS9+jbm+Mna+fc8zT09m8W
+   EZVrgudFkdcblcp/g/0xhNok0v5fuDaqWsaAnoT9Nu7yvnaoGMshnZsXR
+   wrCGjFKt7LVzn/7lyG5O6j3T3fsrOWTJf1cqurkaLZkz7Yv9gJkpDFbg4
+   UosfkB/B9nChL7BcMmjFcZd/nw19NHoNeozvyh/1ggYMzrkfWaoMDufxk
+   Q==;
+X-CSE-ConnectionGUID: z7AF6vW+S2uDvgslxF9VIw==
+X-CSE-MsgGUID: znMVddaRTqacz/aQMj7X+A==
+X-IronPort-AV: E=McAfee;i="6800,10657,11961"; a="2891035"
 X-IronPort-AV: E=Sophos;i="6.27,204,1787036400"; 
-   d="scan'208";a="3029279"
-Received: from fmviesa007.fm.intel.com ([10.60.135.147])
-  by orvoesa111.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2026 13:07:28 -0800
-X-CSE-ConnectionGUID: RlK6+in1QtO9oHc7LF6exQ==
-X-CSE-MsgGUID: TXhYDmvJTZWeBVqp0INsFw==
+   d="scan'208";a="2891035"
+Received: from fmviesa013.fm.intel.com ([10.60.135.153])
+  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2026 13:08:20 -0800
+X-CSE-ConnectionGUID: 9mzrnITSTCWp3mYwFFhN9g==
+X-CSE-MsgGUID: g+I/rsvFQIuyAWnrJ/fJVg==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.27,204,1787036400"; 
-   d="scan'208";a="8399041"
+   d="scan'208";a="9824440"
 Received: from ijarvine-mobl1.ger.corp.intel.com (HELO localhost) ([10.245.244.139])
-  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2026 13:07:22 -0800
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2026 13:08:15 -0800
 From: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
 To: linux-pci@vger.kernel.org,
 	Bjorn Helgaas <bhelgaas@google.com>,
-	"Maciej W. Rozycki" <macro@orcam.me.uk>
-Cc: linux-kernel@vger.kernel.org,
-	=?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Alex Dubov <oakad@yahoo.com>,
-	Dominik Brodowski <linux@dominikbrodowski.net>,
-	linux1394-devel@lists.sourceforge.net,
+	"Maciej W. Rozycki" <macro@orcam.me.uk>,
+	Ulf Hansson <ulfh@kernel.org>,
 	linux-mmc@vger.kernel.org,
-	Maxim Levitsky <maximlevitsky@gmail.com>,
+	linux-kernel@vger.kernel.org
+Cc: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
 	Sascha Sommer <saschasommer@freenet.de>,
-	Takashi Sakamoto <o-takashi@sakamocchi.jp>,
-	Ulf Hansson <ulfh@kernel.org>
-Subject: [PATCH 00/11] PCI/CardBus: Disable properly when CARDBUS=n & fix some issues along the way
-Date: Mon,  9 Nov 2026 23:07:00 +0200
-Message-ID: <20261109210714.3862-1-ilpo.jarvinen@linux.intel.com>
+	Dominik Brodowski <linux@dominikbrodowski.net>
+Subject: [PATCH 06/11] mmc: sdricoh_cs: Depend on CARDBUS
+Date: Mon,  9 Nov 2026 23:07:06 +0200
+Message-ID: <20261109210714.3862-7-ilpo.jarvinen@linux.intel.com>
 X-Mailer: git-send-email 2.47.3
+In-Reply-To: <20261109210714.3862-1-ilpo.jarvinen@linux.intel.com>
+References: <20261109210714.3862-1-ilpo.jarvinen@linux.intel.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -92,76 +89,36 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Hi all,
- 
-When CARDBUS=n, there are still leftovers in the bridge setup code that
-add annoying corner cases by confusing CardBus bridges with normal PCI
-devices. This series attempts to truly disable CardBus bridges when
-config asks to do so as it seems the most reasonable way to prevent
-those corner cases. That is, this series removes ability to select only
-"partial CardBus support", full support for CardBus remains in kernel
-and can still be enabled with CONFIG_CARDBUS. The alternative to this
-would be to sprinkle pci_is_cardbus_bridge() everywhere to work around
-the corner case is not reasonable given CardBus is quite old and rarely
-used legacy technology.
- 
-Disabling CARDBUS also implies the entire Multi-Function Device is lost
-because CardBus bridge at Function 0 gates enumeration of the rest of
-the functions that are not CardBus related (multiple drivers affected).
-This is intentionally not addressed with Kconfig dependencies; see the
-changelogs for the rationale. Towards the end, part of the patches are
-marked as RFC because they might have an impact on existing configs for
-that reason.
+sdricoh_cs accesses the SD controller through the PCI device of the
+Ricoh RL5C476 CardBus bridge. An upcoming change makes the PCI core
+ignore CardBus bridges when CONFIG_CARDBUS is not set, so the driver
+would no longer find the controller.
 
-The series first fixes a few issues in PCI core and CardBus integration
-(4 patches, the first one is totally unrelated to CardBus but CardBus
-integration will use the same label in a later change). The fixes can
-be applied on their own if needed. After that, there are some
-preparatory changes and the main move of CardBus setup into
-setup-cardbus.c. Finally, the series moves a few CardBus specific
-quirks and the resource name getter into setup-cardbus.c to keep them
-out of the other PCI core code.
+Make MMC_SDRICOH_CS depend on CARDBUS.
 
-
-Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Alex Dubov <oakad@yahoo.com>
-Cc: Dominik Brodowski <linux@dominikbrodowski.net>
-Cc: linux1394-devel@lists.sourceforge.net
-Cc: linux-mmc@vger.kernel.org
-Cc: "Maciej W. Rozycki" <macro@orcam.me.uk>
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: Sascha Sommer <saschasommer@freenet.de>
-Cc: Takashi Sakamoto <o-takashi@sakamocchi.jp>
+Signed-off-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
+---
 Cc: Ulf Hansson <ulfh@kernel.org>
+Cc: Sascha Sommer <saschasommer@freenet.de>
+Cc: Dominik Brodowski <linux@dominikbrodowski.net>
+Cc: linux-mmc@vger.kernel.org
 
+ drivers/mmc/host/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Ilpo Järvinen (11):
-  PCI: Free device name when pci_setup_device() fails
-  PCI: Use Header Type in __pci_bridge_assign_resources()
-  PCI: Use Header Type to detect CardBus bridges in
-    pci_resource_alignment()
-  PCI: Fix off-by-one in CardBus resource names
-  PCI: Move pci_read_bases() wrapper with BUILD_BUG_ON() to pci.h
-  mmc: sdricoh_cs: Depend on CARDBUS
-  pcmcia: yenta_socket: Always select CARDBUS
-  PCI: Move CardBus device setup to setup-cardbus.c
-  PCI: Move CardBus legacy mode quirk to setup-cardbus.c
-  PCI: Move Ricoh RL5C476 MMC quirk to setup-cardbus.c
-  PCI: Move CardBus resource names to setup-cardbus.c
-
- drivers/mmc/host/Kconfig    |  2 +-
- drivers/pci/pci.c           | 25 +---------
- drivers/pci/pci.h           | 23 ++++++++-
- drivers/pci/probe.c         | 27 +++++-----
- drivers/pci/quirks.c        | 45 -----------------
- drivers/pci/setup-bus.c     |  6 +--
- drivers/pci/setup-cardbus.c | 99 +++++++++++++++++++++++++++++++++++++
- drivers/pci/setup-res.c     |  2 +-
- drivers/pcmcia/Kconfig      |  2 +-
- 9 files changed, 144 insertions(+), 87 deletions(-)
-
-
-base-commit: 6628e7d4c6b25c8d18f1345e3a20d21829aae7e4
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 79bfc425e7c7..6b18b66c10b4 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -692,7 +692,7 @@ config MMC_SPI
+ 
+ config MMC_SDRICOH_CS
+ 	tristate "MMC/SD driver for Ricoh Bay1Controllers"
+-	depends on PCI && PCMCIA
++	depends on PCI && PCMCIA && CARDBUS
+ 	help
+ 	  Say Y here if your Notebook reports a Ricoh Bay1Controller PCMCIA
+ 	  card whenever you insert a MMC or SD card into the card slot.
 -- 
 2.47.3
 
