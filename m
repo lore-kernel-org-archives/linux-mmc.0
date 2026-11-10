@@ -1,82 +1,93 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=198.175.65.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.222.170
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794258535;
-	b=5ck1IZWzXH0fwrWx8/+e/WXZAEMGQsR8xvaUEPdjfpRC+gi46nMMJsICeL+C/znTA2k+
-	 EBb6cNooZP0Ii83GSFv6L4bKXKNjPcImGhKzNTGt3YCrn0OeWxIaugrBq1MyrKeJqzlrw
-	 4Ytw2Q65+LOabxAgl5m/uJZXnW05pYOCA0sdR+TlBspvoOtJyWjWje9PmvE484L3k1p+2
-	 iTcrbjOfmcADpBZtFh8izcfF/6RjDbWm1+V1+OH7dw4x/tmJHQsDJx6PT9CQ4eALoHMQY
-	 qJAJKV9Y/Swdh0hXIaP7iBrIb2hpHgoG9rEniTzeQ6k5EhfHHvkfsLOXntxt/ly7JZQ==
+	t=1794285015;
+	b=udC34llakPu2hh7XTCNE0sgPi35NCaAonrDa9l2TDvcNAN7kdBrrChZSS9HHT2rPfIoC
+	 eFfZZPJUa3Mm2zkimOIC7rjU0bD6fKatrGX1QOpBb7yV93vZKW54m5ZOl5u34rw7AYTFN
+	 WgGdEDTIQ06cHf2A180FZEOcwC0kFKOiFAs0oNjhkNvsU8uELevaTSjfGfuOXjm/Bv1s9
+	 Ty3NBdRmdLRx13MzSmeUHR/ls+6j4d+KzHvRewNjV2jttpxdcBbvYWRI6sH8KTEAS/Gek
+	 xSIj9bJHzNBou14l/jWjxzeWgd9r0RBgx6mP2wtnK/G5tFXc3BEVp0qq1U96FZ47cWA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794258535;
-	h=DMARC-Filter:DKIM-Signature:X-CSE-ConnectionGUID:X-CSE-MsgGUID:
-	 X-IronPort-AV:X-IronPort-AV:Received:X-CSE-ConnectionGUID:
-	 X-CSE-MsgGUID:X-ExtLoop1:X-IronPort-AV:Received:From:To:Cc:Subject:
-	 Date:Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
-	 Content-Type:Content-Transfer-Encoding;
-	bh=nJXpT9iXdx94yXelr2/lcrtGyQw9Dx0QS5S60pLVPxc=;
-	b=XgSD9nySPjbVn0/HBKSZvcNGA3oKsbjlg/bGBY3QP3GrUalqOeWWOWyBDSqDgdonrMSr
-	 MTL4O+1jSFHA+AO+93Up4Tanzj1BoOVJ4b77KLEVteaxasMB4CfGOdQ3LXH+Ed1OWNnxg
-	 X7sWP9xBngFqKQE+nWzdRTJhsC8bAIPsNgG9R6Fq46C8AQwWPGYZcX6/csKR6qIOvVTTw
-	 Z2EmgLsBEf3UVz1LN6cxQOiee5VywaEsnIPFcTCVYgOwGE/e+ANnyJm6ZH5D0mMTSeUE7
-	 BUC0xJD86TORJcCXT2t0MzsNphBXEf6rXwisgsKHZfZkmcbvrlt0GV+GKqK0zMDmhpQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794285015;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
+	 Date:Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding;
+	bh=WsSLHGnK7HTgTyexFfYUW9M44U5fpvmPCQ/caosU9hE=;
+	b=TtcWaNpCnWEWdVr6rJvz7u5ZYM/whgqlaFXCtAz+zgVk9QLbY1qd3O5Woe9Vbjvkq2b1
+	 VPB8DC9SThocBIafozXhJLuKv8v7YNfPy4eEd3qYUr+GQzMChnXdCnRbHR/YN/e4kLRKf
+	 fObLOVALOoTLFctKDjiQVKW6M3RfQOZSqhZRTeEPBCSepJOL5y54Hvu9HaKDbvcCVolX5
+	 PT8Bod5dxa5wQ76O/yMc/KNZgpocqHIQPKtE6aUseRrkSz+HzSqrPsGD2eAkHOmTE8mtr
+	 SoFN7pSfGpF4LjdJi54JSEw4bx/HgQRK4cMpz6Gu+sJSzRiHxbDsNl8qKgCr2o69l2A==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=linux.intel.com;
-	spf=pass smtp.mailfrom=linux.intel.com;
-	dkim=pass header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=jclOP7MP;
-	arc=none smtp.remote-ip=198.175.65.18
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
-	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=W5+fZx9c;
+	arc=none smtp.remote-ip=209.85.222.170
+Received: from mail-qk1-f170.google.com (mail-qk1-f170.google.com [209.85.222.170])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D2D760A261F;
-	Mon,  9 Nov 2026 21:08:55 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4D2D760A261F
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4FFA8606A33D
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2026 04:30:14 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4FFA8606A33D
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=jclOP7MP
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1794258535; x=1825794535;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=GJSEzZmICoPE/wW6tSgVwwNOD9tll7j5fgf72H9u2Bo=;
-  b=jclOP7MP01IquL4V2uCkKuy+tYKDWJKAGqsY853nAxTzGIvS3VBiu/XS
-   vhgJVbxKGh1oBO6QaLZkO1Y6MSfM63QW7D4Rlpxz6PkPfVZW/5I1q6hSd
-   Vi5lXvR4kG7hlhsE48+FBtqK+1iob6ZqLvwylffyH1rT0k5OuS+4Pxlh0
-   fo70now/oYbfBvoXn9q0gNFxkC47l0zFY6H+CAVDfA90OWNvRbNkQvGln
-   0zrzl0q7sEHTWpYveGi53TSd72YBB6P+DjOMEMO8rTVAwUWDDxHkx249i
-   mzajH94EwgR6Zti7TO9pXEG5VBuIJImnxybBecCcgp0xynaYTeuaqqNWS
-   A==;
-X-CSE-ConnectionGUID: hwba+UV/TIKtc3f+2FilFQ==
-X-CSE-MsgGUID: tyeAUBxfTHaQ6BhnqJJD+Q==
-X-IronPort-AV: E=McAfee;i="6800,10657,11961"; a="3004820"
-X-IronPort-AV: E=Sophos;i="6.27,204,1787036400"; 
-   d="scan'208";a="3004820"
-Received: from fmviesa011.fm.intel.com ([10.60.135.151])
-  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2026 13:08:55 -0800
-X-CSE-ConnectionGUID: YXmaD0cCRv221kbduNrunQ==
-X-CSE-MsgGUID: YhzI90G9QVeJ7E8zK6HsLg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.27,204,1787036400"; 
-   d="scan'208";a="9747008"
-Received: from ijarvine-mobl1.ger.corp.intel.com (HELO localhost) ([10.245.244.139])
-  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2026 13:08:51 -0800
-From: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
-To: linux-pci@vger.kernel.org,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	"Maciej W. Rozycki" <macro@orcam.me.uk>,
-	linux-kernel@vger.kernel.org
-Cc: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
-	Maxim Levitsky <maximlevitsky@gmail.com>,
-	Ulf Hansson <ulfh@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	linux-mmc@vger.kernel.org
-Subject: [RFC PATCH 10/11] PCI: Move Ricoh RL5C476 MMC quirk to setup-cardbus.c
-Date: Mon,  9 Nov 2026 23:07:10 +0200
-Message-ID: <20261109210714.3862-11-ilpo.jarvinen@linux.intel.com>
-X-Mailer: git-send-email 2.47.3
-In-Reply-To: <20261109210714.3862-1-ilpo.jarvinen@linux.intel.com>
-References: <20261109210714.3862-1-ilpo.jarvinen@linux.intel.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=W5+fZx9c
+Received: by mail-qk1-f170.google.com with SMTP id af79cd13be357-93f30660e69so128281685a.0
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Nov 2026 20:30:14 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20260707; t=1794285013; x=1794889813; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=WsSLHGnK7HTgTyexFfYUW9M44U5fpvmPCQ/caosU9hE=;
+        b=W5+fZx9cVh5JpgpRFqmhQ3HMG14XtDuE9pttcjkhvhpyLGfdTvvjVe9ADn40mNYN5M
+         /X1XSBiKzsql9aat5AR+ALWaLb1dCSPz18Z4MPID0OP7uYSM0U9/18sYyJQuL8n01Hmq
+         dOGAOtS0jOYDMd0OTCbolo2maKz1q+XEeFdWu5H7Fgi8XFHsxK+8xSjQc8TQ9rgzpdAU
+         06L5ZczAJi+gfWAS+vaahQXdUzxXzO+YWRAg0DPK8PSD8t/Klclr3/qNjLXf45idqFpW
+         4VGNIVn0K4YGF0YIKzGTp/Y0IQ69vwUvpKL7xelN+NdBkZ8OO8Rs/PO/ODxWfsFsZ6jY
+         XixQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1794285013; x=1794889813;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=WsSLHGnK7HTgTyexFfYUW9M44U5fpvmPCQ/caosU9hE=;
+        b=N81Xzz84F9booRDJ1TBqD/S4c3FFNPO3lO4fUY9IM9JpVYZ8sSgWK0bRVWXuegO3+i
+         xtnBOCeozWn2PH/euYfV4v8//jz6IvPLEnrklqNATnDsAAq1tjbPDDDWdAdDKXSZgWER
+         UvKYUQHhqhyO1MS4rpJaUm09ZwBicA/kTROk9Rh5frwIk8oZAkvFZJFSDx4kMtwiYKPi
+         XxWUYe88RyFaa/s5z7/bMObFFPVLnoPY/runfVEmqP+gIxN+rKhPTlEiA+r0ZP3EnaPq
+         fERK/FwfAxOvQUq2bU+1xkm7n4GdB9gWeDtB0Ka0B0xtEnm5jzncARQFPMj1Ou/bh583
+         +qwg==
+X-Gm-Message-State: APuU4Z++2VFenEIrG6aEt6kkx7alGgonydDV+ouAf0S6yb6tSuLjGJyy
+	IOdT+yeMaLaIRDqeJ/mpsctjqXNnV/dli09CQxQsSaRExHFAMsYJ2II=
+X-Gm-Gg: AYBFou0ZZJaVG7C564xVOgEaFQ6A2SzZiRfntxuFLWm/emID9e/vGCh6vnE+hqvWH6D
+	lIlKsxd3RZMxlwEVL5xwxh6ovbztGNz5ep1OIM1IN1ggST2yJY/6ltZerjj0+CPr/FJ7bINEFFw
+	Msqhg0FgUVeyFPG9QEz2ZuOEHKbQXnMyZycgjWhTrxjSi7chK3qsUfAYzpGVXTk8y4gt5uLTp6f
+	4EH2UV2dPTV0+IBZp6GJsA615mlHFpjvDd9MZi3QXNcxXXEy94sQ+B1UFtLs+kZVSQGskrG+fmb
+	8iFBX/0hf3IBTcO2RVFY3Dl4Nv3ujFiq8SQDChamDWSrwBh0wmFcrKejoeZK4WBaDK9zMaXcM9L
+	3t5Dh54FMtnRvfZKJhft0m370b3JqcFq3FF8HAz6/w+XEF1TO7vy9YjsBFFUZM3GQjQFO2hwL2w
+	BN87E9dPqIK8Ty5RnX5duKWuQb4AvtrAD5YJWzWItO+S4YWyMBpCp/k4nQQlj3J+pxEy2CGdUvC
+	wP9PFsb4ag9Ry/KDsa+Pa07v1FmZyjhZMqfWcUtZzSOsfZoo14e8V/lRNT9rosbXvgkcS0VG0Fe
+	Ov8COE8PY24eosxpCQhJOjFvBUGqr4bNWI7VJkmF+LiMPC8eLWqe4eB2YhnIzcfJThlnly7XGU0
+	YN0FCtLC9hYM/Q6rjNz+J1F8MCZGctJfVv+WofBpA54C6Ex5yDYKuKlO7N+yanruF
+X-Received: by 2002:a05:620a:6c84:b0:93a:14c:32ad with SMTP id af79cd13be357-9479f09bf6fmr258929185a.0.1794285013134;
+        Mon, 09 Nov 2026 20:30:13 -0800 (PST)
+Received: from localhost.localdomain ([104.39.152.7])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-9479e7e9b4bsm134049385a.39.2026.11.09.20.30.09
+        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
+        Mon, 09 Nov 2026 20:30:11 -0800 (PST)
+From: Myeonghun Pak <mhun512@gmail.com>
+To: Maxim Levitsky <maximlevitsky@gmail.com>,
+	Alex Dubov <oakad@yahoo.com>,
+	Ulf Hansson <ulfh@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	stable@vger.kernel.org,
+	Ijae Kim <ae878000@gmail.com>
+Subject: [PATCH] memstick: r592: shut down the detect timer on removal
+Date: Mon,  9 Nov 2026 23:30:08 -0500
+Message-ID: <20261110043008.56716-1-mhun512@gmail.com>
+X-Mailer: git-send-email 2.47.1
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -86,130 +97,45 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-ricoh_mmc_fixup_rl5c476() disables the proprietary MMC controller of the
-Ricoh RL5C476 through Function 0 of the chip, which is a CardBus bridge.
-When CONFIG_CARDBUS is not set, CardBus bridges are ignored and, as
-Function 0 is then missing, pci_scan_slot() does not enumerate the other
-Functions of the chip either. The quirk has nothing to do in that case.
+r592_remove() deletes detect_timer before freeing the interrupt.
+A card insertion or removal interrupt can re-arm it in between,
+allowing r592_detect_timer() to access unmapped registers and queue
+media_checker work on the freed host.
 
-Move the quirk to setup-cardbus.c so it is only built with CARDBUS.
-CARDBUS defaults to y when CONFIG_PCCARD is enabled, so existing configs
-for systems with these chips should mostly keep the quirk.
+Use timer_shutdown_sync() to wait for the callback and prevent
+re-arming. Keep timer_delete_sync() in r592_suspend(), since the
+timer is needed again after resume.
 
-CONFIG_MMC_RICOH_MMC is an option of the SDHCI PCI card reader driver
-(CONFIG_MMC_SDHCI_PCI), which drives the SD controller of both the
-RL5C476 and the R5C832 family. On the R5C832 family, the MMC controller
-is disabled through the FireWire Function, which does not need CardBus.
-Thus, do not make MMC_RICOH_MMC depend on CARDBUS.
+Found by a static analysis tool under development.
 
-Signed-off-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
+Fixes: 632644227850 ("memstick: r592: Fix UAF bug in r592_remove due to race condition")
+Cc: stable@vger.kernel.org
+Co-developed-by: Ijae Kim <ae878000@gmail.com>
+Signed-off-by: Ijae Kim <ae878000@gmail.com>
+Signed-off-by: Myeonghun Pak <mhun512@gmail.com>
+
 ---
 
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: Ulf Hansson <ulfh@kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org
+ drivers/memstick/host/r592.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
- drivers/pci/quirks.c        | 32 -----------------------------
- drivers/pci/setup-cardbus.c | 41 +++++++++++++++++++++++++++++++++++++
- 2 files changed, 41 insertions(+), 32 deletions(-)
+diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
+index dc3de63901be..399873a61d1b 100644
+--- a/drivers/memstick/host/r592.c
++++ b/drivers/memstick/host/r592.c
+@@ -827,7 +827,7 @@ static void r592_remove(struct pci_dev *pdev)
+ 	/* Stop the processing thread.
+ 	That ensures that we won't take any more requests */
+ 	kthread_stop(dev->io_thread);
+-	timer_delete_sync(&dev->detect_timer);
++	timer_shutdown_sync(&dev->detect_timer);
+ 	r592_enable_device(dev, false);
+ 
+ 	while (!error && dev->req) {
 
-diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 78f6df5d4d19..85b4c39617a6 100644
---- a/drivers/pci/quirks.c
-+++ b/drivers/pci/quirks.c
-@@ -3320,38 +3320,6 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_HINT, 0x0020, quirk_hotplug_bridge);
-  * #1, and this will confuse the PCI core.
-  */
- #ifdef CONFIG_MMC_RICOH_MMC
--static void ricoh_mmc_fixup_rl5c476(struct pci_dev *dev)
--{
--	u8 write_enable;
--	u8 write_target;
--	u8 disable;
--
--	/*
--	 * Disable via CardBus interface
--	 *
--	 * This must be done via function #0
--	 */
--	if (PCI_FUNC(dev->devfn))
--		return;
--
--	pci_read_config_byte(dev, 0xB7, &disable);
--	if (disable & 0x02)
--		return;
--
--	pci_read_config_byte(dev, 0x8E, &write_enable);
--	pci_write_config_byte(dev, 0x8E, 0xAA);
--	pci_read_config_byte(dev, 0x8D, &write_target);
--	pci_write_config_byte(dev, 0x8D, 0xB7);
--	pci_write_config_byte(dev, 0xB7, disable | 0x02);
--	pci_write_config_byte(dev, 0x8E, write_enable);
--	pci_write_config_byte(dev, 0x8D, write_target);
--
--	pci_notice(dev, "proprietary Ricoh MMC controller disabled (via CardBus function)\n");
--	pci_notice(dev, "MMC cards are now supported by standard SDHCI controller\n");
--}
--DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476, ricoh_mmc_fixup_rl5c476);
--DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476, ricoh_mmc_fixup_rl5c476);
--
- static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
- {
- 	u8 write_enable;
-diff --git a/drivers/pci/setup-cardbus.c b/drivers/pci/setup-cardbus.c
-index ef35393aca1b..33aca7b28354 100644
---- a/drivers/pci/setup-cardbus.c
-+++ b/drivers/pci/setup-cardbus.c
-@@ -330,4 +330,45 @@ DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_ANY_ID, PCI_ANY_ID,
- 			PCI_CLASS_BRIDGE_CARDBUS, 8, quirk_cardbus_legacy);
- DECLARE_PCI_FIXUP_CLASS_RESUME_EARLY(PCI_ANY_ID, PCI_ANY_ID,
- 			PCI_CLASS_BRIDGE_CARDBUS, 8, quirk_cardbus_legacy);
-+
-+#ifdef CONFIG_MMC_RICOH_MMC
-+/*
-+ * Disable the proprietary Ricoh MMC controller on chips whose function 0
-+ * is a CardBus bridge. See ricoh_mmc_fixup_r5c832() in quirks.c for
-+ * details.
-+ */
-+static void ricoh_mmc_fixup_rl5c476(struct pci_dev *dev)
-+{
-+	u8 write_enable;
-+	u8 write_target;
-+	u8 disable;
-+
-+	/*
-+	 * Disable via CardBus interface
-+	 *
-+	 * This must be done via function #0
-+	 */
-+	if (PCI_FUNC(dev->devfn))
-+		return;
-+
-+	pci_read_config_byte(dev, 0xB7, &disable);
-+	if (disable & 0x02)
-+		return;
-+
-+	pci_read_config_byte(dev, 0x8E, &write_enable);
-+	pci_write_config_byte(dev, 0x8E, 0xAA);
-+	pci_read_config_byte(dev, 0x8D, &write_target);
-+	pci_write_config_byte(dev, 0x8D, 0xB7);
-+	pci_write_config_byte(dev, 0xB7, disable | 0x02);
-+	pci_write_config_byte(dev, 0x8E, write_enable);
-+	pci_write_config_byte(dev, 0x8D, write_target);
-+
-+	pci_notice(dev, "proprietary Ricoh MMC controller disabled (via CardBus function)\n");
-+	pci_notice(dev, "MMC cards are now supported by standard SDHCI controller\n");
-+}
-+DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476,
-+			ricoh_mmc_fixup_rl5c476);
-+DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476,
-+			       ricoh_mmc_fixup_rl5c476);
-+#endif /* CONFIG_MMC_RICOH_MMC */
- #endif /* CONFIG_PCI_QUIRKS */
+base-commit: 630059a5a632377b9b7b487baccde92b7ae1dd47
 -- 
-2.47.3
+2.43.0
 
