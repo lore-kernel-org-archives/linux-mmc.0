@@ -1,123 +1,123 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794319418;
-	b=whrBUbuyXR4pif+4XaMoU6QWzxIZvV23GpkbZynSLTu+DVdIr4Fc7bMTkpWmgVEdSMhb
-	 1GvSikDxDrdpMT0fqzRimGBL+Au3nK5M5EURayi6NMwTgy13eJ/0ZSkxng5e1DmjfcYMl
-	 dMoiHUlLLWVNoyQJzefZU0RnttQ6F+TCwcGPAD28foqt80mp+QNy+8NwoGBSSevGRS0un
-	 McmJiXzrzruAhJFnQ8OPDgeFPdqeBvM9K6nz/DS/SimNk2yW9PymHUMxH/1WJp6nyIwn0
-	 0SGil91BLvSEJyGkrpcwgTNFu4c1ksqHmRVZ8OIuz1GJWD1iUqCtu1XfiUH3DcOEBfg==
+	t=1794319421;
+	b=TzhQ65lgc/YBtUuaAHdQToD4bJkA3gNGxJHmCGP3aDv5R2SqCXVn3BY/75GhvnSwzcTq
+	 MVuqQseOLXGZpopuiHhMK/3YBpLaKSVDuAEp3aKC/DVfNj5NNujLmwXckDv630ojgzM2F
+	 u5AGso4SCoxdul4RIl5VYf2bLHlYTM7XKVf73K3YJveB7VRY3YiWhUl8kF35YrS6hMsg3
+	 5Ow+pDCnBgRj+J4Y7S9Cl67vczQ0e6ENPNasBL6IRYYWbgxV7VuVfrUt1+PzxwPLWp4ro
+	 ewraSRSObL8TGwqq4CVlo6NOyHvYPzsvM1M+ofgeAv5XDwQ5QN72yVpgdo0lpha5orA==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794319418;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794319421;
 	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
 	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
 	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
-	 Cc:Content-Type:Content-Transfer-Encoding:X-Proofpoint-ORIG-GUID:
-	 X-Proofpoint-Spam-Info:X-Authority-Analysis:X-Proofpoint-GUID:
+	 Cc:Content-Type:Content-Transfer-Encoding:X-Authority-Analysis:
+	 X-Proofpoint-ORIG-GUID:X-Proofpoint-GUID:X-Proofpoint-Spam-Info:
 	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-Virus-Version:
 	 X-Proofpoint-Spam-Details;
-	bh=ek5NNY/Kina5esSdV1eh8PHtvhY8sTVXt0HaMhKb/+M=;
-	b=cr9d7xj/iG9/3ogoFYOOK/sNYFAAtniJcWrJ9FKYSh6n4IDW7xAfUNRPGvrrfyOg1Ke1
-	 pxwDHIgxR+6uUbbbwqP6/kN4y+PM1Bk7dZLsIx63O/KoiUUkWqmjLePPoJtnrswGeArBT
-	 XciNJcPDm4XKjnT3mA8PpgZui3631g0RsNjNlv4tJyD89saKEMFSWeIyD5ZdbNQLzTDe+
-	 MQx1WLdYz2RbPYNXLxYD7kj8UFbpmrDtlHiO/QBxh5Z9tacPkbqCDoN/1RLM+zxXKJGyX
-	 JdXeEETb9N4vcy/ROCcXYWKR98oxLZqMwEYV/rf1ZFiy1EO0CnfEcauqVYU7AjvcRng==
+	bh=dDX5RY4IsH57J/4XqqE9KKM+HkzFDQFjq5zuAjcxbQI=;
+	b=I9/B5LVdYa95CzADl0ttza7fFGDqBYl59XggqVRGWMpN7dq+2fwHQa1RKLPx5kqbut2K
+	 ud7AN58WlPta8rcck578YmjZL6HM9+sTSEleoMTiAdBnXmSgAsHsjdFFqYjzL2ZWNxOfo
+	 KJ+J7ICzSAAjQNyEHiz8SO6p4S0J658W8eKfbtnT2pPCoIFcrP5eUV+PKJl22eyKyWu97
+	 jIPjuyLP38NLU3xeL9DQaNpLdlt57V2ZQfAATrm7kMRnGvmZ/rFJIwTi0MARyw30PhyCk
+	 O35wMqV2aKQwkP0gWn5jU33nh4qJZpMewCtOprbXAppktAwe6PM0Qtlz0qGbxmfhvbQ==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=oss.qualcomm.com;
 	spf=pass smtp.mailfrom=oss.qualcomm.com;
-	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=duCEkvbl;
-	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=ZZUliZfK;
+	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=KgXOUwrI;
+	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=TRgeo6Rw;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2C61D60A2608
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2026 14:03:37 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2C61D60A2608
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFE9460A261D
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2026 14:03:40 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org CFE9460A261D
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=duCEkvbl;
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=ZZUliZfK
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AABA9vE3196161
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2026 14:03:37 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=KgXOUwrI;
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=TRgeo6Rw
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AAE3WeF028692
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2026 14:03:39 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	ek5NNY/Kina5esSdV1eh8PHtvhY8sTVXt0HaMhKb/+M=; b=duCEkvblviFFNHrQ
-	BFI3/JtAG3aSmw8heuXx6P5iVUOg/m5xN7jPov5yWeqyfAR0SOlV6YFMLu5I957x
-	PNqsz+xC4i9iFpyP+aOH/6USXcwJQ04TM114LyKWkyToExiWrD2+FolaA/obNvhj
-	jeiST/GFCv1T4h22OAtMko1mTykkLi8BH5rUt7mmIs6a9PSal7svLt/yZFCt+1dd
-	UTsqWiBYBxyhwIgNernFyDck5yF6z2MYquYjLzpaqErlJLawSNYgjZEqhPeXeIql
-	TR6/k06/k2IF83JUmQ8k/59gYxEEw2MiolPq2JOSjVHJtIGiVZCyunmNs9Iu/EZ/
-	zgzGZw==
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com [209.85.214.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hv03cs1ra-1
+	dDX5RY4IsH57J/4XqqE9KKM+HkzFDQFjq5zuAjcxbQI=; b=KgXOUwrITrNNU6Dj
+	/Yvq+TrAEK8YKXw+BevwJlstrdE99zvrKFLzDpy8CbkA1NX7B+2G91rwfRmXqPQL
+	JnBY8RsWq4K2koAAMPHerYnf59uXqkU9f5ir7uppKQ66lXEGzJrw1JGH/rtBU0LM
+	oliZwED9/Gtpe5El2/JmNAaoMIY/sXP396QBPsZloSRMy9p45P6ECsV4OYXTCZSv
+	xURwlcr3ghHSjdIST4UWCGmoK8aXG1QqJFKHZDMd5SK+iti6+FHzKJZKVY4N8hzS
+	+1Ezy93APlrNaAC7yJ89394ZUMtu2pD7mIi6JhPFfvxTO06zg5K5+B/lSa/nUhIZ
+	+g0mMA==
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com [209.85.214.200])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hv4pv801m-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2026 14:03:37 +0000 (GMT)
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2eaae8d29e0so28676395ad.2
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2026 06:03:36 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1794319416; cv=none;
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2026 14:03:39 +0000 (GMT)
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2eaf3f829b3so17181505ad.3
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2026 06:03:39 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1794319419; cv=none;
         d=google.com; s=arc-20260327;
-        b=eFkq1+8Eq19dFH+8Lk3JlBY+Ru5dfs1fR10AihUlPBTJ8AEJlY4aWoKHo+GBGzIy8Z
-         aHFL8TOCnLAaWHdgrqc61cE45fzKr/Di3aKuWyc1xWVNake7+vd789vOadHHkrZFK129
-         pAmUHRPn3Me9feREtxi+eKumbKV4/7haWQ2XkAGo7np8JX+dGnmoe9o6BAcgxaI6fq6k
-         nQslly0OwZjraKNSZ62EC9qtf5CsPJNXxE6yoK/JZsjGhxRTMnmN52TEciLT0iqmlUm2
-         7kV4h5GDXeR+/cmAKgSQjaZRmPIKVc7ZVXqxmuU04jL3pqV4aYi/uEJNezTbWXlkNiqL
-         ickQ==
+        b=MaG4AorPs0GXLpashgxCW3RSGiPrqW1ZBRX0DZlJgyTgSBG6g+nowmQ6FFNSacJYXM
+         vwREUfE7LUZppJumBhF6FfuZ3qJyEmWOwTzL73M/FOFusrGnMrg6KPRM9zklwJ1TwCw/
+         0jtwPGtGM1zE11iG9JtVu0GxlsSMYaz8Ov5x8zHIcd4Z7O5dgc8dFULWYifwzWFU/FRi
+         FtFZuzxHIyhyGcz9rsDFD+NK0ORKcB+/RTUXI26TLoObYDFlUa1E4Dp94QWHgO8ny4iQ
+         vxFdzd7Qcttwj42+HBYo4ki8mep9+TpRbuwboMYjz58LX3EqP7AY3f4UxM7pXXhV2DoU
+         yb9A==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=ek5NNY/Kina5esSdV1eh8PHtvhY8sTVXt0HaMhKb/+M=;
-        fh=xkFbThGybA4WD3X32Y8/v3RF7YbNbh9KHCvwdRDMikM=;
-        b=XnsuZd5K6/XGc4SRtX27iqhyz/v7N5KLuA6W0r4qQeZCdhKXqLm1NaeuOtx60O0Olm
-         24KlK5raGP+MdVTQIQ9Qkv9urDl6p6G/t/azlNGgmhYFNKWxXHucdEjtM6P5UFDoKoFH
-         1VPj8C0IrfddBGJDmBzgAdh6wh8bBWDwCKNQtUb7LYGXNcI/fSAtsIf4XfQ9fIh3ozQT
-         4So/YE1fQa9/F2l691As4Ajy7uNl4+cxgf+L+/cAIRFyQLaGIhRCBhpcSZY+fof7lAP6
-         JlU5ya+9nwGmDHBz1ynSdh98BI7ekUBo8FwtkKXGumZIV+fNMdWyFHT30CjKg83V2mOJ
-         5tOg==;
+        bh=dDX5RY4IsH57J/4XqqE9KKM+HkzFDQFjq5zuAjcxbQI=;
+        fh=Yz8HxecZLzpFHLj2ajPyWSeH0kAGAtkUsiy8ITtbGWI=;
+        b=HfTmQV75ekrBWVkQWan693DnB5yrUooWGF8Z13//Bfitb0cu+vVcwJ7R3kTSvad4co
+         NKw/LavGqjdzfIRc5mlQ26p7ERfwz9nqid0CrMsRG/gTtCQlisvtR7M0hUGgt+qfbywt
+         85x+1wEBLwVlPfoyy5iHJkszZNdzfIh7sTIl3a3sJsLb0Zo9y/fTE8skYrnGToghm9mv
+         k2Wr5DqCt11GPWf5OVy/9pQDB1x5T9hriVOYElFIrO4YcEucWWyHldUgzNB1g0r0SNDR
+         FKSlCk5olumiL9o0IUZvbqiyQGY5if16Rkoqt0ghhYORCPDagac5ppSJL+bcOz0KTxxp
+         ipVg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1794319416; x=1794924216; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1794319419; x=1794924219; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=ek5NNY/Kina5esSdV1eh8PHtvhY8sTVXt0HaMhKb/+M=;
-        b=ZZUliZfKiBmVwSXUrjbgWNZkQb0ZQLoCpVS0JYUF/2wNL5Q8VihSAFCMHkc58exuR0
-         j9MmHsFHrnXYePaPrMdIEw1CKLcM14lwwSiUkU4ItAA2FsChIGjKbl9AfKLpeNHtzy7v
-         GU/C6HRL23F9pOT8r8/3HC/kHBG6hv+nW1+yaTNyhdtKa4uYZtcY/9XGRE1Sqf2fwKTw
-         2OnMu9lFn3Sbee0AEsvGrXXN7VSalX5MajV/7icl5wgzIoIB97Xe//yxFUr8nyRED4D6
-         Mw+WjgLzoFY+VcEwgvhvq0Ann0hqkjHRxRqBlpiYKrPdWBXgrk5syfpc6nX0WVPx8Q7l
-         8pyA==
+        bh=dDX5RY4IsH57J/4XqqE9KKM+HkzFDQFjq5zuAjcxbQI=;
+        b=TRgeo6RwEHSsA2/xwLMsO8yEk6Vm/2bcK5XT3poRWGF+sKb6KRfMm5tAg90mxLiJ4Z
+         +CS+Ku+3CUnLMopKYwyxdXUu8jl7K2cJ/aytHhu6XEPN2OnZxGvqO135FE2VeFB7jacg
+         qlXyI4T11RbFO4M8BQQFCzT2SQ4gd7sl2PaRXFMrtg4R7Q8OeEIKKVmiXV7JonctTC50
+         ljsFCBPgYvggl2jHRGTgT9aBxAHfoq2nmH+b2hzZwAZHP0h03T90l6GedY/C8pxEScgU
+         OG5XoTQM5HRu9S4/dvq+LxyfsjbHoMMIf7+mXH1FnOwwenCoOVjir/gcsW/HCo78UUYw
+         kfcw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794319416; x=1794924216;
+        d=1e100.net; s=20260707; t=1794319419; x=1794924219;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=ek5NNY/Kina5esSdV1eh8PHtvhY8sTVXt0HaMhKb/+M=;
-        b=kE3DhrupJ+UDPFcjkK28Ct88tPr8pI2WasafntqochvIqsNowD1ooOc3DKFwkXD9Xg
-         zhWYYkGARYsPyQ0M1HQTH3mERrU21cznFBCiK+Sl8Kw/hsrfERHKX8Jp/3iWtMDb9vak
-         5ehxBk/VC/GvcLYUQ3IWk+uJDpybOSdqywBnf09iuHyWKHsJjLQQyqUgA/ixlA6Y1NRn
-         gGakNp928257Hs7EUTpuqqw6y9FF3zoMSJJTSp8vv8Fy2xUCCKS5/T7lYZiyvDBiJ3FV
-         dAVnCuwy+y6a0iCJOabwiGwmHp+0QTTroPYuB0MGOPkqs70caOPf5yYJkQgZ6Pu9AcK+
-         xmHw==
-X-Forwarded-Encrypted: i=1; AL+hErFWfIVE58pzPdQ/pvk+koSL67NQcEGRqiitJasWBsda4ukR4RG5YbFZkbaRORJpoOZIKC8hoj6QJlY=@vger.kernel.org
-X-Gm-Message-State: APuU4Z9bV8qYgFpzfKMMoXzMgMMffacNIVZZmIJvbNIGGx6f9PGm5ZTl
-	NtGkh7rv61tzrTdsDIvQLCsPVG4wH0p+9QsRzPkRNgDZyAoNUmJXcyf2608UyDaZa8bp6krJaA0
-	Qn8ZPD2ZvoU7Tl+Ejm5Mx+cMjYimghGPgY8Wz094GB70fwu/sv9SbfHPP3zWXMGGk67s9OSUfjB
-	B2pO8Ohf2XrsHQ8kh0eq9ALptwOdKZRi02mbqwHA==
-X-Gm-Gg: AYBFou0hhZDvcNAM2Z87woe80fhlVzpX31IdPD29/q1NNbg3VxTJMHaYM8zp+H4ZMwP
-	ExBRLkjGS7iHVwX2K87YQdQJwzVC9unhh4JjUvTC1s1UGrZbK9wG8jlFJxC71YRkofz3c4kjcA8
-	jLn0nFE6SaCS45saefCgL34pT9MPVgmJdUNBNBcmYVWZl/X7WolXdUSnorKA==
-X-Received: by 2002:a17:903:4586:b0:2ed:1b26:2bf5 with SMTP id d9443c01a7336-2edb929234bmr24126775ad.44.1794319415862;
-        Tue, 10 Nov 2026 06:03:35 -0800 (PST)
-X-Received: by 2002:a17:903:4586:b0:2ed:1b26:2bf5 with SMTP id
- d9443c01a7336-2edb929234bmr24126515ad.44.1794319415317; Tue, 10 Nov 2026
- 06:03:35 -0800 (PST)
+        bh=dDX5RY4IsH57J/4XqqE9KKM+HkzFDQFjq5zuAjcxbQI=;
+        b=2yOke4z2LBdcLKfut1P/31KYmomZENn9zz80dd1iqRzGhFsf1WTxndwbsvA85XivmK
+         pBwMt04nFgypgfLYOjKnDU5nadekPtKohrM1e7PHecmZnI86gN+73rTS7cGuMs8MNv+V
+         BnOUuHbbXNEKjICHxFLom8Bh9tyGflYGt+RDcgKJCAKT8ZXcDpl5+WL7V7HzxkPPC9zv
+         UYSe5Og6gKHMcer2ufCkB7yhaSeWJ3Vpz3gWvv8td6OQMTpz2ZagRJxQ7Y2WtyGR+KKB
+         j1DVzzDNsFQkFLm8vEdwxZhe69Cdfn1L5g/jI3j8mOaqD6RZfYAZXmjXthKjKvpZubAX
+         aSgg==
+X-Forwarded-Encrypted: i=1; AL+hErEmvPVfqHDlzzzDXqr9Z7m9jlge7yiZkyByLM/QsY/Gr72GnZSh1BmAFuDFTvknf7XoA+4Sdrar09k=@vger.kernel.org
+X-Gm-Message-State: APuU4Z+Ei4MSTX+Vg3FUY6Xz1umBeVSD7TuFKD8daKktz55GtC41ABjk
+	M0be8+aL+NG2ktKU2Ag+ubbTndK9rwvPgWEIAP401G4/QJKKrH5LMBgr4DMygP1t6hwSXIbNXoE
+	F3Ik7O670lgb7PbXpS6Gi8wIzseedDpImeqRPQgDT+RyjItvZq+vpWTI1SQARIP72Vat5EP6vhJ
+	itlLnYX55lAY0rmude5m09st7mMKdZcBZzLaYyPQ==
+X-Gm-Gg: AYBFou0slthGX0Y0rBeCIqqlut17p4QRJ/F75QrLLT+MDmPwOZm7EGFNNgm8H4XbOEl
+	r+T7nKxnS1ew/xHrv+48XRjDKx+cqjSEXIMaFsJRlfqZWKF6I6mHS/aTnGyh1+Ep0q3L1gF6uHG
+	bGGOACqJGuykzHyp8fUkMpXKVmrsGZsXwrg5fuCUgNDE7pntK3zy5+nzq5fQ==
+X-Received: by 2002:a17:902:d547:b0:2ed:218:6043 with SMTP id d9443c01a7336-2edb93052e6mr21107265ad.59.1794319418779;
+        Tue, 10 Nov 2026 06:03:38 -0800 (PST)
+X-Received: by 2002:a17:902:d547:b0:2ed:218:6043 with SMTP id
+ d9443c01a7336-2edb93052e6mr21107095ad.59.1794319418328; Tue, 10 Nov 2026
+ 06:03:38 -0800 (PST)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -127,141 +127,101 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261030143151.2916788-1-codex@local.invalid>
-In-Reply-To: <20261030143151.2916788-1-codex@local.invalid>
+References: <20261101063719.88570-1-0xbeac@gmail.com> <20261102022924.51343-1-0xbeac@gmail.com>
+ <20261102022924.51343-2-0xbeac@gmail.com>
+In-Reply-To: <20261102022924.51343-2-0xbeac@gmail.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Tue, 10 Nov 2026 15:03:23 +0100
-X-Gm-Features: AclHuK9c-6I-YAHtE9dTnl7aHjWrrxjIwBDk_O287mNrvM9-nmP2rQsZ5uVzYFA
-Message-ID: <CAPx+jO-jo=1rZJ5ps127D0xoHnWmqZFmn-Nq+OkECVGvTQzZew@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sh_mmcif: unmap DMA buffers only after the transfer
- has stopped
-To: Codex <samarth.colleges@gmail.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Date: Tue, 10 Nov 2026 15:03:26 +0100
+X-Gm-Features: AclHuK_Jj5PX-_n156Je1b1cz-aHL6EQj5fE_4gj1noerQIcKZbFTd5LaBqKoz8
+Message-ID: <CAPx+jO_-6R2N_Mf0AjsqVa==4fQAf2hoveOsR6RyY8zVxrPbSg@mail.gmail.com>
+Subject: Re: [RFC PATCH v2 1/2] mmc: dw_mmc: drain bh_work on host removal
+To: BeaCox <0xbeac@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulfh@kernel.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-ORIG-GUID: oZjdQlaioKTn0k6LWHtVhSfnkk8K7hq_
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMTEwMDA1NSBTYWx0ZWRfXy2a1BOkG836J
- wQJgi6saXMd73D++o+x9XdKh+ioW/6U7atJLmsiovS+2c9Y4xGOICHk1gKQoCJ2iNUknjpg/C4H
- ePOI0kcUGQo3a21/WBBk76JYbGmYl2o=
-X-Authority-Analysis: v=2.4 cv=FuiQbGrq c=1 sm=1 tr=0 ts=6af32439 cx=c_pps
- a=MTSHoo12Qbhz2p7MsH1ifg==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
+X-Authority-Analysis: v=2.4 cv=XqZvqlF9 c=1 sm=1 tr=0 ts=6af3243b cx=c_pps
+ a=IZJwPbhc+fLeJZngyXXI0A==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=rJkE3RaqiGZ5pbrm-msn:22 a=pGLkceISAAAA:8 a=e049Jz8NGw_-8GbDANAA:9
- a=QEXdDO2ut3YA:10 a=GvdueXVYPmCkWapjIL-Q:22
-X-Proofpoint-GUID: oZjdQlaioKTn0k6LWHtVhSfnkk8K7hq_
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTEwMDA1NSBTYWx0ZWRfX0t/Z0McV0SpA
- OwdtOhbM5ca3uL87TsqvOupR9Nzi49V6yYUBLcwkd0TONozMZzCch1CiagkOjupj9OP4pn/EIXv
- MQ3uIwWXnn0qGGMKlUfMJ36/oRICNK9M2WpdBi+KmrW7dOrG019HfD8rk22153179tb2DWgVJCK
- b8oB+V8S7+cpBe4Ri7ts/qKNq14J2brKtB3MfllHDd1TAqHMAhzLkX2D/52TNTbOyDe85Eey2BW
- 0jrOU5jBz4FckN/k3xf2XRdhlWBCbAaSM9am6l3D33vNjDFIRLa2uS0RccQmoC72I+QuJknSZPR
- Ja7Wa64AW2PJUCCdyieLqq/caflDU1Ud83H9QcR0Z84w30waRIaIay+bby8dmShXxGcymT9ftdZ
- XofQponbOJ7pTUNINGjAxcLkb5biUj48pKTZ5IyrbZj2kxj4zjJo5c+dcjY4RYxn0pUYNJOTwxR
- xFZQsGEN1+Y+N4fQOLg==
+ a=3WHJM1ZQz_JShphwDgj5:22 a=pGLkceISAAAA:8 a=VwQbUJbxAAAA:8
+ a=J95AHcnkyf1SBl47ZhgA:9 a=QEXdDO2ut3YA:10 a=uG9DUKGECoFWVXl0Dc02:22
+X-Proofpoint-ORIG-GUID: FTT5VPFSBj9CTOhqExsqumk5UV_mDxH0
+X-Proofpoint-GUID: FTT5VPFSBj9CTOhqExsqumk5UV_mDxH0
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTEwMDA1NSBTYWx0ZWRfXz3HMbhJgFQiM
+ tiP0Uvn36yH9kvqKKtvBwHGIt07XCBZGLPxwRN4ag843EGKLXIZj7/yxe/F67vCbbkjfHY8TmsJ
+ F+EY3t5CUrloGM6Bvydv5QZTpXK5RyQ=
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTEwMDA1NSBTYWx0ZWRfXxpT1PkMRcSMx
+ 04Z0fxZrFxEUp441ANuwYXnECPFmhK4NzoGi6qsfWqBLGZf+9Uxnsiu7g6Mnoh61TUXQfJTqH8a
+ NKNdWSQtQ8SShNIbNbhxp1SvmqkMAhezcnWopDRcgo/tr14oabRdD9Q6WnZYopZiBnWnNTAKUQq
+ mlIRyWFZ3OKq6S4/jJB8lVg59sFREEmW8tK0a2FtjvXnNpQI8hsZIsrYcX9KmQM4dqwN/kgNMIz
+ Kzjkat9SlrLhqUVTgNLC+moTjAI3+06YkFcFKboI89DQPM+ZJoZmwG0zKuAWPhyjknn0EzdddeM
+ 9eJJCkXjtdElcfuH62qEklxROw1He69j1zjDeJLjzbl9gmwuZrszEUOesDCaUhypoERT9WsJfsP
+ TXSRjkXzkxanfjVjjwdb2/iRdMTnwLULUd2/QVZzjwK2fJBe6EopwsXv7iL2Zr005IPpWOLcBkY
+ wUJFoGJykS82Qc53nLA==
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
  definitions=2026-11-10_04,2026-11-06_01,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 bulkscore=0 adultscore=0 malwarescore=0 spamscore=0
- clxscore=1015 lowpriorityscore=0 phishscore=0 suspectscore=0
- priorityscore=1501 classifier=typeunknown authscore=0 authtc= authcc=
+ impostorscore=0 suspectscore=0 clxscore=1015 priorityscore=1501
+ malwarescore=0 bulkscore=0 lowpriorityscore=0 adultscore=0 spamscore=0
+ phishscore=0 classifier=typeunknown authscore=0 authtc= authcc=
  route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2611040001
  definitions=main-2611100055
 
-On Fri, Oct 30, 2026 at 3:32=E2=80=AFPM Codex <samarth.colleges@gmail.com> =
-wrote:
+On Mon, Nov 2, 2026 at 3:29=E2=80=AFAM BeaCox <0xbeac@gmail.com> wrote:
 >
-> From: Samarth Narang <samarth.colleges@gmail.com>
+> dw_mci_remove() does not drain bh_work before the driver core releases
+> the devm-managed host.  The interrupt handler, the fault-injection timer
+> and the DMA completion path can queue that work, and its callback
+> accesses the host and MMC request state.  A work item that is still
+> pending or running after remove returns dereferences freed memory.
 >
-> When sh_mmcif_end_cmd() is woken by a data error interrupt or a DMA
-> timeout, the DMA descriptor may still be active. However, the function
-> unmaps data->sg before clearing BUF_ACC_DMAREN/DMAWEN and calling
-> dmaengine_terminate_sync(), potentially releasing the mapping while the
-> controller is still accessing it.
+> This is not a regression from the tasklet-to-BH-workqueue conversion.
+> The tasklet that bh_work replaced was never killed in dw_mci_remove()
+> either, going back to the original driver.  Commit 921c87ba3893
+> ("mmc: Convert from tasklet to BH workqueue") only replaced
+> tasklet_schedule() with queue_work().
 >
-> Since data errors can be triggered by the card, a faulty or malicious
-> card may cause DMA accesses to continue after unmapping, potentially
-> affecting reused IOVA or SWIOTLB mappings or causing premature cache
-> maintenance on non-coherent systems.
+> After removing the MMC host and masking controller interrupts, drain
+> the interrupt handler and disable the work synchronously.  Disabling
+> the work also rejects later queue attempts, unlike cancellation alone.
+> Stop the fault-injection timer after the work callback has finished so
+> that it cannot rearm the timer after teardown has cancelled it.
 >
-> Move the unmap after DMA termination so that the mapping remains valid
-> until the transfer has either completed normally or been terminated
-> synchronously.
->
-> Fixes: eae309836509 ("mmc: sh_mmcif: Terminate DMA transactions when dete=
-cting timeout or error")
-> Assisted-by: LLM
-> Signed-off-by: Samarth Narang <samarth.colleges@gmail.com>
+> Fixes: f95f3850f7a9 ("mmc: dw_mmc: Add Synopsys DesignWare mmc host drive=
+r")
+> Cc: stable@vger.kernel.org # 6.11+
+> Signed-off-by: BeaCox <0xbeac@gmail.com>
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
-> This issue was identified through static analysis of DMA lifecycle
-> ordering and has not been validated on hardware.
+>  drivers/mmc/host/dw_mmc.c | 5 +++++
+>  1 file changed, 5 insertions(+)
 >
-> Since the request pages are not released until mmc_request_done() is
-> called after DMA termination, direct-mapped pages remain owned by the
-> request. The potential exposure is therefore limited to the DMA mapping
-> layer, including IOVA or SWIOTLB slot reuse and premature cache
-> maintenance on non-coherent systems.
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index ff0b25d..5b47643 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3406,6 +3406,11 @@ void dw_mci_remove(struct dw_mci *host)
+>         mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>         mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first =
+*/
 >
-> The fix also relies on dmaengine_terminate_sync() stopping the channel
-> correctly on both MMCIF DMA providers. However, shdma clears CHCR.DE
-> without confirming that the channel has stopped, while rcar-dmac polls
-> the bit for approximately 1 ms but only logs a timeout if it remains
-> set.
->
->  drivers/mmc/host/sh_mmcif.c |   23 ++++++++++++++---------
->  1 file changed, 14 insertions(+), 9 deletions(-)
->
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 8bd9cdeda..7b33f832b 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -1173,15 +1173,6 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host =
-*host)
->         time =3D wait_for_completion_interruptible_timeout(&host->dma_com=
-plete,
->                                                          host->timeout);
->
-> -       if (data->flags & MMC_DATA_READ)
-> -               dma_unmap_sg(host->chan_rx->device->dev,
-> -                            data->sg, data->sg_len,
-> -                            DMA_FROM_DEVICE);
-> -       else
-> -               dma_unmap_sg(host->chan_tx->device->dev,
-> -                            data->sg, data->sg_len,
-> -                            DMA_TO_DEVICE);
-> -
->         if (host->sd_error) {
->                 dev_err(host->mmc->parent,
->                         "Error IRQ while waiting for DMA completion!\n");
-> @@ -1208,6 +1199,20 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host =
-*host)
->                         dmaengine_terminate_sync(host->chan_tx);
->         }
->
-> +       /*
-> +        * An error IRQ or a timeout wakes us up while the DMA transfer m=
-ay
-> +        * still be running: only unmap once it has completed or been
-> +        * terminated above.
-> +        */
-> +       if (data->flags & MMC_DATA_READ)
-> +               dma_unmap_sg(host->chan_rx->device->dev,
-> +                            data->sg, data->sg_len,
-> +                            DMA_FROM_DEVICE);
-> +       else
-> +               dma_unmap_sg(host->chan_tx->device->dev,
-> +                            data->sg, data->sg_len,
-> +                            DMA_TO_DEVICE);
+> +       synchronize_irq(host->irq);
+> +       /* Stop the work before the timer that it can rearm. */
+> +       disable_work_sync(&host->bh_work);
+> +       dw_mci_stop_fault_timer(host);
 > +
->         return false;
->  }
+>         /* disable clock to CIU */
+>         mci_writel(host, CLKENA, 0);
+>         mci_writel(host, CLKSRC, 0);
+> --
+> 2.43.0
 >
->
-> base-commit: 24a19b953e2a3d0ea5a8c4951a0ab8f32720c907
