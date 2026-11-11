@@ -1,75 +1,68 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=188.68.63.174
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=194.117.254.33
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794388022;
-	b=xX+zYeiNrZfiwOxQYZHKytgoM7/eD9srtkKPdIxPg3+0EdqU093EMs7wvPCLlgLAmfV6
-	 oee08nSjkDZTU14QN6npCALeLsdW9FuEKx/wD3n+TEvT9E4rc55rWUJ5lMPkmUk++sV8y
-	 HoZw0fEU2YrqvwvGj8OgjcSziFnBMoASr+NBA5Fl2B1rmpcjz+19js4u9TWCoLFSeA6s2
-	 K/u2s46BIq2MFSPuJ8EvC56CEhAgivWwJPDJ4Yv6o8vcqoON6t3LRd7F5aJZtQPKSrkKh
-	 tjdXZmQWn8C0juOp8EiA0h5vWy5Lb2/zV0uu3/csezFT7v3kBtbe0ym6LUy50Iay6AQ==
+	t=1794391629;
+	b=RqjIAuBu4MNA1sOwH/RoHViPsybYyn7bV6le3N73aKeU1dMMsYgE7ieYRCbFslvU9+AI
+	 rUVG/ki21EvZ3HDJBHzVt7pBQIZvRVrNv2HvbA4o4JSaPCPjJ4JSLAILhuj6aStYcno0X
+	 1+pfjER64MRVCJVK2t5DH5g4ZFlwE6iW81Yc+NZUMZcGJQCIDLdkwrPNAU0wG3acm1qui
+	 Mt9ijPaua/iohpBSDAdZ3soH29ib1Rgbdpvm3XbWWMYlVNFPy8jd1g2JJhXi+m4pDWt9J
+	 sSQcL19XQzpBMBzP5m5HFDOCiY5Z2iM+aNiUlnGCWgG1hZRRN3tDw5cQJoyJr1ISRSQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794388022;
-	h=DMARC-Filter:Received:DKIM-Signature:Received:X-Virus-Scanned:
-	 X-Spam-Flag:X-Spam-Score:X-Spam-Level:X-Spam-Status:Received:Received:
-	 Received-SPF:Message-ID:Date:MIME-Version:User-Agent:Subject:To:Cc:
-	 References:From:Content-Language:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:X-PPP-Message-ID:X-Rspamd-Server:
-	 X-Rspamd-Queue-Id:X-NC-CID;
-	bh=V+S16jvVJ/4V/Nfo9ZvQwnf9kBmWGykNbIHNb3xxxYE=;
-	b=0mpOBM6fYOK6zYpO6jgiSozbUsoNA3suceAHrlOOwIZVqzGC1g2HsE47nAbSoZMHoXfq
-	 lP9iuoZ906OvSt8zolsjyn1viVUaoqSU4alsFk3auE1GhW6wvsZCA6XZcMCcqAmcHhE6B
-	 o26Yl3jTTf0RfM+qYpobgeRjq0QuLFhCPaLZKGe7IJ+f/BRemzjMiLbkekcQBOM88gfl0
-	 WRLa1F+U9WE6mWAqVNyPgoMBtV7hfU/bMKP4yCHsyfG1eXVdMmEY5X6Tddx4GU/vlKwCp
-	 6xswCpou/nrV/mS2aGBnihnZKb2PTyX8hShIt838fhFZv55zIoPlRIrwRVgVT2oDLFQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794391629;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:X-UD-Smtp-Session:Date:
+	 From:To:Cc:Subject:Message-ID:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To;
+	bh=uxZnvepp6CMTyAQzCft/l3P80dC4U8HDCpbqhXxVogk=;
+	b=ocnGBPT8NlxJPD0yAvArm4Yid6uLsx2sgu3WO0tOeW5D9XgWeNt84INaC+fXZ4eFGHMj
+	 hawFvID93n4ggRZN2v1RS8hSoW3NnrXK+tUwP7Gu/uHnGIOb4yxQ+CVXtQ7XvuN3G6vg5
+	 BhThQRLoNVisG0QHI2iVQoDwEVUu5KfOHDuaoNHZLvEOH4VG1TUjgPY9QyExLZNE82kXJ
+	 T+yYCbP1cRgj725d00BIuq81iPeWBAaYgj7u1XkBJnEC/48Nah+yzE60JaRxqg11HvZth
+	 L9B6pYV122g32vN30nhgVorAkUTuxFa5+qa2TSYX/jNYMpLCQQF9ATQzHkQ61x4oNkQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=leemhuis.info;
-	spf=pass smtp.mailfrom=leemhuis.info;
-	dkim=pass header.d=leemhuis.info header.i=@leemhuis.info header.a=rsa-sha256 header.s=key2 header.b=CpHnNhvb;
-	arc=none smtp.remote-ip=188.68.63.174
-Received: from relay.yourmailgateway.de (relay.yourmailgateway.de [188.68.63.174])
+	dmarc=none header.from=sang-engineering.com;
+	spf=pass smtp.mailfrom=sang-engineering.com;
+	dkim=pass header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=PkayZSoz;
+	arc=none smtp.remote-ip=194.117.254.33
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E901606A338
-	for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2026 09:07:01 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8E901606A338
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=leemhuis.info
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=leemhuis.info
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA22D606A330
+	for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2026 10:07:07 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org AA22D606A330
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=leemhuis.info header.i=@leemhuis.info header.a=rsa-sha256 header.s=key2 header.b=CpHnNhvb
-Received: from mors-relay8204.netcup.net (localhost [127.0.0.1])
-	by mors-relay8204.netcup.net (Postfix) with ESMTPS id 4jPd1v306Vz8qr3;
-	Wed, 11 Nov 2026 09:06:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=leemhuis.info;
-	s=key2; t=1794388019;
-	bh=/kbCvdOJ7QCib0T9Mf7mnkxk/okPSpYuI282WIwHn+Y=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=CpHnNhvbzWGLvGdFMiV1oE7K/oASCqJrT/SHEw2VEDJo94ZdqF/3nav/Ihx/fu3GT
-	 sHkiJ0xEmgX6A8O6wJ3RDwHDiAIlV/s5qfm5GURaqFxLQ8CAm9coi+/A44WxVoHScr
-	 OkPXGZgAKQrnCeFQQr9OtBLeBpKsHq6zGyH+GOJOMWhku+hPI2MRdvUneKUSqD7wjH
-	 oGVod+POD933opxN2pkCu4R3ji39KALjG+Oi3/YKhVrv++UmseEQ7vtWgU6Rikh4ET
-	 4zJY32A3X/2yeqzOYVt2ALYm/0ZTE01sVclmmiQLfG4+F0GWREvP5Jsg58rvYNDH+s
-	 p44Oox/5RcppA==
-Received: from policy01-mors.netcup.net (unknown [46.38.225.35])
-	by mors-relay8204.netcup.net (Postfix) with ESMTPS id 4jPd1v21Pbz8fvQ;
-	Wed, 11 Nov 2026 09:06:59 +0000 (UTC)
-X-Virus-Scanned: Debian amavisd-new at policy01-mors.netcup.net
-X-Spam-Flag: NO
-X-Spam-Score: -2.901
-X-Spam-Level: 
-Received: from mxe9fb.netcup.net (unknown [10.243.12.53])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (P-256) server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by policy01-mors.netcup.net (Postfix) with ESMTPS id 4jPd1s15N4z8v5H;
-	Wed, 11 Nov 2026 10:06:56 +0100 (CET)
-Received: from [IPV6:2a02:8108:8984:1d00:a0cf:1912:4be:477f] (unknown [IPv6:2a02:8108:8984:1d00:a0cf:1912:4be:477f])
-	by mxe9fb.netcup.net (Postfix) with ESMTPSA id 9D22E5F9C5;
-	Wed, 11 Nov 2026 10:06:18 +0100 (CET)
-Authentication-Results: mxe9fb;
-        spf=pass (sender IP is 2a02:8108:8984:1d00:a0cf:1912:4be:477f) smtp.mailfrom=regressions@leemhuis.info smtp.helo=[IPV6:2a02:8108:8984:1d00:a0cf:1912:4be:477f]
-Received-SPF: pass (mxe9fb: connection is authenticated)
-Message-ID: <eb52777b-8607-427b-a709-cf1ab76ef672@leemhuis.info>
-Date: Wed, 11 Nov 2026 10:06:18 +0100
+	dkim=pass (2048-bit key, unprotected) header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=PkayZSoz
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=uxZn
+	vepp6CMTyAQzCft/l3P80dC4U8HDCpbqhXxVogk=; b=PkayZSoz0Yfvrg8A4nVp
+	y2sD11cFcE+/jq2e41+na8Uosyr/Oc4uG8mR9M4oXsf2ztA5l4TLDGlUBZsz5kOS
+	NLhAQZOcr+JnL8b8XM4pWPYyczh+yorEIUjS+RA8JpBQ/Sr0dvWtE05mafQIOLdG
+	fmP/rnoa1g98NMJb1zAfbZnqNv1mdTl5R6D2+jY5s2rwRd/hlgBws9C/lQDn3X6P
+	qRH8OuH3Lxh75aBGQDb27642NWK2Ro3ALFxJmAwIn6z5LoYpxC5Tvey3ycUJb8zE
+	4aMW8WfuaEWAIkSO7/Sl1X/C2Eej0PzlKXc8wqdsxX31yLJi/sPTm2+2ulnYftB1
+	fQ==
+Received: (qmail 562499 invoked from network); 11 Nov 2026 11:07:04 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 11 Nov 2026 11:07:04 +0100
+X-UD-Smtp-Session: l3s3148p1@NOlfW/1fctEujnun
+Date: Wed, 11 Nov 2026 11:07:04 +0100
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Biju Das <biju.das.au@gmail.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Philipp Zabel <p.zabel@pengutronix.de>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Biju Das <biju.das.jz@bp.renesas.com>
+Subject: Re: [PATCH v25 03/11] mmc: renesas_sdhi: Add clk_mask to support
+ wider clock dividers
+Message-ID: <avQ-SIf0ZEsr51SB@shikoro>
+References: <20261028-rzg3l_sdhi-v25-0-57f16691c2ed@bp.renesas.com>
+ <20261028-rzg3l_sdhi-v25-3-57f16691c2ed@bp.renesas.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -79,49 +72,60 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [REGRESSION] rtsx_usb_sdmmc: RTS5129 (0bda:0129) no longer
- detects SD card
-To: Philipp <pjjonas@web.de>, linux-mmc@vger.kernel.org
-Cc: regressions@lists.linux.dev, ulf.hansson@linaro.org
-References: <523eb7d1cc0811df4a5e4c534538f3dd@web.de>
-From: Thorsten Leemhuis <regressions@leemhuis.info>
-Content-Language: de-DE, en-US
-In-Reply-To: <523eb7d1cc0811df4a5e4c534538f3dd@web.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-PPP-Message-ID: <179438797893.651191.2239725785049408778@mxe9fb.netcup.net>
-X-Rspamd-Server: rspamd-worker-8404
-X-Rspamd-Queue-Id: 9D22E5F9C5
-X-NC-CID: OyAd3oB1dPEk2svXE75+9uKgLyuDtW+DPjOTYIBvlgcyR17OLmM=
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="uChG5fgUX4xJiPFz"
+Content-Disposition: inline
+In-Reply-To: <20261028-rzg3l_sdhi-v25-3-57f16691c2ed@bp.renesas.com>
 
-On 11/8/26 19:51, Philipp wrote:
-> 
-> the SD card in the internal Realtek RTS5129 USB card reader
-> (0bda:0129) of my Lenovo V110-15IKB is no longer detected.
-> 
-> Works:  6.12.116, 7.2.x
-> Broken: 6.18.x, 7.3.3
-> 
-> On broken kernels rtsx_usb and rtsx_usb_sdmmc load and the platform
-> devices rtsx_usb_sdmmc.0.auto / rtsx_usb_ms.1.auto exist, but no
-> mmc host/card appears (no mmc0, no mmcblk0) and there are no errors
-> in dmesg. Reloading rtsx_usb / rtsx_usb_sdmmc, re-inserting the card
-> and disabling USB autosuspend (power/control=on) do not help.
-> 
-> Since 7.2.x worked but 6.18.x does not, I suspect a change that was
-> backported to stable.
+--uChG5fgUX4xJiPFz
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Might, but might not -- and I wonder if you have two bugs, some race, or
-if some .config setting is disturbing something. Overall this situations
-is somewhat puzzling. The best way to bring some light into this is afaics:
+On Wed, Oct 28, 2026 at 12:51:20PM +0000, Biju Das wrote:
+> From: Biju Das <biju.das.jz@bp.renesas.com>
+>=20
+> The clock divider on the RZ/G3L SoC is 11 bits wide, which needs a
+> clock mask of 0x200000200 in renesas_sdhi_set_clock() instead of the
+> hardcoded 0x80000080 used so far.
+>=20
+> Add a u64 clk_mask field to struct renesas_sdhi_of_data and struct
+> tmio_mmc_data so SoC-specific match data can supply its own mask, and
+> widen the clk and clock variables in renesas_sdhi_set_clock() from
+> u32 to u64 to hold it.
+>=20
+> While at it, clamp the initial clock value to a minimum of 1. If
+> actual_clock / 512 evaluates to 0, the loop condition
+> "new_clock + clk_margin >=3D (clock << 1)" is always true, and the
+> loop never terminates.
+>=20
+> In probe, copy clk_mask from the OF data and fall back to
+> SDHI_CLK_MASK_DEFAULT when none is provided, so existing
+> SoCs keep their current behaviour.
+>=20
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 
-Check if 7.2 is working; if it is, bisect between that and 7.3.3; of
-not, bisect between 7.2 and 7.2.x to find what fixes things. And ensure
-to use the same .config as a base during the bisection, as explained here:
-https://docs.kernel.org/admin-guide/verify-bugs-and-bisect-regressions.html
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-dmesg outputs from a working and a not-that-different version that is
-broken (say 7.2 and 7.3.3) would be helpful, too.
 
-Ciao, Thorsten
+--uChG5fgUX4xJiPFz
+Content-Type: application/pgp-signature; name=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmr0PkgACgkQFA3kzBSg
+KbbQ9BAAr/nzYNQcsD9ViDt2WEyB8HC2BkiqBKr+lWZFEoMfXyN1XK1vdG+PajX5
+7Zd/EleQZMTitOfetXGFjLfNo/hfo0Nf4GoPmPVkiJmTZSSAMETQi2bQoAJFIoHH
+csuGrBpNyFJPolnw3O440kP3B1DdIq8GKboWhrN0QfP1x3UvtrNLUf0gCRsaGxuq
+8gd5fSCCx6RL3+5JvdWCbQq62tggRnANfQ8yaQ7lGH9tS6HZJ76qpk/W1a/RhSZW
+uymCHgnsA1JcAvFnaAohmKvRVP/XjS354sHn40uNoWGshcheyeGvPUhjHOYjzRrP
+0BYt35kJHapOxyEfNAvZS3LphSUouF6NSmRjmZKWx6dKp+6hJG+fONXWSoXWlyHZ
+dy2t5X0wmFxlX7CZXTMJgTG2aTn8pFDqHJiyvbW1nClJO73WTxpX3+QX4vq3Z/e1
+Mc6xNmSA6xgaO68t5Wp4cEA8Szqt9jA8f0yew8/e0h36ehjThi/u0/tihyo5Fjuz
+oIohntq3U3sBDoV/oyB3P1YGHwSjPSt8kNxHqecahSII7rMhFaOm+AxshCM7cfGT
+1EnRLrV+5McHsXpc93DUH9bqoFk1Yr8b+2/V3KLcSvEUgJQYc6W0fHCmcJdF/suX
+U902TD191MX6r+YFZtJCkxuNmR5LWlTVaCtI/vnq8z9wLqwrgAE=
+=1p21
+-----END PGP SIGNATURE-----
+
+--uChG5fgUX4xJiPFz--
