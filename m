@@ -1,123 +1,150 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.229.35
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794400693;
-	b=vh5G+D5q1j95CIl8czSHWpsiNRSux+Stx3BHVOgdVmv4n683T85sAYSTx7Y7o+RWKIGb
-	 AwQPRqtRGtqn1RVLtdcxg7YoyNcQku5GyTuTkfNc2IzW8fGMMUuZLL3DH5gxtTWX+Ada+
-	 UkAa0nuWVvUpMPKmMrPEpnD9l3bI3eIY3TbU6Te01aaNi77YtFQAtTbN04e2/3NKlGSW8
-	 ptf2vmUSGlV8osGtJqTFqYBL/Yhd6TSRsnktH96X8WHNUQiUMY5hOOnp8rXL0DzAbe8qU
-	 XcN0s+bfqc6Tn+RkmhOaMbXek+xWyz5BX1m1YeIVFslpWtgWAeOVT63YWbVoNs5i7NA==
+	t=1794408136;
+	b=LYGFBdTGIpAz9RZAzQXBJm6iaZK7gNwmnnLhiY1o1dMoSg80RafUc0K726cF5OD/hom0
+	 UL9GWBVuUh53Gr3vstxI0mDnWBK0fy8Ogj1CJGc34/cs2p8RyLrBxNRKLN5Re2qpMeul1
+	 51YoOBLK0IS92DmWsShFSJecqCsfcpVrYgB3vImc+OIXlty3U7OYopkCkmzs1YyBIypwe
+	 XVQtpl6ovAozCCn/656EqjTUFYBvjkMD9f1bGcDy/uEW4ETp/wwz3NN5gvHkJJGXKQPSd
+	 z9IyNZb7Ktf8jU5jaYBYnxZJkKpaz4CfUZbwfPDsuHJeuKdUq7tdYsGwUx5Fr5qeNdA==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794400693;
-	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
-	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
-	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
-	 Cc:Content-Type:Content-Transfer-Encoding:X-Proofpoint-Spam-Info:
-	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-GUID:
-	 X-Proofpoint-ORIG-GUID:X-Authority-Analysis:
-	 X-Proofpoint-Virus-Version:X-Proofpoint-Spam-Details;
-	bh=N/aRmjV7cFcArA6Vo1LK5MJrHqjUEekZ6x7SBzSyzqg=;
-	b=F+KWnb1X6uFw6zmSk0XF/suC/552dhXnEEeqvjh7MKmzG47loYgzjExYpTNHmpjM08ca
-	 O/tTvDxZJaIbsvVa5Nez56ryuKubJGClJiZtKNkigagPQ/0mcD0JfKZaqE9SR0x7mw81B
-	 E05Q9dATMxd/cOEkaky/6BA8w944JGscxBvRUl6g/YPbR2Q2S2RtrIihECTHcSb6EMoLK
-	 2pXF+vYAdx/Nu9ys74ywfFYKhHcyvcvqFPF9qJY2bAg3XCoYk8YsXEevIMsa/UMeP+Vx0
-	 p5W8Lj0RlZXWy0+QkU89aJmn9m+WvD7bBdGSOAjdYHs/5GI+XNeXbg2r5PsGNRwbbjQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794408136;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:From:To:CC:Subject:
+	 Thread-Topic:Thread-Index:Date:Message-ID:References:In-Reply-To:
+	 Accept-Language:Content-Language:X-MS-Has-Attach:X-MS-TNEF-Correlator:
+	 x-ms-publictraffictype:x-ms-traffictypediagnostic:
+	 x-ms-office365-filtering-correlation-id:x-ld-processed:
+	 x-ms-exchange-senderadcheck:x-ms-exchange-antispam-relay:
+	 x-microsoft-antispam:x-microsoft-antispam-message-info:
+	 x-forefront-antispam-report:
+	 x-ms-exchange-antispam-messagedata-chunkcount:
+	 x-ms-exchange-antispam-messagedata-0:Content-Type:
+	 Content-Transfer-Encoding:MIME-Version:X-OriginatorOrg:
+	 X-MS-Exchange-CrossTenant-AuthAs:X-MS-Exchange-CrossTenant-AuthSource:
+	 X-MS-Exchange-CrossTenant-Network-Message-Id:
+	 X-MS-Exchange-CrossTenant-originalarrivaltime:
+	 X-MS-Exchange-CrossTenant-fromentityheader:
+	 X-MS-Exchange-CrossTenant-id:X-MS-Exchange-CrossTenant-mailboxtype:
+	 X-MS-Exchange-CrossTenant-userprincipalname:
+	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
+	bh=4+Irat6nFB62ZQ5zBniOr2/LqEj+DrNIptLLT4jBJrY=;
+	b=rzDWC8me4xtTICDtd3dEJXEhJNkKi+GEqonuctzKpw5M2gCNXwafPWBkfqJ1RAkDAGZI
+	 b5krYzjdy/WNSkJsnd8DzIrQEHPJxJa2Q91Hl8yMHp6HZrn97kNCNkIfZP1Sv80yvQ/01
+	 nkUgYzRdiapJD62Er183T00ELVDPLSuw7ESeg751ZGVCUyMBREpaWRPgp98Hl0vVGPrGu
+	 ftu+1JoBrf1Q2Q41m6MSU9TSjZy11DmfT0UEUgdnC8qEPD8jywjvMqCGRE1TKL/x9T9yh
+	 5pcV+WTM/+PuZt4ikDL1U0QCIYFAB8Syuh2ITUBxGjud/C4xcdErsriQ3l8jTh2UmwA==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=oss.qualcomm.com;
-	spf=pass smtp.mailfrom=oss.qualcomm.com;
-	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=gFVp+Ac4;
-	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=JmJof+9l;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	dmarc=pass header.from=bp.renesas.com;
+	spf=pass smtp.mailfrom=bp.renesas.com;
+	dkim=pass header.d=bp.renesas.com header.i=@bp.renesas.com header.a=rsa-sha256 header.s=selector1 header.b=UUhcLZNP;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.229.35
+Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11010035.outbound.protection.outlook.com [52.101.229.35])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AB94606A327
-	for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2026 12:38:13 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6AB94606A327
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0610606A321;
+	Wed, 11 Nov 2026 14:42:15 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A0610606A321
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=gFVp+Ac4;
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=JmJof+9l
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6ABCYmsn1358959
-	for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2026 12:38:12 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	N/aRmjV7cFcArA6Vo1LK5MJrHqjUEekZ6x7SBzSyzqg=; b=gFVp+Ac4kRHnINFN
-	2Gxzh3Ia932399gYojdmLddB7NhIAu1oXhA2JDP/wn3OFqDmsIoWWcL0djWCrJgT
-	iIN+lACHrY4/NwEeHH/0H4W+ky1BaPiUc5av/lxGC3oSz+Xm3sz3r1EccMINd2XZ
-	wBrkvlAIu/b9irr9+ZcUcY8ClbnvVB2UePBc5rcdjHNCOAPtk0ZXsoZuk85KnQxK
-	jsChlJc1HKtlhz7g/D+usVqsitC0497NApjpqUXHDRIktBNFye9bBr5QzyqZ4/IC
-	TllwhmkeYLrTSiutbHh1mlelgFmHFrfs8LbCa2vy9qc8l7CvN+UkWE1jSBQyF3xG
-	yHqWAw==
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com [209.85.216.71])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hvk7ps8x6-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2026 12:38:12 +0000 (GMT)
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-3b0a7cbf164so3427627a91.3
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2026 04:38:12 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1794400692; cv=none;
-        d=google.com; s=arc-20260327;
-        b=adU5FPssoMbDRAP803ISZIf9WGcbNLf+0tZmKKFLIgvTBSSNjLojgiOYgEKPxOFDWQ
-         kGCb8Q6TiVE3CKfy7X6dfSwz7BsR07tiyRr4IR7WM6B3Rg6zUl9EOIuQ4nQWYja4Bbsh
-         tYem1h2ibY65JTslSvDKCq+fTiDxbR0VeAaGPxx5Wh+NfSCT4QNXTi190TNk1JJcT6yu
-         yDsiETNPrmSDaDUwg7xcrG56+klPh6n70WnRJ7I5mQLW465p0j8nhtPkCNG0YuQh5CBc
-         6zQI81/Zef/SATcTu++h7EwumI0i16mKZaih1sPHBWF9m3RNin+IYCBaKuFEv2e1lbWO
-         yKJg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=N/aRmjV7cFcArA6Vo1LK5MJrHqjUEekZ6x7SBzSyzqg=;
-        fh=IOjCfBbtE8rLr7ZuyPIDt50aluDcD/uXrJS5TkuQGyI=;
-        b=WVB3gyNhmWNgeoZCQ43fGQ6L3XbzxuFJxs5dJVwdb5c4kcOBg49F9hr15Ziq7HIY1v
-         Gv80wRpj2TO2spJYpeAZ7lYxC0ZV6FrVyqRECAeW2RQvQW2lkT3wlmF9WXfBA7ZJmyUD
-         PYYcHhnXshtT+Ud6vy0xG8sHJdLZPMCelAARRCO/JPYp5vKPeRSEux9lQodMYya7h17p
-         G52s1Z9kEke6cSjc7tbAAxCbRGLT/pKP7vsWc22g1q5n5tCdnj0JajkHrrXu0a+5QQl7
-         iIWI/jb0b2rVBR4sgg441Rn0VJsNhwzQHg9bLVGwUSCFs70dRCvYIWnIu1ONwZzDq08a
-         Dx3g==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1794400692; x=1795005492; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=N/aRmjV7cFcArA6Vo1LK5MJrHqjUEekZ6x7SBzSyzqg=;
-        b=JmJof+9lNArolaJU8MZhpGNpN//8Nxgp4dQ9vnxEXvCr1lmhLSzoUQwdQcdyuV8OdP
-         AqBUcxwc5TfGxPV87WqUSoavMB7sXPAongKU1G7sE/M7AOWGraBEShC5yBh5QNYtUOQM
-         84Mv5KcuCkDcrGbV3Re5qua27aJnUX8mb85zJKfsJsIrQMsrU90OaqjzEq+ZPgRN3orE
-         W+CxeE/7ljizuP68+KS1RU78Yqn/GPTEqsF1VRWElYA153AUMgv/Ku2Lx2SQv2NC7T0A
-         aH4bLBqQsLnTeDVdTd2nCnjcf4zhPfio43B3F+FD7xFqGqCl00t83wXA1At/xxDkBbpB
-         q0fw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794400692; x=1795005492;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=N/aRmjV7cFcArA6Vo1LK5MJrHqjUEekZ6x7SBzSyzqg=;
-        b=ATtsr7Cx1l9r/71pfOXJqSe+oE76TEsoiNhM/HP1kV3yQDQ21Qmqw6+aRjj/ofWLaR
-         dJuV0Y+fYCC+hI5kZ1UdbWGoTmRz3GACSaF7Mjrx8gUCqCc/G7HW1IBnyqhExb8rsYww
-         9UAdhA9cmxADRE7bwQO3t07LkZb3ZF0ApkuLxlFDKby/X+iA4YiV0Fkga6JZSfq4q6n+
-         ohG61KWcKGv7DI2LNoEaiEg9G7hF4CFueG9q0E8bkOX5J/qzK+tUZhwBHhCBVytgwRw/
-         nHb/DkJN0O6s6sixZ1AZMvdwus8L0KDO7+BaLb9Rr0xlUn86F8cosEI5pbE5yvYcnaGT
-         ebKg==
-X-Forwarded-Encrypted: i=1; AL+hErFTh1sz+A1nhTYwhE321KA1yjlflws43Ny/lHhhkuFEaJMWdXsAp4ZWIs2/oTzXtIbSPoQYMN7HCiM=@vger.kernel.org
-X-Gm-Message-State: APuU4Z/zEstdZyZEvPjHrf3n1cOV1LIHdFvjvgby1PTb8I6k3fsUYZRa
-	AAiUcIzlVJRnWYWSKs8VRnYb0yMF+NQjQfrim/n7xqgYPXrt9SxB7HcZXaBXrq2vO0vCNCTm/lA
-	xeui37n8DlT5uL/BVP8dcfrFztQPnLfRCrJ2KkNuGTAr7LPzR7iFHjBWb1cfYS8b97uJI7gnGPp
-	XH84mNynjoF/L7w9m1nlfNUsAzfzCBtJRlIvywnQ==
-X-Gm-Gg: AYBFou00iFsQgHf0qCjXE63Tsk+qK2jw35WPBJWROLVBvWuiJoaW4s+af4tkep3O1Nd
-	Jnwp+fIKF1dVVHAUDGRG4tA01RrIKW0afr026bjK4PkMkXrCPnILmUk8qffg/0/X/1Sgyn1qoEf
-	2CRnqZA4as8Ps1Y50vjYqnkLwyiOCL0dWWuNm72h2WSAV5wFP2/L8X1MLt5A==
-X-Received: by 2002:a17:90b:4f43:b0:3ab:4f1:4f7e with SMTP id 98e67ed59e1d1-3b182ed93b9mr2269247a91.28.1794400691884;
-        Wed, 11 Nov 2026 04:38:11 -0800 (PST)
-X-Received: by 2002:a17:90b:4f43:b0:3ab:4f1:4f7e with SMTP id
- 98e67ed59e1d1-3b182ed93b9mr2269224a91.28.1794400691415; Wed, 11 Nov 2026
- 04:38:11 -0800 (PST)
+	dkim=pass (1024-bit key, unprotected) header.d=bp.renesas.com header.i=@bp.renesas.com header.a=rsa-sha256 header.s=selector1 header.b=UUhcLZNP
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=yiFkh0qyKrMbpbq2BmhOcMZ9czswwa+iIRL8L/FWhGCmbvdaebie61MwgyJYIzCJhUu0LemT2Gb4N4I1L7rmS2I110NWjqZwakp1Fzs62vGrkk+bcKZ0sV38YRzwAu0iwyMUwNgPiEdLFlATFEb+/sF8blc+cX9OLFJ0LNJK2lB7SRYVTUPcnmKfUlYRtCshX4Tmcbd11gbobvXzwUNE+yRLhYtk/M4Oxn1AwW3d06wca5z+DoybvLkc0pPjRIv9axmcZ67mgXFc1Brk6i4eZVM9NUNOmu+XddKBwJN4kiusr6RzvPSRT9y2mr2PXnwx2c4Fapti0gpfksZZsxJWyQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=4+Irat6nFB62ZQ5zBniOr2/LqEj+DrNIptLLT4jBJrY=;
+ b=Qc7S4E0C6iVSOf5kKfPAZUV64EExC0BWEmw0/4PKPpkD3eEYLLhcG2h27Ds4vGPUCkPOlEMjSUF3YRIGDQW/MQZ74W3pY2K4atC1XWtI06SohPCQSTgUbLO0wFLqDol8wVpIe0gIyvORkLkfrxbaCZyz3G6ZzC5/UWdnSydXwcQfyd4piewNSGJIJ9jn+u7H5RkYT9y7VhNrxJ25FtI9LXdgA9OzmwHsM4WqO9sGhIdc6XkaqXH3oSLd0nNgZRex85Bjk9/iyjVfV+EROnI1SxUZzCjNA6ZgYSRf1VQRTq8tIPiYuwx3NR1ZTFyUOfuaO65MwU46INEwA6vd/cRa3Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
+ header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=4+Irat6nFB62ZQ5zBniOr2/LqEj+DrNIptLLT4jBJrY=;
+ b=UUhcLZNPR4pTXI/Xr9mT9wHtk3DmZReUhrT6D38QBT3B/eFQ2oI00K8zNjB5P8a7Pq373OWfoYwi3jOT6k2O8+U+ocx0YyK3n5Y3g/m5p2twAUop9HnEVotrAcGrC4AieWZ57O9Hf4P3Gp7567Y6jT4sWubtZYIdgLQ+eg2L8lk=
+Received: from TYYPR01MB6603.jpnprd01.prod.outlook.com (2603:1096:400:e0::9)
+ by TY5PR01MB18237.jpnprd01.prod.outlook.com (2603:1096:405:3e4::24) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.615.9; Wed, 11 Nov
+ 2026 14:42:04 +0000
+Received: from TYYPR01MB6603.jpnprd01.prod.outlook.com
+ ([fe80::145b:b854:162:2e7f]) by TYYPR01MB6603.jpnprd01.prod.outlook.com
+ ([fe80::145b:b854:162:2e7f%5]) with mapi id 15.21.0615.008; Wed, 11 Nov 2026
+ 14:42:00 +0000
+From: Biju Das <biju.das.jz@bp.renesas.com>
+To: wsa+renesas <wsa+renesas@sang-engineering.com>, "biju.das.au"
+	<biju.das.au@gmail.com>
+CC: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>, Krzysztof
+ Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, Geert
+ Uytterhoeven <geert+renesas@glider.be>, "magnus.damm"
+	<magnus.damm@gmail.com>, Philipp Zabel <p.zabel@pengutronix.de>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
+	Conor Dooley <conor.dooley@microchip.com>
+Subject: RE: [PATCH v25 00/11] Add Renesas RZ/G3L SD/eMMC support
+Thread-Topic: [PATCH v25 00/11] Add Renesas RZ/G3L SD/eMMC support
+Thread-Index: AQHdZtsKIVdgUVrim0CV11eBXE5E9rco13GAgAAwFRA=
+Date: Wed, 11 Nov 2026 14:42:00 +0000
+Message-ID:
+ <TYYPR01MB6603343EE1D9AF5140FC080286712@TYYPR01MB6603.jpnprd01.prod.outlook.com>
+References: <20261028-rzg3l_sdhi-v25-0-57f16691c2ed@bp.renesas.com>
+ <avRWDN43k3LcFVRa@ninjato>
+In-Reply-To: <avRWDN43k3LcFVRa@ninjato>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=bp.renesas.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: TYYPR01MB6603:EE_|TY5PR01MB18237:EE_
+x-ms-office365-filtering-correlation-id: 09dccdd9-f078-4708-27be-08df4001f1ee
+x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|376014|7416014|23010399003|1800799024|366016|38070700021|10067099003|11063799006|4143699003|56012099006|261026121527099003|22082099003|18002099003;
+x-microsoft-antispam-message-info:
+ neRdEKkPifY49jo+5LudlAY26N7o9itZhRxBn63kJx0aM26JUlzb+Xgc9xfheNyblPjB9/ADt0uW6nmjR120MqAiB1vFg1g4tbabXpfyv8F8KK8yw1iCZCn7QNhi8SIiKv3O6ZVKMKxog8RRhXeDOP9gcjxe6MOUuD620Tj2vq+LXegxi8qbIDHtc65AQjvGnD+2d4KDkDZQri+J2YJVA63Z/347sTHw/rXeDO8AtiGIac7Z72rAHi5prfUe5BgAUP9wQiS8bOoN6LVA4DhdxDoLuVELRXTJMMUwLpFbzliyPYrIiNmFZkQHsu1gKhjVKlPF1hktlFKBHbtotCXVV9Ic9QezwJg8QbUtk0QNa5W5U9iJphLF44iIte7MEjjnjz+GUQ/IAl/osdPU9KnX5Om+nMRiyWk8nyJvwQ0x6Q4vJ8nyc9DUc8sslzSjL5NTxx0Wg/rkrGLdg/kG5c5DTxhY50pgnrIGpOOB5eGdroegHaaOYW56bMFYS2JWi1g7Ld0mhcYgho4aSqBnTjRNuv8xJC59WWfs5FiHInAYN/hARreIvCDs1EMGXxuEhaCanZsmhVbE78QYvYlu1WetGRJ8bxJ1qI/YVKiYVUMXwmng2LdWYv84Wkq8tixrDtChU41MbFGLxh/8rn6UQk8SZ17u3tg3ERbifHio4bPsaPIODyXbR+CMBn3Ue4hWBb6z8kpem5kl7ugZZx7H77gPsw==
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TYYPR01MB6603.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(23010399003)(1800799024)(366016)(38070700021)(10067099003)(11063799006)(4143699003)(56012099006)(261026121527099003)(22082099003)(18002099003);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?IOEcUyWKy2Oodlb6T+bMhn9F99M5osYR+PCo9UMMco5cuBchmVewUMjJdjDG?=
+ =?us-ascii?Q?yJ3J4BxJUxvHYsOKKgYN1d9WDu4XETUKMwhZeAmlOkI4J3OJb+Rsuf+9b0vJ?=
+ =?us-ascii?Q?mIcT5mPYVHaUi2pThIS7aJ8/LlwfaavhWdpYfet7EQuaPQXZViV+fdC8L8JK?=
+ =?us-ascii?Q?r5aykZ+aWBhaNc2b3cc7DviRy6IbLcjd8rbFcSIQddsQlZySBC65t1NSf3uh?=
+ =?us-ascii?Q?UX04nXsDR4MvOVt4AjhSCgm3t4+W3PqefM5JN38LxF2ApT9UwpnnDUex7+pD?=
+ =?us-ascii?Q?MOa/180ZDe6ET+et7a5suu5NNDHCkjskW4tGih58C444Wc+hCVyq6bMHH4LB?=
+ =?us-ascii?Q?Sif0Op3KLSDbBeQ7VE7KtLDYEiumtcoFRZtXoEMHoVq0b0IxhmcPiaPLqzdF?=
+ =?us-ascii?Q?Zu8wWKma3+2qSXyHnZL0BU/HONcZokPAeYAL4fLbDYB4QHGUB1BcDRAwZgzN?=
+ =?us-ascii?Q?Zlx46nwtq2EtIssGE14AGOq6SYzEpsE/wg0rF+TzTA3bb8wLpbSOFJMJv8ZI?=
+ =?us-ascii?Q?z4/pdnXenV5BEM3lUXhZjQkoUkG4kaGSCxpkGnR+lgH4WD9LKA2BnQ2NPV0/?=
+ =?us-ascii?Q?+IaccrX7DEJn/0ZSqInHlCmnkcBPQl5MGYT8GgeKYp/bx41QBoQjiUrrpxQm?=
+ =?us-ascii?Q?wgMgswdS0ZtOJDxMFkI5e3wspmt9EB9bI68TkZYhZJODhkJHU2Q2vgHZQ6Mk?=
+ =?us-ascii?Q?jJZq95YGtPvHyZzeR8UEBOb8kAYIWIv68NGYQuNbB+9hwUerD/AYRIgwdc24?=
+ =?us-ascii?Q?9JHH7J5wI5qGqNjKHFw8K0XGUUVPSqbO2s+1lEUHYUaI4yOy6elxcOkejJn3?=
+ =?us-ascii?Q?AiIgrxs6vtwbjuMSNRCwoYNbzGii3t/f0hQh1cqybViwV4jzZPTO50cOe1E/?=
+ =?us-ascii?Q?A0kYJLzzgmWg0zn1cnZzwEtxxqK8X1V+CkOzCMlnv6U6aP1u+tKpVk2+Ee9Z?=
+ =?us-ascii?Q?k5qaEnXPoe1ux5ivbt+UthZeikgFoF66vRRnkl68UAbjEekw/wLrsZZoA2eb?=
+ =?us-ascii?Q?RpkhSwara5D7R4E3d3MfCeMJzqBbe5osU/tNScaD1yFmQ0nlIWjD47QtpVsc?=
+ =?us-ascii?Q?93QavZ+5cxn0ATv5hN6nUmFEsVxOqwS+ug/n0ce+V2xyfRfyVaZi/t0Lo1e1?=
+ =?us-ascii?Q?DX6r5sFeKPlmB/+qXPNMgODckl9LvfNud8YLnjv7W1bRGoLag+pxHOxLmUfB?=
+ =?us-ascii?Q?jURDgYfjI/tNpz3PS1WaqAwEcQDtFivcVIA49cCeAgGoMDVZ3iorUBTXOW/Z?=
+ =?us-ascii?Q?+V5yaCCD3b2Nlz+wjzmyYnkbXePswseiq+alz9mWQHGj1fWTcCPLoJeTHxGB?=
+ =?us-ascii?Q?RUvgGwPIRTFqP2R0VSDcf9ZPSl0I4XwvIgjhA+Z5rKZJr2sZ3DvCp9hASVLd?=
+ =?us-ascii?Q?Vf0EaxEJ5xeWwz+IqiQ0f/hI/UnDEWbU3f51HC7+KsPkY/JJoqZUkB7uE7Y/?=
+ =?us-ascii?Q?AgnR/bu71vfDmjyzVoqZ5Nx9AbO5meM74YIVg9kp3+jvuG/pshhJSopz7gN7?=
+ =?us-ascii?Q?cw3bO3etpp39aubDoUu9SCFMa61XH+jC3KAO87zWK/E3BPnOHbQmL9GTI69/?=
+ =?us-ascii?Q?k57FXPSE69k3H2Yl0cYuWVg7z0BoWKlo3z6QNDvbXuRlxzuLJ5xP+e2HjQ4P?=
+ =?us-ascii?Q?nzqSk6PUmDZULCaMfHxt0mxx95xGyhKAxn2iG9VCo/QsmBr+3LozqApzdbMI?=
+ =?us-ascii?Q?kMI6kRhMJVJ+fYfgtUBZLqbf5AT2kK2IJylG0viQtVeCintzfeJYZJLeq8cQ?=
+ =?us-ascii?Q?/T5IL6hVUA=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -127,163 +154,53 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261104193521.1488192-1-matthew.schwartz@linux.dev>
-In-Reply-To: <20261104193521.1488192-1-matthew.schwartz@linux.dev>
-From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Wed, 11 Nov 2026 13:38:00 +0100
-X-Gm-Features: AclHuK8Wl6w7WfkH27qfSdFdd9nhOmyzBOg2pz93Kf5iIkFUVMWyceq0qKzLxFY
-Message-ID: <CAPx+jO_Hn3XWNvd9u-t=Ra7WNgAjHn0vKU=ioBFWNaJ+-zEC1A@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL9767: Wait for UHS-II wakeup
- before LPM
-To: Matthew Schwartz <matthew.schwartz@linux.dev>
-Cc: adrian.hunter@intel.com, ulfh@kernel.org,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>,
-        Lucas Lai <lucas.lai@genesyslogic.com.tw>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMTExMDA1MCBTYWx0ZWRfXxETyxRfHSTq1
- O61Sd3YhIYNqTmWITX729ITMkD+edRquIPS58mV8CtyZOdLQC/6AP4HpUk5uOnwR7pmlRX0+lUA
- SjVVhgBXfJUVyii7sBaC7Ou9IcY/2q0=
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTExMDA1MCBTYWx0ZWRfX+UeXaVZnbLQB
- AVSwRAFaJXd8Cyrxtcz55KOjkI+dOiDbgrU/LXkrqBWFcNYNEgqK6pwMcI/VSgaPKwq2LR0oIYo
- Wgb7/Dh2v0owdpisNISC3zEeNlh3tbQm5ylplxI83q10aIQCsmtbhtBK5bSc79mUg/HqfayZ3yW
- DBf2pAqvhfxrX7s53pNC1pe67BaFI1CNrqJw5UZXGpO6PwAgMB8XqY9J8gaKi7qZGYgKIgmtBqY
- wPhcx2dD00JKLA5Lt6OVXsaR1zBjFgX71I8EUGV83Z3r/FP7vPikbsMTahwYVimnlHgQUMSeSSx
- Zuf9xf+RhB2Im7J1xLAKzayPW8LUOPrcK0Clob+xcCUTtSijf2OQqvqnt0YggUF0OQqdEURGQ8q
- iFW/BJbW/CeOoyD2jZCrHRA3Y7fDV/URyFv/JBbT7GEephhUk/whlMVu3Pq9xINuYZgxvvXK1hO
- +C2tRYWz+qq1JBNDRDA==
-X-Proofpoint-GUID: GsJXPgNHEa0FAAvOxfz6w7n3No0gbC0M
-X-Proofpoint-ORIG-GUID: GsJXPgNHEa0FAAvOxfz6w7n3No0gbC0M
-X-Authority-Analysis: v=2.4 cv=BpcIUoX5 c=1 sm=1 tr=0 ts=6af461b4 cx=c_pps
- a=UNFcQwm+pnOIJct1K4W+Mw==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
- a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=YMgV9FUhrdKAYTUUvYB2:22 a=VwQbUJbxAAAA:8 a=MTqqJCi6AAAA:8 a=QyXUC8HyAAAA:8
- a=k1VgLetk2nvzqEboKn0A:9 a=QEXdDO2ut3YA:10 a=uKXjsCUrEbL0IQVhDsJ9:22
- a=Ezp7Wq9ZhlihhAROVjRg:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
- definitions=2026-11-11_02,2026-11-11_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 clxscore=1015 spamscore=0 lowpriorityscore=0 adultscore=0
- priorityscore=1501 phishscore=0 malwarescore=0 suspectscore=0 bulkscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611110050
+X-OriginatorOrg: bp.renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TYYPR01MB6603.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 09dccdd9-f078-4708-27be-08df4001f1ee
+X-MS-Exchange-CrossTenant-originalarrivaltime: 11 Nov 2026 14:42:00.7495
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: DIaFEeJ05x4FnpONBQNS76gdVIK2WaxBtO0Q9RvPw05uCxHObalf356h6MEquk5y9+sukBW7Cd/7/CdeLVKGlkb3ox49RSnkeQQJN3XSzfY=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY5PR01MB18237
 
-On Wed, Nov 4, 2026 at 8:35=E2=80=AFPM Matthew Schwartz
-<matthew.schwartz@linux.dev> wrote:
->
-> sdhci_gl9767_set_clock() re-enables low power negotiation right after
-> releasing the UHS-II PHY reset. If the bus then goes idle before the
-> UHS-II wakeup has finished, every SDHCI MMIO read returns all-ones for
-> about 250 us. sdhci_uhs2_interface_detect() takes that as IF_DETECT and
-> LANE_SYNC set, so a UHS-I only microSD card is treated as UHS-II. The
-> attach then either fails with "SDHCI_UHS2_CAPS_PTR(65535) is wrong" or,
-> if the registers come back before the CAPS_PTR read, runs DEVICE_INIT
-> 30 times with a 10 second timeout each and delays card detection by 5
-> minutes.
->
-> Bit 13 of the UHS-II Status register at config offset 0x8CC is
-> UHS2_WAKEUP_ACTIVATE. It stays set for about 250-300 us after the PHY
-> reset release. Poll it before re-enabling low power negotiation. With
-> the wait in place 12 of 12 UHS-II probes of a UHS-I card correctly
-> found no UHS-II interface.
->
-> Fixes: 27dd3b82557a ("mmc: sdhci-pci-gli: enable UHS-II mode for GL9767")
-> Tested-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> Signed-off-by: Matthew Schwartz <matthew.schwartz@linux.dev>
+Hi Wolfram,
 
-Applied for fixes and by adding a stable tag, thanks!
+> -----Original Message-----
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Sent: 11 November 2026 11:49
+> Subject: Re: [PATCH v25 00/11] Add Renesas RZ/G3L SD/eMMC support
+>=20
+> On Wed, Oct 28, 2026 at 12:51:17PM +0000, Biju Das wrote:
+> > Hi All,
+> >
+> > The Renesas RZ/G3L SoC has:
+> >
+> > Channel 0 supports SD and eMMC (including HS400/HS400ES).
+> > Channel 1 supports SD and eMMC (except for HS400).
+> > Channel 2 supports SD.
+> >
+> > The SoC supports a maximum frequency of 150 MHz. The SD0 interface
+> > does not support IOVS and PWEN in the SDHI register (no internal
+> > regulator), unlike SD1 and SD2. It has an internal divider for all mode=
+s except HS400.
+> > It also has a 2048-bit divider compared to 512 on others. Moreover
+> > RZ/G3L supports HS400 enhanced strobe mode.
+> >
+> > This patch series support all modes except HS400. HS400 support will
+> > be added later.
+> >
+> > This patch series tested on smarc-rz{v2l,g2l,g2lc,g2ul,g3s,g3l,g3e},
+> > rz{v2h,t2h}-evk and hihope-rz{g2h,g2m,g2n} boards
+>=20
+> Tested with a Renesas Salvator-XS board (R-Car M3N). I don't see bugs or =
+performance regressions. I
+> think the series is good to go!
 
-Kind regards
-Uffe
+Thanks for review and testing. The code is much better now
+based on your review feedback.
 
-
-> ---
-> Changes in v2:
-> - Rename the register and bit to PCIE_GLI_9767_UHS2_STS and
->   PCIE_GLI_9767_UHS2_STS_WAKEUP_ACTIVATE as suggested by Ben, and the
->   helpers to match
-> - Use read_poll_timeout() instead of read_poll_timeout_atomic() (Adrian)
-> - Describe bit 13 by its documented name instead of the inferred behaviou=
-r
-> - Say "wakeup" instead of "PHY" in the subject and description to match
-> - Link to v1: https://lore.kernel.org/all/20261021233313.247155-1-matthew=
-.schwartz@linux.dev/
->
->  drivers/mmc/host/sdhci-pci-gli.c | 29 ++++++++++++++++++++++++++++-
->  1 file changed, 28 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pc=
-i-gli.c
-> index b55618566d651..263bb091374be 100644
-> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -205,6 +205,9 @@
->  #define   PCIE_GLI_9767_COMBO_MUX_CTL_RST_EN             BIT(6)
->  #define   PCIE_GLI_9767_COMBO_MUX_CTL_WAIT_PERST_EN      BIT(10)
->
-> +#define PCIE_GLI_9767_UHS2_STS                         0x8CC
-> +#define   PCIE_GLI_9767_UHS2_STS_WAKEUP_ACTIVATE         BIT(13)
-> +
->  #define PCIE_GLI_9767_PWR_MACRO_CTL                                    0=
-x8D0
->  #define   PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE                       =
- GENMASK(3, 0)
->  #define   PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE            =
- GENMASK(15, 12)
-> @@ -1190,6 +1193,27 @@ static void gl9767_set_low_power_negotiation(struc=
-t pci_dev *pdev, bool enable)
->         gl9767_vhs_read(pdev);
->  }
->
-> +static u32 gl9767_read_uhs2_sts(struct pci_dev *pdev)
-> +{
-> +       u32 value;
-> +
-> +       pci_read_config_dword(pdev, PCIE_GLI_9767_UHS2_STS, &value);
-> +
-> +       return value;
-> +}
-> +
-> +static void sdhci_gl9767_uhs2_wait_wakeup(struct sdhci_host *host)
-> +{
-> +       struct sdhci_pci_slot *slot =3D sdhci_priv(host);
-> +       struct pci_dev *pdev =3D slot->chip->pdev;
-> +       u32 value;
-> +
-> +       if (read_poll_timeout(gl9767_read_uhs2_sts, value,
-> +                             !(value & PCIE_GLI_9767_UHS2_STS_WAKEUP_ACT=
-IVATE),
-> +                             20, 10000, false, pdev))
-> +               pr_warn("%s: UHS-II wakeup did not complete.\n", mmc_host=
-name(host->mmc));
-> +}
-> +
->  static void sdhci_gl9767_uhs2_phy_reset(struct sdhci_host *host, bool as=
-sert)
->  {
->         struct sdhci_pci_slot *slot =3D sdhci_priv(host);
-> @@ -1276,9 +1300,12 @@ static void sdhci_gl9767_set_clock(struct sdhci_ho=
-st *host, unsigned int clock)
->
->         sdhci_enable_clk(host, clk);
->
-> -       if (mmc_card_uhs2(host->mmc))
-> +       if (mmc_card_uhs2(host->mmc)) {
->                 /* De-assert reset */
->                 sdhci_gl9767_uhs2_phy_reset(host, false);
-> +               /* Low power negotiation during UHS-II wakeup makes MMIO =
-read all-ones */
-> +               sdhci_gl9767_uhs2_wait_wakeup(host);
-> +       }
->
->         gl9767_set_low_power_negotiation(pdev, true);
->  }
->
-> base-commit: 4df4d2a577db2d3d57b888bcfb1206fc74661d16
-> --
-> 2.56.0
->
+Cheers,
+Biju
