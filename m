@@ -1,64 +1,59 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.136.64.226
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794398083;
-	b=iibBquJPWy75nQ3w4CZrbqkD5lbO9IDMMJ4ZVIdRYxE5oBaUlQJIaS5D8LazSGinuo5u
-	 K5NrR8Yl+fTtKJ7r0YwWCutgQhjA4Iia3oWawRStmX6r6DyNlS+OoYbF7vT0oHNGp47Tc
-	 rt7xVJocw3UkdHYhYhG3w34cFEM3q4rDALPauc+9DVr8AtORASFm89IbveJWn2L6ADsj1
-	 XrROymAD2HP2uj6eA5NaYyvk7rHmPqs6UjWPg9f5WbKHw9txgzi4vQs/gPRLqy5J2s9v2
-	 Dic3uZ+z6JPR4Pe7BRqk4IUz+/qtyqEv349vzpq3OnisBmtIgbUs2w5uc/4FQWg0XTQ==
+	t=1794398978;
+	b=b8lQuovkiyaVQUbiZqRDJKnT04vMKwYiqynd/cDJ3d6ZgwCNw0Ljd271uNREPIqbY/nq
+	 zj2Bb8C3gecNqo3GCpogxx/8SBMBfRo0x2IyuW2CKT88pWfBk1rF/ueMbrMy0Ok5NUV6S
+	 MEMrTY2zYbgu3zL+R9G3WtKgwru96reFtUbDqZnROLWLyVlkr4VgiPNJlehbSpbZ77qp8
+	 Y1RdAsz/v48ISu1TuDpYepOZCgfFCU+oUSuLMXsPIhkY082dlmuMhIgZA3Z2upEPPb+VH
+	 Wq34oe4bFHOGhNPytFg9GPk+Wduau1y5rJkiH5MeYeoHLHDG0DNikER3arjQVzqGajA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794398083;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:X-UD-Smtp-Session:Date:
-	 From:To:Cc:Subject:Message-ID:References:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To;
-	bh=bk/xtUL0TQa1hkGHi57+F0vnkupo2qPX6iYJ2SnqDe4=;
-	b=UuQB+930kGLXUXv094njukrFgcNQEC82qHmEx/REsRJyFPI++4C0R4/mC4q9RYGW/fD3
-	 9+e/M+yVqizwQDDxTSntylzwItBhUZioqnbLPA16EkR5F6SVZl1gNNsbmmj5wnODOs/iR
-	 NsRednl8Tr8ZaBN81bZp2gu8z27k9bejoLhvSiz+in5MfX4aJG8JyFHpRKkjK1++pNh1W
-	 4BADCKoWT8aJy93B5kwt3E2Fsr+QgwklHU0riQ6lb+Ly2fEV/2jw5lRT2VBNcPke5UT90
-	 sza2emrpguvyNPDyADFrc/2UptppsAcIb0JouCLWxxaHBHU16Kopr1aPyenG1pewMWg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794398978;
+	h=DMARC-Filter:Received:DKIM-Signature:From:To:Cc:Subject:Date:
+	 Message-Id:MIME-Version:Content-Transfer-Encoding:
+	 X-Flowmailer-Platform:Feedback-ID;
+	bh=9Zel7mapNneHNU1zsFcA6/Cil5Rqn8iobmE7NXg3s0g=;
+	b=NiE607jZFiMfb8PQX+cedis14anTqRiM3pH/vQoAq30nZ4TloulUTKGMa3oeuf1IJPuQ
+	 WnCNOBVFG7vvBzEKOujsJ9RQliHzQKYDbcnSxb9JfFMb65tcTJazl8j6e0nW/jqEdRk+7
+	 5k/SvJnfYqtZIirSHsqaaBKtvV/YWnqkQv70nUPwcKK9Cx1TzIbfZPMVjdYBxMn+XSmpy
+	 VTmZEflp5GqRdoRwYdAXL+BEYB5a2TF9zHn+h83CeCcqQl0GMa6Xf7dLlPQxG7oHGJOxQ
+	 jqSPgiIvYQi75rxUvllKVyVJvXmzuNuRkcdmeRMrvlhm7BaszIfjvBaKtPsAUizJMKw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=sang-engineering.com;
-	spf=pass smtp.mailfrom=sang-engineering.com;
-	dkim=pass header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=khnIYuOL;
-	arc=none smtp.remote-ip=194.117.254.33
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dmarc=pass header.from=siemens.com;
+	spf=pass smtp.mailfrom=rts-flowmailer.siemens.com;
+	dkim=pass header.d=siemens.com header.i=michael.haener@siemens.com header.a=rsa-sha256 header.s=fm1 header.b=TrB+SeYv;
+	arc=none smtp.remote-ip=185.136.64.226
+Received: from mta-64-226.siemens.flowmailer.net (mta-64-226.siemens.flowmailer.net [185.136.64.226])
+	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 480EF606A33F
-	for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2026 11:54:41 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 480EF606A33F
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9FC4606A32D
+	for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2026 12:09:35 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B9FC4606A32D
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=siemens.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rts-flowmailer.siemens.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=khnIYuOL
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=bk/x
-	tUL0TQa1hkGHi57+F0vnkupo2qPX6iYJ2SnqDe4=; b=khnIYuOLGFscxVwD2A2f
-	Pikm3TGugPqReJTjPxxakdZ/vMxwRm0e24O3jzg+Y8IVMJUuZ9otGGzPmDn0xgDi
-	ZWXNJ717x9IHhh7F2v4qAdVKxcH5h3w0ZFUNfXyWy/CcxhwaQB3LGg43rAnnP8zW
-	bPHP88yr5UK7bDYDTSAKCh799LNYkKbrPd9vvZXGnbFKs24j441Ri0al+ZLjA60H
-	sd4JKKk8LIGr/5hFNrzdNrJukUUgUFaLHXI1sNFsOcC0erynx/Q6paPZSsJEb18z
-	nqy1MN+/IFAla5ELrJFgwRVi//R+D1TalBrTke2mVpsasBtT/wiMnPP5Fu8zpJmB
-	9A==
-Received: (qmail 598728 invoked from network); 11 Nov 2026 12:54:40 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 11 Nov 2026 12:54:40 +0100
-X-UD-Smtp-Session: l3s3148p1@Mi0k3P5f8Lsujnun
-Date: Wed, 11 Nov 2026 12:54:39 +0100
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: BeaCox <0xbeac@gmail.com>
-Cc: Ulf Hansson <ulfh@kernel.org>,
-	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>, linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org
-Subject: Re: [RFC PATCH] mmc: tmio: disable dma_issue work before releasing
- DMA
-Message-ID: <avRXf6SJuXxslsbx@ninjato>
-References: <20261101063739.89331-1-0xbeac@gmail.com>
+	dkim=pass (2048-bit key, unprotected) header.d=siemens.com header.i=michael.haener@siemens.com header.a=rsa-sha256 header.s=fm1 header.b=TrB+SeYv
+Received: by mta-64-226.siemens.flowmailer.net with ESMTPSA id 20261111120927ff91cceaeb0002070a
+        for <linux-mmc@vger.kernel.org>;
+        Wed, 11 Nov 2026 13:09:27 +0100
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; s=fm1;
+ d=siemens.com; i=michael.haener@siemens.com;
+ h=Date:From:Subject:To:Message-ID:MIME-Version:Content-Type:Content-Transfer-Encoding:Cc;
+ bh=9Zel7mapNneHNU1zsFcA6/Cil5Rqn8iobmE7NXg3s0g=;
+ b=TrB+SeYviLzQFkrb6weJdov/oWLhJArf3B/HcX1Xa22s9dHv7ZjpsTcGoLB4p1jwDriJHJ
+ bdtp0J8uvxUSc/tfkv8BOJYy1gp1p8c9canfXMMiJ7dD0AlTlCbWGI0sbSZynFSLcojCtR15
+ qAqgc5W9QBkqJb4bZ1HtSq/KOJlk3xdnadw+9HI4c72ciXDxEPyg8qqGwF1RLkZaZC24ptRH
+ HnXF1XwFK8t4zt9zN6ZxQVA11hCOi1UYbvTF8T+bhbBaRiK+rZclNtWi3pTRZKQU3fiVhu4a
+ m5XA8rmqzm4Mxi+XCcq+rIOS3u6nkF8ZXHeJmaesET8Ft1hIG/AsZPeQ==;
+From: Michael Haener <michael.haener@siemens.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Avri Altman <avri.altman@sandisk.com>,
+	Luke Wang <ziniu.wang_1@nxp.com>,
+	Michael Haener <michael.haener@siemens.com>
+Subject: [PATCH 0/2] mmc: speed up secure erase on ISSI IS22TF128G eMMC
+Date: Wed, 11 Nov 2026 13:07:57 +0100
+Message-Id: <20261111120759.100830-1-michael.haener@siemens.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -68,29 +63,34 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261101063739.89331-1-0xbeac@gmail.com>
+Content-Transfer-Encoding: 8bit
+X-Flowmailer-Platform: Siemens
+Feedback-ID: 519:519-664519:519-21489:flowmailer
 
-On Sun, Nov 01, 2026 at 02:37:39PM +0800, BeaCox wrote:
-> tmio_mmc_host_remove() drains done and delayed_reset_work, but leaves
-> dma_issue pending or running when it releases the DMA resources. Its
-> backend callback accesses the host, controller registers and DMA state.
-> 
-> Disable dma_issue synchronously before releasing DMA. This also rejects
-> late queue attempts from an interrupt handler that is still running;
-> cancel_work_sync() alone does not provide that guarantee.
-> 
-> Some DMA backends fall back to PIO before initializing dma_issue. Move
-> their work initialization ahead of the fallible setup so the work is
-> always initialized when a DMA backend is present. Skip the disable call
-> when no DMA backend is configured.
-> 
-> The analysis, patch and validation were assisted by OpenAI Codex.
-> 
-> Fixes: 85683fb39d9b ("mmc: sdhi: Convert from tasklet to BH workqueue")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: BeaCox <0xbeac@gmail.com>
+Secure erasing a 33.5GiB partition on an ISSI IS22TF128G eMMC (NXP
+i.MX8, sdhci-esdhc-imx) takes 5-7 hours, because the request is split
+into roughly 10000 max_discard sized secure erase commands, each with a
+large fixed overhead.
 
-Real name, please.
+Patch 1 adds the card to MMC_QUIRK_FIXED_SECURE_ERASE_TRIM_TIME, which
+brings the same operation down to about 6 minutes. It is tagged for
+stable.
+
+Patch 2 is hardening for the quirk: with qty no longer bound by
+max_busy_timeout, the 32-bit erase timeout calculation can overflow for
+cards with large ERASE_TIMEOUT_MULT * SEC_ERASE_MULT. None of the
+currently quirked cards reach that limit (the ISSI card is at about
+half of it), so it is not tagged for stable.
+
+Michael Haener (2):
+  mmc: add ISSI IS22TF128G to fixed secure erase time quirk
+  mmc: core: saturate erase timeout instead of overflowing
+
+ drivers/mmc/core/card.h   |  1 +
+ drivers/mmc/core/core.c   | 19 ++++++++++++++-----
+ drivers/mmc/core/quirks.h |  9 +++++++++
+ 3 files changed, 24 insertions(+), 5 deletions(-)
+
+-- 
+2.56.0
 
