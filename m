@@ -1,54 +1,52 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=95.215.58.205
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=178.251.229.89
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794359759;
-	b=3G4dYTGdzGoTxowerk9We4SwO+z2k7UfcydkGmfItnRlxj1ZH9MkSWkqWkOU2zJd99me
-	 ++GB3d2V7md/1cNrmo+0T1emvonHHF4rsUP0giaceTmllGjuE0TlvBedwu6vRKq09lp/b
-	 ch+SqwN5Du1YqOf4EirjZ1i5P8B0wEtqWVd904olak4UveKCUTFqGeihee4rf7+bF1DSC
-	 K/onF2ZpOHUts0vGi2KREIR7SVqGRgAq0SwKrOETvg34uQS2GB3zXL9zfH0LMVWGHhKm9
-	 RRHbJjWy8Anu8y9h2ohEnzfmh5TtW5CpVI5yEcNMwPXC2MaKYb3AmQsotOQjPhy9czQ==
+	t=1794370475;
+	b=M10foFyFPhOqNV+nNdKpkfIwHzfIosdSsVCXmTxDMrok5sHOTx20AVUw8E1ykTQMTVUd
+	 MCJGI69anPfIv2xb+y//UPSeOAiucytdC/EAis9yE1ACuFdokX2QTvLO+qLhhGGhDJRzZ
+	 exi9yL9zECELH8AVCHFCEtgFilZbMjhN2ZniY8VgM5Hud5qa9ZYjF0r+p+nAtfnV5VDJM
+	 y7CUG4CbwTTGTHU9smg1tG0XPh0NMeTLcACYjoYbYjxGkNT+LRkfUpsE3idhSYWqiyHcw
+	 65XCI0468LxuUJCpuIVIb1GOBqqoaHQqlmTwOj8xnz4vnTLyya3kHn0VBCAkOlJZr9Q==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794359759;
-	h=DMARC-Filter:X-Envelope-To:DKIM-Signature:X-Envelope-To:Received:
-	 X-Mizu-Trace-ID:X-Migadu-Flow:Message-ID:Date:MIME-Version:User-Agent:
-	 Cc:Subject:To:References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding;
-	bh=MZb76DR3XAf0JkuNQyt+BOnnz3hO4qVggLr4XwcoBcU=;
-	b=vwrLFFOvBaBcymt28mfml2cgdUBLnyPczKGoxYSVAexu+PtinyAPQFGycpZ/8Kvaa5Li
-	 Bgvi35lxD8qpSPU0dLYsyGi9+urHfThRvICXovrbgZ3diJ97ExXGyW42OenFGgCvDF4Sr
-	 Cc/w/BS2+xOMBb5SsvbhWz+Ajyy3GviG6xagl1PpwLdXcGxo0kkq18Oc5F8lYmVZn0R+n
-	 3/Fnn7gdAfAkkMddXd/D3pXFiqR4HEEU6W12GfUtyatAUWrrrQ68e6ofwFY1VfhAENNyk
-	 hnO8FlYPiT8G47BxkLP4HICRVrGx/t6Y6yfE75pKfcDDtiE+DJ5ohdfFQcOylqEco4w==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794370475;
+	h=DMARC-Filter:Received:DKIM-Signature:Message-ID:Date:MIME-Version:
+	 User-Agent:Subject:To:Cc:References:Content-Language:From:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding:X-Last-TLS-Session-Version;
+	bh=3fOO/5TS5MC3uku0IcFyxhEk9H8U26fc9bugwI8TDqQ=;
+	b=rOOEhrY9YwwB762UvfhK69g1d3W0jZkJUkSDV4RhNoY4NzKIERRpgxwkJ5O/vRi1qFMO
+	 Z72AJExQ3MkvcBL06U40V92IVIbQhY0qZPwamiYKNJPk2dXK6CZu9+7/sgmAkU8VMcNTr
+	 yaAYVYGZLb6GjeBWJB1F6dZPU0eYhU+G9jW5Ca9vNK4CJg/6RtLjFkkUOZWyH78ENke3Z
+	 maVF4KXAFkvtkv4LrOyCQApE2TJcCUx6FMkxpAqH4YF0OmJf2QxLexVeuztXyfaVprU6g
+	 jVU67f83B+BhQmt+V+WbQy+KwT4u6pKPFJ98VKEDev+KpH43AVeeLJ4rdE/SoM3vNwg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=linux.dev;
-	spf=pass smtp.mailfrom=linux.dev;
-	dkim=pass header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=UV7nT5wD;
-	arc=none smtp.remote-ip=95.215.58.205
-Received: from mta1.migadu.com (out-205.mta1.migadu.com [95.215.58.205])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dmarc=pass header.from=nabladev.com;
+	spf=pass smtp.mailfrom=nabladev.com;
+	dkim=pass header.d=nabladev.com header.i=@nabladev.com header.a=rsa-sha256 header.s=dkim header.b="JxPsOZ/v";
+	arc=none smtp.remote-ip=178.251.229.89
+Received: from mx.nabladev.com (mx.nabladev.com [178.251.229.89])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7AFE4606A31C
-	for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2026 01:15:57 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7AFE4606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D774C606A321;
+	Wed, 11 Nov 2026 04:14:34 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D774C606A321
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nabladev.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nabladev.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=UV7nT5wD
-X-Envelope-To: linux-mmc@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=V+zXxBqY4bH0VRopB1Nhwt9W/o/YGB29BanigCQLPMw=;
- c=simple/simple; d=linux.dev;
- h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1794359755; v=1; x=1794964555;
- b=UV7nT5wDLvyhkKRJPSB311LqEUpIQrmig3chau8TSrUKSh3IMkxjwsjaa3DXvPmXjvxqUxeg
- 3J/V/kv+qUJgB9t5BwWmiy/VwBybAWp8ZPe4kLmDJG1O2rnjXistQBtfahiZL3Mxp0DbZ3OvA+q
- SZ53f2ugxqKRApI17cfa6sT4=
-X-Envelope-To: linux-mmc@vger.kernel.org
-Received: by smtp.migadu.com with ESMTPS id 63ed50b758153cc2;
-	Wed, 11 Nov 2026 01:15:55 +0000
-X-Mizu-Trace-ID: 63ed50b758153cc2
-X-Migadu-Flow: FLOW_OUT
-Message-ID: <0c0bf25b-3a23-4d24-8ffb-fce801a3208c@linux.dev>
-Date: Wed, 11 Nov 2026 09:15:47 +0800
+	dkim=pass (2048-bit key) header.d=nabladev.com header.i=@nabladev.com header.a=rsa-sha256 header.s=dkim header.b=JxPsOZ/v
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 0BE9410DD7E;
+	Wed, 11 Nov 2026 05:14:27 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nabladev.com;
+	s=dkim; t=1794370469;
+	h=from:subject:date:message-id:to:cc:mime-version:content-type:
+	 content-transfer-encoding:content-language:in-reply-to:references;
+	bh=3fOO/5TS5MC3uku0IcFyxhEk9H8U26fc9bugwI8TDqQ=;
+	b=JxPsOZ/vQsc9ChQPwqoKSIBD5HFyAEFCENBUwOk0ggInk+3gfzcC9vvOaMPE6YGYgeaNi8
+	qAzCD82Y2LHRuWypQRfr4IoYSxM3zI908pBCG2iTvbwaL8nxnzjWaXmh/QZ1q3eQnm1JAM
+	kPMbtrxwzVAc0kA8MJInhvoD0tKuKsbxKKbBae1Icb2vDUrCDwOP7U9eYlNEYqEpK3ZSUL
+	PoUw+ypedIEBIMBR/hpjGnhfKSyvy6BaC2usJRXmbYwI3lzdYJH6dVIMtoYFkpH9s5mtvh
+	vJ7OU2mhN+HjUKz/BGgMwcY8TXaSrMkc+61x8+ap2s7qzbmckUjahVvIXoTcDg==
+Message-ID: <51207e63-ec60-4805-bf6a-b10647ee3866@nabladev.com>
+Date: Wed, 11 Nov 2026 03:27:24 +0100
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -59,126 +57,67 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@linux.dev, Jaehoon Chung <jh80.chung@samsung.com>,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: dw_mmc: enable MMC_CAP_DONE_COMPLETE
-To: Marek Szyprowski <m.szyprowski@samsung.com>,
- Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulfh@kernel.org>
-References: <1791876245-190981-1-git-send-email-shawn.lin@rock-chips.com>
- <CGME20261110192834eucas1p1e183345528f097cb64340f36a03e4b14@eucas1p1.samsung.com>
- <4a1867dc-7bcd-4c63-bdbd-a533043cd91e@samsung.com>
-From: Shawn Lin <shawn.lin@linux.dev>
-In-Reply-To: <4a1867dc-7bcd-4c63-bdbd-a533043cd91e@samsung.com>
+Subject: Re: [PATCH] mmc: mmci: stm32: handle mmc power up
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Cc: linux-mmc@vger.kernel.org,
+ Christophe Kerello <christophe.kerello@foss.st.com>,
+ Alexandre Torgue <alexandre.torgue@foss.st.com>,
+ Maxime Coquelin <mcoquelin.stm32@gmail.com>, Ulf Hansson <ulfh@kernel.org>,
+ kernel@dh-electronics.com, linux-arm-kernel@lists.infradead.org,
+ linux-kernel@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com
+References: <20261030215427.488298-1-marex@nabladev.com>
+ <CAPx+jO8sc8gbxNQTjK2tx+1UPLqwwEof3E9vknHNc4kmbeB7oA@mail.gmail.com>
+Content-Language: en-US
+From: Marek Vasut <marex@nabladev.com>
+In-Reply-To: <CAPx+jO8sc8gbxNQTjK2tx+1UPLqwwEof3E9vknHNc4kmbeB7oA@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-Last-TLS-Session-Version: TLSv1.3
 
-Hi Marek,
-
-在 2026/11/11 星期三 3:28, Marek Szyprowski 写道:
-> On 13.10.2026 09:24, Shawn Lin wrote:
->> All requests issued by dw_mmc are completed from dw_mci_work_func(),
->> which runs from the system_bh_wq workqueue. It is therefore preemptible
->> context and host->lock is dropped before the completion, see
->> mmc_request_done() in dw_mci_request_end().
+On 11/10/26 2:32 PM, Ulf Hansson wrote:
+> On Fri, Oct 30, 2026 at 10:54 PM Marek Vasut <marex@nabladev.com> wrote:
 >>
->> The dw_mci_interrupt and the dw_mci_watchdog_fn never call mmc_request_done()
->> directly. So every request is completed from a sleepable context with no
->> spinlock held.
+>> From: Christophe Kerello <christophe.kerello@foss.st.com>
 >>
->> This is exactly the contract required by MMC_CAP_DONE_COMPLETE, which was
->> introduced for hosts that can complete requests within mmc_request_done()
->> without deferring to the core's complete_work.
+>> Manage MMC POWER UP state like MMC POWER OFF state. In case of low
+>> power use cases, it will avoid random initialization timeout. This
+>> fixes a failure to switch DDR52 eMMC to 8 bit mode due to -EILSEQ
+>> returned from mmc_get_ext_csd() in mmc_compare_ext_csds() called
+>> from mmc_select_bus_width() after Standby1 suspend/resume cycle.
 >>
->> Without the flag, the core records the finished request in
->> mq->complete_req and queues mq->complete_work, i.e. a second workqueue
->> dispatch plus an extra context switch per request. With the flag,
->> mmc_blk_mq_req_done() completes the request directly via
->> mmc_blk_mq_post_req() -> blk_mq_complete_request(), and a following
->> request completes the previous one inline from mmc_blk_rw_wait().
->>
->> Measured on an RK3576 SD card (dw_mmc) with:
->>
->>    perf record -a -g -F 999 -- sleep 30
->>    perf report --stdio -g graph,0.5,caller
->>
->> fio: 4k randread, ioengine=libaio
->>
->> Without the flag, the completion hot path is:
->>
->>    mmc_request_done -> mmc_blk_mq_req_done -> queue_work_on      (~4.3%)
->>    ... -> mmc_blk_mq_complete_work            (kworker/5:1H-mm, ~18.4%)
->>         -> mmc_blk_mq_complete_prev_req -> mmc_blk_mq_post_req
->>
->> with the flag the workqueue round trip disappears completely: there is no
->> queue_work_on and no mmc_blk_mq_complete_work in the profile anymore, and
->> the previous request is completed inline:
->>
->>    mmc_blk_mq_issue_rq -> mmc_blk_mq_post_req -> mmc_blk_mq_complete_rq
->>                                                    -> __blk_mq_end_request
->>
->> This can remove a redundant workqueue dispatch and context switch per completed
->> request.
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> 
-> 
-> This patch landed yesterday in linux-next as commit 80636b762eec ("mmc: dw_mmc:
-> enable MMC_CAP_DONE_COMPLETE"). In my tests I found that it causes serious
-> problems. I found that it is responsible for corrupting root filesystem and/or
-> journal.
-> Reverting this on top of linux-next fixes the issue. Unfortunately I didn't find
-> what mmc access pattern causes the corruption, but running my tests and rebooting
-> boards 2 or 3 times usually ended in breaking it.
-> 
-> 
-> There must some corner case missed in the analysis behind this patch.
-> 
-
-Thansk for testing.
-
-I have tested this patch in my local product environment for several
-days and did not trigger the issue. Of course, I have also been keeping
-an eye on whether the Linux-next branch can reproduce the problem on
-other platforms, because frankly speaking, this is the first controller
-that is about to enable this mmc block multi-queue internal mechanism,
-meaning this mechanism has not undergone rigorous large-scale deployment
-testing. Could you please help test the following patch to see if it
-resolves your issue?
-
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2248,6 +2248,7 @@ static void mmc_blk_mq_req_done(struct mmc_request 
-*mrq)
-
-         /* Take the recovery path for errors or urgent background 
-operations */
-         if (mmc_blk_rq_error(&mqrq->brq) ||
-+           mmc_blk_card_busy(mq->card, req) ||
-             mmc_blk_urgent_bkops_needed(mq, mqrq)) {
-                 spin_lock_irqsave(&mq->lock, flags);
-                 mq->recovery_needed = true;
-
-
-> 
-> 
+>> Fixes: 46b723dd867d ("mmc: mmci: add stm32 sdmmc variant")
+>> Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
+>> Signed-off-by: Marek Vasut <marex@nabladev.com>
 >> ---
+>> Cc: Alexandre Torgue <alexandre.torgue@foss.st.com>
+>> Cc: Christophe Kerello <christophe.kerello@foss.st.com>
+>> Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>
+>> Cc: Ulf Hansson <ulfh@kernel.org>
+>> Cc: kernel@dh-electronics.com
+>> Cc: linux-arm-kernel@lists.infradead.org
+>> Cc: linux-kernel@vger.kernel.org
+>> Cc: linux-mmc@vger.kernel.org
+>> Cc: linux-stm32@st-md-mailman.stormreply.com
+>> ---
+>> Marek: Update commit message
+>> ---
+>>   drivers/mmc/host/mmci_stm32_sdmmc.c | 3 ++-
+>>   1 file changed, 2 insertions(+), 1 deletion(-)
 >>
->>   drivers/mmc/host/dw_mmc.c | 2 ++
->>   1 file changed, 2 insertions(+)
+>> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
+>> index 9dc51859c2e51..659a5040729e9 100644
+>> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
+>> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
+>> @@ -368,7 +368,8 @@ static void mmci_sdmmc_set_pwrreg(struct mmci_host *host, unsigned int pwr)
+>>          if (dlyb && dlyb->ops->set_input_ck)
+>>                  dlyb->ops->set_input_ck(dlyb);
 >>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index ff0b25d..bec777b 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -2945,6 +2945,8 @@ static int dw_mci_init_host_caps(struct dw_mci *host)
->>   	if (mmc->caps & MMC_CAP_SDIO_IRQ)
->>   		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
->>   
->> +	mmc->caps |= MMC_CAP_DONE_COMPLETE;
->> +
->>   	return 0;
->>   }
->>   
+>> -       if (ios.power_mode == MMC_POWER_OFF) {
+>> +       if (ios.power_mode == MMC_POWER_OFF ||
+>> +           ios.power_mode == MMC_POWER_UP) {
+>>                  /* Only a reset could power-off sdmmc */
+>>                  reset_control_assert(host->rst);
+>>                  udelay(2);
 > 
-> Best regards
-
+> What exactly will this reset?
+The controller.
