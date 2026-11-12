@@ -1,99 +1,52 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.214.180
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=178.251.229.89
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794450780;
-	b=FGF1If2DBet1u7Yi+hh7kZvd1lfKOecNduMfXMYkDcwAsDUrAMis4Gk26PEhXBpW6Izq
-	 +QYMidmMNUg3sIJA1u84F+dAeYEqFJJRWyF9hm/aS7z2pn3DJ5rkoL93UsZchI61QhuPO
-	 JqaTwFhDPOL0FNc8DnKFsKC8vYL1A1k8W9BebMY/fN98WayJKOf7cGCPFgknQNtsGAMgW
-	 /75y5aEx79MJiVnA8cti6OoUFuvovcnfV6t4vaKeeET5PIdXah/iqJCeLWHhftUKok/AO
-	 n/ZW8dAFpwPX31+Td6QIojWOrVjOTURG3+b8HFXpj7W5kTVQsrwpzroqk7GEudManCQ==
+	t=1794464797;
+	b=ED4LVLhTbMwP8l+UhHNb9XOe8tSsXVB3QyhJ4DmH9vmImzXpEGCe0/J1hd1TWJBI0ELf
+	 Xa3DHBH8Ts08HHO8A1Q//FSYHJ5tCU/NzgtlH01LSTZRaFzzLxGV+2y78sXYDfZkpxbbf
+	 NUVTsW49QEpfYnSOGbYz1URauKQZ2yuX9+abnY92dMii5S5r6TBU+oGwbOUP44gI9dZ6P
+	 7+GpBKflC9wVxyQR2r9JQ7MZV5YeVNI6aBXhlLKZ4wRvY7q35NVE0VNdOYEPHJ/R6uPzW
+	 VfwSjROcUB991frt0AMJNqPbI7xqHquTpKWM2IWlzB7HPHoNa0X6tInZ00l/NFMmVYQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794450780;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
-	 MIME-Version:Content-Transfer-Encoding;
-	bh=+BRgZi/ru4kt6Z44lXsT8xtnCbwbkOnntJWrR5mZ6uk=;
-	b=IiXpvF8QDcHICZ93BBzMlsrYqR5vMIfMBpLd/ZcnoTGL+oKdF5Hv7uSBqgpNi597cMf4
-	 Pum0hq6Sm8+fy8GwOF9fsMWi1SoIbI+fQV0+aOchh79qHleCt6YFP+9RNEuSzvwvAsBbh
-	 SdAcIr9wHt/qsDNaObjvw01tElSzZ5dKgnwKsJgoPH2EOtMzibwZNZfqdZ6N5ytt0/GRx
-	 exYGLdM++wyn8p1ULJ/GB9WBjud+8tKFVk6AIHvGDCAxfeisD4B8uCDrMbzopqRbN5k82
-	 r3iDY14a/SsTrgofFLTmiS5xUnsvT7pLyH6+qzE42vJuqI9H9O3nXWSXeDMLCKTeGjg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794464797;
+	h=DMARC-Filter:Received:DKIM-Signature:Message-ID:Date:MIME-Version:
+	 User-Agent:Subject:To:Cc:References:Content-Language:From:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding:X-Last-TLS-Session-Version;
+	bh=HQqBrTbEZxsA8ilEZ7vX7+ePIXnnagD5L9RGTt8hUKU=;
+	b=GlbrxLeaL7mTnjut/gx/g8i14oVTpl3yPJPhoQ3nJJscn1yVwqo59xXd1lWuO1p/qlCI
+	 IRRfff0+3CEnRntAdUGLETCZfyutYiO3kXSEzsmsbKb3QdZVUyq7NxqNrbXhECX608Fis
+	 +mR9tmXFL9EJiPLp2GEfgV8BLyKUeYso51CeeQ3hD7LpHWgAONBpHmpuUEWTlMAogVCOX
+	 dnF5lxAZj+FcAThG/PeREwG3IBDrY3HsoImdTbJzJTZvzZ9xaKcsKxzFqgkbmUrruQU8r
+	 oo8kHihauDFce7d/njQS1NLPgVgZcfWI854PyB+EUXNTRmziDztkW4uA5xDeWYHDrGg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=sf1ye8c0;
-	arc=none smtp.remote-ip=209.85.214.180
-Received: from mail-pl1-f180.google.com (mail-pl1-f180.google.com [209.85.214.180])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	dmarc=pass header.from=nabladev.com;
+	spf=pass smtp.mailfrom=nabladev.com;
+	dkim=pass header.d=nabladev.com header.i=@nabladev.com header.a=rsa-sha256 header.s=dkim header.b=UrOqU3G3;
+	arc=none smtp.remote-ip=178.251.229.89
+Received: from mx.nabladev.com (mx.nabladev.com [178.251.229.89])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4BF40606A324
-	for <linux-mmc@vger.kernel.org>; Thu, 12 Nov 2026 02:33:00 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4BF40606A324
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3C78606A33D;
+	Thu, 12 Nov 2026 06:26:36 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C3C78606A33D
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nabladev.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nabladev.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=sf1ye8c0
-Received: by mail-pl1-f180.google.com with SMTP id d9443c01a7336-2e946155442so30574965ad.3
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2026 18:33:00 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1794450780; x=1795055580; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=+BRgZi/ru4kt6Z44lXsT8xtnCbwbkOnntJWrR5mZ6uk=;
-        b=sf1ye8c0sYH4D0xHSeFLJxtpIO8jYTtz8n+aCV9WLa2DhH7wECKLKrebKKCVoWtJN1
-         XGDXn6GnRtwi0LFCkr5wcuX1LiSqzArhl5OwTuIsjrLsgEvzwPOpsSUmcAve7cyy6RWn
-         n7b2ddRE5kWsPfU8zCVrQh4I4H2MYJf+a120kMCM1Q0eNu1zj3kSuJA0MGoEFAbndMfv
-         /s1djguR280b44OTKyZ9pxBwsRBlDEey6tRTGXTNXUafQh2jyBFBo/3/YWktc+tZcBDC
-         2In3z9t3Y88yQ8U5dBYtfgb4neN+C8mfjmz7hYjnzm4MMpAq8UFO4Y/IAZbhHjdyd+98
-         BwLg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794450780; x=1795055580;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=+BRgZi/ru4kt6Z44lXsT8xtnCbwbkOnntJWrR5mZ6uk=;
-        b=VYae1bKouoz9s7s4JANu0z/yaO7Hnhnz22lC+NA16JQL1tBGXKvKEPfHfxpNWvAiGs
-         MDWktYnwHVsU7U/X/muJw4aZ0asvD/jDkF3fMmSJJUCGUDVc5AFy4av8ZdgnKbwrNhb6
-         nhmaTRcE5goSMIqZkCULJX7m95BqAh/1Wl03ufEUns8amLhyLh4P9uEfr9j6M5IkW2l0
-         IfGP32UhN3Zjz1NTOAj40mEL9Syh51WE0UVPQEGEOfVjHaNj7RO53MdBl86lTAClkLC/
-         WBiAxDIVXa06er26gF+pWLPQ7cfpq2leV6lyNF5lSWu/ZmkvmcnUaUkk1WO0F/PMBHEa
-         UMJQ==
-X-Forwarded-Encrypted: i=1; AL+hErEIifSURiTuif7ZbCpuTESfBiFHghGCf8yq19uXL6v3mRsXZTpwCMsOK6eeYt6N/R4YWJUmfdcDiPM=@vger.kernel.org
-X-Gm-Message-State: APuU4Z+oZoqX7z/hsifI9gluweWPoG5BLtOIg8af47gaOlVuTk0tnAyk
-	MShMGrOXHSW53+N8dNC3qxoy57XF5VBoweoo0t8uzQc+RV7sm8YkrHwb
-X-Gm-Gg: AYBFou3gw3FTkegWz1JluVjaIP7MMTxm2vX5Cg8c65Q4vx3jjEPROp/HNkjR4Y52FNr
-	uYmd8ydg1MycXv5o9t5IU0lU7zHthBfn07MXWYkUgahiKsnIaJpK93baZj613upENieKkRsoDSJ
-	ozcmb8FZUSTZR25W9ouUcNE2ZZPTCOU0SCK7gAuM0tn8MdJMc+r5K6fe9T2UcJEgZ4o2EMDGabf
-	eiIQL8hygV7nirKg7t4QEOyFKe945BdHNClp1dfPzYjlfS6xjyEtn/y4pAJA3YF3qK+92luGHTO
-	T5ZglMKms8WY2SldnkRZXIhd2dIsK1f1yLqS3WOUVAukMJgMdhbb3EPRfVlQEsRZLdduQYtuLMa
-	89VJA65ecmowFpHdi6ZuGIEJMNfWCz5DuvTzpj9NWf7c5iR/gnLnYuebs95KbWLGfTvbv0ZV6n/
-	PxbgWNw+J1b+Leu1f+GE2YSz2M0qx9o/vgpyP5HbVJm5OVdWVmuKj2dTn/WcMt7Go2WA/vhbdli
-	WLX4r/kMbfqEonYdRdtXVKA4HPcKS1C3hsSuh7DCyt0AuRtGGgIxiHEVcNUuCGdywaC73x9QpOt
-	UBFFuEWAG6+/IyeH+wZirofqgQ8/be1Aobq7SLUAO8MwZ+11
-X-Received: by 2002:a17:903:32c6:b0:2e8:1910:e398 with SMTP id d9443c01a7336-2edd76d5e01mr46318665ad.9.1794450779567;
-        Wed, 11 Nov 2026 18:32:59 -0800 (PST)
-Received: from ubuntu24.vpn.host.chaitin.net ([124.77.124.144])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2edb68204d4sm26378855ad.0.2026.11.11.18.32.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 Nov 2026 18:32:59 -0800 (PST)
-From: Yuansheng Yang <0xbeac@gmail.com>
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Ulf Hansson <ulfh@kernel.org>,
-	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>,
-	linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org
-Subject: Re: [RFC PATCH] mmc: tmio: disable dma_issue work before releasing DMA
-Date: Thu, 12 Nov 2026 10:32:53 +0800
-Message-ID: <20261112023253.7607-1-0xbeac@gmail.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <avRXf6SJuXxslsbx@ninjato>
-References: <20261101063739.89331-1-0xbeac@gmail.com> <avRXf6SJuXxslsbx@ninjato>
+	dkim=pass (2048-bit key) header.d=nabladev.com header.i=@nabladev.com header.a=rsa-sha256 header.s=dkim header.b=UrOqU3G3
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id C2AEC10E394;
+	Thu, 12 Nov 2026 07:26:22 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nabladev.com;
+	s=dkim; t=1794464784;
+	h=from:subject:date:message-id:to:cc:mime-version:content-type:
+	 content-transfer-encoding:content-language:in-reply-to:references;
+	bh=HQqBrTbEZxsA8ilEZ7vX7+ePIXnnagD5L9RGTt8hUKU=;
+	b=UrOqU3G31RyOiOqFQExBFk/gH/aWva67ebwxY/V4/r0OTjA6A1UFpegkRCSIk+tE0mFD33
+	Wtq9qE24rFg0BigDkfjPT5qwA8YrIwZQ3w3riH6OlpJm2nnWA/jN/cHH7CsoiG+Zjv5H8s
+	E/36RtsB4sX3SoI6dWvu3cJq9oiVsR3iyJSf5l3MVmnzmE8thu8sBqXr3R3PmsiNsje4+B
+	u/2Sg8e5L1PhKDwi2FUzuKeGyk3GJFv1gMY3l1XSVsP4WkfoC2zBLgDqUQQVb1pWSd3hmx
+	oklxgLxwfH6TWsiJPNTQWy0acnm0ueUh9EjoilfioFqZJTV4QX2/rNgY2fFCNA==
+Message-ID: <c3cbd7ab-e689-4a9b-b311-af43980738d2@nabladev.com>
+Date: Thu, 12 Nov 2026 02:22:10 +0100
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -103,13 +56,55 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: mmci: stm32: handle mmc power up
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Cc: linux-mmc@vger.kernel.org,
+ Christophe Kerello <christophe.kerello@foss.st.com>,
+ Alexandre Torgue <alexandre.torgue@foss.st.com>,
+ Maxime Coquelin <mcoquelin.stm32@gmail.com>, Ulf Hansson <ulfh@kernel.org>,
+ kernel@dh-electronics.com, linux-arm-kernel@lists.infradead.org,
+ linux-kernel@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com
+References: <20261030215427.488298-1-marex@nabladev.com>
+ <CAPx+jO8sc8gbxNQTjK2tx+1UPLqwwEof3E9vknHNc4kmbeB7oA@mail.gmail.com>
+ <51207e63-ec60-4805-bf6a-b10647ee3866@nabladev.com>
+ <CAPx+jO89Z0Z241L1jyB_3sUygdEwGicqT-WfHc6ppG8egHUO2w@mail.gmail.com>
+Content-Language: en-US
+From: Marek Vasut <marex@nabladev.com>
+In-Reply-To: <CAPx+jO89Z0Z241L1jyB_3sUygdEwGicqT-WfHc6ppG8egHUO2w@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Last-TLS-Session-Version: TLSv1.3
 
-Hi Wolfram,
+On 11/11/26 12:45 PM, Ulf Hansson wrote:
 
-Apologies for the handle in the Signed-off-by.  I have resent the patch
-with my real name, Yuansheng Yang, in From: and Signed-off-by:.  Only the
-author identity changed; the code is identical to the RFC.
+Hello Ulf,
 
-Thanks,
-Yuansheng Yang
+>>>> -       if (ios.power_mode == MMC_POWER_OFF) {
+>>>> +       if (ios.power_mode == MMC_POWER_OFF ||
+>>>> +           ios.power_mode == MMC_POWER_UP) {
+>>>>                   /* Only a reset could power-off sdmmc */
+>>>>                   reset_control_assert(host->rst);
+>>>>                   udelay(2);
+>>>
+>>> What exactly will this reset?
+>> The controller.
+> 
+> Okay, I see.
+> 
+> In that case, this reset also makes us reset preceding updates to any
+> other registers, for example the clock register. I would not recommend
+> doing that here, but perhaps there is no better option.
+
+Does that pose a problem in the MMC_POWER_OFF/UP state ? I agree this 
+would pose a problem in the MMC_POWER_ON state, but here the card is not ON.
+
+> If I may I suggest an alternative solution, perhaps we can manage this
+> in the ->runtime_resume() callback instead. If the power_mode ==
+> MMC_POWER_OFF, perhaps do this reset there instead? Would that work?
+> 
+> Anothing thing that caught my eyes was the MCI_STM32_PWR_CYC bit that
+> gets written at MMC_POWER_OFF. This bit becomes cached in
+> host->pwr_reg, hence it's also rewritten at MMC_POWER_ON. Is that
+> intentional?
+I _think_ so, this seems to be used to power cycle the card.
