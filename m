@@ -1,59 +1,62 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794542903;
-	b=puH4C1yq5oyr2Sagn+hG9ky3Tzvpuq+DoATwlmffiovBaeR+VNWgVxJiNGcBmWQ1zD17
-	 xg2o8qQd2a2kUvNZnMabovjOBnY5ESNrOrrNDOMfyrXUf1m/b9HTqz1ditojSdTxZiERx
-	 JBtBdJy3KlqzV8tWLHwnShIYt+cmaRsyzmlA+gu0hdfect88UikGxeQt6eSwo1JgPSGfj
-	 jJb3A3G9A23f3pYTtsL8ygoHPZpRvr6UC6OM2spO9n2PmVLfQ90ELqUJ4es9jwrsL0ntI
-	 1axToPiIVE7wTy9BQpZx5LLlZOGnmZ/GpzpmzsF4fQU7mbL+YJrwnyN0sdFB3LQ3MgQ==
+	t=1794553143;
+	b=koo/uhRC2gQusPvUV3EIpSaeKAxHN0xNRuqHLtDgjGJ1jhs/kxYULSYu0tbyaJ7+BdGG
+	 JTbm9N+90+5NLhpSaL2JVtsqdyi+ZnEFRGxEPQg26QneEJRC7+Pa6A9879N7c6Pm01UnN
+	 GoL5TH11zoMFI84FshVqSkHeyLG8g056AyhxNZ8vuY70RoK5QAEmdTWPBHuoUmcN10b1W
+	 VLCQDT7TxH3dldD6GPGMaEjLg4CIvSl8ojOzvodAMlsrvZRL30l9ek/Yhgaicr3Xro5W/
+	 8Idn35BhQrmKeK2nHDFvUDNwXV9ml2BPs7wVrCloAVNgsC3mgZP2UbLOT5X9Ldpj1SQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794542903;
-	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
-	bh=8YARFsfshi83KcJAZu11qEFspbOUXOBNNkYtX280ZF4=;
-	b=ml04ySx3lp3gX6TkhY1YCnoWEald4wsy1iuIE2EAyaGJE6iiO0F9Ropr6Repl+a+3nat
-	 zH7yjaGIT1COatpg3rlKPHxbqW40Z8eaFG3OCaTd6LoqRS0StP5e3HGJZZQhosCKRlRS6
-	 wsLZNwaLX29Z8guCw3aujGCnqNOsLJZaqA0hFCylXyJf7ECkkPSekWSGdBvOzf/F7XGHT
-	 jhq32z5Nh0HEEGsy88ZLOoWXk4FVWP+JEohFdVknYE3fPh7rJMl26exye/CXPdiSc0Xoj
-	 JuU1tsQRMc5MtJNdn4BJdUS9QuFZ6Es204Wfj37cmFYFacFtYdp2wAZnYKgdq6R5BYA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794553143;
+	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
+	 MIME-Version:X-Developer-Signature:X-Developer-Key:
+	 Content-Transfer-Encoding;
+	bh=ozxLfapJWDQCfeGZqwmNNx/MIjqfWyk0rPIWNbFTJv8=;
+	b=ew5wZO6F8Vj8ACnZheVjcypb51M7QZVYSq4oHzud2SWRDqEgTr9rotkfapapZy1Ihv0X
+	 +OeA90oErZxhgQyB3+iWNNkeWqjmiZKOvmgZiVt8GUkaeMlNKEsGwc3vVn7eiGhHthmMr
+	 Ap0wYcpYnsY4KlKthK9Znmd5KWcltBUpKOOs/cMfvyBA8w77RTowgJpsnsXZmP+L7Axvf
+	 9T805X17UGDLhA7PTiRbtCVvwiyBM5YOKH6TeuZpDtr+ccdcMOGLcJODKsYZgXzuCKXy+
+	 T0odD3/ulKGyKCxlf/SQEUixM5IQjPdECFUfjZWRWBbIjg4TMvv1ydCeC46iNGnc6tg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=iNlulHIL;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=DyTJMdFX;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 17D1F606A323;
-	Fri, 13 Nov 2026 04:08:22 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4BB3B606A31C;
+	Fri, 13 Nov 2026 06:59:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=iNlulHIL
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 318871F000C4;
-	Fri, 13 Nov 2026 04:08:22 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=DyTJMdFX
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CA49B1F000C4;
+	Fri, 13 Nov 2026 06:59:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794542902;
-	bh=8YARFsfshi83KcJAZu11qEFspbOUXOBNNkYtX280ZF4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=iNlulHIL2SCc/Ua0Dc/VeDfAjB02OCQvHD+MzXAmOhhxh+bZgS+UL96+x2DCtz1op
-	 264qXfZCs2EyN2TtlyLiDMruuz4hw2cNgl8y5RjXdjSy6kSGCM5C3R8Y6/jeBgjvlX
-	 hu5wQXOZ3CUF8bK7vd82ZaaDeBaI2Tr58/pnBQndI8uKpIvywufrXxRY2N9ykpFy9u
-	 MUWrdwXqo8TYz5kR6h8Q825vzr9LcUVa9oJlTsUajpP+rFujxdAMxV3XM3AW3NJ+BD
-	 1jyDoUy90T4f1LMR7Bhgmzref1+wEOAT6c2nTMqKC3NnCJx0d/FLlWMSe9Ftk4gTVS
-	 4seotPE5TqjcA==
-Date: Thu, 12 Nov 2026 20:08:20 -0800
-From: Eric Biggers <ebiggers@kernel.org>
-To: Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
-	Abel Vesa <abelvesa@kernel.org>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
-	"Martin K. Petersen" <mkp@kernel.org>, linux-mmc@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-scsi@vger.kernel.org, stable@vger.kernel.org
-Subject: Re: [PATCH v2 2/2] ufs: ufs-qcom: Enable ICE before enabling crypto
- support
-Message-ID: <20261113040820.GE1742@sol>
-References: <20261112-qcom_ice_pm_enable-v2-0-177e454d6f22@oss.qualcomm.com>
- <20261112-qcom_ice_pm_enable-v2-2-177e454d6f22@oss.qualcomm.com>
+	s=k20260515; t=1794553142;
+	bh=ozxLfapJWDQCfeGZqwmNNx/MIjqfWyk0rPIWNbFTJv8=;
+	h=From:To:Cc:Subject:Date;
+	b=DyTJMdFXBeFK5qaPreaxje3hizU8jMb6FEYbTcQKphiGueLwI9jtH1CTYxsmAvAm+
+	 O+NHlWmVT9A6isBSNieuC7USvpXWAFGj67Fd7Bb6oP56vuRpkLAzy7E6rZ5s2lNZy/
+	 xKtOG4wLODwuHnfluEiCZdsBUaBze+CqKmKiKSEXKcC/I2Sz2E3TF/5tJLDxS0QZzC
+	 JRijyUPV9UZD/qTf9Z/MFW1g9rPBcQi2O4yNITHz0GVCLIlJIywjwsyR2hz6rupbcW
+	 v6kJo6VHGGO6K+4w9E4b5h9wn3/JoNlaJ6+0uBebJzpO8TLnVasAEmMVUEDbxzrETV
+	 uodSadJUJmQkg==
+From: Kees Cook <kees@kernel.org>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: Kees Cook <kees@kernel.org>,
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+	linux-mmc@vger.kernel.org,
+	linux-hardening@vger.kernel.org,
+	stable@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: mmc_test: Set "cnt" to the allocated size explicitly
+Date: Thu, 12 Nov 2026 22:59:00 -0800
+Message-ID: <20261113065859.i.967-kees@kernel.org>
+X-Mailer: git-send-email 2.55.0
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -63,47 +66,41 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261112-qcom_ice_pm_enable-v2-2-177e454d6f22@oss.qualcomm.com>
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1248; i=kees@kernel.org; h=from:subject:message-id; bh=Shs3zF3wUU8JHN1trlidFo9nMMZXkE47Zl6or46ELb4=; b=owGbwMvMwCVmps19z/KJym7G02pJDFnfthp7FC0QlCyQ7/jw+5pI/iMndT93BsHtH9Kuz/FOa lxu7PS4o5SFQYyLQVZMkSXIzj3OxeNte7j7XEWYOaxMIEMYuDgFYCJMTxn+B9u/fzTtSeDfCdPV /B3nbdJedWCq4JHzRkvzHkqw//a5L87wz/RL/SP265wH1GQ6S9RT5/scWl7zaO4p3mfTwz/8ku0 Q4QYA
+X-Developer-Key: i=kees@kernel.org; a=openpgp; fpr=A5C3F68F229DD60F723E6E138972F4DFDC6DC026
+Content-Transfer-Encoding: 8bit
 
-On Thu, Nov 12, 2026 at 06:48:18PM +0530, Kuldeep Singh wrote:
-> ufs-qcom currently exposes UFS crypto profile and sets UFSHCD_CAP_CRYPTO
-> before enabling ICE. This leaves a window where blk-crypto can issue
-> keyslot programming calls before ufs-qcom has explicitly enabled ICE.
+Since commit c35fac6481a1d ("mmc: mmc_test: Fix __counted_by handling
+after kzalloc_flex() conversion"), mmc_test_alloc_mem() bounds its fill
+loop with mem->cnt, relying on kzalloc_flex() to have set it to
+"max_segs". kzalloc_flex() only sets the __counted_by() counter when the
+compiler supports __builtin_counted_by_ref(). Otherwise mem->cnt is still
+zero after the first segment is stored.
 
-Please be more specific about what actually goes wrong, and why.  During
-probe, the crypto profile hasn't actually been registered with the block
-layer yet.  So the above seems inaccurate.  Likewise in the MMC patch.
+Set mem->cnt after the allocation, as that commit's description intends.
 
->  static int ufs_qcom_ice_init(struct ufs_qcom_host *host)
->  {
-> @@ -188,6 +190,12 @@ static int ufs_qcom_ice_init(struct ufs_qcom_host *host)
->  
->  	host->ice = ice;
->  
-> +	err = qcom_ice_enable(host->ice);
+Build tested ARCH=x86_64 defconfig with CONFIG_MMC_TEST=m and W=1, with
+GCC 16.2.0.
 
-Use the 'ice' local variable.
+Fixes: c35fac6481a1d ("mmc: mmc_test: Fix __counted_by handling after kzalloc_flex() conversion")
+Cc: stable@vger.kernel.org
+Signed-off-by: Kees Cook <kees@kernel.org>
+---
+ drivers/mmc/core/mmc_test.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-> @@ -636,12 +645,15 @@ static int ufs_qcom_hce_enable_notify(struct ufs_hba *hba,
->  		 * is initialized.
->  		 */
->  		err = ufs_qcom_enable_lane_clks(host);
-> +		if (err)
-> +			return err;
-> +
-> +		err = ufs_qcom_ice_enable(host);
->  		break;
->  	case POST_CHANGE:
->  		/* check if UFS PHY moved from DISABLED to HIBERN8 */
->  		err = ufs_qcom_check_hibern8(hba);
->  		ufs_qcom_enable_hw_clk_gating(hba);
-> -		ufs_qcom_ice_enable(host);
->  		ufs_qcom_config_ice_allocator(host);
->  		break;
+diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+index 4dc16649e61d..aa30df9d33d8 100644
+--- a/drivers/mmc/core/mmc_test.c
++++ b/drivers/mmc/core/mmc_test.c
+@@ -357,6 +357,7 @@ static struct mmc_test_mem *mmc_test_alloc_mem(unsigned long min_sz,
+ 	mem = kzalloc_flex(*mem, arr, max_segs);
+ 	if (!mem)
+ 		return NULL;
++	mem->cnt = max_segs;
+ 
+ 	while (max_page_cnt) {
+ 		struct page *page;
+-- 
+2.55.0
 
-Needs an explanation for why ufs_qcom_config_ice_allocator() and
-ufs_qcom_ice_enable() need to be called at different times.
-
-- Eric
