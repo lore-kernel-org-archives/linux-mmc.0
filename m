@@ -1,52 +1,52 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=178.251.229.89
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794651244;
-	b=Sy5H0Amn59Ez0D4TjKli8Ac1EbMAX8g+61vWeKaH5wVJ5/TrxegiAyLG0gNSZDArxucT
-	 u2veb49JbPR1unFBFVBsJn38Er9Fh7MymBTbP+zD5/Hfbzfc6H8LU5t5POyBqaV1DeMKU
-	 muY8myvQaEY8MMeu9ByjBeKAG/ow6Oo1DS6c5KMER965CxtwU/z06vfRt0/iNgj6x0hUL
-	 nvBQW6yuRrOTTZWDZOIdsEtSoh1Bljie9juRi+GFmiuyN4RmLA4bLy/fJDkJbQyMK5/+I
-	 67uIo/ciiqtYCU9cc9kjCgzLMfgk/N/OxjL5HlSjIL4n9PTJpcyRIOEXIPL4P0jheew==
+	t=1794651240;
+	b=dSEZLVKh1Llp92LSrsW0GhCItxKAx88UlPODcYvnQjU4KVcB7qDb58OVVWx2XlcNFH59
+	 sRoNZpCMTiNawBiJRD2uKCK1cYrfw6tf6uYTZOR6XCjtPSRN7icGHpdVIowEGFUpCOlEE
+	 bkZ+0s6YtJvC/sYETdVhFsT3ZzhfVhBVXmXiet/nB22+RCfii05RpywGucuNqYELMfyKM
+	 HUKqi/YVHuIaO+4cUbXYsdMproaVWpPXmjA6mTq6vJ8OaeuMZHnabYrdORyPP/xfOm3ge
+	 Gf0tJrEke8qc95pQHwv6JyWYdmjEHvOlzVBwJDMl8owgfFlVCKuvGqQAPgLlSC7HnhQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794651244;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794651240;
 	h=DMARC-Filter:Received:DKIM-Signature:Message-ID:Date:MIME-Version:
 	 User-Agent:Subject:To:Cc:References:Content-Language:From:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding:X-Last-TLS-Session-Version;
-	bh=SB73NSyM9IDD31uAayyVRUqA94r4RoQKPelrn7GTAjE=;
-	b=AfnMwjIAT6QruHuI3u5NsiH73IwTV9lD7bNQBBVmh0UWIY6KH95OqyBN0rfTLIKctXOv
-	 9Cv0sK7fNawiuUGGuF2dNcyC3LCCtks5SrUaISziNkG33REdbHw2Ifh1OF5RCQjY7B77A
-	 6/93IaIb1VWGlXzZnW/BYvfYxEzn1oJpjQYHW3imIRCHOz5LrJmXxqeSWakAJYRCCbgG/
-	 N8xxyitMGr5rpHHnFepqPoK/rlV+uCBhKGSgOaoDVA6leAY4GZuKuif8I8MnLgvqNj69Q
-	 B025FeLjvEhL+3VY97V+v3A/J0VAeEFjYm92fuQZLr3r0YM3eBonklNCLVAVwUPssLQ==
+	bh=CC8AtHwZZub26kjn5ZZpKA5wzTG30rrk88z324avJjY=;
+	b=J7G95gxltliwfCbFX3KXdnkDFKCEZ4AV9LWlJnzca4eOOS0TkGwmqnOYL8v2rxm/37Oe
+	 YZaQIRXC6C7ZRPLmkG3nN21rXnqV/gX9Fq3o0HkL1ijmgwLbx/uuvHRku9t+pgH8B8BNS
+	 SlTAqz9Zhca5NqAASm6l6apDWwVCAqwXLaHG4sCuFc5P7t4aWqW7A84ltF/dMyBjPT2IZ
+	 Z3/TqmsNF6img05FAmadCbEQgK6XjS10GB967SO6L7uQQGq7HJYdGhtbJGwFnt5aqaEVj
+	 jEB78V8UUDt4YQQXYMiA+VZHbjN79QySvO1ebGI5egK/BaPyGojzPxhylhqfL/eW6YA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=nabladev.com;
 	spf=pass smtp.mailfrom=nabladev.com;
-	dkim=pass header.d=nabladev.com header.i=@nabladev.com header.a=rsa-sha256 header.s=dkim header.b=N02D2b3b;
+	dkim=pass header.d=nabladev.com header.i=@nabladev.com header.a=rsa-sha256 header.s=dkim header.b=Q5EjRVDW;
 	arc=none smtp.remote-ip=178.251.229.89
 Received: from mx.nabladev.com (mx.nabladev.com [178.251.229.89])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55A6F606A32D;
-	Sat, 14 Nov 2026 10:14:04 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 55A6F606A32D
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87FFD606A327;
+	Sat, 14 Nov 2026 10:13:59 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 87FFD606A327
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nabladev.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nabladev.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=nabladev.com header.i=@nabladev.com header.a=rsa-sha256 header.s=dkim header.b=N02D2b3b
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id F056D10E988;
-	Sat, 14 Nov 2026 11:13:51 +0100 (CET)
+	dkim=pass (2048-bit key, unprotected) header.d=nabladev.com header.i=@nabladev.com header.a=rsa-sha256 header.s=dkim header.b=Q5EjRVDW
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id E353610EA56;
+	Sat, 14 Nov 2026 11:13:45 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nabladev.com;
-	s=dkim; t=1794651233;
+	s=dkim; t=1794651227;
 	h=from:subject:date:message-id:to:cc:mime-version:content-type:
 	 content-transfer-encoding:content-language:in-reply-to:references;
-	bh=SB73NSyM9IDD31uAayyVRUqA94r4RoQKPelrn7GTAjE=;
-	b=N02D2b3beYxmdyVWuxq2DIFbj4k0uds9ayUfn6iXl2pkTt9f+I5uts4pP0PtRM2Q5pk9qz
-	hvDoZeJqQ6afVUn8uqnsHnllNg8UjbA0Z+vxzsAmROQbCK5iofs55grgqYk2Qj183Gq03s
-	u3Sq0cVX1eDc/f/nwezT3kBi7NTzeEeP3hHy0KaYXORo/CzfxTXGG1PK+/N5mYjwTs4+71
-	mjrBr+UCchPV0oyb4RUBdq0y7sjzKU98HFV1VSPMURxSGCxvSKx+WAPgKafkrOhBtTf81t
-	y2GYq6ngM7uR2Hy272blLfddU7HYSGRfy61mQm1kc6BOXlQQpf+kh5hv4z3cvQ==
-Message-ID: <73cca072-583d-4601-8953-6f2769c6cb19@nabladev.com>
-Date: Sat, 14 Nov 2026 02:00:42 +0100
+	bh=CC8AtHwZZub26kjn5ZZpKA5wzTG30rrk88z324avJjY=;
+	b=Q5EjRVDWT3H/xWt3GrsIshGnhpWFrEavh+eY86S263kmWctWNZfRU81FhBHggWF4lOEiU8
+	msuBYOQeLmINg7TkyrL2pIE+U1NBKu7F0Cleq65rQLXW1ThqAgPvFjPojlt88O05F2wvGl
+	luNUArApXeMXrG78BtVFq+d7brCadobBVCAJAMkxTTNaiVhM55NGeLJUNyBj8pdzPTLXg3
+	ilhyqPcs1TJ2vmHg5758GYcaPugsyYvT2y3PXWH5pa2Rw9iX8hAPM6qtV/kHJpXSTfQtC5
+	ehI6eOc566dPy2zbwP4WWukIHfF4JJhP8VaNZ3tBr3WGhhB8XuT6y2AyxNpbnQ==
+Message-ID: <6fc041d3-f66d-47c9-9dc1-f47b4c416104@nabladev.com>
+Date: Sat, 14 Nov 2026 02:00:16 +0100
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -57,68 +57,48 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: mmci: stm32: handle mmc power up
-To: Christophe KERELLO <christophe.kerello@foss.st.com>,
- Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Cc: linux-mmc@vger.kernel.org, Alexandre Torgue
- <alexandre.torgue@foss.st.com>, Maxime Coquelin <mcoquelin.stm32@gmail.com>,
- Ulf Hansson <ulfh@kernel.org>, kernel@dh-electronics.com,
+Subject: Re: [PATCH] mmc: mmci: stm32: reset and restore SDMMC state on system
+ resume
+To: Christophe Kerello <christophe.kerello@foss.st.com>,
+ Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulfh@kernel.org>
+Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+ Alexandre Torgue <alexandre.torgue@foss.st.com>,
+ Philipp Zabel <p.zabel@pengutronix.de>, linux-mmc@vger.kernel.org,
+ linux-stm32@st-md-mailman.stormreply.com,
  linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-stm32@st-md-mailman.stormreply.com
-References: <20261030215427.488298-1-marex@nabladev.com>
- <CAPx+jO8sc8gbxNQTjK2tx+1UPLqwwEof3E9vknHNc4kmbeB7oA@mail.gmail.com>
- <51207e63-ec60-4805-bf6a-b10647ee3866@nabladev.com>
- <CAPx+jO89Z0Z241L1jyB_3sUygdEwGicqT-WfHc6ppG8egHUO2w@mail.gmail.com>
- <c3cbd7ab-e689-4a9b-b311-af43980738d2@nabladev.com>
- <CAPx+jO8=nVBUuOQ==Q66nOnH+VeXur88DetmETe8qmOiS_NCWQ@mail.gmail.com>
- <e996f9ab-6373-4a27-b5ae-591ba33845c5@foss.st.com>
+ stable@vger.kernel.org
+References: <20261113-fix-resume-reset-v1-1-115b3da5764d@foss.st.com>
 Content-Language: en-US
 From: Marek Vasut <marex@nabladev.com>
-In-Reply-To: <e996f9ab-6373-4a27-b5ae-591ba33845c5@foss.st.com>
+In-Reply-To: <20261113-fix-resume-reset-v1-1-115b3da5764d@foss.st.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 X-Last-TLS-Session-Version: TLSv1.3
 
-On 11/13/26 5:53 PM, Christophe KERELLO wrote:
-> Hello Ulf,
+On 11/13/26 5:35 PM, Christophe Kerello wrote:
+> On standby exit, the bootrom may reuse the SDMMC instance used as boot
+> device, leaving the IP in a state not known by Linux.
 > 
-> On 11/13/26 12:46, Ulf Hansson wrote:
->> On Thu, Nov 12, 2026 at 7:26 AM Marek Vasut <marex@nabladev.com> wrote:
->>> On 11/11/26 12:45 PM, Ulf Hansson wrote:
->>>
->>> Hello Ulf,
->>>
->>>>>>> -       if (ios.power_mode == MMC_POWER_OFF) {
->>>>>>> +       if (ios.power_mode == MMC_POWER_OFF ||
->>>>>>> +           ios.power_mode == MMC_POWER_UP) {
->>>>>>>                    /* Only a reset could power-off sdmmc */
->>>>>>>                    reset_control_assert(host->rst);
->>>>>>>                    udelay(2);
->>>>>> What exactly will this reset?
->>>>> The controller.
->>>> Okay, I see.
->>>>
->>>> In that case, this reset also makes us reset preceding updates to any
->>>> other registers, for example the clock register. I would not recommend
->>>> doing that here, but perhaps there is no better option.
->>> Does that pose a problem in the MMC_POWER_OFF/UP state ? I agree this
->>> would pose a problem in the MMC_POWER_ON state, but here the card is 
->>> not ON.
->> I think it is a problem, yes. If you have a closer look at what
->> happens in mmci_set_ios(), I think you will agree.
->>
->>>> If I may I suggest an alternative solution, perhaps we can manage this
->>>> in the ->runtime_resume() callback instead. If the power_mode ==
->>>> MMC_POWER_OFF, perhaps do this reset there instead? Would that work?
->> Can you try this?
+> STM32 variants do not set pwrreg_nopower, so MMCICLOCK, MMCIDATACTRL and
+> MMCIPOWER are neither saved nor restored by mmci_save()/mmci_restore():
+> their content is expected to be retained by the hardware.
 > 
-> I have sent a new patch based on your proposal:
-> https://lore.kernel.org/linux-mmc/20261113-fix-resume-reset- 
-> v1-1-115b3da5764d@foss.st.com/
+> Add a reset_on_resume variant flag. When set, and if the card is powered
+> off and a reset line is available, reset the IP on system resume and
+> restore the cached MMCICLOCK, MMCIDATACTRL and MMCIPOWER values.
 > 
-> It works fine on my side.
+> This is done from a .resume_noirq callback, so that mmci_irq() cannot run
+> on a state left by the bootrom once device interrupts are re-enabled. It
+> also runs before pm_runtime_force_resume(), which does not resume the
+> device if it was already runtime suspended before system suspend. The
+> clock is therefore enabled locally for the duration of the sequence.
+> Clock and reset errors are reported to the PM core.
 > 
-> Hi Marek,
-> Could you also test it on your board to confirm that it fixes the issue 
-> you reported?
-This works too, thanks .
+> Enable the flag for all STM32 SDMMC variants.
+> 
+> Fixes: 46b723dd867d ("mmc: mmci: add stm32 sdmmc variant")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
+Tested-by: Marek Vasut <marex@nabladev.com>
+
+Thanks
