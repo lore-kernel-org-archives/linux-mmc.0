@@ -1,88 +1,91 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.48
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.216.97
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794855168;
-	b=xuWSWAtKV9ftxOtQEuIs0WaUq7mUnnX8jMuIsGx+dKWnXUQRfD84HlZWthJkpVrj8sjU
-	 aW0opp3M/CZ/8o9GBovq+26NhpF71C4TBcxqMva6z/pJjiPFBh/1bOIGGryvE7wEIUsgA
-	 HkZLEOQ9N7p15zIj8O8Sxy2pNO30PYZWUhX1VYaQ8Kn7xWC+6gkzsbXHE/liNnx4wzzH9
-	 J14tPL1W/GYfcDcFidA5JLWJgZLHfBc3b0iwDpyhkgrOQjQKTxk4OSED4278jOrbs3VEq
-	 eWzlz0g0LWHv5P/Y2BFgKqkNfvZ00AtSWN3swmMt78oY+CDEbMRhZPqg3FjlkJxsCOw==
+	t=1794860104;
+	b=AGJylAz9Pv4pDorLnuUJPytShdSmija4HZq4TEcKtL5RvUgdqas7RErci9y0Jbtp4Lbn
+	 HisILkk1xKl5u7PtbspvIWM65SMHx6mM7Zh9uVkOwFc93jJCvJIV7U/goXDA5XY4JPbkV
+	 eQvh7c96jrBtED+k8dEFSBzPPVEYRChihkOmqwgQ+pWebdY6BWABSTkeBXe1dJeTr5e+V
+	 e1I7CQxN2s0KUzVcqZSwNY9I3Q5JmYZSAn2CyJdOHfQCFBe+5xD6sga4YCGMTo0znHY22
+	 mR7SUOOeyc6bbfqDeEL/PILRqJjRxzEwBnbbQmQPC7IsU50qLb2/vElLqmufc09ZLsA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794855168;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:Date:Subject:
-	 MIME-Version:Content-Type:Content-Transfer-Encoding:Message-Id:
-	 References:In-Reply-To:To:Cc:X-Mailer:X-Developer-Signature:
-	 X-Developer-Key;
-	bh=dnESQZB66ZqtLu8qDe7KJpPX20rrkH6E5cL34m1eAjk=;
-	b=eGH0fJ8+NBVlWv3SWOgKufY9k9Uo4SK5vanzL1LvfrmiyKTAogcPl1zTr9zO6DZEhRlD
-	 4py1iGibcoqJOIlxBpT3pwmByxuUye3umv3muIePTE8yoyNBCHqQktOizA7jTDlrLg/0/
-	 +6ZjSUz6aO7mnIgz9JFW7D4B98mmkb+K1BGmIjYF4lbNkJU+uRRUnj37yvTy/nZaD/OtS
-	 QF3j5dT9pbtmnH/UBLMGzWJgjpLNMr26nxccHpMJd93iRZC55KK646wBnJnnjrEnSS+Mn
-	 dtBt8YjWfJSYJpjB0u+QXwE4L8fc559z53i1rOBmizjqHaJiDH8HXDG0dRWTz8fTxyw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794860104;
+	h=DMARC-Filter:Received:X-Google-DKIM-Signature:X-Gm-Message-State:
+	 X-Gm-Gg:X-Received:Received:X-Relaying-Domain:X-CFilter-Loop:Received:
+	 DKIM-Signature:X-Received:X-Received:MIME-Version:References:
+	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
+	 X-DetectorID-Processed:Content-Type;
+	bh=k+kx/9F6dKI+1j4Cph1rIaL1YuPi1oeZXmxdyVS3oJI=;
+	b=igITLAuft6MVtFVb2IodmArdaO5OvSjMGMc1TD52DZhupAR0Mycb5sFxcfLzW0rGCmvm
+	 vF0BoEDTl4pIB8EXoYvQ+HiKP1Z/uft3+mkOJSrVK/hmZ6xpktpL1/MFhQXt+6POTKoy8
+	 5/DfTa584A9/VCfWGyzemq7wFApFtCf952z1kRUSN/8cqVg8k7f9qFHBGBvSzDyI/VBzs
+	 YGdQpDgapAOv8bhue3sUpd0eKB9OaFpH8kJEIQDlOMXwblpi8Ol5+leszx8SwgrQjZckN
+	 NyJpbSTO08mIuabwBVBjKruDff0nhIDvIHk/uC/NI3IeCyfqf9IER5rxtXk9sOJ4cjQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=MeEs0rAb;
-	arc=none smtp.remote-ip=209.85.128.48
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
+	dmarc=pass header.from=broadcom.com;
+	spf=fail smtp.mailfrom=broadcom.com;
+	dkim=pass header.d=broadcom.com header.i=@broadcom.com header.a=rsa-sha256 header.s=google header.b=cuJzYfpk;
+	arc=none smtp.remote-ip=209.85.216.97
+Received: from mail-pj1-f97.google.com (mail-pj1-f97.google.com [209.85.216.97])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 917E0606A8A2
-	for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2026 18:52:44 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 917E0606A8A2
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 48D4C606A329
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2026 20:15:04 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 48D4C606A329
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=MeEs0rAb
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-4a214c5c4c0so38287465e9.3
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2026 10:52:44 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1794855163; x=1795459963; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :content-type:mime-version:subject:date:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=dnESQZB66ZqtLu8qDe7KJpPX20rrkH6E5cL34m1eAjk=;
-        b=MeEs0rAbBqdpQTtPaZAUaHzwQuaajnsJkfMmed7vGCCuK/Np4aDjJYaG19/5LCBnHO
-         3iwFlZ5Tk8R9RG2XTkmUHFzyqlee5C4ica3JcNBjOsnd6SKxbz9Cd4cyJoHYmnQ2xQ1A
-         P1UD/nhaUOpm8/zaMPqO0cqwsHOdNHCUP/uH+eJZ9xsiXIYBvccN3NdbPBH1j9Ouz7Yl
-         A1USMd0RjstTye73wY2QuCR2DQSlPE4z254LM0rZzvOFauoMCkKXqzOMpO4RU146lkWw
-         HReMe3YhBPi2bYDa3g5w0WpfDBeff3QBgJvXkFzbzJhK3oAksaFpVx7EGMWZyldpOlgM
-         TLRw==
+	dkim=pass (1024-bit key, unprotected) header.d=broadcom.com header.i=@broadcom.com header.a=rsa-sha256 header.s=google header.b=cuJzYfpk
+Received: by mail-pj1-f97.google.com with SMTP id 98e67ed59e1d1-3ace1f3897cso2120494a91.0
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2026 12:15:04 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794855163; x=1795459963;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :content-type:mime-version:subject:date:from:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+        d=1e100.net; s=20260707; t=1794860103; x=1795464903;
+        h=content-type:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=k+kx/9F6dKI+1j4Cph1rIaL1YuPi1oeZXmxdyVS3oJI=;
+        b=QwOC6pSJKGq1/7LY82bVHojMBWaF9kyVG2/9pYlXdDxpUbnfXZPtu6sAB+s8rJAmUr
+         INKrhVWd4ZLmzUcZ96fZmJ+7u2X9FwQeFXpylvtId6HO44OSApEnr3Hkl+wXRNlWkDkX
+         F5TBK2WcX+PTaZ9FAuxKOXCD9347X5ARYIY0NIW2V/aSU31ITZScJ7vIzBRpnhhEA2WH
+         u6GkQuJ0aauHlpLDd358AW3by+fqCzZPHdmIPt5ayY+AZYqg8aRch+ytIKEj21kgTXtI
+         KySJOczV88tRHbKHh0jj5hBpMdP1FAMIgWGMTG9NWB5RkMZEe6FA8tPTeKXwPY0SVSoK
+         LbTA==
+X-Gm-Message-State: APuU4Z9es4UBVatoXDbLAr050/x6l0QafdYNgnG5B3dhsfWhXsslqCib
+	Y4TQvEFdRsDT3L88SDz60JPeelSvcrVLWZGOMxDFuqJFQTadj3n83S4fAnCLOPUQ96/Gr3GKFNy
+	iACb8TLW6B/Jmj0PGmj1MdLuueN8TeCCDAAsDUziIwUMxbmc8a8sAm06KwRiknnxVaP+jsajLG9
+	65kMVlPtNCL2aI3O38ZzEUeZfnOqrPbN/oMZdLBAcnHmEQTQDz4u3zJ83Kv1O/OkPg4upgT58jI
+	nuZPAphyIgf
+X-Gm-Gg: AZFdTZdSH/u5G2wXQdsNXKefS+ickXJ6o28OOzX5rDV7r0Fy9wguqUr9DgdXNo7tzw2
+	M3njCaqS+O7CP+llUUmC7C3HO6MkYtBYPJpcQeoGicQi66ICCe+MuBLSnUeyoIZA8VRUKKB3tf3
+	gaqohF95QQu77nCczgMzvpHWNb8UBgEcLN0jrm4s+uZP+bs7Jb4KGjLS3RM//P5gkOFyAz80Yyg
+	wTyri2M4VlMjTubUjDFabDdlyPyNZp9bL7oIND5Yq5Kc62oSiL40EW1ZIo2T2TwLpw6VPrz53FU
+	S0ggTQaxHqkV0t5gcZH3votVcPnid9szCx/hV2KhMH5OM7laFmACOafBU2yCgnGHPUWH+KNgKcB
+	LTIX80Dnr/siw0FfAwPVjEGf+kgpdUrgbdrUxy+VIF6ILJLorKbJMzXex+e4F4rpZCgtJsSKbCw
+	17BwGTyO7xKswFLY0tTVdw2CiAthgnwkcYqY4=
+X-Received: by 2002:a17:90b:3ec4:b0:3b0:bc3c:3e7 with SMTP id 98e67ed59e1d1-3b1b0a1bdc3mr11931973a91.10.1794860103294;
+        Mon, 16 Nov 2026 12:15:03 -0800 (PST)
+Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-123.dlp.protect.broadcom.com. [144.49.247.123])
+        by smtp-relay.gmail.com with ESMTPS id 98e67ed59e1d1-3b1b3a71eb9sm6184695a91.4.2026.11.16.12.15.02
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 16 Nov 2026 12:15:03 -0800 (PST)
+X-Relaying-Domain: broadcom.com
+X-CFilter-Loop: Reflected
+Received: by mail-ot1-f72.google.com with SMTP id 46e09a7af769-85f37d25fa3so4543558a34.1
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2026 12:15:02 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=broadcom.com; s=google; t=1794860102; x=1795464902; darn=vger.kernel.org;
+        h=content-type:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=dnESQZB66ZqtLu8qDe7KJpPX20rrkH6E5cL34m1eAjk=;
-        b=wADWmZYaYQ+LdzZbGydHmvwpLvrpdQiEMbZnI521Ad5rTXufkvCNHncoHmDCuMeVhh
-         Nym6gXzyjI4htZ8d6BwAfbDM5ylmUCh8y8dXcWIa6TWUuoTIBacAVigCq2W9uPuWli1U
-         7CbRRhK2yPbGfdUn8NEjtWy7TJGJ0fcT6ihBpyDVQfZUpwyuWJ3tc1Cna1yl1U2/sAGi
-         DriRyawRr7hySTZEXo5O1jb8E7W9QoPyUnsIwUGDIdKCQIRoGZVo85Khp1mXm5Jzn708
-         RzKRKW5rvOx19ZeyTOZSBL6Fe0XiZcdTWBzOdXxzgRrZ/dWgzXsZf1AgeMV1Ac93leIO
-         P+VA==
-X-Gm-Message-State: APuU4Z/qNE261OfnhH3ufh0mggC2F/gbocwevM0K4FDfFynDTZB7xRAO
-	K62VOVh9y4O8t4i6m9ccbgTLJAxnGX+PMtIZFBBG8S+ke2ySERJSrjEE
-X-Gm-Gg: AYBFou1Ia6lSKLR+P3p0iOZs7k4IyTgzG1/dgaloy11K4icroaw1e49qIhBzdcJU9Mz
-	HVjVj+uxbY90DPMtnJzdFyO5k+HNnbonpEwebLLnxntzXG0s0LSDoauKY/tIJZTWOX51DC1WIje
-	i6dlyUycFHfoFqkVj9QTe4mbGgVmQJpOc1Jy2Kpt5i3CXDmNV8w+iccPqvwe3KB4Qm9lErjRGQT
-	lHZSknXgDz2URoQ0slZLO6fG/oOwEXFSncPVVy59Om3EyCXFGT9PLn2Jwv3EWAqT1LlVuKIG2Gk
-	ZeDtSxp2mkTR89lf5cpV5DJ7hasAccArOC+YVI2vlWQpVUzGBw+TLsdZ0Ws0kKhQbp9f0D3ipP7
-	oB3hbUYG2ZJRSxEIvE2q2jB/ohgUIqGh1Sg/Ly5uADvPNTRSJKMNGZe9Fx/CH3MGcSFK++DYazJ
-	B2Uj+lpd3dTx9RYKJO/clh0Nfr0WCslIKKtc1svUmjxsrxF4F5SBinfHE+4JgmrWBlFJvNhreAj
-	jkbKG4Ggzg/gU1/oVMB9N62Ps/4ORWXxKY9y4l2ZvVbs1MQ8/h/OfqqcmxXDsfdgO5JtKhxNBTC
-	7i3NMxfG2AiZSQOT4hGEZ+WOLdUFeogceRUk4g5AG7aIbcSxr7F8bqnHq0z3de58c2C1o68TqHO
-	9FFV522ml6RY=
-X-Received: by 2002:a05:600c:81c9:b0:4a1:83f0:7c91 with SMTP id 5b1f17b1804b1-4bb55a65b31mr234258215e9.18.1794855162899;
-        Mon, 16 Nov 2026 10:52:42 -0800 (PST)
-Received: from [127.0.1.1] ([2a00:23c4:a702:d301:6889:eb24:5e57:83b1])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4bb5720f6basm157961345e9.4.2026.11.16.10.52.42
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Nov 2026 10:52:42 -0800 (PST)
-From: Biju Das <biju.das.au@gmail.com>
-Date: Mon, 16 Nov 2026 18:52:41 +0000
-Subject: [PATCH v2 3/3] mmc: renesas_sdhi: Add RZ/G3L HS400 support
+        bh=k+kx/9F6dKI+1j4Cph1rIaL1YuPi1oeZXmxdyVS3oJI=;
+        b=cuJzYfpk1hlqBDw/2/SsSLTTl/Jw6H5VDduDkb0uOc4DFIkdncOrRqQfC2Mj7BN+Dk
+         Kb9R/8N24CHQdn3WPjFq1RQwoA0MZSLjCP46Pqa6iFLgPHHW5ZoeF7q98pNFywEn2mTC
+         tWij1bIuJ6PkEx1qt1E5mBu4v1TQNDS3cAQN0=
+X-Received: by 2002:a05:6808:c1c4:b0:4f3:68d6:f0dd with SMTP id 5614622812f47-56e6563024dmr10471931b6e.38.1794860101823;
+        Mon, 16 Nov 2026 12:15:01 -0800 (PST)
+X-Received: by 2002:a05:6808:c1c4:b0:4f3:68d6:f0dd with SMTP id
+ 5614622812f47-56e6563024dmr10471897b6e.38.1794860101344; Mon, 16 Nov 2026
+ 12:15:01 -0800 (PST)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -92,236 +95,281 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20261116-sdhi_hs400-v2-3-de41f7a7f330@bp.renesas.com>
-References: <20261116-sdhi_hs400-v2-0-de41f7a7f330@bp.renesas.com>
-In-Reply-To: <20261116-sdhi_hs400-v2-0-de41f7a7f330@bp.renesas.com>
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
- Ulf Hansson <ulfh@kernel.org>, Philipp Zabel <p.zabel@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
- linux-kernel@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>
-X-Mailer: b4 0.13.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1794855160; l=8502;
- i=biju.das.jz@bp.renesas.com; s=20261020; h=from:subject:message-id;
- bh=zSh1witOWgk70aQXdLbB1vUXnJMNBizQ3rQrfFp6sRo=;
- b=zU21SwipWnY3BNuItVFANLBfF6cJhVhygSBvpXQMHKuOYeWD9fL0yDFg8sNF+WCaIZaXLR981
- cMOQT618E9+ApeBBeXIb7ggAFzPgi5OSIBNcXuqH1CM3wUeGAUpiCXT
-X-Developer-Key: i=biju.das.jz@bp.renesas.com; a=ed25519;
- pk=yzD2T1OLS3lEYflbk64xhLlxhk75lZ+NoOtkTOqrlVw=
+References: <20261113211143.3759154-1-kamal.dasu@broadcom.com> <20261113211143.3759154-7-kamal.dasu@broadcom.com>
+In-Reply-To: <20261113211143.3759154-7-kamal.dasu@broadcom.com>
+From: Kamal Dasu <kamal.dasu@broadcom.com>
+Date: Mon, 16 Nov 2026 15:14:25 -0500
+X-Gm-Features: AclHuK_grL8FafTPMTWrPF9kQrENjp_nrDZ7UOaKKgewjcgPZAo7g3fp7Zzrzm0
+Message-ID: <CAKekbetSFisJ2YCN2oC1p0_G1asOFbHE6P3UXb952vnktZmtUA@mail.gmail.com>
+Subject: Re: [PATCH v13 6/6] mmc: core: Add support for resetting an eMMC at
+ system resume
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>
+X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
+	boundary="000000000000d1b24a06606a6ea5"
 
-From: Biju Das <biju.das.jz@bp.renesas.com>
+--000000000000d1b24a06606a6ea5
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Add HS400 support for the RZ/G3L SoC.
+On Fri, Nov 13, 2026 at 4:11=E2=80=AFPM Kamal Dasu <kamal.dasu@broadcom.com=
+> wrote:
+>
+> From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+>
+> The DT property reset-card-at-resume specifies that we need to make a res=
+et
+> of an eMMC card at system resume, assuming it also has stayed powered on
+> during system suspend.
+>
+> To implement support for this, let's start by parsing for the new DT
+> property and set the new bit MMC_CAP2_RESET_AT_RESUME if it's found. Base=
+d
+> on the property, we must also set MMC_PM_KEEP_POWER in the pm_flags for t=
+he
+> host, to keep the eMMC powered on during system suspend.
+>
+> Finally, to manage the actual reset during system resume, let's extend
+> mmc_resume() to support the needed behaviour.
+>
+> The property only makes sense together with keep-power-in-suspend, as the
+> card would otherwise be powered off and system suspend is refused. Valida=
+te
+> that in mmc_validate_host_caps(), to make the host probe fail upfront on
+> such a misconfiguration.
+>
+> While at it, claim the host around the reset in mmc_resume(), as it sends
+> commands to the card, and propagate any error from the reset so that a
+> failure to re-initialize the card is reported by the resume path.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+> Co-developed-by: Kamal Dasu <kamal.dasu@broadcom.com>
+> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+> ---
+>  drivers/mmc/core/host.c  | 17 +++++++++++++++++
+>  drivers/mmc/core/mmc.c   | 12 +++++++++++-
+>  include/linux/mmc/host.h |  1 +
+>  3 files changed, 29 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 8e9e61839198..94c8ec81ee08 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -48,6 +48,14 @@ static int mmc_host_class_prepare(struct device *dev)
+>         if (host->bus_ops->pre_suspend)
+>                 return host->bus_ops->pre_suspend(host);
+>
+> +       /*
+> +        * If it's required to make a reset of the card at system resume,=
+ this
+> +        * indirectly also means that we must keep the card powered on du=
+ring
+> +        * system suspend.
+> +        */
+> +       if (host->caps2 & MMC_CAP2_RESET_AT_RESUME)
+> +               return mmc_set_host_pm_flags(host, MMC_PM_KEEP_POWER);
+> +
+>         return 0;
+>  }
+>
+> @@ -375,6 +383,8 @@ int mmc_of_parse(struct mmc_host *host)
+>                 host->pm_caps |=3D MMC_PM_KEEP_POWER;
+>         if (device_property_read_bool(dev, "wakeup-source"))
+>                 host->pm_caps |=3D MMC_PM_WAKE_SDIO_IRQ;
+> +       if (device_property_read_bool(dev, "reset-card-at-resume"))
+> +               host->caps2 |=3D MMC_CAP2_RESET_AT_RESUME;
+>         if (device_property_read_bool(dev, "mmc-ddr-3_3v"))
+>                 host->caps |=3D MMC_CAP_3_3V_DDR;
+>         if (device_property_read_bool(dev, "mmc-ddr-1_8v"))
+> @@ -620,6 +630,13 @@ static int mmc_validate_host_caps(struct mmc_host *h=
+ost)
+>                 return -EINVAL;
+>         }
+>
+> +       /* Resetting the card at resume requires that it stays powered on=
+ */
+> +       if (caps2 & MMC_CAP2_RESET_AT_RESUME &&
+> +           !(host->pm_caps & MMC_PM_KEEP_POWER)) {
+> +               dev_warn(dev, "reset-card-at-resume requires keep-power-i=
+n-suspend\n");
+> +               return -EINVAL;
+> +       }
+> +
+>         /* UHS/DDR/HS200 modes require at least 4-bit bus */
+>         if (!(caps & (MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA)) &&
+>             ((caps & (MMC_CAP_UHS | MMC_CAP_DDR)) || (caps2 & MMC_CAP2_HS=
+200))) {
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 122ac9ba0a4b..829947374dcc 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -2316,14 +2316,24 @@ static int mmc_hw_reset_recovery(struct mmc_host =
+*host)
+>   */
+>  static int mmc_resume(struct mmc_host *host)
+>  {
+> +       int err =3D 0;
+> +
+>         if (mmc_card_keep_power(host)) {
+>                 pm_runtime_set_active(&host->card->dev);
+>                 mmc_card_clr_suspended(host->card);
+>         }
+>
+>         pm_runtime_enable(&host->card->dev);
+> +
+> +       if (mmc_card_keep_power(host) &&
+> +           host->caps2 & MMC_CAP2_RESET_AT_RESUME) {
+> +               mmc_claim_host(host);
+> +               err =3D _mmc_hw_reset(host);
+> +               mmc_release_host(host);
+> +       }
+> +
+>         host->pm_flags &=3D ~MMC_PM_KEEP_POWER;
+> -       return 0;
+> +       return err;
+>  }
+>
+>  /*
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 032c018650e0..3c0ea74e3e35 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -430,6 +430,7 @@ struct mmc_host {
+>         u32                     caps2;          /* More host capabilities=
+ */
+>
+>  #define MMC_CAP2_BOOTPART_NOACC        (1 << 0)        /* Boot partition=
+ no access */
+> +#define MMC_CAP2_RESET_AT_RESUME BIT(1)        /* Reset the card at syst=
+em resume */
+>  #define MMC_CAP2_FULL_PWR_CYCLE        (1 << 2)        /* Can do full po=
+wer cycle */
+>  #define MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND (1 << 3) /* Can do full power=
+ cycle in suspend */
+>  #define MMC_CAP2_HS200_1_8V_SDR        (1 << 5)        /* can support */
 
-RZ/G3L needs a second HS400 enable register, SDm_SCC_HS400MODE2
-(offset 0x020), alongside the existing TMPPORT2 path. Add a
-TMIO_MMC_HS400MODE2 flag (bit 16) for controllers that need it.
+Hi Ulf,
 
-RZ/G3L HS400 mode does not use internal divider and supports
-only one divider value "0" in the SD_CLK_CTRL register.
+Sashiko reviewed v13 and flagged one thing on this patch:
+https://sashiko.dev/#/patchset/20261113211143.3759154-1-kamal.dasu@broadcom=
+.com?part=3D6
 
-Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
----
-v1->v2:
- * Using ios.timing to decide whether the HS400 divider restriction applies
-   is wrong: mmc_hs400_to_hs200() lowers the clock while ios.timing is still
-   HS400 and then walks through DDR52/HS/HS200 before prepare_hs400_tuning()
-   clears the HS400 bits, so the divider could stay at 200 MHz or prohibited
-   non-zero dividers could be programmed while HS400 is still enabled. So
-   tracking HS400 hardware state for RZ/G3L clock programming using 2
-   variables hs400_active and hs400_clk in struct renesas_sdhi.
----
- drivers/mmc/host/renesas_sdhi.h               |  2 +
- drivers/mmc/host/renesas_sdhi_core.c          | 63 +++++++++++++++++++++++++--
- drivers/mmc/host/renesas_sdhi_internal_dmac.c |  3 +-
- include/linux/platform_data/tmio.h            |  3 ++
- 4 files changed, 67 insertions(+), 4 deletions(-)
+MMC_PM_KEEP_POWER is set in mmc_host_class_prepare() but is only cleared
+in mmc_resume(). If system suspend aborts after prepare (e.g. another
+device fails dpm_prepare(), or the cache flush fails), mmc_resume() is
+not called and the flag stays set at runtime.
 
-diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-index 8ae2ec04bd1f..d14cfd873bb9 100644
---- a/drivers/mmc/host/renesas_sdhi.h
-+++ b/drivers/mmc/host/renesas_sdhi.h
-@@ -94,6 +94,8 @@ struct renesas_sdhi {
- 	const u8 *adjust_hs400_calib_table;
- 	bool needs_adjust_hs400;
- 	bool card_is_sdio;
-+	bool hs400_active;	/* HS400 enabled in hardware */
-+	bool hs400_clk;		/* divider bypassed for HS400 clock */
- 
- 	/* Tuning values: 1 for success, 0 for failure */
- 	DECLARE_BITMAP(taps, BITS_PER_LONG);
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 7dfcf7f970aa..66da2d1e9370 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -133,9 +133,10 @@ static int renesas_sdhi_clk_enable(struct tmio_mmc_host *host)
- static unsigned int renesas_sdhi_clk_get_rate(struct tmio_mmc_host *host,
- 					      struct clk *clk)
- {
-+	struct renesas_sdhi *priv = host_to_priv(host);
- 	unsigned int freq = clk_get_rate(clk);
- 
--	if (host->pdata->flags & TMIO_MMC_INTERNAL_DIVIDER)
-+	if ((host->pdata->flags & TMIO_MMC_INTERNAL_DIVIDER) && !priv->hs400_clk)
- 		freq /= 2;
- 
- 	return freq;
-@@ -226,12 +227,33 @@ static void renesas_sdhi_sclken(struct tmio_mmc_host *host, bool enable)
- 	}
- }
- 
-+static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
-+					  struct renesas_sdhi *priv);
-+
- static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
- 				   unsigned int new_clock)
- {
-+	struct renesas_sdhi *priv = host_to_priv(host);
- 	unsigned int clk_margin;
- 	u64 clk = 0, clock;
- 
-+	if (host->pdata->flags & TMIO_MMC_HS400MODE2) {
-+		/*
-+		 * While HS400 is enabled in hardware only divider 0 is allowed.
-+		 * Leaving HS400 (e.g. mmc_hs400_to_hs200()) lowers the clock
-+		 * before the core calls prepare_hs400_tuning(), so disable
-+		 * HS400 here once a non-HS400 clock is requested.
-+		 */
-+		if (priv->hs400_active && new_clock &&
-+		    new_clock <= MMC_HIGH_52_MAX_DTR)
-+			renesas_sdhi_reset_hs400_mode(host, priv);
-+
-+		if (new_clock)
-+			priv->hs400_clk = priv->hs400_active ||
-+				(host->mmc->ios.timing == MMC_TIMING_MMC_HS400 &&
-+				 new_clock > MMC_HIGH_52_MAX_DTR);
-+	}
-+
- 	renesas_sdhi_sclken(host, false);
- 
- 	if (new_clock == 0) {
-@@ -259,6 +281,13 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
- 			clk &= ~SDHI_SD_CLK_CTL_DIV1;
- 	}
- 
-+	/*
-+	 * RZ/G3L SoC HS400 mode has only 1 divider value.
-+	 * Other divider values are prohibited
-+	 */
-+	if ((host->pdata->flags & TMIO_MMC_HS400MODE2) && priv->hs400_clk)
-+		clk = 0;
-+
- 	clock = clk & host->pdata->clk_div_mask;
- 	if (clock != SDHI_SD_CLK_CTL_DIV1)
- 		host->mmc->actual_clock /= (1 << (ffs(clock) + 1));
-@@ -315,6 +344,7 @@ static int renesas_sdhi_card_busy(struct mmc_host *mmc)
- #define SH_MOBILE_SDHI_SCC_TMPPORT5	0x018
- #define SH_MOBILE_SDHI_SCC_TMPPORT6	0x01A
- #define SH_MOBILE_SDHI_SCC_TMPPORT7	0x01C
-+#define RZG3L_SDHI_SCC_HS400MODE2	0x020
- #define RZG3L_SDHI_SCC_HWADJ4		0x022
- 
- #define SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN		BIT(0)
-@@ -350,6 +380,9 @@ static int renesas_sdhi_card_busy(struct mmc_host *mmc)
- #define SH_MOBILE_SDHI_SCC_TMPPORT_DISABLE_WP_CODE	0xa5000000
- #define SH_MOBILE_SDHI_SCC_TMPPORT_CALIB_CODE_MASK	0x1f
- #define SH_MOBILE_SDHI_SCC_TMPPORT_MANUAL_MODE		BIT(7)
-+#define RZG3L_SDHI_SCC_HS400MODE2_HS400EN2		BIT(0)
-+
-+#define RZG2L_SDHI_SCC_TMPPORT2_TMPOUT		GENMASK(15, 0)
- 
- static inline u32 sd_scc_read32(struct tmio_mmc_host *host,
- 				struct renesas_sdhi *priv, int addr)
-@@ -364,6 +397,18 @@ static inline void sd_scc_write32(struct tmio_mmc_host *host,
- 	writel(val, priv->scc_ctl + (addr << host->bus_shift));
- }
- 
-+static void renesas_sdhi_set_tmpport(struct tmio_mmc_host *host, u32 tmpport)
-+{
-+	struct renesas_sdhi *priv = host_to_priv(host);
-+	u32 val = tmpport;
-+
-+	if (host->pdata->flags & TMIO_MMC_HS400MODE2)
-+		val |= sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2) &
-+		       ~RZG2L_SDHI_SCC_TMPPORT2_TMPOUT;
-+
-+	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, val);
-+}
-+
- static void renesas_sdhi_set_hw_adjustment_delay(struct tmio_mmc_host *host,
- 						 bool force_clear)
- {
-@@ -374,12 +419,12 @@ static void renesas_sdhi_set_hw_adjustment_delay(struct tmio_mmc_host *host,
- 		return;
- 
- 	if (host->mmc->ios.signal_voltage == MMC_SIGNAL_VOLTAGE_330 || force_clear) {
--		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, 0x0);
-+		renesas_sdhi_set_tmpport(host, 0x0);
- 		if (hwadj2)
- 			sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HWADJ2,
- 				       RZG3L_SDHI_SCC_HWADJ2_3_3V);
- 	} else {
--		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, 0x1);
-+		renesas_sdhi_set_tmpport(host, 0x1);
- 		if (hwadj2)
- 			sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HWADJ2,
- 				       RZG3L_SDHI_SCC_HWADJ2_1_8V);
-@@ -486,6 +531,12 @@ static void renesas_sdhi_hs400_complete(struct mmc_host *mmc)
- 			host->pdata->osel_tmpout) |
- 			sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
- 
-+	if (host->pdata->flags & TMIO_MMC_HS400MODE2)
-+		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HS400MODE2,
-+			       RZG3L_SDHI_SCC_HS400MODE2_HS400EN2);
-+
-+	priv->hs400_active = true;
-+
- 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL,
- 		       SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN |
- 		       sd_scc_read32(host, priv,
-@@ -623,6 +674,12 @@ static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
- 			 host->pdata->osel_tmpout) &
- 			sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
- 
-+	if (host->pdata->flags & TMIO_MMC_HS400MODE2)
-+		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HS400MODE2, 0x0);
-+
-+	priv->hs400_active = false;
-+	priv->hs400_clk = false;
-+
- 	if (sdhi_has_quirk(priv, hs400_calib_table) || sdhi_has_quirk(priv, hs400_bad_taps))
- 		renesas_sdhi_adjust_hs400_mode_disable(host);
- 
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index 37eeaa52f011..d9b9f9663386 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -165,7 +165,8 @@ static const struct renesas_sdhi_of_data of_data_rzg3l = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
- 			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2 |
- 			  TMIO_MMC_64BIT_DATA_PORT | TMIO_MMC_TUNING_DELAY |
--			  TMIO_MMC_INTERNAL_DIVIDER | TMIO_MMC_HWADJ,
-+			  TMIO_MMC_INTERNAL_DIVIDER | TMIO_MMC_HWADJ |
-+			  TMIO_MMC_HS400MODE2,
- 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
- 			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
- 	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT | MMC_CAP2_MERGE_CAPABLE,
-diff --git a/include/linux/platform_data/tmio.h b/include/linux/platform_data/tmio.h
-index 501ca4355c34..81a37d6baefc 100644
---- a/include/linux/platform_data/tmio.h
-+++ b/include/linux/platform_data/tmio.h
-@@ -59,6 +59,9 @@
- /* Some controllers have hw adjustment delay */
- #define TMIO_MMC_HWADJ			BIT(15)
- 
-+/* Some controllers have HS400MODE2 */
-+#define TMIO_MMC_HS400MODE2		BIT(16)
-+
- struct tmio_mmc_data {
- 	void				*chan_priv_tx;
- 	void				*chan_priv_rx;
+I think this is real, though unlikely. SDIO sets the flag in the function
+drivers' suspend callbacks, which run later, so the window there is
+narrower than setting it in prepare.
 
--- 
-2.43.0
+If you want it handled, I can clear the flag in mmc_host_class_complete()
+when MMC_CAP2_RESET_AT_RESUME is set and send a v14. Otherwise I'm happy
+to leave it as is, or do it as a follow-up. Let me know which you prefer.
 
+Thanks,
+Kamal
+
+--000000000000d1b24a06606a6ea5
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Description: S/MIME Cryptographic Signature
+
+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
+H0K0rs+X8O45xZIUJlxzf5UZex3BLi1f/H+08rSQULWEtO/ECwkFod2DIzSX7fZdz5RQ1PpziEOp
+goo/JZPYIeCmgt3rIyvMuupj8Ymb0J/velhpXfQuYUM52viw2nmqVcxCwBqyM3Iq7eI4xtEOFRmR
+wxSizd3MSQMf6GCHA4/B/6ttnxhGAr3utaOU+x/RnzG0gPLTW1XRAQ0+GVc/tGFdI864OG1cyrRl
+GvBnHJQSAFOIKwYrUk2oFpgMbafQ6osCAwEAAaOCAdswggHXMA4GA1UdDwEB/wQEAwIFoDAMBgNV
+HRMBAf8EAjAAMIGTBggrBgEFBQcBAQSBhjCBgzBGBggrBgEFBQcwAoY6aHR0cDovL3NlY3VyZS5n
+bG9iYWxzaWduLmNvbS9jYWNlcnQvZ3NnY2NyNnNtaW1lY2EyMDIzLmNydDA5BggrBgEFBQcwAYYt
+aHR0cDovL29jc3AuZ2xvYmFsc2lnbi5jb20vZ3NnY2NyNnNtaW1lY2EyMDIzMGUGA1UdIAReMFww
+CQYHZ4EMAQUDAzALBgkrBgEEAaAyASgwQgYKKwYBBAGgMgoDAjA0MDIGCCsGAQUFBwIBFiZodHRw
+czovL3d3dy5nbG9iYWxzaWduLmNvbS9yZXBvc2l0b3J5LzBBBgNVHR8EOjA4MDagNKAyhjBodHRw
+Oi8vY3JsLmdsb2JhbHNpZ24uY29tL2dzZ2NjcjZzbWltZWNhMjAyMy5jcmwwIgYDVR0RBBswGYEX
+a2FtYWwuZGFzdUBicm9hZGNvbS5jb20wEwYDVR0lBAwwCgYIKwYBBQUHAwQwHwYDVR0jBBgwFoAU
+ACk2nlx6ug+vLVAt26AjhRiwoJIwHQYDVR0OBBYEFOV9h+N/T9ZsJ40qRxh7NYYD+N6MMA0GCSqG
+SIb3DQEBCwUAA4ICAQAKtKh30wv1/30230mCimgUjMWQE/LImRmyfDgrp2IhBVS6mDun+wH8thEB
+WhBHQMz3gsGixU4ZBJG72eWi39IzQ7CGnisJwA0+hsGaGg03AVtFtqo1rXYRZ81MEDOb6BPYLigJ
+RsHbNmrUGR+LsGeUwOWUeRXqBrYaYFrkgHKvVK1NEewv+vUY08n4tsezO3jq0HKhVDY46bMbf8vL
+oQqqhtcQvu2+5FK2jpUayeubpzPwobjEG61RIhBvM0KivY4CB2s9A7qgjL1XBycAybIvG03BbFoT
+t282FqXwk9JU6YihLlt+hpzO9UF7E8GZYlQlVIZOLOvytqilhua+2h77Yy8Jz/FJyIXKuaLPtvb2
+SC2shL7jF28kQbP3QUKwAig+cxwbpngnUkd9D9cXSHVq9PPwYm0A4eAO0YQ/80Uq20+gXF++g0sy
+NKrrV3i0T1dbCd86miGDKvarGzjh7pdsdwNY15liGP6Orib1tnWkJcbtP1rJty4r/mbbxcK8ILO4
+IvTGFG6BfjJ+La0aRt69i1fQmjUWHLwzkLNpw9cJH8/MONZcEJeDkq9WELSyy29bagStk5KHu7NO
+TH65sZg+i/4qmj3DEeEGTr/Shzp4YWSNn4W7NEelr0VgDlwa7xqlwZjXxG4MIJqy0SsQlAwEXtqd
+nH2FpJfzgAetkuyU6DGCAlcwggJTAgEBMGIwUjELMAkGA1UEBhMCQkUxGTAXBgNVBAoTEEdsb2Jh
+bFNpZ24gbnYtc2ExKDAmBgNVBAMTH0dsb2JhbFNpZ24gR0NDIFI2IFNNSU1FIENBIDIwMjMCDEca
+ZUGCu6d0oT1M+zANBglghkgBZQMEAgEFAKCBxzAvBgkqhkiG9w0BCQQxIgQg9WZ/ftn6Fk2jSVUL
+sKK9UrBv9Qn57bjX9g8tF24LDdMwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0B
+CQUxDxcNMjYxMTE2MjAxNTAyWjBcBgkqhkiG9w0BCQ8xTzBNMAsGCWCGSAFlAwQBKjALBglghkgB
+ZQMEARYwCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMAsGCSqGSIb3DQEBBzALBglghkgBZQMEAgEw
+DQYJKoZIhvcNAQEBBQAEggEA0OIn2X6qTnhrsCh0L+V6Hy60fkWgK2pDwJu0GwBOTXDp+Z92YfdB
+VKbVF1JjGFIZVaUYh8MheV0O0lHtIWhi5KsWo5XAIK5Fnm6NPiX75HLYen5CT2L+H3Wl3QlLp6/i
+kBdQ9juLhdOwe3c+7AZW61G4Dhuh+MXzF3nw6i/VApDjq5iELExCRsB6eII/vBsdn0Fx7kWtbhEe
+RgVRIuKGYgHEpwckAvMQS6geX+qSAo4k8pvmJW1MSDIuganRB79x2doWC+LjcXfTF7Y5inab7fyp
+mcrzHXMgdbBZsubJal7KX99Zp/7pk3wR5ptUDEDGTFwq4d5cx3Y3T1bpIXaS7A==
+--000000000000d1b24a06606a6ea5--
