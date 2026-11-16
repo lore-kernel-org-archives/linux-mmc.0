@@ -1,98 +1,110 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=40.93.194.70
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794770767;
-	b=MxMp0Zl4kdy6l9BedWS0b8n/4kju9x58ahANz1qlwd/NY24sRb0OzcFo9kvQwsVtXHW1
-	 PKPbFNjCJ0h7SnSTnrv04e8bby+9ViiB5S+2BmfCWVI7EaS0bBcmNPULEpTQwOT2/j4xF
-	 /1doxdqn1jqAVkKBCDZvMOlF2z0ZSEi0SolPzvNIcsc5C5wtrJEZxiwDVVxYxN1lhU3rF
-	 SXaljac5QwfL+gjT6mmwtlKZEKsImgPw+c5HStNiDcDPzzs2YEbLE2EPPlLPucFpf0fFp
-	 ZZaxHjHrZshutWqt0UogMeNz4HoOtRx3snDgqGUTdyFGE0PDNlzNNS41KJvjCiORXNQ==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794770767;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:Message-ID:Date:
-	 User-Agent:Subject:To:References:Content-Language:From:In-Reply-To:
-	 Content-Type:Content-Transfer-Encoding:X-ClientProxiedBy:MIME-Version:
-	 X-MS-PublicTrafficType:X-MS-TrafficTypeDiagnostic:
-	 X-MS-Office365-Filtering-Correlation-Id:
-	 X-MS-Exchange-AtpMessageProperties:X-MS-Exchange-SenderADCheck:
-	 X-MS-Exchange-AntiSpam-Relay:X-Microsoft-Antispam:
-	 X-Microsoft-Antispam-Message-Info:X-Forefront-Antispam-Report:
-	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
-	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
-	 X-MS-Exchange-CrossTenant-FromEntityHeader:
-	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
-	 X-MS-Exchange-CrossTenant-UserPrincipalName:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=BVzHNmUxGU6hGw2W7R8kFl19hz7cHsdpnl70rPDRG7k=;
-	b=K+wJvEW2on1x6jDZMjyYtGouc2hx/qVv/ApC2TTfanhjGOo/fyr88vhAp5ormJXbxZAo
-	 cbaefOO1wZBouke2T1iwd4ngUSzV1qNdieje7uz3yBIUHQRxx8prloVRd8niUpJOd69pm
-	 UnmBlATlOKZ9NgFp+FsutyumMvWoPSFvyaG1XkhNNkg3NxODdCWSWfzU2cUvqYVLDkV1U
-	 3Upowz+wBSvdmo39BYE0jnU/9OEWxF7VEyEzAySBg2W7UhsjKQeGlDsNK8VZ3ShcCf5Fj
-	 QfN++uKzOoJGyoqSpQp2DMI0J2NdT2K05KGPNLvuiCMQa1++F2cun12jBG2Kqqxtwig==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=altera.com;
-	spf=pass smtp.mailfrom=altera.com;
-	dkim=pass header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=FcYHDz9E;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=40.93.194.70
-Received: from SN4PR0501CU005.outbound.protection.outlook.com (mail-southcentralusazon11011070.outbound.protection.outlook.com [40.93.194.70])
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=205.220.168.131
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1794812233;
+	b=x8kC6AIK9eu4EV9BMOKXOkaQKqNsr+loOLhR2uf96m4m4eSEcufEyYFGC/NuhA/8Gnj/
+	 B9LnjFFaQE5qpxyDjZYxV/9ZZKOKBr4i6YCqSdDBO6Z78E3PEbqE26vHvQBYNjPZg8GSa
+	 AA/WEPdRRrKOwTLKYsdxgFGNa70Zuz2xXgMIJmwgl3VLWcUmRMvl2UWdiC3UOGfnnb4DM
+	 +8HBt/34pPEaChm744tEWSHVrs7vkhrqrAfj8AhUM6awmqfLxVkHEWiTibixHk5OD6a68
+	 8UkRfXdsLVnR2gz8rc1mgFSzRd0hYcCrr5I7bi7EShK2K7W32Eixt+bhbiBUdPwTz7Q==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794812233;
+	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
+	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:Received:Message-ID:
+	 Date:MIME-Version:User-Agent:From:Subject:To:Cc:References:
+	 Content-Language:In-Reply-To:Content-Type:Content-Transfer-Encoding:
+	 X-Authority-Analysis:X-Proofpoint-Spam-Info:X-Proofpoint-ORIG-GUID:
+	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-GUID:
+	 X-Proofpoint-Virus-Version:X-Proofpoint-Spam-Details;
+	bh=8kVbLa2hYPiQsN9qOzj3DO2zSgYLfY1noEtwJGDEPiM=;
+	b=L5VH4MCoroS4kc9p3mSvdmzYWpbrFD8JlDEKgptlrk6dxJ/zyRZECSinOppSwcd57b+t
+	 4eQiwKkmGLAPaRlr2d7KSovsBmTA3WXkYRYfvabgYUsECpLrFmqlOgMwWqndkoMKj37bv
+	 aCVKh0gOcEF12FczDhdq/b/z/L065tpNotcoUVKN4g+xOtecjhN1MBW4oppkM2DVdrZtA
+	 FqCv8kDJma6C3hFi5L9dUQ1rgKhEKB1YDzYlwravxwsugZ4sT0GRaEAqj+FwiYyZYqOjD
+	 2QeIBR5/hOrF7bvCLFAvDOVNd71VPHrNqQwgV6Okx5V0yomc+uO+6Dl0GrjRjIqOugg==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=oss.qualcomm.com;
+	spf=pass smtp.mailfrom=oss.qualcomm.com;
+	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=FLCw5W7Q;
+	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=BDG8ylHP;
+	arc=none smtp.remote-ip=205.220.168.131
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A5FE0606A334;
-	Sun, 15 Nov 2026 19:26:06 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A5FE0606A334
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4292606A323
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2026 06:57:12 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D4292606A323
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=FcYHDz9E
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=rVfd1maYiqJE8AkSH2ufmHhbgKN9RsjcvVu22kfHiFZdr/y78AXxuk52TX7YSeMmKZJ0gFAu/JTWbPY3ZutE3if7TCfpAY7r+gb1goc63nUsM3kpp/s+6wNMzmQDzhjzHg+sLFNn8KErNVWKgdLV1kHREonR+QBbMyFr32fQL4iQh8lRlina9STZl62TePNHMqFFeCbmnqfI8ev7wozu3/IYdkbXdRI7dDjg4BhBumPdqfJb/+6Eftzq1cw6KUnXgZ5F0YjLhVeJm3dUGMg36tNyCRsSua2bxUfZNF5rBrNVW5e1d8M9z+X3jdcHwhmrERj7x5+wKkA0s08fckuYlA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=BVzHNmUxGU6hGw2W7R8kFl19hz7cHsdpnl70rPDRG7k=;
- b=GuuqdCeZ+THPbkV4QndUVYinxAfn7LNyz4msqONPc/7IfFC2RV7M4m95k1/LZFeYMcEQIi7//lIa2wrrFO57oQvs/3bRW9+WoURA4DCb85PUGHg/PKGoe1W4WmJGCkMNQTwPHD0A8zCMscg6ONYiC387hxAz1u1CpZN+QaL5N+D5chXk4qEg2pAzVvK5rJYWesg/bhK9+1p0RPYmkIOOpyInce44N3lawdeYsppq8oTqAWPa9tW2t1kk6NrxUMqCwBnRh8V34io8u/k2k7xYxdhOmbzrg/G0j7cIvoBhwPWsQEW/wOwffMu0ySRjBYh8ca5EgI4NpNqnutKIibnpaQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
- dkim=pass header.d=altera.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=BVzHNmUxGU6hGw2W7R8kFl19hz7cHsdpnl70rPDRG7k=;
- b=FcYHDz9EJrss6uaGn+46DM6JhthZTCNcU4EFE4y9ALC0HdCk9qID8faLadBD3kZWUeCbROHodacnOBQHnJ3paCQ1Pp+06oHZUgIeCXMulk96HMScYfDO41KCSH5QmDpC0lTioQWoZOqfeX9MZpeZgHgyk5F6kKk9+wSe5nsqsGsZqMfyx8e41LalxOFuEs5lHo3AVh/G+nUKGcCMpx4mjDHwqIMsrEwDokRktRUwv4fWK99ffYmSylZ2HXKo5Omyn3dkWwqkYuYrMF+jaYGeV3iX3Lih5dCAKN5X4LwIBMe3AFjDgskTuZC3AqlUUL96wDsVmvCzwvx7c5TBourLVg==
-Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=altera.com;
-Received: from DM4PR03MB6208.namprd03.prod.outlook.com (2603:10b6:5:39c::19)
- by PH0PR03MB6542.namprd03.prod.outlook.com (2603:10b6:510:bc::5) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.615.14; Sun, 15 Nov
- 2026 19:25:02 +0000
-Received: from DM4PR03MB6208.namprd03.prod.outlook.com
- ([fe80::2216:93ef:67b:9e04]) by DM4PR03MB6208.namprd03.prod.outlook.com
- ([fe80::2216:93ef:67b:9e04%3]) with mapi id 15.21.0615.009; Sun, 15 Nov 2026
- 19:25:02 +0000
-Message-ID: <8fd95a2f-6320-4c52-8e5c-6e26c8aa46fd@altera.com>
-Date: Mon, 16 Nov 2026 00:54:54 +0530
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/4] mmc: sdhci-cadence: abort failed tuning command on
- SD6HC
-To: tze.yee.ng@altera.com, Adrian Hunter <adrian.hunter@intel.com>,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, devicetree@vger.kernel.org,
- Ulf Hansson <ulfh@kernel.org>
-References: <20261106-sd_cadence_ddr50_v3-v3-0-cb50afece614@altera.com>
- <20261106-sd_cadence_ddr50_v3-v3-1-cb50afece614@altera.com>
-Content-Language: en-US
-From: "Kathpalia, Tanmay" <tanmay.kathpalia@altera.com>
-In-Reply-To: <20261106-sd_cadence_ddr50_v3-v3-1-cb50afece614@altera.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: PN3PR01CA0081.INDPRD01.PROD.OUTLOOK.COM
- (2603:1096:c01:9a::20) To DM4PR03MB6208.namprd03.prod.outlook.com
- (2603:10b6:5:39c::19)
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=FLCw5W7Q;
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=BDG8ylHP
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AG5LVSK1585502
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2026 06:57:12 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	8kVbLa2hYPiQsN9qOzj3DO2zSgYLfY1noEtwJGDEPiM=; b=FLCw5W7Q7NkeVCGU
+	yuUOnerr82EOmNUhiSOX2nGjnVGRAMsexFpHYCIfr3Ha51qinHKBh8x323+XYXve
+	L9f67DnSziCuEMlxEr34fazeYbkYBDMGw9F4qZooZatHME8M02cujI/l4Wvt+hHM
+	KD7wzIusA3EAA6SAAaQoMBDlWpxp4Xnf1nmTxGtagzqsvuniB4fb57OCA3fE1LN/
+	HgpLtkLNQZBsO95/Fqedn6PPuyi2nfNUOcbg+Vem5TdgG3HJxaLB8b33/bHwisCg
+	j1v6fIC6QPjQTiUQrx/pBdPjV3J+kRNcmXAY2s/873c+QJZZBMv9dwCNLF8UjlO5
+	L6NKfQ==
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com [209.85.210.199])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hxhhdw5mr-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2026 06:57:12 +0000 (GMT)
+Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-89fb6a45c48so3681993b3a.1
+        for <linux-mmc@vger.kernel.org>; Sun, 15 Nov 2026 22:57:11 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1794812231; x=1795417031; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:content-language
+         :references:cc:to:subject:from:user-agent:mime-version:date
+         :message-id:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=8kVbLa2hYPiQsN9qOzj3DO2zSgYLfY1noEtwJGDEPiM=;
+        b=BDG8ylHP85zP3NraEzlVsFnSt/VhVC2pTmVrULFYefJUmRT4S2rHMjovPPgJ2XuY4F
+         JJKlfhpDp+906ZcAbOQm7U/TS6CqfRjMyAUxsyMXdhc7F//V5tWP/GIOT9laFoQt42r+
+         jPAwusWs1aG5w8Fc3L+yaQSI/wHl9pDG7Mfzt4CO7VrAZbA3+p7F3fcTl/OUgRlpUt3U
+         /+XeownhoeAaFfvBY1nRVUJRYxC1Vv83oRnNNQNSzGZCTWV+xFSYqsght28QmfgwmGxe
+         dEVgnyluBOUwYJJJbOrxmc1YbOdPyz0mVyLyD6/jupwTCwMaYm8By8nQf8ZAmNeCJom+
+         tWrw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1794812231; x=1795417031;
+        h=content-transfer-encoding:content-type:in-reply-to:content-language
+         :references:cc:to:subject:from:user-agent:mime-version:date
+         :message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=8kVbLa2hYPiQsN9qOzj3DO2zSgYLfY1noEtwJGDEPiM=;
+        b=CKgiil7Numr0SycGrjaQppwQ/G9KHsLeqvMOOgOprs0l94NZcMqhipbUSZec5jg+AR
+         s1PN3OT6Uj59VZXbpQU5ABW6meB5A1jccPQLUJbPyM9KIJmwxuHZnodsLRwPkret4z/B
+         i0rmkn/OHRBJjwzzROq9/4BjotZe/Oals6ZlTodZ5h0lWCbAqurZ5S2x/J58drZlwh7k
+         T/wgOiAS9nYmyDLQ2sUm49MgjQ4lIgzDGICVLsPF0n5w3WOCFnezKqOytlmf4BL5sLYG
+         lnPigLq7Cv4lNub7tgQSxgzlLsbJogJOEqIp/Z9VLqgMUkJAezeBRztEz1xPGVN53EPD
+         CIAw==
+X-Forwarded-Encrypted: i=1; AL+hErE0xydjFYT0mcmWSggIZMrky2mduf7nRs6LkC81W18SLt4wXp6PUFvTNZsbiiPZftBbLfP5vgylXz8=@vger.kernel.org
+X-Gm-Message-State: APuU4Z8OKJa1uli4PaCd5WqhRFOWyAqx33jqWjDIFsjevgfF8oggktdE
+	NTXbTTfLSbdfRHuy1LCzlWfiJagXrjxjpG0XAcxaPHoLdOEMyVpRjfsV5xvOEKfjKI7ylTMKNjD
+	WMwhF9F6x23Z+RoiHffijM9A8wCLJ4JkNwpbOhGEHDcDK5d78XgLlBAHHzHpI+LQ=
+X-Gm-Gg: AYBFou3UgrMsliL4SJt++pdc7tjAspB+nDUa64RoQialDfdO6w7esxfwYo7IGaST93/
+	WhnoV6RKusBcpf4zhOqsaHZm53iXVFz4B4J11KOJgYdaWJvf9EV9HWKmkRO8LEu7NZ+yFe3P6GV
+	tjMTVKqMOivPxMZ9fBn59MzkYTaIDxghJyWsR9Be55GyWYbyRn27vAJwgcNiSWbfwsHLLrIcIDP
+	YD6Pdpez4r3GYW90fY1YBtE+m97XW0Ee9rJjplbt/4j/1w/c4ld80jZ3mD4zC9G4mTlNJDT2vFJ
+	HG6f6aTTWU0RVWcHdIjoX/TwLQHxnEkeovzH7m5Tiiw72Haz9ibN4TcRJgGbsdlIPxWiC7I/New
+	8V6PzlqCe1TuSgJXjEuPkhTbHezYt1Ag/dGmTRzImJUE2J7Ec9Uif0KoGkT3KwCxsVXeXdIzK2d
+	MVLMVP
+X-Received: by 2002:a05:6a21:3405:b0:3e2:b15d:56a8 with SMTP id adf61e73a8af0-3f7a95f156cmr9720581637.50.1794812231408;
+        Sun, 15 Nov 2026 22:57:11 -0800 (PST)
+X-Received: by 2002:a05:6a21:3405:b0:3e2:b15d:56a8 with SMTP id adf61e73a8af0-3f7a95f156cmr9720565637.50.1794812230960;
+        Sun, 15 Nov 2026 22:57:10 -0800 (PST)
+Received: from [10.218.31.125] ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-cddc18c09fesm3754506a12.26.2026.11.15.22.57.05
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 15 Nov 2026 22:57:10 -0800 (PST)
+Message-ID: <304e72a9-2def-40c0-9314-0b7413e45e17@oss.qualcomm.com>
+Date: Mon, 16 Nov 2026 12:27:03 +0530
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -102,137 +114,87 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|PH0PR03MB6542:EE_
-X-MS-Office365-Filtering-Correlation-Id: eb1e1dce-2309-4d4f-37b2-08df434e2569
-X-MS-Exchange-AtpMessageProperties: SA
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|23010399003|366016|1800799024|376014|10067099003|56012099006|11063799006|4143699003|261026121527099003|261026140227099003|261028144727099003|261022105027099003|261021123027099003|261021121427099003|261102123227099003|261009223027099003|55112099003|18002099003|22082099003|6133799003;
-X-Microsoft-Antispam-Message-Info:
-	zjRwVufHCu8yDB++G2v54maBPgtBTDC/Ydx0Kcc3oPOVYseOr/pw0R1KgHEAp4CwWzBGHO7NAMv3uPAqFzs2n57D8cCT97thBRuupjZHGaa1lLE4co+THjMaAJIUultQFLw5es5bY+DXOkL9/XkPGGz7Ad3b8w+bZTPpJfmo2tYnMgc/Jk/yVXFIBewtu6bbj4HwIovvb9HTv0BKAtht6O/qjrpdb2aCxZLXgYP7FOz4g4jMg8gkoEZRK/YN5+JxBRjyL8jA0hU9CW8261/W6us1NOxVnE5D/o6Ds0mzHi4VuMmCXWJv3+h+MamUddjVrNMcLiysZp/G+VVwPqf+T9o4ijv7hmN0ge3jfVNMd+oewSu51ZrG6+3COuhTAFM6WVX4cHrZgTr5ziHVMFeBhb3eGU6WMtbdHvXahUoNScYSNLJKzW6bG1N3aF2dXZMb3YFUA0ibucb20yr0uptwgZogXhsy6plq1sAyoPu72Mer4xQg3u+mSPaQYtlvNt1Zplvxhy8Yq5/dL2/VImx2GAii9G0xe+wjpKQDBye2tDfNPYb9lGo4UuP1vADSjJJjQ6uRWQtrZv+51w3/lDQ/GGohekbV8TVawYGa9oUrvBqEWWElT3pDuWBPZrqiS1Jvm7k/MQkupqtC3izhcmpc5kI0AqRa4h/SqMDR/0uyYVk=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(366016)(1800799024)(376014)(10067099003)(56012099006)(11063799006)(4143699003)(261026121527099003)(261026140227099003)(261028144727099003)(261022105027099003)(261021123027099003)(261021121427099003)(261102123227099003)(261009223027099003)(55112099003)(18002099003)(22082099003)(6133799003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?bi9GSDZDYUhwaG1Fcm9TdlNVS21aVDVrN0YxZlNsT2ZTYzBQVEFKRElRUmFI?=
- =?utf-8?B?c2hCczl1NFZlWDNxUDk4a1doeFNRa2Y3cFFNSEZ3bFBoYjdXU2M5UzhiU0U1?=
- =?utf-8?B?emM4Q0N5eWNEV09zZHB0dFNTS25PTEdYV0pTWmJNcG54RXBMbzZQT2k1RFBr?=
- =?utf-8?B?UTMzT1dISkN0WTc5RSttaVZFUm5peWFQV0ZXR3F5cWxna0d4YzdoOE5xNFVY?=
- =?utf-8?B?NUg5VXNsY0Qwc0MrWDRGalN0dUpaV0l6cVdGRHAxUGQ5Z2NvTFJmemVzbldD?=
- =?utf-8?B?T0U2R2l1bHZ3d3RSdXE2a1JSL1VSK3JORGhGZlBxL0U5aHNqYW13MnAvWmE0?=
- =?utf-8?B?Y1l4QjJ5NEVneFBrTHhNc0srTER0ckJsaDB0QjVUNmkvd2JGbXdhRnlKRnV0?=
- =?utf-8?B?TjBLZEVESWZXTm0yVjhnU2lPODIzTHRpZjBuYkk0NmtMZ0hERXVjNElPRXJV?=
- =?utf-8?B?dVRER3ZKYzk1a3NyZjdBMWxBcGRtVUhEVEpuamVZbmZEaTBHZVE3WndOWFFD?=
- =?utf-8?B?VGVmQzFZSG42VzkwVkczdnZwVFhncUNDV2hKSzJ4dzZPMHYvTzg5QVcyYTFz?=
- =?utf-8?B?K0c4RlBiRVltQXJJemlSYzJ1RDVKWmY0ZEIxamVXTWRZbmtuYUg4L1FEK0ts?=
- =?utf-8?B?dXcxc2R4c0d4aUxNYTM1Y1pzUjRkalgvQTlPSldIa1VEYkNUanh1N3VwQVUr?=
- =?utf-8?B?RzN2T0pUNFY3WUI5VkdxY3lHZHVHTGR4UVEwbGlxbW4zSERZcmNMNWxNU3dt?=
- =?utf-8?B?MmgyRlFtelN3NDA2QTZobkdEa0VOUytHSVV3ZXVaRjNGZTJTZUFHWEF6OTRR?=
- =?utf-8?B?WlRhdTF6cENNQSs4MFp2NlQ4SHFYazNOVGJEL1gxa2puSmVjQUZiMTZtY2d4?=
- =?utf-8?B?aWY1OWxqV25FSy9RZVBzQ2tDUjZ6Yi9WVlFJeE5LWjhEOTdKQkUyZmRpdzBo?=
- =?utf-8?B?VXAzMWhLOFVidTZPZ3A4NHg5eXRnQk1HR3RSZDM3dCtUdWRScWFQcEtxMU5H?=
- =?utf-8?B?UUhONEhuZDgrTHJaRm5jYkpCb1hmS0xyakpLdm0xcGhuNWFDZWRjQlBRK1hz?=
- =?utf-8?B?aGZ5WlNyRGRGUEZGcFFnK3RHc2VDTzY4bytUOWFibyszNS9VZ0hhbHFNNTlZ?=
- =?utf-8?B?ZDhKQjFLN3hMVXYxdWNiTEFrdmZyZ2Q3Yll5UE16YTI1eWNqUkkxOXRGakV6?=
- =?utf-8?B?S3pDcStiaGZNamxxc2VZRU5rTm5vL2RCS3N0VlJsOG44aEJNcWdCUW8xdFYz?=
- =?utf-8?B?VUM1WmRqc21Ca1FXVk9hVkU1OXZUeG9LV2Nma1hJMVE0T3k4Y21heVkzOGpY?=
- =?utf-8?B?SDRKdjFMMWNTUGUrcUY2S0MzZkdRc2pHS0dOUDZLcS9NcURsK25KeW9MeFhD?=
- =?utf-8?B?QTdpUkt2SnZoUEpuQ09BTnFOYkdtaWVlK1JsM01DV04zR3VYbGoyODU1L29O?=
- =?utf-8?B?STNuZVhnRHpiUEpxS2p3M2Z5VmhSSlVoYy9RSWU2dlZLcXREVTBkOGMxVnVu?=
- =?utf-8?B?Y0k2eDYyUFU5VmZwRkZXOEFtQ3N0SGhvcU9uUXFLL0tSMENONlVrZTZSQmZY?=
- =?utf-8?B?NEZNZDFCZFpTazQ5cStYWjh6TW50eDVYSFVTMlpNMVlkeVQyeFYvM0s1V2hs?=
- =?utf-8?B?OVJUQnhQc3M1aTZKQ2E4UThSSkVrZ2lMNitHaXY2RmN3K2U1dHArdGNDRHV0?=
- =?utf-8?B?ZXVWcStqS2plYVVHUElRTTNXQlJFZlJaeExValgyaUhIbVF2clBOS3VHM2ww?=
- =?utf-8?B?NmNNL09pQjVVcUQ5dWlqMEhDcE13VmRDZVRVOURJWnBjcjlLam1XRFlWd2pl?=
- =?utf-8?B?dkZLa2ZDQm5MUkVicVk3M3cxbmlibjFVc1NYM1FKL3BxaGppRCsvUVNneFF0?=
- =?utf-8?B?WmdrNTIwY0lmY0dwUmR1TFVXN0tzMDY3NGFKUDh2M1NUVEpkYm1LeEZwRWg1?=
- =?utf-8?B?OHpxZ3dCQURyNTRWTlhlanc5VXplc0hackJVeHNkMHhHcTVPc3JNWXpGSEZX?=
- =?utf-8?B?bnVTdnc3TlUvVGJ2RS8vbWtTeE9zakVDS2FOMXp5bXRyb2RjWFBzVjE3Vmht?=
- =?utf-8?B?bWdMb2VaMjFPdk00TnZLSG1kUHc1N0crZVJPSzZhQVEvcDlNWEJQa05EditD?=
- =?utf-8?B?TEtBMGdzdk9sdDYzcVZEMUpwelVwSCtwanozT2VOc0Z2ZFJCU3dQVnBGRnYx?=
- =?utf-8?B?cWlHV3hpL0gwSEUvMThMcVFlblN0OGpPUFQ0U1I0MG42NHJidWY3M1Y1ckdE?=
- =?utf-8?B?U080c2FsM0gxaDNUV3YyWFk1OW5NTElxNXEwSXVFMXVqWDVQdWlWbk53eGU0?=
- =?utf-8?B?YkU3RW05a0pqZUVuS2tmUXRSWEFqOWpOR05MNWZOS09GT1hDTEZiKzdqc0lN?=
- =?utf-8?Q?6FuYtEO0JRqHHu4w=3D?=
-X-OriginatorOrg: altera.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: eb1e1dce-2309-4d4f-37b2-08df434e2569
-X-MS-Exchange-CrossTenant-AuthSource: DM4PR03MB6208.namprd03.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 15 Nov 2026 19:25:02.7456
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: wBgyEEQ1VcNXx9psEG8VkoTxcQs7AyM3O55XgpE1Mgit63SQSeHAd6GoECECMueQSHqw+BtXhS2MyeOdIyr2cjgSt6sZ37CwN3E7wNUY2Jg=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR03MB6542
+User-Agent: Mozilla Thunderbird
+From: Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
+Subject: Re: [PATCH 1/3] mmc: sdhci-msm: Enable ICE before enabling crypto
+ support
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
+        Abel Vesa <abelvesa@kernel.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+        "Martin K. Petersen" <mkp@kernel.org>,
+        Bjorn Andersson
+ <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>, linux-mmc@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-scsi@vger.kernel.org, linux-crypto@vger.kernel.org
+References: <20261022-qcom_ice_pm_enable-v1-0-f7a84086c651@oss.qualcomm.com>
+ <20261022-qcom_ice_pm_enable-v1-1-f7a84086c651@oss.qualcomm.com>
+ <20261024182904.GD2553@quark>
+ <172229a8-a4c5-4103-a38b-e4cce3f18718@oss.qualcomm.com>
+ <20261113035858.GD1742@sol>
+Content-Language: en-US
+In-Reply-To: <20261113035858.GD1742@sol>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Authority-Analysis: v=2.4 cv=VOVIDNPX c=1 sm=1 tr=0 ts=6afaa948 cx=c_pps
+ a=WW5sKcV1LcKqjgzy2JUPuA==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=eoimf2acIAo5FJnRuUoq:22
+ a=VwQbUJbxAAAA:8 a=AalTVwZ0bjgfRv4LwVwA:9 a=QEXdDO2ut3YA:10
+ a=OpyuDcXvxspvyRM73sMx:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTE2MDAyNyBTYWx0ZWRfX39fbNR7dslGs
+ azxK8P+2ql5HfEaCHJozCCYtnJjSmQSWRbnfCKb20SVH3Px0Wv94tPooKiL7UmsDGqXhJYrlSAP
+ 4eueJelmtXfqEJzL7eV+lUOPTQBvUBI=
+X-Proofpoint-ORIG-GUID: Z3x3Gop4HtXb7FZRQ0RG68VCSUVUfAlK
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTE2MDAyNyBTYWx0ZWRfX/BuDXUEqb19B
+ L8sE/LQA3jhBOtKUknZCeDHicC3L++GQQH/OfHhrvAgF906hjaM3Y4C/mnfFLYJNQULrZMX7/tY
+ p5phy96q3DKMOdFiqEm0q0oxEUVMUI29/1ab1un+xem876Lc/V0qB9nRUf4uvF4s2dyrirq4HSa
+ 6oFi2a74OmWTPk4JwjO5LJpctW2Zug19xPGElbU5vqD2UuLQFQU+gczQ+XQLAC2lB+XS+GbmPc3
+ 5Gx3mN/woOtUBaRekqzjVFC5fsK+tvAWawr6YKzX9Lt8JE7cClydA2MjpieNlNkYm5KG17rhHZh
+ sF5KWFZIREzO0l7IDD5FBgovtZ+RJ/EzSNjIgQ5RncEeQbMG5jNNiuaVv9riVHx/cqITGbpI1Qs
+ jWY9fONatAigRzgsbT9IeyH8HO7TC4FMMSyGECEDMFAYniwovJzbrv6IF6C3j4sanY89ae9Xol8
+ Rda+4c+PvACccPZCC9w==
+X-Proofpoint-GUID: Z3x3Gop4HtXb7FZRQ0RG68VCSUVUfAlK
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
+ definitions=2026-11-16_02,2026-11-11_03,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ spamscore=0 phishscore=0 priorityscore=1501 malwarescore=0 adultscore=0
+ suspectscore=0 lowpriorityscore=0 impostorscore=0 bulkscore=0 clxscore=1015
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611160027
 
+On 13-11-2026 09:28, Eric Biggers wrote:
+> On Thu, Nov 12, 2026 at 05:00:56PM +0530, Kuldeep Singh wrote:
+>> On 24-10-2026 23:59, Eric Biggers wrote:
+>>> On Thu, Oct 22, 2026 at 03:21:50PM +0530, Kuldeep Singh wrote:
+>>>> Remove ICE enable call from CQE path, since ICE is now enabled
+>>>> during SDHCI crypto initialization only.
+>>
+>> Sorry for delayed response as I was away on vacation for more than
+>> 2weeks and hence couldn't catchup on the thread!!
+>>
+>>>
+>>> This change makes the low-power and "optimization" settings in
+>>> QCOM_ICE_REG_ADVANCED_CONTROL be set only once, during probe.  Is that
+>>> correct?  Those settings never get lost at runtime?
+>>
+>> Yes, the low-power and optimization settings are set once and are
+>> retained over suspend/resume cycle.
+> 
+> What about hibernation?  We recently went through this for keyslot
+> reprogramming, and it was established that keyslots need to be
+> reprogrammed after a hibernation image is restored.  See the commit
+> https://git.kernel.org/linus/8b190e9c0b36aac5
+> Doesn't the same apply to qcom_ice_enable()?  If so, this commit breaks
+> ICE upon restoring a hibernation image.
 
-On 06-11-2026 11:46, tze.yee.ng@altera.com wrote:
-> From: Tze Yee Ng <tze.yee.ng@altera.com>
->
-> SD6HC uses a software tuning loop that calls mmc_send_tuning() for every
-> tap but never aborts a command that fails. When a CMD21 fails with a
-> command error the eMMC can remain in the Data state and reject the next
-> command, so the CMD6 that mmc_select_hs400() issues right after tuning
-> times out. SD is not affected because CMD12 cannot abort CMD19.
+Ok, I didn't verify hibernation with this change.
+Let me verify and get back with results.
 
-Nit: The SD state diagram (Fig 4-13) shows CMD12 leaving the data state 
-after CMD19; the
-tuning section just doesn't use it. Instead we can use that SD is 
-unchanged because
-mmc_send_abort_tuning() only acts on CMD21.
+-- 
+Regards
+Kuldeep
 
->
-> Request the command error from mmc_send_tuning() and, on a command
-> error, abort the tuning command with mmc_send_abort_tuning(), which is a
-> no-op for SD. This matches the generic sdhci tuning path.
->
-> Suggested-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
-> Signed-off-by: Tze Yee Ng <tze.yee.ng@altera.com>
-> ---
-> Changes in v3:
-> - New patch replacing the v2 1/4 PHY settle: abort the failed tuning
->    command (mmc_send_abort_tuning(), a no-op for SD) instead of masking
->    the post-tuning command timeout with a settle delay. (Tanmay Kathpalia)
-> ---
->   drivers/mmc/host/sdhci-cadence-core.c | 11 ++++++++++-
->   1 file changed, 10 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-cadence-core.c b/drivers/mmc/host/sdhci-cadence-core.c
-> index 745455743b01..a94296cebf47 100644
-> --- a/drivers/mmc/host/sdhci-cadence-core.c
-> +++ b/drivers/mmc/host/sdhci-cadence-core.c
-> @@ -330,9 +330,18 @@ static int sdhci_cdns_execute_tuning(struct sdhci_host *host, u32 opcode)
->   	}
->   
->   	for (i = 0; i < SDHCI_CDNS_MAX_TUNING_LOOP; i++) {
-> +		int cmd_error = 0;
-> +
->   		if (sdhci_cdns_set_tune_val(host, i) ||
-> -		    mmc_send_tuning(host->mmc, opcode, NULL)) { /* bad */
-> +		    mmc_send_tuning(host->mmc, opcode, &cmd_error)) { /* bad */
->   			cur_streak = 0;
-> +			/*
-> +			 * Abort a failed tuning command so an eMMC does not
-> +			 * stay in the Data state and reject the next command;
-> +			 * a no-op for SD.
-> +			 */
-> +			if (cmd_error)
-> +				mmc_send_abort_tuning(host->mmc, opcode);
-
-sdhci_cdns_execute_tuning() is shared with SD4HC, so this changes those 
-too, and only SD6HC was
-tested. Please limit the abort to SD6HC:
-
-     if (cmd_error && host->version >= SDHCI_SPEC_420)
-         mmc_send_abort_tuning(host->mmc, opcode);
-
-If SD4HC should get it too, that can be a follow-up once it has been 
-tested on EyeQ or UniPhier.
-
-With the SD6HC guard and the commit message fix:
-Reviewed-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
-
->
