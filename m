@@ -1,111 +1,87 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=103.168.172.138
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.48
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794921519;
-	b=WsaLn6Q1JowobN9FgxEpSXyweE8O/qCh9WniNE7GLJd/Cj5aQPK+fg4ngD2cy9HY0Q2s
-	 MzRLxbsrPpD2AUtprPGVnQTAmXF6V6w9ms74+nPU/e70UPMJgk2+4R4Z6ub3AVOOX5k56
-	 5gMSBerVnzNr5FM6pu5OsmR0QQknBIHFUb7H3arspOCoqKlRoaHHp/Wp3Vc0FDMcf/5eo
-	 4vIM8pe1wKy9Wbf66fKBWZfb7PG/OOiLvhpjRIZur7TGz3+LJsTWtOnzHc625Sv2e5v6k
-	 VpW+VcZKVZ5bHpQCoN4MhCI1DD7IJ9ALjBgrypKPAr2Pgn4nUD5LbpJgeOsYiDNACrA==
+	t=1794933290;
+	b=xymChJ9AhUxp+UlWhbzkv47ioJ5tyeqDKlnGqNTqquHedy//T22NoFTpcI3BmYf0CUzm
+	 REBNi1wpGohRHxK7QyykjJEXZ7AaKyNo8qiwIooxUKIZL0/D66KhRKG89jnj739geeoom
+	 cp+UCVf5mBcZAKkc9JXiOJ7x4v+JG5imZXzC4qpZvI0w3ozA0LFhQwl+t1FDjqfbnQsI3
+	 clSXX+jz6Xln3hhIiRHvJQ1+xRIH/OOP41jSqDA6lXxdiGSJDx1KISqnVMGiqMwaU8uMU
+	 VsDDgJL4sEZvfkQrZYmgyoTAOdnoCilqjaB5sSBC3Q5n7/1KiDODbk8DEOsLWsV6LFw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794921519;
-	h=DMARC-Filter:Received:Received:DKIM-Signature:DKIM-Signature:
-	 X-DKIM2-Info:DKIM2-Signature:X-DKIM2-Info:Message-Instance:
-	 X-ME-Sender:X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
-	 MIME-Version:X-ThreadId:Date:From:To:Cc:Message-Id:In-Reply-To:
-	 References:Subject:Content-Type:Content-Transfer-Encoding;
-	bh=X5Rz2Ygap5kebIv8LKY3vVFeHVyc95pMyChBqQQNkts=;
-	b=PmPdtGPekDN76EPbgZF5tuITZJKUUHRHy6j7YT4+/pjZw2PlMOj0BkLf1ihHMCHUjkLb
-	 VeE2RMxqz6cpObBEEYOlwWkLeL1JwfWqgNvsX1LLARVZjfjE4UDBFL5+3lBitrYTZh2OP
-	 4pfdJ+oVVPPbyA/vyRsQCePhg9kR7YQ3Zqk8mhJCI4xBlR/6tnukP3Zix0JFA7VliES+h
-	 iJRlTzH2gIBC2bAXy4/KJbpY8hUN3q264uNPmQ84S1vexS16pDnlYkTIDBzfdVaBuXnj/
-	 Rb9ta5yXG26voHh2fxR9y2+Pq90i/i6Ec46Oluz7Bn4fg5d9GJzm7jfFkJt3KQZ5dCw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794933290;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:Subject:Date:
+	 Message-Id:MIME-Version:Content-Type:Content-Transfer-Encoding:
+	 X-B4-Tracking:To:Cc:X-Mailer:X-Developer-Signature:X-Developer-Key;
+	bh=0nLr92kUcJStZC2BCr+sdHppUBlRwS9fPEEDDTJn8Q8=;
+	b=pHYffxhFNygln2jTEy+lHzD4PZB3OnjU+GVgD0dyQ6Isq7bXLul3T7AmP8U5gjAyv4ch
+	 a/iD74lSbOqznSh7bU7z0oh0iQVgoVILZEpwNiivtjtV+fbX7hlSGf81xVzkx5IfeDT0o
+	 Twcmd0JfndFkriKJKedh4CFKKLIHiaFb/2W8jRJATks/jmk+pz1Tqy6tuuBrXLTb3i4pY
+	 VsEaJGqcm4OIxmPl5PqEAzF15hhT4XQl3fhi1wQOvzzkuNB63fizT8NLaRHeVyt6RoSb5
+	 3K0huouDrVhV1PsiUyEUNAJt2PPhM9isUEwpqAzazdYIfFJTpdixvDC+h/0uLrXzYSg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=arndb.de;
-	spf=pass smtp.mailfrom=arndb.de;
-	dkim=pass header.d=arndb.de header.i=@arndb.de header.a=rsa-sha256 header.s=fm2 header.b=WKdnVgri;
-	dkim=pass header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=rl5FsS4I;
-	arc=none smtp.remote-ip=103.168.172.138
-Received: from flow-a3-smtp.messagingengine.com (flow-a3-smtp.messagingengine.com [103.168.172.138])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=C4q3T7wT;
+	arc=none smtp.remote-ip=209.85.221.48
+Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13E8B606A337
-	for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2026 13:18:39 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 13E8B606A337
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BB1B606A31C
+	for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2026 16:34:50 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7BB1B606A31C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=arndb.de header.i=@arndb.de header.a=rsa-sha256 header.s=fm2 header.b=WKdnVgri;
-	dkim=pass (2048-bit key, unprotected) header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=rl5FsS4I
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailflow.phl.internal (Postfix) with ESMTP id 30F611381C22
-	for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2026 08:18:38 -0500 (EST)
-Received: from ams-imap-03 ([10.64.2.23])
-  by ams-compute-02.internal (MEProxy); Tue, 17 Nov 2026 08:18:38 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-	:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm2; t=1794921506;
-	 x=1794928706; bh=X5Rz2Ygap5kebIv8LKY3vVFeHVyc95pMyChBqQQNkts=; b=
-	WKdnVgriXweWZY4U1+3kve1Va7e1M/Pj8ATLzphElORes34pUpLyH3bHbrZCHO0n
-	wsBP+6b9ZTG66/Fk9E3ETVSXuyxFZ8YnxzVpLnBDzwhG3GSn72tl2ifD3mZ7ZTEG
-	n0MI3+tzPkoeKfW/aPsBUfAj8ujAwEihGOVYWBk6FieNHgSSycXFOKmi9sjcssvA
-	vbxwQ1i6ZI07uaDP+nsNxSWKv/2STM6+kICF07pu01ESt7hNLjIQyP+Gu3AlmmsL
-	7sj+zajL/M/eLzJM4B8lOCPzpzCv2dwkUckoGi9zvoCiEKK/A9PxsLowBvsKMXXt
-	m9dNjTVqFyeEq6zOz4R0AA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1794921506; x=
-	1794928706; bh=X5Rz2Ygap5kebIv8LKY3vVFeHVyc95pMyChBqQQNkts=; b=r
-	l5FsS4IDuyP752/h1Jb6fS61PRMZoiCuMXTKa3VYNVTdykFf5oSzlx1fTq9Mne+z
-	tswNEnclYS+YFaCJZwxUyUlUGB+K3XNfya/YoGUwnBtBbt0/ASY2d+8VGdapj1Qa
-	VIJ4t9qv8XXWj2Wt0AHdQiIEM4asJ3irmDiwbfjcTivM3PecnjnCa/zXV3rMmz+1
-	piik4/axMNMt6+lY9/RXFrYr1s5OVgj5Ds8ZSK+ocG1Nag1ZSfqQbyfkxsa9sgq0
-	9ONmtzN+cRmqoqNtUn0kQAq9yX3XvCBdKbBV1URJVneUr1JK6VPo8n0gn9EqMLzb
-	ZnxuKQoj+gmZH6yuK/Dgw==
-X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
-	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
-	action=sign d=arndb.de a=rsa-sha256;
-DKIM2-Signature: i=1; m=1; t=1794921506; d=arndb.de;
-	mf=PGFybmRAYXJuZGIuZGU+;
-	rt=PGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc+;
-	s=fm2:rsa-sha256:krz8MrYXtANmrzhjanbxq1l+SvBsEqoKBlRZItNaD1kYalT
-	tdqVvpXPLTRmGsnHUR7ekQsiVip+AMUTi1yeKRXsJLwCSRXTcMCWEjRPEXWoCfNA
-	Ha30wNIJnh7kO188AiwjDHTaDwznnxVf4g4kgf6F3zSLlmGx8D2Wq/Rva3v2XnJe
-	z5c39czWN+f+JSLz04ttfEXP6HvF3j8WpwcgtfpxUIlP/GHoEJAY8SvACGejHyES
-	+w8Hx1bsfMF58nw7KsZbr50clodWGIptr4DX1coy6gdgvmWpQPUy4QfPGs9/eDb3
-	j0vqnrvwqXoTBjfhKIU4dvmBExefvOon3005/4Q==;
-X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
-	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
-	action=mi-m=1; hc=12;
-	hn=cc,content-transfer-encoding,content-type,date,feedback-id,
-	from,in-reply-to,message-id,mime-version,references,subject,to;
-Message-Instance: m=1; h=sha256:E4p+jgEjA6z4YOh+zG8xI2+TIk/z5V7O3REzuJQl8e0=:s3MaRm4deGZPyFhIC/OTW6d1TxrbpBC2jMCuDZt0O64=;
-X-ME-Sender: <xms:G1T8akqR9LXxK17B3VNCjPaUZv57ob7Yn46_dzb14CXweKQFfcsvSw>
-    <xme:G1T8alcscSthCjjkEkXgL3qIRo-bMunpt4OBXbN78KGGfcuTDxoOWm0DixukFZnAB
-    3jwegdzC0Na_olzE9jxlu50q8T7-2oo-ZplwiPDT5uLUjQ65k0u1q9j>
-X-ME-Proxy-Cause: dmFkZTGybI4vNsfJtZzIBSKeQUH0Qakpa4RCkhFfnaLfC6yUDA+d0FhnQKXWZPDy/kj75y
-    /NHXCGCkIIRkpWzs7V9nOux+5xMy4D//gORpgKSuDZagCYoHdROAEolXCtxYlk0V1qzgQ7
-    tcyU5IV832OfArLFKi2C/fRZinN6cp9vGaENPPMTnNQB1tBH54th32q6znhW6538GoSMEE
-    EhVz6USd1rgWFhLy5dx+8gopg3Q2n02hhp9Ut/26LIFIBBrr6XDaNrQr3uc7JLxPG1YIcm
-    CXvYq72ZJ4TSsSUhaxEqTJ4r5trqsjQG41MN2FyVjBHM4jh7jdH8iSN98sq8Kket5g8KTq
-    KPawFUnDmboDkfTjXA1nO+6db8zom9yA7ww/NF516/xY8wRTARG4qPKmjfyMlz5FZzA4+a
-    UmK8pc0Ig7ijBU+s+TdVHbSuTD7IF1SFl3/OCRO1wCGCX1MOwhgdWVLrswT1xBdYUb5IZo
-    q2MKDq7HBY1HPpvVYhu0TUuc2fFf0gvDTmeNvi4jjM/cWX23SJ0vmGopOyiS+K3gGgeuiH
-    JaLkcuenAxN7oIrhjnHLdpKm8HwRus9h/Xb6D/dA3byDadtX8Q5Z2zWcygswz7dG3P6d1U
-    aOIqYoTzVsKgm58c6yLw2B2ghJF5wUPpSx0T9gzjYz+50yTWNagB3MCcR8WA
-X-ME-Proxy: <xmx:H1T8atf0rCO8nggJRHa3MyNETIrNXBA9ztat274b8BY8M91kpbOlSQ>
-    <xmx:H1T8apDGPcEkAr2z3ZJXbIveHkxb4ZSuzFvSStwP3wvf13bTz57KtA>
-    <xmx:H1T8anZqVdU-2n1FqALuJcgxj9pguX_xsdvzfQXPKL-6O-W2_l3BxQ>
-    <xmx:H1T8ah5fpGKSVyEDLsEzjKY9JbCEw_GPFnc29qLNYFLNdcNn_pni1g>
-    <xmx:IlT8ah8jKTg2Mn15xl3Eu9v6m_LkhV9tQB8vZpV-ATMNI6ddq304vKIJ>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 45C6C32A0099; Tue, 17 Nov 2026 08:18:19 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=C4q3T7wT
+Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-4a5506f09f5so382240f8f.0
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2026 08:34:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20260707; t=1794933289; x=1795538089; darn=vger.kernel.org;
+        h=cc:to:content-transfer-encoding:content-type:mime-version
+         :message-id:date:subject:from:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=0nLr92kUcJStZC2BCr+sdHppUBlRwS9fPEEDDTJn8Q8=;
+        b=C4q3T7wToBWaEWAHAaUkEgc7IXBfUPR9NnEL98/CNVERz5kG9TGeFB4fZqLgIAD70n
+         JMRkTC3c7PdNLL2uD9l1LY3pZ1E1rCpTpHmq9HDCylbBUNSVqnoTOlHrwUUzYMPS94rZ
+         uyCvWY8DWOancmBiHuWEanvDTdxe/lKOGFOTewYj2LNJPh9mggqU4h6LfuJc30qv2bjJ
+         yudF6uYvmMaXLRPDXnIgAV0qDlcimx8Chb+Co+hViyJxovQQM6v1ciJDL98tcOJ/abKB
+         OcnapyrtMkAWiSkbcXTzjiQCPc1F4J75s8j/feT9hdhyfLtx66BnrIMsTBet3DkogyC3
+         2z3A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1794933289; x=1795538089;
+        h=cc:to:content-transfer-encoding:content-type:mime-version
+         :message-id:date:subject:from:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=0nLr92kUcJStZC2BCr+sdHppUBlRwS9fPEEDDTJn8Q8=;
+        b=iIbQGNX4BCnz6eFFO9OAdsU0wh9PJfiL5RWplrvHNy9KWaoty+xzkCbHVhBRTuuyQO
+         Gu5GVrhd+NQ/W+Myz+7Llq/RgQ/DjG48QvPt4csst9AUje31ck0L9DvHVc55lYpZKYma
+         4yfPioNlm9iWzIAbtmJbJ1l3u/EdRnfK5cqR8/WWe6zVoArhya6dg89SJ1AsJlgsUG9G
+         yeNbsm95h6d7E6ynIlFJvOr59XtXGOcZY1uF77FG6FnnEAWJV+ADRsBBzIeQIdB07NRG
+         U90jAowNbR01ke15IdfhVbqA+bfvL6Qu1JmWwWNkAlaB9BIxfUDAbK+ckkEZDQQx0dWx
+         aJrA==
+X-Gm-Message-State: APuU4Z80t2TIm34cgmQHDWL+oxaCG6k/qcq1ixqM4KgEIHw4wrMLDZVd
+	vp3ejaaDeDa42vsAmYd1N8Q0Gxso5LVt52d7uZEAU6rlE2lpZfrmL2tI5sGqLw==
+X-Gm-Gg: AZFdTZdawbUiSajtrJFpEABwTNcLXTIPubbFZF7tsC7S+2u3VftaoHhaKbh5imi1cBO
+	p0q5edIjP39d+zHoOMAbe5cjU83FdzTbjAwoVwXMltQFKIEXuYgwWaf8/wU11+H65dxayhfbDZ+
+	WCYfh2XgmJEs4SqPl4fZwJUaBkcEvUic190Z8LLbuabveU34mbxlDN5MDWJhNjSWSz85z0yESRb
+	HhkFfYdBZTcECeoCtBjfVv5N6fvLrpOBCnWSSWPxQEAcY53H2CdiPcPaPa9h7ByohxeowKXR0xA
+	iV0h5Ue18SEnnDt5JW85FzSrSK7rP6r8ObHf99YUMkLmzQWkSezl7rsRIzYjiVp4eDQOztfJGJO
+	HjQnqE2++JmhUVkTj9Y2kIqmshD6iCmkkWS5SJ8RHH2cSq6roPumAuCz+P9dMk8VKv6+cjHuVJP
+	0kNN6cxQ4xlWJ7KTIEZb77U4B8+YZdl7X8yrDGvk29Kco9PuB7SJZbtNK9jWV3r8Z3WqTa1/Csb
+	IeJfBKQYSsFHMIhJFU1RHC5VtrPNohlBgenUbVdq7GVH8B2gmCRn42x0rT2aOGGPXCB+UH7KbGV
+	yYqTChGat2jc1iPiHM5oWdnYzPSo1wL4HVdYeoI9Y6ChQRKhs+V2ZchzgZqwbLPNeyKKj0SLz2S
+	JlQZ1X+61L5o=
+X-Received: by 2002:a05:6000:24c6:b0:491:273c:9649 with SMTP id ffacd0b85a97d-49c70b051dcmr32305652f8f.15.1794933288673;
+        Tue, 17 Nov 2026 08:34:48 -0800 (PST)
+Received: from [127.0.1.1] ([2a00:23c4:a702:d301:9260:9c28:f0f5:e091])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-49c6d079a2asm26672248f8f.16.2026.11.17.08.34.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 17 Nov 2026 08:34:48 -0800 (PST)
+From: Biju Das <biju.das.au@gmail.com>
+Subject: [PATCH v3 0/3] Add RZ/G3L HS400 support
+Date: Tue, 17 Nov 2026 16:34:45 +0000
+Message-Id: <20261117-sdhi_hs400-v3-0-b4659189db69@bp.renesas.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -115,61 +91,67 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-X-ThreadId: AruObr9CcEcw
-Date: Tue, 17 Nov 2026 14:17:58 +0100
-From: "Arnd Bergmann" <arnd@arndb.de>
-To: yogo.0917.sabu@gmail.com, linux-arm-kernel@lists.infradead.org,
- devicetree@vger.kernel.org
-Cc: "Rob Herring" <robh@kernel.org>,
- "Krzysztof Kozlowski" <krzk+dt@kernel.org>,
- "Conor Dooley" <conor+dt@kernel.org>,
- "Dmitry Torokhov" <dmitry.torokhov@gmail.com>,
- "Thomas Gleixner" <tglx@kernel.org>, "Radu Rendec" <radu@rendec.net>,
- "Ulf Hansson" <ulfh@kernel.org>,
- "Daniel Lezcano" <daniel.lezcano@kernel.org>,
- "Adrian Hunter" <adrian.hunter@intel.com>,
- "Jonathan Corbet" <corbet@lwn.net>, "Shuah Khan" <skhan@linuxfoundation.org>,
- "Randy Dunlap" <rdunlap@infradead.org>,
- "Russell King" <linux@armlinux.org.uk>,
- "Alexandre Belloni" <alexandre.belloni@bootlin.com>,
- "Linus Walleij" <linusw@kernel.org>, "Drew Fustini" <fustini@kernel.org>,
- linux-kernel@vger.kernel.org, linux-input@vger.kernel.org,
- "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
- linux-doc@vger.kernel.org, soc@lists.linux.dev
-Message-Id: <c3832ce3-4605-4810-9348-c6fee394fe04@app.fastmail.com>
-In-Reply-To: <20261117-at550-rfc-v1-v1-6-5879573cb825@gmail.com>
-References: <20261117-at550-rfc-v1-v1-0-5879573cb825@gmail.com>
- <20261117-at550-rfc-v1-v1-6-5879573cb825@gmail.com>
-Subject: Re: [PATCH RFC 6/6] ARM: add the SiRF AT550 platform and YPL514si board
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIACWC/GoC/3XMywrCMBCF4VcpWZuSmfRmV76HiLTNxGRhWzISl
+ NJ3Ny0Igrg8B/5vEUzBE4s2W0Sg6NlPYxr6kInBdeONpDdpC1RYAYCWbJy/Oi6UkqVVDZWoazy
+ CSMEcyPrnjp0vaTvPjym8djvC9n6Y6puJIJUcyp6M0YCFak79nAcaiTvOh+kuNivi/x5Tb6gAW
+ 3e11Vr99Ou6vgGElEJJ6QAAAA==
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+ Ulf Hansson <ulfh@kernel.org>, Philipp Zabel <p.zabel@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>
+X-Mailer: b4 0.13.0
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1794933288; l=2081;
+ i=biju.das.jz@bp.renesas.com; s=20261020; h=from:subject:message-id;
+ bh=CBpGJ3J11Ge4CceUmYpikw5K8cAJ7APFU5cYhMUuhMo=;
+ b=f1Ib0zXkvJbVhSIRi0rJXpTosKpULS2jRkUem/AewnONbvsTd9To1UD27al99sVL0I+cpOg/M
+ 8av6eBULDyADkZjoSUf7RzLMME6/kIjvommvFAoXxgYjxWu0Fa2VppO
+X-Developer-Key: i=biju.das.jz@bp.renesas.com; a=ed25519;
+ pk=yzD2T1OLS3lEYflbk64xhLlxhk75lZ+NoOtkTOqrlVw=
 
-On Tue, Nov 17, 2026, at 14:06, yy-Local-LLM via B4 Relay wrote:
-> From: yy-Local-LLM <yogo.0917.sabu@gmail.com>
->
-> Add a minimal DT machine using standard IRQ, timer and simplefb paths.
-> Describe the SoC and the firmware-configured YPL514si display. Leave
-> usable memory and the divided counter rate for the bootloader to
-> populate. Keep optional peripheral nodes disabled until firmware hands
-> them over. Disable unvalidated board suspend; limit this board to SD PIO
-> at 25 MHz. Document the RAM-boot contract and the missing
-> cold-boot/clock-tree support.
->
-> Signed-off-by: yy-Local-LLM <yogo.0917.sabu@gmail.com>
+RZ/G3L SDHI IP support HS400 and HS400 ES mode. This patch
+series aims to add support for HS400 mode. HS400 ES mode
+support will be added later.
 
-Please use a real name for signoff and make sure you understand
-the legal meaning of this.
+Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+---
+Changes in v3:
+- Clear hs400_active/hs400_clk in renesas_sdhi_reset() after a HW reset.
+- Disable SCLKEN before leaving HS400 in renesas_sdhi_set_clock() to
+  avoid transiently enabling the clock with stale divider settings.
+- Drop the ios.timing check, which bypassed the divider before HS400
+  was enabled in hardware and halved the clock; hs400_clk now follows
+  hs400_active and the clock is reprogrammed in hs400_complete().
+- Link to v2: https://lore.kernel.org/r/20261116-sdhi_hs400-v2-0-de41f7a7f330@bp.renesas.com
 
-> +config ARCH_AT550
-> +	bool "SiRF AT550 platforms"
-> +	depends on ARCH_MULTI_V6
-> +	select ARM_ERRATA_411920
-> +	select AT550_IRQ
-> +	select CLKSRC_AT550
-> +	select CPU_V6
+Changes in v2:
+- Added fixes tag for patch 1
+- Using ios.timing to decide whether the HS400 divider restriction applies
+  is wrong: mmc_hs400_to_hs200() lowers the clock while ios.timing is still
+  HS400 and then walks through DDR52/HS/HS200 before prepare_hs400_tuning()
+  clears the HS400 bits, so the divider could stay at 200 MHz or prohibited
+  non-zero dividers could be programmed while HS400 is still enabled. So
+  tracking HS400 hardware state for RZ/G3L clock programming using 2
+  variables hs400_active and hs400_clk in struct renesas_sdhi.
+- Link to v1: https://lore.kernel.org/r/20261116-sdhi_hs400-v1-0-c5bedd312408@bp.renesas.com
 
-Which CPU is this specifically? You need to select CPU_ARM1136R0,
-CPU_ARM1136R1 or CPU_ARM1176 instead CPU_V6 since b5fdfa208175
-("ARM: deprecate support for ARM1136r0").
+---
+Biju Das (3):
+      mmc: renesas_sdhi: Save and restore IOVS across suspend/resume
+      mmc: renesas_sdhi: Make HS400 OSEL bit configurable per SoC
+      mmc: renesas_sdhi: Add RZ/G3L HS400 support
 
-     Arnd
+ drivers/mmc/host/renesas_sdhi.h               |   5 ++
+ drivers/mmc/host/renesas_sdhi_core.c          | 111 +++++++++++++++++++++++---
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c |   5 +-
+ include/linux/platform_data/tmio.h            |   4 +
+ 4 files changed, 113 insertions(+), 12 deletions(-)
+---
+base-commit: 522b5bdb42c730db0269a384bf5a2501ecb21e8d
+change-id: 20261113-sdhi_hs400-5f08e5237291
+
+Best regards,
+-- 
+Biju Das <biju.das.jz@bp.renesas.com>
+
