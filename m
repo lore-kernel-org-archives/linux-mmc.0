@@ -1,91 +1,80 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.246.84.56
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794912133;
-	b=O/ZPzRgQOdtzzcKgXG6USoaFc+zKV2Jzq8EEmvbQnqqk7FawdtDZGYxpCeROsnBfHbej
-	 SLMaQXH9+nGHfEYNCDtvyWCJ0l5gq52iDH+1J//i8WPKztq8ekxO5RZJ3f05SI0OMOCIH
-	 8Q/QC+qvnJvghf9VSci6m3ZBc30wnMaVdcBo5sHtf3lkmFfrRi3MTwLoLt3BQ1B44SIkx
-	 1t9nFFz3lJJDYW3U7TisWN+gQyQKBD1eoKWzvxPwsj9312mshMv6CcK7s2UKi3qWsm9WF
-	 UAyyoEAb+uUp4iPrytZfTlrXHTGT5c5P7XDH0JIZQL7d9lxjepupCv+VABAWhWesccg==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794912133;
-	h=DMARC-Filter:Received:Received:Received:DKIM-Signature:From:To:Cc:
-	 Subject:Date:Message-ID:In-Reply-To:References:MIME-Version:
-	 Content-Transfer-Encoding:Content-Type:X-Last-TLS-Session-Version;
-	bh=wceIsHyc0JJfV1Tp3tL8VGdKFtx5ifQ7EH/SXRMWvMs=;
-	b=nmmBdQNCkXxgMSbdRmljKWXtuTqfv0QpuBAU655r6wlrLvZIIlZbz4bIp9nDjjNTTmBY
-	 1n0UUnPADDVkMTQ4Sg7AaYcIH6VCz2OBFiytPXAYkgff3MaqGlTslkQkwOMBWcx822KGh
-	 koHZAJcKgLWh/wnnp64NpOpr8ZH+a+AIKPTHJB7NZk5n1Hp2sd16EZ+R4GhaBKVHI+1xe
-	 1ztke3KONd8+g3rtHcEJW2YHq/APZvsOqhkC0ERv2f/+LClUGNaHDpgBrdrw5aOidoKXu
-	 H+nwtzbFiH3V33an8M0AB6g1mv8cASLZWZ45P8i+wQrAcqD3niSpHZoZN54k52ot36A==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=bootlin.com;
-	spf=pass smtp.mailfrom=bootlin.com;
-	dkim=pass header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=a26lEPKG;
-	arc=none smtp.remote-ip=185.246.84.56
-Received: from smtpout-02.galae.net (smtpout-02.galae.net [185.246.84.56])
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1794920820;
+	b=BDCSv4duKTIFWoQ4ZqQoMoF073z+aJIpRmjDIWqpoK5VJZFylOUVlOsbKx+RNIQw+QCV
+	 tceKmi/bB+Q+7MNavviiFNQuQS0IAXLMbaZGYQyDcCxyIGNAYSijJZhTgo6vpKxmOnEE3
+	 s1wlwc5LJ0oTyT2ykCeWUqn010F/fjnoiaHPOxDJnexbmaQ3vZvDjJeYxJI9vftZ6Hi54
+	 KmROmEcTzKgaenQ4g+lK8oOX6F7XU7sB445WXZIcmLPOcwLf5em7aJco9ZFX765uw0rOn
+	 W80bmSsqx10Y1pR9uwByitLCxQINTuItUCAF47sKN0bd26IZiInut5w04CK7vnuOg1g==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794920820;
+	h=Received:DKIM-Signature:Received:From:Subject:Date:Message-Id:
+	 MIME-Version:Content-Type:Content-Transfer-Encoding:X-B4-Tracking:
+	 X-Change-ID:To:Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:
+	 X-Endpoint-Received:X-Original-From:Reply-To;
+	bh=HVEE3Tcbne75iVGjTL3VoYX5NV8IDX+fOPLq54L1FA0=;
+	b=KHC9X0D73LsIykY2KpLde5Hv9pwVrfgrS2LeJ7JqS6bjl6fHcS853TH0wGLobwH2fG2Z
+	 Jki9EOvQnZzad80C30ivbZ6w2E+mtTTpJVOY903DOlzO8YstNJ8APuiucRjAcOJhgRdGr
+	 9LeOXsHHOeppRxO1av3lhViEG0LrBZ03l4Wud/cwfd5pwvppOJaYRkBBcSN9/sUlac3DC
+	 mWs7QoPd1zMTIkyk9rf7Mi/Xfn2cWRKln7he99iFd0YrbYxzBrXsQ9UxtfF9mLwXHxjeN
+	 1BDZH3QOg4cEq/7YrQS1mZAiQwIDVNVrgpgycd6fGxQpcWpQpopi83jZMV/U7c2ujAQ==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=KusGYfdX;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41B50606A330;
+	Tue, 17 Nov 2026 13:06:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=KusGYfdX
+Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
+ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
+	t=1794920819;
+	b=0r9uRdivsCoewUCIvlrK4zMxlXevmaH6yWMBF+nT7p7HRRZwZyZ5PsWuYdrw6719GIgp
+	 dFzSInt/f9S19cPSXf2QiPx6zOnJIt3+RZNMSK03yqEl6juUkILnEQ+af5h32WmT9jiEJ
+	 h1S7UhkxbfJ79ZDOFZX+X9217yluSyE41q6v6R9Kv70ghOK10WTY2TmQRE8QIe13dX8ca
+	 auTwZmNEMwep+/oh4QxP5y8AkSnXfHaXo2ZJXoptZBW2jdjzXpBVB81OrmmhKVKmVviQg
+	 BHR76q/vVpWLF1ZvB6eCxWagW7rBasBykwESyrQPGlTVtUOnBsxpqE0H1zeBizIGPQQ==
+ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
+	c=relaxed/relaxed; t=1794920819;
+	h=DKIM-Signature:Received:From:Subject:Date:Message-Id:MIME-Version:
+	 Content-Type:Content-Transfer-Encoding:X-B4-Tracking:X-Change-ID:To:
+	 Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To;
+	bh=HVEE3Tcbne75iVGjTL3VoYX5NV8IDX+fOPLq54L1FA0=;
+	b=QuwfeivrjGypZTmqkpMEujYkm3IHy0bLqL7n4tt0kO118sRj+oTPiPYVck0QOVqfFGux
+	 a9wjEalkmDuqeBoewJMa9AD2qTRJtDA6rMGCoiNpBWu7G+6BP7UWl8AjbeSt79XGjBOtF
+	 D04LgHeMNB1sHrdOp0HAyuCL02AjCusuOIIU60BFm+siaFYycxAog+ycZO98rI0IFUkvo
+	 Xq3GhLBWqdJzPPRfxf4CZ/UFcQFHDLs/qUcOGFYjBH/Ki0fmUlMb7LUt/ZZs/q73vrcPs
+	 oAV38JDwbXSBdVUn0S8QGhPTyS94qbPM33HsjgbqpNf5NLPPMdN0CsFm5MYaTRxWuUg==
+ARC-Authentication-Results: i=1; smtp.kernel.org; 
+	arc=none smtp.remote-ip=100.80.115.77
+Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3584E606A31C;
-	Tue, 17 Nov 2026 10:42:12 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3584E606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=a26lEPKG
-Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
-	by smtpout-02.galae.net (Postfix) with ESMTPS id AD1191A1605;
-	Tue, 17 Nov 2026 10:42:10 +0000 (UTC)
-Received: from mail.galae.net (mail.galae.net [212.83.136.155])
-	by smtpout-01.galae.net (Postfix) with ESMTPS id 61C145FC81;
-	Tue, 17 Nov 2026 10:42:10 +0000 (UTC)
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 9D08311BC05B4;
-	Tue, 17 Nov 2026 11:41:53 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
-	t=1794912127; h=from:subject:date:message-id:to:cc:mime-version:content-type:
-	 content-transfer-encoding:in-reply-to:references;
-	bh=wceIsHyc0JJfV1Tp3tL8VGdKFtx5ifQ7EH/SXRMWvMs=;
-	b=a26lEPKGpRLbN20V+Guhv3+Ri3lgmGzYvJ9lhcDbnoztwv8hrDn+FB4Wm5cL8Gq54hX4LI
-	Zd/Zx/RRnC4xEEEZkSBZIY3E0VChxBDnl2qBszN/EpA8qomHLNGuZoi4h1mKqMjEeM57RB
-	IgfkmPfTFxq1THD6o9kLLC1nehFx22DVjHITXSbV6kJy/1MskOp7pEkNeO8aCZRgve6liv
-	iUXR2/+qBbBKrzLeD21mY0v+KPhOZEVl1opMjW1aTG+ZGaaaBInvMdB1XRbGlklCCCrwUB
-	dTwnW0TPclaOwwjY9QmOmvSSZKdpJpXlXQ4AiibFZx2eouDgjXeanClktsboyg==
-From: =?UTF-8?B?QmVub8OudA==?= Monin <benoit.monin@bootlin.com>
-To: Mark Brown <broonie@kernel.org>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Jun Chang <jun.chang@metanoia-comm.com>,
- Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
- Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
- Philipp Zabel <p.zabel@pengutronix.de>, Sebastian Reichel <sre@kernel.org>,
- Vinod Koul <vkoul@kernel.org>, Neil Armstrong <neil.armstrong@linaro.org>,
- Manivannan Sadhasivam <mani@kernel.org>, Conor Dooley <conor@kernel.org>,
- Jonathan Cameron <jic23@kernel.org>,
- Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
- Thomas Gleixner <tglx@kernel.org>, Radu Rendec <radu@rendec.net>,
- Samuel Holland <samuel.holland@sifive.com>,
- Ben Zong-You Xie <ben717@andestech.com>,
- Daniel Lezcano <daniel.lezcano@kernel.org>, Ulf Hansson <ulfh@kernel.org>,
- Jisheng Zhang <jszhang@kernel.org>, CL Wang <cl634@andestech.com>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Wim Van Sebroeck <wim@linux-watchdog.org>,
- Guenter Roeck <linux@roeck-us.net>, Adrian Hunter <adrian.hunter@intel.com>,
- Minas Harutyunyan <hminas@synopsys.com>,
- Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
- Randolph Sheng-Kai =?UTF-8?B?TGluKOael+iBluWHsSk=?= <randolph@andestech.com>,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-riscv@lists.infradead.org, linux-pm@vger.kernel.org,
- linux-phy@lists.infradead.org, Paul Walmsley <paul.walmsley@sifive.com>,
- linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
- linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org
-Subject:
- Re: [PATCH 00/25] riscv: add support for the Metanoia MT2824 SoC and MT5824
- EVB
-Date: Tue, 17 Nov 2026 11:41:52 +0100
-Message-ID: <_koitdIgQPmk89LDhlUlJQ@bootlin.com>
-In-Reply-To: <f6bb6461-c9d0-4685-8c93-7e62691a93b8@sirena.org.uk>
-References:
- <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
- <f6bb6461-c9d0-4685-8c93-7e62691a93b8@sirena.org.uk>
+	by smtp.kernel.org (Postfix) with ESMTPS id 22FEB1F000C5;
+	Tue, 17 Nov 2026 13:06:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794920819;
+	bh=HVEE3Tcbne75iVGjTL3VoYX5NV8IDX+fOPLq54L1FA0=;
+	h=From:Subject:Date:To:Cc:Reply-To;
+	b=KusGYfdXQi2wznXRCzHL7Aq4lwcI8FtpRcxI+2rN3pyAUNIB3woFzVIh3AutC1hgi
+	 fYAFXsw46f1BdQHReX7Dbig8Rgg55iTaNTfyUm2CO1fz/iWIJGZL1B08w/Of9Zey3G
+	 kv7GV2YQFIgFqLSwMzDgWD9Xtl4nCR13o6Qz4+igw1oTdUZ64qW7tg/RwNpryK0SrX
+	 TW5wiftGS8u73LDaPHWh52KpWh48T3vEK5iEPkQG8kUXW6EstME8pCEE5iXBG+3I2i
+	 sxegNTHNEumVyHqKukHUZrw5YAPhSYI7tZPVfFPH/DIpBc8nOgI6UITtZmwaDtGZnQ
+	 X7LKRPH5JMZ0Q==
+Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
+	by lkml.kernel.org (Postfix) with ESMTP id 934E14A97F;
+	Tue, 17 Nov 2026 13:06:58 +0000 (UTC)
+From: yy-Local-LLM via B4 Relay <devnull+yogo.0917.sabu.gmail.com@kernel.org>
+Subject: [PATCH RFC 0/6] SiRF AT550 / YPL514si initial RAM-boot platform
+ support
+Date: Tue, 17 Nov 2026 22:06:50 +0900
+Message-Id: <20261117-at550-rfc-v1-v1-0-5879573cb825@gmail.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -95,60 +84,133 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
 Content-Type: text/plain; charset="utf-8"
-X-Last-TLS-Session-Version: TLSv1.3
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
+ vPSU3UzU4B8JSMDIzNDQ0Nz3cQSU1MD3aK0ZN0yQ10jU0tDQwvTRKO0VAsloJaCotS0zAqwcdF
+ KQW7OSrEQweLSpKzU5BKQQUq1tQBphOzAdQAAAA==
+X-Change-ID: 20261117-at550-rfc-v1-2591185a2fe8
+To: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, 
+ Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
+ Thomas Gleixner <tglx@kernel.org>, Radu Rendec <radu@rendec.net>, 
+ Ulf Hansson <ulfh@kernel.org>, Daniel Lezcano <daniel.lezcano@kernel.org>, 
+ Adrian Hunter <adrian.hunter@intel.com>, Jonathan Corbet <corbet@lwn.net>, 
+ Shuah Khan <skhan@linuxfoundation.org>, 
+ Randy Dunlap <rdunlap@infradead.org>, Russell King <linux@armlinux.org.uk>, 
+ Arnd Bergmann <arnd@arndb.de>, 
+ Alexandre Belloni <alexandre.belloni@bootlin.com>, 
+ Linus Walleij <linusw@kernel.org>, Drew Fustini <fustini@kernel.org>, 
+ linux-kernel@vger.kernel.org, linux-input@vger.kernel.org, 
+ linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, soc@lists.linux.dev
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1794920817; l=5303;
+ i=yogo.0917.sabu@gmail.com; s=ypl514-20261117; h=from:subject:message-id;
+ bh=2VJuHtWvJ/6kBBAKkOQqaxVnf8LunGjT3BvQbOpAQfM=;
+ b=TqlrSuhkixWIR2lMSrU1nGDY+ADJU4gjIR3CMH3zWTCgohhAVNsc4WHccWXgrO6bUMFtL6UWE
+ irl8pnb2GR4D1jPLdZS1FC97ZoM/BZRsaNtgzdRlcZRgSrzz+BDGTh1
+X-Developer-Key: i=yogo.0917.sabu@gmail.com; a=ed25519;
+ pk=TIQ8Tk4xQrxyn8rmk3GI2f5qg/kO6g2KZm7YOOyBHeg=
+X-Endpoint-Received: by B4 Relay for
+ yogo.0917.sabu@gmail.com/ypl514-20261117 with auth_id=1550
+X-Original-From: yy-Local-LLM <yogo.0917.sabu@gmail.com>
+Reply-To: yogo.0917.sabu@gmail.com
 
-On Friday, 6 November 2026 at 12:15:09 CET, Mark Brown wrote:
-> On Fri, Nov 06, 2026 at 10:29:57AM +0100, Beno=C3=AEt Monin wrote:
->=20
-> > The series is organised as:
->=20
-> > - patches 1-14 add the device tree bindings, the Metanoia vendor prefix,
-> >   the RISC-V board schema and the SoC block compatibles
-> > - patch 15 adds ARCH_METANOIA and selects the AX45MP errata
-> > - patches 16-23 add the reset, SPI, watchdog, MMC, PHY and USB changes
-> >   needed to build and probe on this SoC
-> > - patch 24 adds the MT2824 SoC and MT5824 EVB device trees
-> > - patch 25 adds the MAINTAINERS entry
->=20
-> This sort of thing tends to work better if you submit the patches for
-> subsystems as separate serieses, it avoids enormous CC lists and keeps
-> the individual serieses a managable size.
->=20
-I agree, and I am reworking the series that way. Version 1 was intended
-as an overview of the complete SoC support, but it ended up being too
-big for a single series.
+This RFC adds initial SiRF AT550 support for the ARM1136-based Yupiteru
+YPL514si navigation device. It splits the working 6.12.60 bring-up into
+normal kernel subsystems and ports it to the 7.4-rc3 development tree.
 
-So version 2 of this current series will be only the platform basics
-(2 patches):
+The device owner has now booted this 7.4-rc3 candidate on the YPL514si
+through the JWM desktop, with the console and screen keyboard. The CE
+handoff record confirms a 32 MiB Linux-owned allocation, all 8192 PFNs,
+and a counter rate of 124387750 Hz. The deployed EXE/DLL hashes match the
+prepared kit. The WM result is reported by the device owner, rather than
+being inferred from the CE pre-handoff log.
 
-  - dt-bindings: vendor-prefixes: add Metanoia Communications
-  - riscv: add ARCH_METANOIA Kconfig entry
+The kernel uses standard IRQCHIP_DECLARE, TIMER_OF_DECLARE, common clock,
+input polling, SDHCI PIO and simplefb paths. Generic ARM head.S, init/main.c,
+MMU and RealView execution code are unchanged. The CE RAM allocator,
+page-table checks, handoff bridge, DT fixups and GUI software are not part
+of this kernel series.
 
-It will act as a prerequisite for the following new series, one per
-subsystem:
+Firmware must initialize SDRAM, peripheral clocks, pin multiplexing and
+the LCD. The bootloader supplies the actual usable RAM and post-divider
+counter rate in the DT, and enables only peripherals handed to Linux.
+Memory/clock zero values in the source DTS are explicit fixup placeholders.
+The timer driver preserves the divider and rejects a running watchdog.
 
-  - reset: binding + reset-simple support (the separate reboot binding
-    is dropped; the RST block is described as a single node)
-  - SPI: optional DMA/IRQ binding, MT2824 compatible, atcspi200 IRQ
-    support + Kconfig
-  - watchdog: compatible + Kconfig
-  - MMC: compatible + MT2824 support (split between SD, eMMC and
-    auto-detection) + tuning/HS400
-  - PHY: USB2 PHY binding + driver/Kconfig
-  - USB DWC2: binding + params
+Validation:
+- AT550-only defconfig Image/DTB build, plus built-in/module leaf drivers.
+- W=1 on the new drivers, dt_binding_check with examples/yamllint, scoped
+  dtbs_check, and ARM32 tests of the actual loader DT fixups.
+- ARM1136 QEMU at 16/24/32 MiB through JWM, five-point calibration,
+  screen-keyboard input into rxvt/PTY/ash and a readonly SD fixture.
+- Physical YPL514si boot through WM, reported by the device owner.
+QEMU uses GIC/SP804/PL181 and synthetic touch, so it is not being presented
+as validation of the physical AT550 controllers. The no-VFP defconfig also
+produces an existing unused-variable W=1 warning in unmodified signal.c;
+there are no reported new-driver warnings.
 
-=46inally, once the subsystem bindings are accepted and the drivers
-are queued, I'll post the SoC DTS in its own series: board schema +
-cache/PLIC/PLICSW/PLMT compatibles + the MT2824/MT5824 DTS and the
-MAINTAINERS entry
+Initial limits: firmware clock/pin setup is inherited; cold initialization,
+clock-tree control, DMA translation and board suspend are not implemented.
+The board DT limits SD to 25 MHz, no 1.8 V, no MMC and no SDIO. SD writes,
+card removal and suspend/resume have not been separately validated. The
+AT551 draft was cross-checked with AT550 CE mappings and prior hardware
+behavior; it is not claimed to be a complete AT550 specification.
 
-Thanks everyone for the reviews, I will integrate the feedback in the
-next iterations of each series.
+I would appreciate early feedback on the initial platform scope and the
+firmware/DT handoff contract before extending clock, pinctrl or DMA support.
+
+Signed-off-by: yy-Local-LLM <yogo.0917.sabu@gmail.com>
+
+---
+yy-Local-LLM (6):
+      dt-bindings: add SiRF AT550 and Yupiteru YPL514si descriptions
+      irqchip: add the SiRF AT550 interrupt controller
+      clocksource: add the SiRF AT550 counter and match timer
+      Input: add polled SiRF AT550 resistive touch support
+      mmc: sdhci: add SiRF AT550 programmed-I/O support
+      ARM: add the SiRF AT550 platform and YPL514si board
+
+ Documentation/arch/arm/at550.rst                   |  55 +++++++++
+ Documentation/arch/arm/index.rst                   |   1 +
+ .../devicetree/bindings/arm/sirf,at550.yaml        |  22 ++++
+ .../bindings/input/touchscreen/sirf,at550-ts.yaml  |  36 ++++++
+ .../interrupt-controller/sirf,at550-intc.yaml      |  46 +++++++
+ .../devicetree/bindings/mmc/sirf,at550-sdhci.yaml  |  51 ++++++++
+ .../bindings/timer/sirf,at550-timer.yaml           |  47 ++++++++
+ .../devicetree/bindings/vendor-prefixes.yaml       |   2 +
+ MAINTAINERS                                        |  17 +++
+ arch/arm/Kconfig                                   |   1 +
+ arch/arm/Makefile                                  |   1 +
+ arch/arm/boot/dts/Makefile                         |   2 +
+ arch/arm/boot/dts/sirf/Makefile                    |   2 +
+ arch/arm/boot/dts/sirf/at550-ypl514si.dts          |  52 ++++++++
+ arch/arm/boot/dts/sirf/at550.dtsi                  |  66 ++++++++++
+ arch/arm/configs/at550_defconfig                   |  34 ++++++
+ arch/arm/mach-at550/Kconfig                        |  13 ++
+ arch/arm/mach-at550/Makefile                       |   2 +
+ arch/arm/mach-at550/at550.c                        |  11 ++
+ drivers/clocksource/Kconfig                        |   6 +
+ drivers/clocksource/Makefile                       |   2 +
+ drivers/clocksource/timer-at550.c                  | 134 +++++++++++++++++++++
+ drivers/input/touchscreen/Kconfig                  |  10 ++
+ drivers/input/touchscreen/Makefile                 |   2 +
+ drivers/input/touchscreen/at550-ts.c               | 108 +++++++++++++++++
+ drivers/irqchip/Kconfig                            |   5 +
+ drivers/irqchip/Makefile                           |   2 +
+ drivers/irqchip/irq-at550.c                        | 110 +++++++++++++++++
+ drivers/mmc/host/Kconfig                           |  10 ++
+ drivers/mmc/host/Makefile                          |   2 +
+ drivers/mmc/host/sdhci-at550.c                     |  62 ++++++++++
+ 31 files changed, 914 insertions(+)
+---
+base-commit: 666539eecdf4db623f5e3c3e55cf9f2dfad24aa4
+change-id: 20261117-at550-rfc-v1-2591185a2fe8
 
 Best regards,
-Beno=C3=AEt
-
+--  
+yy-Local-LLM <yogo.0917.sabu@gmail.com>
 
 
