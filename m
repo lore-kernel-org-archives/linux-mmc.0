@@ -1,52 +1,47 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=115.124.28.125
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794972759;
-	b=SX75BIUMQmVgat0CbP37J5QBPZN8CdJctNRRnVHvKfP5O8eh7Iw06focas46jEfOnug9
-	 qzzlfsEI+SVNiEqxrSKkrhPAHJXJ27vtW9gcJsiMLKDCkjIAW2s8/G7QM3FFuSkkyn1g3
-	 dxOYzcf7mMQyRXxpqSF5tEcCKQGz8tUiZfWiBb4zfWPjASfqbl2u5YI4lbugMm3uNGDIl
-	 92UW86ttpKup99tRWvJ6jYepswoTGHl/r/HzckvD6CqAlzfme6OsTNJvUCMRWZKV8NZe2
-	 0uDeSxKFNQhjaTbUzS4OE/r5Ul0bceiuydpA3aEj1lneeZVPOSsanuxaqscEyVyFAAQ==
+	t=1794989665;
+	b=RQ6Y45JIguvkyLtj6zIjEkayeWQERwfjbRGSwELb0QWTZBE/Ebb6BsBbZr+CRNsnaX12
+	 oBcUxM7RR2dbXnFPC6+r4H6C0HlxakStYlG9dqPuQKusKXPG5E5FRe6tm7N824RY40nJa
+	 qGGw7hnqvJjWVgvKYxYMn94yiICamF4kjR1arLx/chZPjqZz2PdGZN40M65bemBebJJMz
+	 Ai8qE46uOBARbc1oBq/cgr2jx3oZsDFkx+0VI5LMNcCsChziBhMLrZgyPiOarY5HQsbj+
+	 UeXNNTZCSUsjZUCxyL53+xLsvgTMNX3qAbzolMRgkK+iVwYjNAEBKOqMFWWIPp/e7fA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794972759;
-	h=DMARC-Filter:X-Alimail-AntiSpam:Received:From:To:Cc:Subject:Date:
-	 Message-Id:X-Mailer:MIME-Version:Content-Transfer-Encoding;
-	bh=JMsEoh9unEObzZlKKNgSl3NBs0hCf3pS2PdnFg6mbtY=;
-	b=EY/+oBNlrWL+o+Hz1ARgdrOtIwcymxcgMRKRfaGK5pnQalBbCn3/tO341u6JlCmp6ab9
-	 8GSOrtOnhbC9x0AqcPjjTgvbQ93WVwPNzPMWx0CcYsJYPU54VnK1ohEn3XrixpCqmgE4O
-	 xPStenR93ZRRBra6mBeAxT7e5iGmbQ3G+efnXhF0OvZbzFmFaZwTOXhSaiHf+A/cCTVkN
-	 i43E5i8wIKRZHPgHjVXhpEyN7+eqXYbCPnP6ObU0hs2VZ6h98fDuyTi+m5kKnZEFOt86M
-	 tefJ1mViUEZUkduRF0BXugiyDHufLPp8VxPusDeMEEQOSTaVEbLbyLpR5yMXhmagAwQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794989665;
+	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
+	 Subject:To:Cc:References:From:Content-Language:Autocrypt:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding;
+	bh=0d+s6cAn6uhV0VhVs39P/ZxCWEh9RIa/jJ/8Nk9ZNIA=;
+	b=JSa93B02HxmQNl1x0DzOLSRl3j81p+8MnDjxW2urDriIf9M/e5XFHofGXAV9REzv1G2e
+	 e89sytSpphaezallYjRVWYkIDNBCVgNQQr/HMmfv/DdsZ6Z5IE/L4mzxeif3jPV3rts4t
+	 j1SLGC+fMJeNKuWX5fXcqOGET3ZAkexUV+3twpNd05yi4Mm4N0THsyCI5VFw3noCI4fbs
+	 3ySibPlwDF5yJLsTuFL7f3EnOEZPZoMA7f9Ak92vgrzhpBd0N+qqLVL1hqjuMQkuRdgvF
+	 6Hlk0okn0JOTp1VLeQfxl0mOvPh/29j1y0RE2vUki5qkmvIwtOLw41DQ1kAIOmiJW9Q==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=kaihong.com;
-	spf=pass smtp.mailfrom=kaihong.com;
-	arc=none smtp.remote-ip=115.124.28.125
-Received: from out28-125.mail.aliyun.com (out28-125.mail.aliyun.com [115.124.28.125])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hSTCRHYO;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D8CE606A325;
-	Wed, 18 Nov 2026 03:32:36 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7D8CE606A325
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kaihong.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kaihong.com
-X-Alimail-AntiSpam:AC=CONTINUE;BC=0.0673776|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.00507667-0.000490795-0.994433;FP=14242939606164800247|0|0|0|0|-1|-1|-1;HT=maildocker-contentspam033045038069;MF=wangxiaolei01@kaihong.com;NM=1;PH=DS;RN=9;RT=9;SR=0;TI=SMTPD_---.k4Lvy.H_1794972746;
-Received: from nj-vm-261.pxvirt.local(mailfrom:wangxiaolei01@kaihong.com fp:SMTPD_---.k4Lvy.H_1794972746 cluster:ay29)
-          by smtp.aliyun-inc.com;
-          Wed, 18 Nov 2026 11:32:27 +0800
-From: Xiaolei Wang <wangxiaolei01@kaihong.com>
-To: ulfh@kernel.org,
-	cw9316.lee@samsung.com,
-	avri.altman@sandisk.com,
-	wangxiaolei01@kaihong.com,
-	shawn.lin@linux.dev,
-	linusw@kernel.org
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org
-Subject: [PATCH] mmc: core: use GFP_NOIO for SD cache flush buffers
-Date: Wed, 18 Nov 2026 03:32:25 +0000
-Message-Id: <20261118033225.1212442-1-wangxiaolei01@kaihong.com>
-X-Mailer: git-send-email 2.34.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1A2D606A31C;
+	Wed, 18 Nov 2026 08:14:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hSTCRHYO
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 93D781F000C7;
+	Wed, 18 Nov 2026 08:14:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794989665;
+	bh=0d+s6cAn6uhV0VhVs39P/ZxCWEh9RIa/jJ/8Nk9ZNIA=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=hSTCRHYO3JhiIIlJxXllrrSefZtvXl07Amkpx95zDAEi6XykgLdseep+C0CUF0y6u
+	 NWvJMPvunO7y5/VgZuW4QAuzE3K9sm07QYVWvOrzZAWq7FJ5zf+epYxTa7MttoBMmH
+	 sg6nmkDfYUPJEFem4xoQIIhFBjmz73NNd1pjzP+TrbL1d9Dr0bb/fUbUq6TxPTB5D4
+	 Vye1+GYwoE6gaaVlJTW8B22dhZYeMA8GkwcWEaBanoAPjqUq/IUkrk5ax2I2Ic1FEm
+	 D8aDDKG/wpA9TmLKw6pbkW80CF2vNel2Och8j695ViMHGf+9RBDrWrhpbKy97b3z/K
+	 oGfpm0nudAi3A==
+Message-ID: <4ae5596c-281b-476c-b656-1e03ae7409b3@kernel.org>
+Date: Wed, 18 Nov 2026 09:14:17 +0100
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -56,80 +51,89 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH RFC 6/6] ARM: add the SiRF AT550 platform and YPL514si
+ board
+To: yogo.0917.sabu@gmail.com, linux-arm-kernel@lists.infradead.org,
+ devicetree@vger.kernel.org
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>,
+ Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+ Thomas Gleixner <tglx@kernel.org>, Radu Rendec <radu@rendec.net>,
+ Ulf Hansson <ulfh@kernel.org>, Daniel Lezcano <daniel.lezcano@kernel.org>,
+ Adrian Hunter <adrian.hunter@intel.com>, Jonathan Corbet <corbet@lwn.net>,
+ Shuah Khan <skhan@linuxfoundation.org>, Randy Dunlap
+ <rdunlap@infradead.org>, Russell King <linux@armlinux.org.uk>,
+ Arnd Bergmann <arnd@arndb.de>,
+ Alexandre Belloni <alexandre.belloni@bootlin.com>,
+ Linus Walleij <linusw@kernel.org>, Drew Fustini <fustini@kernel.org>,
+ linux-kernel@vger.kernel.org, linux-input@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, soc@lists.linux.dev
+References: <20261117-at550-rfc-v1-v1-0-5879573cb825@gmail.com>
+ <20261117-at550-rfc-v1-v1-6-5879573cb825@gmail.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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
+In-Reply-To: <20261117-at550-rfc-v1-v1-6-5879573cb825@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-sd_flush_cache() is called from mmc_blk_mq_issue_rq()'s REQ_OP_FLUSH
-branch, which runs in the block layer dispatch path with the queue usage
-counter held.  Both it and sd_write_ext_reg(), which it calls, allocate
-a 512-byte buffer with GFP_KERNEL.  Under memory pressure that
-allocation enters filesystem reclaim, and reclaim may submit I/O back to
-the same request queue, closing a cycle against queue freeze:
+On 17/11/2026 14:06, yy-Local-LLM via B4 Relay wrote:
+> From: yy-Local-LLM <yogo.0917.sabu@gmail.com>
+> 
+> Add a minimal DT machine using standard IRQ, timer and simplefb paths.
+> Describe the SoC and the firmware-configured YPL514si display. Leave
+> usable memory and the divided counter rate for the bootloader to
+> populate. Keep optional peripheral nodes disabled until firmware hands
+> them over. Disable unvalidated board suspend; limit this board to SD PIO
+> at 25 MHz. Document the RAM-boot contract and the missing
+> cold-boot/clock-tree support.
+> 
+> Signed-off-by: yy-Local-LLM <yogo.0917.sabu@gmail.com>
 
-      CPU0                              CPU1
-      ----                              ----
-  lock(&q->q_usage_counter(io));
-                              lock(fs_reclaim);
-                              lock(&q->q_usage_counter(io));
-  lock(&q->elevator_lock);
+Awesome, you did not want to even read what LLM told you?
 
-lockdep reports it on an arm64 Raspberry Pi 5 that boots from an SD
-card, with the flush dispatched by blk_mq_requeue_work and the elevator
-switch in another thread:
-
-  -> #2 (fs_reclaim):
-       fs_reclaim_acquire <- __kmalloc_cache_noprof <- sd_flush_cache
-       <- mmc_blk_mq_issue_rq <- mmc_mq_queue_rq
-       <- blk_mq_dispatch_rq_list
-
-blk_alloc_queue() declares this ordering explicitly and teaches lockdep
-about it:
-
-  /* Teach lockdep about lock ordering (reclaim WRT queue freeze lock). */
-  fs_reclaim_acquire(GFP_KERNEL);
-  rwsem_acquire_read(&q->io_lockdep_map, 0, 0, _RET_IP_);
-  rwsem_release(&q->io_lockdep_map, _RET_IP_);
-  fs_reclaim_release(GFP_KERNEL);
-
-Taking q_usage_counter(io) and then entering reclaim is the reverse of
-that contract.  GFP_NOIO drops __GFP_FS and __GFP_IO, so neither the
-lockdep dependency nor the writeback that could resubmit to this queue
-can happen any more.
-
-sd_write_ext_reg() is also called from sd_enable_cache() (probe) and
-sd_poweroff_notify() (suspend).  NOIO costs nothing on those paths: the
-allocation is order-0 and 512 bytes, and reclaim without writeback is
-still available.  Keeping a single gfp flavour in the helper makes its
-semantics independent of the caller.
-
-Fixes: 130206a615a9 ("mmc: core: Add support for cache ctrl for SD cards")
-Cc: stable@vger.kernel.org
-Signed-off-by: Xiaolei Wang <wangxiaolei01@kaihong.com>
----
- drivers/mmc/core/sd.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index c763efb10f64..88d0ddfe007a 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1041,7 +1041,7 @@ static int sd_write_ext_reg(struct mmc_card *card, u8 fno, u8 page, u16 offset,
- 	struct scatterlist sg;
- 	u8 *reg_buf;
- 
--	reg_buf = kzalloc(512, GFP_KERNEL);
-+	reg_buf = kzalloc(512, GFP_NOIO);
- 	if (!reg_buf)
- 		return -ENOMEM;
- 
-@@ -1335,7 +1335,7 @@ static int sd_flush_cache(struct mmc_host *host)
- 	if (!sd_cache_enabled(host))
- 		return 0;
- 
--	reg_buf = kzalloc(512, GFP_KERNEL);
-+	reg_buf = kzalloc(512, GFP_NOIO);
- 	if (!reg_buf)
- 		return -ENOMEM;
- 
--- 
-2.34.1
-
+Best regards,
+Krzysztof
