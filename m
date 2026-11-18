@@ -1,58 +1,92 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=185.171.202.116
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795009501;
-	b=L/ajfUHTh0Q1eWcwjOXfNlOysRulZTCCx3OWexGV9qIDzeTfxKCO3qvpmNGcGFrOTMaZ
-	 SKM2nrE4B6ueBhve9gruPSf0nZoLTAMF6bM9kfJLkth2v8G7DhJPoLTgqUnKwGxE4ksMN
-	 p1XKyVkvifQ4H9rNHY7i8brAnRTgKH0BHynBAwRHlRLZDbE6IJGtZ7FQrlPJqE387s8Fk
-	 tablN9IQj1WuNxQZv2VMayTTXJq3EH/c03uxiBjEV+0yNZpTaT9Limj0A7ZVXi5PDh0uf
-	 yPVU7NfyLAcxywgdrUbYzIFvhuUHLCXfwFuqrh+oNVW3pXiUN/5Tg+1XbJiRgTxyHFw==
+	t=1795018135;
+	b=WZq5LiIQESCP3NkV+Y+CxkRyJgztEwxpmeSSNyaRlFX9mOfN5ccrhXb8XWMxyGaDv/+S
+	 UsWFn4v0wU99DzTX28nKq5wHIl45X3YsNHq7fQkKzZ5RBdk4MFNtjhydSVBD26W4wA6zg
+	 iRJjGNrNBWkagBJEDH4l40hkRaw0jLhGmFAP7UaNCXbCnAS4nxwjJQYgaNuhsrhh+Tri7
+	 2HHaxAe/CeXXjkZCT87ifaA+btDIMVZylwOTamvJz7TabNoVEwDpQMaYz7EyWMJyGJcT/
+	 gssZCGxox9yecXICsjxGXy/jS6KL1iT/jbjH71t6A6z8L2jw7tMcWgIk+P79l40Ox3Q==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795009501;
-	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
-	 MIME-Version:Content-Transfer-Encoding;
-	bh=5tUlyNBQsLqghT4FUQlxLY5bC88rlZM0X+hORoNIiMQ=;
-	b=HlWVBiZ0a522p565EPy8ZmaAPZGQVqnlrZpUPFtM8U2fOa6ZWNRiVyN65XJeTQRggTZx
-	 JtSzPNbwLeE98cl13okhkmyINNHNS8regSOp6lPXR6xyURTsCqvaG8rS7mKSnHKjRThD5
-	 7X0jfBX/js0HgZUJXgEmtsPhIOmDaEQ4R4d3uzOlYfn+h+MYOtxAtbmDoNmxN+noujBer
-	 keXMSNr4VlFEHbTfGdwTWEXhdQaOtDSmvkJY+o7kMIPek5/8kIQ7Y49M64EQh6uj+MlZa
-	 KHd3xmq9TwDlqVZ+A4zHf2yM2xGbpMICIk618uzzeVCzxhqpU2dIp08zFqHb/HpO3AA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795018135;
+	h=DMARC-Filter:Received:Received:Received:DKIM-Signature:From:To:Cc:
+	 Subject:Date:Message-ID:In-Reply-To:References:MIME-Version:
+	 Content-Transfer-Encoding:Content-Type:X-Last-TLS-Session-Version;
+	bh=NyruYRmBJ333KKsYOsJfBubBYnjFdFekZpcsS68Afoo=;
+	b=J4xZpVynxE7mjesYjl99fEZTmC0Jo5hzL+GCkIoC4aHffK3XdRRQ5GSKLw9dPbMwnvNs
+	 Y2bgtgOdh2EhXL6+8B0icKt+rpQs8codyf8Kq9Z9PALGhgNS35HrEy0coyPPtgf86poLc
+	 xFrL2XJll2VX0xDULxfvihKsVkU3G0Z6foC1u3NW++h3vPDbNRAi6wRfyvTHXAe+U6CYf
+	 aQq/VyK7QzaEJbs+27uR6bTjgB8eba2hVH/WO/2J0nIAsUwEjSXGdJ5E1P9qmXbQRS0G6
+	 o3MSzw8Hhlh4fqXMBkjARe8PK1EJ1nLjbPyWjHhgyrindR03hO1VjZSwNZcMbyv+uhw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=TYXHZjyv;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	dmarc=pass header.from=bootlin.com;
+	spf=pass smtp.mailfrom=bootlin.com;
+	dkim=pass header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=X6cEgtil;
+	arc=none smtp.remote-ip=185.171.202.116
+Received: from smtpout-04.galae.net (smtpout-04.galae.net [185.171.202.116])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BC21606A31C;
-	Wed, 18 Nov 2026 13:45:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F835606A330;
+	Wed, 18 Nov 2026 16:08:55 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3F835606A330
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=TYXHZjyv
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 80B071F000C4;
-	Wed, 18 Nov 2026 13:44:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795009500;
-	bh=5tUlyNBQsLqghT4FUQlxLY5bC88rlZM0X+hORoNIiMQ=;
-	h=From:To:Cc:Subject:Date;
-	b=TYXHZjyvBJURnLIknxHA4DXkQty/01rjeI87Gfqi9Qp3TLjNlw7QFInL20ndedE5O
-	 XAFdLI1UNjCvQVgiSZaRrcIpYSTKLJUIzjVoz3HmYvZbBlAFPJ3ebZ10QG6jQGW3xb
-	 6gRojFeuzv8Pq8qxLdq3/mIETIiH79IWqu8WjFlJE1S4ZbvmiHleXdRJp/6usRVObm
-	 w8ZIcW2E+E76S4EhMq/7fAn9D22FO278au2ti9n8MkATQIqwTfMWLb8FupRBRLaYuu
-	 MFKsWYpqqO0olLet9608L6cyUEgbkFev7PCqxoj05qGvbRXc0EIzx8XjO4YG2CXc+h
-	 Effav++yXrq1g==
-From: Arnd Bergmann <arnd@kernel.org>
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Arnd Bergmann <arnd@arndb.de>,
-	Linus Walleij <linusw@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Ulf Hansson <ulfh@kernel.org>,
-	Frank Li <Frank.Li@nxp.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: sh_mmcif: rework sg_miter handling
-Date: Wed, 18 Nov 2026 13:57:59 +0100
-Message-ID: <20261118134445.2909283-1-arnd@kernel.org>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.a=rsa-sha256 header.s=dkim header.b=X6cEgtil
+Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
+	by smtpout-04.galae.net (Postfix) with ESMTPS id 14695C79A9F;
+	Wed, 18 Nov 2026 16:08:58 +0000 (UTC)
+Received: from mail.galae.net (mail.galae.net [212.83.136.155])
+	by smtpout-01.galae.net (Postfix) with ESMTPS id 299BD5FE9B;
+	Wed, 18 Nov 2026 16:08:53 +0000 (UTC)
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id BD37011BC244F;
+	Wed, 18 Nov 2026 17:08:34 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
+	t=1795018130; h=from:subject:date:message-id:to:cc:mime-version:content-type:
+	 content-transfer-encoding:in-reply-to:references;
+	bh=NyruYRmBJ333KKsYOsJfBubBYnjFdFekZpcsS68Afoo=;
+	b=X6cEgtil8ijijO0rJLXA2fM6mfOKCqDSKEpQnIZl8O7QDvCmAFq44iTLtGiRg59T6tim+9
+	BkfAmw+/K2LmZlkCdVN2sYKaDDdw/b0/mTAmoK6EDNyam9WvPm2KyqSsK6FFH80ZrBBRbl
+	fOuG3P4fgquqDyFTbuhX5QPxzAzzTotAL3yURPLSCZ75iuwuF5fR7obk1dgbOVKjz5XyHU
+	usLAW0L1/qdVNqF382CZu2aco6xcOyG4qofdf/C4tljy9+Ib67sXLpy0J5bWTKyaLMICZ9
+	hf3TVLYsrb2HPg/gXOz12/t9aAj1TndcLvng+XJYM9BoHm2TlIq0tO3MLsgbzA==
+From: =?UTF-8?B?QmVub8OudA==?= Monin <benoit.monin@bootlin.com>
+To: Conor Dooley <conor@kernel.org>
+Cc: Mark Brown <broonie@kernel.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
+ Jun Chang <jun.chang@metanoia-comm.com>, Paul Walmsley <pjw@kernel.org>,
+ Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>,
+ Alexandre Ghiti <alex@ghiti.fr>, Philipp Zabel <p.zabel@pengutronix.de>,
+ Sebastian Reichel <sre@kernel.org>, Vinod Koul <vkoul@kernel.org>,
+ Neil Armstrong <neil.armstrong@linaro.org>,
+ Manivannan Sadhasivam <mani@kernel.org>, Jonathan Cameron <jic23@kernel.org>,
+ Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+ Thomas Gleixner <tglx@kernel.org>, Radu Rendec <radu@rendec.net>,
+ Samuel Holland <samuel.holland@sifive.com>,
+ Ben Zong-You Xie <ben717@andestech.com>,
+ Daniel Lezcano <daniel.lezcano@kernel.org>, Ulf Hansson <ulfh@kernel.org>,
+ Jisheng Zhang <jszhang@kernel.org>, CL Wang <cl634@andestech.com>,
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+ Wim Van Sebroeck <wim@linux-watchdog.org>,
+ Guenter Roeck <linux@roeck-us.net>, Adrian Hunter <adrian.hunter@intel.com>,
+ Minas Harutyunyan <hminas@synopsys.com>,
+ Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
+ Randolph Sheng-Kai =?UTF-8?B?TGluKOael+iBluWHsSk=?= <randolph@andestech.com>,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-riscv@lists.infradead.org, linux-pm@vger.kernel.org,
+ linux-phy@lists.infradead.org, Paul Walmsley <paul.walmsley@sifive.com>,
+ linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
+ linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org
+Subject:
+ Re: [PATCH 00/25] riscv: add support for the Metanoia MT2824 SoC and MT5824
+ EVB
+Date: Wed, 18 Nov 2026 17:08:33 +0100
+Message-ID: <tSRWYJl8QRO6qpOrYOmeTA@bootlin.com>
+In-Reply-To: <20261117-calamity-quiver-96d0d568b338@spud>
+References:
+ <20261106-mt2824-v1-0-86087eaf5af4@bootlin.com>
+ <_koitdIgQPmk89LDhlUlJQ@bootlin.com>
+ <20261117-calamity-quiver-96d0d568b338@spud>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -62,242 +96,75 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+X-Last-TLS-Session-Version: TLSv1.3
 
-From: Arnd Bergmann <arnd@arndb.de>
+On Tuesday, 17 November 2026 at 18:30:58 CET, Conor Dooley wrote:
+> On Tue, Nov 17, 2026 at 11:41:52AM +0100, Beno=C3=AEt Monin wrote:
+> > On Friday, 6 November 2026 at 12:15:09 CET, Mark Brown wrote:
+> > > On Fri, Nov 06, 2026 at 10:29:57AM +0100, Beno=C3=AEt Monin wrote:
+> > >=20
+> > > > The series is organised as:
+> > >=20
+> > > > - patches 1-14 add the device tree bindings, the Metanoia vendor pr=
+efix,
+> > > >   the RISC-V board schema and the SoC block compatibles
+> > > > - patch 15 adds ARCH_METANOIA and selects the AX45MP errata
+> > > > - patches 16-23 add the reset, SPI, watchdog, MMC, PHY and USB chan=
+ges
+> > > >   needed to build and probe on this SoC
+> > > > - patch 24 adds the MT2824 SoC and MT5824 EVB device trees
+> > > > - patch 25 adds the MAINTAINERS entry
+> > >=20
+> > > This sort of thing tends to work better if you submit the patches for
+> > > subsystems as separate serieses, it avoids enormous CC lists and keeps
+> > > the individual serieses a managable size.
+> > >=20
+> > I agree, and I am reworking the series that way. Version 1 was intended
+> > as an overview of the complete SoC support, but it ended up being too
+> > big for a single series.
+> >=20
+> > So version 2 of this current series will be only the platform basics
+> > (2 patches):
+> >=20
+> >   - dt-bindings: vendor-prefixes: add Metanoia Communications
+>=20
+> >   - riscv: add ARCH_METANOIA Kconfig entry
+>=20
+> Realistically, this does not need to be a prereq either, because you'll
+> have "depends on ARCH_METANIOA || COMPILE_TEST".
+>=20
+True but checkkconfigsymbols.py will then complain about a referenced but
+undefined Kconfig symbol in the following series.
 
-This driver is the only one that uses sg_miter_next() to get a persistent
-mapping across interrupts, which prevents us from converting the internal
-kmap() to a local mapping using SG_MITER_LOCAL flag.
+> >=20
+> > It will act as a prerequisite for the following new series, one per
+> > subsystem:
+> >=20
+> >   - reset: binding + reset-simple support (the separate reboot binding
+> >     is dropped; the RST block is described as a single node)
+> >   - SPI: optional DMA/IRQ binding, MT2824 compatible, atcspi200 IRQ
+> >     support + Kconfig
+> >   - watchdog: compatible + Kconfig
+> >   - MMC: compatible + MT2824 support (split between SD, eMMC and
+> >     auto-detection) + tuning/HS400
+> >   - PHY: USB2 PHY binding + driver/Kconfig
+> >   - USB DWC2: binding + params
+> >=20
+> > Finally, once the subsystem bindings are accepted and the drivers
+> > are queued, I'll post the SoC DTS in its own series: board schema +
+> > cache/PLIC/PLICSW/PLMT compatibles + the MT2824/MT5824 DTS and the
+> > MAINTAINERS entry
+> >=20
+> > Thanks everyone for the reviews, I will integrate the feedback in the
+> > next iterations of each series.
+> >=20
+> > Best regards,
+> > Beno=C3=AEt
+> >=20
+> >=20
+> >=20
+>=20
 
-Linus previously attempted to use atomic mappings here, which failed
-for the same reason. I gave it another try, with a mapping that is only
-active during a single sh_mmcif_mread_block()/sh_mmcif_mwrite_block() call.
-
-This is mainly a revert of the patch that fixed the command 18 timeout,
-but tries to solve the problem by updating and checking data->bytes_xfered
-to keep track of when the transfer is finished.
-
-Instead of calling sg_miter_stop() on error or completion, this now
-always stops the iterator after the data transfer and restarts it during
-the following interrupt.
-
-Cc: Linus Walleij <linusw@kernel.org>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Fixes: 4d4a2c71b862 ("mmc: sh_mmcif: Advance sg_miter before reading blocks")
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
-Hi Wolfram and Linus,
-
-Could you have a look at this? I'm not familiar with this driver,
-so there is a chance I got this completely wrong. If the change
-does make sense, maybe you can try testing it on one of the
-highmem-enabled boards.
-
- drivers/mmc/host/sh_mmcif.c | 63 +++++++++++++------------------------
- 1 file changed, 22 insertions(+), 41 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index aa5a19d16c7f..7f1818831f93 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -604,7 +604,7 @@ static void sh_mmcif_single_read(struct sh_mmcif_host *host,
- 			   BLOCK_SIZE_MASK) + 3;
- 
- 	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
--		       SG_MITER_TO_SG);
-+		       SG_MITER_LOCAL | SG_MITER_TO_SG);
- 
- 	host->wait_for = MMCIF_WAIT_FOR_READ;
- 
-@@ -621,7 +621,6 @@ static bool sh_mmcif_read_block(struct sh_mmcif_host *host)
- 	int i;
- 
- 	if (host->sd_error) {
--		sg_miter_stop(sgm);
- 		data->error = sh_mmcif_error_manage(host);
- 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
- 		return false;
-@@ -629,7 +628,6 @@ static bool sh_mmcif_read_block(struct sh_mmcif_host *host)
- 
- 	if (!sg_miter_next(sgm)) {
- 		/* This should not happen on single blocks */
--		sg_miter_stop(sgm);
- 		return false;
- 	}
- 
-@@ -638,6 +636,8 @@ static bool sh_mmcif_read_block(struct sh_mmcif_host *host)
- 	for (i = 0; i < host->blocksize / 4; i++)
- 		*p++ = sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
- 
-+	data->bytes_xfered += host->blocksize;
-+	sgm->consumed = host->blocksize;
- 	sg_miter_stop(&host->sg_miter);
- 
- 	/* buffer read end */
-@@ -650,7 +650,6 @@ static bool sh_mmcif_read_block(struct sh_mmcif_host *host)
- static void sh_mmcif_multi_read(struct sh_mmcif_host *host,
- 				struct mmc_request *mrq)
- {
--	struct sg_mapping_iter *sgm = &host->sg_miter;
- 	struct mmc_data *data = mrq->data;
- 
- 	if (!data->sg_len || !data->sg->length)
-@@ -659,14 +658,8 @@ static void sh_mmcif_multi_read(struct sh_mmcif_host *host,
- 	host->blocksize = sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
- 		BLOCK_SIZE_MASK;
- 
--	sg_miter_start(sgm, data->sg, data->sg_len,
--		       SG_MITER_TO_SG);
--
--	/* Advance to the first sglist entry */
--	if (!sg_miter_next(sgm)) {
--		sg_miter_stop(sgm);
--		return;
--	}
-+	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
-+		       SG_MITER_LOCAL | SG_MITER_TO_SG);
- 
- 	host->wait_for = MMCIF_WAIT_FOR_MREAD;
- 
-@@ -682,27 +675,26 @@ static bool sh_mmcif_mread_block(struct sh_mmcif_host *host)
- 	int i;
- 
- 	if (host->sd_error) {
--		sg_miter_stop(sgm);
- 		data->error = sh_mmcif_error_manage(host);
- 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
- 		return false;
- 	}
- 
-+	if (!sg_miter_next(sgm))
-+		return false;
-+
- 	p = sgm->addr;
- 
- 	for (i = 0; i < host->blocksize / 4; i++)
- 		*p++ = sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
- 
-+	data->bytes_xfered += host->blocksize;
- 	sgm->consumed = host->blocksize;
-+	sg_miter_stop(sgm);
- 
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
- 
--	if (!sg_miter_next(sgm)) {
--		sg_miter_stop(sgm);
--		return false;
--	}
--
--	return true;
-+	return data->bytes_xfered < host->blocksize * data->blocks;
- }
- 
- static void sh_mmcif_single_write(struct sh_mmcif_host *host,
-@@ -714,7 +706,7 @@ static void sh_mmcif_single_write(struct sh_mmcif_host *host,
- 			   BLOCK_SIZE_MASK) + 3;
- 
- 	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
--		       SG_MITER_FROM_SG);
-+		       SG_MITER_LOCAL | SG_MITER_FROM_SG);
- 
- 	host->wait_for = MMCIF_WAIT_FOR_WRITE;
- 
-@@ -731,7 +723,6 @@ static bool sh_mmcif_write_block(struct sh_mmcif_host *host)
- 	int i;
- 
- 	if (host->sd_error) {
--		sg_miter_stop(sgm);
- 		data->error = sh_mmcif_error_manage(host);
- 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
- 		return false;
-@@ -739,7 +730,6 @@ static bool sh_mmcif_write_block(struct sh_mmcif_host *host)
- 
- 	if (!sg_miter_next(sgm)) {
- 		/* This should not happen on single blocks */
--		sg_miter_stop(sgm);
- 		return false;
- 	}
- 
-@@ -748,6 +738,8 @@ static bool sh_mmcif_write_block(struct sh_mmcif_host *host)
- 	for (i = 0; i < host->blocksize / 4; i++)
- 		sh_mmcif_writel(host->addr, MMCIF_CE_DATA, *p++);
- 
-+	data->bytes_xfered += host->blocksize;
-+	sgm->consumed = host->blocksize;
- 	sg_miter_stop(&host->sg_miter);
- 
- 	/* buffer write end */
-@@ -760,7 +752,6 @@ static bool sh_mmcif_write_block(struct sh_mmcif_host *host)
- static void sh_mmcif_multi_write(struct sh_mmcif_host *host,
- 				struct mmc_request *mrq)
- {
--	struct sg_mapping_iter *sgm = &host->sg_miter;
- 	struct mmc_data *data = mrq->data;
- 
- 	if (!data->sg_len || !data->sg->length)
-@@ -769,14 +760,8 @@ static void sh_mmcif_multi_write(struct sh_mmcif_host *host,
- 	host->blocksize = sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
- 		BLOCK_SIZE_MASK;
- 
--	sg_miter_start(sgm, data->sg, data->sg_len,
--		       SG_MITER_FROM_SG);
--
--	/* Advance to the first sglist entry */
--	if (!sg_miter_next(sgm)) {
--		sg_miter_stop(sgm);
--		return;
--	}
-+	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
-+		       SG_MITER_LOCAL | SG_MITER_FROM_SG);
- 
- 	host->wait_for = MMCIF_WAIT_FOR_MWRITE;
- 
-@@ -792,27 +777,26 @@ static bool sh_mmcif_mwrite_block(struct sh_mmcif_host *host)
- 	int i;
- 
- 	if (host->sd_error) {
--		sg_miter_stop(sgm);
- 		data->error = sh_mmcif_error_manage(host);
- 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
- 		return false;
- 	}
- 
-+	if (!sg_miter_next(sgm))
-+		return false;
-+
- 	p = sgm->addr;
- 
- 	for (i = 0; i < host->blocksize / 4; i++)
- 		sh_mmcif_writel(host->addr, MMCIF_CE_DATA, *p++);
- 
-+	data->bytes_xfered += host->blocksize;
- 	sgm->consumed = host->blocksize;
--
--	if (!sg_miter_next(sgm)) {
--		sg_miter_stop(sgm);
--		return false;
--	}
-+	sg_miter_stop(sgm);
- 
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
- 
--	return true;
-+	return data->bytes_xfered < host->blocksize * data->blocks;
- }
- 
- static void sh_mmcif_get_response(struct sh_mmcif_host *host,
-@@ -1296,9 +1280,6 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
- 
- 	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
- 		struct mmc_data *data = mrq->data;
--		if (!mrq->cmd->error && data && !data->error)
--			data->bytes_xfered =
--				data->blocks * data->blksz;
- 
- 		if (mrq->stop && !mrq->cmd->error && (!data || !data->error)) {
- 			sh_mmcif_stop_cmd(host, mrq);
--- 
-2.53.0
 
