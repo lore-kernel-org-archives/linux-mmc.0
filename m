@@ -1,110 +1,72 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=103.168.172.153
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795024250;
-	b=KvVRnI7NZNlhvveoVZt8R1CSBj0IhVFfg6r2fikeiajUFLlQpUFPD4gNmsj8cXaANNNP
-	 XlHE5IiVchNeYrFzxV3bTQqbSxXpjDnVuLF007K/aSDxvinCCKwwMHjrULytw/C0FZQcQ
-	 WbSAloFt0pq/UtHUMjy1l8MDzj0ecCHICVgj6Lia2B6GNlH6vGM3Rk7hxuihKo89XeboZ
-	 bhDN+kbXov8F1k+CNKjaKb+UQa6LuD5fZdLYZNFuXeBySGlTg6HORhXjQkYkni9rDVuBR
-	 pfLN0+YQQRkQvVeTzeC0obkFgh8FUzc45B6EpUIFSNz2YCTOiyxOhvIWig/SfZXC0ag==
+	t=1795024334;
+	b=WD9Ef8bsE8LCoUj3NwE6e6Nqa99uyRSZTddsfutvCN/d0ZB+Zn1QdabjzjafJDibjRXR
+	 z5XFQh2sfCNud3bAJtZiTa6/nBdYs5sR3WMjs4cuj5wL683yGQJqysCkgU7pbVXbyinHl
+	 V/ijFRsRrhqsyY8t0s1hpCk58UuS2o5Hs8RuDse2FLXkVRaqzj413fNJgirnb85l266i3
+	 IU4fuvdicWAyaQ4PFLZ/2Oewr/RQLU+FieFdmu+Ie5fx0JVzvFTN8v42pqDNxTbM8sign
+	 h7EI4R7is2yx+dZoGAvFrkr7OowX1f65CxK6Z6srPD2kWT21yvIJGgDAdIDI1R2DuZg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795024250;
-	h=DMARC-Filter:Received:Received:DKIM-Signature:DKIM-Signature:
-	 X-DKIM2-Info:DKIM2-Signature:X-DKIM2-Info:Message-Instance:
-	 X-ME-Sender:X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
+	a=rsa-sha256; c=relaxed/relaxed; t=1795024334;
+	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
+	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
 	 MIME-Version:X-ThreadId:Date:From:To:Cc:Message-Id:In-Reply-To:
 	 References:Subject:Content-Type:Content-Transfer-Encoding;
-	bh=aGoos/bm0q3mGBn1ZAhSG7pC13rp8om2SKkXD/T2kdo=;
-	b=xWK6cbtXiIZ/5CZ8YGyV+b0pKaPkXDNSB64BdBT+qvGKKJxL9HEYPoyxWNyK8tH3hIBB
-	 o12u3d7MYQceXH1ybWwwuQFcSy4hBRayIQf1c+UMA5pU6SHwZcuMKk530r13LgWkpg1AU
-	 fgG0wcIOiW4tBW2UhH+VTWfLDKd0+5HKc3cLIyOy2HdsEvOcR4AjCZl6MoHJqnUvVfyHz
-	 Ww6/PYsZSp61UP2mHp15dMJBojONY3PvqHv2SNuRQqj/iWNKM1rqm8owE4F+yP45XCP+s
-	 zYDF+IpRcBYFYSNaTB3MbWBZXxwOFv1L9o/GvXG7xBmQqHyr584PDZelPQaJyRroliQ==
+	bh=4ARnCtd3uzto/PHgfCMWuGtlnwWSM7jlXaejDo5/H8E=;
+	b=uKNdHBk+t0n70TOh+YDxn+ekGPPNQE/t1q4pbgW1qIR8VmElkYEMBAPpDSQKlfsjYOZ9
+	 HUCkVyWIT8MRRL8BU9/2Y33NWDw5CkqPjnbG9hvL1SZfW5X0CN2rc+SqiDBBlFYVPzH0y
+	 OVzdXWkPVhqX5eDdH6UcS2TOAgRH9o4QMuGgvDlr8ppuSyxtq2SDMEQWY2USGIxNyD5YN
+	 hVVGyGyqrdTA0aUW3kAskkfjZAYdH5YtCrl4M6LUiWmc1dUBIrI5Wki4jwiOK9GziMgUe
+	 iiTaFc0H5McYgrt4jGCaxU8awAhacBPFPAYqHDv8R+VyAvbe09xuT3l7VQL4YfzJlcQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=arndb.de;
-	spf=pass smtp.mailfrom=arndb.de;
-	dkim=pass header.d=arndb.de header.i=@arndb.de header.a=rsa-sha256 header.s=fm2 header.b=Jo2tp2ec;
-	dkim=pass header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=pZw6f4Ix;
-	arc=none smtp.remote-ip=103.168.172.153
-Received: from fhigh-a2-smtp.messagingengine.com (fhigh-a2-smtp.messagingengine.com [103.168.172.153])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=fEjpn3Bc;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38B7D606A330
-	for <linux-mmc@vger.kernel.org>; Wed, 18 Nov 2026 17:50:50 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 38B7D606A330
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EDDE8606A33D
+	for <linux-mmc@vger.kernel.org>; Wed, 18 Nov 2026 17:52:13 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=arndb.de header.i=@arndb.de header.a=rsa-sha256 header.s=fm2 header.b=Jo2tp2ec;
-	dkim=pass (2048-bit key, unprotected) header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=pZw6f4Ix
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=fEjpn3Bc
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0AD131F0092C;
+	Wed, 18 Nov 2026 17:52:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795024333;
+	bh=4ARnCtd3uzto/PHgfCMWuGtlnwWSM7jlXaejDo5/H8E=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=fEjpn3BcPjPfxyKuZ7eWrBQcAsQ3tATqdn9wim6WNheqc8b/cDlhkKY+o0MYInRFB
+	 OKRlXQjAsGwjFOu6XuQwaB7mLkzEJKVhDFlW88++/LuZNlItFDiaJgT7mJXI+AtIoT
+	 M6MOQbgHW8vIqD9C8DbSWXw/OuFj+bXNb6cCd5rOIQ+ph1JT3UOqxf/8hylQDx8YfR
+	 1tLLl5BgfitKjpju68/BxM1cqRM5I++IHiHxRPsYoDvzpznPQ92E5PM0vWAN07l/GA
+	 42QwqPWsqgTW+th8CJPet1SVuI4rZrw3QDSOhE88niiV7pWZUmszHcjJzx9EhrvhmH
+	 0vob3WQ90be0A==
 Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id 559641400135
-	for <linux-mmc@vger.kernel.org>; Wed, 18 Nov 2026 12:50:49 -0500 (EST)
+	by mailfauth.ams.internal (Postfix) with ESMTP id 3BFAA198003A;
+	Wed, 18 Nov 2026 12:52:11 -0500 (EST)
 Received: from ams-imap-03 ([10.64.2.23])
-  by ams-compute-02.internal (MEProxy); Wed, 18 Nov 2026 12:50:49 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-	:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm2; t=1795024245;
-	 x=1795110645; bh=aGoos/bm0q3mGBn1ZAhSG7pC13rp8om2SKkXD/T2kdo=; b=
-	Jo2tp2ecbXVUADVkQ7u4Svu2jEu/wFiviN7wo1V6teOLe5a2Hrjt/l33hF1JTFPc
-	1OFWgkXo1lVvyDKIlO4NvO+mxbqWFG29LF0vRersC72XQ0aVhfwrCy1xNOFIVIWy
-	A2kr0Brj8JS6xTktpG7UrN2SXAiszk6qi8i7sMDCxX/89i4XVwXgGIwfL8FMNebR
-	7XGOR9Lr/3MeVd63PGxaHxy7gqdGAzmaQchAqOnZuA4J4KIxQbDSKncJbPN7BhE6
-	AuoccM/rtuoqZH2+nQ4jznSeiIQfP9qXVUrfG0118dpTmR8VoipDMeZDCPGmwEq1
-	R9jrePz4qy+50WJdWW37sA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1795024245; x=
-	1795110645; bh=aGoos/bm0q3mGBn1ZAhSG7pC13rp8om2SKkXD/T2kdo=; b=p
-	Zw6f4IxIqOCPwEACkZnjHXC4bGogp2vX9RogsbjPk3qZKzg/J/YBSWPUodDhVSSC
-	Aque0Nwwn5iPtjU0jLTT287iUZFp/wO/3FVo/Tib8IvhPK6gHxudb9xwOFcdEYUA
-	J7GmBjqElqI0zNc8JZwgUjZAsFnPzePOqWZfHxOZ9I4n7hZuA+RmtUiL73TV9NcH
-	T42XPVt/iPQj1N+kLgLlEdG9GaEDntgoU7vVj2+IVX9rjwvx+G9PKKlUhUBmhpdT
-	rpK74M1n58mI8uT6QEF9F8MJMRosXxbz8JO7MkMG62HkWDn+vnegVyUueyGjUAIM
-	jf3QPjhNz4o5GeinCWbbQ==
-X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
-	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
-	action=sign d=arndb.de a=rsa-sha256;
-DKIM2-Signature: i=1; m=1; t=1795024245; d=arndb.de;
-	mf=PGFybmRAYXJuZGIuZGU+;
-	rt=PGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc+;
-	s=fm2:rsa-sha256:bOngTcJ0Zjc4PsiYcm5hqoXJHDY2DMUf8xZsQ6kAbSoJOcB
-	0wtyj3d3HrolXOaGG6Iyn8jqZ+lrGlMLnuvPTQjUPzfebH2tCIbY0lIuNqFhGQuT
-	jbReFVFtQNmTFBZho23yF5BuHd+RPz2V9iGMoqKUinIQTSIuZfLabrjX5XLX6+lP
-	GF1fT9GUQYtPBR00XMW0TpCsh9FQqVFeUIaA0Asb64ij8l15oOpKPwOjCZF2zjSF
-	4AcA57X8UDwpYh5KxRVxS4m/Lm82ZG6MJD2fqGLTphFkypWTHe+3rjdLtNlemqTO
-	opLQoFjrkhtgTvb8WgghVt9+LBAptqhMGTZLsrA==;
-X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
-	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
-	action=mi-m=1; hc=12;
-	hn=cc,content-transfer-encoding,content-type,date,feedback-id,
-	from,in-reply-to,message-id,mime-version,references,subject,to;
-Message-Instance: m=1; h=sha256:wPa1euv29z5VU3mBZo0cVR9qYCzCUaEPsPx4oFldfb0=:HNAiVtIOjGzSmkQr1UV0dRgDq27I2m3SqVTFy0hMr0w=;
-X-ME-Sender: <xms:ceX9ajK576jRM0aq6qvCiqar-V_dr8-N70EXAl_DDmouPN1pZIuWoQ>
-    <xme:ceX9ah-aG0CyBLv3xQ2ETmqquvYPpFj9-6QN00PxhE_jkTm8Elec31KUgm02QGs8v
-    STDV_oeyJx4A7dZZs--MP2cKZ8aNU2X8NkmKulgYfFm4IW-nPAAYqQ0>
-X-ME-Proxy-Cause: dmFkZTEC7Hu4PLzw48z+HlfEj9wpMNPvPQMm2CzSmF7B/36bEDoVSqO1f5JKOTM4YC1BIx
-    klP6Kmfmv+z6Ac+8J4cbLWsD0sYOX/JIJ406Vy8vntURe6LManFaz1yEz2NKNFq1MyGdxh
-    /CVgk88nV7yfpdcgwKVnDbq+b6mRllrr2LaTLrU+rA7TzGj7xEGQxNw4jvfWvV0n8o7wuN
-    kSvIdHdFnESg/5rT72JjVVPbBcijYuXjaLFjHdIsE09auZCTtq5q5N22NtC2F5c8ZMvftx
-    H1y79eUfnHOmBZs1eTVIWHpXbcn4vl8+u/SBuZoS5ZXyVk3rG6DC/WALPcbdPzqZVb5GQm
-    w6MRPpn+FY1wf0nOLvttJpZctxET1/9Re1Bl9cIA9kbGnCrIjzaw6V+cnkKjwiK1/+0dKN
-    ZGyrDq7VT/uJ79y6HRwcRi7tAJNebLaX1RjlC6SFtbBXLqAujjm8MSGio6M7DTG9lhPzY7
-    OcNZAXrD8pnMQM+LlK0WgtCvGVNCp4N9IDay8IDdTN0E4N1/VXu+bJzgCnOjE2qQdHBujL
-    t7JeBNFj4CmXAUIut5Od9BlpSRJW+xTbYjyAVKJdz9/3HVVMBk76dijk7QrLsFIxJLwXjZ
-    68WPG8ADxL2ycX9Sjy57WU/ER7PKByj0Edu/khO41xu0cTmU6Eyc45nUFJPg
-X-ME-Proxy: <xmx:cuX9aiYzcekvkOEQDinMZZorHWztEy9IWZQ7-ggP5O43Bkb63A3wEQ>
-    <xmx:cuX9al2h0EWWwhT4t25Xyf501JzIPuRbhtT_LGtMZzwO2X4tE6E38g>
-    <xmx:cuX9ato-kVv8vgTLJ8fBCmKuxTkQIdVr5EVLMJ71RyXW0aL7cjhXOQ>
-    <xmx:cuX9asOFE_DfOTZuXKWxSFvJRZb4HvtmDkgO-CB9-kg-nC9Ympr6gg>
-    <xmx:deX9ak4yr2dOAYgatmSPDBmDMhobRiEya6uEjg6DU3x7esefzfd6irX7>
-Feedback-ID: i56a14606:Fastmail
+  by ams-compute-02.internal (MEProxy); Wed, 18 Nov 2026 12:52:11 -0500
+X-ME-Sender: <xms:yeX9ahl9MSfxN4sTMAroam9MjurPlx6ItgAx3JAsor09Qws2e9CVoA>
+    <xme:yeX9anqNEQOjvo3J645XUlBVetwSNdA9UPWCxhTYrolv_d1XxJ4DsU_YFR5Jz-PzU
+    pJ_MSXB7eY1QWNJyV17MUZTn34XSIZ0a6kWh6zU9TR_Qd8MSdIrfyQniA>
+X-ME-Proxy-Cause: dmFkZTGXEjOHTyRbeH7wX+barNrdVzrhxIMtHH4AQ3khzLpzp+Mqso9wSQl02IsvrfAHa3
+    W4JuqVmqapUTAs38f8bIAXgKPBDyb0SzYwWYtcCjXmbQL75fp9+bDNev+0g0FEPu+awqGa
+    D9U1fUGfB4P5Z8vSjWvX/6fmjio69h5xdkehIWGWjfF1H8A5HSoyjEjXSupIynmerSa+e8
+    /IlMY5VsIZpkoK34dANjv0z0PuMqTyDGitZ1qck+dG5ncATtKhSlF39rhg6OccX4e3/acr
+    nVpu/MBrpwkbhJNznVcsPKQ1PwjHVQeIjbxUsGABeXqUVSs9CMYy463By1FRw2vF2MEArT
+    JZBz3EmyKnUnQrtXRV37dpJ5a7H9r5/KAbvh8GQ0NP8nkU33uL/zh21pG+eazF/16NvmWx
+    Qt/hG8bBkNL2a2/Q4JSmnT+FuGGGPBrYULKZpUUxQKPcMcGwcn7WBb7lqm/ig87vZcNX9o
+    1sHHGp/R8/OVcbfBmliKsmgJnHolBW5V3+6zoJemjarNZqDBC9tWuqARhRu4A1Yf8AZcbk
+    WUuJ2djoQEg0CeCYKnsTd2jn3MmgzAdPv4XTUegiGUcsGyG45lZGV91keIVX2/iBSgfy1O
+    3/3CWWPUe5u3pViXFfa4slARg4NkXWDOzPAK0sLHKWiTJuzxEdrm7uzosRVQ
+X-ME-Proxy: <xmx:y-X9akGk7YZ1oTFw1OVjVtjaMKU9M-vNJBtF6--GTt1zDiE339q8Pw>
+    <xmx:y-X9aoR03U3DEoMg5ryracda4ucCATh8AuM1a9WAS4X4JysVCJc7VA>
+    <xmx:y-X9atKqsQ0ggRr-yZdTkuXY0YrrdRe2FTfxzcRWgn0Gj0CLs5qpig>
+    <xmx:y-X9arZrhAjC1KWsUzcP1vuh3fxe3d8zKkQiKA1W7NC6L26dAsEipA>
+    <xmx:y-X9an88M6Q6nOx-kHuKARXrjVp3JPk6d32ltQPrk3EoetZy2EGayoFw>
+Feedback-ID: i36794607:Fastmail
 Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 2688D32A009E; Wed, 18 Nov 2026 12:50:41 -0500 (EST)
+	id 8B84032A0099; Wed, 18 Nov 2026 12:52:09 -0500 (EST)
 X-Mailer: MessagingEngine.com Webmail Interface
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -116,79 +78,305 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 X-ThreadId: AbyrFe5vH_go
-Date: Wed, 18 Nov 2026 18:50:20 +0100
-From: "Arnd Bergmann" <arnd@arndb.de>
-To: "Linus Walleij" <linusw@kernel.org>, "Arnd Bergmann" <arnd@kernel.org>,
- "Geert Uytterhoeven" <geert+renesas@glider.be>
+Date: Wed, 18 Nov 2026 18:51:29 +0100
+From: "Arnd Bergmann" <arnd@kernel.org>
+To: sashiko-reviews@lists.linux.dev,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Cc: "Wolfram Sang" <wsa+renesas@sang-engineering.com>,
- "Ulf Hansson" <ulfh@kernel.org>, "Frank Li" <Frank.Li@nxp.com>,
- "Adrian Hunter" <adrian.hunter@intel.com>,
- "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
- linux-kernel@vger.kernel.org
-Message-Id: <bf5fcc4b-05cb-4f11-8f6c-0f94fafd65b9@app.fastmail.com>
-In-Reply-To: 
- <CAD++jLnMxxtrtDMm6rYxB1_5jn-FpnrO3Jrb0=SmBmFWFkCTdA@mail.gmail.com>
+ "Linus Walleij" <linusw@kernel.org>,
+ "Geert Uytterhoeven" <geert+renesas@glider.be>,
+ "Ulf Hansson" <ulfh@kernel.org>
+Message-Id: <2236a38c-de88-4f83-8d46-2ea96c5ac915@app.fastmail.com>
+In-Reply-To: <sashiko-outbox-221162@kernel.org>
 References: <20261118134445.2909283-1-arnd@kernel.org>
- <CAD++jLnMxxtrtDMm6rYxB1_5jn-FpnrO3Jrb0=SmBmFWFkCTdA@mail.gmail.com>
+ <sashiko-outbox-221162@kernel.org>
 Subject: Re: [PATCH] mmc: sh_mmcif: rework sg_miter handling
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Nov 18, 2026, at 18:47, Linus Walleij wrote:
-> Hi Arnd,
+On Wed, Nov 18, 2026, at 15:11, sashiko-bot@kernel.org wrote:
+> Thank you for your contribution! Sashiko AI review found 3 potential
+> issues to consider:
+> - [High] mmc: sh_mmcif: DMA transfers leave data->bytes_xfered at 0
+> - [High] mmc: sh_mmcif: blksz + 3 in sh_mmcif_read_block() and
+>   sh_mmcif_write_block()
+> - [Medium] mmc: sh_mmcif: PIO leaves data->bytes_xfered non-zero on
+>   transfer error
+> --
 >
-> On Wed, Nov 18, 2026 at 2:45=E2=80=AFPM Arnd Bergmann <arnd@kernel.org=
-> wrote:
+> commit 6f62463df398beb43ce5f1bf65cbfc2642c791de
+> Author: Arnd Bergmann <arnd@arndb.de>
 >
->> From: Arnd Bergmann <arnd@arndb.de>
->>
->> This driver is the only one that uses sg_miter_next() to get a persis=
-tent
->> mapping across interrupts, which prevents us from converting the inte=
-rnal
->> kmap() to a local mapping using SG_MITER_LOCAL flag.
->>
->> Linus previously attempted to use atomic mappings here, which failed
->> for the same reason. I gave it another try, with a mapping that is on=
-ly
->> active during a single sh_mmcif_mread_block()/sh_mmcif_mwrite_block()=
- call.
->>
->> This is mainly a revert of the patch that fixed the command 18 timeou=
-t,
->> but tries to solve the problem by updating and checking data->bytes_x=
-fered
->> to keep track of when the transfer is finished.
->>
->> Instead of calling sg_miter_stop() on error or completion, this now
->> always stops the iterator after the data transfer and restarts it dur=
-ing
->> the following interrupt.
->>
->> Cc: Linus Walleij <linusw@kernel.org>
->> Cc: Geert Uytterhoeven <geert+renesas@glider.be>
->> Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>
->> Fixes: 4d4a2c71b862 ("mmc: sh_mmcif: Advance sg_miter before reading =
-blocks")
->> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> mmc: sh_mmcif: rework sg_miter handling
 >
-> FWIW:
-> Acked-by: Linus Walleij <linusw@kernel.org>
+> This commit converts the sh_mmcif PIO scatterlist iterator to use
+> SG_MITER_LOCAL by mapping and stopping the iterator within each block
+> transfer helper and tracking progress with data->bytes_xfered.
+>
+>> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+>> index 51be5dc82f6e6..4583c22e8989b 100644
+>> --- a/drivers/mmc/host/sh_mmcif.c
+>> +++ b/drivers/mmc/host/sh_mmcif.c
+>> @@ -604,7 +604,7 @@ static void sh_mmcif_single_read(struct sh_mmcif_=
+host *host,
+>>  			   BLOCK_SIZE_MASK) + 3;
+>> =20
+>>  	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
+>> -		       SG_MITER_TO_SG);
+>> +		       SG_MITER_LOCAL | SG_MITER_TO_SG);
+>> =20
+>>  	host->wait_for =3D MMCIF_WAIT_FOR_READ;
+>> =20
+>> @@ -621,7 +621,6 @@ static bool sh_mmcif_read_block(struct sh_mmcif_h=
+ost *host)
+>>  	int i;
+>> =20
+>>  	if (host->sd_error) {
+>> -		sg_miter_stop(sgm);
+>>  		data->error =3D sh_mmcif_error_manage(host);
+>>  		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
+>>  		return false;
+>> @@ -629,7 +628,6 @@ static bool sh_mmcif_read_block(struct sh_mmcif_h=
+ost *host)
+>> =20
+>>  	if (!sg_miter_next(sgm)) {
+>>  		/* This should not happen on single blocks */
+>> -		sg_miter_stop(sgm);
+>>  		return false;
+>>  	}
+>> =20
+>> @@ -638,6 +636,8 @@ static bool sh_mmcif_read_block(struct sh_mmcif_h=
+ost *host)
+>>  	for (i =3D 0; i < host->blocksize / 4; i++)
+>>  		*p++ =3D sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
+>> =20
+>> +	data->bytes_xfered +=3D host->blocksize;
+>> +	sgm->consumed =3D host->blocksize;
+>>  	sg_miter_stop(&host->sg_miter);
+>
+> [Severity: High]
+> Does setting sgm->consumed and data->bytes_xfered to host->blocksize h=
+ere
+> (and in sh_mmcif_write_block()) trigger WARN_ON(miter->consumed >
+> miter->length) in sg_miter_stop() and over-report data->bytes_xfered b=
+y 3
+> bytes?
+>
+> sh_mmcif_single_read() and sh_mmcif_single_write() initialize
+> host->blocksize to (MMCIF_CE_BLOCK_SET & BLOCK_SIZE_MASK) + 3 to round=
+ up
+> the 32-bit word loop, so host->blocksize is data->blksz + 3 while
+> sgm->length is only data->blksz.
 
-Thanks!
+I've changed this to no longer refer to host->blocksize now:
 
->> Hi Wolfram and Linus,
->>
->> Could you have a look at this? I'm not familiar with this driver,
->> so there is a chance I got this completely wrong. If the change
->> does make sense, maybe you can try testing it on one of the
->> highmem-enabled boards.
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 7f1818831f93..cade6ae7d44f 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -636,8 +636,8 @@ static bool sh_mmcif_read_block(struct sh_mmcif_host=
+ *host)
+ 	for (i =3D 0; i < host->blocksize / 4; i++)
+ 		*p++ =3D sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
+=20
+-	data->bytes_xfered +=3D host->blocksize;
+-	sgm->consumed =3D host->blocksize;
++	data->bytes_xfered +=3D 4*i;
++	sgm->consumed =3D 4*i;
+ 	sg_miter_stop(&host->sg_miter);
+=20
+ 	/* buffer read end */
+@@ -688,13 +688,13 @@ static bool sh_mmcif_mread_block(struct sh_mmcif_h=
+ost *host)
+ 	for (i =3D 0; i < host->blocksize / 4; i++)
+ 		*p++ =3D sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
+=20
+-	data->bytes_xfered +=3D host->blocksize;
+-	sgm->consumed =3D host->blocksize;
++	data->bytes_xfered +=3D 4*i;
++	sgm->consumed =3D 4*i;
+ 	sg_miter_stop(sgm);
+=20
+ 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
+=20
+-	return data->bytes_xfered < host->blocksize * data->blocks;
++	return data->bytes_xfered < data->blksz * data->blocks;
+ }
+=20
+ static void sh_mmcif_single_write(struct sh_mmcif_host *host,
+@@ -738,8 +738,8 @@ static bool sh_mmcif_write_block(struct sh_mmcif_hos=
+t *host)
+ 	for (i =3D 0; i < host->blocksize / 4; i++)
+ 		sh_mmcif_writel(host->addr, MMCIF_CE_DATA, *p++);
+=20
+-	data->bytes_xfered +=3D host->blocksize;
+-	sgm->consumed =3D host->blocksize;
++	data->bytes_xfered +=3D 4 * i;
++	sgm->consumed =3D 4 * i;
+ 	sg_miter_stop(&host->sg_miter);
+=20
+ 	/* buffer write end */
+@@ -790,13 +790,13 @@ static bool sh_mmcif_mwrite_block(struct sh_mmcif_=
+host *host)
+ 	for (i =3D 0; i < host->blocksize / 4; i++)
+ 		sh_mmcif_writel(host->addr, MMCIF_CE_DATA, *p++);
+=20
+-	data->bytes_xfered +=3D host->blocksize;
+-	sgm->consumed =3D host->blocksize;
++	data->bytes_xfered +=3D 4 * i;
++	sgm->consumed =3D 4 * i;
+ 	sg_miter_stop(sgm);
+=20
+ 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
+=20
+-	return data->bytes_xfered < host->blocksize * data->blocks;
++	return data->bytes_xfered < data->blksz * data->blocks;
+ }
+=20
+ static void sh_mmcif_get_response(struct sh_mmcif_host *host,
+
+
+>> @@ -792,27 +777,26 @@ static bool sh_mmcif_mwrite_block(struct sh_mmc=
+if_host *host)
+>>  	int i;
+>> =20
+>>  	if (host->sd_error) {
+>> -		sg_miter_stop(sgm);
+>>  		data->error =3D sh_mmcif_error_manage(host);
+>>  		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
+>>  		return false;
+>>  	}
+>> =20
+>> +	if (!sg_miter_next(sgm))
+>> +		return false;
+>> +
+>>  	p =3D sgm->addr;
+>> =20
+>>  	for (i =3D 0; i < host->blocksize / 4; i++)
+>>  		sh_mmcif_writel(host->addr, MMCIF_CE_DATA, *p++);
+>> =20
+>> +	data->bytes_xfered +=3D host->blocksize;
+>>  	sgm->consumed =3D host->blocksize;
+>> -
+>> -	if (!sg_miter_next(sgm)) {
+>> -		sg_miter_stop(sgm);
+>> -		return false;
+>> -	}
+>> +	sg_miter_stop(sgm);
+>> =20
+>>  	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
+>> =20
+>> -	return true;
+>> +	return data->bytes_xfered < host->blocksize * data->blocks;
+>>  }
 >
-> I don't have this hardware, but Geert does (he helped me with the
-> previous patches to this driver), so it'd be great if he
-> could give it a spin!
+> [Severity: Medium]>
+> --=20
+> Sashiko AI review =C2=B7=20
+> https://sashiko.dev/#/patchset/20261118134445.2909283-1-arnd@kernel.or=
+g?part=3D1
+> What happens if a PIO transfer encounters an error or timeout after on=
+e or
+> more blocks have been transferred to or from MMCIF_CE_DATA?
+>
+> In the single-block and multi-block PIO helpers, data->bytes_xfered is
+> incremented as soon as the controller FIFO is accessed, before
+> MMCIF_WAIT_FOR_READ_END, MMCIF_WAIT_FOR_WRITE_END, or MMCIF_WAIT_FOR_S=
+TOP
+> completes.  If a later step or sh_mmcif_timeout_work() fails, data->er=
+ror
+> (or mrq->stop->error) is set while data->bytes_xfered remains non-zero,
+> which causes mmc_blk_mq_rw_recovery() and mmc_blk_mq_complete_rq() to =
+treat
+> those unconfirmed bytes as successfully transferred with BLK_STS_OK.
 
-I'll post a v2 tomorrow with the bugs addressed that Sashiko found,
-no point testing this version. Maybe Wolfram can still take a look.
+Not sure what we actually want data->bytes_xfered to be in this case,
+I would guess that if the FIFO access went through, we should count it,
+but to be on the safe side I can reset the value in the error case
+and leave the behavior unchanged here:
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index cade6ae7d44f..6c3aff6e8c46 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -1253,6 +1253,7 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *de=
+v_id)
+ 		break;
+ 	case MMCIF_WAIT_FOR_STOP:
+ 		if (host->sd_error) {
++			mrq->data->bytes_xferred =3D 0;
+ 			mrq->stop->error =3D sh_mmcif_error_manage(host);
+ 			dev_dbg(dev, "%s(): %d\n", __func__, mrq->stop->error);
+ 			break;
+@@ -1263,6 +1264,7 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *de=
+v_id)
+ 	case MMCIF_WAIT_FOR_READ_END:
+ 	case MMCIF_WAIT_FOR_WRITE_END:
+ 		if (host->sd_error) {
++			mrq->data->bytes_xferred =3D 0;
+ 			mrq->data->error =3D sh_mmcif_error_manage(host);
+ 			dev_dbg(dev, "%s(): %d\n", __func__, mrq->data->error);
+ 		}
+@@ -1378,6 +1380,7 @@ static void sh_mmcif_timeout_work(struct work_stru=
+ct *work)
+ 	case MMCIF_WAIT_FOR_WRITE:
+ 	case MMCIF_WAIT_FOR_READ_END:
+ 	case MMCIF_WAIT_FOR_WRITE_END:
++		mrq->data->bytes_xferred =3D 0;
+ 		mrq->data->error =3D sh_mmcif_error_manage(host);
+ 		break;
+ 	default:
+
+>> @@ -1296,9 +1280,6 @@ static irqreturn_t sh_mmcif_irqt(int irq, void =
+*dev_id)
+>> =20
+>>  	if (host->wait_for !=3D MMCIF_WAIT_FOR_STOP) {
+>>  		struct mmc_data *data =3D mrq->data;
+>> -		if (!mrq->cmd->error && data && !data->error)
+>> -			data->bytes_xfered =3D
+>> -				data->blocks * data->blksz;
+>> =20
+>>  		if (mrq->stop && !mrq->cmd->error && (!data || !data->error)) {
+>>  			sh_mmcif_stop_cmd(host, mrq);
+>
+> [Severity: High]
+> Does removing this assignment leave data->bytes_xfered at 0 for all DMA
+> transfers?
+>
+> When DMA is used, sh_mmcif_end_cmd() waits for host->dma_complete
+> synchronously and never calls the PIO block helpers, and only touches
+> data->bytes_xfered to zero it on error:
+>
+> drivers/mmc/host/sh_mmcif.c:sh_mmcif_end_cmd() {
+>     ...
+> 	if (data->error) {
+> 		data->bytes_xfered =3D 0;
+> 		/* Abort DMA */
+> 		if (data->flags & MMC_DATA_READ)
+> 			dmaengine_terminate_sync(host->chan_rx);
+> 		else
+> 			dmaengine_terminate_sync(host->chan_tx);
+> 	}
+>     ...
+> }
+>
+> Every successful DMA read or write will therefore complete with
+> data->bytes_xfered =3D=3D 0 and fail in the MMC block layer.
+
+I see. I could either put back the original line, or move it
+into sh_mmcif_end_cmd() for the DMA code path only:
+
+@@ -1178,6 +1178,8 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host =
+*host)
+                        dmaengine_terminate_sync(host->chan_rx);
+                else
+                        dmaengine_terminate_sync(host->chan_tx);
++       } else {
++               data->bytes_xfered =3D data->blksz * data->blocks;
+        }
+=20
+        /*
+
+Let me know if you have a preference, otherwise I'll go with this one.
 
       Arnd
