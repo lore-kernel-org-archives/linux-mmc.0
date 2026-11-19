@@ -1,13 +1,13 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.56.23
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.201.49
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795081547;
-	b=RK3N/3UaV3tSfgryciwf1rPDbqy/RqG/K2ffcrQeDKxqqiGfPFcOza8vj1MhWxokSTH7
-	 ii79/KqAQl2qsHVCbscPCR1IKqZwwxjBaKrYqpDA67/lPxMFKDa7jgiy9SNsGz8Xpd3JT
-	 p1XcwcBxxcf123IsJYJYqyLlfTonDQ/P7z+TXvKt+dYR17p5FL2kLleLTqHl8IU92G0jc
-	 xhgj4fvPKngb84I31IuFhdNz+Ehf7BzcUhE3XDPiFVxHwLjt9IQ6D93HVEMjT3ZzHVDz6
-	 cQNaMglvr1AbGYEBSMlktb+ec6tR+rS2LSUh8Bc/QHYutb1WvgFv3b3YSFeXM1JxmPA==
+	t=1795081552;
+	b=ud+CjR2BuuVafC4wVLUxG+oe1pJv3IWjDpiLLGAyP/WArLVhYFOWuzZX6yVlzKPwufjb
+	 TdpfJp8cLLDIgKHKrTXcgYlj21T+ajA3mdtFDzW6R7E5JwzLphuPZh3zOHLghEjv5iB80
+	 RpYrRYrsMrYlBUL73lzJx3KabEil3qZfFEuv06VeQHl86twKGS28DqgIpkFfrXAXLLB8G
+	 6psC8fgB0oZjifF/G8IGDseciP9qJ+VAosQltqJYtyWVcfOsnzZBI0bUJh7Tor/JLCpvG
+	 qRe73DCfEYSYE0DkixNwIeaFDooqPECFUkWTCPZ/h8lse/RBTdbodD2vlQwjO6/Gsgg==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795081547;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795081552;
 	h=DMARC-Filter:DKIM-Signature:Received:Received:From:To:Subject:Date:
 	 Message-ID:X-Mailer:In-Reply-To:References:Content-Type:X-Mailer:
 	 Content-Transfer-Encoding:X-ClientProxiedBy:MIME-Version:
@@ -25,54 +25,54 @@ ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
 	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
 	 X-MS-Exchange-CrossTenant-UserPrincipalName:
 	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=3J5cBs+9d3aQnyAQqLt35rCtokIOt4sFe5+IBM3QZpc=;
-	b=soX6aIhKTSuv+25WBnDcu9QJIGFC0h4YLdxYu0vV7Hwqd71rbUXcDvgl6MCRunXAiW6e
-	 2fMcmiPaUz6m31qINzJ8Q9teFG9mTlHw6GmOEtC1KJdZ8Tp/KHttvRXLFNrsUZwaIYKGx
-	 Nnuq409lEGimTu2uFKg1nIwcq6pqAXtb65eGPylG7J6EOreOQsksiE/G7hgff7UvVe0Ej
-	 20dyxCTDV1tpDj39yzTiA2j6e2O/WGHR/5enfXyqjRbb0Dk8kSElz/qIUr9qxVRdD4QSd
-	 gwQHpLM8Y3RWAcPaoWcnAyDOu+7XQRazvKLt8OxN+EyNwXpvkfb+DKW73o2WxU8t2Ew==
+	bh=P7Q5GjQN2NZeg26BaGpYbQqwviCXw6TNnmsVB3gqqsw=;
+	b=1+tiQbq0RpyQq7Vi4Hd5LrekPCt/oUuIClPZBSXIiLk4kY/HByPHjy3PBXA3moYaxRNP
+	 J8xy/Cin2iOBOlUxx6Cp9kZhXEJkFUGwNImmBOGh84RL9ZIVR3H+xwk8qp4HMLVC/nL5k
+	 hVcYFEhaGg+HT9yxvMXV6C+GNHnEBFxVxrifZy/13TJG4rt2/IwGDNymICEEsYcjH0//H
+	 jgh0pu55IpnR8aAH6c00U8fZuHiIP3BX6PsNNwrqEVGmF6u5QDrTBqFO7xQoBAI9oudVg
+	 NiCzq0zS4R9VxPZtDGDiP5yw49vGr4U9kMM1+K59Y3tcJLiA95A8uvvDE56Qe+ycyRQ==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=altera.com;
 	spf=pass smtp.mailfrom=altera.com;
-	dkim=pass header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=WMXtIaGH;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.56.23
-Received: from BN1PR04CU002.outbound.protection.outlook.com (mail-eastus2azon11010023.outbound.protection.outlook.com [52.101.56.23])
+	dkim=pass header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=ieCCxrZB;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.201.49
+Received: from PH7PR06CU001.outbound.protection.outlook.com (mail-westus3azon11010049.outbound.protection.outlook.com [52.101.201.49])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9AF36606A32F;
-	Thu, 19 Nov 2026 09:45:46 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 9AF36606A32F
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B204D60A260A;
+	Thu, 19 Nov 2026 09:45:51 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B204D60A260A
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=WMXtIaGH
+	dkim=pass (2048-bit key, unprotected) header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=ieCCxrZB
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=DiuRRRX32LkfMHvmlMIt6TiqyWeKfO4J4q4F6NBnFRh6rmd05BEobcLzs8jtP/4oNfZZwUWTH0kADVRWORhCYCTQJUqSL6aWVcIj4jBdosOF+kpZjIhPpI4sT+z5l9j9yNpRpWnwHmsITi1V8VLgE9NQWP1j6MpC3XUHD74Sb6qqBLbdLwTjDPh+3Axl7oOipGWscemOhRo8dJdA1G/tpGsczctwei9kQvwYtxDCn6SpMXgh3RBTNeeHS084v5tXQ/N0nN65jcQaiHugVVqQhQhcnbSW26imGy5ogXyQumJrd0QZihQLZmAEOi4u2K4yyXgWjhGEqWFIa4Yco8z7+g==
+ b=EtUQYKlL2XG8AhjXHzJCCneznib8ydiVKsOb9aY68jj89O+gF12g/fc0xfj47mFoO1Y7FKnBBf3/vk0Yl3dXcpXqKPMviDACrxrFX2eiFMMzzteBHJQt92u7g/j56aHMPh6XQQc/6wlNsF8++51lJCkIbCUwXMjreCdlHc6MK02dEEz8s/9Jp0VvVCV4BeJfKb8ljIXKnOWZPH7GvRusWYY83CmgC6kUlkBCF6YPH0lpnf6L3RLFQVeR9W7fSoII4hFkcMujDq2oqRJTUpkebS4E5+Lammd9KdhlIwcIhmmP8Yu8LfIW3XxDLGmvGNnC6+omyLBwu26vm4v1fPnVQw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=3J5cBs+9d3aQnyAQqLt35rCtokIOt4sFe5+IBM3QZpc=;
- b=CvgUsUHpITOAuJM+jc0QDzd2lgeyoCtnhh4dRtJo8PQkuO2zPIhAou8c5ZRnNigJIfQKojIhfqhXCjCE+t4abYBn0jd/vEqz2kq3ud8EPNdEOXhYQ+N1Zyqwau1Vasot+cqZAZLxMlrFUzGaPedUVvYfrKK5ilFTQKdpddWIxQzUVvVsBjstG3fBkksFCWUvql54X1WQIQBPpm1xAvTKM6KQ8WBsMfQYLrkOSCgjT4Qc95feRsPoNxE+YptxHOub0dFQmbPTjGOYmGkND7FBb2OcZ9zPGAFMBUlfowW/g9ELi8/l8A8S1Y40w1/CsU1in3WFwMDEpLRh87uvuV4FVA==
+ bh=P7Q5GjQN2NZeg26BaGpYbQqwviCXw6TNnmsVB3gqqsw=;
+ b=Lx1CCYWnEhX9TA3YQD0RL22GoStK4wfczHGpVqVGTXQIGFT2XXVRnX1VyiTl29amDTxPbLHYr4mG4dxZAYBZ7TrLyp9tXmR54QjTvp9KEDulHlnWgHc/wMQGynD63DaCYbPxIMkYEUNYSsK1wn8Hp5JIoLalMAFd7W459Dobe39Lu0egW/UkzdwVFkiIn45CSgNA9gL2WVSbRbgBDcbyeEkLcJNZ41D6D8G7fIQL5CIkc2kjtUcO5dH7lHjC+CERc/7wipaI7yax7qFPWsPLDmeIIgvVh2NrtuLcyMKtEqC9uIS7oTdf+pQD2JGkaci7XAkkU8BYvOnanWY1JgepbA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
  dkim=pass header.d=altera.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=3J5cBs+9d3aQnyAQqLt35rCtokIOt4sFe5+IBM3QZpc=;
- b=WMXtIaGHHD8fn632Mb3Jm6j/s1rU2pm32S5VjLAViNuAz2qJ5v5DchKHxIb58pEjJBXgHJWSUB4H5SdgUeRMmNUf7pj2BpW5x2vcU/QhaICihClqxZinTMNn7ONN3jp+GcG8D38076xhVIYIwjl8qUzmOh3nMD90ejR2Yqq+cB/yB8zrCa76hhF2p/XfV9Y4kvkk9XMPPSmuK/zoX+1mi+brkopPmEyKv4F0WtPq8cqX/7Cl1Oz/iRfS69EuAIcrejkTASctI5EKCmoOpVBmo4RDbqB6fRbhCdPlNbnqbkkInfUhV72LL0+JW0Yxq8uh8DwvQwXZc/70lc6gOq/U2w==
+ bh=P7Q5GjQN2NZeg26BaGpYbQqwviCXw6TNnmsVB3gqqsw=;
+ b=ieCCxrZBgZp+g7XO4HRetS8g+OVpUujEwTA4yfLv3hYcBASqwLlxAlRhx9A12gJ03G//G1FGVT1P6JdrkG1qahRKr2W5TkA5VbtLu3mzQZifj146Wb83GjBP8F/TQJqbor10mNke6p+WvaOTA2S2RK5VhQtGFKfZF00h/Aww5shUuob7peFFqxcucnobWaLyP3G2st2vSMvDEa6BIJnmhCVp+0JR3EX5+mVNRBLdaTP0UuvN++lQJV6fKYTdHodJU6xfyBRCiRcZvgvuGTgnN/WjJfNZ2iaSkIwpbNsIRvhEWsFTcijNFONXB1D8Vh9EDx2GGnRLmcm30uAXpxzdBA==
 Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=altera.com;
 Received: from SJ0PR03MB5950.namprd03.prod.outlook.com (2603:10b6:a03:2d3::20)
  by SJ0PR03MB6987.namprd03.prod.outlook.com (2603:10b6:a03:43b::12) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.615.10; Thu, 19 Nov
- 2026 09:45:44 +0000
+ 2026 09:45:49 +0000
 Received: from SJ0PR03MB5950.namprd03.prod.outlook.com
  ([fe80::53a0:bf93:6b6b:de01]) by SJ0PR03MB5950.namprd03.prod.outlook.com
  ([fe80::53a0:bf93:6b6b:de01%3]) with mapi id 15.21.0615.013; Thu, 19 Nov 2026
- 09:45:44 +0000
+ 09:45:49 +0000
 From: tze.yee.ng@altera.com
 To: Adrian Hunter <adrian.hunter@intel.com>,
 	Tanmay Kathpalia <tanmay.kathpalia@altera.com>,
@@ -83,9 +83,9 @@ To: Adrian Hunter <adrian.hunter@intel.com>,
 	Conor Dooley <conor+dt@kernel.org>,
 	devicetree@vger.kernel.org,
 	Ulf Hansson <ulfh@kernel.org>
-Subject: [PATCH v4 1/3] mmc: sdhci-cadence: abort failed tuning command on SD6HC
-Date: Thu, 19 Nov 2026 17:45:33 +0800
-Message-ID: <20261119-sd_cadence_ddr50_v3-v4-1-95a94a0aaaf3@altera.com>
+Subject: [PATCH v4 3/3] mmc: sdhci-cadence6: tune SD6HC DDR50/DDR52 read path
+Date: Thu, 19 Nov 2026 17:45:35 +0800
+Message-ID: <20261119-sd_cadence_ddr50_v3-v4-3-95a94a0aaaf3@altera.com>
 X-Mailer: git-send-email 2.43.7
 In-Reply-To: <20261119-sd_cadence_ddr50_v3-v4-0-95a94a0aaaf3@altera.com>
 References: <20261119-sd_cadence_ddr50_v3-v4-0-95a94a0aaaf3@altera.com>
@@ -106,130 +106,253 @@ Precedence: list
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: SJ0PR03MB5950:EE_|SJ0PR03MB6987:EE_
-X-MS-Office365-Filtering-Correlation-Id: 7e33cc40-2a5f-42c1-1117-08df4621e14b
+X-MS-Office365-Filtering-Correlation-Id: 4aae887a-aaed-4594-6ae0-08df4621e483
 X-MS-Exchange-AtpMessageProperties: SA
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|23010399003|376014|366016|261102123227099003|261026121527099003|56012099006|11063799006|10067099003|261022105027099003|261022075727099003|261021123027099003|261026140227099003|261028144727099003|261022113327099003|261021121427099003|261009223027099003|6133799003|55112099003|18002099003|22082099003;
+	BCL:0;ARA:13230040|1800799024|23010399003|376014|366016|261102123227099003|261026121527099003|56012099006|11063799006|10067099003|261022105027099003|261022075727099003|261021123027099003|261026140227099003|261028144727099003|261021121427099003|261009223027099003|55112099003|18002099003|22082099003|3023799007;
 X-Microsoft-Antispam-Message-Info:
-	oQ+/pbE1wyaAj6M36P6CwwsCsT2n25w9h0V2bO0d0Qel0Ri+NM/jATLsUz74XAqpf1mc4RRwcxbUMU/Gf5jLmJGmtLBFkehVjYWDtgVVZUFFUpZLZWbZV5eThToW1GQ2L7eAHNUuHgxDkRIzc+VXNr9tVtdT5dKGYd3MFzZDXqEDKIAT/IQFtCpFKGzDaKJ52MXE4MPM6LfdWA4d820WGlkUfgZ+Et//2vD7+joaklDwzrlZKEAfrtzvYD/7QAUcX/EhrzPFwfDL8m+1fOBhQMU8EHX/Qt3HTgE6XxL+IuH0dGwO9pPui33sgleHZmuC/2obomRQM6J3GTLynOVyMhBfxQxqPhiUVVCTd9DaZti3eqasb8gzHSlljYWUFoIrF5yQJCepypj1t7HZDD0+NMxzcjSaK7Sk4EMeRvwYTpF1789fdKgZtyhjmhQ+8XhjZbkZfXKhoZCQKF/XLmg8t6OOkkjw7aQfRBI4D3wM9BP4gUzSNXVIjJg6eRdrRGy3q5Vz81jcCFXj/2Ah5ZvMgCjU2pBKJQnWLrnMP/FYut/78tTL3Phh2WItf/4Nu75bfN8O8+V4RGzD4THSWVu6SyfRKw0Skhw9dBvoM6El5U8OEE9y7kPEj8X9GamlmakzJwbvY7ldAI9AJgiL66Hv17amY79ipfEI4h+JSPEuePQ=
+	58Z4eIVjqqNgeCZ2fIdnrzlkemVLdStGWKa2fOZH1ocSQGFPAMkCIrFyiLggt10R47WwfOiuyV9nxSe+qRjjbrAcAO8RVZtR0VeOkYn6PZEjyV4eSm3eWr91V1Y+NR3FdATtJc81U3E56I5oI68mwdWzVMNHs6uNdt/cZdBQqEZ/4d6EujeFwuIOY1QziD+A+SxSv3gvx9XWI9rnh+frdIY4GejIXJmjCk2LQM87dBUdEPuYMtdN6sdDKB7CV6CUetWXT6Y/B3T2u2Mq9KQUJAgzuZgVf9vB7yuG+m71emG4/vOm1NcYzKnELvEwY+lASQc8H2hjPWzdiL21zzbn63Z+Lpg1evpTDHYgJmz57HdVGAxuH+aJ5ht77jEhxQCjtrjysymlAX8jRnEWsXosCEDeKpTVG6zhptUFwCHnCMwdyX3HFxdtIo61q6gXVNW7TqgwTWDlSpvKfQbeOuG1TTNM1cWfxK7A34/5oiv0gqxuWzozaOOnH7zU3FnMzLE2j/ddFnXsM37Si6xdS88zQnOLkByyZhoX5OK60kmWehDjpECUwqSJypl/XJRgcYGqjH9mIxwBvUtTKREesqjQ6vcr/h9LYvVegy5I/eizXRCErXHJWQH2Jf+qeCVHPiM3IZ/dnNRfz1sFNPvalEGR7sUGp1QtbMCudV38i/KJwyw=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR03MB5950.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(23010399003)(376014)(366016)(261102123227099003)(261026121527099003)(56012099006)(11063799006)(10067099003)(261022105027099003)(261022075727099003)(261021123027099003)(261026140227099003)(261028144727099003)(261022113327099003)(261021121427099003)(261009223027099003)(6133799003)(55112099003)(18002099003)(22082099003);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR03MB5950.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(23010399003)(376014)(366016)(261102123227099003)(261026121527099003)(56012099006)(11063799006)(10067099003)(261022105027099003)(261022075727099003)(261021123027099003)(261026140227099003)(261028144727099003)(261021121427099003)(261009223027099003)(55112099003)(18002099003)(22082099003)(3023799007);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?SFd5ekthNVp1Rld0WkdnenpURHNUdng3TWVzU0dwZlV1RGxYOWZieTI3N0Zr?=
- =?utf-8?B?ZllTSG9RTklaTm4vejhvYUMrRXFMK3VqMkpaZTcvWlpqM2Z0dWM5bnhMSVhu?=
- =?utf-8?B?M3FCd0ZhTE00UlBrUnl2OG0yK1hxSHgyUkJiMm56c3gvTXZTbGp0UlRlR29x?=
- =?utf-8?B?SEJONXdOclJWaWtLeURqdE8yVCt4WlVhQitNekowU3VFTHdGMzR5anRySWYr?=
- =?utf-8?B?YlQxcWJ3M2F5bTRVRWx2MjN4OXViQzNma2l2NVBpRXlYQ2lpUldXa2JpMnZI?=
- =?utf-8?B?VmE2RnNDUTdtdWlhY252MUt3bTZkRlRtY2ozRmdHVWNyRTlWdTJERHdoaXdY?=
- =?utf-8?B?RVluMThZbkcycTdRV1JYVElVenF0OENtdHZHMlBKN01kQ3gxeTIzemtuUG9a?=
- =?utf-8?B?aUtEZVNCcWV1bTFMVlRsMTgxelRUMUVoaWFQS3hyRmdRUmVqbnJCVk9DQmQy?=
- =?utf-8?B?eDM2SHNMQ3JVUms5S2FWTDlrR1EwRURDbTM4NFR3UzIvRHQ2VDRIMWN5aE00?=
- =?utf-8?B?dExjUEJpNGxLLzN5TUJuQjFaK0QyMWdhMk05Q09VYTNmS3kwZkJibVFNVjVj?=
- =?utf-8?B?UW1HcXRTL1FXbHNuL3cyY1BZaW9aN1hFM3I2M0pwTk53MnBKL1FsU09aeURU?=
- =?utf-8?B?R0pidy9KaHZISThNaTh5WHBkVzh2MjdqUkNLVVdpTm94YWRZZTNaTWhldVdp?=
- =?utf-8?B?VUlMU2pvMjFuckRTMWcwaHg1eWNKUFJFRkxSRTZmc0EvakJsay9qZWE1MTlk?=
- =?utf-8?B?SURoWTNteERCTVdMZDI5Lzc1UlVIMDZNUFc4VjFEeFJQWGxBM29uanlEcWg1?=
- =?utf-8?B?dmtnNklOd1RMTTE1QmF5OGpDQ3FSUGhudjBRdm9CUk5nSXEyK29icDQ1RUIv?=
- =?utf-8?B?bTRFSjUwSGsweXo1QU00eEttU09Nd3BhYXdtVC9Wem4xNVhaVU1RWW9BMEdi?=
- =?utf-8?B?bHZRaVZGd1RqdUNFQXV4QVVNQ05IQnN5cHlVWkpaSTNoakVlZFJrVjhlYWQw?=
- =?utf-8?B?RTd4cDVNd1ZlSnEzM24wOWtHdTE1SE1UM1dVVkZ1UHJsbXVReisvMmloL0xS?=
- =?utf-8?B?V29HSWxTZk5DcUFkTDEyMFdHOE1MU0R0VmJBUTBOK2kyUDRYZzlOUWdpY1JP?=
- =?utf-8?B?aWFSRmo0aUc3ZHQ1ZVdSTXppVXFaWmtyRmxqdTdYUFdzbForUFl4N0hOdWph?=
- =?utf-8?B?WnhWRmM4T296a0k0SEtKR1RqUE4yMHY0bFZaUlVLV1I3VUFKelNhQVZVYnhC?=
- =?utf-8?B?K29VTHZMcFpSRExoY2ZIcHFrdkJwS1BnZnpWYzRJTWlabURNaFR0eHdqQktw?=
- =?utf-8?B?dWFyOXliSmxkZGdMUzljaG55SEt2cUtMVjdxeHJsci82MVg3OUJ2dm5tbzZR?=
- =?utf-8?B?ZUdvOVFyVEJLSzdONlkvcWFzSHd6S3UwU2c4ZzR3VjBNdkdDL0pOMTJuOUlS?=
- =?utf-8?B?OUM5VkhFYXBROWZYbjAwa0RwVDRJKzduREFaK1RzdEJENzBHOWZEN2ZERXBx?=
- =?utf-8?B?NEhhcmtRaWhxMTBVVndWWEpWOEhjS1NoZ3M2REpZYnlQaVgzLzNJS0MxKzkr?=
- =?utf-8?B?RlpSMlhESk0rTXVpekRtd0tQemRvWjVsYmFZOUo5ekJwYjBMMnhkcEc1WHo3?=
- =?utf-8?B?d3FaYWxvTFRaVUtIcjlZSFBYNHNrNHZRT3lLTU1ZSG12RnE4VU5zNUJoNXJU?=
- =?utf-8?B?dTJ0Qng1UmpJT2VESWlKZTZ0Mkkrb3l4d3gwU1AxMWNjNURJVFJUTFZJYWNV?=
- =?utf-8?B?Qmk1Uzg2Q3B6ekpkdy94ektqcGxGd0I2WFk2bHRrdEFDL1hkeDFINE1mVTg3?=
- =?utf-8?B?ajB0eVVzOEIwVU9WTXY4Sm1ZQVRuQmJkdkFDNk1lNVoyRmlHWEpKcU95Um9D?=
- =?utf-8?B?bGd3MnQ4NlYzMmNPQXdLS0lnbHFpU3l3Ym5NUGRxcTZ1R3NHVVFGd1BqUTJU?=
- =?utf-8?B?VGVxMXh2SHNRUlpUQ3BnN29ySVRXcDFaMUpyazhlcml2dlVoV0pmZWNhYUlz?=
- =?utf-8?B?SFhOVnQxblFvaGlxL05kODBaYWpTNTRFaWpLU0ZXdGpWUG5LQnUwdzdDQ1Aw?=
- =?utf-8?B?WFE2R1oyNnFRSjVJeTljOXNKcERYZTVTQXdHTDkraS9MWVN0TWxLMzdKOVRS?=
- =?utf-8?B?RzRyM3B4YmpYTGRIMi90VUgvNlh2SXpJbDc5allTb0p1aUw4SWVtRTBpVUht?=
- =?utf-8?B?RkRtaGRqZFR5SjdhNmZTa1FPK2hTUVNxSHVDZ0JEQXYwNDc3bEx4Wmt4Unhn?=
- =?utf-8?B?WFVjTmt6RHdXUTRFeUtDblN4ZDk2WHlySW9jci9Zb1RoYXpWelRTdkM3ditT?=
- =?utf-8?B?QXNUN2t3UEkveTRBWnpoVEtOQlRLbm1jck04TTBKUW56RnR5NHZnZz09?=
+	=?utf-8?B?a1NoanZWNVNBMEd2UEdPb09jaHQwNlUxbFBUVDNKUGhIVk5qWTN3dEorSGtS?=
+ =?utf-8?B?VUNIKzF4Q3d5TGhFS2JHbXJKQnJNUGF3YlpOaXVkTmFtUGx0ako4dk1ZMThC?=
+ =?utf-8?B?QmQyYUtScFl6c1Z6THJhZXhRU296TE9pbkxpbFg2OXBZdm5IQTBVbkR5dVY5?=
+ =?utf-8?B?WHc4R3NOVHZDbU5aZjFnU2FoSkc2d0dPMjVMUkcrdjVWTVlYOHFEZDFWR1FR?=
+ =?utf-8?B?SkFkMGkrUGRWN09mcFNOVStYdzkyb0hHNG9GS1BsZmlVSzZad2R1UUQwelRh?=
+ =?utf-8?B?Snk3M3FIbCtSVkRIaFMyOGJxNUxsZGMvVEw1WlRZOWtHcjlvYzcxeUlCNDdI?=
+ =?utf-8?B?M3lINHVBeldHbnJVM3BDdGlZS1dQMlp2OW1TQWk1cGV2bVBaT3ZORjE5dFdW?=
+ =?utf-8?B?b05Xekd4Qkt3cVNEeXlCbEFUNG5jNXMyOHZPYVdvU0VibFkrSm4wWm9DZGtE?=
+ =?utf-8?B?Y2pmRm0zU3VFSmVvK3AzSDQ4dGlMYXJ0bGowcGYwVm92dFk2Z1NFUnp4eE5C?=
+ =?utf-8?B?SVFtcnRWczh6c3QxYTJycHY0K2hJcE5paTN5TEt5cDlMTEVkZjNPTGQrempX?=
+ =?utf-8?B?TU9vNU1nMlcrZUFrNlFwbDV2MEltZm9sLzBPaXliYVNHVFFCWFkrYUNnTG51?=
+ =?utf-8?B?OHNJQVAySnFRM3o3TC9MSVVFazMxWkMzcE1iMXVzSjVvRnczYnB2cy8wOHZn?=
+ =?utf-8?B?MjdBTkFvbFljOVczcHcvdnB1TFVsT1FRdmJ1V3pZY0JHVFgwVnRoaVpxZXNG?=
+ =?utf-8?B?cnFsSGZrNkxOVjBJckxBOW5XR2pnK1QvU2VlZlNYalM2VVZjMElPanMwMzlK?=
+ =?utf-8?B?SlBCUTAydEY0ZUV3VHFHeVdCL2hOck42bCtrR2NtL3llOUljdFhXTmQwWHlp?=
+ =?utf-8?B?UXJrUGZjTTB2UnR4cnU0UXE1TFlsbHkvUks2MnNIS3JnOHlIM2JjY2ZkNmxy?=
+ =?utf-8?B?ajZmeGROb0tQYWhleExZSWVmUU5aZDBSK1o3QXg2VDRWNTVIQVVQanh0clEy?=
+ =?utf-8?B?bUhia3RTS1k5aHZNbkVseTh3cEh2dFBUS1hpanlyL2dLSHU0dTV4OGpVOEsz?=
+ =?utf-8?B?elJET29saTFFTHhISkxKY2txckNTN2xYc0xnaXZJTVc3eDlLNEdKZmlhdkRi?=
+ =?utf-8?B?U1YxNzlCVUQwY3JQZG55cDk4MUxWRnRPMUQyUEU5bXFydHRNT3pXSDFUWjZ4?=
+ =?utf-8?B?by8xUXJ2S0gyY1lwS1gxcFM0RWhwN3YvWVFkQitocG5rZ0dUWTRPeExXKzFx?=
+ =?utf-8?B?cmxzblFuL0J4MWlhYW9ZTUQ0emdyck9TREY4ZkRORTQwamppRnMvTHdFcmxM?=
+ =?utf-8?B?bFVlaVUyTFZUdFRGeWtVTXFCT0JXMGE2M29Bb0FyYU1Td0ttZlBFdVJuRlVu?=
+ =?utf-8?B?dVZaNDk2VFFEOHNDN29uSEJFbEpjdTA3RG1oM3p1ajNPTzVNNHBPcDNDTC8r?=
+ =?utf-8?B?Um9CekEzUDI5YmRLT2J5VTdTcWRaRzdzWG9QS1BPVXAvN0E4bFVZdFRRa3Bx?=
+ =?utf-8?B?aXFES05HajZyK1dEdWFYSEtKdUQ0YVJucDVTVXU0akdRZWViM1NZV0doTmp4?=
+ =?utf-8?B?dklXZFN2Z1VwZjlkQmdWZ0JxYm1IbGtCZHJxaTBjWGtycm04MXhuU1d5YXpD?=
+ =?utf-8?B?Ui9pSzc1dTJWRlRrR0J2d0FPM2FQMFRMbUpoL0RTTUptelhoQUlkZjdaRUFh?=
+ =?utf-8?B?NGRuY3ljL3JoTlppVWhaWjFLdUdlck1pNG9OOUk2TmpFZlduYWRsWnF4ZGM0?=
+ =?utf-8?B?NkpOMGNCendIUE51b2JkZStoL2hIVzlFZXhDK0JoVmxZMzM1TkJDTkZ1U2FU?=
+ =?utf-8?B?anJzczBLaE0wU0VUZURMYUxEcVk3RWVMV2taKzhFS1cwV0YrSUJnUlAxbHU0?=
+ =?utf-8?B?Unh1SU0rVkVoN2dtK1FmSGs0Nmd6NXBuS1Byd01IMTBLeXdLc1dqNWVuR3Z1?=
+ =?utf-8?B?QlhxK2JoSXhPU3p0YkJ5OHRXdGdZbXdaVXhGZmhVaFo5NHBVTmpoSTN2K1Ft?=
+ =?utf-8?B?WHVGdmNTSE8xTGJROEFzb0EvN0l4eXpMVkZSUFd0eUdKK1RrN3R4Nll6aXBl?=
+ =?utf-8?B?T2pTV0kyZXZXYW1RMklQaGlpZjBJaXpONTladlYxcUxtRG1WbmM1dFU4Mlpo?=
+ =?utf-8?B?aTdTZVVKT1hkdmd2RjhVVFJ5dTgzUnJHNElqTEFIdmZIQktTUGZPampwYkJn?=
+ =?utf-8?B?eVBHb1p5MDFlNnFUQ1J0ZWVMdVB5cUNqbjV5T05aZ2tQZ3Jhc1A2WmlLeE5q?=
+ =?utf-8?B?aTNEdzk3Z1poTXlQSk1yRzVncmdCOGlsQWMwaTE0R0VHT1prOVBNdlZEeEY5?=
+ =?utf-8?B?YytXTUZISUpHMk8zTFYwZkFjSWpnYXRpQnNmTDI1RG5DaWdvM20xQT09?=
 X-OriginatorOrg: altera.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7e33cc40-2a5f-42c1-1117-08df4621e14b
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4aae887a-aaed-4594-6ae0-08df4621e483
 X-MS-Exchange-CrossTenant-AuthSource: SJ0PR03MB5950.namprd03.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Nov 2026 09:45:44.0118
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Nov 2026 09:45:49.4076
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: n6WAMfgEFGL14/eDsZMs67zROPdYXgY9SokJVaPVpgV/Xdk61yHd5EJlH5pkNVkM77y3+prRLwOhXoHtpRMVCQ==
+X-MS-Exchange-CrossTenant-UserPrincipalName: 4NK3cfC6lE2te1uhhsAyt0evIkF4PJez/pJkDLSOF5CMDmW2IR1z3ayCD5HWeLzVZf+5UiKV8hFSWdoEMEAojg==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR03MB6987
 
 From: Tze Yee Ng <tze.yee.ng@altera.com>
 
-SD6HC uses a software tuning loop that calls mmc_send_tuning() for every
-tap but never aborts a command that fails. When a CMD21 fails with a
-command error the eMMC can remain in the Data state and reject the next
-command, so the CMD6 that mmc_select_hs400() issues right after tuning
-times out.
+DDR50 and DDR52 have no CMD19 tuning, so the SD6HC extended-read path
+relies on static PHY settings. Two things are needed to make it work.
 
-Request the command error from mmc_send_tuning() and, on a command
-error, abort the tuning command with mmc_send_abort_tuning(). This
-matches the generic sdhci tuning path. SD is unaffected because
-mmc_send_abort_tuning() only acts on the CMD21 tuning command and is a
-no-op for the SD CMD19 one.
+First, PHONY_DQS_TIMING (phy_ctrl_reg[9:4]) was left at 0 in every mode.
+In extended-read mode the RE# (rebar) pulse is held high for half an
+SDCLK period, so its width in clk_phy (sdmclk) cycles is the SDCLK/sdmclk
+divider / 2, and the field must hold that width minus 1 (0 otherwise).
+Leaving it at 0 in extended-read DDR duplicates one DDR edge and corrupts
+reads. Derive the width from the clock divider so it tracks the
+integration rather than a hard-coded value: e.g. 1 at divide-by-4,
+confirmed on DDR50 hardware where 1 captures both beats and 0 corrupts
+reads. The field only takes effect when the fabricated phony DQS is
+selected, so the computed value is written in every extended-read mode
+and clamped to the 6-bit field. This timing model follows the Cadence
+SD6HC PHY documentation.
 
-sdhci_cdns_execute_tuning() is shared with SD4HC, so limit the abort to
-SD6HC (SDHCI_SPEC_420 and later); only SD6HC has been tested and SD4HC
-can opt in once validated.
+Second, the remaining read-path knobs need board/SoC characterisation, so
+read them from device tree at PHY probe and apply them in the
+extended-read DDR modes (DDR50 and DDR52):
 
-Suggested-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
+  - cdns,ddr-read-dqs-delay: read-DQS delay as a count of DLL delay
+    elements (each cdns,delay-element-ps wide), written to the 8-bit PHY
+    field (0-255);
+  - cdns,ddr-no-lpbk-dqs: fall back from the recommended loopback DQS to
+    the fabricated phony DQS.
+
 Signed-off-by: Tze Yee Ng <tze.yee.ng@altera.com>
-Reviewed-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
 ---
 Changes in v4:
-- Limited the abort to SD6HC (host->version >= SDHCI_SPEC_420)
-  because sdhci_cdns_execute_tuning() is shared with SD4HC, which has
-  not been tested; reworded the commit message accordingly. 
-- Added Tanmay's Reviewed-by.
+- Merged v3 2/4 (PHONY_DQS_TIMING) and v3 4/4 (read DDR tuning from
+  device tree)
+- Derive the PHONY_DQS_TIMING rebar pulse width from the
+  SDCLK/sdmclk divider (t_sdclk / (2 * t_sdmclk) - 1, clamped to the 6-bit
+  field) instead of the hard-coded 2 clk_phy cycles, and apply it in every
+  extended-read mode instead of only DDR50/DDR52. 
+- Dropped the cdns,ddr-phony-dqs-timing override. 
+- Stored ddr_read_dqs_delay as u8.
+- Dropped Adrian's Acked-by from v3 2/4 since the patch was merged and
+  substantially reworked
 
 Changes in v3:
-- New patch replacing the v2 1/4 PHY settle: abort the failed tuning
-  command (mmc_send_abort_tuning(), a no-op for SD) instead of masking
-  the post-tuning command timeout with a settle delay. (Tanmay Kathpalia)
----
- drivers/mmc/host/sdhci-cadence-core.c | 12 +++++++++++-
- 1 file changed, 11 insertions(+), 1 deletion(-)
+- Read cdns,ddr-read-dqs-delay directly as the delay-element count and
+  write it to the 8-bit PHY field; dropped the ps->element conversion
+  (divide by cdns,delay-element-ps) and the FIELD_MAX() clamp.
+  (Krzysztof Kozlowski)
+- Hoisted the repeated DDR-mode test to a local bool. (Adrian Hunter)
+- Removed the probe-time dev_warn() that validated the firmware value.
+  (Adrian Hunter)
+- Unwrapped the of_property_read_u32() call to 100 columns.
+  (Adrian Hunter)
 
-diff --git a/drivers/mmc/host/sdhci-cadence-core.c b/drivers/mmc/host/sdhci-cadence-core.c
-index 745455743b01..5e5a74ca25ce 100644
---- a/drivers/mmc/host/sdhci-cadence-core.c
-+++ b/drivers/mmc/host/sdhci-cadence-core.c
-@@ -330,9 +330,19 @@ static int sdhci_cdns_execute_tuning(struct sdhci_host *host, u32 opcode)
- 	}
+Changes in v2:
+- Updated patch title to "mmc: sdhci-cadence6:" since it touches only the
+  v6 PHY.
+- Renamed the properties to cdns,ddr-*.
+- Read cdns,ddr-read-dqs-delay-ps in ps and convert it to delay elements
+  (dividing by cdns,delay-element-ps), clamping that quotient to the 8-bit
+  PHY field. (Krzysztof Kozlowski)
+- Read cdns,ddr-no-lpbk-dqs via of_property_read_bool().
+  (Krzysztof Kozlowski)
+- Dropped the v1 per-property range checks and redundant FIELD_MAX() write
+  masks. (Adrian Hunter)
+- Apply the overrides in both DDR50 and DDR52.
+---
+ drivers/mmc/host/sdhci-cadence-phy-v6.c | 52 ++++++++++++++++++++++++++++++++-
+ 1 file changed, 51 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-cadence-phy-v6.c b/drivers/mmc/host/sdhci-cadence-phy-v6.c
+index 22d56bb46d75..f3a878e86f9b 100644
+--- a/drivers/mmc/host/sdhci-cadence-phy-v6.c
++++ b/drivers/mmc/host/sdhci-cadence-phy-v6.c
+@@ -126,6 +126,10 @@ struct sdhci_cdns6_phy {
+ 	/* Active delay element (ps); doubled when one SDMCLK requires > 256 steps */
+ 	u32 delay_element;
  
- 	for (i = 0; i < SDHCI_CDNS_MAX_TUNING_LOOP; i++) {
-+		int cmd_error = 0;
++	/* DDR read-path overrides (SoC-specific) */
++	u8 ddr_read_dqs_delay;
++	bool ddr_no_lpbk_dqs;
 +
- 		if (sdhci_cdns_set_tune_val(host, i) ||
--		    mmc_send_tuning(host->mmc, opcode, NULL)) { /* bad */
-+		    mmc_send_tuning(host->mmc, opcode, &cmd_error)) { /* bad */
- 			cur_streak = 0;
-+			/*
-+			 * Abort a failed tuning command so an eMMC does not
-+			 * stay in the Data state and reject the next command.
-+			 * Restrict to SD6HC; the shared path also serves the
-+			 * untested SD4HC. A no-op for SD in any case.
-+			 */
-+			if (cmd_error && host->version >= SDHCI_SPEC_420)
-+				mmc_send_abort_tuning(host->mmc, opcode);
- 		} else { /* good */
- 			cur_streak++;
- 			if (cur_streak > max_streak) {
+ 	/* PHY_DLL_SLAVE_CTRL register fields */
+ 	u8 cp_read_dqs_cmd_delay;	/* bits [31:24] */
+ 	u8 cp_clk_wrdqs_delay;		/* bits [23:16] */
+@@ -142,6 +146,10 @@ struct sdhci_cdns6_phy {
+ 	/* PHY_DQS_TIMING register fields */
+ 	bool cp_use_phony_dqs;		/* bit [20] */
+ 	bool cp_use_phony_dqs_cmd;	/* bit [19] */
++	bool cp_use_lpbk_dqs;		/* bit [21] */
++
++	/* PHY_CTRL register fields */
++	u8 cp_phony_dqs_timing;		/* bits [9:4] */
+ 
+ 	/* HRS07 register - IO delay Information */
+ 	u8 sdhc_rw_compensate;		/* bits [20:16] */
+@@ -505,6 +513,7 @@ static void sdhci_cdns6_phy_calc_dat_in(struct sdhci_cdns6_phy *phy)
+ {
+ 	u32 hcsdclkadj = 0;
+ 	bool strobe_dat = (phy->mode == MMC_TIMING_MMC_HS400);
++	bool ddr = (phy->mode == MMC_TIMING_UHS_DDR50 || phy->mode == MMC_TIMING_MMC_DDR52);
+ 
+ 	if (strobe_dat) {
+ 		phy->cp_use_phony_dqs = false;
+@@ -517,6 +526,33 @@ static void sdhci_cdns6_phy_calc_dat_in(struct sdhci_cdns6_phy *phy)
+ 	if (phy->mode == MMC_TIMING_MMC_HS200)
+ 		phy->cp_read_dqs_delay = phy->hs200_tune_val;
+ 
++	if (ddr && phy->ddr_read_dqs_delay)
++		phy->cp_read_dqs_delay = phy->ddr_read_dqs_delay;
++
++	phy->cp_use_lpbk_dqs = true;
++
++	/*
++	 * In extended-read mode the RE# (rebar) pulse is held high for half an
++	 * SDCLK period, so its width in clk_phy (sdmclk) cycles equals half the
++	 * SDCLK/sdmclk divider. PHONY_DQS_TIMING holds that width minus one.
++	 */
++	if (phy->sdhc_extended_rd_mode) {
++		u32 rebar_cycles = phy->t_sdclk / (2 * phy->t_sdmclk);
++
++		phy->cp_phony_dqs_timing = rebar_cycles ?
++			min_t(u32, rebar_cycles - 1,
++			      FIELD_MAX(SDHCI_CDNS6_PHY_CTRL_PHONY_DQS_TIMING)) : 0;
++	} else {
++		phy->cp_phony_dqs_timing = 0;
++	}
++
++	/*
++	 * Loopback DQS is the recommended read-capture path; allow boards that
++	 * need the fabricated phony DQS instead to opt out in the DDR modes.
++	 */
++	if (ddr && phy->ddr_no_lpbk_dqs)
++		phy->cp_use_lpbk_dqs = false;
++
+ 	if (strobe_dat) {
+ 		/* dqs loopback input via IO cell */
+ 		hcsdclkadj += phy->iocell_input_delay;
+@@ -680,10 +716,11 @@ int sdhci_cdns6_phy_init(struct sdhci_cdns_priv *priv)
+ 	sdhci_cdns6_dll_reset(priv, true);
+ 
+ 	reg = sdhci_cdns6_read_phy_reg(priv, SDHCI_CDNS6_PHY_DQS_TIMING_REG);
++	reg &= ~SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS;
+ 	reg &= ~SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS;
+ 	reg &= ~SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS_CMD;
+ 	reg |= SDHCI_CDNS6_PHY_DQS_TIMING_USE_EXT_LPBK_DQS;
+-	reg |= SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS;
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS, phy->cp_use_lpbk_dqs);
+ 	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS, phy->cp_use_phony_dqs);
+ 	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS_CMD, phy->cp_use_phony_dqs_cmd);
+ 	sdhci_cdns6_write_phy_reg(priv, SDHCI_CDNS6_PHY_DQS_TIMING_REG, reg);
+@@ -715,6 +752,8 @@ int sdhci_cdns6_phy_init(struct sdhci_cdns_priv *priv)
+ 
+ 	reg = sdhci_cdns6_read_phy_reg(priv, SDHCI_CDNS6_PHY_CTRL_REG);
+ 	reg &= ~SDHCI_CDNS6_PHY_CTRL_PHONY_DQS_TIMING;
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_CTRL_PHONY_DQS_TIMING,
++			  phy->cp_phony_dqs_timing);
+ 	sdhci_cdns6_write_phy_reg(priv, SDHCI_CDNS6_PHY_CTRL_REG, reg);
+ 
+ 	/*
+@@ -863,6 +902,7 @@ int sdhci_cdns6_phy_probe(struct platform_device *pdev, struct sdhci_cdns_priv *
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_cdns6_phy *phy;
+ 	unsigned long val;
++	u32 read_dqs_delay;
+ 	int ret;
+ 
+ 	phy = devm_kzalloc(dev, sizeof(*phy), GFP_KERNEL);
+@@ -901,6 +941,16 @@ int sdhci_cdns6_phy_probe(struct platform_device *pdev, struct sdhci_cdns_priv *
+ 
+ 	phy->delay_element_org = phy->delay_element;
+ 
++	/*
++	 * Optional read-path tuning for the extended-read DDR modes (SD DDR50,
++	 * eMMC DDR52).
++	 */
++	phy->ddr_read_dqs_delay = 0;
++	if (!of_property_read_u32(dev->of_node, "cdns,ddr-read-dqs-delay", &read_dqs_delay))
++		phy->ddr_read_dqs_delay = read_dqs_delay;
++
++	phy->ddr_no_lpbk_dqs = of_property_read_bool(dev->of_node, "cdns,ddr-no-lpbk-dqs");
++
+ 	priv->phy = phy;
+ 
+ 	return 0;
 
 -- 
 2.43.7
