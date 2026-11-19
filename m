@@ -1,106 +1,73 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.167.51
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795090243;
-	b=cLITd02/9ra390Ftv17KfYGvqXN+MDG+WRv9r7UDibFxr3x/+hLVGkpiiSbLDXYQQ/AY
-	 kjO0jyLo64Jc30ObqaulL+tyNiTWKWRYR8HkIj5IhEuOXr0OqrsC4Z0QBs1ASRdfHMKvM
-	 ivrRkHyj010mGKAjjzhl+cbM0nL+uubHeamakvhY57OFNilo8EHueBr0sZEVJBsHqYvJ3
-	 AIRHnCQMMSUgdj0d8j5AOg60s9Js+4utD3QFRdIEBUlWtt2N1FX6BhhF2nDrpwZad1JZk
-	 GlShxNS46iijJ6DnoyFtEfBJHzu8nrN2QyMLlag5n82FmgzlDgFy1G2O0yutvg3o7tw==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795090243;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:In-Reply-To:References:MIME-Version:Date:X-Gm-Features:
-	 Message-ID:Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
-	bh=bETUltzFp8ju63w5h2+StYgoq2SuMVMwAED32c/bEV4=;
-	b=ZVQUIFuf0rWSwaYtGwEsJd9/U8tx80V4gXwRhGLrTl1VgP5ZGoITelFzTRd+LQ+66R2o
-	 QgmJxZw9CWhOJ2zGPUgIgbiZCH1fUDki4xcJAYdAQ/Ny394moLa+dfhCuM2GqH+yl056T
-	 KpInVqoAdZ8k1hMUekNC/r0GLd8aTVoLzN1ceyL8OmSSwMIMoxJpkkTCJBEs04MHmoDly
-	 TWHjqM6b09WZwf7NwhgggppSs6SOVGIpxheullm7e9pv6l1LDSwfLdopVI+1wu/2KkDjS
-	 v3h14feU6GyW03QTuOsMv8/oR4mmtnATY04D2fT3q9iNk7v3Y4sj15Qwrq8TXnOlBMA==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=KLQ7dQyn;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.167.51
-Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1795101719;
+	b=HpYAET7ApKQk3MayNYRkbL8ICs0gcdvk9IlE3xOfCw2ttSTI/+CI+LLBGm99BYvPznGl
+	 7XL1ma6qN9cADAu3TOFKmuIMbIzGHMk0hWV+yxTOXb7La1/hf+dMbupm2c4nZVCWQGGLQ
+	 SHt0kSrRKx9vypR9CmWRnuif7HA/RePQDEdwsJDSm843xllnNiJJSmISbcJr6ubttI7LW
+	 8Z/XcE8utVm6beI05DXO9zjYHiHaz7m+RfJAl9x9+C9dojNHMH298ZOx4VLkq29wY5tC/
+	 FC9A9AZgimI9+IEfpmESqu0bBxWkUpBYHlMxnp+uTGsA7FI9aPtZ1MqHFbT9wI84ToA==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795101719;
+	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
+	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
+	 MIME-Version:X-ThreadId:Date:From:To:Cc:Message-Id:In-Reply-To:
+	 References:Subject:Content-Type:Content-Transfer-Encoding;
+	bh=5l8GqR1pMHHk4vhkBIQpJlp6jJQ7JDN3kxOn/4iGrAc=;
+	b=YwtjKF3jslUoEBmo0CgCRYhzyk2I1FRzqvy9XbKnEUSsU+GQx6Y2rwROfM+4sSUAR4iL
+	 AXbhC+w5Zdi85hP19fEPNlFcnzg43qTyv4m1GylFQ53qnv5mxvvCVO/1oJyH02mmTffTl
+	 fZ4iBzT6k12O+jk3odTVxUl5S+0F/035nBB1gVZ+wFjKyakwI+oVvsvcQ/N5kDgqDdC2Q
+	 +DBriFSIFjmvnH1bk2vA9ZX9gsl5vxBMLwzADTLDRLRuJq191OQyt00mRs85Z9I4VNwEc
+	 CfwyHlu1q+8WDqd/Srlzyu7jp6q8R53LE0cruwiGTM4BOA2f254ReANO6e6jATFerag==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=OSetPPx1;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8004F606A333
-	for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2026 12:10:43 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8004F606A333
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 253F2606A324;
+	Thu, 19 Nov 2026 15:21:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=KLQ7dQyn
-Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-5be4a2d94adso1844000e87.0
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2026 04:10:43 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1795090242; cv=none;
-        d=google.com; s=arc-20260327;
-        b=b6fnEIFSvhqIp7eUHnS4I7Q3gzRpi3SQNoI0tQnncV63c86WA0aepiA3HPkLukcLqm
-         Ejur5QAsrQM8qHpMB8uTJi02e0Pd2jPneYPWi5nKZhfFQkaUdgcfmE/VZetnNMKJz7A6
-         ymU7zGZiuJRhJI1xpK4ulSuePCtgnalTcBD55AP+59Zf3qIhpIvpBWtU9OKol6ounw1A
-         lAR8TKI6nXAVRJaQtFTK0bNJkAMaRrrRzgHLHNK/JPEoeaJsw1A7k96WlYdGVjPdJ5is
-         CRP0+DQPIu9t+xkgdnawqSAwRZh+CSXJtXT35P4EfEvwDN6AQcSu4TfR0C3pOUk+8s0H
-         EflA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date
-         :mime-version:references:in-reply-to:from:dkim-signature;
-        bh=bETUltzFp8ju63w5h2+StYgoq2SuMVMwAED32c/bEV4=;
-        fh=sWkHCLJjn3gq4ho+CfJGtzqZFtKGezCjRMgBlJZDiZ4=;
-        b=iEIUnhAm+mJu35uLkNblThdC1RtEpCCKw9pVHfqQIRY0b5kVU08D0WqKOIPoQMtD6E
-         cqb94oMZBFq/ULV2UHaVhGP/FMaGbRZ6XT8MzDDHYT5a+NAYn0YCJ4hbaIVcF3Y31lQO
-         1m7jEYMiK0PELxfDxiOyH1bKKQBVdFMrAJV2yguvcvykLH8dHrBqk9Z7fXG50A60aa+s
-         KyJFI2sBvqIa02Icw3AFf5NQzl8JNtSTcAgB32DhfAgmdAfM29U6ez1SUlPEBijXgtoK
-         SXBfuY8wwk+56qgWBmYXSDpyqo7gIdPK93r9rcUpcQK7IBl5spxBC/ELuRzWpuYdE29z
-         Cttg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1795090242; x=1795695042; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:mime-version:references:in-reply-to:from:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=bETUltzFp8ju63w5h2+StYgoq2SuMVMwAED32c/bEV4=;
-        b=KLQ7dQynqqbDBKLNTf2S9ZhkFBRr1jU1T6kECC2ddaZCWxtcJ1p6slULShoWmzSaav
-         cjV87KWjorD98055ojC3bpRCmOLPpfTgiP6j6njrBJUC6DomS/qj1EOtu0HtWiC4Nesb
-         +/BgStH7M4VTNgLfRZVqN14PCCa0NAUOF5n3V7rDn0N6092vHqevbkX5V5nuMMDzQhrX
-         yYnjhQd3iV/p+B3slEGTja0rvTo4XGxl9sKE4vme0uZMLmnzWCAH82itfoRrDWzLFzv2
-         cg1A8lIJFroGrhIg/LrZQZyAbKWi6qSlEHfrlSs6svqT41eZU+5CT0fvlQU1V4h7AJ1G
-         yh+Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795090242; x=1795695042;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:mime-version:references:in-reply-to:from:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=bETUltzFp8ju63w5h2+StYgoq2SuMVMwAED32c/bEV4=;
-        b=LblkHd+AHvMbdDlbDDe0u6ZvfclbCKh2UzmMOOeK4Vem/MlVDn6cjFcToGUHjn0x6O
-         pNCp3JCa6oIQjNKy6VEkb9LhX7/ZtSD5QwLRJ5dPzgsUw4MFAHLYXxuMZU/aUpeTchco
-         oe3ipJ9dpvNfw9nTtWr5moN96z/DH7a+17SRn6DnnbEQ/5J0bw6w8ZgdJqjyp9ziMX3m
-         3Dj0GLCgBM4NmGG7W1qT9CDQEK5rlIKX9LWkPk1jKcPiJdgHzKdxlwwZOM2SorMhJXcW
-         TKUpg+upceaZh2ET6HFQe7L5AHSOFEnkvbJ32miFfymCJyIEJOVgICnaP3V21jwQML1p
-         JpNA==
-X-Forwarded-Encrypted: i=1; AL+hErEW/+JlfJPf6b6uVcm24ThCZvIQHHebstj6155gooneWmeLqmdxcfPyaBE2MmmzY0KBTqfguBgafmo=@vger.kernel.org
-X-Gm-Message-State: APuU4Z+o3uCTfy5GlXsJxo5Hp+IMb+tgX1ZpCHdwNqTbKzB4ktXxlMYJ
-	2zaPdCskZ+twdxtyDcsCrBcHPFCHaU8wQklFdIX8V4ZjJ0sKG+U7ztLWwg3ceNKxj1Ch+dTnJIc
-	6syx9rnMD2fK+oelKgOSz5B+2WhCcrNA=
-X-Gm-Gg: AYBFou0O26W6eC8tr3LARFjbZdPF3OUb8cjd/wnhspcin/arMBAqg8d4UqPEi/2wHs7
-	/tqJ7RwizF2Fdw2xbLSCiFGClV2QxLKvBzlYbBOzIQ8d15shsZp1rtB0DSlMjO7IsnGePck9aSU
-	kurVAWHhS3oXYxCTKNHrBAjqmNLX1pjnTBXfFlnrENTqDtTJq/DqiolNI2USKFUfkBpx/2DS6RK
-	l3fF1VajHgs2tgqVJkvP3YbVxTKMjjV8qJtRnwFz8sEGZtLXnJVL1CEnEluiryqMZcr/IXGgGfv
-	qlVoUjNYmz/we0UWh2mhqg+UCXTAySRlMgVKA4Fni/KPosi5gO9pxhI82NGYEmMX8Vxvos6RhAQ
-	eSLna5BiTV7eBTFX2l6daeH+QBp1kPwLn4MGv4UEu4uCcrTrr+v4Ublc=
-X-Received: by 2002:a05:6512:3c9a:b0:5c0:ca1:9dcc with SMTP id
- 2adb3069b0e04-5c1aa02c2bbmr2030231e87.57.1795090241380; Thu, 19 Nov 2026
- 04:10:41 -0800 (PST)
-Received: from 138594053405 named unknown by gmailapi.google.com with
- HTTPREST; Thu, 19 Nov 2026 04:10:40 -0800
-From: =?UTF-8?B?57Gz55Sw5oKg56KB?= <yogo.0917.sabu@gmail.com>
-In-Reply-To: <4ae5596c-281b-476c-b656-1e03ae7409b3@kernel.org>
-References: <20261117-at550-rfc-v1-v1-0-5879573cb825@gmail.com>
- <20261117-at550-rfc-v1-v1-6-5879573cb825@gmail.com> <4ae5596c-281b-476c-b656-1e03ae7409b3@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=OSetPPx1
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0352E1F000C8;
+	Thu, 19 Nov 2026 15:21:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795101718;
+	bh=5l8GqR1pMHHk4vhkBIQpJlp6jJQ7JDN3kxOn/4iGrAc=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=OSetPPx1twH283yAOInw1fVxzhw6z+BPC5Tlx5mIjAXPmRFxG4D4S2lFePMSUqLm8
+	 Gndj7p8fZcCVNUVRaWM3hlQhJJxuunUnD/wZCQ5C+kK8YJ3HOHZGl9WyT3nTY9Wpfb
+	 PQLGNJ9JEuzopCag+K0UdCoO06QGot6gcOXeEzO2Ih+t6g/Lm/+xzZ8DC/pszbG3ae
+	 naI4fex3IFeyWN7z9OW0uNUgQUnPHUnPzNiWCFvMTuMLMtT8z+iHMCqSN/p5khPqGV
+	 rKvqO5cREgOR1LojY4hIewYADGa1nUY3RNOGz05xMqDJr45GbNzbiLh7MLtXZWFq+j
+	 FHFxJ9U3clMmg==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 3C64D1980070;
+	Thu, 19 Nov 2026 10:21:56 -0500 (EST)
+Received: from ams-imap-03 ([10.64.2.23])
+  by ams-compute-02.internal (MEProxy); Thu, 19 Nov 2026 10:21:56 -0500
+X-ME-Sender: <xms:EhT_apq3zDL60VDfd6TM6kuSn8gYoR-zNDdjp2ps-AepjsU8pEu6kg>
+    <xme:EhT_amdcpTc6LxFyP8eKCWJD411DbcuJxGQ0gKXaGq5H7RRCrYIdVBPGTKqC0p9f6
+    CrM2Kr6SXwTWCpSRyIDa5afdU7jyH3VMTYwOcn9KHIjS6ptXULVAQgw>
+X-ME-Proxy-Cause: dmFkZTFAW/rrkNPBzeKLhGsKQLHRswz64G63poKWKLw463QHaf+1d6xN/yc1sejtO6QZx5
+    fWiT25IhBCJ8GMWFTQTjv17SWOHq++Oevi4ctTjpcivsO2LF2xQ2wswTLOK8ph6KV4LEED
+    CQvmx85m+a3iOx/33ttWiG+PidCD8TTSn5aN6y1tEO0guG2ekBixUT53Q+TYyzKirYxiXP
+    ooQJGLYtDJvYjEGVlV6SoXrpayOMHJayUEiFc6Xx/MkhbYKJMgSXrmDgkvf7SuAGeOkPd/
+    AYTE8c+pNDG+vxK60r+h9Euncql3Rw4oB6YT/CjHquFMIQUYfAJALpcZy4OguG+Uz+3BbT
+    3XA7FpyBGa8qGgavfhjZCnvR32BMweU7Bvwi3ScjH0hTzDi8p21OAdSV/kZ0zYxokVmZbR
+    /GMjLXUJeKBSyzcNAhOfSCIIniCAK2couGCe1pWQnGF17mpgU5myXUlAqmFH4SUbbAiXk+
+    HCxPMPwFOVE3O3YEQQYsHdXlILJe2rE/F+fW/seFx5bs49ySGwOUyKPJtGomHHxW0TzTco
+    jWSs1ajdwaywdT9f8chb6Vk/NOkr/fPQPvf8ZJ/DQBH+VeGPa+2NZ5nbZCU94lePBQHSHX
+    Qy9YKhx+WJUCWg7HysG8TiORDpE389ucvtaT5lED9LHM0kGto8+pSzmCCUnw
+X-ME-Proxy: <xmx:FBT_asq5ALVgmDljti4u2jJqbZQ9SpUG35T6Du2mawnuQ4JrGSQxAw>
+    <xmx:FBT_atm1orlVR3_XkVd0_SR8mJ-SYO3Cij9LvN5Wrig8t4iCq7lTDg>
+    <xmx:FBT_agPavBnsWSlRJDN06fXXagaMJ7tLE_ARYd7BKFHIv-ihw-HdZg>
+    <xmx:FBT_apOJ2TRSsPoXzryr-AeJs_NZe7Afdx7d24RCNS7OTHljfNK6ow>
+    <xmx:FBT_apiBASsX6cjMETqXeG4ukwaVEVEJI-JyjCtrHzHjQupCxlOovebI>
+Feedback-ID: i36794607:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id B63EF32A0099; Thu, 19 Nov 2026 10:21:54 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -110,49 +77,129 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Date: Thu, 19 Nov 2026 04:10:40 -0800
-X-Gm-Features: AclHuK9FN_lcxmvKpiBOURMVJw7FuBsEr81qRUdUW-5-lcWp0rWdYKip_S5TZBE
-Message-ID: <CAJGK9zbbEJ_E5t4tXAHmi2QH8vjAmFzLDUbykUfQv_cDwvkG6w@mail.gmail.com>
-Subject: Re: [PATCH RFC 6/6] ARM: add the SiRF AT550 platform and YPL514si board
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Dmitry Torokhov <dmitry.torokhov@gmail.com>, Thomas Gleixner <tglx@kernel.org>, 
-	Radu Rendec <radu@rendec.net>, Ulf Hansson <ulfh@kernel.org>, 
-	Daniel Lezcano <daniel.lezcano@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Jonathan Corbet <corbet@lwn.net>, Shuah Khan <skhan@linuxfoundation.org>, 
-	Randy Dunlap <rdunlap@infradead.org>, Russell King <linux@armlinux.org.uk>, 
-	Arnd Bergmann <arnd@arndb.de>, Alexandre Belloni <alexandre.belloni@bootlin.com>, 
-	Linus Walleij <linusw@kernel.org>, Drew Fustini <fustini@kernel.org>, linux-kernel@vger.kernel.org, 
-	linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-doc@vger.kernel.org, soc@lists.linux.dev
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-ThreadId: AXSqIyz7GwKB
+Date: Thu, 19 Nov 2026 16:21:34 +0100
+From: "Arnd Bergmann" <arnd@kernel.org>
+To: sashiko-reviews@lists.linux.dev
+Cc: "Linus Walleij" <linusw@kernel.org>,
+ "Geert Uytterhoeven" <geert+renesas@glider.be>,
+ "Wolfram Sang" <wsa+renesas@sang-engineering.com>,
+ "Ulf Hansson" <ulfh@kernel.org>,
+ "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>
+Message-Id: <169128b7-9b30-4e3a-a4b8-be46012b691c@app.fastmail.com>
+In-Reply-To: <sashiko-outbox-222892@kernel.org>
+References: <20261119093924.3508355-1-arnd@kernel.org>
+ <sashiko-outbox-222892@kernel.org>
+Subject: Re: [PATCH] [v2] mmc: sh_mmcif: rework sg_miter handling
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-You're right. I submitted the patch without properly reviewing and
-understanding the LLM-generated code. I'm sorry.
-
-I'll review it carefully before submitting another revision.
-
-2026=E5=B9=B411=E6=9C=8818=E6=97=A5(=E6=B0=B4) 17:14 Krzysztof Kozlowski <k=
-rzk@kernel.org>:
-
-> On 17/11/2026 14:06, yy-Local-LLM via B4 Relay wrote:
-> > From: yy-Local-LLM <yogo.0917.sabu@gmail.com>
-> >
-> > Add a minimal DT machine using standard IRQ, timer and simplefb paths.
-> > Describe the SoC and the firmware-configured YPL514si display. Leave
-> > usable memory and the divided counter rate for the bootloader to
-> > populate. Keep optional peripheral nodes disabled until firmware hands
-> > them over. Disable unvalidated board suspend; limit this board to SD PI=
-O
-> > at 25 MHz. Document the RAM-boot contract and the missing
-> > cold-boot/clock-tree support.
-> >
-> > Signed-off-by: yy-Local-LLM <yogo.0917.sabu@gmail.com>
+On Thu, Nov 19, 2026, at 10:59, sashiko-bot@kernel.org wrote:
+> Thank you for your contribution! Sashiko AI review found 2 potential
+> issues to consider:
+> - [Medium] mmc: sh_mmcif: data->bytes_xfered not reset on multi-block
+>   PIO and stop errors
+> - [Medium] mmc: sh_mmcif: out-of-bounds sgm->consumed in
+>   sh_mmcif_read_block()
+> --
 >
-> Awesome, you did not want to even read what LLM told you?
+> commit 65703f98092b0e4db22d64298984b4fb57add099
+> Author: Arnd Bergmann <arnd@arndb.de>
 >
-> Best regards,
-> Krzysztof
+> mmc: sh_mmcif: rework sg_miter handling
 >
+> This commit reworks PIO scatterlist mapping in sh_mmcif to use
+> SG_MITER_LOCAL, stopping the iterator after each block and tracking
+> completion via data->bytes_xfered.
+>
+>> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+>> index 51be5dc82f6e6..8a0ccab9861d5 100644
+>> --- a/drivers/mmc/host/sh_mmcif.c
+>> +++ b/drivers/mmc/host/sh_mmcif.c
+>> @@ -604,7 +604,7 @@ static void sh_mmcif_single_read(struct sh_mmcif_host *host,
+>>  			   BLOCK_SIZE_MASK) + 3;
+>>  
+>>  	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
+>> -		       SG_MITER_TO_SG);
+>> +		       SG_MITER_LOCAL | SG_MITER_TO_SG);
+>>  
+>>  	host->wait_for = MMCIF_WAIT_FOR_READ;
+>>  
+>> @@ -621,7 +621,6 @@ static bool sh_mmcif_read_block(struct sh_mmcif_host *host)
+>>  	int i;
+>>  
+>>  	if (host->sd_error) {
+>> -		sg_miter_stop(sgm);
+>>  		data->error = sh_mmcif_error_manage(host);
+>>  		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
+>>  		return false;
+>> @@ -629,7 +628,6 @@ static bool sh_mmcif_read_block(struct sh_mmcif_host *host)
+>>  
+>>  	if (!sg_miter_next(sgm)) {
+>>  		/* This should not happen on single blocks */
+>> -		sg_miter_stop(sgm);
+>>  		return false;
+>>  	}
+>>  
+>> @@ -638,6 +636,8 @@ static bool sh_mmcif_read_block(struct sh_mmcif_host *host)
+>>  	for (i = 0; i < host->blocksize / 4; i++)
+>>  		*p++ = sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
+>>  
+>> +	data->bytes_xfered += 4 * i;
+>> +	sgm->consumed = 4 * i;
+>>  	sg_miter_stop(&host->sg_miter);
+>
+> [Severity: Medium]
+> Can setting sgm->consumed and data->bytes_xfered to 4 * i exceed
+> sgm->length on single-block transfers whose data->blksz is not a multiple
+> of 4?
+
+I've gone back to reporting data->blksz for the single transfers now,
+which I think is what we expect to transfer here. It is a bit odd that
+nothing actually compares host->blocksize and data->blksz, maybe
+there should be a check here as the loop could otherwise go long
+or short and both of those would presumably be bad.
+
+> sh_mmcif_single_read() and sh_mmcif_single_write() add 3 to
+> host->blocksize so that host->blocksize / 4 rounds up the 32-bit FIFO word
+> count.  When data->blksz is not divisible by 4, 4 * i is larger than
+> data->blksz (and sgm->length), which triggers
+> WARN_ON(miter->consumed > miter->length) in sg_miter_stop() and
+> over-reports data->bytes_xfered in both sh_mmcif_read_block() and
+> sh_mmcif_write_block().
+
+Exactly, except that host->blocksize is not even set to data->blksz
+in the first place.
+
+>> @@ -1397,6 +1382,7 @@ static void sh_mmcif_timeout_work(struct work_struct *work)
+>>  	case MMCIF_WAIT_FOR_WRITE:
+>>  	case MMCIF_WAIT_FOR_READ_END:
+>>  	case MMCIF_WAIT_FOR_WRITE_END:
+>> +		mrq->data->bytes_xfered = 0;
+>>  		mrq->data->error = sh_mmcif_error_manage(host);
+>>  		break;
+>>  	default:
+>
+> [Severity: Medium]
+> Does this leave mrq->data->bytes_xfered non-zero when a multi-block PIO
+> transfer hits host->sd_error or when MMCIF_WAIT_FOR_STOP times out?
+>
+> sh_mmcif_mread_block() and sh_mmcif_mwrite_block() increment
+> data->bytes_xfered as each block is read from or written into the
+> MMCIF_CE_DATA FIFO, but their host->sd_error paths do not reset
+> data->bytes_xfered to 0 if an error interrupt arrives on a later block.
+> Likewise, case MMCIF_WAIT_FOR_STOP in sh_mmcif_timeout_work() does not
+> reset mrq->data->bytes_xfered to 0, unlike MMCIF_WAIT_FOR_STOP in
+> sh_mmcif_irqt().
+>
+> When data->bytes_xfered remains non-zero on error, mmc_blk_mq_rw_recovery()
+> and mmc_blk_mq_complete_rq() can treat those unverified or aborted blocks
+> as completed with BLK_STS_OK.
+
+This was intentional on my end: if something has already been transferred
+through registers, I would count it. Since I already changed the other
+instances, I have changed this one as well now, and just unconditionally
+reset 'mrq->data->bytes_xfered = 0' in the timeout handler. No idea if
+this is actually better or worse.
+
+     Arnd
