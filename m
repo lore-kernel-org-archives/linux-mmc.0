@@ -1,84 +1,83 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.47
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.42
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1795110612;
-	b=N7Ti+QM+IDiaCUfC7CsfcpMDBBGZG/+t/C3XejctY18e0TVfOUjl5HLtticH72UR9mn3
-	 A5HR0sL34QxVYfIgZE/Wu9S9g/kYzhOn35i/ZJM/rPHp3vn4lqTHyFETeUafRBaJzGQu4
-	 cjpJlmVwh6HhHud+HRcdSQaiJvtoveNuRoN535bbvpAgH006PpHGm7mvU96xVd4niPdWc
-	 ZrojIebnJeBJQe+bYOIxPdpYwdP+wP9nyXjZYpG8TZQRRqb+TeP2F6woUOVQGSoUQ11CS
-	 cgdir2c+9BdAS2+A3mgcGtDE5rroAAnDUtHtC74I6UXKog1zYHgWGJBjGLCnOF//TuA==
+	b=N+poiXnWh5jVX0VLhAUKY12muIuCCIMUHWFfB4nmewhhj3/SDdUhKF4qnLmClVPPgH98
+	 4S0qo2txoSjOCTOvH+DCiDIcgEHWPD+HWe+BBST09tR+ntq3lrOe+nPLdDQfqrts5EAbU
+	 l/eFdWvt/qFInx2UI8WmNwKeGtshLP4fQf1WMnfG9nzkcXMuLXdJSZFo4E8OXzvucZetl
+	 kFRBgRALn7LucWkF+bqKW/q6tkxQO2xiF0Kvib2an3kV5IpV1hSvpa20CSqGevMdir4p5
+	 9GDt+wmcEF8DwRPTOwyLeVZMxylzieW2svlf/7fhVnDoarbO19VSOV6o1JxpJKwvF2w==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1795110612;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
 	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
 	 MIME-Version:Content-Transfer-Encoding;
-	bh=5m08k+pWTgZ26W4H99NIdw305iHAopUdzj3Kg8DMx8c=;
-	b=WP3VNs3sI8/IbyYdbm1EJgru6WWa2U+9nz4OErRBc1K+I6Rpdfsqd2vemNHZuCkmdCYJ
-	 Ug/zU/VYcvLaua8RKyZj9nG8lN3qerSHCFiwSrQ4OIod/auImW7N0BHbQcB6o/kFfaK8b
-	 ywEq/ushvq4wCwEjjFXacxwSVDG84/h0KCk+z02GEd3EqFAjsc6Nkr3ahQZqYJyA0M0D0
-	 Pu/BNCo4+dmOV4BUOsB35J7tFa9sO+Gd/4NIya5V9V+XFXLxpwPI5oqw8OlblXGg1JuWm
-	 ynqtji868lCFuNMn0l8C8Uv6jKA8QHUAL2noW5kOR5xluS4QfmS9iXxEhbQLxLUMHgA==
+	bh=+y4Dhz36GBPfKNKm/OZQCyp1F0ego1607MuK1Oaddis=;
+	b=n0vMfuYwxnjpLDnc+Mqvb7cKDy1arB0mQ/jvGUQy7g6U62EpPebe6OWVyQdjKmbhcGuA
+	 YQnrEgNckz4kZ18uyCLlXRI2NE5c25Wx6tjoamfzu2KAQ6gkRCDPRzzK2R5m0QLFrNOD8
+	 zhVdHg/r6j6ckZm3h9D7zg41TZe/A/lWLE15jJuM9pv97yUQwosyeTTMyK+1IfBrpqGY6
+	 WDwtskwrbtvOX3KXJUQLFzvyTfE5RVhRlzF0ClNy14dTeCoJau7DWu2wNd/YAN7cypE8j
+	 ftmmTmxiY2mazKa0wDbqKR4OpLEErVGSib4LFW6FMlDFVrXvIr9cYM+n3TnfShC2E7g==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=aheymans.xyz;
 	spf=pass smtp.mailfrom=aheymans.xyz;
-	dkim=pass header.d=aheymans-xyz.20260707.gappssmtp.com header.i=@aheymans-xyz.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b="fvJykZ/n";
-	arc=none smtp.remote-ip=209.85.128.47
-Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
+	dkim=pass header.d=aheymans-xyz.20260707.gappssmtp.com header.i=@aheymans-xyz.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=noXf1rHX;
+	arc=none smtp.remote-ip=209.85.128.42
+Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A6F32606A335
-	for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2026 17:50:11 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A6F32606A335
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BE9F606A330
+	for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2026 17:50:10 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 1BE9F606A330
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=aheymans.xyz
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aheymans.xyz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=aheymans-xyz.20260707.gappssmtp.com header.i=@aheymans-xyz.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=fvJykZ/n
-Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4a35d5d4a20so27644815e9.2
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2026 09:50:11 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=aheymans-xyz.20260707.gappssmtp.com header.i=@aheymans-xyz.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=noXf1rHX
+Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-4bb70074ab2so27641545e9.0
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2026 09:50:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=aheymans-xyz.20260707.gappssmtp.com; s=20260707; t=1795110610; x=1795715410; darn=vger.kernel.org;
+        d=aheymans-xyz.20260707.gappssmtp.com; s=20260707; t=1795110609; x=1795715409; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=5m08k+pWTgZ26W4H99NIdw305iHAopUdzj3Kg8DMx8c=;
-        b=fvJykZ/neLyVItFEhBuAi0WmfnkNb8Y4jIVy1xZB3JP5mhV0QHRRKZuIo/1ChInedQ
-         ozTOCjI7wfcchmNYhF669sue2/HmF0Uy6XdyhIrtktpdEYN3CyMnTTIufpcXJDebi4CY
-         eOcOpBits2EoRc6ryq8QttSom5epvDHt7vHgHeTqiMIJNN1aOJRK0GQFL1Y5FTfzhkXE
-         yyYVP4MJRF9EH1kSLVrO+m0Yi0PYAKmgSL7sGRfB1YTQtsDia+DoKocrsqZHpJoqUY59
-         n+XiF6L3WfCtONnXjhitg2wRYLsXpW8Si8BnzO+aQ5aVv6QnbUq+c4PNY+/Od58FQ+4z
-         HSow==
+        bh=+y4Dhz36GBPfKNKm/OZQCyp1F0ego1607MuK1Oaddis=;
+        b=noXf1rHXHVA5Bo4zBqtRn+YjTYtHNXGVE83xggHGKpOWjneiUdG5LTFmE9tzs3PcFi
+         QDgwMI0eZzahFKbbUHQxOzro7v4Hw3kiJ4m3AYRUtEkI7RUatHAETc/wADxUDy48QzWy
+         NltjoUQNyPz91+WrQGjtvuHrtGTA7HQakwoozd0ncQc5831PnXftOw4lhkDLw/7sDU2A
+         5cF+ssEbbYVFSUwmA53rpP3GVOutHQ/72+f9fJqIRZo1Deuv6sQUSQjSD1ZU8RhziwLX
+         M6YNfnpf2S1ZK5CHuPW2PZYCZ/XVkE7wLBdZJYg1Er631mnNtAF3hoy2QVU+0gJo2z8X
+         JXag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795110610; x=1795715410;
+        d=1e100.net; s=20260707; t=1795110609; x=1795715409;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=5m08k+pWTgZ26W4H99NIdw305iHAopUdzj3Kg8DMx8c=;
-        b=DBKTDETs78kh5lCLBBlJPWRh5QMpiuL6nuAJS8S97dGGxu3q1IkhrODa0gMkDcbs33
-         jg5Shj4CAWwBBQYiLKv0wQ5E1DiBrHFy32fnkEy3AqsTAxUagrzfik4eQWul42Ewl5LT
-         VQdfdlolU5pw3kjSQ7uM9jfYD1XnzxK6v9Ayw0rzhQE/ILWfAIznW/1jKa2R+dQI0n4f
-         3ybt4h/65FNuc5bJWvUo/Gm5yiAvfTuHEWxGqgpskCldLPF/3m58UuSoj4VBsUovRUl5
-         kRoIDigjnl9YtQV2h1skbxGYzltoeLt5hOmARMD7kMuJTxDXMtp52ki7OnQw0XutRCGA
-         ZBpg==
-X-Forwarded-Encrypted: i=1; AL+hErEBVfXZqVm0K9FcDCWBlNFdUF9M+awftPAZki/RtyYwm0GaNmy6bjfJ9tXFdZ21s/d8SMkb+9TJ/tw=@vger.kernel.org
-X-Gm-Message-State: APuU4Z8vG7XnGRJAzxMtge0/vTRWcBETplc0aZHeE5DgFHuvx73NgLMD
-	rh9ipiundEltQopNX0uPZZBERkPnu9RvXmDcgtrpzST25CCIruGc0RMAbhFNjYiIS0XDXgepaL/
-	oxLiQF0o=
-X-Gm-Gg: AYBFou122nPuFcKO08JuKrpRVhJXeqrQ1SGefM7EqdBZPXWXP2gvUmb5L/Os17MUmgd
-	YDZ8NIy0GHXaws263rg1FrFOZxm1a+nqBRJ11MezptyURwkHtvjtX7CjTUdTspEnnwzTgaJkojQ
-	TJmhAQ+gMxa2vBiK+SyqN4UW5jvjNoKNAvZvpGPcDhLNsRVqJsKAcGB9ZVjIrUJFIry11F+pCvE
-	ZxR1OhYqbiwb0pWRV9k4IRUtZmSN/268ENRWZrsVZ4qBdIZdS17EeXw9QJ7fhZ2Mv66yErap0L/
-	aKLfoQgVz1QCBnrfkpGXaCIYDKMXvZ7Nv7JdCq6Xuev/BotHeM0UAO8alEim9CMfrh2J128i/cp
-	jyj5BMLv0gD8ms6F0AZR2ZOXQwpZhBMKdl/PN8huL21Lm06pShcJqi4gjBokljhNjyYUbD1KXjE
-	Jh5I7Pj/9cMQLOvgrxc08bs4VtSms1rjjJyttr9lLvSBH9EHZzPecdg1NTaR85MdsYNxgva3m4P
-	eDBwLzU1phvTGR1nHZPbG4CVsXYjv8k7WvnvVbZShvL32l2/p2y1XbvqRiRrLPTBGYh07QrW/55
-	piuv0Ld5gI10vptGIebP+x2xyC7YZEKzO6AxM+dsjfGgap2KL4+lOdTDCYJruAEoy9smcOMVxP9
-	c6Qw2rto1yBq3Lqqm1h4qTpHaewCskzE2+UySlBgIzFv966jjdFgBiEtsgzkkEy/C4vx+FLRfl2
-	o//uY=
-X-Received: by 2002:a05:600c:64c7:b0:4bb:68c4:2044 with SMTP id 5b1f17b1804b1-4bb887fe725mr6329465e9.11.1795110610075;
-        Thu, 19 Nov 2026 09:50:10 -0800 (PST)
+        bh=+y4Dhz36GBPfKNKm/OZQCyp1F0ego1607MuK1Oaddis=;
+        b=XSXVUJf4N3PonBuuwfvk40wRN0bssOWT+pDNfHooSBVB1VxJPUDYFUS7XZzTlSGx1P
+         3bVVSKN9nrc0w4Vs2PbJZ2Wd6SwuR0DWIsuR43l2GXZOOrTqnObCE/55o0iQxAJERkDq
+         YtQJxFCBSy+sX4nxOCwMEM3Tse/NMhhKieunfy9TwD6w1idHuLVMOv+TGRbmmP44kW3Z
+         mDgqk/mpkNo6j1WT8oDjWeaMPFougPFo3zJlhoW1sx+LlvDNL6cEjnrPV0aXb8CILUvW
+         2NpSNtxwI6d1MCs8KUV99TZ4w9bA7PPKEajn9aqhUvicc11VwGa4PWe4Roi3E6Tf5IsN
+         DXYg==
+X-Forwarded-Encrypted: i=1; AL+hErEQZuapyu7ixwwfQoyRKwnM7Eu7wHdadIp/o84Zqn8vSVGGZKdWoy4JS6Ydgm5LhXmyNvTqbtwCn20=@vger.kernel.org
+X-Gm-Message-State: APuU4Z8sefiGKULGtcjnZCIA8KAX4rFJ4GQ6FIUDaYpeqn4hR7An7rOs
+	YrHpe4F9UADUBSO/Z1Izs/M1kD6h9q/xTK+nvmSZiuP8IuqCvfkWUE4vwyHWOaPbSfE=
+X-Gm-Gg: AYBFou3Ifra5A0n3sfPjfc6ykiF+9KXGxoiV6XvrIcajKLSlSBjInNAUtBYy3QfxfRi
+	sDJnpgM8jjDp68o1S4FunbgzaraHt2R3dh+SxE7ERiRMpS7HTOdnGHQsa3jOhS6fpkl+fTYnph9
+	XatbQN/gm7QhHqNaFPhQWXERbJ+aRnGsCCdIOF6Ac56fjChG4Sq61Q3CEBjsGOIrFK8bB3xgyUy
+	QCh3B+KbfJwWr9DOSPeGhVgb1pe+wWLw2aoTwOtV3nA5Sup8JHBxf1vmKmJPUWlNXf+Qo6rGeEI
+	ywaGdqHobp5d63SrNKlbfuJIdBve8CFGzT88p0uaDN4+41+gwLQnH+XAOutkoLIiaZFtgN1nOeu
+	HXoiKojbExHaln2mu6NHh3BlQ9TfK4agQZS/pFYrN9fjqYO5A2CLGJ/CTNBghFSRbAyT8Tkvjbk
+	kzmekv7yMxkT1jQBDoQ8vUEct3sTPPTTRzNtxy5Vy6m0D1piSMuubgsMe/or8Nwlfz8wPGl0xGk
+	/93tHBcfqg2PsxLwYB/hNXFh6ti/No0PdCUddQpTMsDE9ZpkVtEAVdBuRdsdJJIR3OAhAedyPGk
+	eAcrzjfiZ1MKvuwAQ04EhmqINFgWMOEm0gKpvfuqsDfyne+RHuvaJb++Jb2Li5QUok5Lhtr4/kH
+	Tg454VC4NLWiVM+k3x4X/06HIGZbTm5SU5kfUsJhCwydt+ZIfLwaNJQdvG41caZM77JFUb+/u7B
+	paQQ==
+X-Received: by 2002:a05:600c:6290:b0:4a3:59c9:a743 with SMTP id 5b1f17b1804b1-4bb8882a21amr5216045e9.27.1795110609383;
+        Thu, 19 Nov 2026 09:50:09 -0800 (PST)
 Received: from localhost (2a02-1810-b422-d400-611-84c9-252f-74ad.ip6.access.telenet.be. [2a02:1810:b422:d400:611:84c9:252f:74ad])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4bb853b2437sm68993685e9.13.2026.11.19.09.50.09
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4bb84e06c73sm90730215e9.2.2026.11.19.09.50.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Thu, 19 Nov 2026 09:50:09 -0800 (PST)
 From: Arthur Heymans <arthur@aheymans.xyz>
@@ -93,9 +92,9 @@ Cc: Rob Herring <robh@kernel.org>,
 	Solomon Peachy <pizza@shaftnet.org>,
 	linux-kernel@vger.kernel.org,
 	Arthur Heymans <arthur@aheymans.xyz>
-Subject: [PATCH wireless-next 02/10] wifi: cw1200: check SDD element lengths before reading them
-Date: Thu, 19 Nov 2026 18:49:54 +0100
-Message-ID: <20261119175002.458988-3-arthur@aheymans.xyz>
+Subject: [PATCH wireless-next 01/10] wifi: cw1200: avoid removing the debugfs directory twice
+Date: Thu, 19 Nov 2026 18:49:53 +0100
+Message-ID: <20261119175002.458988-2-arthur@aheymans.xyz>
 X-Mailer: git-send-email 2.56.0
 In-Reply-To: <20261119175002.458988-1-arthur@aheymans.xyz>
 References: <20261119175002.458988-1-arthur@aheymans.xyz>
@@ -110,85 +109,74 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-SDD elements have byte alignment. Read the PTA and reference clock
-fields with get_unaligned_le16() and reject short elements instead of
-using incomplete board configuration data.
+Unregistering the wiphy removes its cw1200 debugfs directory. On SDIO
+unbind, cw1200_debug_release() then tries to remove the stale dentry.
+Leave directory removal to the wiphy and free the counters as before.
 
 Prepared with OpenAI Codex.
 
-Fixes: a910e4a94f69 ("cw1200: add driver for the ST-E CW1100 & CW1200 WLAN chipsets")
+Fixes: fa8eeae10257 ("cw1200: Remove "ITP" debug subsystem.")
 Signed-off-by: Arthur Heymans <arthur@aheymans.xyz>
 ---
- drivers/net/wireless/st/cw1200/sta.c | 26 +++++++++++++++++++-------
- 1 file changed, 19 insertions(+), 7 deletions(-)
+ drivers/net/wireless/st/cw1200/debug.c | 19 ++++++++-----------
+ drivers/net/wireless/st/cw1200/debug.h |  1 -
+ 2 files changed, 8 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/net/wireless/st/cw1200/sta.c b/drivers/net/wireless/st/cw1200/sta.c
-index 5d8eaa700779..db9f0c4a07aa 100644
---- a/drivers/net/wireless/st/cw1200/sta.c
-+++ b/drivers/net/wireless/st/cw1200/sta.c
-@@ -11,6 +11,7 @@
- #include <linux/firmware.h>
- #include <linux/module.h>
- #include <linux/etherdevice.h>
-+#include <linux/unaligned.h>
+diff --git a/drivers/net/wireless/st/cw1200/debug.c b/drivers/net/wireless/st/cw1200/debug.c
+index 7dad6d3ba239..6b8b6ca35103 100644
+--- a/drivers/net/wireless/st/cw1200/debug.c
++++ b/drivers/net/wireless/st/cw1200/debug.c
+@@ -359,19 +359,20 @@ static const struct file_operations fops_wsm_dumps = {
  
- #include "cw1200.h"
- #include "sta.h"
-@@ -1072,28 +1073,34 @@ static int cw1200_parse_sdd_file(struct cw1200_common *priv)
- 	while (p + 2 <= priv->sdd->data + priv->sdd->size) {
- 		if (p + p[1] + 2 > priv->sdd->data + priv->sdd->size) {
- 			pr_warn("Malformed sdd structure\n");
--			return -1;
-+			return -EINVAL;
- 		}
- 		switch (p[0]) {
- 		case SDD_PTA_CFG_ELT_ID: {
- 			u16 v;
-+
- 			if (p[1] < 4) {
- 				pr_warn("SDD_PTA_CFG_ELT_ID malformed\n");
--				ret = -1;
--				break;
-+				return -EINVAL;
- 			}
--			v = le16_to_cpu(*((__le16 *)(p + 2)));
-+			v = get_unaligned_le16(p + 2);
- 			if (!v)  /* non-zero means this is enabled */
- 				break;
+ int cw1200_debug_init(struct cw1200_common *priv)
+ {
++	struct dentry *dir;
+ 	int ret = -ENOMEM;
+ 	struct cw1200_debug_priv *d = kzalloc_obj(struct cw1200_debug_priv);
+ 	priv->debug = d;
+ 	if (!d)
+ 		return ret;
  
--			v = le16_to_cpu(*((__le16 *)(p + 4)));
-+			v = get_unaligned_le16(p + 4);
- 			priv->conf_listen_interval = (v >> 7) & 0x1F;
- 			pr_debug("PTA found; Listen Interval %d\n",
- 				 priv->conf_listen_interval);
- 			break;
- 		}
- 		case SDD_REFERENCE_FREQUENCY_ELT_ID: {
--			u16 clk = le16_to_cpu(*((__le16 *)(p + 2)));
-+			u16 clk;
-+
-+			if (p[1] < sizeof(clk)) {
-+				pr_warn("SDD reference frequency malformed\n");
-+				return -EINVAL;
-+			}
-+			clk = get_unaligned_le16(p + 2);
- 			if (clk != priv->hw_refclk)
- 				pr_warn("SDD file doesn't match configured refclk (%d vs %d)\n",
- 					clk, priv->hw_refclk);
-@@ -1147,7 +1154,12 @@ int cw1200_setup_mac(struct cw1200_common *priv)
- 			pr_err("Can't load sdd file %s.\n", priv->sdd_path);
- 			return ret;
- 		}
--		cw1200_parse_sdd_file(priv);
-+		ret = cw1200_parse_sdd_file(priv);
-+		if (ret) {
-+			release_firmware(priv->sdd);
-+			priv->sdd = NULL;
-+			return ret;
-+		}
- 	}
+-	d->debugfs_phy = debugfs_create_dir("cw1200",
+-					    priv->hw->wiphy->debugfsdir);
+-	debugfs_create_file("status", 0400, d->debugfs_phy, priv,
++	/* wiphy_unregister() removes the whole subtree. */
++	dir = debugfs_create_dir("cw1200", priv->hw->wiphy->debugfsdir);
++	debugfs_create_file("status", 0400, dir, priv,
+ 			    &cw1200_status_fops);
+-	debugfs_create_file("counters", 0400, d->debugfs_phy, priv,
++	debugfs_create_file("counters", 0400, dir, priv,
+ 			    &cw1200_counters_fops);
+-	debugfs_create_file("wsm_dumps", 0200, d->debugfs_phy, priv,
++	debugfs_create_file("wsm_dumps", 0200, dir, priv,
+ 			    &fops_wsm_dumps);
  
- 	cfg.dpdData = priv->sdd->data;
+ 	return 0;
+@@ -379,10 +380,6 @@ int cw1200_debug_init(struct cw1200_common *priv)
+ 
+ void cw1200_debug_release(struct cw1200_common *priv)
+ {
+-	struct cw1200_debug_priv *d = priv->debug;
+-	if (d) {
+-		debugfs_remove_recursive(d->debugfs_phy);
+-		priv->debug = NULL;
+-		kfree(d);
+-	}
++	kfree(priv->debug);
++	priv->debug = NULL;
+ }
+diff --git a/drivers/net/wireless/st/cw1200/debug.h b/drivers/net/wireless/st/cw1200/debug.h
+index 80bc1567533a..339a375b4c18 100644
+--- a/drivers/net/wireless/st/cw1200/debug.h
++++ b/drivers/net/wireless/st/cw1200/debug.h
+@@ -10,7 +10,6 @@
+ #define CW1200_DEBUG_H_INCLUDED
+ 
+ struct cw1200_debug_priv {
+-	struct dentry *debugfs_phy;
+ 	int tx;
+ 	int tx_agg;
+ 	int rx;
 -- 
 2.56.0
 
