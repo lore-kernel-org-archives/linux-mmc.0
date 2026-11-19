@@ -1,85 +1,85 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.48
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.50
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795110615;
-	b=y7JwDAEjF1FbN3VzpahX36l4ve0DPj1ZSYkGJZ6UZ/F/PFC6CCp6QUcUWx29N48kJdnk
-	 z+jvb2lERpZVzLW47YU/XnLSSJ3ia+pte6LOIYoV61+4NdCt+/dLJZS15o9j7LldFg1us
-	 34LCW92xVq8EbhtdPW6j+Xkij/I4yE/Mqi4gWVqn8SReXOQs1BhBu5ctPac6Kaauc3Fdv
-	 CmJ+Y5UrZ/IT7m8NITNdTbaD/FQ5BP6NwkFv29Kapy9jNxiYSyH2S30j0UsW1iSURy6MM
-	 CLTxXtghba73xJmn5X9uzpwNS2g0yO/bkzTi6G1ERbFbURp/PS1PqWaHp6TzWYuUDZg==
+	t=1795110616;
+	b=V0xI9Y2cuM66iawzO8ZVWzf+ntqSZzvkzdJD+/B+XZiXYn5xiPy77flzVRj12b2brI0q
+	 BPADE/Xy+iXPOncb/Y2gIq80zd8EmPeZ+7tLnPfKp2WT9cftNZfW2cnvmsZCANfq1IoUW
+	 BEUZ3tOPG2lKxz6tsUItuD/cdCYy72pQBdmGCufPcoj+6RYctd4C2Ye9nMxjJ0fNnVp+H
+	 uZCpxwZ+WjtZyqbmw4eA6V5lvk0/IOwpA1Sg9YWn4AykzvmZAfCrHXhtTw8CpdYvlIn0X
+	 w4QoAx7RmiiECEsS5Hho+FETrwACaT6XQdCPzW/Vc3DKG88KJikMcP8Wb8BqH0y8c2Q==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795110615;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795110616;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
 	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
 	 MIME-Version:Content-Transfer-Encoding;
-	bh=VaJ32hdTW6OdgBsH5EJWCERCqsHcMt1Z/thd7ws6mpM=;
-	b=051eoRamGRm+89+KTgk3E2T+W+v7ao6NnogtF55e9JxI2ZyuB0TaX3qO2vkbNrKnhawn
-	 VJ7Mkz77cBPKB4h7Lgyv/lGlNW+4EPWKvMg0PHBSrYbGlwuG0VIfEruCPJd8WkSsiQpYb
-	 0COpnLiwS4yU90tzcr8MmM1C7py9zRZbiEl2Yjv464SOToBRJRJY2ppJM/dYnVtd/cpAs
-	 qCGBzAeMeKl3rGy+ZYAwN1J8FoFY3Edxd/thjrihEyAY5Kl9y5iTGTKrgoOieSj13dwfq
-	 E1EkxgQy07KoA1FlpI1UI5tIE9SWIXgzUnzW7c7Z0buGmUPVkqieE1XQX5jpx+7EaIQ==
+	bh=esT354LfgWAtzd0fzH7vF+hhVEnmCcI3/TAJZroHtbo=;
+	b=rd3RovEdocv9dadx5uyuTYCtLuZquAKEIDPPGQ6GdPLN48pfGKOjqhnEtzUCXEhe8a8H
+	 MOV8kwLXoYAaabLYwEx6xv9J2HOFBlgp/3AeeM25FpOwe+IlEoAUQ95WATJeKcJBPAuso
+	 pXZ8NbV+SHK7ODJxnWrFgERDMc54fhqNlqj4W0rr1oFZhDh8ezU2MIcOROCAdOZL0PhN4
+	 R7ceZL4tjO6GVFUvYOZ0e5WyiajQdWRlKOPRb6Qb3HyJ9D2mPTRTkRK3KhJ8UtxIq5I85
+	 qbqZSg37j7pgFC95R4Fhr60fb/2VnrYY7Ym06gF59Je/KyV59ZFDcYkQXyIP3liqlJw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=aheymans.xyz;
 	spf=pass smtp.mailfrom=aheymans.xyz;
-	dkim=pass header.d=aheymans-xyz.20260707.gappssmtp.com header.i=@aheymans-xyz.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=g3XD3WOn;
-	arc=none smtp.remote-ip=209.85.221.48
-Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
+	dkim=pass header.d=aheymans-xyz.20260707.gappssmtp.com header.i=@aheymans-xyz.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=HqIwrB7x;
+	arc=none smtp.remote-ip=209.85.221.50
+Received: from mail-wr1-f50.google.com (mail-wr1-f50.google.com [209.85.221.50])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4E1760A3828
-	for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2026 17:50:14 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D4E1760A3828
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB01960A5BC5
+	for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2026 17:50:15 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org BB01960A5BC5
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=aheymans.xyz
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aheymans.xyz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=aheymans-xyz.20260707.gappssmtp.com header.i=@aheymans-xyz.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=g3XD3WOn
-Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-4a42b34e930so2198685f8f.2
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2026 09:50:14 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=aheymans-xyz.20260707.gappssmtp.com header.i=@aheymans-xyz.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=HqIwrB7x
+Received: by mail-wr1-f50.google.com with SMTP id ffacd0b85a97d-4a9be758734so731010f8f.1
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2026 09:50:15 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=aheymans-xyz.20260707.gappssmtp.com; s=20260707; t=1795110613; x=1795715413; darn=vger.kernel.org;
+        d=aheymans-xyz.20260707.gappssmtp.com; s=20260707; t=1795110614; x=1795715414; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=VaJ32hdTW6OdgBsH5EJWCERCqsHcMt1Z/thd7ws6mpM=;
-        b=g3XD3WOnMdsJFDEykQoDr1yoI2Ub/9w2hyjJixXgE5sY7EuEC6aXaSUX4dGIt6DqNK
-         SOHsRGi8PSmlch6qy3qjIgF7U9PrEyx/Jy5IwrJXiqkDYDivx/QbQY78tg96+LVHBKtD
-         jbxR3ktY4KV6imDUzRuVrMSdMHEbXesVNc+sD4j4SJrJlCTtIC7/El4ddJbDNzU8+L7S
-         yOLiDZW9FtRRJz2KmT4q9auuwU6WN+ZSLQ+aZgBh22Ix7kGanQOsiQW+gJEeCp+2I5nS
-         Kfn5BrHHYT2Q4basE0JG9NfGfgEbWJvvk/kaVA/RkyaskTLPbViRN/4qaEOoLdLTYB0I
-         G5tg==
+        bh=esT354LfgWAtzd0fzH7vF+hhVEnmCcI3/TAJZroHtbo=;
+        b=HqIwrB7x2+DpqqIgAt1fYw2X+S0cMj8zCUqo/TtX86KaS4qJ5mPzW9HLO8eqO2WDh4
+         f+Khohjj9EDyDE4t1MOVwWqhBgN6AjH76sRgY4qojJCrR7L1gJ1A9Fdd2lpjkHyHD6lt
+         5VNSXCEizYBZRgwGV32R+VJPHlhk9toLuBUl200ttN5SIS68yC4iCUGC0blpVJmbmYxL
+         EKvoeT6aFBbexdCppiSSpaeeAcR++6QXZG3HB2r4kmmF95cLAX0hydKb9sIo3CnsQdCu
+         vsuCknPexkSExhRu5B7HWAu4hRQ4egkHYCs+QC+l9Z2clQ4LZmhyI0afLUfzzFGEUIYF
+         pdlA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795110613; x=1795715413;
+        d=1e100.net; s=20260707; t=1795110614; x=1795715414;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=VaJ32hdTW6OdgBsH5EJWCERCqsHcMt1Z/thd7ws6mpM=;
-        b=YTZB4QZ9m6ewrjg8dHfHpOy35w4u8MSOXCf5CawW/azpJPgxkevjv4ApsgCRXbMa0X
-         haX+6JkFMUq15BXLhSwcf+fkbI8t+E9wbrFiSpZDVgP2zmUSV6k6J+XvE3zedwfSrLYb
-         kXujtSjWln8L+sN2og2DZwiiA8ynDX8n5yZRrZ5KrWFB2TMNcOsuIu7zUWNNEkX/icGC
-         6I/D+18WzMec+XYv50fMJN3DPKgbygMwEdCRpdEFuiCnxGd9puhoCAe9xtD6ON5NlpSf
-         2ff7OvzRwgq8bOySyGjsCk1i/aisiLY2S1Gv4GWazwqb/3LkaN1K5Jn+WBEHp9pCULvm
-         Sntg==
-X-Forwarded-Encrypted: i=1; AL+hErG1PExGHI9CDXzEc9QI9jrfh9TD13Zs5We7MNwLIW20pnqZ49LYl+WFSvjU8wuuu/JvUhK5QQMQWbI=@vger.kernel.org
-X-Gm-Message-State: APuU4Z9y6/wlwp0paHBc33kQEbUe0PqMA6jtZafSpw8Q50O1gOEn5gZn
-	TT4b7itqrROePNc+IZYva1kgUEFRRcT8vZGiMWKtS/DCt8/MQHWuqRGNYw29z9jsbLc=
-X-Gm-Gg: AZFdTZe5LM4RdU9f/r0kGpshFyswlwq8JeB71QLhSpuGHgo6ODvKMMlAsVYOiPXfnoe
-	tFxVCHS1SLCSbacZ+rlUkp+JJQ+ILbj/No6E8kcDIJUDBBwTcswQI397ar0dM5bEvxDg1PJXEH7
-	8VGru2HW8XuVh1o26JC6dS1R4sAarVQQe87RvyfePri3Vq14lYiBEg3roCTZmzjb/QEv4ZhaA1z
-	tJDhT+yN+DGg8OvV6O1qNK3kD/GiMxnghR5aG0A9kybIiF01Z5aICpzCfi20LTUZeqVFofEsmsx
-	BOWq+zw/oliavgVooNzCwbrJyjV+J3vGPv9WN6Jvf811FxSFMNskDg40YTnPWJhTky1jBH6JfAC
-	4W4cTkvVffVLzb/ZCzq/14sGAf0j+cBehd1/noqsEHkRJao0jQRSj65+KI6MFpwMbvpV7iDCbUx
-	HICD7k85d03XzceZxdFl/ZasgoiQ4QEEFXNKPT1mM7JB8h8IAGmoMmTQLtcA4jqtCZonmVA7CO9
-	3mL6mV+/nbR73oKw4MBdTvZKiIR2wKC7o9X+71/YrSHnudBRZr5PA+o3diczZD+oHXRJ+a6neOr
-	B/DnB5v3ATb4fqVsHtHfhQXImeAwjm/CIf9gPEbqnYA1diCpfePgGQulIuRPYZnDCAeX4ioF9S1
-	yVv24m9FVt2BSJY4cWoQdyQv0xrg8ZgpfO81bqUPCU2qJAMdidj6WHDLTQvozlh9KdgUlVU7uAg
-	gv8w==
-X-Received: by 2002:a05:6000:2313:b0:490:50c1:f359 with SMTP id ffacd0b85a97d-4abb4d70071mr190135f8f.39.1795110613162;
+        bh=esT354LfgWAtzd0fzH7vF+hhVEnmCcI3/TAJZroHtbo=;
+        b=2yyn84rmM8MCoFhBeVAdoZoyITzXyNJG7JdZeUJ9KlJUBCuNJrsp//LHqg3KAyLnU9
+         ri1cCQ95fWdbZlcKnPgSsScZZ6czyyh6YwPJZCCJxREqIh7w31N9uagLHZZqv+IerYLJ
+         91tfD316iMZaB+QrGKbZRxWEfTGijcA6G/NVZJ6lHjqqA15PQC1GzaTIttHJIV6gmK5G
+         PfS1axXbydywNqgD10/v3xF3m6o20v5WKhyh98jbnuxX7YwQjezYlRUXk7N62+HAgnC3
+         rcxuERfTQAJZJuEbBw3qo+75H/HWKy4Mbhf/uLsOOY7giCzGMSrq/UP4kcNheoRtKjPB
+         OTIQ==
+X-Forwarded-Encrypted: i=1; AL+hErFkAI9krjx0YRxTPJoFK+b25/WPOyLqavTJOzNhwASfuxv+BPXxsoxuMNRmzUmvWstotwG2+vUDZrg=@vger.kernel.org
+X-Gm-Message-State: APuU4Z9R+/hlrvUtSqDPQ7/x/1OLzoFT44e1t7KYqA4zZp+H/NOWu10H
+	vMnC2PVqzkywXRYV/zG8/J3qcU4VLpFBXYqVQOMaQjTsw5BDWtX6VdAij0/udeS4+dY=
+X-Gm-Gg: AZFdTZeQKuOy7Elud6HKRBnVph+W47XNYKxQO+yhlCR3f4nGoQkeOrXZSiEocCPUieh
+	JPmP9E3nvZve1Hq264r00smshei3d/2ZLBzjNfVGfu9pkP/zvFqimaHf3L7KP+YrXjLZmxbWkEr
+	P+uPwNEMkFPK0cmXw7eS8GQTCVx2SlS/9Nkwfi0pmj+T0HomTwletFj8kAhD6iTgRxEaR/aaW96
+	yzRBQsnGZihTGP1LVlfH4vhkl/jG+nQ+DBrYHAqIhq6e7uM78OQr9op8g3DHjQEHu0j4kgB/ExR
+	cpgdllE4XEyua2fap+mvNhRd3eOW7Mp2ws+nC34spzNMAlkYnNHXLEd/ygGc23Ta2HQjYWSCENH
+	4VO3peHLewd88d/dalbD9Wo0VCXTIP7zDWPW2qIDLgiX53iupdv7wAcAenq132UN+4JlUD/fDdI
+	M1nwZzzoFzsRN/3jtp5Nq7nwOdBvUa261xEr4vvq8sHmBFM67HFvdZyyZyhlGa56JT3vN4P1MDj
+	On8TLueYNSyQK9VseKumVeeO3HfAthZfT+gNEpdPCcy3/8d/iNSjMQZLeoDMX66T+WxE99Dl25I
+	YEkNCawpgvxmQ9o13hV+wW3GCip8tBsq8rEfIFaC+r3zIgzTmZH8VO/TEod6skd+Q4rm2gHBJcC
+	aVfr1S9RnBrCM7QH68YCaFWFKzPta0wJs8P8zzZo92cF44SjfxeOmdmv1H+j4sYG4M+MzK/zrPc
+	/bLIk=
+X-Received: by 2002:a05:6000:4a0b:b0:4a7:4efc:11d0 with SMTP id ffacd0b85a97d-4abaf740155mr279928f8f.12.1795110613914;
         Thu, 19 Nov 2026 09:50:13 -0800 (PST)
 Received: from localhost (2a02-1810-b422-d400-611-84c9-252f-74ad.ip6.access.telenet.be. [2a02:1810:b422:d400:611:84c9:252f:74ad])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4ab9cf005f2sm310363f8f.45.2026.11.19.09.50.12
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4ab6ae2dd55sm876032f8f.30.2026.11.19.09.50.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Nov 2026 09:50:12 -0800 (PST)
+        Thu, 19 Nov 2026 09:50:13 -0800 (PST)
 From: Arthur Heymans <arthur@aheymans.xyz>
 To: linux-wireless@vger.kernel.org,
 	Johannes Berg <johannes@sipsolutions.net>
@@ -92,9 +92,9 @@ Cc: Rob Herring <robh@kernel.org>,
 	Solomon Peachy <pizza@shaftnet.org>,
 	linux-kernel@vger.kernel.org,
 	Arthur Heymans <arthur@aheymans.xyz>
-Subject: [PATCH wireless-next 06/10] dt-bindings: vendor-prefixes: add XRadio
-Date: Thu, 19 Nov 2026 18:49:58 +0100
-Message-ID: <20261119175002.458988-7-arthur@aheymans.xyz>
+Subject: [PATCH wireless-next 07/10] dt-bindings: net: wireless: add XRadio XR819
+Date: Thu, 19 Nov 2026 18:49:59 +0100
+Message-ID: <20261119175002.458988-8-arthur@aheymans.xyz>
 X-Mailer: git-send-email 2.56.0
 In-Reply-To: <20261119175002.458988-1-arthur@aheymans.xyz>
 References: <20261119175002.458988-1-arthur@aheymans.xyz>
@@ -109,28 +109,85 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add the vendor prefix for XRadio Wi-Fi chips.
+The XR819 exposes one SDIO function. Boards may provide a MAC address
+and wire a GPIO interrupt instead of using the SDIO interrupt.
 
 Prepared with OpenAI Codex.
 
 Signed-off-by: Arthur Heymans <arthur@aheymans.xyz>
 ---
- Documentation/devicetree/bindings/vendor-prefixes.yaml | 2 ++
- 1 file changed, 2 insertions(+)
+ .../bindings/net/wireless/xradio,xr819.yaml   | 49 +++++++++++++++++++
+ MAINTAINERS                                   |  1 +
+ 2 files changed, 50 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/net/wireless/xradio,xr819.yaml
 
-diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-index 5471a06f93f1..066c2e90f289 100644
---- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
-+++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-@@ -1959,6 +1959,8 @@ patternProperties:
-     description: Xilinx
-   "^xnano,.*":
-     description: Xnano
-+  "^xradio,.*":
-+    description: XRadio Technology
-   "^xunlong,.*":
-     description: Shenzhen Xunlong Software CO.,Limited
-   "^xylon,.*":
+diff --git a/Documentation/devicetree/bindings/net/wireless/xradio,xr819.yaml b/Documentation/devicetree/bindings/net/wireless/xradio,xr819.yaml
+new file mode 100644
+index 000000000000..4f6919b6bcbd
+--- /dev/null
++++ b/Documentation/devicetree/bindings/net/wireless/xradio,xr819.yaml
+@@ -0,0 +1,49 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/net/wireless/xradio,xr819.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: XRadio XR819 SDIO wireless controller
++
++maintainers:
++  - Arthur Heymans <arthur@aheymans.xyz>
++
++description:
++  The XR819 is a 2.4 GHz IEEE 802.11b/g/n controller connected to the host
++  through SDIO. Its out-of-band interrupt may be connected to a host GPIO.
++
++properties:
++  compatible:
++    const: xradio,xr819
++
++  reg:
++    const: 1
++
++  interrupts:
++    maxItems: 1
++
++  local-mac-address: true
++
++required:
++  - compatible
++  - reg
++
++additionalProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/irq.h>
++
++    mmc {
++        #address-cells = <1>;
++        #size-cells = <0>;
++
++        wifi@1 {
++            compatible = "xradio,xr819";
++            reg = <1>;
++            interrupt-parent = <&pio>;
++            interrupts = <10 IRQ_TYPE_EDGE_RISING>;
++            local-mac-address = [02 00 00 00 00 01];
++        };
++    };
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 0cf311e6c4be..6e7b5f6beba4 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -7211,6 +7211,7 @@ F:	Documentation/process/cve.rst
+ CW1200 WLAN driver
+ S:	Orphan
+ L:	linux-wireless@vger.kernel.org
++F:	Documentation/devicetree/bindings/net/wireless/xradio,xr819.yaml
+ F:	drivers/net/wireless/st/
+ F:	include/linux/platform_data/net-cw1200.h
+ 
 -- 
 2.56.0
 
