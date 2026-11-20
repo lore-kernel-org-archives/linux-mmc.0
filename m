@@ -1,56 +1,95 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=84.42.129.46
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.43
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795186080;
-	b=R4WO8rBZST0/GApK74iGE8z1fzVWOQGSmGWUYRFTPC24l8LeIKV+FuxhyoRWRmcs7Jn0
-	 2BIYZuPz53Ff1allAxQ8QAXKxAEifmvpPHZHHp3YUyv0rKneTDAp8A6c1ixSQu/W3HQB4
-	 kkMALUyCKox9rgdiGbxuqaIZRqqT5fMqASQKVz3NwbWyaWLtdpL8x0AJu9FebMF4k/Pcc
-	 jVuA/cHuP/xlqS+FvREQ3bZCo/M6f34qXFPl2Aqe8DXQkq7ekTp4lLQZDVOsnMKEbaLeO
-	 1HInc7gT5amxC1YToeGTPumG4Nki3wLQxGR/gcOlapqjxy0DVdibruJwTjtIYYSnJHA==
+	t=1795189935;
+	b=i9lYLUm/ch3A9YTVNl+vWAtDzMkAxqCImwCskokzs/5+WgykqbqY/OO2/UQZBNybu9ZH
+	 KsrkwnXPo1je8Wu4rOv957/5fuo4Ww1iW+lCxOHPOvQTlta9Vi6ihL9KhFbzdHLXzStHT
+	 XA0GUeV3/qz/Ri5dR+R3HMLobrFPtuEDrV607oUVHzKNT8azfBfRf/Y3XWRGNm8fOP8PJ
+	 D2XcVMxVlH7B3s3PyauFi05u+AEx8FlJc1m9pKG1/7GrRdiiqLPhBlkvEiEKRejnkhMbS
+	 5/XuVySXGN7hbF7AEV4KkESaz28vq9Z+raRC1i2pYIkMV5A+MqjxCdJRyJ7gRLtmDMA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795186080;
-	h=DMARC-Filter:Received:DKIM-Signature:Message-ID:Date:MIME-Version:
-	 User-Agent:Subject:To:Cc:References:Content-Language:From:Autocrypt:
-	 In-Reply-To:Content-Type:Content-Transfer-Encoding;
-	bh=ajQHVPUlwHQJNrn8ibr6uDUislX3tx7P9n70504rO8w=;
-	b=vE8jpvX/WwQDChZEO6cdsydcyuhBWIN2v9g8I1pW/4FoGjwC5upflkNU7R6zg8cd1t5V
-	 rbt7pcA2Xr0HMvjZ97GfW+O88ptZlk28ySAKMgaDijM59aiCjmL6gZsVIligI/pd5zpyd
-	 9zCiu2UUgs5oIR2gYFZWIWXShPG3a8stetJwUZgYwZ/i0cgWY8NRc46TmeeIOdobgWuX6
-	 AoCkFQYVOwLQ0NCxPJYjDYYfCZbuCLmNKjG9R4/Skw7fCvBzVd55D7VcDCOVaVteMwaQD
-	 sWGmDEkXMBIJ27oznXi9xVXF01h1AvKHxOMASLQRIbdNO4UpDInHMoFyG/Si3EHw1Aw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795189935;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
+	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:MIME-Version:
+	 Content-Transfer-Encoding;
+	bh=o0nDPHjheNdO6zZdX+LgK+UkTDP3QtATTApjvPCGCnc=;
+	b=2bDY23Hp56srM0rHzRpHn/63aZtMWvznI7BFXk2W/hoBQE/MGjxthSmAzHNk8YkMF2Ps
+	 0Df7lyM8juDMkeI8aCMGXvJ0wsXHBKFi++0ZAd+YwDysF3Ywqitop4ssQsQyt/k1ntxYM
+	 sWsc45J4Qs3bxJE+u1zXiu7HsJfde1ITXQ8e2Qcoym9vPoID/CzlSYQC5zu8YosZTARMp
+	 Fin2pl3ibsdS/CdQ7rNcM09aYF0wdJhvJnNKpPlgSrnSgzA+VSDDixfaT0iVe2NYLGazi
+	 i06UrYkbmMHuzDV0E0xqHr2vF6ORCVPrk+iaj/+W4K0XDk6TSezI0GgMEF7HM386E4A==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=ixit.cz;
-	spf=pass smtp.mailfrom=ixit.cz;
-	dkim=pass header.d=ixit.cz header.i=@ixit.cz header.a=rsa-sha256 header.s=dkim header.b=Jp5YHK9N;
-	arc=none smtp.remote-ip=84.42.129.46
-Received: from ixit.cz (ixit.cz [84.42.129.46])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	dmarc=pass header.from=starlabs.systems;
+	spf=pass smtp.mailfrom=starlabs.systems;
+	dkim=pass header.d=starlabs-systems.20260707.gappssmtp.com header.i=@starlabs-systems.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=WCwH1Rqf;
+	arc=none smtp.remote-ip=209.85.128.43
+Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58C16606A333;
-	Fri, 20 Nov 2026 14:47:59 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 58C16606A333
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ixit.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ixit.cz
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BBC84606A32C
+	for <linux-mmc@vger.kernel.org>; Fri, 20 Nov 2026 15:52:14 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org BBC84606A32C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starlabs.systems
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=ixit.cz header.i=@ixit.cz header.a=rsa-sha256 header.s=dkim header.b=Jp5YHK9N
-Received: from [192.168.42.97] (nat2.prg.suse.com [195.250.132.146])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by ixit.cz (Postfix) with ESMTPSA id 1914B5340330;
-	Fri, 20 Nov 2026 15:47:49 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ixit.cz; s=dkim;
-	t=1795186069;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=ajQHVPUlwHQJNrn8ibr6uDUislX3tx7P9n70504rO8w=;
-	b=Jp5YHK9NUKKl4cH7UcHex285hOmyYKUs9qzhdA5oWpVdDucxm15y4TYfHWydvzg6ir8OoC
-	0T3QAf0OgcIgZ5gpzfR4KKe1WR30aQSUVjlJbfZIYe4MNeKLEO7hwjWjo+bxF7s6R6bvbB
-	j1Va8kjmm9Y8qPCc3KZg74IPkQv51F0=
-Message-ID: <787950f1-ff2f-4b49-b164-61da3c9971c6@ixit.cz>
-Date: Fri, 20 Nov 2026 15:47:48 +0100
+	dkim=pass (2048-bit key, unprotected) header.d=starlabs-systems.20260707.gappssmtp.com header.i=@starlabs-systems.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=WCwH1Rqf
+Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-4a207b02a2cso7754765e9.1
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Nov 2026 07:52:14 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=starlabs-systems.20260707.gappssmtp.com; s=20260707; t=1795189933; x=1795794733; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=o0nDPHjheNdO6zZdX+LgK+UkTDP3QtATTApjvPCGCnc=;
+        b=WCwH1RqfXcIScdHJy67+kfLKwT3+/hNO+QkRu5Opt0VR+buDe/ijfkc2usbr/6Z4kd
+         Kw0ewx5QbspFC6o6hGcEPJXruFv4weYCFML7eC6321KZMFDuC3gl0eBCNwyqSDyoMcdj
+         uNBOrPNI52NZEo9THh9toLwpC5yMpZDUSXSsyBXag5r1HY+cqsjBc2RnElr3X2yhZMFS
+         cprvs3KfotLC2ZdIK+Kvzk11nPb8YlTM7DP4/SSvQ80DKoF6MdKBrCZINJzExS5VmyVB
+         diCTjoIWZZQkLyMYcLu/7wCxoQX/ip/j/HvBUN+PoB+J1phxeEq2zy9SXxKLrTpyfPpr
+         ltPQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1795189933; x=1795794733;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=o0nDPHjheNdO6zZdX+LgK+UkTDP3QtATTApjvPCGCnc=;
+        b=yPYFs4ZFMKszk6hmEnlI/vtHnpmgYW1fPjKLRMCYQ2LfjSiPYJuwA87XSkDdPlSyvE
+         IloWZjMzobF19IdSETbpPuSvSEW7lG27gofpATZL+P7j0WvSyFKe8S0+lcrYdeRiicHA
+         WMCxVzB3jlgw3SHiloKrMsJMV+doOSs8hp/0XPep5pJ/CiCepHdtlCAUR25U7JDyQo23
+         76EQmKWPFHbp69IHrfGDp7KIOmDZ5k/0u6Uc1S30B+TqK8HumOEdCFcPiekDnBk60his
+         OF1jFO56xgxZTknoDifqOd0y6ah8tpwNNGGqQpZO8LZfedeO+G2ajd/HzUERm7um7NJr
+         Eobw==
+X-Forwarded-Encrypted: i=1; AL+hErFzZdIK+faDbO8pMb9u7kGJF049tLfHgi+GhYp/YkeIC3ICqCEX7QZkgQSlXTU9KN7e3Id5Oyb0YKk=@vger.kernel.org
+X-Gm-Message-State: APuU4Z+kvmKndE7JOdTM2s2c4uFx4CPg9p0PXr+XZqDOorSrjHYDVCnH
+	4hIIK+3jAsyxVwQFH73gAPaBa3izwleq7lQHoBzteizl5As/fLYfGzZlu68KVsk4QQ==
+X-Gm-Gg: AYBFou1GT3hfit/HI3eLBt1TLxD03R1z9pV3WABVK0Xo51bqj2JmjQgplNo0GNOl8gc
+	LvnioQCyb+Pb58sc1IH6R5nGnu5Vi9/z0fSrFyMhyvcdQHe7UpwuQhYgGHMKt1iu1Orksciqlbg
+	RIKqB4p21qbytZ1zn+0g7p3zF/YKuP7LBb/ECD2himZKDnasagntokZqyIRnRld6c1S/e5Zgzgf
+	C6vgKsU9JtLI7TUTZUrd50QThgr2yNx2kvaKyvD/FPii7SaWpzNTRRT5LIdwcoLRsijLDxFIEd3
+	hAO2wkNuRw18u+pWn01dcGf3pWzIof4Us1yX+0H0jeW8zzk1UAvCK/TfS5L1eUTaAB8isREBWwE
+	r3ybU7n0tNGQGLjJT4//9Zp1B1b6SNfiIIGI7fknLkTYmAdvYNRl9wOQU1oMtnKlR0ZBEsUwEHg
+	jekAgGos+xTYQTLfQEPpvf6UEa4vAX4AqTsqMEAxnRY14+pyDs0XwoYiLEpb3Kx4EVg2AoHgNyD
+	EWcnOPjXqHgBfaOfw2+TrY8TxPibj/VTQVckurGhngkNK1AN5xByR/SB8JL3TTnIrDJWwbOx+fj
+	sHoxQTZOzAF6DA8kLXcADWwj5PQv7nOUuVLs7Kl8vDzyeKwtvKmsjxicLNrKOeFs9QcsewdVAhF
+	UE9bIRUNtBYIoI+hnbJUCAbSFa04uDGCi+bEvAQ==
+X-Received: by 2002:a05:600c:c09b:b0:4bb:665f:7e52 with SMTP id 5b1f17b1804b1-4bb8880995dmr59500055e9.10.1795189932934;
+        Fri, 20 Nov 2026 07:52:12 -0800 (PST)
+Received: from fighter ([2a02:8011:ef47:0:33c1:5cb4:17b2:3e17])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4bb853a12acsm132029365e9.8.2026.11.20.07.52.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Nov 2026 07:52:12 -0800 (PST)
+From: Sean Rhodes <sean@starlabs.systems>
+To: Ulf Hansson <ulfh@kernel.org>,
+	linux-mmc@vger.kernel.org
+Cc: Philipp Jonas <pjjonas@web.de>,
+	Thorsten Leemhuis <regressions@leemhuis.info>,
+	regressions@lists.linux.dev,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: rtsx_usb_sdmmc: allow legacy SD init after CMD8 timeout
+Date: Fri, 20 Nov 2026 15:52:11 +0000
+Message-ID: <20261120155211.2535908-1-sean@starlabs.systems>
+X-Mailer: git-send-email 2.53.0
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -60,104 +99,49 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [DONOTAPPLY RFC PATCH v2 0/4] WiFi support for
- samsung,coreprimevelte
-To: Karel Balej <balejk@matfyz.cz>, Brian Norris <briannorris@chromium.org>,
- Johannes Berg <johannes@sipsolutions.net>,
- Johannes Berg <johannes.berg@intel.com>
-Cc: Francesco Dolcini <francesco@dolcini.it>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, =?UTF-8?Q?Duje_Mihanovi=C4=87?=
- <duje@dujemihanovic.xyz>, Andrew Lunn <andrew@lunn.ch>,
- Gregory Clement <gregory.clement@bootlin.com>,
- Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Frank Li <Frank.Li@nxp.com>,
- linux-wireless@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-mmc@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
- phone-devel@vger.kernel.org, Jeff Chen <jeff.chen_1@nxp.com>,
- Peng Fan <peng.fan@nxp.com>
-References: <20251026182602.26464-1-balejk@matfyz.cz>
- <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
- <aSnWYS2g5slVFaSk@gaggiata.pivistrello.it>
- <DI5L100Q1RKO.1A68EJIPWYSRC@matfyz.cz> <afI8y70U7wFT_07h@google.com>
- <DLQ9LXDE2P29.248MPYCJMT0DL@matfyz.cz>
-Content-Language: en-US, cs-CZ
-From: David Heidelberg <david@ixit.cz>
-Autocrypt: addr=david@ixit.cz; keydata=
- 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
-In-Reply-To: <DLQ9LXDE2P29.248MPYCJMT0DL@matfyz.cz>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 
-On 27/09/2026 19:12, Karel Balej wrote:
-> Brian,
-> 
-> Brian Norris, 2026-04-29T10:15:55-07:00:
->>> Brian, what are the options here now? Would it be possible to make an
->>> exception and accept the patches without the firmware being in
->>> linux-firmware? This is an old device with no mainstream audience so I
->>> expect everyone who will want to use it will be able to supply the
->>> firmware themselves
-> [...]
->> I suppose I'll leave it up to Johannes on this part, and may be willing
->> to retract my NAK [1].
-> 
-> I have not been able to get a response from Johannes for these last five
-> months, despite pinging twice – is there any chance you might be able to
-> help with that in any way, please?
+According to the rts5139 staging driver, SD 1.x cards do not respond
+to SD_SEND_IF_COND. On an RTS5129, a preinserted 2 GB SD card times
+out on that command and the driver then rejects CMD55 and subsequent
+initialization requests with -ENOMEDIUM. This prevents MMC core from
+trying the legacy SD path.
 
-Hello Johannes,
+Do not suppress card detection on a timeout from a no-data CMD8.
+MMC SEND_EXT_CSD uses the same opcode with a data transfer, so retain
+the existing timeout handling for that command. Keep refreshing the
+physical card state and retain suppression on other discovery timeouts
+to stop repeated probes of an empty tray.
 
-any chance to share your opinion here? Would be very helpful if could move 
-forward here :)
+Fixes: 7185b6d33b17 ("mmc: rtsx_usb_sdmmc: suppress false CD after init timeout")
+Reported-by: Philipp Jonas <pjjonas@web.de>
+Closes: https://lore.kernel.org/r/523eb7d1cc0811df4a5e4c534538f3dd@web.de
+Tested-by: Philipp Jonas <pjjonas@web.de>
+Signed-off-by: Sean Rhodes <sean@starlabs.systems>
+---
+ drivers/mmc/host/rtsx_usb_sdmmc.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
-Thanks
-David
-
-> 
-> Kind regards,
-> Karel
+diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+index bf37fab233cf..55fb83f29328 100644
+--- a/drivers/mmc/host/rtsx_usb_sdmmc.c
++++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+@@ -879,10 +879,12 @@ static void sdmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ finish_detect_card:
+ 	if (cmd->error) {
+ 		/*
+-		 * detect card when fail to update card existence state and
+-		 * speed up card removal when retry
++		 * SD 1.x cards can time out on SEND_IF_COND. Leave card
++		 * detection enabled for the legacy initialization sequence.
++		 * MMC SEND_EXT_CSD shares the opcode but carries data.
+ 		 */
+-		if (!mmc->card && cmd->error == -ETIMEDOUT)
++		if (!mmc->card && cmd->error == -ETIMEDOUT &&
++		    (cmd->opcode != SD_SEND_IF_COND || data))
+ 			WRITE_ONCE(host->suppress_cd, true);
+ 		sdmmc_get_cd(mmc);
+ 		dev_dbg(sdmmc_dev(host), "cmd->error = %d\n", cmd->error);
+-- 
+2.53.0
 
