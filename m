@@ -1,79 +1,78 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795264998;
-	b=VPbbi/cogsbgvR8k0vweicalguLf0a0K7eKdIsUrN7vkAefjrz112JzmN3PBdtJ0xYWY
-	 +pmAzdzQBAr66uAeN2bMzUWBpnZOLKS5IFSVm8yPKt8ynR/3QiKaKUt2h1GruSLRffLhu
-	 cW/VDq3ZLH+b3kIR2O6kNbTSj+5x3LFS1pSYKPONVRE+pEMSyov9mVWnv5ek1SuYy2IM8
-	 aVrQpmqaeiu8+vceEVTJSfmwGeYaiLUmfPLVcokA28V8/zl82YxuOnO6gGkm7q8KDaHr0
-	 12YX9wixuqnxEepyj/iHQxVoVz8/k1EX7eZazQCLL+UkgC8lgxHSow+kB6pTaH9BQew==
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.remote-ip=100.103.45.18
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=fail;
+	t=1795264995;
+	b=hVHSCUBO2lFS6lpLkRi9xtSh8X18gQteJBNEF0eX0PjvQN2dN6iRv4XzGdbJpFv/Pyyp
+	 KZ1ourLzze7ixsuI+lSjnn9XdkxVPPIw4YkEKAbbdSvDv+PbogR5wsAuAzB50tFq31xGJ
+	 OUC39gnIhTacyZOGcqqxRrwSPtLPBeq1MzQqIxyKO4OvJEtDzGaipbJOvSk8MmzjTHOxA
+	 dOfUkDVdMyfYy5XeZGlz1MTAYpw0Qev/nc+2YjUvZqVxLsf3fyrxU1dSkWMwO5Ggm5mug
+	 SdeApLsEDifNvb3ARh+Ll4jodWbn3HSKK2tcbUyqKAQs6Ny4c5kBaAMv9TO8ALagfSw==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795264998;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795264995;
 	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
 	 Content-Type:Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
 	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
 	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=xUb80D30HN0DexKwD7t51Nu9644o2kzgN3wPWJ8IipE=;
-	b=0i5cWAYer6End77XnZBaoIGAJ1ixnpJnWcR7P/I+JlvX5yy7OZ5PDhRiPvFArCei7I8o
-	 aRoco+yRvW6Lr/zIQim7Ci6MewnI/QCR6LcUtdlop+tHMZASPl+cDTI+sd9SJmZdCytMo
-	 h5sJU9bauEBquWVBxDkDMKv555UpWIdT33iE5+8LMrDCaLKSkF1PNKk8//6Ku7z7V1KzZ
-	 FDKLEQ4TMTp3aBkPgrFb3TDUccx+pk2Do9VUfSVFv57XaJ0OfFFH3vd02IXsAOj1Jbr8z
-	 it34U4F9hTUKLnkfP7sRGf3ExPEyMEl9U+KEnCyDtpJlKRtT50O99VV2s4wupXD/97A==
+	bh=1yuakmTQTH2nDMkgihJWUJR+XjzHNUnODXcOI9ROkNg=;
+	b=XFlrrc/vUjZgjNzYlO/c2/rBSjtMY1wfVjTrByyvvo+uYViTcxhKbMCKRBUi3RnefoAW
+	 UgICt2pg/nbEFOHevjvA1hMg0DgNsqYENPOmQ2X1T9loDyIwP1KxyY+I3Z5t15fwefc2A
+	 gXafblWZ644FTs9HQ4wH97UaMEF48iVEUda9qqa+JSwk0KHI40jdk8JmoBP9QyqzUhYki
+	 HW9a1lAf3WzOOPGUkLzLgAB3sh/0Wg+VEgLdwFMt4869uM7EC0hrFOqWBnLDGdmdE7lwb
+	 4iy3EpFQecfCyTIZAwDBO7TSZeZ82NOOBogv6BiFBtdzoSHhF9/mfv2fmgl+OIprlGA==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="f4ef/v33";
-	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QtKelhFb;
+	arc=fail smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 557E260A2614;
-	Sat, 21 Nov 2026 12:43:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E3C95606A320;
+	Sat, 21 Nov 2026 12:43:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=f4ef/v33
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QtKelhFb
 Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
 ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1795264998;
-	b=uDDbXblnLhDx2GPfwE6ChRzQb1aNvOl2kF+wPdDtFU8mK3sMcni3iQ3jbryQsQ082S+x
-	 GLCNR40TWr/pdZjWpRyfKouifyyqT5YeM9gaHmPM6Q0i6hJ5FSuaQMIwTC6UHDhnPtK55
-	 p+A2p/Fe4vGFqMmnyqLtg6X1GTZ2AfV2a2D94kTGk2C2J0ipczbSYJ87Cv8RUx2UyYzHt
-	 WLoK3Fn7aEOI8sW5GvDdG+8L7NKj5b6EXABSKOGGSCKAnfZvgFOBfkpdEFuFy1XWzyYqj
-	 gzqd8/qumUMfrzf1I/f29Ju9htPp66CaUzdq0K7TDEbwtoe8QutrjDWffopBTgdvxGQ==
+	t=1795264994;
+	b=syC4y7fC3UMUnV3qLtg/1PVeDGDPN6Ghj8vIrSKL8MeYtQtZarznEuwbIitn3Dn4u5ng
+	 b+SWR8okkANr29fK07aTPYZfydp/vm2k2HUlOnunXzMWG6F8ccIztanz/90goMReK3XZb
+	 1bkMQZU+iCqMfuM0wha6KEe1qsYU0LQEDHuBC4Ekj43iw3gbYEfM46fiqBuLJHgl23/8L
+	 3DupiKG3L9oF9WZ0IesHqjBtd/yluzD4fCnXX7wIO+BjnNSn1mdMsnPAmmz2adnj/DY7f
+	 98i+6DOgu4M0Cyyzt616+23PKPz45/V7YuVPHvmStA/mhQr1MXQZy9XqX/kLD9gPUEg==
 ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1795264998;
+	c=relaxed/relaxed; t=1795264994;
 	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
 	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
 	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
 	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=xUb80D30HN0DexKwD7t51Nu9644o2kzgN3wPWJ8IipE=;
-	b=e08hB6PciCf4Mf7GgwNnsUXJR2ujhnGEqIGxIYazfzNLFNpRfqIAhXWV52hvUnxmapm0
-	 h4N0M/adnTUtYBR5QBIWYh1WG2E9P4I9j4CFqs/Cu3AO9vxwh9TgqUdKIHfZmEtHPKNDu
-	 3GY7ZW29/lVys9ykcIRMm5EwFiAwEN8KmpcU/bTH8tK5TuRoe24JcZWMg4DoJfg0Y/K6g
-	 JrbJqHisNadxRobv9jnv25ZT+t4V5U4/ebf1pBG6LD8rm1XQgeq34BmdvFaK9E8C1qXzw
-	 XbS0oz/dOt/yty50rZsTn9O10rqRVkhyBTHOvOPkfFDqGYAc6Ulavv2MNkOq6pF0GGQ==
+	bh=1yuakmTQTH2nDMkgihJWUJR+XjzHNUnODXcOI9ROkNg=;
+	b=Zm+gX4IOIieiGo4rxdBCu4G7gk1YjbA7JKPWTyogwMBIFmpIygnMQlizgTNqQogKnx79
+	 KOqop9+UR95NbIsEXeLUGmX+xFvvh9b0LhHcwXjFOqUCZa2OZAB2WPmLRvUVgRzsHL5fw
+	 2gpEOA2+MtN2E7eM1MOenvKgdb0/wfwMDkuZ9NFoW8PcbcbSp/iSL8ROMeTg03Fqiy8DT
+	 rpDQTDiw0AabMMPXcv7X/4eFq+tCoboQQqzCNr7v7D7t4oFN2ayKksAjeE5DrlpBm4DhO
+	 6IaANothrPwA15DARLXUktPzs2HN3cnYLSezF0wubIj1tosVX7E0xVbK9QhjQcF8tUQ==
 ARC-Authentication-Results: i=1; smtp.kernel.org; 
 	arc=none smtp.remote-ip=100.80.115.77
 Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id 5B8C81F000E6;
-	Sat, 21 Nov 2026 12:43:15 +0000 (UTC)
+	by smtp.kernel.org (Postfix) with ESMTPS id 7BDC61F000C0;
+	Sat, 21 Nov 2026 12:43:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795264998;
-	bh=xUb80D30HN0DexKwD7t51Nu9644o2kzgN3wPWJ8IipE=;
+	s=k20260515; t=1795264994;
+	bh=1yuakmTQTH2nDMkgihJWUJR+XjzHNUnODXcOI9ROkNg=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To;
-	b=f4ef/v332CSW1tGruCYNrhi1XpCPnOUKmrLXU5SvjUiC1Y8ZLpSbVLeondYmbbeIM
-	 n6PbWZS+JH6enELa5YTuNQXAuxLNy5A9Byp693OSHnljZT4+XT1oryiEVctzKVPBkI
-	 euWRAYSMJjHHbv4MI2HRunA46xgJ/pQuY3rHK3t4iKLmi7shvEOv4wrRkzeHg+CJfF
-	 yNf94VLoa1kvaos9Aj1fPYi14h+eZYz1OQKEv78+6nz/FoayGGRvkvAjYPVt9NBcSY
-	 mHDi8JDC+66ocQQ88HxqMR1jUJ842mxsQNRZXaRUyp5lWe8fCk24XXWOHaA6Q62/DO
-	 KXi7MA6d1LAMg==
+	b=QtKelhFbc/SDLCCr/emMuEHSq1hudODoU9eYLLumjbE1xbNm4jNO5lLM7zvWx5MPp
+	 xXTTD+xj9jHq24BqaagF3SUiAQeuQa8VKEpIiIoBZBktmrH4A8Bq8JPijzUHTwK/xX
+	 /sVQNa5bKBEdYegY0VWulYCi0bpyiLA9tXHLsAWhKFmbymdZ+lcqoNQrGsot1T6mri
+	 CKqnKOGa4A7GcVU2LbZV7ABOYGEST1IojSfv5R08QEWjnQFcw7Q9QkPFnCsXBnh1qa
+	 1U82O6dqPi5E4hZCs6TTKHRYMjER/EpXIIzrvOyMRGH+XI9m1ZS3Xq2z/JBOqlzXzN
+	 CWV0a43uPdAEA==
 Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id CE02F4BC56;
+	by lkml.kernel.org (Postfix) with ESMTP id 004964BC28;
 	Sat, 21 Nov 2026 12:43:13 +0000 (UTC)
 From: Yuugo Yoneda via B4 Relay <devnull+yogo.0917.sabu.gmail.com@kernel.org>
-Date: Sat, 21 Nov 2026 21:43:19 +0900
-Subject: [PATCH RFC v2 09/13] dt-bindings: mmc: add SiRF AT550 SDHCI host
- controller
+Date: Sat, 21 Nov 2026 21:43:11 +0900
+Subject: [PATCH RFC v2 01/13] dt-bindings: vendor-prefixes: add Yupiteru
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -84,7 +83,7 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Message-Id: <20261121-at550-rfc-v1-v2-9-b0309d0789b2@gmail.com>
+Message-Id: <20261121-at550-rfc-v1-v2-1-b0309d0789b2@gmail.com>
 References: <20261121-at550-rfc-v1-v2-0-b0309d0789b2@gmail.com>
 In-Reply-To: <20261121-at550-rfc-v1-v2-0-b0309d0789b2@gmail.com>
 To: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
@@ -101,11 +100,11 @@ Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
  linux-kernel@vger.kernel.org, linux-input@vger.kernel.org, 
  linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, soc@lists.linux.dev
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1795264991; l=2242;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1795264991; l=853;
  i=yogo.0917.sabu@gmail.com; s=ypl514-20261117; h=from:subject:message-id;
- bh=Cw4PW1ium2XRqrgyq5Y/w+tMdamgHyjj6FEWVO1PTf0=;
- b=a5zpJI5EjZIlhB/FD+UmNuiUUXzSTRIjkg4sO7w1rcWzckKK7gDVBjOIO3C0eFjJNY8WwdmVc
- UhNpbbAXLIQAkJNLHm9G7C7Wsjlcl3mCu9pYSehXwFqMXqfogeooB8J
+ bh=iTb2YlDC2bx8pU62e20oqkil7g9/9I3ZNsd6Gavq2p8=;
+ b=l1YtOmr9CaFokZU5dpeyq/EVoMqxnwB90l19866gxNAwwvsVxpoZM9f+hkdODTQxJVZV1+iyg
+ POP1Rn6jT+MCi+07TxTe5oOi1aTSOsHRAL1ee9s2Ap7LzWBvyNfrOMh
 X-Developer-Key: i=yogo.0917.sabu@gmail.com; a=ed25519;
  pk=TIQ8Tk4xQrxyn8rmk3GI2f5qg/kO6g2KZm7YOOyBHeg=
 X-Endpoint-Received: by B4 Relay for
@@ -116,83 +115,27 @@ Content-Transfer-Encoding: 7bit
 
 From: Yuugo Yoneda <yogo.0917.sabu@gmail.com>
 
-Document the Devicetree binding for the SiRF AT550 SDHCI host
-controller.
+Add the yupiteru vendor prefix for Yupiteru Corporation navigation
+devices.
 
 Signed-off-by: Yuugo Yoneda <yogo.0917.sabu@gmail.com>
 ---
- .../devicetree/bindings/mmc/sirf,at550-sdhci.yaml  | 50 ++++++++++++++++++++++
- MAINTAINERS                                        |  1 +
- 2 files changed, 51 insertions(+)
+ Documentation/devicetree/bindings/vendor-prefixes.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sirf,at550-sdhci.yaml b/Documentation/devicetree/bindings/mmc/sirf,at550-sdhci.yaml
-new file mode 100644
-index 000000000..ca0c7c414
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sirf,at550-sdhci.yaml
-@@ -0,0 +1,50 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/sirf,at550-sdhci.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: SiRF AT550 SDHCI host controller
-+
-+maintainers:
-+  - Yuugo Yoneda <yogo.0917.sabu@gmail.com>
-+
-+description:
-+  SiRF AT550 SD/MMC host controller compliant with the SDHCI specification.
-+
-+allOf:
-+  - $ref: mmc-controller.yaml#
-+
-+properties:
-+  compatible:
-+    const: sirf,at550-sdhci
-+  reg:
-+    maxItems: 1
-+  interrupts:
-+    maxItems: 1
-+  clocks:
-+    maxItems: 1
-+  bus-width:
-+    enum: [1, 4]
-+  no-1-8-v: true
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    mmc@56000000 {
-+        compatible = "sirf,at550-sdhci";
-+        reg = <0x56000000 0x1000>;
-+        interrupt-parent = <&intc>;
-+        interrupts = <36>;
-+        bus-width = <4>;
-+        max-frequency = <25000000>;
-+        no-1-8-v;
-+    };
-+
-+...
-diff --git a/MAINTAINERS b/MAINTAINERS
-index df3d38c6b..1164152dc 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -25853,6 +25853,7 @@ S:	Odd Fixes
- F:	Documentation/devicetree/bindings/arm/sirf,at550.yaml
- F:	Documentation/devicetree/bindings/input/touchscreen/sirf,at550-ts.yaml
- F:	Documentation/devicetree/bindings/interrupt-controller/sirf,at550-intc.yaml
-+F:	Documentation/devicetree/bindings/mmc/sirf,at550-sdhci.yaml
- F:	Documentation/devicetree/bindings/timer/sirf,at550-timer.yaml
- F:	drivers/clocksource/timer-at550.c
- F:	drivers/input/touchscreen/at550-ts.c
+diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+index 5471a06f9..a8927fea3 100644
+--- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
++++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+@@ -1985,6 +1985,8 @@ patternProperties:
+     description: Shenzhen Yashi Changhua Intelligent Technology Co., Ltd.
+   "^ysoft,.*":
+     description: Y Soft Corporation a.s.
++  "^yupiteru,.*":
++    description: Yupiteru
+   "^yuridenki,.*":
+     description: Yuridenki-Shokai Co. Ltd.
+   "^yuzukihd,.*":
 
 -- 
 2.56.0
