@@ -1,65 +1,105 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=165.173.180.11
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795449490;
-	b=UMhRsqGdjKw+dqiWyKgz2J95poxBJ2DVnW6TE/65bCaTegAqlYkkLvNu/Ea3gsz8rA2H
-	 cCFbz4hoT8SI/SwTVTR3PQennw9e//bBb0cvU+eV/u1oPnXsSLbQdaLBdnls9EEIvojlO
-	 2LlySc/o+5Okf4hBVgKawS91EYkNLCU6Mpec+AiFsff0rz9ZK5Hb0wgSWmyvI/SZZKuIs
-	 L0xz74pYZcZDr9WjZbbWAbgDaxPPAPHWhi7HvHh8bZT+xsasB/5sWXrAlaEyhSip0UTtm
-	 yzfp2v7yQjIkid+hHZydf6Takig4Usz8FfhxgjeCmLybS3bnGGgKDZw/e+I7uPfq0xA==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795449490;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:Date:From:To:Cc:
-	 Subject:Message-ID:References:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To:X-Zoho-Virus-Status:X-Zoho-AV-Stamp:
-	 X-ZohoMailClient;
-	bh=Eyxh1hEZsAyseeXNRudrDoljPbAu7lArqp12eub0Uiw=;
-	b=ndO4iQhtNQww1MdbdTHEWWrh1feRa+xl6qLiNVDug4Ges29/xP+Mw8t9bJ86QrSLhkD1
-	 56RGN9ikGnJvuXcM6ywcd7bIfh3OwIZr5jrD9VBzFSDPBmBWo+wArMlex1y/XfRM9sDhh
-	 3cQHYr+Mt7s72FL6aE2vojQa8j9QyeqSflYKRehtG0xhAjtotXHVTesruM/wsoskizdkF
-	 fh1RDuqEdVJ4fmMKOW2/t8uLK904xCZF9CvPsHavMX8tpkzt9OhoYd3OO0Q25YlirkAgV
-	 BNcQZPZYj6mW0cqABAeZOPWHP6oBC/+puYmlmqaciB5hY9d/po7k1c4kB5Pvr4t+zRw==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=collabora.com;
-	spf=pass smtp.mailfrom=collabora.com;
-	dkim=pass header.d=collabora.com header.i=@collabora.com header.a=rsa-sha256 header.s=zohomail header.b=j8N210qI;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=165.173.180.11
-Received: from sender6-op-o11.zoho.com (sender6-op-o11.zoho.com [165.173.180.11])
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1795461435;
+	b=lMLTt8Y+mjJVE/zNX1J64DT8uo+pDW3vbSBc7NjHz0WqsDFzYYGZKIOtO6Sz6pNuDg8Q
+	 ZnpBWUrj9USSWAj8NbwXAVrO2+B22DAm+RqFQm005E1GCVGeLxIDC/r9RJyTKLKAAppJH
+	 clEkfWoBpeT/9Xq4bQKUskiI9ELTcCOSzjwRbJxOCsXsJv1P7W+f8nIB3tOyRAmQkmqeh
+	 2ZZDDSIMxScFeyNyFPAYnxpKvi0EQaCCPinTPpD1y9y7GOdT2ZgjmJn/LH9HHEq91pOkH
+	 BA8ILTWn0NhpbEMNcWY0OQp/dZwi7okExDy++DozAcl+UoUh5ygIKeOrYEeol7JUYRw==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795461435;
+	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
+	 MIME-Version:Content-Type:Content-Transfer-Encoding;
+	bh=93LY7kxfE4k6lRlMsqn9aMoZqt0mdV8mOF8QxYg6ZSM=;
+	b=n4kBoMjK06/TAoWMUhniGWh/VW85RdXyU66Ek4Er3XljBRtmAvEaPFLXMDQNjUh8kg3F
+	 5KXNmF20Aw/YZR3dU5xwnO/J3b6HvRnsHfjmEf/tiaLZSgSAk36vgBbujA3PzEigRGNaW
+	 WvHC1xqE302xNjdchtWt8xmjNP+86T6RpqTIakijq+OVtX5PMeGvX9yckWsEyyDAO6W+q
+	 pyfJknE3qeLrMQMEpF4TZTZMU+ceT1/hXGEmi+S8Ay43QZfqD1zgNb/p4BEzh3OQKxCUV
+	 oNhljIDRXLVowg7Hgz40Z+vnFD8Iw8Ql0DiaiQXDRRptCZb3+jiZIMLzBXfJ41sAhbA==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=KXV77g+x;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E781C606A31E;
-	Mon, 23 Nov 2026 15:58:09 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org E781C606A31E
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30ED3606A31A;
+	Mon, 23 Nov 2026 19:17:15 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=collabora.com header.i=@collabora.com header.a=rsa-sha256 header.s=zohomail header.b=j8N210qI
-ARC-Seal: i=1; a=rsa-sha256; t=1795449448; cv=none; 
-	d=zohomail.com; s=zohoarc; 
-	b=IJq+7h6/QZIZtDQaFGULBMS3RB7Q0FpvdsSPgYsnPdD2cwJgyKo3iSlwteY4JJXl4uPEfdKVgoCAXhjUwN50z86T9Ivz4NN5uNLe4zsMe5NwS4Ba6UFAxpKDpvZ9eR64ZFDxViDVPU9xgbFAYjXss0FvQfoehg9OQjsHMp1sdMQ=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1795449448; h=Content-Type:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=Eyxh1hEZsAyseeXNRudrDoljPbAu7lArqp12eub0Uiw=; 
-	b=I9whJXSeM3JO3Quz0gOZkp7X73h9oC+xLXIyL8B0vUgC7J3SpodbuJVRdUPSSv+fuGDybDMIlm9jkWkLJx8FQJPcNHb8Jm67x7jRwOmnmilKTtjUwIxdK/gHJl/RZtiPpvDiMrFAY3Jc7jRwDih3FXHLtSEfSB5bpUUfzwNJvpg=
-ARC-Authentication-Results: i=1; mx.zohomail.com;
-	dkim=pass  header.i=collabora.com;
-	spf=pass  smtp.mailfrom=sebastian.reichel@collabora.com;
-	dmarc=pass header.from=<sebastian.reichel@collabora.com>
-DKIM-Signature: a=rsa-sha256; b=j8N210qIWeCJtN1NXecuwDAf0h308Qmhsw9q4orz5AgBR8cC7ya11nsQli7KJxVo+1uhmMsKFPf+BN+sP4wIU62AGGAUdNN7GJ3Azq/R622uzkKGZBSzA2fB1uqkOTzcPTvlW5YJ9BASzmRuhcjuX1bzlNIwGaJYAosnI+OpJTk=; c=relaxed/relaxed; s=zohomail; d=collabora.com; v=1; bh=Eyxh1hEZsAyseeXNRudrDoljPbAu7lArqp12eub0Uiw=; h=Content-Description:Content-ID:Content-Type:Content-Transfer-Encoding:Cc:Date:From:In-Reply-To:List-Subscribe:List-Post:List-Owner:List-Id:List-Archive:List-Help:List-Unsubscribe:MIME-Version:Message-ID:Resent-Sender:Resent-Cc:Resent-Date:Resent-To:Reply-To:Resent-Message-ID:Resent-From:Sender:Subject:To:Date:From:Message-Id:Reply-To:Subject:To:Cc;
-Received: by smtp.zohomail.com with SMTPS id 1795449444640910.3807170275704;
-	Mon, 23 Nov 2026 07:57:24 -0800 (PST)
-Received: by venus (Postfix, from userid 1000)
-	id 25CB618044C; Mon, 23 Nov 2026 16:57:10 +0100 (CET)
-Date: Mon, 23 Nov 2026 16:57:10 +0100
-From: Sebastian Reichel <sebastian.reichel@collabora.com>
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, 
-	Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 1/4] mmc: dw_mmc: add central watchdog and convert CTO
- onto it
-Message-ID: <awRdY6Xw5scc5V7-@venus>
-References: <1787817486-137277-1-git-send-email-shawn.lin@rock-chips.com>
- <1787817486-137277-2-git-send-email-shawn.lin@rock-chips.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=KXV77g+x
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8AA881F000C4;
+	Mon, 23 Nov 2026 19:17:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795461434;
+	bh=93LY7kxfE4k6lRlMsqn9aMoZqt0mdV8mOF8QxYg6ZSM=;
+	h=From:To:Cc:Subject:Date;
+	b=KXV77g+xEmHcy7JpHoLaeSS6FNFX59hjFuDeFdRUxf8bakm+MFK4B1tIxcAizka31
+	 d/TYrffwOZ6eh2MYxzhBrE9U7xKPR5+FHseHQy3XVCEuumJvJPUtAspAB82Q6LKRcV
+	 +o6jDteDq6bDsXTuRRHptp7IXtEnseEwH8XiKo1HADF54dAIvJi6/mXE3DU3W+rNYd
+	 R8X9ukWTBJO7GV23deLPIpUYCKrTq3QNVJ0MEsYklQIkIINdoCFxejPEeZCuOl7VI+
+	 42puN8d8vAQ5rB9YQ5J0VPQzofHnbk2b+w3U4zA8Rv2LuQfEh9+It5SOowCZK4UM5d
+	 jxMn/yzINazhQ==
+From: Lee Jones <lee@kernel.org>
+To: lee@kernel.org
+Cc: linux-kernel@vger.kernel.org,
+	=?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
+	=?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund+renesas@ragnatech.se>,
+	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig=20=28The=20Capable=20Hub=29?= <u.kleine-koenig@baylibre.com>,
+	Aaro Koskinen <aaro.koskinen@iki.fi>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Aidan MacDonald <aidanmacdonald.0x0@gmail.com>,
+	Al Cooper <alcooperx@gmail.com>,
+	Alex Dubov <oakad@yahoo.com>,
+	Allen Pais <allen.lkml@gmail.com>,
+	Apelete Seketeli <apelete@seketeli.net>,
+	Aubin Constans <aubin.constans@microchip.com>,
+	Binbin Zhou <zhoubinbin@loongson.cn>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	Cavium Inc <support@cavium.com>,
+	Christian Loehle <christian.loehle@arm.com>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Georgi Djakov <djakov@kernel.org>,
+	Guangshuo Li <lgs201920130244@gmail.com>,
+	Heiner Kallweit <hkallweit1@gmail.com>,
+	Hiroshi DOYU <Hiroshi.DOYU@nokia.com>,
+	Huacai Chen <chenhuacai@kernel.org>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Jan Glauber <jan.glauber@gmail.com>,
+	Jarkko Lavinen <jarkko.lavinen@nokia.com>,
+	Jerome Brunet <jbrunet@baylibre.com>,
+	Josua Mayer <josua@solid-run.com>,
+	Juha Yrjola <juha.yrjola@nokia.com>,
+	Kamal Dasu <kamal.dasu@broadcom.com>,
+	Kevin Hilman <khilman@baylibre.com>,
+	Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+	Lars-Peter Clausen <lars@metafoo.de>,
+	linux-amlogic@lists.infradead.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-arm-msm@vger.kernel.org,
+	linux-mips@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-omap@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+	Neil Armstrong <neil.armstrong@linaro.org>,
+	Paul Cercueil <paul@crapouillou.net>,
+	Phil Blundell <pb@handhelds.org>,
+	Pierre Ossman <drzeus@drzeus.cx>,
+	Pramod Gurav <pramod.gurav@linaro.org>,
+	Ritesh Harjani <riteshh@codeaurora.org>,
+	Robert Richter <rric@kernel.org>,
+	Samuel Ortiz <sameo@openedhand.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Tony Lindgren <tony@atomide.com>,
+	Ulf Hansson <ulfh@kernel.org>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH 00/13] mmc: Assorted bug fixes across MMC host drivers
+Date: Mon, 23 Nov 2026 19:15:44 +0000
+Message-ID: <20261123191703.179283-1-lee@kernel.org>
+X-Mailer: git-send-email 2.56.1.831.g720f3f5937-goog
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -69,66 +109,96 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="qho7i2axl5cadfjp"
-Content-Disposition: inline
-In-Reply-To: <1787817486-137277-2-git-send-email-shawn.lin@rock-chips.com>
-X-Zoho-Virus-Status: 1
-X-Zoho-AV-Stamp: zmail-av-0.2.13.1.5.4/295.423.79
-X-ZohoMailClient: External
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
+These issues were reported by Sashiko.
 
---qho7i2axl5cadfjp
-Content-Type: text/plain; protected-headers=v1; charset=us-ascii
-Content-Disposition: inline
-Subject: Re: [PATCH 1/4] mmc: dw_mmc: add central watchdog and convert CTO
- onto it
-MIME-Version: 1.0
+None of these changes have been tested on physical hardware.
 
-Hello Shawn,
+Cc: "Michał Mirosław" <mirq-linux@rere.qmqm.pl>
+Cc: "Niklas Söderlund" <niklas.soderlund+renesas@ragnatech.se>
+Cc: "Uwe Kleine-König (The Capable Hub)" <u.kleine-koenig@baylibre.com>
+Cc: Aaro Koskinen <aaro.koskinen@iki.fi>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Aidan MacDonald <aidanmacdonald.0x0@gmail.com>
+Cc: Al Cooper <alcooperx@gmail.com>
+Cc: Alex Dubov <oakad@yahoo.com>
+Cc: Allen Pais <allen.lkml@gmail.com>
+Cc: Apelete Seketeli <apelete@seketeli.net>
+Cc: Aubin Constans <aubin.constans@microchip.com>
+Cc: Binbin Zhou <zhoubinbin@loongson.cn>
+Cc: Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>
+Cc: Cavium Inc <support@cavium.com>
+Cc: Christian Loehle <christian.loehle@arm.com>
+Cc: Florian Fainelli <florian.fainelli@broadcom.com>
+Cc: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Georgi Djakov <djakov@kernel.org>
+Cc: Guangshuo Li <lgs201920130244@gmail.com>
+Cc: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Hiroshi DOYU <Hiroshi.DOYU@nokia.com>
+Cc: Huacai Chen <chenhuacai@kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Jan Glauber <jan.glauber@gmail.com>
+Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Cc: Jerome Brunet <jbrunet@baylibre.com>
+Cc: Josua Mayer <josua@solid-run.com>
+Cc: Juha Yrjola <juha.yrjola@nokia.com>
+Cc: Kamal Dasu <kamal.dasu@broadcom.com>
+Cc: Kevin Hilman <khilman@baylibre.com>
+Cc: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+Cc: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc: Lars-Peter Clausen <lars@metafoo.de>
+Cc: linux-amlogic@lists.infradead.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-arm-msm@vger.kernel.org
+Cc: linux-mips@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-omap@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org
+Cc: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: Neil Armstrong <neil.armstrong@linaro.org>
+Cc: Paul Cercueil <paul@crapouillou.net>
+Cc: Phil Blundell <pb@handhelds.org>
+Cc: Pierre Ossman <drzeus@drzeus.cx>
+Cc: Pramod Gurav <pramod.gurav@linaro.org>
+Cc: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: Robert Richter <rric@kernel.org>
+Cc: Samuel Ortiz <sameo@openedhand.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Tony Lindgren <tony@atomide.com>
+Cc: Ulf Hansson <ulfh@kernel.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-On Thu, Aug 27, 2026 at 03:58:03PM +0800, Shawn Lin wrote:
-> +	if (host->wd_events == DW_MCI_WD_DATA_EVENTS) {
-> +		dev_warn(host->dev,
-> +			 "Data timeout, state %d\n", host->state);
+Lee Jones (13):
+  mmc: cavium: Remove MMC slots before destroying slot platform devices
+  mmc: cavium: Prevent slot_pdev[] out-of-bounds write during probe
+  mmc: sdhci-msm: Resume runtime PM before accessing registers on remove
+  mmc: meson-gx: Fail request when descriptor chain DMA mapping fails
+  mmc: jz4740: Skip DMA cleanup in PIO mode during post_req
+  mmc: renesas_sdhi: Guard host->cmd access in internal DMAC issue work
+  mmc: tifm_sd: Synchronise timeout handler with request completion
+  mmc: omap: Shut down cover timer before disabling cover BH work
+  mmc: renesas_sdhi: Disable internal DMAC BH work items on release
+  mmc: jz4740: Apply DMA max_seg_size limit to unified tx-rx channel
+  mmc: dw_mmc: Disarm central watchdog when ending a request
+  mmc: renesas_sdhi: Fix SDIO manual tap correction in SDR104 mode
+  mmc: sdhci-brcmstb: Handle absent optional sdio_freq clock in probe
 
-This new warning is now printed during boot on RK3588 and RK3576
-(the other message from here are printed at info level):
+ drivers/mmc/host/cavium-octeon.c              | 17 +++++++++++++----
+ drivers/mmc/host/cavium-thunderx.c            | 15 +++++++++++++--
+ drivers/mmc/host/dw_mmc.c                     | 14 +++++++++++---
+ drivers/mmc/host/jz4740_mmc.c                 |  6 +++++-
+ drivers/mmc/host/meson-gx-mmc.c               |  7 +++++++
+ drivers/mmc/host/omap.c                       |  8 ++++----
+ drivers/mmc/host/renesas_sdhi_core.c          |  9 ++++-----
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 13 +++++++++++++
+ drivers/mmc/host/sdhci-brcmstb.c              |  6 ++++--
+ drivers/mmc/host/sdhci-msm.c                  |  8 ++++----
+ drivers/mmc/host/tifm_sd.c                    | 16 ++++++++++++++--
+ 11 files changed, 92 insertions(+), 27 deletions(-)
 
-Sige 5 (RK3576):
-[   17.801623] mmc_host mmc2: Bus speed = 198000000Hz (req 200000000Hz, actual 198000000HZ div = 0)
-[   17.820103] dwmmc_rockchip 2a320000.mmc: Data timeout, state 3
-[   17.853679] dwmmc_rockchip 2a320000.mmc: Data timeout, state 3
-[   17.854003] dwmmc_rockchip 2a320000.mmc: Successfully tuned phase to 228
+-- 
+2.56.1.750.gf70dc682cf-goog
 
-Rock 5B (RK3588):
-[    3.956249] mmc_host mmc1: Bus speed = 198000000Hz (req 200000000Hz, actual 198000000HZ div = 0)
-[    4.049033] dwmmc_rockchip fe2c0000.mmc: Data timeout, state 3
-[    4.086338] dwmmc_rockchip fe2c0000.mmc: Data timeout, state 3
-[    4.093284] dwmmc_rockchip fe2c0000.mmc: Successfully tuned phase to 102
-
-Greetings,
-
--- Sebastian
-
---qho7i2axl5cadfjp
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEE72YNB0Y/i3JqeVQT2O7X88g7+poFAmsEYk4ACgkQ2O7X88g7
-+po5VQ/9F/v1dR9FHMW0+l181dZXmg1DjRRIurLUOl72TcokNjfEQyGB6TN5PtJZ
-PDH5UJgzmgKhjleEOdjXEdFKLj5Bu2FOfreyJlBdi+pfpt3AwlZ9pB9AvDNbk8QR
-GGrr0BKcGmuwU8n7ywxJ51LlWcjKHTu8D+ezC6p2f/jYv9uduenA+WgeiXJKcZ/b
-TVIqpWZuSgYeN5CTTjne/2oG80gZMZxjLsgkNGt4RGwTdtiDoSWT7zeE+fMUx5n/
-OHJbrb+JNrmwnN07ZbtcGaediRAl+aYyYemN+VYRR0eyBvsjUtoInQrVSgHAMudx
-O6yhUxCMiL78j5MGcalf2xjV1C9pZCAl/6AcpjWQ7DfBjoBmMxVmElON3AzIiD86
-d9WHCocP+wCPhuZwVUtOhbosfJ6KQWQ0i/2wj/UvgFUgergWugMB2MpznIDu9/JP
-yyZw1Made2Bi1SROFgZJKRKL7LeZxp1asx4r/A29Ro57O0HmsxVy7H1soJNE6vFO
-SYgGRc4meQH7NFqFZE73dIKYMoNGQ2cnS5H5ZeqM7kMN+nWTyLiCMdQeXARir1tn
-XbJZe8RhhGHwftDAbIeXOzOtsvg+G7wmZ9pFDKahWbyqkbkUQ5n//jBhy4RlL4tT
-o6zZMNNL0P9QceEcKXKFNC3JDxdmNbJNH9N/KgJ8LqCRsqR3oQY=
-=yIi9
------END PGP SIGNATURE-----
-
---qho7i2axl5cadfjp--
