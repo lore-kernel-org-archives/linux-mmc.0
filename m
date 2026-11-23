@@ -1,55 +1,61 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795461518;
-	b=kin4hunJFNlcl/tgNiWAsLVG17Z3j/c7tZw5DC0l9GJRAxeq8rzN9oYKNaB2weZpGLav
-	 99O6vSkduSCG5qNUocn2XijV7LkVJgW2sL/ymMUNXfWH1S+haKxBk7dWPyGsLLLbuQHYM
-	 9FzwZ5t+PUXGK59aGAbgQluD+Zr5J+T/wiZbWorTx9z/Sk9Ijs/vuN+4EX8vNJhQnh6dx
-	 4KEdzGtwlDn6XckQJ8KNwU0pGAStizVR6l/59CRNyN2eU/Um5eW7jmuwhnp1YjnilI1Xs
-	 adRTXN+LQ8CeZB1EzXTrnvuJB4CHsKN/Deui6v7UEU2MK3NdLR7Gsq/sg70pvwuKrvg==
+	t=1795461525;
+	b=DZkainQtCKGi89vl8rmhHZtvuyfw1+Pb3pWblMg61n6YEA7Q/QXC/lXQqxkT82Pi8ZFN
+	 jZeUCm3RNu2W/IZtI4VeZOGUeHFQDQrCWNZdSmlEzhvm7Z1mV9b7YWvRRXwTSZrXLAfeq
+	 O96KXcSlItBg7FXECeagsqqC2OemrtSQhg0Eklecu02deU1/BRnmCTAVxOhvQGALtux9Y
+	 6bKM0AFIqguw94g4sSyuPNM+g68ZWOMdJL6NGlhxVtgKz9YbfGlUUDpOu9tzak6fIMZGP
+	 wekNW6GTK2HTZSASsVgvRV2hbDWY95aVvEQKSDEWD4x/exHLQL+C8Co+q4oUzCemYvg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795461518;
-	h=Received:DKIM-Signature:From:To:Subject:Date:Message-ID:X-Mailer:
+	a=rsa-sha256; c=relaxed/relaxed; t=1795461525;
+	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
 	 In-Reply-To:References:MIME-Version:Content-Type:
 	 Content-Transfer-Encoding;
-	bh=aQjlvqRep44Ttr211pWzlgA8ZTFpi9k6/k/c/EcXx1Y=;
-	b=GaGzMrqu739rGCiYUNkIhkr9A1bMyOqZE31P+636casMkGK9QXv4rDIkBoMSZTgzqQJB
-	 FP8HggWJj2S1q16I/1DXBw+araVa8vqeaodvTP50sE1XwnbauRf4PBzPxdJGGses1qvDm
-	 72eXd5f74cP4whEbZhuLJCtPB1eY8fIJO0woa4lgB69lfL5aabgqdxp0Inv7MWP7X+zKE
-	 caP0LJf+D5sg4qmGidCWooLw2f4bQuhsGacLSlArkQCBROkfeFhpb+N/nC6osQUanayYn
-	 UzGhatwrJ6BjyLwzexi02F22TYMuEtR0r581NXiUGu0Pv49Y93XTdv+E5dnFO0hrbZg==
+	bh=JnOYAZMVOKO0Zb5wr2NJKaiBoXlxX18Wrt6Tra1io+M=;
+	b=cWSiJ3gGQ7+Ac3wmZ8OKnS4YaDl4lv+KAMtNjnrfWTW34c3avSXE6DbTBrhEAahNiuKY
+	 wkvf7I/Io5fiFTsvD0aMz7kIewS4OCciGiZlov8xgTXn+2XT3KMEzvH5872g1ZDby9Ib0
+	 KYRZrKMzbQ5hT2cqP+WtWMa1yzToUV7VHM7crBOTS3BD8Axrbi0GWYKu6VtsD/kugyoPy
+	 M2Gk5ZPtbrxkdRvTvXXN8yXmboR0mCasVG0zOA4f0F0xQzEUiHVQSt/plT56oeF+6D7P3
+	 H+UdCYbtoAdkxz00JEEcz9GvGVfsab4Hb5b0uzr8PVAydEfoT248Y9JizSn57854slg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=d1cc42vD;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=aVXId1HY;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 47432606A332;
-	Mon, 23 Nov 2026 19:18:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2DC8E606A326;
+	Mon, 23 Nov 2026 19:18:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=d1cc42vD
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AAC341F000C0;
-	Mon, 23 Nov 2026 19:18:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=aVXId1HY
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 13C281F000CF;
+	Mon, 23 Nov 2026 19:18:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795461517;
-	bh=aQjlvqRep44Ttr211pWzlgA8ZTFpi9k6/k/c/EcXx1Y=;
-	h=From:To:Subject:Date:In-Reply-To:References;
-	b=d1cc42vDqR0hwuOyHRkb5DCYPT/5sZ+mJg2EZOn5cYqFwLED5ZZmLW/AiL0PDom/c
-	 564EiqnX9WoAmXJnmWmTSgOZemaTkvqw4X++nCfmiCiad/PduDet84KklclQO3sPMv
-	 hZ9KYDDGp7KDPj7AmEFXI0TIS7EhWWI7kRsAgL1qRwetm8XGoIjIrppKGiFnUOL78r
-	 7BVeiYYIq9u1BnCeDXpWtYGa3jaPNygBF7hFOf4c7VzjB9vMWFhwARhWhExPggUA5k
-	 JfB0dOBsPhUiZ4hcRIYo/SybQ1hl+bW9NtUpHr2NeoUuVodIhNhUsQI74xoPgobHnI
-	 EvVJG2NX5UWnw==
+	s=k20260515; t=1795461524;
+	bh=JnOYAZMVOKO0Zb5wr2NJKaiBoXlxX18Wrt6Tra1io+M=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References;
+	b=aVXId1HY4yvRkxunhsZ5Ii0G3g4gOgtOkKcQhELWATLmLG8u39Mmpd/8pckilWHht
+	 WwVBFzGApqpo2nnUgdezLywGH3u4PFqT55rRxOgiewg9MxIReGpw2/SfUoHuhMzSsz
+	 0JzO3+2kzcGilYPJjN2VADJcn2Zl2qBzkLZiSTEuNupIiBzr2p0ryclQidrAvvUFOT
+	 vKfK4HbBBjVKeaUfpBw/JQx+pw4XFuCdtg3bX4jzev9X1OPVLptxFCt6htLkKCX+i2
+	 udmvcjvcEfF31GGXebNe/vpkLkW69u3vvYi2Qy6CT/FeJFa9d12AwBdZBS9NZTTuXF
+	 NR3jgXMzo1P8g==
 From: Lee Jones <lee@kernel.org>
 To: lee@kernel.org,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
 	Ulf Hansson <ulfh@kernel.org>,
+	Josua Mayer <josua@solid-run.com>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Phil Blundell <pb@handhelds.org>,
+	Samuel Ortiz <sameo@openedhand.com>,
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
 	linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 11/13] mmc: dw_mmc: Disarm central watchdog when ending a request
-Date: Mon, 23 Nov 2026 19:15:55 +0000
-Message-ID: <20261123191703.179283-12-lee@kernel.org>
+Cc: stable@vger.kernel.org
+Subject: [PATCH 12/13] mmc: renesas_sdhi: Fix SDIO manual tap correction in SDR104 mode
+Date: Mon, 23 Nov 2026 19:15:56 +0000
+Message-ID: <20261123191703.179283-13-lee@kernel.org>
 X-Mailer: git-send-email 2.56.1.831.g720f3f5937-goog
 In-Reply-To: <20261123191703.179283-1-lee@kernel.org>
 References: <20261123191703.179283-1-lee@kernel.org>
@@ -65,71 +71,74 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-When EVENT_DATA_ERROR (such as SDMMC_INT_DCRC or SDMMC_INT_SBE) is
-handled in STATE_SENDING_DATA, send_stop_abort() starts a stop command
-and arms host->wd_timer for DW_MCI_WD_CMD_EVENTS.  In STATE_DATA_BUSY,
-dw_mci_data_complete() resets the controller on data error, aborting the
-in-flight stop command, and dw_mci_work_func() ends the request via
-dw_mci_request_end() if EVENT_CMD_COMPLETE is not already pending.
+Commit 30fa7d53afd4 ("mmc: host: renesas_sdhi: Fix incorrect auto
+retuning for an SDIO card") switched SDIO cards from automatic to manual
+SCC tap correction so that DAT1 SDIO interrupts would not spuriously
+shift the sampling tap, but exposed two logic errors in the manual
+correction path:
 
-Because dw_mci_request_end() does not disarm host->wd_timer, the stale
-command watch remains armed after mmc_request_done() and later injects a
-spurious SDMMC_INT_RTO and EVENT_CMD_COMPLETE while idle or during a
-subsequent recovery command (for example MMC_GO_IDLE_STATE, which does
-not re-arm the command watchdog).
+1. renesas_sdhi_manual_correction() checks !priv->card_is_sdio instead
+   of priv->card_is_sdio before ignoring DAT1 mismatches, so the SDIO
+   DAT1 check never executes for SDIO cards.
 
-Disarm the central watchdog under host->irq_lock when transitioning to
-STATE_IDLE in dw_mci_request_end(), and clear wd_states and
-wd_deadline_ns alongside wd_events when disarming in
-dw_mci_wd_deliver().
+2. renesas_sdhi_check_scc_error() already returns early when running in
+   4-tap HS400 mode, yet still passes the hs400_4taps quirk flag as
+   use_4tap to renesas_sdhi_manual_correction(), halving the 8-tap
+   SDR104 and HS200 tap index when writing SH_MOBILE_SDHI_SCC_TAPSET on
+   SoCs with hs400_4taps.
 
-Fixes: ce0043b9a302 ("mmc: dw_mmc: add central watchdog and convert CTO onto it")
-Closes: https://sashiko.dev/#/bug/linux-d7e53c20-ef39-494b-bb97-b00b62186c2f
+Check priv->card_is_sdio without negation and drop the unused 4-tap
+division from renesas_sdhi_manual_correction().
+
+Fixes: 30fa7d53afd4 ("mmc: host: renesas_sdhi: Fix incorrect auto retuning for an SDIO card")
+Closes: https://sashiko.dev/#/bug/linux-735317da-fe00-4630-b954-5dcc1052aaa8
+Cc: stable@vger.kernel.org
 Signed-off-by: Lee Jones <lee@kernel.org>
 ---
- drivers/mmc/host/dw_mmc.c | 14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
+ drivers/mmc/host/renesas_sdhi_core.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index ff0b25d287a9..6865cffad51a 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -79,8 +79,11 @@
- static void dw_mci_wd_deliver(struct dw_mci *host, unsigned long events)
- {
- 	host->wd_events &= ~events;
--	if (!host->wd_events)
-+	if (!host->wd_events) {
-+		host->wd_states = 0;
-+		host->wd_deadline_ns = 0;
- 		hrtimer_try_to_cancel(&host->wd_timer);
-+	}
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index cb35360239bf..497c7c75f966 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -741,7 +741,7 @@ static int renesas_sdhi_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	return ret;
  }
  
- /*
-@@ -1887,15 +1890,20 @@ static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
- 	__acquires(&host->lock)
+-static bool renesas_sdhi_manual_correction(struct tmio_mmc_host *host, bool use_4tap)
++static bool renesas_sdhi_manual_correction(struct tmio_mmc_host *host)
  {
- 	struct mmc_host	*prev_mmc = host->mmc;
-+	unsigned long irqflags;
+ 	struct renesas_sdhi *priv = host_to_priv(host);
+ 	unsigned int new_tap = priv->tap_set, error_tap = priv->tap_set;
+@@ -783,7 +783,7 @@ static bool renesas_sdhi_manual_correction(struct tmio_mmc_host *host, bool use_
+ 		if (bad_taps & BIT(new_tap % priv->tap_num))
+ 			return test_bit(error_tap % priv->tap_num, priv->smpcmp);
+ 	} else {
+-		if (!priv->card_is_sdio &&
++		if (priv->card_is_sdio &&
+ 		    !(val & SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR)) {
+ 			u32 smpcmp = sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_SMPCMP);
  
- 	WARN_ON(host->cmd || host->data);
+@@ -802,8 +802,7 @@ static bool renesas_sdhi_manual_correction(struct tmio_mmc_host *host, bool use_
+ 	}
  
- 	host->mrq = NULL;
+ 	priv->tap_set = (new_tap % priv->tap_num);
+-	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET,
+-		       priv->tap_set / (use_4tap ? 2 : 1));
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, priv->tap_set);
  
--	if (host->state == STATE_SENDING_CMD11)
-+	if (host->state == STATE_SENDING_CMD11) {
- 		host->state = STATE_WAITING_CMD11_DONE;
--	else
-+	} else {
-+		spin_lock_irqsave(&host->irq_lock, irqflags);
-+		dw_mci_wd_deliver(host, ~0UL);
-+		spin_unlock_irqrestore(&host->irq_lock, irqflags);
- 		host->state = STATE_IDLE;
-+	}
+ 	return false;
+ }
+@@ -854,7 +853,7 @@ static bool renesas_sdhi_check_scc_error(struct tmio_mmc_host *host,
+ 	    SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN)
+ 		ret |= renesas_sdhi_auto_correction(host);
+ 	else
+-		ret |= renesas_sdhi_manual_correction(host, use_4tap);
++		ret |= renesas_sdhi_manual_correction(host);
  
- 	spin_unlock(&host->lock);
- 	mmc_request_done(prev_mmc, mrq);
+ 	return ret;
+ }
 -- 
 2.56.1.750.gf70dc682cf-goog
 
