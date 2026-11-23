@@ -1,104 +1,66 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.46
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=194.117.254.33
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795425460;
-	b=3n8m/PZe7Ht1Z1PJS0jAiOStnV6IbYKpMnBk89tqgwPfk2FzTFo3lYVSks0Jtqmv0mnh
-	 ItiF2T77/XYKzXxOmuwWp29hSALJv0s4KmYkNLmv4AENHor+NYG24XKmxG37ikuHdwEYD
-	 Gj+Y0j0YLX1Vjkwtx6yxu0NG9qrbqD7R2edvoTQSug3pmOlLvC/nQyOwBowuv4hC+zCxY
-	 Q3yDZUdiJBUtfi6ATHgaUcGAVRaEB+Cw4+MGfYtKWuHhoevYKQhTTDpi0lFj0Vy7BlTVV
-	 xTIdlfLxIa4dUVE3UkyCwZsDdL3BigJIY56g0CmF/WLqG8ktzlfVEV5kgSRvpG1Ew5Q==
+	t=1795433324;
+	b=uWROAEA6yVikLY18egWKnTpIynQP4gXdZ5lzeK5pL2TTzWZ3BI8x+DmLxG+Pcy8NCzFb
+	 NLUG7ePnHmlrur8tN/7hM/Jrz1RIO43G9CoTmKHEkAE9S/ZeO9U9lLQUglRGvkiLTKqVN
+	 dcI5H4ymehtOZOSwXGf769y15k1eRrvxlb/+WKrxwpL0C5DAYiGpBI7DZSSQPvkcyE6u7
+	 gqzJTC5YwCjK/YNd74eGtdh5kifkfX5DY6W713mheeLUyH5JYFCmFRKNEDV2We+2VMCKV
+	 tvewj3NYRtvCv0aJyK4X5aywD10Jq3sBaykLf8bFdNaRbGGVz8dMupnaDhSSldhkFxw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795425460;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To;
-	bh=XivqS2GzXFfLVs4e8GPr3drYgoFDRP+i4GE/VUr/Vsw=;
-	b=HtLWAJTSVIwHpaUBTYjPhEZT7Jc87wHxMJTd2iYnRQOH/6OmLteVvBmAeLt3gGMXrAwK
-	 U6ZhGmi16U7TKiXk90phnUvL/gGvynGw6F81j9dv6A/k8q1Mi7jAd6EpYgszYgzHYPQ0h
-	 6MSrlpwctjzHBpYUzSslC3Lnl4NBbcWvcApgpIL0lkksuhr3rkc1KS9+A0u4syzimF4sh
-	 15AmDzuPyHZlaWvK4NxgbMMsvuG+6DytfGWREu4vUa+gzut3T21Sz8Lv5UYwdV26m2zNc
-	 Y888uspf5TtiEWEnLWWQGVcRyrdgvIF+RCSAtIy9x1Vb6HIj7AZu/i1IJg4bSeCiGSQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795433324;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:X-UD-Smtp-Session:Date:
+	 From:To:Cc:Subject:Message-ID:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To;
+	bh=WkpqttVEIBaMSa9UY7eLmUB8mOCbvmxmx8PkXKxMIOs=;
+	b=e7AfWQ0pJfM7ryI/mkrUEOkV7BHDOvwEb85Ke1jDq41v/OrPAd85p6pOBK5CDEA6ZTrw
+	 cyNyLiq/F+V19hbASs+QHRn8i2cTVivTQmCiysWpXoxB0z+HY3rnGsIMoIKGtVs+KiSqi
+	 o67cITL/jcLco1OtHqU7y4/E2EydSR4ybV5jP2TKH1nTgK7cZz9ODu6oGcIR3ELk8JsOv
+	 Bly2qx4SIWqvngKXfemm56ljmUyb0tj/WKxbl+t/TtRf1uON/DgP8xFT1AXxrixNyIfvb
+	 ZoHUy/MmR3GWSeJc9bB95e96pBwRhyRB5HgGMd0U6BkfcwqgfAwMO39I+4htUdd/mnw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=baylibre.com;
-	spf=pass smtp.mailfrom=baylibre.com;
-	dkim=pass header.d=baylibre.com header.i=@baylibre.com header.a=rsa-sha256 header.s=google header.b=MjgPBNgH;
-	arc=none smtp.remote-ip=209.85.128.46
-Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	dmarc=none header.from=sang-engineering.com;
+	spf=pass smtp.mailfrom=sang-engineering.com;
+	dkim=pass header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=LrxwVMkf;
+	arc=none smtp.remote-ip=194.117.254.33
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4EB5160A3823
-	for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2026 09:17:39 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4EB5160A3823
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2558D606A31E
+	for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2026 11:28:41 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2558D606A31E
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre.com header.i=@baylibre.com header.a=rsa-sha256 header.s=google header.b=MjgPBNgH
-Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-4bb70074ab2so30119015e9.0
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2026 01:17:39 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre.com; s=google; t=1795425458; x=1796030258; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=XivqS2GzXFfLVs4e8GPr3drYgoFDRP+i4GE/VUr/Vsw=;
-        b=MjgPBNgH02xQwwlmVT88dEKqXLmkOtxBaiUolaQXrr+yWHJYso0rq5H3V5cMGxLZ4j
-         4A2RItLr1Sek84a15jzHonWwk1i+lX6hrm7p24UH3BIVH8u/GLz3xMWZesQ53FDWA+dG
-         x2x2jR4ERMEhavazR0qcOByOsQ2qCtCO2KRjD5X4T6FvMjY7zuG6fmRzqAPu/AUqV92V
-         3zRAjur90G2sULFJ+iQ/xXtaDgx1eTPqGezZVhpjaWkCUtP1ZjTSJ27EpBZSLQkbdNSp
-         w+okTMvneu+NyL6uX2WegqtYxcRuAgKYFanr9LmWTOiEkdkqf5Pi0yPw0QbSbOF/v2lF
-         Cgaw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795425458; x=1796030258;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=XivqS2GzXFfLVs4e8GPr3drYgoFDRP+i4GE/VUr/Vsw=;
-        b=XQZ7eSfLrBBZpcOm7fnI7b4wOt44F7XVwBmxD7KEpFIZ8ew3q3cQqjpe1hgcXdepta
-         UIyP7rnMsp7OX8zlGQm8U/G9jGPsqQjWquk1xKR1ovkPpJwc7T6KMJYAw1NQgjFhU8R6
-         HK73MjRzbg591xXP3nahFZRc5xhMQJplEc/Ucu25T9gBVUN0/tFvRGfFlJ5GRphcv5Vs
-         bHZ+7lGc8/msx+4jHNb+slmZCVcrqYtVvbiQIbDfHpi5nWCOLt69XqfUpgKTO3R4vbFu
-         ckzNKy/WKEu1I4rENTOKYeQyvW3Aj5pviY8eCQ2e7nHarqfOT1fxrN3wOvaH4czWq9qO
-         37rg==
-X-Forwarded-Encrypted: i=1; AL+hErE395T3twF3mexShiOLf7JJVPi7p+kNOWDtJcGK96bQtGZuN0QoNUYmhhM5D5+Yn+eSHVFg/TEFR30=@vger.kernel.org
-X-Gm-Message-State: APuU4Z+S+j3mODj8cgq3RXb9imxfzaSGjv6N7pMJgqxRF34Icopf0DJD
-	NJvo+ThGZgGHvY3ApTcOJY3U2Rs+HB1EvTuu4pqkqv2DfYwMDFmbhkOwcg7aejiU8JU=
-X-Gm-Gg: AZFdTZc3v3d0QE1S+09/zirUfguVzeIhZWgq+WVJZddJfW7HY7Jfoj87+RTzuzuldIh
-	loTr3u7LeRjwzaeJBM6WojgHd6ByJRfPStXRG3ADDKWsRKDDAeFrYtzHLiMlOPN1JVnrxxJICEz
-	B87kZtAzS8Pkmul2WZG0FkO6+TOnLxj3o5YYorIXwsU9rakRt1tl+RqIcmSmfs9Y5RCx8r9ZRSc
-	sdca07A4oxrJa8xD22LtkLpgeME8Nv9riQYYzldJFckOTHUJ/s45pxqJ6aEs8x0agBScfeuvW7N
-	7Gf2lR1WQ+rW5feip8diCX25Ike49p5zeuunvrlb2GvPhnMieU458HzBoiavCVaQa2M/QnKWN0t
-	jzcnTecMROc4cUhVvSiDcHxXzz2E1bO1C3tRV25IRY19o9yide0jiJVCVoUMVa/GFsowGyLDy8u
-	Kxwh1q1QUt2cafM6yPumV28uqu7dNFeCJTddVOPGltQBtNKVpyovgZJ3wuCwHecB066QiK3uxwl
-	wFN62kekN84TYYOd/hQOP+LxKDgYHMNEupEIwCA8C1c2eVPJG4SS1aoJ+FzRManlQnf3O4SFOy7
-	QxLDH2vROy4pOKJUNdeKhFr6dDZMgPLJphQNJY1mW51gPS3/EJ1tpa5EbV+Mx89hhnYuoUpjLSj
-	scKCaGqBatiARTubIwNwg/AG3i3kF1ezUAIJabQ==
-X-Received: by 2002:a05:600c:468b:b0:4ab:cc03:7f60 with SMTP id 5b1f17b1804b1-4bb8881b511mr224342725e9.18.1795425457707;
-        Mon, 23 Nov 2026 01:17:37 -0800 (PST)
-Received: from localhost (p200300f65f19a90438645cebc2ee104e.dip0.t-ipconnect.de. [2003:f6:5f19:a904:3864:5ceb:c2ee:104e])
-        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-4bb906e4ce6sm162891895e9.4.2026.11.23.01.17.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Nov 2026 01:17:36 -0800 (PST)
-Date: Mon, 23 Nov 2026 10:17:35 +0100
-From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
-To: yogo.0917.sabu@gmail.com
-Cc: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Thomas Gleixner <tglx@kernel.org>, Radu Rendec <radu@rendec.net>, 
-	Daniel Lezcano <daniel.lezcano@kernel.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
-	Ulf Hansson <ulfh@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Jonathan Corbet <corbet@lwn.net>, Shuah Khan <skhan@linuxfoundation.org>, 
-	Randy Dunlap <rdunlap@infradead.org>, Russell King <linux@armlinux.org.uk>, 
-	Arnd Bergmann <arnd@arndb.de>, Alexandre Belloni <alexandre.belloni@bootlin.com>, 
-	Linus Walleij <linusw@kernel.org>, Drew Fustini <fustini@kernel.org>, linux-kernel@vger.kernel.org, 
-	linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, 
-	soc@lists.linux.dev
-Subject: Re: [PATCH RFC v2 10/13] mmc: sdhci-at550: add SiRF AT550
- programmed-I/O host driver
-Message-ID: <awQEjpz2572Y9wsB@monoceros>
-References: <20261121-at550-rfc-v1-v2-0-b0309d0789b2@gmail.com>
- <20261121-at550-rfc-v1-v2-10-b0309d0789b2@gmail.com>
+	dkim=pass (2048-bit key, unprotected) header.d=sang-engineering.com header.i=@sang-engineering.com header.a=rsa-sha256 header.s=k1 header.b=LrxwVMkf
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=Wkpq
+	ttVEIBaMSa9UY7eLmUB8mOCbvmxmx8PkXKxMIOs=; b=LrxwVMkfEaZxfz8eLLQc
+	Ddd9sY/0rF6aUBbb/BgH9O+u3XL4UQ+jhVJ5Cdkfw06y7Zxmq8SYdC+IUKuC2owk
+	si6dlR6uF8S6oUukMNh3uoUimSw+WdDTUptU9Q4tTVcP/iDwQW+iwBKdHIsVkwg3
+	GyLbgEsYaXOJQJxGkFwv9zAWhFP2s2DhNt6Vfe7KrIjq0c61+Fh9S7meRzdKltYV
+	7HNlgaTsWaJeB7G1h59T+ZwDkENWDJ39NJOiBZiURYvnN8VhfLVBojrXYtGh2afx
+	3jAgIVjtk+7j9kGcvhad7F4UtObwS1PA8wEFkN7hxP0eYrBcNFI55ExvaY8GTuWf
+	kg==
+Received: (qmail 2692048 invoked from network); 23 Nov 2026 12:28:38 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 23 Nov 2026 12:28:38 +0100
+X-UD-Smtp-Session: l3s3148p1@8jQt5e9get4ujnsu
+Date: Mon, 23 Nov 2026 12:28:38 +0100
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Arnd Bergmann <arnd@kernel.org>
+Cc: Ulf Hansson <ulfh@kernel.org>, Linus Walleij <linusw@kernel.org>,
+	Arnd Bergmann <arnd@arndb.de>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Frank Li <Frank.Li@nxp.com>, Runyu Xiao <runyu.xiao@seu.edu.cn>,
+	"Matthew Wilcox (Oracle)" <willy@infradead.org>,
+	Pan Chuang <panchuang@vivo.com>,
+	Samarth Narang <samarth.colleges@gmail.com>,
+	linux-mmc@vger.kernel.org
+Subject: Re: [PATCH] [v3] mmc: sh_mmcif: rework sg_miter handling
+Message-ID: <awQjZnsCKLzUKUey@ninjato>
+References: <20261119152559.3051943-1-arnd@kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -108,55 +70,54 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="53xo6eipu5xw5r7j"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20261121-at550-rfc-v1-v2-10-b0309d0789b2@gmail.com>
+In-Reply-To: <20261119152559.3051943-1-arnd@kernel.org>
 
+On Thu, Nov 19, 2026 at 04:23:24PM +0100, Arnd Bergmann wrote:
+> From: Arnd Bergmann <arnd@arndb.de>
+> 
+> This driver is the only one that uses sg_miter_next() to get a persistent
+> mapping across interrupts, which prevents us from converting the internal
+> kmap() to a local mapping using SG_MITER_LOCAL flag.
+> 
+> Linus previously attempted to use atomic mappings here, which failed
+> for the same reason. I gave it another try, with a mapping that is only
+> active during a single sh_mmcif_mread_block()/sh_mmcif_mwrite_block() call.
+> 
+> This is mainly a revert of the patch that fixed the command 18 timeout,
+> but tries to solve the problem by updating and checking data->bytes_xfered
+> to keep track of when the transfer is finished.
+> 
+> Instead of calling sg_miter_stop() on error or completion, this now
+> always stops the iterator after the data transfer and restarts it during
+> the following interrupt.
+> 
+> As sashiko-bot comments, there is an inconsistency with the size of
+> each transfer: The mmc core expects a transfer of size data->blksz, but
+> the actual transfer is host->blocksize, which is read from a hardware
+> register. To keep the behavior as close as possible to what it was before,
+> I still advance the data->bytes_xfered and sgm->consumed values by
+> the requested transfer size for single-block read/write, but advance
+> them by the actually copied number of bytes for the partial transfers
+> in the multi-block requests.
+> 
+> Cc: Linus Walleij <linusw@kernel.org>
+> Cc: Geert Uytterhoeven <geert+renesas@glider.be>
+> Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Fixes: 4d4a2c71b862 ("mmc: sh_mmcif: Advance sg_miter before reading blocks")
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
---53xo6eipu5xw5r7j
-Content-Type: text/plain; protected-headers=v1; charset=us-ascii
-Content-Disposition: inline
-Subject: Re: [PATCH RFC v2 10/13] mmc: sdhci-at550: add SiRF AT550
- programmed-I/O host driver
-MIME-Version: 1.0
+Moved some large files around, checksummed them, double checked across
+reboots. All on these boards:
 
-Hello,
+Lager (R-Car H2, 2GB RAM, eMMC)
+Genmai (RZ/A1, 128MB RAM, MMC card (yes, I still have some))
 
-On Sat, Nov 21, 2026 at 09:43:20PM +0900, Yuugo Yoneda via B4 Relay wrote:
-> diff --git a/drivers/mmc/host/sdhci-at550.c b/drivers/mmc/host/sdhci-at550.c
-> new file mode 100644
-> index 000000000..11c9de0c9
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-at550.c
-> @@ -0,0 +1,51 @@
-> +// SPDX-License-Identifier: GPL-2.0-only
-> +/* Standard SDHCI PIO only: do not assume CPU/PCI DMA address equivalence. */
-> +#include <linux/mmc/host.h>
-> +#include <linux/mod_devicetable.h>
-> +#include <linux/module.h>
-> +#include <linux/platform_device.h>
+Anything else I could do? Otherwise:
 
-<linux/platform_device.h> already provides of_device_id without the
-implied dependencies you get by including <linux/mod_devicetable.h>. So
-please drop the latter.
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Best regards
-Uwe
+I trust Linus' review. I'll be around for more testing in case a
+regression shows up.
 
---53xo6eipu5xw5r7j
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmsEBK0ACgkQj4D7WH0S
-/k7hOgf/csj9IbehNzv7kJ/jSWUzgb6r4/RUEEbwtHDzllOp2mTN98xOQkRXzRr+
-kmuM5eb3Prkbs0qQBPQiihfmm0Jo8lnvB2N8uBswWQM42XQ1o5YmtZx2RIs5cp4a
-M0FFz9Bz2fH6rmOr5ETS3FRjnZ8CNqQnaFBWD9lGusUfgppfoyqvFwbXBZyQd45Z
-KCR1pIqN6sWoDMkalLwcL8/M72VapgfDtPpmNp4qxYjf3m8WbJJZGT7uK2Mk78DG
-WWybLbbeuHCv72ICgMdJArlShc5E7A8r/LZSSpXjnNPBCxOU5AeW1Fa/7Ma+TYWI
-G0UtaE9KZSsmGdqMVovJUC5O5/MnDA==
-=R4EF
------END PGP SIGNATURE-----
-
---53xo6eipu5xw5r7j--
