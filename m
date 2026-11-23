@@ -1,79 +1,104 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795416737;
-	b=m/hnyC8j7I7uob6T2Yp2eUZmRxQ4HlgRQHX0tT2lBpwXsTOh0pfC7Yod8yXYtnX9rqyv
-	 QQBHd87cQ9/p+X4Ld9W1WdWKdXL6X43k+/IzhP+QKgpbz4N2hm/LeEMC9C/L4tD8/GI4Y
-	 mamTgCeYSmQkp/w313yiPbsSBSDA7xWc5IxvQN3iv96Bf0j+5GPC0vHOXdLAPFX9VTcgF
-	 +UOSHUcO7MaF1/zLRgQ+U2/zC1a3MzAGqzwsT/KrsumRThxjLs1AwfJwvo0z/34vPBFtX
-	 1lTVW4FLnQozO5zQEiUYeWzOAMBe8w1FwdCWnYSj10nKBcBuoaA6Zws9NfLVS8xM3zw==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795416737;
-	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
-	 Content-Type:Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=GUKVQF78LxhcCZ4rExAOoGb06gsLyRPQJ3PlRYhBYIw=;
-	b=1tTWBvTTS6sObQOEmxNq8zF/Cdx9MoLtMSq+FZI/zDdnb3wpg+0M46lfixeay1AIpqme
-	 xfBLwQYWeHkvprYErA7Eptrx1KJI2sBHtHwiIhRNaqc0cG2uexAbGQ6VzBrqX8ks0MO7g
-	 zSCsWZNWn3eXXC+0CCOZxgA3PD8h9znVfyAT3M1XoWc6yT233bB6nN7iEVS5UCtUU1C33
-	 I9L31dpl9FwQkIAMYXVJV2J8dJ0kxSyhcSSxcBRtB78eKZ8P/FQ6Uya8aQCo/1K+Wz34i
-	 ZtZ0phMj+3sg87on1Re/GcjMBi/ZBRa7bCRF2MlW1AJoosBEVU6ixzRVhMDSfN2f3oQ==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=fKCiH2Fr;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C42E1606A31A;
-	Mon, 23 Nov 2026 06:52:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=fKCiH2Fr
-Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
-ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1795416737;
-	b=OnXBMuoNsC2qmr8sRf9y0gUDmIUqI7B0vDNZzS2JibLXkg09p9uZbOwRGqzawDgz2+YC
-	 oK8FNTMWCilrW5Z8+ZUDxsh/8XkzSZpyfUJimG+h7ZDoJkQkm2xNpcwsRN/f6/xE1Rr0B
-	 XQCOFTYHAki6l7tmddHVNJYqdup07tVw94zYTt8Xcx0APbjYKadL90fpu37MvOA9UwrAF
-	 CbA5wYLnxCkno3fjVuxV1IOPg0Pk3G8fWjADStLuv8OmVCuSxkGN5ilR2SV3iH3fMzeah
-	 MKt9Bn1YtUWMz3vSLQY0eQvIvPd3iRmNEKaHrC34qifsn7P/5TvEj+xgNX1H/Crb0jQ==
-ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1795416737;
-	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
-	 Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=GUKVQF78LxhcCZ4rExAOoGb06gsLyRPQJ3PlRYhBYIw=;
-	b=xZlZdbpNuPo7BYq8kUiUExpwRiv8VrCMaGtIm2wgdmPNemFZ9Ik4I8UOqBx64SwkBmo7
-	 Bdt+y0sogJ4VYAWwPxXmUif2UDaXjFzizhePL+mup3AfcftAs1JKzpGwBLzRtYVHVdYqP
-	 D2+A7YBIAWJCqQHnZQ1PfOQ1IFWtxbovH/QzTJ2lUOezkudCzfjmbxF21DMPJUlyO5hh0
-	 S2jLAH/chtLcgVCWIqnop5a1qTBxyymUv+R0m6VTW92AZ7x34JJhli01Bc3UQN2s+QZ/i
-	 GpWNwY0yKvfWq+TJubwAwaaHGGdoYi1fQpns2lmEWW02UdD3nwXhx1cTcdJeU0J4Hsg==
-ARC-Authentication-Results: i=1; smtp.kernel.org; 
-	arc=none smtp.remote-ip=100.80.115.77
-Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.51
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1795425420;
+	b=p5S1dzdHNnQbfTyr+sWHUUBlRnMU3NwWYFuZHG9m98TZREEzbZhb/UzWbrT/f5OmUrNt
+	 Gm7Psw2aPmMlYs9ZELwZKHhISvKKFG1eYi9Ef2al/AlpZC2mwxX5cxDmv5lIO7NuUPXOU
+	 6sNOBROYiESepKMpQOWQ8/7H8b5iRYMHxlRx3XZqsXL84my1eeevRH6mmFMcOfj0GU/NH
+	 Tcf4dCwege8ZoGcLZ80y1Ixm1aj+mPaujIWvrOB2GTZXO1eOZXySBy9ThnF0R6XDY1Ug6
+	 FoqnL+LadF+5H8D+Oiomq0MiJOGm0Q923kD5M1aqvlFukVhQyqPHp5932o2fSqIUD/A==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795425420;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
+	 Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To;
+	bh=KntknVNj068zKgAq+zdLaDv094kaGVDF9/OJXVQRtwA=;
+	b=x00sGQ2pX3Aljy4MdTx7d6nxflziWoaGEHQdo5aftvq/B4Z8sC6mCvjo1ybR0UYuuA/g
+	 pya8/YCDNrzQCPxju4tzre7W3DL0niWEtimLPe6PdLxh6TOIAr/LBmdOAel1AjFopMm2L
+	 yRKMOJcaB+iZzhuk5oeDX3FNobuk6gW0bbLfqWohDOEzb7HYXTRqjU9nxJLxAkMoFD9Zp
+	 fSvXP32IT9JaerRwFL/I27EeSyPqJIrvHb+M0rbQIz/fVxJ8xRV+hwr2fDep8yUZLPbsA
+	 0uueJtJhWnBMHP16J2rKTGPCDTGkkeKxu5j93wqTbFw1c7pfc+iRAe5Y+MrEw+eSFpA==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=baylibre.com;
+	spf=pass smtp.mailfrom=baylibre.com;
+	dkim=pass header.d=baylibre.com header.i=@baylibre.com header.a=rsa-sha256 header.s=google header.b=SujOSC3b;
+	arc=none smtp.remote-ip=209.85.221.51
+Received: from mail-wr1-f51.google.com (mail-wr1-f51.google.com [209.85.221.51])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id DC2621F000CA;
-	Mon, 23 Nov 2026 06:52:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795416737;
-	bh=GUKVQF78LxhcCZ4rExAOoGb06gsLyRPQJ3PlRYhBYIw=;
-	h=From:Date:Subject:To:Cc:Reply-To;
-	b=fKCiH2FreNy01XVnTxsbvdQjwmIXeZFe63xOJm0CAwFCBuJWod7wMY0Rz4A0+5uuc
-	 dg7NxGZZMXBaj64nw5NUre1CW2thbgYJoC6tM9bujOw1h9hdvFHPW5fHuRJ8vzevKX
-	 2jJKGYS9/JVWq5V6MKZAde8G9JYwTQmDtRP4w1hERnXUCyGaedKLQ32gEKefllOxhx
-	 gb3tRUXTsVp/4NMVtOgoEoip6eYVXSh38ic7lxThr9FFXK9zELVTuMWDGAYeQcucMg
-	 79LcoYODHyjVuI70eMyTzk6m4jGiY3Mhs2PSat2vyAs8zviG2KSwtBH0BCuEOwsO9t
-	 Y0xSrqy540Lvw==
-Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id 57CDC4C399;
-	Mon, 23 Nov 2026 06:52:11 +0000 (UTC)
-From: Athira Palliprath via B4 Relay <devnull+palliprath.chromium.org@kernel.org>
-Date: Mon, 23 Nov 2026 06:52:08 +0000
-Subject: [PATCH v2] mmc: core: poll busy at HS clock if CMD6 errors in
- mmc_select_hs400
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 623CC606A31F
+	for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2026 09:17:00 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 623CC606A31F
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=baylibre.com header.i=@baylibre.com header.a=rsa-sha256 header.s=google header.b=SujOSC3b
+Received: by mail-wr1-f51.google.com with SMTP id ffacd0b85a97d-4a9be758734so1788682f8f.1
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2026 01:17:00 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre.com; s=google; t=1795425419; x=1796030219; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:content-type:mime-version
+         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=KntknVNj068zKgAq+zdLaDv094kaGVDF9/OJXVQRtwA=;
+        b=SujOSC3bJ6T5qZYnGcOUlGfGb/XPzEz/mcEywcTIoGYC/v/096w5zQui8EIrk/p2Cv
+         cKCrDJV3hNKyi4Q+XaH1MbeqOl2FjAJPbqvclju5ti9weuviulXhw7yJ6g9cD8SnB+EY
+         NiRHE6rL1xTY7zHCjnfM8vjPsa+ffWVQI+MXLuMxh6zoIGTMDPrOFTgpO0ErILuJt+pE
+         Eq2bhuFgPdWjpQq+YtoYvEh8QCknNuwPr/4YslboIRW6Tb6Q0WlwOiizJDnAwN30eCzO
+         yJ09eoWNrpIrDwPh1vIqEcRloBzHouFWuo6mGf1X0BK+tC7e3DB6KWGRuwLm+GgwrSnW
+         o16Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1795425419; x=1796030219;
+        h=in-reply-to:content-disposition:content-type:mime-version
+         :references:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=KntknVNj068zKgAq+zdLaDv094kaGVDF9/OJXVQRtwA=;
+        b=a7Xs6ZqL7/IcaeQxJk7n5zdTJRGg0LOSl4iPtN5/zy6V5HxCwXRZp3yreASV1yFugh
+         SMkrURkvHwapfwJkO1wrRxm2PpHbDqQNKaZtkW6QiTfW20tPvFDBGoNYD7FS7y9u3BY3
+         5y003fJaRQ9NALgc+d1RfvreNshMitYDy47FOpAJ4FJKwGfLm40gzN4V+4eNRnD0YwZa
+         E1FZEs4i+Guyj+FJa66/QGRQGHDMlCf3z34lAxoBaQJy0vyCluFE9VfZo7Pars2MSnXU
+         DDyHCxEIOxAZ9CX9Cp+BfHeFhOIFT1MNlJyih35JgJ7/zBsCR1/FmDS9lvoEoE/NOsXr
+         JTsA==
+X-Forwarded-Encrypted: i=1; AL+hErHUIJbWxiOw4uWzDE6AK/LMXQiIMq6LGrCfbXlv7d9Y2zCbLcggcYLNFUCa1NfYh4O1kTIbloY4TuI=@vger.kernel.org
+X-Gm-Message-State: APuU4Z8+td2f0+6pm0HmbzFClNsc6yj0RSmbP8Jhlf2iRnCLBPSKaSph
+	HWkv93+adt4x+T4DOFXebZUr1HNemrYyw4zMIBF/8gm99yuiR4iJ3ugdcF+hZynfqmc=
+X-Gm-Gg: AZFdTZeVAQtPake2daGSLMw4J2uA4hcsrZwqhPkJwz/TS6LHSjSfkMPEPjUh3Y7uhOT
+	EUt8P0ZeejdpmvFfWK9QGcdwceYqBXAj5lCTb3Kyopdzwvv3foi+GVfwQk3CjCwLG0HSS0wTDT/
+	37gG8dn35lGgZdQQTRFFSGllfaFSIXuuMy9ZyPi08IuPQ8IErDxsKz+gUwm5BTOBrSzAgVhM2v6
+	vN7wJGgSq4gpBC8ui5FK8o9X9/bRwXVobdEfZnaSJmdaV0ww0JurMGXF5kb6AJFEYqUem7O7rB0
+	wSww6SRoN7Z7vp6WCuqxVyogo5NFEKMkO3j/JyF0wtf4/AY2E+s7EHPwjTI2tGzh8k2x3PU55oW
+	sHn/kkQoGjkNoL1igysllYXyDD3JmfiTEtboPNyKidUQanM7tLILnDnzVb5jnqcezDCMlzfsc0y
+	aPsSmpYoDR/T6OhjJZ7drxP2+5CzyeTuk+S3+kM/uWIpuqNCIvPAfptJPIPSmiOqtDKl+2lahcD
+	mc08vFtYM+Yt3efV23nlI45NJCGv7U34zJVVAWqAHDPGcBsQkbYxFdRW0f01QWq+U51ZmARHxdt
+	BNjNu4Q7dwqIoe43IgA25Sen5RSzwpC0zp9Yc0ifXA8GJkmGWHd7/dJqOAVGuMokmRoQYOy6+Z7
+	nmbtngTohJs1HiGYX+z9Yi3pw77MsaYUmCNhz2w==
+X-Received: by 2002:a5d:64c9:0:b0:4a7:69c3:94d5 with SMTP id ffacd0b85a97d-4abb0e469cfmr20062459f8f.28.1795425418389;
+        Mon, 23 Nov 2026 01:16:58 -0800 (PST)
+Received: from localhost (p200300f65f19a90438645cebc2ee104e.dip0.t-ipconnect.de. [2003:f6:5f19:a904:3864:5ceb:c2ee:104e])
+        by smtp.gmail.com with UTF8SMTPSA id ffacd0b85a97d-4ab69bf61e8sm22313933f8f.11.2026.11.23.01.16.57
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Nov 2026 01:16:57 -0800 (PST)
+Date: Mon, 23 Nov 2026 10:16:56 +0100
+From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
+To: yogo.0917.sabu@gmail.com
+Cc: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Thomas Gleixner <tglx@kernel.org>, Radu Rendec <radu@rendec.net>, 
+	Daniel Lezcano <daniel.lezcano@kernel.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
+	Ulf Hansson <ulfh@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Jonathan Corbet <corbet@lwn.net>, Shuah Khan <skhan@linuxfoundation.org>, 
+	Randy Dunlap <rdunlap@infradead.org>, Russell King <linux@armlinux.org.uk>, 
+	Arnd Bergmann <arnd@arndb.de>, Alexandre Belloni <alexandre.belloni@bootlin.com>, 
+	Linus Walleij <linusw@kernel.org>, Drew Fustini <fustini@kernel.org>, linux-kernel@vger.kernel.org, 
+	linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, 
+	soc@lists.linux.dev
+Subject: Re: [PATCH RFC v2 08/13] Input: add polled SiRF AT550 resistive
+ touchscreen driver
+Message-ID: <awQEP9bHA0RPfRUA@monoceros>
+References: <20261121-at550-rfc-v1-v2-0-b0309d0789b2@gmail.com>
+ <20261121-at550-rfc-v1-v2-8-b0309d0789b2@gmail.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -83,135 +108,58 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Message-Id: <20261123-fix-hs400-clock-v2-1-ad3b935bd9f9@chromium.org>
-X-B4-Tracking: v=1; b=H4sIAJfiA2sC/3WNTQ6CMBCFr0Jm7Zh2QGJdeQ/DotZCJwolUyUa0
- rtb2bt738v7WSF5YZ/gVK0gfuHEcSpAuwpcsNPgkW+FgRS1WpPCnt8YUqMUukd0dzSm6P6qGnI
- KSmsWXyLb4qUrHDg9o3y2g0X/3P9bi0aNpj0Q6fpobe3PLkgc+TXuowzQ5Zy/BylIY7EAAAA=
-X-Change-ID: 20261120-fix-hs400-clock-99400fb042c0
-To: Ulf Hansson <ulfh@kernel.org>, Ziyuan Xu <xzy.xu@rock-chips.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
- palliprath@google.com, Athira Palliprath <palliprath@chromium.org>
-X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1795416730; l=4337;
- i=palliprath@chromium.org; s=20261118; h=from:subject:message-id;
- bh=LgH1THntmAvlqiGNxlcLpYqtPqoAxQtaL85fDfG/ZnQ=;
- b=kU4ot6vnYSfPC/tm5TT5gNcJTkEkEeW7Ooh0EGqLGPDmIiLl8QMQ0J14O522sygH7K+cKjzDv
- 3R1HBjwETOnAt8ItX0eS4Dss+i1630e6xGr92zprEvJAak5ZfmjkbSD
-X-Developer-Key: i=palliprath@chromium.org; a=ed25519;
- pk=OTJWz85nJwutJ218eeYfQMyFjDnPEnUi0L8N9EGsTa4=
-X-Endpoint-Received: by B4 Relay for palliprath@chromium.org/20261118 with
- auth_id=1580
-X-Original-From: Athira Palliprath <palliprath@chromium.org>
-Reply-To: palliprath@chromium.org
-Content-Transfer-Encoding: 7bit
-
-From: Athira Palliprath <palliprath@chromium.org>
-
-When switching from HS200 to HS in mmc_select_hs400(), some eMMC cards
-immediately switch to 52 MHz HS timing upon receiving CMD6, causing the
-host at 200 MHz to fail sampling the R1b response (-EILSEQ / -ETIMEDOUT)
-and leaving the host stuck at 200 MHz HS200 while the card is in 52 MHz
-HS mode.
-
-To keep JEDEC JESD84-B51 ordering (send CMD6 first, then lower clock to
-<= 52 MHz), pass retries = 0 to __mmc_switch() and, if it fails with
--EILSEQ or -ETIMEDOUT, switch the host to HS timing and 52 MHz first
-before polling for busy completion at 52 MHz. Other error codes still
-fail immediately.
-
-Also temporarily set host->retune_crc_disable across the HS200->HS
-__mmc_switch() and fallback mmc_poll_for_busy(). Since mmc_select_hs400()
-runs right after HS200 tuning enables host->can_retune, an expected
--EILSEQ on CMD6 (or on a retried CMD13 while polling) would otherwise
-flag host->need_retune in mmc_request_done(), triggering invalid tuning
-at 52 MHz HS timing on resume/reset or leaving re-tuning pending after
-returning to HS400.
-
-The retries parameter in __mmc_switch() was added in
-commit 5e52a168be37 ("mmc: core: Add a retries parameter to __mmc_switch
-function") specifically so callers where retrying CMD6 is harmful (such
-as eMMC sanitize in commit 5b96247c68d8 ("mmc: core: Let eMMC sanitize
-not retry in case of timeout/failure")) can pass 0 instead of
-MMC_CMD_RETRIES. Passing 0 here trades off automatic retries if a
-transient bus error corrupts the CMD6 request itself at 200 MHz, in
-order to avoid retrying CMD6 at 200 MHz after the card has already
-switched to 52 MHz.
-
-Fixes: 649c6059d237 ("mmc: mmc: Fix HS switch failure in mmc_select_hs400()")
-Signed-off-by: Athira Palliprath <palliprath@chromium.org>
----
-Changes in v2:
-- Temporarily set host->retune_crc_disable across the HS200->HS
-  __mmc_switch() and fallback mmc_poll_for_busy() so expected -EILSEQ
-  errors do not set host->need_retune (reported by Sashiko AI review).
-- Link to v1: https://lore.kernel.org/r/20261120-fix-hs400-clock-v1-1-96522138aa3e@chromium.org
----
- drivers/mmc/core/mmc.c | 26 +++++++++++++++++++++++---
- 1 file changed, 23 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a02b04938e1a0..d4fc0bab690f6 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1181,6 +1181,7 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
- static int mmc_select_hs400(struct mmc_card *card)
- {
- 	struct mmc_host *host = card->host;
-+	bool retune_crc_disable;
- 	unsigned int max_dtr;
- 	int err = 0;
- 	u8 val;
-@@ -1192,13 +1193,22 @@ static int mmc_select_hs400(struct mmc_card *card)
- 	      host->ios.bus_width == MMC_BUS_WIDTH_8))
- 		return 0;
- 
--	/* Switch card to HS mode */
-+	/*
-+	 * Switch card to HS mode.
-+	 * Temporarily suppress CRC-triggered re-tuning because non-compliant
-+	 * cards may switch to 52 MHz HS immediately on CMD6, causing an
-+	 * expected -EILSEQ at 200 MHz (or on a retried CMD13 while polling)
-+	 * that would otherwise set host->need_retune.
-+	 */
- 	val = EXT_CSD_TIMING_HS;
-+	retune_crc_disable = host->retune_crc_disable;
-+	host->retune_crc_disable = true;
- 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 			   EXT_CSD_HS_TIMING, val,
- 			   card->ext_csd.generic_cmd6_time, 0,
--			   false, true, MMC_CMD_RETRIES);
--	if (err) {
-+			   false, true, 0);
-+	if (err && err != -EILSEQ && err != -ETIMEDOUT) {
-+		host->retune_crc_disable = retune_crc_disable;
- 		pr_err("%s: switch to high-speed from hs200 failed, err:%d\n",
- 			mmc_hostname(host), err);
- 		return err;
-@@ -1215,6 +1225,16 @@ static int mmc_select_hs400(struct mmc_card *card)
- 	max_dtr = card->ext_csd.hs_max_dtr;
- 	mmc_set_clock(host, max_dtr);
- 
-+	if (err)
-+		err = mmc_poll_for_busy(card, card->ext_csd.generic_cmd6_time,
-+					true, MMC_BUSY_CMD6);
-+	host->retune_crc_disable = retune_crc_disable;
-+	if (err) {
-+		pr_err("%s: switch to high-speed from hs200 failed, err:%d\n",
-+		       mmc_hostname(host), err);
-+		return err;
-+	}
-+
- 	err = mmc_switch_status(card, true);
- 	if (err)
- 		goto out_err;
-
----
-base-commit: d2616724e01132376c78872b8324f38659af9f28
-change-id: 20261120-fix-hs400-clock-99400fb042c0
-
-Best regards,
--- 
-Athira Palliprath <palliprath@chromium.org>
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="o4xfpqjjox3khpoi"
+Content-Disposition: inline
+In-Reply-To: <20261121-at550-rfc-v1-v2-8-b0309d0789b2@gmail.com>
 
 
+--o4xfpqjjox3khpoi
+Content-Type: text/plain; protected-headers=v1; charset=us-ascii
+Content-Disposition: inline
+Subject: Re: [PATCH RFC v2 08/13] Input: add polled SiRF AT550 resistive
+ touchscreen driver
+MIME-Version: 1.0
+
+Hello,
+
+On Sat, Nov 21, 2026 at 09:43:18PM +0900, Yuugo Yoneda via B4 Relay wrote:
+> diff --git a/drivers/input/touchscreen/at550-ts.c b/drivers/input/touchscreen/at550-ts.c
+> new file mode 100644
+> index 000000000..89c2d2701
+> --- /dev/null
+> +++ b/drivers/input/touchscreen/at550-ts.c
+> @@ -0,0 +1,124 @@
+> +// SPDX-License-Identifier: GPL-2.0-only
+> +/* SiRF AT550 coordinate acquisition. Layout cross-checked with AT551 draft. */
+> +#include <linux/bits.h>
+> +#include <linux/input.h>
+> +#include <linux/input/touchscreen.h>
+> +#include <linux/io.h>
+> +#include <linux/mod_devicetable.h>
+> +#include <linux/module.h>
+> +#include <linux/platform_device.h>
+
+<linux/platform_device.h> already provides of_device_id without the
+implied dependencies you get by including <linux/mod_devicetable.h>. So
+please drop the latter.
+
+Best regards
+Uwe
+
+--o4xfpqjjox3khpoi
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmsEBIYACgkQj4D7WH0S
+/k6Mogf+I4t6gj7ob8tkta5kHm+YP96+f6rsROw+nYQ5NXBDBTwdaHgtuxTw/3u3
+9TSFi59BI6mt1CJkV2ldOhel8Do0lFyFlVyx1+tlaLGNAjrt3f8m2IWJcvQU4hQK
+qCxr790Ac2+n+6M13QHVHO8E7+V5Kxu109uuNUNUWIsrjawNdIUx+lqOywM9o/JT
+s7dUkwPF41vgxb8gPn3Hr9uAImmkTspc70TUfxqNtGVNmQlizkBCtSCoABv5QCdW
+mXZx4sl+NJUJpqZ/jj0ehbdZ1DT8xVBRF1ZDrDU0AdqO6EAWVEnOx3tb5+7JsaKI
+HSj3Bm7869/tgf+jXQ3QF1Uu7I1vmA==
+=UpFb
+-----END PGP SIGNATURE-----
+
+--o4xfpqjjox3khpoi--
