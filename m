@@ -1,74 +1,74 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.167.199
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=74.125.82.200
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795545000;
-	b=Q+cX4crgRRLndiGxk9cfdljJRU16vbf6csEsywAbcsP9ybq9iMhLYHw5r+mz0jBdojvR
-	 dE0vd9ZvSuNCf6xHa5vllIYgEJEvFWdBBFRAnyZ0ouYOt86GJX6Dz+5KhDe5nEL8pyxHg
-	 SuQbT4UaVXLvqnV6nhNIqkdtHlWq6A48MT/jwKDvIQc9wAFfwmK6tusIudZOQpxxvI9+b
-	 kvV2wZfpk2GJBjrDA5T6SZvwEUsKVXqH6JaXIXm/W++09iPk04XdsmQcf4bRCelIJzhzq
-	 hz3yge2iJjWJSVuokYn+c3sau4lKtY+6T3+VHiCeS9eva9QvS3HVNupxH9zbj5O4NXA==
+	t=1795545003;
+	b=Niz8nu8xDQv6nlOInyTIHgFNJqAWa7UxN7WWaJm0n5HOiBZz91QzncAgXqjqA5otEgbD
+	 t1GkLwfa49wDEUfkHwqNW7N7Q06N0JuLAd9RhYmfevXXT3UYbbvFngm+YGs+iedmGnExc
+	 VVUEHIBAxkGyZqYMM2Zv7nWoXSWAvmRbHlNEIS2iRHSzR132MEBhl30+4flawZIu+Uhte
+	 nSVfllNABvNk8hVq3eIkhdqcz0Chpg0qt8uhvuE9u57l1mk04YeeLV45XssBw+u4ku3R2
+	 6o5QACKn2jMXEzCVLgSBteCe9HlcTds51483STO6Pa4GtTCzOv41hiL0N9hOvtsOTiw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795545000;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795545003;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Received:Date:In-Reply-To:
 	 Mime-Version:References:X-Mailer:Message-ID:Subject:From:To:Cc:
 	 Content-Type;
-	bh=7j6NQ+GDtGAfwdRkFCQTMRmSY7z5XVEstvt7hBMwONU=;
-	b=Alr3ksg0UcsZYa1oHnGNPumC9PfAFYGzebh/4P06KzVsfoUl9QkoZ+5nRoe+zxD5NMrf
-	 Oa64xlnUvXK51Rqp5NdfeBdd81izkEJYdoofefL3PkdwxMqxOCsXMSWcaGHLiFu+inalp
-	 Ci1Evp924qGsDlq+iCzjn0HPh/KefdhKp4FbotWH16ZREoAM/A7rUNFsG5mMNFsApbtuj
-	 KASpoNoJ6LKwSivI8bEDwCQOnZsnItVXp5BIg6EY18IrkPWTt9fsQkPfiOQX11gQK3fq1
-	 3y1UY0c+swyH48vY9VxEKGiy5K+goxin8Z5d4lZ6shDfDCU/RH0G87HiCvEXJ/f3tAA==
+	bh=lrwfQJcwFhFffOygVO/MIPK8atOxj4tdwaWQGKK21rQ=;
+	b=njNofuoZHcb6YjPhxpqRNFQZ1PvW7XcY3NBfRXAMBDUX5RNAH5BJpG9wFRSTDAOW2CQW
+	 yhdsvYuXCaz+v6hmpDEViqwNH8cuzDx8IVLwagI2HBbunHHwTrm2Sns45auYZpVZsNuSo
+	 4qaiC7Fwqnj8rHa4wvXpfaVxYIEn0Dotowvbv9SJFBzmXkUkmt+2kZA86D4UIOS5eCrDj
+	 LhsxS3Y/AsUtWMq4mfbGrhfFeI5MNzDe+FET0YGzfsz9JoVeWOkQv4DnbJgCmXMBAY5wm
+	 1lZxiMOIGztMVULIotMATVrb9ej7ZbHVoNZWyGf/lC+ttjqLdqisaL3Co27iAMEJHhg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=google.com;
 	spf=pass smtp.mailfrom=flex--wusamuel.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=mezn6k+x;
-	arc=none smtp.remote-ip=209.85.167.199
-Received: from mail-oi1-f199.google.com (mail-oi1-f199.google.com [209.85.167.199])
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=go7z79EE;
+	arc=none smtp.remote-ip=74.125.82.200
+Received: from mail-dy1-f200.google.com (mail-dy1-f200.google.com [74.125.82.200])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A592E606A32D
-	for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2026 18:29:59 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A592E606A32D
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCE26606A333
+	for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2026 18:30:02 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org DCE26606A333
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--wusamuel.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=mezn6k+x
-Received: by mail-oi1-f199.google.com with SMTP id 5614622812f47-540537f959fso5207630b6e.0
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2026 10:29:59 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=go7z79EE
+Received: by mail-dy1-f200.google.com with SMTP id 5a478bee46e88-38531c1a566so4435884eec.1
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2026 10:30:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1795544998; x=1796149798; darn=vger.kernel.org;
+        d=google.com; s=20260707; t=1795545002; x=1796149802; darn=vger.kernel.org;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=7j6NQ+GDtGAfwdRkFCQTMRmSY7z5XVEstvt7hBMwONU=;
-        b=mezn6k+xCF+zoCAKeIiUkqMUHcOIl/J/XjYDnf14QlZy/EQCBdTgR1/HVIP6xJe9VW
-         aYCT1mZz4qUgeFosoGUvcK2O6ZZPNrBeNQdmef8Pw4zIPa/HmYYVsSwaTqhDRmUzKA09
-         scTeqGErq6kTqFhxlI2I2gy1F9VC75TRUQW+NDBvlOGWXiFcKWfFHsuwKF9cId+YgFVK
-         HCnyqPHHeDEAC2dXgyuhmjoEelTl4V7i6JCE5wcRyofzpV7PBSKY0PVWPoCNSxwLYnAd
-         6aCzQZiTFcAw+MSKZWMH32juhUNZ+hD9dspx8EK96vdBmu2mf05TQYdkmYCcn0Lsroai
-         FTjA==
+        bh=lrwfQJcwFhFffOygVO/MIPK8atOxj4tdwaWQGKK21rQ=;
+        b=go7z79EEMwM8DcKxyu1rcawcR9gem2qglmb/EX8DKunyp/71HLowR54WVpZIsq3lRt
+         x2spNPZjMIY4tmnDH7C5G1ilTKVQ/UoVrrSLgZ4gBjDWlKIjieYMFKurYhSq/aWEUG4l
+         o+nMR97UarPCQ+DqFa4dG49AJZYoJ/rWMUJSxuG3yUaeYIe7+6vm0j0Om62zSc+HGAnZ
+         hut+4iI6cwvGeZaxb00WGO45t47JHg/X/CZmMCaO9COHfE3gFcszc0MG9WQTAErpwD9S
+         nSMV6J0KwL9BOvEgZchHljB/LeCFrhbj6df3ou/Fc3M5kwPEPYvoJF04O0dqdPa27Fzu
+         5+3w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795544998; x=1796149798;
+        d=1e100.net; s=20260707; t=1795545002; x=1796149802;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=7j6NQ+GDtGAfwdRkFCQTMRmSY7z5XVEstvt7hBMwONU=;
-        b=OPMOHmyYnyGDFvTKoBwsRn71QulfKdigu/bdPwCwJxLqgepvl8APA/4ZRNUVWNTrLS
-         mwJvS9Ws4CW0i7mNPoYea+jo40qUuyGN1q5XcrwdvIqul2QH8hIlmJKMWjIXq44mpqfw
-         O3bWJ/R4pkGd/YmvxyGgfUA2/NHgzHbiL2GOlzzM+QCw19L+2dL+UFLi8Y1QjqV98SoZ
-         +daq8iBjxkU7q1rJioRv2Bi1hykpLYWH4a3RFeU+ttcCwpCNDeKksHc+hLr68KdvIcV1
-         q4cfEKBDRaOJQTJfaR/Digz5+ChX/163GYsQGyyiiPLmOTBo5afYe8QseU5Un3nih6a1
-         hOhw==
-X-Forwarded-Encrypted: i=1; AL+hErFIBTJp9FMAOI4yoeq8WxOT99V5nDLmJbxPBjv2mUesMlu3QLkcn4WP1dwHH6Fi/JUFc2lizR1if38=@vger.kernel.org
-X-Gm-Message-State: APuU4Z9uO5iqakuTqPz75vzpfDbcQDEi2k5jt4vrQIzvsXmJ30r8AiNQ
-	Mpx+ruqoLwOxtTb4/+pLdBkkoGpjiQnNMeWL9L7FTs2gmWh68hueVC+JeTsoku0QEIOh1Y43c4r
-	baf0UO3ekCAJERQ==
-X-Received: from oabvk9.prod.google.com ([2002:a05:6871:e49:b0:4a9:9e93:8ee0])
+        bh=lrwfQJcwFhFffOygVO/MIPK8atOxj4tdwaWQGKK21rQ=;
+        b=oycyG2aDquOMBX5fHzzZE2UJtC9iqoD90vS44ESlPe8EpXWioOomSFgG2u/l6Q0Tg/
+         esIgSyrYnccJDCbPkOMMSm1XGt9E/wnZLoepYG/RPlTJpuK+AKGZHVLMYXjgnI+sLobg
+         cCmN1Ga6kNoqYo4kkjlfE5snVZLUO/AgMRbaW/S1yuT8EtSJflzJSzUKDIL7gXy3ZjER
+         /na+dkHaOnMrwp5vc7FitFo8ejyBeJLiF77GQRUepn+WvRkROF434evKxdrLp9Y2gpCA
+         lPGd23pWX9Kwtt/ZXnI/58INbAmPuDAI0bdV3PcAHivWgftouAsNucghkwU8uL4u+YoF
+         UgVw==
+X-Forwarded-Encrypted: i=1; AL+hErGBP/O0y65V0AnfjtTCm0LeNzCPRUGk1SQlc/raJa6P3fdj7qNdCtq0E0fFGvhW/c6hSjYnTXsp6Zk=@vger.kernel.org
+X-Gm-Message-State: APuU4Z+jOslYAcMI8MlNukEv1PRhjcB5XWK8SL1LAA0eTnYfZyscQKS5
+	EIaDZh8o6PXW50CSMZ0Vpkr6JEc0A7TM2pCkHpCVZ3IuizLCDyAPH4+/v7c3GFERx6ARn6fTl7p
+	klzD0x5e7heLS4A==
+X-Received: from dybnj14.prod.google.com ([2002:a05:7300:d08e:b0:381:f292:18e4])
  (user=wusamuel job=prod-delivery.src-stubby-dispatcher) by
- 2002:a05:6808:f03:b0:50c:bc6f:fba8 with SMTP id 5614622812f47-57a0c7c3651mr17024101b6e.65.1795544998225;
- Tue, 24 Nov 2026 10:29:58 -0800 (PST)
-Date: Tue, 24 Nov 2026 10:29:13 -0800
+ 2002:a05:7301:4710:b0:378:314:4042 with SMTP id 5a478bee46e88-385702587c5mr14762927eec.14.1795545000942;
+ Tue, 24 Nov 2026 10:30:00 -0800 (PST)
+Date: Tue, 24 Nov 2026 10:29:14 -0800
 In-Reply-To: <20261124182911.3886897-5-wusamuel@google.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -81,42 +81,121 @@ Precedence: list
 Mime-Version: 1.0
 References: <20261124182911.3886897-5-wusamuel@google.com>
 X-Mailer: git-send-email 2.56.1.831.g720f3f5937-goog
-Message-ID: <20261124182911.3886897-7-wusamuel@google.com>
-Subject: [PATCH 2/3] mmc: dw_mmc: restore IOS on runtime resume whenever card
- power is on
+Message-ID: <20261124182911.3886897-8-wusamuel@google.com>
+Subject: [PATCH 3/3] mmc: sdio: avoid waking idle host on keep-power suspend/resume
 From: Samuel Wu <wusamuel@google.com>
 To: Ulf Hansson <ulfh@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, 
-	Shawn Lin <shawn.lin@rock-chips.com>, Ben Dooks <ben-linux@fluff.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>
+	Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Ben Dooks <ben-linux@fluff.org>
 Cc: Samuel Wu <wusamuel@google.com>, kernel-team@android.com, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-dw_mci_runtime_resume() resets the controller, so the I/O settings must
-be restored. It does this only when MMC_PM_KEEP_POWER is set. That flag
-is set for a system suspend and is cleared at the end of resume, so a
-runtime resume at any other time does not restore the I/O settings.
+mmc_sdio_suspend() and mmc_sdio_resume() always claim the host, which
+runtime-resumes it. If the card keeps power, uses no SDIO IRQs, and
+nobody holds the host, neither function does bus I/O, so an idle host is
+woken for nothing.
 
-Restore the I/O settings whenever the card is powered, similar to
-sdhci_runtime_resume_host().
+Skip the host claim in that case, saving cycles and reducing suspend and
+resume latency.
+
+Comparing with and without this patch on a Pixel Watch 4:
+  - mmc1 suspend + resume: 11.59 ms -> 0.01 ms
+  - sdhci suspend: 3.75 ms -> 0.002 ms
+  - dpm_suspend median: 38.79 ms -> 32.51 ms
 
 Signed-off-by: Samuel Wu <wusamuel@google.com>
 ---
- drivers/mmc/host/dw_mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/core/sdio.c | 36 ++++++++++++++++++++++++++++++++----
+ 1 file changed, 32 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 2f60bf8adeb5..9e920275868b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3487,7 +3487,7 @@ int dw_mci_runtime_resume(struct device *dev)
- 	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 83c785ae677a..99368eb230a3 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -7,6 +7,7 @@
  
+ #include <linux/err.h>
+ #include <linux/pm_runtime.h>
++#include <linux/spinlock.h>
+ #include <linux/sysfs.h>
  
--	if (host->mmc->pm_flags & MMC_PM_KEEP_POWER)
-+	if (host->mmc->ios.power_mode == MMC_POWER_ON)
- 		dw_mci_set_ios(host->mmc, &host->mmc->ios);
+ #include <linux/mmc/host.h>
+@@ -1048,18 +1049,41 @@ static int mmc_sdio_pre_suspend(struct mmc_host *host)
+ 	return 0;
+ }
  
- 	/* Force setup bus to guarantee available clock output */
++/*
++ * The host must be claimed for SDIO suspend/resume unless the card keeps
++ * power, uses no SDIO IRQs and nobody holds the host. In that case no bus
++ * I/O is needed, so skip the claim to avoid waking a runtime-suspended host.
++ *
++ * If somebody holds the host, claim it to wait for them, as before. A claim
++ * taken after this check is not waited for, same as a claim taken after
++ * mmc_release_host() before.
++ */
++static bool mmc_sdio_need_claim_host(struct mmc_host *host)
++{
++	if (!mmc_card_keep_power(host) || mmc_card_wake_sdio_irq(host) ||
++	    host->sdio_irqs)
++		return true;
++
++	guard(spinlock_irqsave)(&host->lock);
++	return host->claimed;
++}
++
+ /*
+  * SDIO suspend.  Suspend all functions separately.
+  */
+ static int mmc_sdio_suspend(struct mmc_host *host)
+ {
++	bool need_claim;
++
+ 	WARN_ON(host->sdio_irqs && !mmc_card_keep_power(host));
+ 
+ 	/* Prevent processing of SDIO IRQs in suspended state. */
+ 	mmc_card_set_suspended(host->card);
+ 	cancel_work_sync(&host->sdio_irq_work);
+ 
+-	mmc_claim_host(host);
++	need_claim = mmc_sdio_need_claim_host(host);
++	if (need_claim)
++		mmc_claim_host(host);
+ 
+ 	if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host))
+ 		sdio_disable_4bit_bus(host->card);
+@@ -1071,17 +1095,20 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+ 		mmc_retune_needed(host);
+ 	}
+ 
+-	mmc_release_host(host);
++	if (need_claim)
++		mmc_release_host(host);
+ 
+ 	return 0;
+ }
+ 
+ static int mmc_sdio_resume(struct mmc_host *host)
+ {
++	bool need_claim = mmc_sdio_need_claim_host(host);
+ 	int err = 0;
+ 
+ 	/* Basic card reinitialization. */
+-	mmc_claim_host(host);
++	if (need_claim)
++		mmc_claim_host(host);
+ 
+ 	/*
+ 	 * Restore power and reinitialize the card when needed. Note that a
+@@ -1127,7 +1154,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 	}
+ 
+ out:
+-	mmc_release_host(host);
++	if (need_claim)
++		mmc_release_host(host);
+ 
+ 	host->pm_flags &= ~MMC_PM_KEEP_POWER;
+ 	return err;
 -- 
 2.56.1.831.g720f3f5937-goog
 
