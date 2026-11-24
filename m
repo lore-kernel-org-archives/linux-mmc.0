@@ -1,67 +1,63 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=111.22.67.139
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=95.143.211.150
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795505542;
-	b=DN/WHrfSlL2WBVPpCExCwSRJl0vZU4KVRkAF0cM7rYwt9t7KDaGA22i7Llf2n8VT7ISX
-	 +kLBr4yMMGqCPqh7EzFQNqt7oVn+KLwzMMxSLrHVPfW/JPtWHFixDWlNT9ysueDh5yxs2
-	 syUzQNBhN/MHeUo1wlP65hJmRBH2MiJKW6kG/Vfg3d99Vgz30jAECyYC1EBGT3f2GmbMw
-	 DLmxscvdQXmXvkbL7Gj2Y/GE3kIZfZZD4XUPs9USZIMUc2cpeqRt+LToG1SH5Cp6t0KHo
-	 G2P3qEousL3QF1bln3fAk8yXc8xVzWcYzWy0fps0HuqclpOhdfM9Z29mM8cIAFyHXhQ==
+	t=1795513329;
+	b=OD3LRa9iGuiyo66PuJ/z60wAv22MN2+d3Ee1MzWjLt9Ti8ccbQ2lu7HMWAAOSexXXIq3
+	 Gr7wML9jMEgYORQphruCvmWKDQmBkqD+rJZdjzG1OZWGxCD+cXGSeeQPriOac8PeQdl2L
+	 V6iwL9d7rIgRLXyMxtj04a/LHsT/74S9kTj8wpVp5a+dVqhtPidvO/dGl2hdTC+7+CtDg
+	 6AardLMyWSGHmHHgSftEc4N1zyj8MD57lWE16fhEUlRBrTJpcjxxA/K7xek5Crqvcdl/X
+	 dhGGlLztBPeLGsX3wPWhaedMBbrN9uSJd/nYRn7J6Q864lxUcFt7UUmFLmyOrkpgmDA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795505542;
-	h=DMARC-Filter:DKIM-Signature:X-RM-TagInfo:X-RM-SPAM-FLAG:Received:
-	 X-RM-TRANSID:X-RM-TagInfo:X-RM-SPAM-FLAG:Received:X-RM-TRANSID:From:
-	 To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
-	 MIME-Version:Content-Type:Content-Transfer-Encoding;
-	bh=Na/xHpz56IDcbN0eSdzo7NSqLd3nv4ld6JrP2WnktoM=;
-	b=c177aJLcCZWQ/JVbmeF9oFlgLBIyPk7H45/MhxNKB+ZUEMGkMwBAywuP1+tYSFChbU88
-	 7NLcVUPFCAsqqkM8GIuUVU8uf0wToIiv7BrIHz1UEpvcCeW0ZxVINfqeu+kAvTGfWaBv0
-	 b9JaQzbgK0jzcKLjo0dfFseelFqw/eD1uozN1CdkG3Xd5mgqsWsFoXwDb/xLoB3Uigh5r
-	 gsLz7aitwgjpk7PuMMgeteLOANtLDdfVdANTVzSR3V/tDnnA940CnMVH311WwYYECJH2G
-	 sYhElcned/VUnPEitlRthpAqkoSvMsmozD0lc2CvdyVaUm+bPgQkmvBoZ9qkCvThMtw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795513329;
+	h=DMARC-Filter:From:DKIM-Signature:To:Cc:Subject:Date:Message-ID:
+	 MIME-Version:Content-Transfer-Encoding;
+	bh=BL1Fu2R9fiyvgELYNd9ojOSDl2hj2PjbPXVKos5gdQg=;
+	b=mFX9ehIx2mE5+wxuJOAHw6jTld/gHjOndmZGq/umyMUCcqlgaetxDHma/O9r23+6SDsx
+	 wk0OSb/Cjpbapsax7wZmdIIgvKwq2Bq2P4Ho9VnAJXoRDah96BUgJbmGDT7goFLD3kq8j
+	 3OTr6z122eeyYZH1+W/AuRrEb1VcqXhNpKbeFM5JgdAS9Bx7OUY/qqm7G0IsxvlzYsgE4
+	 WgLQn1TymLFDBD3SCuMgKWh9/BAojsti0fy8aPKwQssUcSDzp5gVSZOnZKQKiYlN+iV6/
+	 dqHcIJgdWI8fNpuscFDmRV4IXcIeZVUCCCreGcmhdvvaje1mcgYND+pSS+L0KllIq5A==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=cmss.chinamobile.com;
-	spf=pass smtp.mailfrom=cmss.chinamobile.com;
-	dkim=pass header.d=cmss.chinamobile.com header.i=@cmss.chinamobile.com header.a=rsa-sha256 header.s=default header.b=xy2v7FaD;
-	arc=none smtp.remote-ip=111.22.67.139
-Received: from cmccmta6.chinamobile.com (cmccmta6.chinamobile.com [111.22.67.139])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 89106606A321;
-	Tue, 24 Nov 2026 07:32:18 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 89106606A321
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=cmss.chinamobile.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cmss.chinamobile.com
+	dmarc=pass header.from=swemel.ru;
+	spf=pass smtp.mailfrom=swemel.ru;
+	dkim=pass header.d=swemel.ru header.i=@swemel.ru header.a=rsa-sha256 header.s=mail header.b=eXOnVbKf;
+	arc=none smtp.remote-ip=95.143.211.150
+Received: from mx.swemel.ru (mx.swemel.ru [95.143.211.150])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A8D4606A683;
+	Tue, 24 Nov 2026 09:41:57 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8A8D4606A683
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=swemel.ru
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=swemel.ru
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=cmss.chinamobile.com header.i=@cmss.chinamobile.com header.a=rsa-sha256 header.s=default header.b=xy2v7FaD
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=cmss.chinamobile.com; s=default; l=0;
-	h=from:subject:message-id:to:cc:mime-version;
-	bh=47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=;
-	b=xy2v7FaDBe6dSOGJoIElLDjgtXQ7HeD4bMqBYgUp+i1d6JjFFQJ0iGh3bO4JhHOlhKUiF/P7OpTpM
-	 xAoF5mUqD88iPyQtjsOAyJAtIy93KcWlrWsntx0r2iz0Uv1dYIWjrPFLnz1I2/YEXDz9tgqRcrnx5o
-	 J0u0x89ZyfUpMePY=
-X-RM-TagInfo: emlType=0                                       
-X-RM-SPAM-FLAG:00000000
-Received:from spf.mail.chinamobile.com (unknown[10.188.0.87])
-	by rmmx-syy-dmz-app09-12009 (RichMail) with SMTP id 2ee96b053d7d3bf-4b05d;
-	Tue, 24 Nov 2026 15:32:16 +0800 (CST)
-X-RM-TRANSID:2ee96b053d7d3bf-4b05d
-X-RM-TagInfo: emlType=0                                       
-X-RM-SPAM-FLAG:00000000
-Received:from DESKTOP-3K8GUTQ (unknown[223.108.79.98])
-	by rmsmtp-syy-appsvr10-12010 (RichMail) with SMTP id 2eea6b053d7e1f4-18454;
-	Tue, 24 Nov 2026 15:32:15 +0800 (CST)
-X-RM-TRANSID:2eea6b053d7e1f4-18454
-From: Xiangwu Lai <laixiangwu@cmss.chinamobile.com>
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Xiangwu Lai <laixiangwu@cmss.chinamobile.com>,
-	Ulf Hansson <ulfh@kernel.org>,
+	dkim=pass (1024-bit key, unprotected) header.d=swemel.ru header.i=@swemel.ru header.a=rsa-sha256 header.s=mail header.b=eXOnVbKf
+From: Denis Arefev <arefev@swemel.ru>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=swemel.ru; s=mail;
+	t=1795513308;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=BL1Fu2R9fiyvgELYNd9ojOSDl2hj2PjbPXVKos5gdQg=;
+	b=eXOnVbKf7nCIPhtfBrWs3le29qisGyC5izuUuGJADf8ds7LQfFUgHi0ixwjoCDSAkysqTI
+	8wX9ohfJKnkt3dlkEO7plZJS91CmYatWgMf1XKNKxWkl4hFz0Sg6o+2w22pstwY5neJHh/
+	dlUYN+4noh05QObNeFVd/SZHxkrblAI=
+To: stable@vger.kernel.org,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+	Matthew Schwartz <matthew.schwartz@linux.dev>,
+	Sasha Levin <sashal@kernel.org>,
+	Florian Maillard <florian.maillard@mailoo.org>,
+	Arnd Bergmann <arnd@arndb.de>,
+	Wei WANG <wei_wang@realsil.com.cn>,
+	Samuel Ortiz <sameo@linux.intel.com>,
 	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: sdhci-acpi: Fix free_irq() of a never requested IRQ
-Date: Tue, 24 Nov 2026 15:32:13 +0800
-Message-ID: <20261124074000.1387-2-laixiangwu@cmss.chinamobile.com>
-X-Mailer: git-send-email 2.50.1.windows.1
-In-Reply-To: <1f6cefa9-497c-4803-a027-81e84f6a6e9f@intel.com>
-References: <1f6cefa9-497c-4803-a027-81e84f6a6e9f@intel.com>
+	linux-kernel@vger.kernel.org,
+	lvc-project@linuxtesting.org,
+	Yang Yingliang <yangyingliang@huawei.com>
+Subject: [PATCH 5.10] mmc: rtsx_pci: fix return value check of mmc_add_host()
+Date: Tue, 24 Nov 2026 12:41:46 +0300
+Message-ID: <20261124094148.96655-1-arefev@swemel.ru>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -71,31 +67,57 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Hello Adrian,
+From: Yang Yingliang <yangyingliang@huawei.com>
 
-On 24/11/2026 08:16, Adrian Hunter wrote:
-> WARNING: From:/Signed-off-by: email name mismatch: 'From: Xiangwu Lai <laixiangwu@cmss.chinamobile.com>' != 'Signed-off-by: laixiangwu <laixiangwu@cmss.chinamobile.com>'
->
-> Otherwise:
->
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+commit 0c87db77423a282b3b38b8a6daf057b822680516 upstream.
 
-Thanks for the ack.
+mmc_add_host() may return error, if we ignore its return value, the memory
+that allocated in mmc_alloc_host() will be leaked and it will lead a kernel
+crash because of deleting not added device in the remove path.
 
-Understood on the From:/Signed-off-by name mismatch: the SoB line was
-left over from an older commit and did not get regenerated when I
-updated my git user.name. I will make sure the SoB name matches the
-sender on all future submissions.
+So fix this by checking the return value and calling mmc_free_host() in the
+error path, beside, runtime PM also needs be disabled.
 
-For reference, the patch:
+Fixes: ff984e57d36e ("mmc: Add realtek pcie sdmmc host driver")
+Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
+Link: https://lore.kernel.org/r/20221101063023.1664968-6-yangyingliang@huawei.com
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+[Denis Arefev: adapted for 5.10: the pm_runtime_dont_use_autosuspend() and
+pm_runtime_disable() calls present in the upstream commit are not
+included, since runtime PM support was never added to the rtsx_pci_sdmmc
+driver in this tree (the probe/remove path has no pm_runtime calls).]
+Signed-off-by: Denis Arefev <arefev@swemel.ru>
+---
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-  mmc: sdhci-acpi: Fix free_irq() of a never requested IRQ
-  https://lore.kernel.org/all/20261110070032.1387-1-laixiangwu@cmss.chinamobile.com/
-
-Best regards,
-Xiangwu Lai
-
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index f0e9a7667994..161bc5b98ed6 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -1439,6 +1439,7 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
+ 	struct realtek_pci_sdmmc *host;
+ 	struct rtsx_pcr *pcr;
+ 	struct pcr_handle *handle = pdev->dev.platform_data;
++	int ret;
+ 
+ 	if (!handle)
+ 		return -ENXIO;
+@@ -1469,7 +1470,11 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
+ 
+ 	realtek_init_host(host);
+ 
+-	mmc_add_host(mmc);
++	ret = mmc_add_host(mmc);
++	if (ret) {
++		mmc_free_host(mmc);
++		return ret;
++	}
+ 
+ 	return 0;
+ }
+-- 
+2.43.0
 
