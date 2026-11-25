@@ -1,15 +1,15 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=40.93.201.39
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.57.37
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795588698;
-	b=X71/PFORu9+1he8Gqau/oApM0J+F/elMVXzpPcU6l3Xj0AnK/YaBTdcrT7CzUq5XP5th
-	 XMZvM1UOMgudp7SDRXtJeVxoA4fnIa3ThmbKjsNTrhY0FZJ1b2FihxDX5t+JPTGeDI7vw
-	 o4c5g44dnC1UWICzo5zTjvpU+wSulrF0V3Bw4dSYYkVfSZmPpHGRNLZJtZH67VCb1WTTV
-	 DiBe66DzZrBBj9to3bxsKtV+DiQHZzLgX+4qYMd8esJHsakpB2Q2sUjqYYqkDVQDSVL6X
-	 CAVfttCLo8frpD0Ddz1475rcIJnawBmdzMDqaDGo25FBjfH3qMek/eWjGCPi5KxXVTg==
+	t=1795591583;
+	b=yXcHoNIZSA/Qt6X/MJO3LrZMhyCDj8WmUZpeddxODEDpOHtg763rntohzGhX0BQa/S4U
+	 DZGfSb3Ona0CoyAOWoh/cPgSmL9aIMhCmJ9Mu9mJudvxV7FVU4NnQ/of7wEFdw4h9dCTu
+	 A2aqVfOl+8jLHcNjIxjBDkc5IZC4HD4sFvqkHA7BoL5FBb+RA1moNhxGSdJaDxZ+ovJbL
+	 tSUlhjS9OBYH4dBW+vVnSsSXkOTsBvWn6I5Mrc76b0ypTQt05f3XV/rhQvdwYkGR3xdqc
+	 hdtRUQaH0W5wh6+4Yi2OhloUdgNslnIWCcSjSsi0tCm7D60DWen7Lcu/J+IphpxuQeA==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795588698;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795591583;
 	h=DMARC-Filter:DKIM-Signature:Received:Received:Message-ID:Date:
-	 User-Agent:Subject:To:Cc:References:Content-Language:From:In-Reply-To:
+	 User-Agent:Subject:To:References:Content-Language:From:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding:X-ClientProxiedBy:MIME-Version:
 	 X-MS-PublicTrafficType:X-MS-TrafficTypeDiagnostic:
 	 X-MS-Office365-Filtering-Correlation-Id:
@@ -25,75 +25,75 @@ ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
 	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
 	 X-MS-Exchange-CrossTenant-UserPrincipalName:
 	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=JigVW69DZBAAUuc+JQkQ23egBAmrCRg5mjuacsz4uus=;
-	b=JNRHcs9+lP3tcMovobM+FJSCp+ROl2G5z6L8vpqgsK534TdTBeYHHtqRBdHR64mQgNho
-	 vVZA9rZhzcJxOwBXbEcLpsBFJqBMgYdZM+wj54Eh9+SrFS1pqCOY0ksG6bxKmYxZKXnvT
-	 4ZRkCYwQ7QMlOHmesKJV9wVZgIxqTHh+HW4RKf4yf98I6Us7r1H5Vb0ln4zGzZPtN++yD
-	 bOJytPXJYXGz8/V67fWGc6eyLAp8r76qhuex0twYe1JlVCO+TeYbZcBcRkcp9kjnyq2oS
-	 1Q/fdaFr9Wa5VtTdc+lhIFCRSCaiBKv1ZhL+lYD78mVwtt7L8zeiPCrGcerr+lMpv+w==
+	bh=3wJMCCTSJrYwQ9biP4gZD2sN/P0osrstDSJEYWxorz4=;
+	b=PkmXenrmH2aOVJi3ar2dI7LM/GpY5wiNIYqCCp4pPnrvGHyS+TSVlDXfQirEhzJmLfAc
+	 cOHRMNb/kZRLK69UpOrn8jHz5LH8xbxN3yNE6XQDajG6iTj5ggwmuBdmCDZBNbkODFzI3
+	 A4ONv/79BfRejt8yzWxb2ncB9mAzSXr1TxYrsEF7OLWxyYjf9pk2vunm6uaTBGbdRxkc6
+	 mTdH4MVtHTeq0PNIGQFkiWdU4S6dT4AMJ3XqRxvpUqyf0AxKpGSk3vlps1gE3zvj3yROk
+	 RnBz9Getrn7D2xSkkk+8g0aB2xf3xb6DpBpH3sHPPOVJU49fh6tDZrMMYFCDgjvyOYg==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=altera.com;
 	spf=pass smtp.mailfrom=altera.com;
-	dkim=pass header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=Bmdmc++N;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=40.93.201.39
-Received: from CY3PR05CU001.outbound.protection.outlook.com (mail-westcentralusazon11013039.outbound.protection.outlook.com [40.93.201.39])
+	dkim=pass header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=CmA3ZvKa;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.57.37
+Received: from BN8PR05CU002.outbound.protection.outlook.com (mail-eastus2azon11011037.outbound.protection.outlook.com [52.101.57.37])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41EE2606A323;
-	Wed, 25 Nov 2026 06:38:18 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 41EE2606A323
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4619B606A31E;
+	Wed, 25 Nov 2026 07:26:22 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4619B606A31E
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=Bmdmc++N
+	dkim=pass (2048-bit key, unprotected) header.d=altera.com header.i=@altera.com header.a=rsa-sha256 header.s=selector2 header.b=CmA3ZvKa
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=GdKvK2mdyEZNPFQHwVDsg615Uqj/nWHi2QInMNmapnkymusKFvWLd6dFfOV9pq9n7Seeu6xfiqek9HrMKFZaU+Gx8ZBD2xpu4575O+u5kcFkxS5D5m3MdJsUNEmuVEodhbZY7LKPkcvgPHC9kc8gjvAg4///OFftScfPtqH5s4l9BLcyUzZFxlAMqU5UoJ4NwMAL9d+KU241RCoGPdCSaSf9Eats8/GJGiBtdJqlYt6cWqkEnZLaevDqQdrjV4hgPRXc1TxnGyXW8FREUlL2ShLa8IXFuz1vHMSsdaYnlT9yfDF7RXKSUP993ELUEyz0ZmTKbR10iF7yb62CPK7j8g==
+ b=bYF2PjSPEIo3jSqEjBih4XVPLq6ZVLZyWblxSdVJeY/w/+JpWFTPCyGYiXkkB5CS685oEFm0hedqxYK5H/Xv86nYIG4CvOnlVUFpFpevIAq0NjV6yt03plo3gn7YVlaPd05VeCPM4t1MleYTo8ticc34jD6+OWl3Q3ZFF9ymMdk0L1AQIxGAPuqkmGyAYADMNbTb0ebeX09J0OXmDDI4NXw19dHY4lKkufgJRESYI3kkI7pU86iK13QpAQQdARwO/bLfdG0JXM5bmjnZEi98wy+U38mouyDAwvxNUCh6SDjU/fUqZm6m8QsAl4AVdWjN3XxV/qZDil+Tp+NRwirQsA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=JigVW69DZBAAUuc+JQkQ23egBAmrCRg5mjuacsz4uus=;
- b=cz4PR17zGPhSctb6aoUSQPhhVEllJU3k88VO17PpTVgE/cxM7o0GPVEAfzzq5m/I0DyRxJJwUWJlYDtUrWs3ABbkVBFKY4TIBlr75u4qiWIgb0nuHBrlPSBDgl0b44CB/nkC8iihIIyRXbXnzGtAdkPpOYr9GCfFL7XhCDBRbbu3JHkT6t6TFzlTAUHH2u/37dICzoiulEE3OiJj87fdPqb3lcW5XLrq+7J2Cpdm0wSnkFg185lmMEzfxi7ObLep7CxXwV+iP4JwfhuOlQ45ykcfQuz4ulXCEG3VuxKzPJ1KO944fnLWF9HJQF7bmoTZNhmAI/MOzKKyoc4L52Orvw==
+ bh=3wJMCCTSJrYwQ9biP4gZD2sN/P0osrstDSJEYWxorz4=;
+ b=y0qdIMUgbK+Ool86fm2eTCqkIiZwERA4fzgmyiycPVBqyLme3l32eEWxsBf7UH+cWxgTywj9YM1yQNBDPQsBLA0i4x1mPhtrTUpRzpgr9DiG/IJOk1qbYUE0Grz3L3d70n7ljvuJe+1fIU/5znV35moworPfzy8VhxJsxsPYIHWVHCC9DXMW27UjyxNu9B/S4Xgwsi7krJfQ/lQz6WcBnp1k9nZvQmbx/WGC4UhY7rQkxgdubMANprf6ZERgqBAlbyVe9pROdLXdi2y8Y/ZvgWhs6q7iWBmPRKWJKMYcGAeAhV/NWD4gTW3FjYJ6Qx79Xt35DHBXn4EM31UJ1aq0Fg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
  dkim=pass header.d=altera.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=JigVW69DZBAAUuc+JQkQ23egBAmrCRg5mjuacsz4uus=;
- b=Bmdmc++N0uA0wCruy4kvgWgqyq6vW/k40/K59GM+zXlM0oTKUvbvg5JD/2BbVfCbrLTgl639loKi/ik256m9cDCMNBmRGaQJoN3c2pQq9uu0738QY8RYkUu08PyzZVE7BDC2JBf8P2/TVOuus3ABXcHGpY1j8aF/WkDP/zPB5YYo9Jz9qRpugdYMnOM5DI6jWsO9upnmnJLJvAxIkPLK7Yc+taE3xfJsZ4EqapPmbs4N6YMUxFYvOICCI2rhmgwGWI9eC2jk0+wm6dwhd3lYGwptjnZMdQh+aOvNdcm+AbYG930VCa7mAHWHdKf33+cghhjpH6rmqOZqttaUsSY/GQ==
+ bh=3wJMCCTSJrYwQ9biP4gZD2sN/P0osrstDSJEYWxorz4=;
+ b=CmA3ZvKamVCZIOG95qiUhbOOgmntjJEYxcVMh7Cg8MZWIU5phXlbkSIYTPVp8vHdmWptwjBSBV28kf7yXhOGwIJ4tZUKhysQq1otqpOckM8EbmmF1X7EycUy+Yq2Y12FEik+yqV4RTZarIOgmE15+HfTS2WZJcI/4AHBM1in7bGAUUVi5Jrj5Tzp0N4+cWfFQ4oMwEHaLlAL0664KLW3N4pqbxxXtr+DyN/Ufxf4gCCmGadRA+88p/KGaDjY/zEVW5mgIAAy912cRj4ZAzPKbn28bAdE4Mul7hgDRugHTja8QzbCaFFfvoT13q2kLS1++6XuA231EOSbvdBgEDMyZA==
 Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=altera.com;
 Received: from SJ0PR03MB5950.namprd03.prod.outlook.com (2603:10b6:a03:2d3::20)
- by DS0PR03MB989311.namprd03.prod.outlook.com (2603:10b6:8:396::8) with
+ by SA2PR03MB5819.namprd03.prod.outlook.com (2603:10b6:806:113::17) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.662.4; Wed, 25 Nov
- 2026 06:38:16 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.639.10; Wed, 25 Nov
+ 2026 07:26:18 +0000
 Received: from SJ0PR03MB5950.namprd03.prod.outlook.com
  ([fe80::53a0:bf93:6b6b:de01]) by SJ0PR03MB5950.namprd03.prod.outlook.com
  ([fe80::53a0:bf93:6b6b:de01%3]) with mapi id 15.21.0662.004; Wed, 25 Nov 2026
- 06:38:16 +0000
-Message-ID: <931f46d7-3396-4f3c-89dd-09fdb7032ed7@altera.com>
-Date: Wed, 25 Nov 2026 14:38:08 +0800
+ 07:26:18 +0000
+Message-ID: <8bf3eddc-305b-4538-a49a-60e2da2f9b8e@altera.com>
+Date: Wed, 25 Nov 2026 15:26:12 +0800
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 0/3] mmc: sdhci-cadence: SD6HC DDR50/DDR52 read-path
- tuning and fixes
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>,
- Tanmay Kathpalia <tanmay.kathpalia@altera.com>, linux-mmc@vger.kernel.org,
+Subject: Re: [PATCH v4 2/3] dt-bindings: mmc: cdns,sd6hc: add SD6HC DDR50
+ read-path tuning
+To: "Kathpalia, Tanmay" <tanmay.kathpalia@altera.com>,
+ Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
  linux-kernel@vger.kernel.org, Rob Herring <robh@kernel.org>,
  Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
  <conor+dt@kernel.org>, devicetree@vger.kernel.org,
  Ulf Hansson <ulfh@kernel.org>
 References: <20261119-sd_cadence_ddr50_v3-v4-0-95a94a0aaaf3@altera.com>
- <20261122-vague-chestnut-peacock-cc8b69@quoll>
+ <20261119-sd_cadence_ddr50_v3-v4-2-95a94a0aaaf3@altera.com>
+ <5de1ad0d-ef89-49e4-9195-195be48d57bf@altera.com>
 Content-Language: en-US
 From: "NG, TZE YEE" <tze.yee.ng@altera.com>
-In-Reply-To: <20261122-vague-chestnut-peacock-cc8b69@quoll>
+In-Reply-To: <5de1ad0d-ef89-49e4-9195-195be48d57bf@altera.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: SI6PR03CA0002.apcprd03.prod.outlook.com
- (2603:1096:4:285::13) To SJ0PR03MB5950.namprd03.prod.outlook.com
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: SI3PR01CA0012.apcprd01.prod.exchangelabs.com
+ (2603:1096:4:296::11) To SJ0PR03MB5950.namprd03.prod.outlook.com
  (2603:10b6:a03:2d3::20)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -105,135 +105,143 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SJ0PR03MB5950:EE_|DS0PR03MB989311:EE_
-X-MS-Office365-Filtering-Correlation-Id: f60cf375-1784-4701-3fc3-08df4abeaf67
+X-MS-TrafficTypeDiagnostic: SJ0PR03MB5950:EE_|SA2PR03MB5819:EE_
+X-MS-Office365-Filtering-Correlation-Id: 65cfdc8d-05fa-44fc-5ab8-08df4ac56556
 X-MS-Exchange-AtpMessageProperties: SA
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|366016|376014|23010399003|6133799003|18002099003|22082099003|55112099003|11063799006|56012099006|4143699003|261022105027099003|261022113327099003|261028144727099003|261022075727099003|261026121527099003|261026140227099003|261009223027099003|261021121427099003|261102123227099003|10067099003;
+	BCL:0;ARA:13230040|366016|376014|1800799024|23010399003|921020|4143699003|10067099003|261026140227099003|261026121527099003|56012099006|11063799006|261028144727099003|261022105027099003|261022113327099003|261022075727099003|261021123027099003|55112099003|22082099003|18002099003;
 X-Microsoft-Antispam-Message-Info:
-	txwpOXeN1XaIHP+99PnV1nwer5d906+v4vHr+n1L8Ry/xiZHHhE0gOYKKk8Y6wpoJl3WslI63RxR7Db7lAETX1zMHuOLpgbpGViSGFBSOxI88XH5/qwciABTVsm2oRkUmwWkcfl8GDIfIOVWvHSXBWknCXte8knopYZIojOFVpkIkROxkY9Eg1Q3DEZLbXSIvPGsods1/JjYP2BQbU47GKILjZc0rU6NNueKHJxcWos8GXrUCuLpR5T+jHJw0ks1Hrw+bFtG2vy7UzZDA4Sc4xmWhdxMt/ROyeDi0CvhqWXjmc/MSHSN2/IH8+Lan4btegdUKO8t/QNuM/Fycm/iyLyL3lj6IjpHuTAYlevk2vUa8mdq97qOn4+3p+FY+0RAauO1HuNNMHWKYyZxfcaaMbHD/EEVQto1Eh0T6XojSiR0hywu9JpHS20vKARLEZojPQ4a8+YZ0t/n/ITuy4ue9MtKf2SbtqwrDymYOb034URsLmRZfHAyefuGFKJUUksajLYutEarvHasm+sE98TUJxcJho4bVXXBq9m9UjNb6nJvLHpXOCAZ7a0FHwD8iiwwgxkweoRJaB/A5724WKqYxhFA0Y0YUjF1PBfnsAbXPFnNFGZ56R8F9aptyJLDKA20YL5f2C/90QYaFieph9h65n7p6qypJP5jfnSUKpTCAbs=
+	vL1ayOmnyegEGYuEhcUeqaGdYFauh1w25nRXHi/6xnNsloI2pF7QG1fT2meJncRXhYxybcdpxCeR0WtJGGkC9rXWtxtAenxti9PqvIi1ACeZMk7koR3pcQT6n4eZaWl0PrLD3p1KUeJxEHmhwVS5OtLsucQV18HXvBKve+XiurSGMsZD3tTpCN2VLMzsoP3t73nmOBnE1JRx8oxBbOZ3vEWCJ0o1E0pbNWpKql/r0LZw3mQPlzkt6RY/2rF4svXx/8GYSLHFqM72bBPDGP4tbDeQmORvIFtvp8cZnnvLB5roLNHQqvWJ06TwblPbTaCCPc4kuMMrKTL/XTWkFH8MgJeiJAAXu5+uzu39wFm7bBfv5GCXNSvso+6pLUOcI07F9sfQs1FiQ8l2uK+S6bj+65FuPjrrd6oPBsSAEVXu2hNRRTmtggxer7t0mf/9P5CtQX+pXWE9giVFguyQyphsgiKli22bNiNdgOfSWkxdLSRM4281/IczpQol2MZ0WLKIXEevN69nj/eK98XE4dO/SzAe7PVMIdtLlBC7KZ4JwHBoe1IodCMqn6YSqZHVwMTiKhb31BfTqKOJbgJD2mZUddltGBe1ZDb7nX6TUGit7wARWNlp9HLTGxaWMTmPm6R2ugdOEwRbiHiN8rENxI8fPyPP7/BqNN9JQvyn7ZYTwr5q1wGT1+HpExUCveF+fTr6Gdgde5H9cqa7xUY1Ze+ddw==
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR03MB5950.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(23010399003)(6133799003)(18002099003)(22082099003)(55112099003)(11063799006)(56012099006)(4143699003)(261022105027099003)(261022113327099003)(261028144727099003)(261022075727099003)(261026121527099003)(261026140227099003)(261009223027099003)(261021121427099003)(261102123227099003)(10067099003);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR03MB5950.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(23010399003)(921020)(4143699003)(10067099003)(261026140227099003)(261026121527099003)(56012099006)(11063799006)(261028144727099003)(261022105027099003)(261022113327099003)(261022075727099003)(261021123027099003)(55112099003)(22082099003)(18002099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?TlU2TU95WW40QnY2emRKNGlXOXVCeGpYcndTdE5ycXRIKzM4eWdJSFJpc01p?=
- =?utf-8?B?eUg5V05BMGcxYnpqNlA1YjU3cVdFNEVHVk5EaWtpd1JRRmtFSCt4YmVQcURm?=
- =?utf-8?B?NG9mT2F0dTMxemdYOUtGYXYraVNMMDFRQUdjYTFmblIrMU5Xa3ZwV1N6bkln?=
- =?utf-8?B?c2h2bUNmYUowSnBxbXpHekM5OVI1L0N3L0FNOE9PSmVSb1B4RFNselFPSGZY?=
- =?utf-8?B?SlpjK0JiTVNENWFUWlRwZ05NWXo2YTAxUkJONXBQSjRVY2dUaCt1cmtSMWVD?=
- =?utf-8?B?dDd1SWlOK1kzNkR6OENBczlqR2d0eUVhSDdQQjEwVkZJUnNIUXMzdkI3TTV1?=
- =?utf-8?B?aFplQ0gwWHZnYi8rRXlMYVFET0N0WXc4NWNXVWdiVnZ2K3NmMmZUL2pHeENR?=
- =?utf-8?B?SFJ0amJWNTVrazRydlBuK0p1NWxDL3hac0x3bTFobE5HOVdNRTlIYmJZaFZ1?=
- =?utf-8?B?N01Lb1o0R3duQ1JnN2hDV1ZhaisyQWM0S2tqQ05Mek5WQmc0ZmNkMWZCRUxt?=
- =?utf-8?B?MDZxZ2RMdzJBYkwwNHJSL0RZaGRYTjlmNld3SEhBa042T0diTVdjMXUyeFY3?=
- =?utf-8?B?TjFpRXhmMVB0SVJOa3lSdEU1QzI1dEg5VTVyRDhOUWdhM1Mxb3RLMXRGLzJa?=
- =?utf-8?B?TGprRWNGZ0wxdU9GNXdFZG1IMHR0WlJkMGhvY013RHZXcUYxeXBlYlppTXY1?=
- =?utf-8?B?Y2YvbHNkQ0E5TjI3WGNpM2kxb3NndTI5ZFIxVmxyRHhsbjdTYWtrb1h4Y2tI?=
- =?utf-8?B?Tktja1QraVMzaUlWbHprK3FRY0hEdTA0blk3czFSa2UyV3YwUGRLZTlyRlRq?=
- =?utf-8?B?NnhuN1hEc1UwcmhzdWZvdlNLZlA5a3VrOTBaSWFPTHVLRVEvNkZLYnE5b0x6?=
- =?utf-8?B?YnpROXpza0N5ZGM2UEthUm1Yd2kxWVB2aUEwVjJDKzMrWEltMmpRaUJEKzF2?=
- =?utf-8?B?UjBST29NR0o0d1dDR0gyQ1B6aDhNak5YRGt2T0F1RG40UjY0a0Q3cENnZHVz?=
- =?utf-8?B?Z3lpbHJXLzJRUmJYOE10bEswTFhoRVhBQUpuV1RUVmJ6bnlWcGt6amsvZzg4?=
- =?utf-8?B?MzNOcUZqTGtLSlFkVE5waklGdEM3RUZTSzk0bWV5YkxFWWpFaDVHNjBkL3k5?=
- =?utf-8?B?a1A5cFBvUEs3UDZweVZmMmJ5QTBIYjRqV1JOL0NaSnA0b1lFSWhWVldvSHR3?=
- =?utf-8?B?RHFHczB6TTdZY0lwL2R6Z0RsYkdVTDZISm1UT1YvL3hTWGYzUUtJaHV2M2FV?=
- =?utf-8?B?ZjhKNHFaN09LNGFoN2NCeS96MzkxYVJzc0tKN3JObjk4ek95NmsvRzZ6aFI0?=
- =?utf-8?B?UGV2L1BHUlhSanZmc0Q4cENkWTVFZXNhcTZLMGdLTS9GOTU4ejV1Y3p6VUdE?=
- =?utf-8?B?cUprZkEvaDNUNjdSdCtadWo1NVcxSitzTGp4SFViU3psK3JadHc3a0cxTSsy?=
- =?utf-8?B?ODk5SUcyTWZOSHpROHNIaDJOR3JKdUpHaW5Xc2EvRFE5RHo3VFFiekNRYldB?=
- =?utf-8?B?L0FrdXRhQ2pxL05EVkw4bUNrS0w5QmcvRkpEVU4rMi9ZdVlmQkxERU1UVDdM?=
- =?utf-8?B?OTQzMDJiQ1ZLNVNpN1VORGI4djRjbWRQWk1OMG5mY0gyamNGNHdUSXhVYTdC?=
- =?utf-8?B?emd2cGg1V2VjOE5jKzJFVExkYnF2cmllQVRvc2xaZWR4QUhiZWRUV0tRZlAv?=
- =?utf-8?B?WWNxTVJSd0N3NVNZVmtYak0rRmtCY3h6SUU0a0ZmOE8xc2x0LzJtRHh1Y2pt?=
- =?utf-8?B?M3BCc3dONi85Und6WVNHUG1kRGpMZjNibEQ4aU5Kc0RrNHNwakFiOE50dGZt?=
- =?utf-8?B?YUZXRWtGcVB3RnQvd1F6cmp3R2lCcUFFWjZvN0djZnYwVkNUb1laZHMyMUhz?=
- =?utf-8?B?RDVFOGxaQ3NwY1ZzNmRvNU5VdEhBWnA1azZjY2d4Znl3dGJta0hSSnhPWEox?=
- =?utf-8?B?VWIyRkNlYVd3b1hFK1Z0aGJIRUF4aXJ5MEw4S0VNUE1TMXRQd1VMWWo2SHlQ?=
- =?utf-8?B?RisxNjBkeXZGYzV2N2U2a1RHeVovai85ZmlELzhuV0xhSklCNk1ITENyMSs0?=
- =?utf-8?B?MGRqbVlDdHpsRC9ESGdYTnJDZlpsZWVhNjR1NlU3dGNaVFhsZlJWYnc2Znpr?=
- =?utf-8?B?em11S2FDRm04MGpLSWJwcHkrMlN0cHpPdTZ3cXQzRVdkcGNkZ3JvTmtLbHN1?=
- =?utf-8?B?Umd2YjJXZ0tyV0RoVW8rS2Y4TlF6SjJybFoyTHN3b01qeTgwV0hsQ0owRjE3?=
- =?utf-8?B?b0UzeWRHT3gvcWNNL3hLRWp3ODlPM01TMzFGeDA1S3Brck5VM3JMMWl4MDJZ?=
- =?utf-8?B?L2tyelFocm9YUU1RMXpjT2l4N01XYW5LK3BoTENtMC9DYkhDTGJKZz09?=
+	=?utf-8?B?aE04RXlsaUFtcUNpa2VpL1AzVzBXRzQzL1BiK2dZWVR0WmxXZXl0UDVFbkI3?=
+ =?utf-8?B?Qy9XWVRyWjBUUkFZRVViaUozSmhqY1JPSDlsMVZZRXdveFprS3N6L2gwRGd5?=
+ =?utf-8?B?V1g0OWM1QjdzeGZ5dllud3Y2RmlBaGFKS01zN3JMT3U2QnhQOExJbzJxS2k4?=
+ =?utf-8?B?RlpaWUNYRStvZFd4ZnhyRkNPQnh1S08zaXVKcGNVRUpNL21mb0lTUmcvaWlK?=
+ =?utf-8?B?TEZXSitWaXpUREJTWjd6YnFNRmwzc0V0bjJ4bUwvZTVHMXhSbGE5YlhJUDl0?=
+ =?utf-8?B?NXFYT1FlNnZzV1RaanFETlJiOENEMGdXV0ttUm4ybndDanF2U0ttWnhVMnB5?=
+ =?utf-8?B?NC9rckJuQng4QVJWZXErZ2M3L2xVM2RRZnN5M01wbFZLRWc0LzVZVE9XTWVD?=
+ =?utf-8?B?blhsb3FNb2FKTUt3MVg2Q0FPc2tsYWpuUUExYlAxbzYzVDloeFJoN1loZzR6?=
+ =?utf-8?B?ZitjMFd3d1dQaCsyNVpHS3l3Z2g5dTFmMlE1d3dVZVZOL0dsRkpheUVJMUs0?=
+ =?utf-8?B?Y3BhY1ZFc0U2ZFpDOWZUdFVXejUrVm9qc0dXOWhvU0h1SDB2eFNzaTZyUWRF?=
+ =?utf-8?B?b1FsSTNOaERjK2pCdVdJNjgxY2tTRFdrK004VWwvcm9ZWWlJSEtoNVBaQ25N?=
+ =?utf-8?B?eXdaNG5pK3hyTmd2YllBSFJRWmw5MlpzbHkvaWNBZ2tIQXRjN0E2eG1wR3g5?=
+ =?utf-8?B?MStGUUV1RzhVVVR2a21pa3JxblJxa0NNKzRHYS8zcjIwUVQ2bDBLNWY0U1FC?=
+ =?utf-8?B?dHV1OWdwc2dFMnM4bS9XK0twZG9NSkNQOUZlZ3RiTXJpWTdDUGdlTytqazFW?=
+ =?utf-8?B?UjZKQkxJNWlta09OMERsSVhCUC9GVVJSWWNCbWNTNUtNZUtnbyt2NjdlR2dk?=
+ =?utf-8?B?NjJOaVJ0K1Q3Zjg1d1FpMkp5VXlnSWVqejRKR1pPT2Z2K2xkUUt5c3ppZFhr?=
+ =?utf-8?B?VStJYUgwVU5ZQk50ZDBIZ3AzYWljS3lnL0cvNU5aSVpYSnRGaUd6VkR5cUk3?=
+ =?utf-8?B?bEMwMlJxOEZHdVF4ODJ2T01tdVFZMGJVMVNQYTkvV00xaUxmVDZpNUoxZ2NI?=
+ =?utf-8?B?WGdZY1c3VFlkN2xFek9aKzBmTWFOSWk2WVlSLzdGMmVZZVAweXMwcElsV3Zp?=
+ =?utf-8?B?Y0VETTBzMGdIYUZ6UGpwUVByTGI1c1hzOUNNV1hhMjZocWFFUldvT25uZFgy?=
+ =?utf-8?B?cjE4K0k2L0o3alZLUFhmVmkvaFFHR1hTTHFVQyt1dml0WGUvUmhvNElqd2Vh?=
+ =?utf-8?B?dFA2Mktud2dja2xHY0NkVXlQQkg5OHI4U0M2NHNWTUw1cjBuNUlmWHB2dmFy?=
+ =?utf-8?B?SXA0OHpmd1JsdmpYcjlYZC9tYWpwTzdsUEFDRnhUZTRiTE5tYkRXQkovNGFN?=
+ =?utf-8?B?RmV2L1A5WHlHWnJkdHBWMXhWMUxjSERXS3BzT3hrZE02bzI2dWpIR0xIZis5?=
+ =?utf-8?B?dmRjMHF0UjJxaVF1bWRQb2V5UGN2bTZZbkE1L1VLMThKZVlZdzZQSThVaEMv?=
+ =?utf-8?B?ZEFqTjhnL3FDcWFicWpPZ1prdFovNkhQUWRsT3d6SWRJbFVDdDNBUGI4MFNT?=
+ =?utf-8?B?dUljb3BmS2Q3MzNKaGFkVFNUMFdmWmJoVGhtTWNTUUV2R1VIc1U5cnJaMmRj?=
+ =?utf-8?B?S1ZqZ1g1L3grLzkyWTFzdlovcG9VN0RYT0xya3QyaWdvTWF1MG4wUXhLcFFD?=
+ =?utf-8?B?OFBqbzdsYkU5N0MvSTEyVmdqUzN0OERidStYQ3I0MTN4Z2xpNHlXQlBuMlJy?=
+ =?utf-8?B?dW5ueE1sSk9idW5OWWJyR0FjQUZzaU04ZEkwK083cVBWTkwzQ0k2K3RMQ3Nn?=
+ =?utf-8?B?b2N4eGFpYzArNmw2VUdDSDdFVVRPYktOWTJkQnlEblBiY291YWZ4RWg0NFk2?=
+ =?utf-8?B?Z2NnSU50MnA3VTBXRnNQRUM5WTRQejRueXpyQnZEdUVjSkt1SUVpY0N0dVZo?=
+ =?utf-8?B?cFdGc3l0OUxJT3NBZ3VFRms0dG9BYnNpbnhDKzJ6NGtHS1hUSnl2emVJcWNn?=
+ =?utf-8?B?cURMdzM4cGhyZTNUNll1cERwMXI1ejd2eUZoV1RPSUx4azl0VUlmcys3Q0VZ?=
+ =?utf-8?B?ODVaaUZiUDdhWUMrb2RucWtkd1JTNVZ0WWlpSlUwZndpWnE0aGVheWtlQ01D?=
+ =?utf-8?B?cGI0OXpoYk1ta09ZTnpYaUNkMnMyOTVnWlZDRElQNzUxR3kwR2JKYUFNblpw?=
+ =?utf-8?B?akMyWVR6Y2ZjWFZpcFV6M0kwdFNHVGp6bEN0bDdrMlRCbmF4STVmYmZydEFa?=
+ =?utf-8?B?MGVwTGFEZDhEbS8xaHFaOEJIMGx4M3Zydm56TnVLa1dNalJXZ1ZzaVZYaXNN?=
+ =?utf-8?B?Wmd1Zy9yRVNIT2VOWGRjMnoxZFZJa3k0eW5YamNVRzd4ekc3Q2lodz09?=
 X-OriginatorOrg: altera.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: f60cf375-1784-4701-3fc3-08df4abeaf67
+X-MS-Exchange-CrossTenant-Network-Message-Id: 65cfdc8d-05fa-44fc-5ab8-08df4ac56556
 X-MS-Exchange-CrossTenant-AuthSource: SJ0PR03MB5950.namprd03.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Nov 2026 06:38:16.0288
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Nov 2026 07:26:18.2777
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 834KctiVgxXFcC/2FF/Jki3zOyVZXQcM/0nqN+rTwPHF6uJXzt9LUJbbZIUn9qXzwBikIOpv+2K4a45OqtUvMQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR03MB989311
+X-MS-Exchange-CrossTenant-UserPrincipalName: m7qZtInTWk4uQeRpmWEoYgvFbVqwEPHDp5mqoEgy5YHcBEV9xxhfSDakCa/6QsY7DWpLRyGXCFHXDZzzaVKJeQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA2PR03MB5819
 
 
 
-On 23/11/2026 12:03 am, Krzysztof Kozlowski wrote:
-> On Thu, Nov 19, 2026 at 05:45:32PM +0800, tze.yee.ng@altera.com wrote:
+On 23/11/2026 3:05 am, Kathpalia, Tanmay wrote:
+> 
+> On 19-11-2026 15:15, tze.yee.ng@altera.com wrote:
 >> From: Tze Yee Ng <tze.yee.ng@altera.com>
 >>
->> This series enables the extended-read DDR modes - SD DDR50 and eMMC
->> DDR52 - on the Cadence SD6HC (SD/eMMC v6) PHY. Neither mode runs a host
->> tuning sequence (CMD19/CMD21), so the read path must be centred by
->> static, board/SoC-characterised PHY settings. Bringing it up on Agilex5
->> also exposed PHY issues affecting the existing tuned modes.
+>> DDR50 has no CMD19 tuning, so the SD6HC read path must be centred by
+>> static, board/SoC-characterised PHY settings. Add two optional SD6HC
+>> properties for the extended-read DDR modes (SD DDR50 and eMMC DDR52):
 >>
->>    - Patch 1: abort a failed tuning command on SD6HC. The software tuning
->>      loop never aborted a command that errored, so after a CMD21 command
->>      error the eMMC could stay in the Data state and time out the CMD6
->>      that HS400 selection issues next; mmc_send_abort_tuning() clears it
->>      (a no-op for SD). Limited to SD6HC since the path is shared with the
->>      untested SD4HC.
->>    - Patch 2: document two optional SD6HC read-path properties for the
->>      extended-read DDR modes (SD DDR50, eMMC DDR52).
->>    - Patch 3: program PHONY_DQS_TIMING, which was left 0 in all modes; in
->>      extended-read mode it must be the rebar pulse width in clk_phy
->>      cycles minus 1, else one DDR beat is duplicated. The width is now
->>      derived from the SDCLK/sdmclk divider rather than hard-coded. The
->>      same patch reads the new properties at probe and applies them in
->>      DDR50 and DDR52, and makes the DQS_TIMING update clear USE_LPBK_DQS
->>      before reprogramming it so the loopback/phony selection takes
->>      effect.
->>
->> The new cdns,ddr-* properties are unused in this series; they will be
->> consumed by the socfpga_agilex5_socdk and socfpga_agilex5_socdk_emmc
->> device trees, submitted as a separate series.
->>
->> Tested on Agilex5 SoCDK: SD DDR50, eMMC DDR52 and eMMC HS400.
->>
->> Signed-off-by: Tze Yee Ng <tze.yee.ng@altera.com>
->> ---
->> Changes in v4:
->> - Merged v3 2/4 (PHONY_DQS_TIMING) and v3 4/4 (read DDR tuning from
->>    device tree) into a single driver patch, now 3/3, and moved it after
->>    the binding patch. The series is now 3 patches. (Tanmay Kathpalia)
->> - Patch 1: limited the abort to SD6HC (host->version >= SDHCI_SPEC_420)
->>    because sdhci_cdns_execute_tuning() is shared with SD4HC, which has
->>    not been tested; reworded the commit message accordingly. Added Tanmay's
->>    Reviewed-by.
->> - Patch 2: dropped the cdns,ddr-phony-dqs-timing property; the phony DQS
->>    timing is always derived by the driver. (Tanmay Kathpalia)
->> - Patch 2: dropped Krzysztof's Reviewed-by since property set changed. The
->>    two remaining properties are unchanged from v3; Krzysztof, happy to
->>    carry your tag again if the reduced binding looks fine.
 > 
-> Not a reason to drop the tag, really. Why would less custom properties
-> be something needing to be re-reviewed.
+> I went through the Cadence SD/eMMC DLL PHY IP user guide (IP6185,
+> rev 1.03) to understand how the delay applies to each of the read
+> strobes, so that is why this comes up on v4.
 > 
-> Best regards,
-> Krzysztof
+> The guide marks phony DQS "not used for SD/eMMC" (Fig 2.1), lists
+> use_lpbk_dqs and use_ext_lpbk_dqs as "Mandatory setting for SD/eMMC",
+> and says external loopback needs no 1/4 cycle delay on the slave DLL.
+> 
+> Either strobe can capture a DDR read if its edge lands inside the
+> card's valid data window, but the delay has to be chosen for that
+> strobe. The delay is what moves the edge into the window, and the two
+> strobes should not take the same value.
+> 
+> External loopback goes out through the pads and the board and comes
+> back, so most of the round-trip delay is already in the strobe. It
+> should need little or no extra delay.
+> 
+> Phony DQS is generated inside the PHY, so none of that round trip is
+> in it. It likely needs a larger delay to meet data that did travel
+> through the pads, the board and the card.
+> 
+> Questions:
+> 1. Do DDR50 and DDR52 work with the defaults (loopback DQS, read
+>     delay 0)? If not, what fails?
+> 2. Did you sweep the read DQS delay with loopback selected?
 
-Hi Krzysztof,
+Hi Tanmay,
 
-Fair point - going from three properties to two didn't change what you'd
-already reviewed, so I shouldn't have dropped it. Thanks for re-adding
-it.
+Your model of the two strobes is right and matches what we measured: the
+delay has to be chosen per strobe, and the two strobes don't share a
+value. Loopback carries most of the round-trip, so its eye sits high in
+the delay range; the fabricated phony strobe carries none of it and
+centres much lower. So I'm not disputing the guide, which loopback stays 
+the driver default, and cdns,ddr-no-lpbk-dqs is only a per-board opt-out 
+for boards where loopback isn't usable. To your two questions:
 
-I'll carry your Reviewed-by in the next revision; if v4 is final, I'll
-resend with your tag applied.
+1) Defaults (loopback, read delay 0): no, DDR50/DDR52 don't work on the
+    Agilex5 SoCDK. Uncentred, the strobe times out on reads, and the
+    write CRC-status token (sampled on the same read strobe) mis-samples
+    too. Centring via cdns,ddr-read-dqs-delay is mandatory regardless of
+    source.
+
+2) Yes, I swept read_dqs_delay with loopback selected before choosing
+    phony:
+
+    - Soldered-down (013b/b0): loopback passes only in a narrow window at
+      the top of the delay line (~[208,255], ceiling-clipped) and hangs
+      below it. Phony passes across a wide mid-range window (~[64,128])
+      and fails gracefully. Loopback works but has no margin, so phony
+      was chosen for robustness.
+
+    - Modular SoM (longer SD flight time): with loopback, reads time out
+      across the whole sweep - the strobe never gates, so more delay
+      can't fix it. Only phony, with its assertion timing re-centred for
+      the SoM flight time, passes cleanly and survives a cold power
+      cycle.
+
+So loopback isn't broken in general and I'm keeping it as the default;
+the DT properties exist because these boards' IO either gives loopback
+no margin (soldered) or can't gate it at all (modular), so they select
+the phony read path and centre it with read_dqs_delay.
 
 Thanks,
 Tze Yee
