@@ -1,65 +1,67 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=111.22.67.151
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795570857;
-	b=GLX5s2+V4no1ufJHNw7jWRyee2XAa3mx+6P6uSwX5YO1UUOGHiTv7dcddbhMMqVygdVo
-	 EWMMd3W3lZcIbLd2zAOzi65GMYehHfKllMtccbuDX9WNCoxmZr9Skun0JUNvxqLZwq37Z
-	 qwDpmj+Ist4221NK2SnXI0B95OZkdcN6vhqkqyAg38hDsew/NeQBOscasZhu5Xjwe6WwC
-	 0ke2igTdqZI/n2AWdueH86ZFPmrAYhL5MR1b2NE7yOdAbKPkHXRhtMzL0ZMrYvcKdVsDR
-	 WJbpJjqm1KjL3hbEyUgRjz75czoWZeYyQadaedF9AO4o+zJhR8Rpym8R4iu+uByit7Q==
+	t=1795571163;
+	b=LE89wWctrVqg0qZwhhU1zTZu03j+uEjwSXUIi6fa0HGwePFfHFmE6F2jcfzdNItB5NFT
+	 CselWA7ZMa0AWaTNbgUj3LpTREXx3CkLEyrI5wSLd2WAjvSt5TPeSX4Uy/JF/dRcb6VhT
+	 E+n4KJwL2sPjpvuuC4FbmCfEjZJR+wZYm99+GSOSNQXCpebRTeUuNH4hNc0TYU8FrmXUM
+	 yjHL8nGEaiaNU2EiiMf4LwzFZxh7bonR30UEorETyIJaYy5Rz1FPfc1YRkvTKVHrwZQDY
+	 tJnrQXkWdT9SaN+TSwnhAPpUNZSd1IHLkI+w5JiMaxAM6dbK3U6nz47kjVAL8y+zmTA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795570857;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795571163;
 	h=DMARC-Filter:DKIM-Signature:X-RM-TagInfo:X-RM-SPAM-FLAG:Received:
 	 X-RM-TRANSID:X-RM-TagInfo:X-RM-SPAM-FLAG:Received:X-RM-TRANSID:From:
-	 To:Cc:Subject:Date:Message-ID:X-Mailer:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=2k30GY8w8sIQsAWoDKXFJYTpD8SvpUR5692TePf907w=;
-	b=Xp3c+EgrH0z2t11qn8A5yddjbuXztGvfB5y/S+EbIEy/VB3nLukfRYN39Pw1KreQ1UAx
-	 wlcfivnXWyQpXXyCfN6b+r2FiJ1NDSZWOeBdwrNVTeD8TDaiu6EdwDcnhG7taW5ByRoGg
-	 G3fE6JKowLgtgNkCIdImsCxCqyRPQULvWTgQSnBHqu6JjTsfl4U68XzlXP4Wlh0azv6mJ
-	 gC5YVcL4iG2uyYh9Uxh6PvCM8g+EE8tz0Kv5wZ0AElt1c7luoegNok0FoxjnuMCM8aYLv
-	 rfvx8zt0dDB3lqamRS0oze/cZa1cuJNxocU+nbH265mfFuCSsVubC2God2GCWPRu18A==
+	 To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
+	 MIME-Version:Content-Type:Content-Transfer-Encoding;
+	bh=TeTnovkauwzR0I7HmMwDZdwEJRwZzHMfctTgYRdrwFc=;
+	b=0XYHgt92txjq1DuJ1MV+z8fTnegfD1ENl4BFKTUAQ0vWjJHjOK+zojWvdjcCo3PQN7ce
+	 O6yFKsoAX5RaYM5CBIMzQZ50foHg+lSYJdcMPZGR+05TlIKob35KUq8CzMtShLNZwO/HJ
+	 nJ2BZygxyyHKGuT4E1KjLB8V6ixLFSsczxPRynWW784RoiaO7Wf/xQu15dxEXKgol2btJ
+	 4IcbURzhtG597vYqQXiwAEgJIMds90FB8wteYka+eRgEtfY76Kfcw2Ksk2dZeRUztvSQE
+	 Pd5OjmZZrgemljznpyUJLjaDrEtqniuq3oiO0rROYM47EJNF4oTc1hO8riO3zAJ5G6w==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=cmss.chinamobile.com;
 	spf=pass smtp.mailfrom=cmss.chinamobile.com;
-	dkim=pass header.d=cmss.chinamobile.com header.i=@cmss.chinamobile.com header.a=rsa-sha256 header.s=default header.b=QIUPozd9;
+	dkim=pass header.d=cmss.chinamobile.com header.i=@cmss.chinamobile.com header.a=rsa-sha256 header.s=default header.b=BxcXtQJs;
 	arc=none smtp.remote-ip=111.22.67.151
 Received: from cmccmta8.chinamobile.com (cmccmta8.chinamobile.com [111.22.67.151])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 45A12606A321;
-	Wed, 25 Nov 2026 01:40:54 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 45A12606A321
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 03843606A321;
+	Wed, 25 Nov 2026 01:46:01 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 03843606A321
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=cmss.chinamobile.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cmss.chinamobile.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=cmss.chinamobile.com header.i=@cmss.chinamobile.com header.a=rsa-sha256 header.s=default header.b=QIUPozd9
+	dkim=pass (1024-bit key) header.d=cmss.chinamobile.com header.i=@cmss.chinamobile.com header.a=rsa-sha256 header.s=default header.b=BxcXtQJs
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
 	d=cmss.chinamobile.com; s=default; l=0;
 	h=from:subject:message-id:to:cc:mime-version;
 	bh=47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=;
-	b=QIUPozd9wvqQg8t0XWYzF8JACoiHkePj9QwMsL/Eigtz+iZ0m9sL9/U6JUbq8pMo9yANyXVdmtH88
-	 wcLA6cVMDqpcVZeXMiKbjv+enEnPI97+avgBNeqTiJESX1sa2v0I9+IEoWo7mnED+C5qk54QdjVGlc
-	 QoZbDJcf9UrPd6fE=
+	b=BxcXtQJsZZmCOCIjtV6GeLiztmJ9hmD2+R6zQ7rYoD029if891/u03F/pTi4vn3lopKRFXPF6HC90
+	 zouc4En/7B/TRFXZx+Lei/LM5ne4v2mg7T7uPc+Qaygdwa6rnIc9JXbSv5kJAe1SsV1TKdcov0O5pM
+	 UXfljaSxhnnota5U=
 X-RM-TagInfo: emlType=0                                       
 X-RM-SPAM-FLAG:00000000
 Received:from spf.mail.chinamobile.com (unknown[10.188.0.87])
-	by rmmx-syy-dmz-app06-12006 (RichMail) with SMTP id 2ee66b063c9a360-18904;
-	Wed, 25 Nov 2026 09:40:46 +0800 (CST)
-X-RM-TRANSID:2ee66b063c9a360-18904
+	by rmmx-syy-dmz-app02-12002 (RichMail) with SMTP id 2ee26b063dd6b9d-88402;
+	Wed, 25 Nov 2026 09:45:59 +0800 (CST)
+X-RM-TRANSID:2ee26b063dd6b9d-88402
 X-RM-TagInfo: emlType=0                                       
 X-RM-SPAM-FLAG:00000000
 Received:from DESKTOP-3K8GUTQ (unknown[223.108.79.98])
-	by rmsmtp-syy-appsvr07-12007 (RichMail) with SMTP id 2ee76b063c9c755-33b71;
-	Wed, 25 Nov 2026 09:40:46 +0800 (CST)
-X-RM-TRANSID:2ee76b063c9c755-33b71
+	by rmsmtp-syy-appsvr02-12002 (RichMail) with SMTP id 2ee26b063dd5b07-33fad;
+	Wed, 25 Nov 2026 09:45:59 +0800 (CST)
+X-RM-TRANSID:2ee26b063dd5b07-33fad
 From: Xiangwu Lai <laixiangwu@cmss.chinamobile.com>
-To: adrian.hunter@intel.com,
-	ulfh@kernel.org
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Xiangwu Lai <laixiangwu@cmss.chinamobile.com>
-Subject: [PATCH v2] mmc: sdhci-acpi: Fix free_irq() of a never requested IRQ
-Date: Wed, 25 Nov 2026 09:40:43 +0800
-Message-ID: <20261125014043.258-1-laixiangwu@cmss.chinamobile.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Xiangwu Lai <laixiangwu@cmss.chinamobile.com>,
+	Ulf Hansson <ulfh@kernel.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci-acpi: Fix free_irq() of a never requested IRQ
+Date: Wed, 25 Nov 2026 09:45:57 +0800
+Message-ID: <20261125021500.258-2-laixiangwu@cmss.chinamobile.com>
 X-Mailer: git-send-email 2.50.1.windows.1
+In-Reply-To: <a3fd82c9-4c71-4b7e-af62-8381110b0a71@intel.com>
+References: <a3fd82c9-4c71-4b7e-af62-8381110b0a71@intel.com>
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -69,63 +71,24 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-qcom_probe_slot() stores the IRQ number from platform_get_irq() in
-*irq and requests it afterwards.  When request_threaded_irq() fails,
-sdhci_acpi_probe() already jumps to the error path that calls
-qcom_free_slot(), but *irq still holds the positive IRQ number, so
-the (*irq < 0) guard in qcom_free_slot() does not catch it and
-free_irq() is called for an IRQ that was never requested, resulting
-in a "Trying to free already-free IRQ" warning.
+Hello Adrian,
 
-Reset *irq to the -EINVAL sentinel when the request fails, so
-qcom_free_slot() skips the free_irq() as intended.
+On 24/11/2026 11:50, Adrian Hunter wrote:
+> You can send V2 with a correct SOB and my Ack
 
-Fixes: 96ccb858093d ("sdhci: acpi: add qcom sdhci host reset quirk fix")
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Xiangwu Lai <laixiangwu@cmss.chinamobile.com>
----
-Changes in v2:
+Thank you. V2 is out:
 
-- Fix the Signed-off-by line to match the sender name. The SoB text
-  was left over from an older commit and was not regenerated when the
-  author name was updated. No functional change.
+  [PATCH v2] mmc: sdhci-acpi: Fix free_irq() of a never requested IRQ
+  https://lore.kernel.org/all/20261125014043.258-1-laixiangwu@cmss.chinamobile.com/
 
-Link: https://lore.kernel.org/r/20261110070032.1387-1-laixiangwu@cmss.chinamobile.com/
+It is content-identical to V1 apart from the Signed-off-by line, which
+now reads "Xiangwu Lai" to match the sender, and your Acked-by carried
+over verbatim.
 
- drivers/mmc/host/sdhci-acpi.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 84c705460..85705d2eb 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -412,6 +412,7 @@ static int qcom_probe_slot(struct platform_device *pdev, struct acpi_device *ade
- 	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
- 	struct sdhci_host *host = c->host;
- 	int *irq = sdhci_acpi_priv(c);
-+	int ret;
- 
- 	*irq = -EINVAL;
- 
-@@ -422,9 +423,13 @@ static int qcom_probe_slot(struct platform_device *pdev, struct acpi_device *ade
- 	if (*irq < 0)
- 		return 0;
- 
--	return request_threaded_irq(*irq, NULL, sdhci_acpi_qcom_handler,
-+	ret = request_threaded_irq(*irq, NULL, sdhci_acpi_qcom_handler,
- 				    IRQF_ONESHOT | IRQF_TRIGGER_HIGH,
- 				    "sdhci_qcom", host);
-+	if (ret)
-+		*irq = -EINVAL;
-+
-+	return ret;
- }
- 
- static int qcom_free_slot(struct platform_device *pdev)
--- 
-2.50.1.windows.1
-
+Best regards,
+Xiangwu Lai
 
 
