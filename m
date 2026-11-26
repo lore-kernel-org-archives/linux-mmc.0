@@ -1,158 +1,123 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.72.63
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795706271;
-	b=BkoaXg4m2jTLl1tz2Q33L936ObaI7djtAKMHsO9XTxFIkF9707PKeOtgEBKCPEmz/j2C
-	 0rY4DPnRvYvFKmDC76h9HBtn7JavYbLTgdrqM5Ps+T+ZJLGu5awZUc56BDHLZhdnP6FyQ
-	 T8SfxK0uh2Yk21dMwBgMMi27DJRnGBKzkElOc763WpHsWFPs6bHIlZxRAzJF3GX6OT9Tt
-	 12wImt0WbEIwAejsibpoqlozFMegVuPyEE6myqweIg8eAVpT/LFwZHVZlDzJ/pxmCCyyR
-	 peWFgi+uscy3wt7tO/jDpk6qfDZ+C9I2LLhluPh/Eu3DBOlX/RZDIQUYI3XJkUGurHQ==
+	t=1795708222;
+	b=hRIdDpA4mNGKjKyIpJXcEc2Ce+zkRQqUZZUTxRqYme2f2hTNBGrPu0IxjNV8YMbiks29
+	 zKGQT10NbeVGsyVF6IL4J2rwGJAwYCKxKvPN/EOma+bhm6UDg+XKR+CHWRwkr1/3PKgU1
+	 tezxtFQC5Vf7AGJaLBnBijtMDEk4lEItwkT4KnMc8/agtCx9naMGvWVKep/VHR1jLWvWI
+	 HwVtVF9tZvCcjsF0WFZKLHrNe4Ao+uorraKnjO5Ugy4jDL3J5JtghEIXgs42FYVuYddf3
+	 TNqpofeSdPM5XBtAy2dRmyZCo4JKRXaJTuf7Qf3QeF1VmAi/sxB8PW2frHzBmYT5PRA==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795706271;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:From:To:CC:Subject:
-	 Thread-Topic:Thread-Index:Date:Message-ID:References:In-Reply-To:
-	 Accept-Language:Content-Language:X-MS-Has-Attach:X-MS-TNEF-Correlator:
-	 user-agent:x-ms-publictraffictype:x-ms-traffictypediagnostic:
-	 x-ms-office365-filtering-correlation-id:
-	 x-ms-exchange-atpmessageproperties:x-ms-exchange-senderadcheck:
-	 x-ms-exchange-antispam-relay:x-microsoft-antispam:
-	 x-microsoft-antispam-message-info:x-forefront-antispam-report:
-	 x-ms-exchange-antispam-messagedata-chunkcount:
-	 x-ms-exchange-antispam-messagedata-0:Content-Type:Content-ID:
-	 Content-Transfer-Encoding:MIME-Version:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-AuthAs:X-MS-Exchange-CrossTenant-AuthSource:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-originalarrivaltime:
-	 X-MS-Exchange-CrossTenant-fromentityheader:
-	 X-MS-Exchange-CrossTenant-id:X-MS-Exchange-CrossTenant-mailboxtype:
-	 X-MS-Exchange-CrossTenant-userprincipalname:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=F2DSgmjMqmkcEJTKuDjux1i71YBQ+ZPzYeTD0BINTys=;
-	b=tWgNR+VKSdxXjCwTrx0WQtdISapW8vlD7YTLrBZXTpNBGehNpygQe+1/wUacATKNpIGz
-	 OlXJfKjO0LClEB5bO+QUZf5D4FE0R1B7q2CsECrwOVPOvAIiSdVULZIlO19PTRhZTHko0
-	 3LCGi3t2i0qPzEe7BD0c0igzu/tS8wzVScLxe7U5jUlEfIRDgkigqCATD7QhlMobbd/C5
-	 Y5xdHqBfQzoBqpiV0QZaqKd7xMFHkk0dHdwv/orHlHuk5YS6uzLzTSZSjJuEjfZutvPta
-	 aS8ZjrgrB0/YawfZv8dmz5HBCEcEmbs0QyGuAzip41rMCKmDf6rFfRT4Q8cSovQ/nVQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795708222;
+	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
+	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
+	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
+	 Cc:Content-Type:Content-Transfer-Encoding:X-Authority-Analysis:
+	 X-Proofpoint-ORIG-GUID:X-Proofpoint-GUID:
+	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-Spam-Info:
+	 X-Proofpoint-Virus-Version:X-Proofpoint-Spam-Details;
+	bh=gIwZcK4QOl3Mm5lzx8mQRAanf4vTLDTmM49asUT7xVU=;
+	b=VwKpXnfLvOyev+Y4d+Ypk9Ya04Qb6PWZGrdlNgF56fQCCTJVvk+EX4X13CPQWJsQyotx
+	 SRIZIqxfOhl4yBl/WCGS2lk+OIMKBPnfPBjGPvibTyZx15CMemM4DZTrLrFWNCKIWnN5y
+	 Aaqk2jJMDTNpwux1UdiFpKIvOwwVG+KqHTAvXdtmzNKJkYQySi7MRvdCSx1Wb/ZR8mL+R
+	 elMYm9sfRc9u11dwVi7ZiM5uGZw2DAR3oa6jYdQ3eQddoX+J0TYhlb0xhWUgeE11Kuk9l
+	 g92knJdLG7z9l9GDes4h96JjWLnJtwfnfOmp0NXN5VHpJInp5HAedQtyWYwwIVeHrjw==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=siemens.com;
-	spf=pass smtp.mailfrom=siemens.com;
-	dkim=pass header.d=siemens.com header.i=@siemens.com header.a=rsa-sha256 header.s=selector2 header.b="OLt/QrnX";
-	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.72.63
-Received: from AM0PR02CU008.outbound.protection.outlook.com (mail-westeuropeazon11013063.outbound.protection.outlook.com [52.101.72.63])
+	dmarc=pass header.from=oss.qualcomm.com;
+	spf=pass smtp.mailfrom=oss.qualcomm.com;
+	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b="Dcvo/I7g";
+	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=TYr0bRva;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2729E606A31C;
-	Thu, 26 Nov 2026 15:17:50 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2729E606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=siemens.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=siemens.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66986606A323
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 15:50:22 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 66986606A323
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=siemens.com header.i=@siemens.com header.a=rsa-sha256 header.s=selector2 header.b=OLt/QrnX
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=TTpxOtSinIvUMG+ReStvOKVynW2TxCf8dsiMD4NvT4f4S4jPCvtAJoi8Vzq/Ls6U7t3pnjktB+GgdEbRnWhFJqZYr/q1Z/U8cSBDUfrkxx5IHzF6d/PtNM21DtNQx8VMCpkGJl+e6z6U7ZZkxIEP2TZanjn0/Tnd+6Yq94RhCQalRF4o5EBTbjlER/1ysgxP2BxfD4e5UsEt0ObbrGXmOI/QE4xdafARE+8OeqinIayXXWjwRJ4izgjnzuQnywGVFCLpslllP13fkow2U6OybbXQ8K+ETpwVVeGvRcYrsxEQ1onAVBqZNqbrzwQF0X21+xLdJVz2trhHoJ4sG4+30g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=F2DSgmjMqmkcEJTKuDjux1i71YBQ+ZPzYeTD0BINTys=;
- b=OWov7OPOJDL1Guh9U8SL3PEyztz22clFkwGh9OG1mv7HP34V7NW4g6R3xL6LYOsecu3F2yZ+RJTPKnMZhOO0/KUUXZsbhQFa1KCowNB6UV2Evsxif8XEK/95NhpIyIRE/jD5rBsodgmdEcuifm/yA/UmaEGKumn9NiSrbGzIaFck4191satiNQejlx7CAXZacTpkOYlEabY9ItYdCpkY/lRF8SOu8PXnS9op6i1oA1D3Ymcl3rWK5Ko1E396VO8P/fnKM1o0SFw1omCp9jQsPHswht8NKQIBDZxQ1GtaZf/E46umW96JA7ZZRzX3K5DQDGaQL/tf+ObEeirLk7tUng==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=siemens.com; dmarc=pass action=none header.from=siemens.com;
- dkim=pass header.d=siemens.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=siemens.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=F2DSgmjMqmkcEJTKuDjux1i71YBQ+ZPzYeTD0BINTys=;
- b=OLt/QrnXL5lOk8O/xW4k4YJ4U0uhItUsS56P6ered9g8tUHUzTx25v+AHNoS1lj2PdUfUy8Qzn5KZXSfNShJqcYoDRWCJz6muDU7fv78UfdNSFACZFGONvtCJpRncwM3AR8BnXkBQToI147wVMBhLqYbH+7iU9IFK5ijUP0I1+s5Q2KOHWdjuX/g9MkjmNKCkMn4FAbD7ppcI28Tvy5Aq+pIE8gb7Z6nMkbiil06MRkZrgpUvNqLPAZCjGz9o49s4mLWJQ8BF2nzfMGisTLnQjmKKiflYc6dc2V4SVPurBjO6mE1mnlOS9fe8pAknc5Tm2IeHEER4slcdOjITczdCQ==
-Received: from AS8PR10MB6867.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:20b:5b6::22)
- by DB8PR10MB3879.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:10:16a::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.688.4; Thu, 26 Nov
- 2026 15:17:48 +0000
-Received: from AS8PR10MB6867.EURPRD10.PROD.OUTLOOK.COM
- ([fe80::9126:d21d:31c4:1b9f]) by AS8PR10MB6867.EURPRD10.PROD.OUTLOOK.COM
- ([fe80::9126:d21d:31c4:1b9f%3]) with mapi id 15.21.0662.004; Thu, 26 Nov 2026
- 15:17:48 +0000
-From: "Sverdlin, Alexander" <alexander.sverdlin@siemens.com>
-To: "Haener, Michael" <michael.haener@siemens.com>, "ulfh@kernel.org"
-	<ulfh@kernel.org>
-CC: "ziniu.wang_1@nxp.com" <ziniu.wang_1@nxp.com>, "avri.altman@sandisk.com"
-	<avri.altman@sandisk.com>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH 2/2] mmc: core: saturate erase timeout instead of
- overflowing
-Thread-Topic: [PATCH 2/2] mmc: core: saturate erase timeout instead of
- overflowing
-Thread-Index: AQHdfblLfLlyX2Pb6kO9RmUlutSEAA==
-Date: Thu, 26 Nov 2026 15:17:48 +0000
-Message-ID: <a939387aedf0ab45a07b370a56ea735999deb115.camel@siemens.com>
-References: <20261111120759.100830-1-michael.haener@siemens.com>
-	 <20261111120759.100830-3-michael.haener@siemens.com>
-In-Reply-To: <20261111120759.100830-3-michael.haener@siemens.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-user-agent: Evolution 3.58.3 (3.58.3-2.fc43) 
-authentication-results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=siemens.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: AS8PR10MB6867:EE_|DB8PR10MB3879:EE_
-x-ms-office365-filtering-correlation-id: ac707877-9859-4dcc-7915-08df4bd06e27
-x-ms-exchange-atpmessageproperties: SA
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|366016|376014|1800799024|23010399003|261022113327099003|38070700021|261021121427099003|261021123027099003|10067099003|261026121527099003|11063799006|56012099006|261022075727099003|261102123227099003|261009223027099003|22082099003|18002099003|55112099003|4143699003;
-x-microsoft-antispam-message-info:
- JoNOCCzD3iCbh4gv2Kxe4Q5ExyF1EkJk8NQ9p2YkNi8BugaQd8j0Fee3cgWl6u9O4k0x9oh0BrlrRTmQZhNVOZAVFJukI0xCSXuYqzCl735YWcABEGn81vFFKfqLUFk6+fn03hsnaSiRSvZV17PLla0DswLdqtyYtZ6/eYCzKjpyvkeCCH8PMAu7pExxD4qJGim+mtiu3xTz0T56aDjyGzbxuGxWgRH1O3V7dUYEgjtOiXozIv5AyHy6qyECCeu9zu5dwqeuDtaFRdceThqYPsMDwrd5bBulalJFODy8ecjcLkTYxcW4qXQkFsai8zZTe+9VafTuVAGqqVlsR+iP8iQLeL7/zfzBwIt8IVG72or1avpBumyp8OMPnXZ5rkMxF1SrQAE8CaeCSSr9Nj+wLbZCT9xkprN9Qe/sCfpu/OgFJwaToTGT3aJADA7023qmkekCLcVGyfI4oCjTXMltvSXQ6ucfmGHW5V65dg/KKllPTvypvrfraAzdk0KW4+lq+odABG52Dbgz7k5JFRafYeq8yhh/QJdk9x2OD6rfKKSKUNF2Y9rTdVVZMS9/IBbEsigAiM17kei//WJDO0ic4AlKwHkyDdB1aTFsNRGL0PZjZDCi0XQ+Rd/92iFnKft2/yQb2Rd50nY/qoPnN4zA8FxexWTIC4xzw16dR2B5BP0=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AS8PR10MB6867.EURPRD10.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(23010399003)(261022113327099003)(38070700021)(261021121427099003)(261021123027099003)(10067099003)(261026121527099003)(11063799006)(56012099006)(261022075727099003)(261102123227099003)(261009223027099003)(22082099003)(18002099003)(55112099003)(4143699003);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?VkRySVI3aHA0YTAwajRDaTJEaUhOWmJuZDJ4N3RtdlFmSGx3VERMZnNFSHN0?=
- =?utf-8?B?ZkNqeGlDVENlM2ptcUZpQXk1SVNqcEtmTlRjRmpQY2kzclE2dlFWYnFEQnJn?=
- =?utf-8?B?d2h6c0dVZlQvLzMreHp6UGVyUU5kc2Q4dm1oUlpxRHZpVmxGbUt0VFJoWEVV?=
- =?utf-8?B?dHoxQllqY01rUXR6bGlEZ0h4eEVWQjBZMDdab2MxZ0NnZFh4aWpncEJJWnJR?=
- =?utf-8?B?OGt3WXl2Q3FtakpIdDMrVVVhNXpLRnBiSm5OaE04MEVuM3FnSTYyb0Z5ajZn?=
- =?utf-8?B?WU41U2lMaDNJTFdtQmljaDV5TUFPdjZjL2xQTTFBMGZiRUxyQk1nY1p0bXFC?=
- =?utf-8?B?eVU0MDM0cFl3MUxIS2x5L2dnKyt5T0FUSDRQdmd2alloSGgwbFA1dUUrVkNt?=
- =?utf-8?B?TncyeFZRS0RTM3FIeFIrQnN6ZlMwWk1yb2YrUWFmYnJnbEU2eDBOTU1FTDBo?=
- =?utf-8?B?K2MwNGFWb2lmRmF0c3RXN1JSY0ErSkZDVXE3SUJLa0VGclp6cFl1UWlHQS9u?=
- =?utf-8?B?OCtwd0Y2enBYTXBYNzJMeEo5NWd4SkovdXNDVG5SeUVwNjRpQWhJM2dwU1dV?=
- =?utf-8?B?cG83Y0gyRXQ4YVBZdkJLcVpWUEd5bTZiR2NyVGdMT1VtTjhSNWV4cEUxR2NL?=
- =?utf-8?B?a1hUc2x3cG9qb0lidWRlNkFEb2lDUFRETm5QZW5ST014RWREZTN4VzZDdVF5?=
- =?utf-8?B?NW1YRmhiYU51WmZ2T29mekZKeHlhaFVVR1hicDlRVCtaNnNWMzQvRFpZQVl6?=
- =?utf-8?B?dnlha09RUXE3MkNZUkhaVlNGTlVzcUFTNHVuSmZyWGQ3Y1NjUjZUM2RIUDZ5?=
- =?utf-8?B?OXNWQXZvNDJyclhiWDJ0ZWEyQklTQUIxQ2hQWmpIdVphYTlBOXh1c2d6d0xX?=
- =?utf-8?B?ajBNWmNqNmJQMXlvRzA2NVIzWkEzY3dmdmU4cXJxYnE4dHd6YmdnZEJTOTZo?=
- =?utf-8?B?NVNtaHFkeTRhSWlaWE5hZTV2NHl6MmY4YjZWUndTSFZxblZQWFBibU1iQnNx?=
- =?utf-8?B?SExMTHgwWmRvWkhtbTR6b3JNd2hQMnFZOHJaTUhaQ015MFRCTzV6WFY0V25C?=
- =?utf-8?B?Z3BYNnY0VktIQ0dHdm9XSlYydG1PSEhHRXJRaXdGMzR2Y0RZT0lJRnUyRmlt?=
- =?utf-8?B?UGx3TGwySGxpMS9nb3Y2ZllnVm0yYmgxaVBCWmI5Z3lyajhxd0dHanBLL2Zs?=
- =?utf-8?B?dkVMajhNNkJLdGh6WkVEYm5ZWEpmWHRYY2dDS3NLcUx0YkprVHR5UDNLRkRQ?=
- =?utf-8?B?L3ZCdHd0aSt2NXFnQWwzOU01QjNpaTJJNlRBV2tncGFGbW1TcXhjS01uaVNo?=
- =?utf-8?B?UzFDSlU4WU9VQmVOR3UzUUtzc0JKRUdhT3B6R0VWUVhmYU9QUHFDWnVrZFlF?=
- =?utf-8?B?UjNvaVh6Z2t4R2NlSHZzY3IrZVFsV0tKMTB1V3RUY2dqeG8rNDQ3T3dlRmJn?=
- =?utf-8?B?UW1nS09EMHJKUXVpSUQyMDBIQ0lHZWY0VGhDQzdDV1JlRUFqVWRhZE5vdGZZ?=
- =?utf-8?B?QThjWUVRZVRNSGxwa3g2MUd4SVVvVGo2QlkwVEI5UUNPK3h1UUpGcHkvMzNW?=
- =?utf-8?B?VkdWQjFMc2tRaVR2YXF5VkRyOGVPYURxb0QvSGFQcmNqbWFuVTZpbTJhNkd2?=
- =?utf-8?B?NWZvek1BSTZDcVVtcU9INnR2ekRlMm1NMy85R3ZJR200bVdld1hmV0RNQ2lW?=
- =?utf-8?B?WU56T0luUzE5amR6L1NtMmxZM1UvUWJLWE9Wd2JiQ0Rsd2MxcytiVG5XOGZr?=
- =?utf-8?B?MW9xMHhxRTRjSWpoZzgwSU1BaHNzQWdtNWMyVzdTbWtodGtQL1dxdUV0RE5G?=
- =?utf-8?B?Yk5ja2gzTmZZTk41Z2wzN09Ya0ErUCtRQkRPcXcyUEtIYjRVQUNoZ0dKdnRW?=
- =?utf-8?B?NmgzQlBzdytwQ1IvakUwWHF3QjlKYWVZSkwyNkZWc0NrdXI4RUhqWHpYWi9x?=
- =?utf-8?B?dkhPbGZvTUcwMmxMMlZuOW9ZVXVrdDZYZGg5NndkdlNMV1UwSkxnWXpVa1Fy?=
- =?utf-8?B?S0MwcCtRaC9ONWRTdUpNdmpkUnczOUtKT0Y2SjRqd3NwMzJTZDdWeWJYdlZC?=
- =?utf-8?B?RXhBYlNFLzYzdHpvTHF4S1h4b1Ztb0N0YXdWbmg3UDUxUG00dngzTFNDak9D?=
- =?utf-8?B?akJDa3JDVndCLzJ2SzNQSytIdWwzOHhvc09MdlhYSDRmajhxWUgwZlkxY2dK?=
- =?utf-8?B?SzFURU05WTR5RHFTdHFsUFA3dS9lSStlRUFTcVFSN3VnNndYdUVtYXpDNFo1?=
- =?utf-8?B?TVk4aHRqNmEwNWlkNitJWms3Q3dhU3ZSQ2ZJRXg2a3BIYUVXSG5YMm1Gd1FS?=
- =?utf-8?B?aG1KWmQwcWRoSlBjSXkxVXVIa0d5QXdKNWRpUG1qVUN5bzE5S1JGbitnMWFR?=
- =?utf-8?Q?B3areqR7nWC5V+WQ=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <EFA964E88CCB8F45A8B32C86AB2F3439@EURPRD10.PROD.OUTLOOK.COM>
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=Dcvo/I7g;
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=TYr0bRva
+Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AQEVYwE3298771
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 15:50:21 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	gIwZcK4QOl3Mm5lzx8mQRAanf4vTLDTmM49asUT7xVU=; b=Dcvo/I7gXFcqEJph
+	3qe+Zy7ukwRz60QpxiUvzYinwPbZ5zXry3KOaePjTQZ3wXEzdF/u7tSb1sXtMWim
+	OXGUpwOIE7v+kpjy33MHwit8tjOuZg3d8akrKLMgDdah69IxiGeV02/L07X+IZTs
+	DL8i4ZqdrKlqmxr2wONtQD9uzMyg1pHnAj7XSNhpQiPzYMqeX/d/sUknJLiV00hp
+	xvOer6QoNUdeZ49hS+pzuv+9IzWQCNWo53ZoCo4v/MnyQOyGSqAewwplxdZIEJim
+	VHK5o//xNesDq1KWF1Bo1qOxz3Tc8vJAdAhOU6nu7B7B4toBzkQxtEeL4YUOuqDR
+	/QidsA==
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com [209.85.214.197])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4j6ak02wts-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 15:50:20 +0000 (GMT)
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2f045e399acso62097285ad.2
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 07:50:20 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1795708220; cv=none;
+        d=google.com; s=arc-20260327;
+        b=e1ONmO3lXDFWXnPrtSVFu11PXMi/8F5hnjVg/Wf/MsLDl8DNWpWTCnqwZqO/Oapsnk
+         xuj9HIS9PbvtRndwr6IbIDa/F3rWoNHWoypj4X2WtWNEiQy4nCnpqi3f5mSj0FIWyRC0
+         hJa67qAuYobM/1CIAcOgBuuSKl/M/M0clkzaOexNrq8PBrnofKo44HRCcDqBxQQUmQcD
+         /LcyVrBXoxeRIBAyR+LM/ZSWqucEQReGR5BpIFSwrfVLO265bTIRMBoDXH9+ahVST5Ml
+         MN+AN3n+yt7JwL26EOXSY8MloIGEPpklm84ff8hmxjp2jOGSysQ19I7wuJBgO3JFvDu5
+         aXyw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=gIwZcK4QOl3Mm5lzx8mQRAanf4vTLDTmM49asUT7xVU=;
+        fh=fFf/86oeVEPpj46Qum47r4XT9cv0rVrPHU293/4Ewoc=;
+        b=sDZXMbqHcp6ld61LHtLkQH21Ob1ANW7OBY+9J/SALfdlIg6MHvJ+pKMZudyP19HZlN
+         v6W2iMAqiJa3tr5jQACiWx0fqzOosTts+efMejaFUD0bek85TlU2+fDbupKQBC6Hh6Vn
+         brJ1V1FwpIbNkoIx7WLvnLOw5sftFQ6g8/91+V/vVnvA5ZwLZOrg+1ohXPQbVl86QT59
+         Snvr8hKiDVF5U6wwx4gbhKjfxdXQYfC1HElXj3q2D73hM/dFFcjCK0rcnM/gqqt5ZI+0
+         iYErtZxwuu0hklkkn8EhVuHA73SfLDJv7YNv61MW0JiQjYTS4YMDKlNw9EDBJ7OOhHKD
+         K06w==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1795708220; x=1796313020; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=gIwZcK4QOl3Mm5lzx8mQRAanf4vTLDTmM49asUT7xVU=;
+        b=TYr0bRvan2D5sbZOUEVtFhHcqoQVLGMhef0bhOGsS8bQa6JhXTDXgQ+USn5ORgY0vO
+         crndiv1fWxVUyNGnP6zWvpfQ7Nu+B+K9kxwoQwBoOqm3fYfP/oVVeFEZJ/vcwgqQZ9c2
+         CpYFtUXBXodJ5jrWDOzKbapp3yEXVpoIHu4jXFuw9bTYXF+CZLesGbbd9Lb93dIK9t2j
+         BATouYVChdiiVy4nY3Lwrl2Pg1VgCy8V+z3LbVtyi3xmW9dbJaf7eq3bRLGW2WVQFg2R
+         2x8j/aKMrSP8fOjR1l1bX30xymdNJQ2h9mJqrAoeXOwP8dJWw+ZmO+X8j6MvjBErb2do
+         Lf9g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1795708220; x=1796313020;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=gIwZcK4QOl3Mm5lzx8mQRAanf4vTLDTmM49asUT7xVU=;
+        b=NS5/vZsaGesNHg4FDzBtjWwazCstwzYbKsqsS5UKGiXzwPVL0YeHvT/oufanvSJy7d
+         C1ck/v8irMfdrBOeLbOoKRN2FuXRdqPxcVjSQRJTl+zmayNhpwErBQzK6/oIRBZsWewA
+         sb+WKRHS5p6s1pPvURNKAWI+3ZADuSWuIjJWvv4Dt2Qv8ZDqeMc4oOpTUUWzIBxKDfMG
+         GsKvdqZ5RtsfTvqMX8+3Lyw1ztHswtcoJf1EXokVkO7Pr5dHrXSV054E9Uaa6YLxhrxA
+         UCgYnWvVjgVCtDqMPvqCzjRC6rfgQzi0yvaviBEsRyiAr/aigrXTdMUxyazRpjp8ihUN
+         9kIA==
+X-Forwarded-Encrypted: i=1; AL+hErHVeKdHfkLeEjCXSIKFQ5zHgTEtf1Rcjz63KoLvjrrncxG9do1IGqSSx/xYVOiMJHZRDIGxoLpbQos=@vger.kernel.org
+X-Gm-Message-State: APuU4Z8Ujz85XjBYsXWoZZy8ApC4PnCWdwj1H5u68FV4mzUvHC0DhoMx
+	fGzQ0i4XHP1cJ19RZidCG3mE2DWDA3hvj12Hu1CZFPpMd4R19ctezqlM3zKg9iiSgc1weN+LiuN
+	XObYP7ac4NYBCh7SnlNI/w9OlgJFijG9apqn/SkjN2USs4r+LG1pGvOhHdGgWZRPZf2By4/xYxb
+	BMIIgQrpAafwfYqhWqTR5KDJwvvrcVGaNJzSwogQ==
+X-Gm-Gg: AZFdTZdVpjEZUhfwKzDZrj7lD74lyAXazfPycHlE50q37e8YLbKJB9E/9V8Ugw1v/X7
+	GlvbrPe1N7iuOfYoC8mHBj6Ts6DQfcURWP/BsIYnwlBdIl0SFzqzroUzHVJXDSXjgUaCR3GEG4w
+	bLlnVTKdeNgELnNWEpnZf4OL0ACPVH5B6Zo3Pv/avAOfuioKm/sNrF7grg3w==
+X-Received: by 2002:a17:903:198d:b0:2f0:39c6:8ee5 with SMTP id d9443c01a7336-2f03f27787fmr233290485ad.52.1795708219877;
+        Thu, 26 Nov 2026 07:50:19 -0800 (PST)
+X-Received: by 2002:a17:903:198d:b0:2f0:39c6:8ee5 with SMTP id
+ d9443c01a7336-2f03f27787fmr233290095ad.52.1795708219369; Thu, 26 Nov 2026
+ 07:50:19 -0800 (PST)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -162,59 +127,139 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-X-OriginatorOrg: siemens.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: AS8PR10MB6867.EURPRD10.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: ac707877-9859-4dcc-7915-08df4bd06e27
-X-MS-Exchange-CrossTenant-originalarrivaltime: 26 Nov 2026 15:17:48.2811
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 38ae3bcd-9579-4fd4-adda-b42e1495d55a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: I7KubsYNrIxRzSRIEIndmOCC8gpDUpvlEJ3L1KOjCaY6OQrQKMvCp741mxGDTiJ62pAYeaT7dd6PN6CG8HkxnOMwrA522gw21Tq3XstUBcY=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB8PR10MB3879
+References: <1789975099-157594-1-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <1789975099-157594-1-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Date: Thu, 26 Nov 2026 16:50:07 +0100
+X-Gm-Features: Aa3M54r82nwhTksPYmbjufapjUhnrkNXbvAYflMCCiHkeElDYkLBJ88_lHxNLsg
+Message-ID: <CAPx+jO8UC-6be9-24eXgWdrFnm047niARcNR2CaOjm0jP_CEHQ@mail.gmail.com>
+Subject: Re: [PATCH v2 0/3] Add SDIO userspace passthrough support
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@linux.dev>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+X-Authority-Analysis: v=2.4 cv=T4oZ3PKQ c=1 sm=1 tr=0 ts=6b08553d cx=c_pps
+ a=cmESyDAEBpBGqyK7t0alAg==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
+ a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
+ a=ZpdpYltYx_vBUK5n70dp:22 a=s8YR1HE3AAAA:8 a=4V_M4x3YfzuPUH-Wr70A:9
+ a=QEXdDO2ut3YA:10 a=1OuFwYUASf3TG4hYMiVC:22 a=jGH_LyMDp9YhSvY-UuyI:22
+X-Proofpoint-ORIG-GUID: -xQ63oz1QNvuRHqLTc-q9KuvxUkSQzYZ
+X-Proofpoint-GUID: -xQ63oz1QNvuRHqLTc-q9KuvxUkSQzYZ
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTI2MDA2MSBTYWx0ZWRfX+DzNidQpX9lN
+ R0kMtgrnAaKhGkve+spyQcGIxQm8R3Ggb/oQRswRXogmqEKwzX7eN74Ck4zDF5swTgKBLZZ2kcp
+ XUFlaOhVyq569e990eVRhmUNIgvASfa5HWwqgjPDNjtOS3RgAHrV7YnG9oSJR9V51bwzvcYJZfv
+ mQEWZA9Mp0dCyMRvVJKiElaEO335lTjWg2N/ZfKh96uW4odsoSEAyhKFAIF6xy9d9a9dmtES9w7
+ wirI3j/mJOTWianXGqL9fruSbXeZh2sKEgLO6/xHnQaBOeck93E7l/n+D0PrreIMJpDYwp/pYYv
+ 1z2/ZAnii1jguBm5M+kioDdMZkTrT3+I4FkZ2bos6cEKwY5zzs2nafaDdpKv3XNWEA108C2ewMR
+ cWyHQ8Dw3McYg6XSj78Cko3GHZTddvcWC1CRB/B5aY4Jc4F8ZXdnL/uvwvBwBsChF58h83Wp7H1
+ sOTHyCEY4V02K65Yvuw==
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTI2MDA2MSBTYWx0ZWRfX0u9AAZy0sPkF
+ 2vpHX8ZfjXzKFGzR8l3pDikKGHpO12Wez8hiA0fFSBMADYFa1WGqnWkJAJPm9p8sYrzDyZKzTUN
+ dtpubC8uH59vKX9mrRMWXPxwdWNvlBE=
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
+ definitions=2026-11-26_03,2026-11-26_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ clxscore=1015 priorityscore=1501 spamscore=0 suspectscore=0 phishscore=0
+ lowpriorityscore=0 bulkscore=0 malwarescore=0 impostorscore=0 adultscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611260061
 
-SGkhDQoNCk9uIFdlZCwgMjAyNi0xMS0xMSBhdCAxMzowNyArMDEwMCwgTWljaGFlbCBIYWVuZXIg
-d3JvdGU6DQo+IFdpdGggTU1DX1FVSVJLX0ZJWEVEX1NFQ1VSRV9FUkFTRV9UUklNX1RJTUUsIHNl
-Y3VyZSBlcmFzZS90cmltIHJlcXVlc3RzDQo+IGFyZSBubyBsb25nZXIgbGltaXRlZCBieSBtYXhf
-ZGlzY2FyZCwgc28gbW1jX21tY19lcmFzZV90aW1lb3V0KCkgY2FuIGJlDQo+IGNhbGxlZCB3aXRo
-IGEgcXR5IG9mIHNldmVyYWwgdGhvdXNhbmQgZXJhc2UgZ3JvdXBzLiBUaGUgdGltZW91dCBpcyB0
-aGVuDQo+IGNvbXB1dGVkIGFzIGVyYXNlX3RpbWVvdXQgKiBzZWNfZXJhc2VfbXVsdCAqIHF0eSBp
-biAzMi1iaXQgYXJpdGhtZXRpYy4NCj4gDQo+IFdpdGggNTEyS2lCIGVyYXNlIGdyb3VwcyB0aGUg
-YmxvY2sgbGF5ZXIgbGltaXRzIGEgcmVxdWVzdCB0byBhYm91dCA0MDk2DQo+IGdyb3Vwcywgc28g
-dGhlIHByb2R1Y3Qgb3ZlcmZsb3dzIG9uY2UgRVJBU0VfVElNRU9VVF9NVUxUICogU0VDX0VSQVNF
-X01VTFQNCj4gZXhjZWVkcyBhYm91dCAzNDk2LiBUaGUgd3JhcHBlZCB2YWx1ZSBjYW4gYmUgbXVj
-aCBzaG9ydGVyIHRoYW4gdGhlIHJlYWwNCj4gZXJhc2UgdGltZSwgbWFraW5nIHRoZSBidXN5IHBv
-bGxpbmcgZ2l2ZSB1cCBlYXJseSB3aXRoIC1FVElNRURPVVQuIE5vDQo+IGNhcmQgaW4gdGhlIHF1
-aXJrIGxpc3QgaXMga25vd24gdG8gcmVhY2ggdGhhdCBsaW1pdCB0b2RheS4NCj4gDQo+IFVzZSBj
-aGVja19tdWxfb3ZlcmZsb3coKSBhbmQgc2F0dXJhdGUgYXQgVUlOVF9NQVguDQo+IA0KPiBTaWdu
-ZWQtb2ZmLWJ5OiBNaWNoYWVsIEhhZW5lciA8bWljaGFlbC5oYWVuZXJAc2llbWVucy5jb20+DQoN
-ClJldmlld2VkLWJ5OiBBbGV4YW5kZXIgU3ZlcmRsaW4gPGFsZXhhbmRlci5zdmVyZGxpbkBzaWVt
-ZW5zLmNvbT4NCg0KPiAtLS0NCj4gwqBkcml2ZXJzL21tYy9jb3JlL2NvcmUuYyB8IDE5ICsrKysr
-KysrKysrKysrLS0tLS0NCj4gwqAxIGZpbGUgY2hhbmdlZCwgMTQgaW5zZXJ0aW9ucygrKSwgNSBk
-ZWxldGlvbnMoLSkNCj4gDQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYyBi
-L2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+IGluZGV4IDY3N2U0NDVkYzQ4Yy4uOTczMDYzM2Rm
-YTgxIDEwMDY0NA0KPiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYw0KPiArKysgYi9kcml2
-ZXJzL21tYy9jb3JlL2NvcmUuYw0KPiBAQCAtMjQsNiArMjQsNyBAQA0KPiDCoCNpbmNsdWRlIDxs
-aW51eC9yYW5kb20uaD4NCj4gwqAjaW5jbHVkZSA8bGludXgvc2xhYi5oPg0KPiDCoCNpbmNsdWRl
-IDxsaW51eC9vZi5oPg0KPiArI2luY2x1ZGUgPGxpbnV4L292ZXJmbG93Lmg+DQo+IMKgDQo+IMKg
-I2luY2x1ZGUgPGxpbnV4L21tYy9jYXJkLmg+DQo+IMKgI2luY2x1ZGUgPGxpbnV4L21tYy9ob3N0
-Lmg+DQo+IEBAIC0xNTY4LDEzICsxNTY5LDIxIEBAIHN0YXRpYyB1bnNpZ25lZCBpbnQgbW1jX21t
-Y19lcmFzZV90aW1lb3V0KHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwNCj4gwqANCj4gwqAJLyogTXVs
-dGlwbGllciBmb3Igc2VjdXJlIG9wZXJhdGlvbnMgKi8NCj4gwqAJaWYgKGFyZyAmIE1NQ19TRUNV
-UkVfQVJHUykgew0KPiAtCQlpZiAoYXJnID09IE1NQ19TRUNVUkVfRVJBU0VfQVJHKQ0KPiAtCQkJ
-ZXJhc2VfdGltZW91dCAqPSBjYXJkLT5leHRfY3NkLnNlY19lcmFzZV9tdWx0Ow0KPiAtCQllbHNl
-DQo+IC0JCQllcmFzZV90aW1lb3V0ICo9IGNhcmQtPmV4dF9jc2Quc2VjX3RyaW1fbXVsdDsNCj4g
-KwkJdW5zaWduZWQgaW50IG11bHQgPSBhcmcgPT0gTU1DX1NFQ1VSRV9FUkFTRV9BUkcgPw0KPiAr
-CQkJCcKgwqDCoCBjYXJkLT5leHRfY3NkLnNlY19lcmFzZV9tdWx0IDoNCj4gKwkJCQnCoMKgwqAg
-Y2FyZC0+ZXh0X2NzZC5zZWNfdHJpbV9tdWx0Ow0KPiArDQo+ICsJCWlmIChjaGVja19tdWxfb3Zl
-cmZsb3coZXJhc2VfdGltZW91dCwgbXVsdCwgJmVyYXNlX3RpbWVvdXQpKQ0KPiArCQkJZXJhc2Vf
-dGltZW91dCA9IFVJTlRfTUFYOw0KPiDCoAl9DQo+IMKgDQo+IC0JZXJhc2VfdGltZW91dCAqPSBx
-dHk7DQo+ICsJLyoNCj4gKwkgKiBXaXRoIE1NQ19RVUlSS19GSVhFRF9TRUNVUkVfRVJBU0VfVFJJ
-TV9USU1FLCBxdHkgaXMgbm8gbG9uZ2VyIGJvdW5kDQo+ICsJICogYnkgbWF4X2J1c3lfdGltZW91
-dCwgc28gdGhlIHByb2R1Y3QgY2FuIGV4Y2VlZCAzMiBiaXRzLiBTYXR1cmF0ZQ0KPiArCSAqIGlu
-c3RlYWQgb2Ygd3JhcHBpbmcgdG8gYSB0b28gc2hvcnQgdGltZW91dC4NCj4gKwkgKi8NCj4gKwlp
-ZiAoY2hlY2tfbXVsX292ZXJmbG93KGVyYXNlX3RpbWVvdXQsIHF0eSwgJmVyYXNlX3RpbWVvdXQp
-KQ0KPiArCQllcmFzZV90aW1lb3V0ID0gVUlOVF9NQVg7DQo+IMKgDQo+IMKgCS8qDQo+IMKgCSAq
-IEVuc3VyZSBhdCBsZWFzdCBhIDEgc2Vjb25kIHRpbWVvdXQgZm9yIFNQSSBhcyBwZXINCg0KLS0g
-DQpBbGV4YW5kZXIgU3ZlcmRsaW4NClNpZW1lbnMgQUcNCnd3dy5zaWVtZW5zLmNvbQ0K
+On Mon, Sep 21, 2026 at 9:18=E2=80=AFAM Shawn Lin <shawn.lin@rock-chips.com=
+> wrote:
+>
+>
+> SDIO cards are normally driven by function drivers (brcmfmac,
+> mwifiex, rtw88_8723bs, ...), but bring-up, debugging and factory
+> test frequently need to poke the SDIO register space directly:
+> CCCR/FBR in function 0, or vendor registers before any function
+> driver is bound, and some deployments, notably lightweight IoT
+> boards, want to handle the SDIO function entirely from userspace.
+> Today the only way is to write a tiny kernel driver per device.
+
+My sincere apologies for the huge delay in reviewing this.
+
+I am simply not convinced that it's a good idea to allow SDIO function
+drivers to be implemented in user space. My concern doesn't only cover
+various new use cases this would introduce, but also about bringing
+another ABI to the MMC/SD/SDIO subsystem. And to me, it looks like for
+no good reason.
+
+However, in regards to debugging, bringup and similar, yes, we may
+have some pieces missing. To address these problems, I would rather
+suggest that we look for in-kernel solutions and if it turns out that
+we need some new SDIO helpers, I am certainly open to discuss them.
+
+>
+> So this series adds raw userspace access to the SDIO register
+> space as well a small reference client. Meanwhile, adding a new
+> documentation about how to write a proper SDIO function driver,
+> because I have recently been working on SDIO function drivers
+> and kept referring to the existing drivers for guidance. It turns
+> out that the knowledge is scattered and there is no unified document
+> describing how an SDIO function driver is supposed to be written,
+> despite the MMC core having clear expectations about how the APIs
+> are used.
+>
+> In particular, the interrupt model has many pitfalls:
+> sdio_claim_irq()/sdio_release_irq() must be called with the host
+> claimed, the handler runs with the host already claimed and must
+> not sleep or claim the bus itself, and sdio_release_irq() must be
+> called from ->remove() because it is the last chance before the
+> core removes the function devices from mmc_remove_host(). Recent
+> fixes around the SDIO IRQ work and host removal and the discussions
+> on the mailing list showed how easily these contracts get broken.
+>
+> Also worth documenting is the buffer requirement of the CMD53 based
+> helpers: the core builds a scatterlist directly from the caller's
+> buffer and the host driver maps it for DMA, so vmalloc() or stack
+> allocated buffers are not acceptable, while the CMD52 byte accessors
+> are safe with stack buffers.
+
+Documentation for SDIO functional drivers would be really great to
+have! Thank you for looking into this!
+
+>
+> Changes-in-v2:
+> - drop RFC as I don't include mmc-utils to be sdio usersapce tool
+> - add sdio doc
+>
+> Shawn Lin (3):
+>   mmc: core: Add SDIO userspace passthrough character device
+>   tools/sdio: add sdio-raw userspace client
+>   docs: mmc: add introduction to writing SDIO function drivers
+>
+>  Documentation/driver-api/mmc/index.rst             |   1 +
+>  .../driver-api/mmc/sdio-function-drivers.rst       | 211 ++++++
+>  MAINTAINERS                                        |   2 +
+>  drivers/mmc/Kconfig                                |  11 +
+>  drivers/mmc/core/Makefile                          |   1 +
+>  drivers/mmc/core/sdio_bus.c                        |  12 +-
+>  drivers/mmc/core/sdio_cdev.c                       | 189 ++++++
+>  drivers/mmc/core/sdio_cdev.h                       |  21 +
+>  include/linux/mmc/sdio_func.h                      |   4 +
+>  include/uapi/linux/mmc/sdio_ioctl.h                |  48 ++
+>  tools/Makefile                                     |  14 +-
+>  tools/sdio/Build                                   |   1 +
+>  tools/sdio/Makefile                                |  66 ++
+>  tools/sdio/gen-sdio-ids.sh                         |  59 ++
+>  tools/sdio/sdio-raw.c                              | 714 +++++++++++++++=
+++++++
+>  15 files changed, 1346 insertions(+), 8 deletions(-)
+>  create mode 100644 Documentation/driver-api/mmc/sdio-function-drivers.rs=
+t
+>  create mode 100644 drivers/mmc/core/sdio_cdev.c
+>  create mode 100644 drivers/mmc/core/sdio_cdev.h
+>  create mode 100644 include/uapi/linux/mmc/sdio_ioctl.h
+>  create mode 100644 tools/sdio/Build
+>  create mode 100644 tools/sdio/Makefile
+>  create mode 100644 tools/sdio/gen-sdio-ids.sh
+>  create mode 100644 tools/sdio/sdio-raw.c
+>
+> --
+> 2.7.4
+>
+
+Kind regards
+Uffe
