@@ -1,123 +1,123 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795710680;
-	b=ycyNJ4EdrjLSL2XRTWUzMBQGqkTqLxiUY2F1HC+SL5VgojrBzq2KwZfSeMEE4nVx3MYe
-	 MENV79A9jjc0ZDzWDleNcsA2O3wPclc7hsSNOWYT81gHIVcsLQlnzihEhbX2CPpoJapqJ
-	 DvrkXol2GcRFS/r+mHQvEP5zhPI0FZCeNVRTiKNON8hDHaBSwUSL6HDbtdBkS7TR7hCCF
-	 FT0HI2yRHvF4/7drL8Nc+u7wEtrhXmrzKKycqesC7YqqFUCnbSh3Zf5A1f7nMZ+wq4Hbd
-	 9lFxbBqQ3eW63BaF2nMbpYfvPF8l3mlfTB7ORAMuxq7pgyUM7xlgoYycWJKcdWBmpiw==
+	t=1795711894;
+	b=oWk4+RJ7IdlvvTW3PYqQaKEe7g2aPUy2soKjg6lz9ao3ye9PacUc0jOjWMIm1AY739SN
+	 w4J1jH7uiZAgCla8c2XyhajmFqGEEL+NIxEsQbyOhphn3sZTIm2vjb3PGkoE848N0KV0k
+	 WzaoODvL0mVKv4Zk59j3EnUBZex1P0mRwf1Z3cSjeLWjXdV/f4V9+YIoJ90g4r/xPVSus
+	 Jp9r8r/fihXcTDaH9GW/b3XM7oN9L6gnhU6LNIhyCIHoMCMutMUBisCn9iUSHHNVauDo9
+	 qMwVvtyhS4ZacBqTLeZMdZ102US951LGIQOiJxVCqwtbTh629ubjHbhVp4cfhU4rNuA==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795710680;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795711894;
 	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
 	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
 	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
-	 Cc:Content-Type:Content-Transfer-Encoding:X-Proofpoint-Spam-Info:
-	 X-Proofpoint-GUID:X-Proofpoint-Spam-Details-Enc:
-	 X-Proofpoint-ORIG-GUID:X-Authority-Analysis:
+	 Cc:Content-Type:Content-Transfer-Encoding:
+	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-GUID:
+	 X-Proofpoint-ORIG-GUID:X-Proofpoint-Spam-Info:X-Authority-Analysis:
 	 X-Proofpoint-Virus-Version:X-Proofpoint-Spam-Details;
-	bh=pmn0FtXxLKA2R9aU92JYzz/Y8uvInEGF5Y8VG+PgdjI=;
-	b=VtsUZ1tSilNS7xq6iV6SbdKhEIhOAOGanXi2wc7XoDm8R/A4J2WV5H7yfIK6UuK4rdvE
-	 3JvzN9SJeT1PR7nK5Iy4awF+EKMlj73WARBCu4pyY/7ZilJZ+ccOawRmMfwOfDclj8/qB
-	 1Xhe6Xh6pM2wY2EoA6q2tW/KNyTYetFjHKZxL1VTPp8AO+6TJ6IARtmtPWxd4sLzLozEk
-	 02Vu+pHgkwHnoldHqyzW+AlIo0IppAW1zb2T7WI4Owg8Qklw+ccTmmmLkD1OwO4R2U1B0
-	 p67Mx65NIq2/KJiv6jCMaTmBP+ArZ7W8UGozc0fUyLp9Ibmgmp5Yu+lHgx4U2ua/Zfw==
+	bh=y/HymTHxVh9JSPRhJ7hx3UDSfUl9znRn6BmHLB/weDg=;
+	b=EzVS31DXPWHilzD4QsKiN8C9NgiEWMzRCJMxFY3EYogU4/byddH0jkNrUoOw5Asa1peH
+	 fyjsNHPZ7ExlIoQ6t6cTYJaJuOvu1U1QpVShqfsh91MSdxxDCj+FFCMwBfyn3XoeIQFrw
+	 XDWk1dhEpxoZa1S9+umPCLw0JuAki5YBCDoW+NZU+OEUgl2Ncsu+/8nTZqFqB4wSttT91
+	 gMfuizlsfOFC91/scLamm7L7JpPKRgjgjgNCfeHnmwHi971KDLzZHphg+B0BOgmJCGZOH
+	 QRdaK178hzqdsRsWq9uT/cTw5C14wC/hWO2H6jFncPfD0fK/6BzNOUI9+oqQSgLgN5Q==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=oss.qualcomm.com;
 	spf=pass smtp.mailfrom=oss.qualcomm.com;
-	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=WrIRQ8hL;
-	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=WfnLPKPa;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=LN8w68kC;
+	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=MM8HQdIp;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF2EA606A31C
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 16:31:19 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org BF2EA606A31C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CEA91606A31E
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 16:51:33 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org CEA91606A31E
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=WrIRQ8hL;
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=WfnLPKPa
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AQFu13D1847724
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 16:31:18 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=LN8w68kC;
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=MM8HQdIp
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AQFtwkc4048185
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 16:51:33 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	pmn0FtXxLKA2R9aU92JYzz/Y8uvInEGF5Y8VG+PgdjI=; b=WrIRQ8hLwmS0resS
-	ZYtDjIHPzb49P3KaZI9vVriH1FsCrR1nrfxdxDE5r7RM5gAveMkLoNsLyYPwlBTJ
-	VaP9iYcw9YxkAl4EIbwvJyRkZ7na8pDLbLYJ9FHy0uGW+zda7zKX8HrGpPWh0yR2
-	7Any2OJyaEse+cgAGPnwYxwP80q8z7jrsj2gjz34U3dyKLz9Kuly4iCf4j35COuY
-	RuNZ901un8/HbtlI7aOEAE748xo1XN4MmfK5wdJjAEIaNlAIfabFDcaC8esiMT1n
-	PkZNTV9VWv5VCla5x14iqMBCvWkt3yJ1vLhz06IdcewWAwgh9EoTzVgl361/z9xv
-	5gBvkg==
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com [209.85.214.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4j6fw7t1sb-1
+	y/HymTHxVh9JSPRhJ7hx3UDSfUl9znRn6BmHLB/weDg=; b=LN8w68kCprRpgF05
+	kJDoNtvjfd4aAUxe9bIeSOxX88cccqH0S0YCVlika7aERAmDsO8j3AmIdt3eEbqV
+	e+OKwkZNPHQ579sxl6c5y+7iQypvPsXf9R25964wlGy2noNoKhzruXSdor7sDVcJ
+	JNnx38dYK3oc89yFYC9jnumXhtRoccPim6YC2Tnj03L3WXmr0IYMM+wStPc1L7ey
+	suNC8+bvVwvs9qvsyyT1ddQzK5ux3eFleUZ37cmeuguxY0d358hTse4amoa8Kt2x
+	NqsubbxpPW172KRqtootduOnp2JoCEewC+LbdOLwW8OQ2CrI3V3v1G35OOGqtf52
+	X27YgQ==
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com [209.85.216.71])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4j6f8rj8jc-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 16:31:18 +0000 (GMT)
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2f033dc37cfso68336755ad.0
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 08:31:18 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1795710678; cv=none;
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 16:51:32 +0000 (GMT)
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-3b4092b645aso6080501a91.2
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 08:51:32 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1795711892; cv=none;
         d=google.com; s=arc-20260327;
-        b=dmZr0KGFh8lgkYl3N681FzsFGoNc1U9ATpNZM74jBZi7vjjGATBBpNfRJeTBU8BpG5
-         l/Jfdn/2TKkYDBbA8paSIt6QvV9SwWJ5mt91THa8EMdv5E65pRbQi9PW3wTLzxPz6oYa
-         yq3JXIzVQbsVGTXvJV/dJ2+l6sLiNcQTXVaAgCPM+dPHKxm2CXAIWf+cFAy133sDbdP2
-         L6AeVu0BeJFKsJw+1SKBwlI6qYYhhkqswe5z6ZQh/d1U3f0D2zVjMiVvSeSjOr/AhGlZ
-         6yYUfO63sHxDTruay0Ssb0XrVlAOd03K6IFgYUPeGUYr8am+49RBSW+qb0p8ZjHSCr+d
-         FZVA==
+        b=OpToq0JfPlfi8sVE0frcyk69u9gN4XG3wTg3zrMvyOTkc0g4/vWF7f4Bl4V8/Rm9CZ
+         Kss7zeBqwROcYLcP03cCTtMIw1BuxEuMaAL7HiKhvGg6bwDlu/CybimJraEhSXYCJ79T
+         D3X6xuCvzXFNu/bgvyUtEYSYQ3SA/2sHqFQnwbXPQQGtiAI+kytHkx8vTQPZy28ZAA3c
+         M+jau9k3QX2+MfOYxVu2whYqX+x2R2znPosWpgVLBbajIFDb20gjaXXChAJVmiYR3Oyn
+         rP4knGIagzd5FtrdQSE+oBvUHaLu6qG4N9RE30+ury2RpRnuEH1NCaJBMbheUhPFERb/
+         I5vQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=pmn0FtXxLKA2R9aU92JYzz/Y8uvInEGF5Y8VG+PgdjI=;
-        fh=kzTrYs0Y51idDSxb9vFU22VIV6YVRmBC0UX/dYsF5Vk=;
-        b=c9JPKBCazy9FVDugK5VKjeUeKOuBcesLSxWPt9k3e4O7Nb3qsr9EhzZ7RckAWfD2Yz
-         Tqpwit7Gm7LJhtdxIA/C9adNUBwQNzPZdGo2wT1byaAV0Q9XdPS/Jo1VMlmwWE/IDi3V
-         PMT2POcHCDqHq8BbWdlD/Ab+Np+eWWyv5Kv4GFUT0v9Y8iZPv8qSWgWNmdBUYbLA+eK0
-         QdMNteSj7r2Oq/8ULB94j1923fEVIrs7ukxF8f8mDJLhVlx4+8+o0xTgEYC9C+CdGUuH
-         4b0MPRZroz0g2tRVmO5RrpkppKtkYoLlkNPz/1Cu+ztltlljJdmjP+kXJRbRtxaoPrB9
-         B9bA==;
+        bh=y/HymTHxVh9JSPRhJ7hx3UDSfUl9znRn6BmHLB/weDg=;
+        fh=Jr6bxL2NRt87wzK13RmXD3XmRPnnY+QT2W2m7reF3j0=;
+        b=kPwrRAkTm+C8gziX1aYlp4PcBR3rdpp/qY4GXxDJm0UKTYVZRFqMjl4JnWKofzM6fr
+         BuWFPyCDT/SEgOd2z8Iha9aL1xS4aU9+D93crGgoYh+6xhICJ8XJ3j03jJe3GD/ngXZE
+         wQZ2gw5D+dnx4ltSdKeiUXMZFthmcYF1FrnmIrMUsK4s0QzCB7Mv4XyRP5PzLeTAGr/H
+         Cw+wTWTVdRGTAU7Z8ow3XbnK8QsVwRlrdV1ha6AssPDW0LBhpwQDA/NfswRMp4LBp24X
+         puB5JmEiZNJRI+Hs0p9P3TUgTBzDgJ4bLppxla1bkW769UQHHyg2eEaQh7rPHl4dJxvX
+         oL2w==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1795710678; x=1796315478; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1795711892; x=1796316692; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=pmn0FtXxLKA2R9aU92JYzz/Y8uvInEGF5Y8VG+PgdjI=;
-        b=WfnLPKPa7fL1N1l8DpZE5C9AGJMUeO2xb2xJukNt1p4LCP4pjPknJr1S+omK7okgC3
-         jXSKjd9u3yS2Sfe4rAFd3G0ViGhWYDbf8OHMmL6ugODAyVfhPkFMSX7Tf27KTw959IBb
-         /XuiDl6l0Taqs0a4eO7uuUwSBv8B5X+fM2hQZtuPSyp4uBBQeoYO+N3EkiAAa0SP+5AJ
-         b2nWWl9eMNPLP3L3wSRM7MOsyN0pZqmg40Cj0R0tRtlMJ0SORu1d+BsVUkboe5OUSBDZ
-         JDmHom1Vwreq/fk6+yPT06p7jlkgCbD64NQ9ZogNzOCnCpwdQraaze+ihgBLuUEgwIzo
-         jDTQ==
+        bh=y/HymTHxVh9JSPRhJ7hx3UDSfUl9znRn6BmHLB/weDg=;
+        b=MM8HQdIpqb5+ZCZcU8fme6VsNf+G6M2cQWwR97jYknUCZ/jYarYxJbTsnvExhZEy2y
+         //dneQmJ8a6yAOcvgaXsCfLRO0HA8rnf5xUZsZcpYdnU7xi7ysCJkFGl7opOoGBVnCsT
+         HYPSEpCJ1w5QuXbpQBbF6Tf1cR/VdAPhTtBhmK/S+wTJXhHrhoiKN4Jy6hp6Tob8VxJh
+         4NJeWkZsbDs/o0ij7oq8WdbBZsNG+D1nq0d95KuD7RldjJGpOEjrrmtunE5H2FIPw/x5
+         /Py1Yf6IIZjUYruRA+M2v8bslYgEEW5jlHL/jTJXbNq7LQ7xIZxGxNN+kI6iPc4wRvE/
+         AWjQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795710678; x=1796315478;
+        d=1e100.net; s=20260707; t=1795711892; x=1796316692;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=pmn0FtXxLKA2R9aU92JYzz/Y8uvInEGF5Y8VG+PgdjI=;
-        b=Ddh6iDks1VJCta5jFbO41YzbPtARrzSM8Gu4xSw6xdYc0wCyOPzT67jSLTfngKbH/3
-         9YlZcanG75/FAzclPHfIJE+EN/kvghGZzGhSpnKoIAZ0eszslNMs2lOgx0NgGoL85e+Y
-         Cp4AUB/KrBThzdMRxKxpXdvHgxPEpdgO2PkmY3g2S9yNDXzSDvyn0pA001zcnW1qvjnw
-         PgIWvjA8akkmQv8JGEBbkTk5gYIaMDkJ/Bmr4ChQjap2but4H0Ab3ng1pTCfBFDVXmxJ
-         4FjfxTdMjvPg+V1G+3kU6Xlnq7EdSboE2rXPVJd0uGsYeF15fzAiauQmJDDmQjQhueoa
-         uUqA==
-X-Forwarded-Encrypted: i=1; AL+hErF2cFEMNfCDl8mH6PGKdmnaIbHXfF9Z1Ik9SoKkI9/NiJbsDjhYXzcDocXbVXjIDyBoEqf+Frcc+bE=@vger.kernel.org
-X-Gm-Message-State: APuU4Z+UP9B0PnmJ7ZSZx+IcwXRzuFTUleC0q40VJ9AYhpxqcJsoUpNt
-	rO/oUVc5JyKP3NxJSZxMg53KrEOkqP9uswvKjHSzQf/2mkSOxcYHztfxfPj90s/RiV1gZjO8KIt
-	wg/GqHcUISELbqZy1MBaoe3pBFeJxm8HZTwBNpIh6JKt+VxEHLdm0rzKmT/wz/rktabProSYKjV
-	30jAISxAG4xB0wuu/Ly0v3HTKp+4aozOnnMK+cjA==
-X-Gm-Gg: AZFdTZevQQrs8FovkMmZ5AruR+YXF9P+m/iddbw9xeY7udORUepMHTbYkYbqy1WT7k4
-	o3A/PiJYpmucRYf0W/yIop0DrbPLXWo//OmS6F6YA3ftKjru5BfkNi8GjdhuiszprcQ/E09x0L9
-	IHODyGULG8YoIUMrAj/59nDQOsH7oScl6rijK1ChUHMePeaTTPE95OFs5DlQ==
-X-Received: by 2002:a17:902:c443:b0:2e7:ff72:203f with SMTP id d9443c01a7336-2f03f1a52b5mr138232235ad.61.1795710677282;
-        Thu, 26 Nov 2026 08:31:17 -0800 (PST)
-X-Received: by 2002:a17:902:c443:b0:2e7:ff72:203f with SMTP id
- d9443c01a7336-2f03f1a52b5mr138231995ad.61.1795710676661; Thu, 26 Nov 2026
- 08:31:16 -0800 (PST)
+        bh=y/HymTHxVh9JSPRhJ7hx3UDSfUl9znRn6BmHLB/weDg=;
+        b=JK1c+Ftj2Q7cOupORrDuoM6urzbl3Z7ox2EM3lWAGExKsWL/xQH/9WkxqVJl/2syb5
+         p8/3Bla8tIwEFnW07cZA1FkHk6GJHWAvEZpBK47ONwj+3DkYuUgWdiRVEmP1gJraZRGv
+         RDkooOG8LWyXfzxk31cpBIctLIMDKj3ggZwL++El5yafCng9qM7zvwDHlGqDM2VLlfJi
+         Hs5WgFSNa2AgDs8Z2ITF5EEYyeMDCjHyIbZR5he8n3rV+pYFMoDVBPV/kPnGmvRYoB2D
+         9bxpnZdE70JTDJdgCMi7bBe5WtGLdnvhUQbuu+bObUvcxCBC+NIbxvixqlXtGZnj19dl
+         Xgnw==
+X-Forwarded-Encrypted: i=1; AL+hErEPWyO8DRWZxBoCbTFy2NiYMvybORUCN9vIMZ5ar+MXP9HMhEHtNUSXq3dZDykzggAM4QJYnYnrtrc=@vger.kernel.org
+X-Gm-Message-State: APuU4Z+eJiyq+bPugi+2YRCiB7WEIrmQ8LoxEy99HjAFJOmUOaxb3vqL
+	eE4JzSg8FE03qcl44GNYZ6+WGk2FsvySSFXeXSIx/M/iDMrEizBl++2rvwciJHOWvilcNTgP0n1
+	SVpQvcz2tL1BkXG83VB4d2uYqVlOwq7Du88udeyUWHj+HQeOBfRkdW4Mc54ZMthW/WJKjjzMgYJ
+	tav4sPBiiZiZp3mJsFf3MDmBPvQR98DjXq7LtxPQ==
+X-Gm-Gg: AZFdTZc+hdvyRAIiqihhQLjpoHnblEMTKNMRdIiHPZKIyKAvHAqC6arN2qjnFXGd6N5
+	yMJSGfnWEOU3QFvzaFIvKIHZ2hoSZIQoAvPrf3xs1+3Tf8DST1q3S89fE6Pc61cYXn1A373fw7U
+	f3PTUbbYZpAa59LqknQVsMd6DtMnmT8xZtULzKncUt00yOoaEkxBpPBJTLPg==
+X-Received: by 2002:a17:90b:50:b0:3b0:b35e:b373 with SMTP id 98e67ed59e1d1-3b41c7c2378mr21122806a91.4.1795711892229;
+        Thu, 26 Nov 2026 08:51:32 -0800 (PST)
+X-Received: by 2002:a17:90b:50:b0:3b0:b35e:b373 with SMTP id
+ 98e67ed59e1d1-3b41c7c2378mr21122785a91.4.1795711891756; Thu, 26 Nov 2026
+ 08:51:31 -0800 (PST)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -127,119 +127,219 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261103185344752TLpWp9rb9fhJW6zaJT5TX@zte.com.cn>
-In-Reply-To: <20261103185344752TLpWp9rb9fhJW6zaJT5TX@zte.com.cn>
+References: <20261113-fix-resume-reset-v1-1-115b3da5764d@foss.st.com>
+In-Reply-To: <20261113-fix-resume-reset-v1-1-115b3da5764d@foss.st.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Thu, 26 Nov 2026 17:31:04 +0100
-X-Gm-Features: Aa3M54oMAs16SdpNYGtEr9578Sq-hyWptfNulukrcUuGONM4R1Hmxei-ZXSrmF4
-Message-ID: <CAPx+jO8n=0mY7ASqA1Be-sVgsCw8ZaTf2F-Jne9hMHwmJCrvsA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: block: check mmc_blk_get() in the sysfs callbacks
-To: shao.mingyin@zte.com.cn
-Cc: ulfh@kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Thu, 26 Nov 2026 17:51:18 +0100
+X-Gm-Features: Aa3M54o4VHeMYCpg2TuAN6_-LjxGTu6SJHr08jR0_SBLE_JPiTPSxML96L7j05o
+Message-ID: <CAPx+jO_V7f69HU+8r7thJW6xvUc75zsaWamHc9+L1Wsh8vyU6Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmci: stm32: reset and restore SDMMC state on system resume
+To: Christophe Kerello <christophe.kerello@foss.st.com>
+Cc: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulfh@kernel.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Marek Vasut <marex@nabladev.com>, linux-mmc@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMTI2MDA2NCBTYWx0ZWRfX+wepsiEd5LGf
- 88qAr9aPWrh4++/9FYeAWRPrKqyGHKyKp8wnNGcgoDlQsBH8Vzo+hnATwJvugVfVGu+FycpUggO
- NsBMWPGKfnpuImJAi5a4zXimEoKXt9Q=
-X-Proofpoint-GUID: YKNaqumt4G4GrOxg_yF-yOa-rbZPLlF-
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTI2MDA2NCBTYWx0ZWRfXwAvUAyx5IW2d
- ssdCe/hAy+LwqMCEBflIf4tyS7FTb3gS5BrkAhzeOCDg9KYKMkV1RuAamp7DeKGe1qSp9b17p5q
- xBV0+WBAZQvgbAvRvFX5eDJQ5eyQkYJknH+mtcQ0XcswreMn1sHFfpb/hmJ/cAwB5Dy7DrebsTU
- xvcvbUgnuwmD8U7i1bAeiAeGLrGNEsRUd4tvDlWzsFBwrCspEqLdQTWRPcKQLkcmj4PDrKXUxvw
- 2n0Kioa4hcxjl8tdtCVt/H8tLxj08eNwjkTn/OUuy4ps2X0uMH/upf+NlgsZql2qJHcLVCK1IZO
- HJyUBMMkK8saeIAm9pjPpGYrKnjo0xr60BDzvtdePye5dWNRjjybFB+nLqqxNHm2FxEyhbOUuco
- pyf2VvjjAWHuHosGUUB2koE5LKTzvjPaHteMfnVu9EXZznX0gnN+FnTNv1pOD5rQHGDl23noOzJ
- vRCRrPLsuyEZ1B5xfCg==
-X-Proofpoint-ORIG-GUID: YKNaqumt4G4GrOxg_yF-yOa-rbZPLlF-
-X-Authority-Analysis: v=2.4 cv=ePeGH3p1 c=1 sm=1 tr=0 ts=6b085ed6 cx=c_pps
- a=MTSHoo12Qbhz2p7MsH1ifg==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTI2MDA2NiBTYWx0ZWRfX0QPawugRKsyM
+ oOZ3qw3VR9KBKruIbxC/IMiZ09GEE8ImXOP9DhCewxf/UEZHXziMq8/uLDi+FcKaT8aBkEEtu+l
+ o3liE51VaPgLmsvlzfenb+kQSHXcQqHq5lnzD9t/6e/4DLL+cYbHesGq+xGHPMcFjTHEMqmwIJq
+ oIaiT5i1ZuJn9ySwoa5VYbCixAOSWyY3AmWaYRM/E3fO1BvuZR0Iwo9Ln0CfLHOvs4rqPnpr1Zm
+ W5+8UCe1femLsEyI/8M0GTrPv1VlWpnH6hN63FnJsuGOC6w66Pqzqq7hYLpnU4INZ6Q/MtUxmc3
+ MS6I94hVy/my4fc9q4udaHwDzt/UpCGgpVQYJBiD8jFZmNh57T9o1o6gc9EeWpYMKmHRWjm5Om2
+ 0eTKrNBe0Wgf/rso839/vx5EJ/CpOvCygiJgPAlbX6qSekSAetnGhz3TqGM6oRqKB/N0Ic6DbGk
+ nfgLj7hBPmOG9f+xmwg==
+X-Proofpoint-GUID: QfdMM7DF45xcSc4yB9yUKEfGiJ_4gRe6
+X-Proofpoint-ORIG-GUID: QfdMM7DF45xcSc4yB9yUKEfGiJ_4gRe6
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTI2MDA2NiBTYWx0ZWRfX5Ti2lXB/YOPz
+ qbE9ucITdKJ6uitkGfbx0E7iFzKsYgK1Ng/rxbe3eRIUtQqftyj+6sKT52seO1gKYBD0A/ANKEi
+ DW1fsHIvlNWvRm63TkjmHgM6GNDwG9c=
+X-Authority-Analysis: v=2.4 cv=FuOQbGrq c=1 sm=1 tr=0 ts=6b086395 cx=c_pps
+ a=UNFcQwm+pnOIJct1K4W+Mw==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=rJkE3RaqiGZ5pbrm-msn:22 a=1RTuLK3dAAAA:8 a=yHZN7Se_Px891H_nw7kA:9
- a=QEXdDO2ut3YA:10 a=GvdueXVYPmCkWapjIL-Q:22 a=kRpfLKi8w9umh8uBmg1i:22
+ a=Um2Pa8k9VHT-vaBCBUpS:22 a=8b9GpE9nAAAA:8 a=VwQbUJbxAAAA:8
+ a=ecHELK-FIlHdQtvxNqoA:9 a=QEXdDO2ut3YA:10 a=uKXjsCUrEbL0IQVhDsJ9:22
+ a=T3LWEMljR5ZiDmsYVIUa:22
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
  definitions=2026-11-26_04,2026-11-26_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 suspectscore=0 clxscore=1015 adultscore=0
- lowpriorityscore=0 bulkscore=0 phishscore=0 malwarescore=0 spamscore=0
- impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2611040001
- definitions=main-2611260064
+ clxscore=1015 priorityscore=1501 impostorscore=0 malwarescore=0 adultscore=0
+ suspectscore=0 phishscore=0 spamscore=0 lowpriorityscore=0 bulkscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611260066
 
-On Tue, Nov 3, 2026 at 11:54=E2=80=AFAM <shao.mingyin@zte.com.cn> wrote:
+On Fri, Nov 13, 2026 at 5:36=E2=80=AFPM Christophe Kerello
+<christophe.kerello@foss.st.com> wrote:
 >
-> power_ro_lock_show(), power_ro_lock_store(), force_ro_show() and
-> force_ro_store() dereference the result of mmc_blk_get() without checking
-> it.  mmc_blk_get() uses kref_get_unless_zero() and returns NULL once
-> mmc_blk_kref_release() has run; an already open sysfs attribute can still
-> invoke these callbacks after del_gendisk(), for example.
+> On standby exit, the bootrom may reuse the SDMMC instance used as boot
+> device, leaving the IP in a state not known by Linux.
 >
-> Other entry points in this file (mmc_blk_ioctl(),
-> mmc_blk_alternative_gpt_sector()) already handle a NULL return.  Do the
-> same here.
+> STM32 variants do not set pwrreg_nopower, so MMCICLOCK, MMCIDATACTRL and
+> MMCIPOWER are neither saved nor restored by mmci_save()/mmci_restore():
+> their content is expected to be retained by the hardware.
+>
+> Add a reset_on_resume variant flag. When set, and if the card is powered
+> off and a reset line is available, reset the IP on system resume and
+> restore the cached MMCICLOCK, MMCIDATACTRL and MMCIPOWER values.
+>
+> This is done from a .resume_noirq callback, so that mmci_irq() cannot run
+> on a state left by the bootrom once device interrupts are re-enabled. It
+> also runs before pm_runtime_force_resume(), which does not resume the
+> device if it was already runtime suspended before system suspend. The
+> clock is therefore enabled locally for the duration of the sequence.
+> Clock and reset errors are reported to the PM core.
+>
+> Enable the flag for all STM32 SDMMC variants.
+>
+> Fixes: 46b723dd867d ("mmc: mmci: add stm32 sdmmc variant")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
 
-How did you reproduce this? Did you verify this on HW?
-
->
-> Fixes: add710eaa886 ("mmc: boot partition ro lock support")
-> Signed-off-by: Shao Mingyin <shao.mingyin@zte.com.cn>
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
+
 > ---
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index a02bb2fee874..a1e942435575 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -235,9 +235,14 @@ static ssize_t power_ro_lock_show(struct device *dev=
-,
->  {
->         int ret;
->         struct mmc_blk_data *md =3D mmc_blk_get(dev_to_disk(dev));
-> -       struct mmc_card *card =3D md->queue.card;
-> +       struct mmc_card *card;
->         int locked =3D 0;
+>  drivers/mmc/host/mmci.c | 58 +++++++++++++++++++++++++++++++++++++++++++=
+++++++
+>  drivers/mmc/host/mmci.h |  4 ++++
+>  2 files changed, 62 insertions(+)
 >
-> +       if (!md)
-> +               return -EINVAL;
-> +
-> +       card =3D md->queue.card;
-> +
->         if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PERM_WP_EN)
->                 locked =3D 2;
->         else if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PWR_WP_EN=
-)
-> @@ -266,6 +271,9 @@ static ssize_t power_ro_lock_store(struct device *dev=
-,
->                 return count;
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 5ecb4d0bdaa5..f5affe4fe1b2 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -278,6 +278,7 @@ static struct variant_data variant_stm32_sdmmc =3D {
+>         .busy_detect            =3D true,
+>         .busy_detect_flag       =3D MCI_STM32_BUSYD0,
+>         .busy_detect_mask       =3D MCI_STM32_BUSYD0ENDMASK,
+> +       .reset_on_resume        =3D true,
+>         .init                   =3D sdmmc_variant_init,
+>  };
 >
->         md =3D mmc_blk_get(dev_to_disk(dev));
-> +       if (!md)
-> +               return -EINVAL;
-> +
->         mq =3D &md->queue;
+> @@ -307,6 +308,7 @@ static struct variant_data variant_stm32_sdmmcv2 =3D =
+{
+>         .busy_detect            =3D true,
+>         .busy_detect_flag       =3D MCI_STM32_BUSYD0,
+>         .busy_detect_mask       =3D MCI_STM32_BUSYD0ENDMASK,
+> +       .reset_on_resume        =3D true,
+>         .init                   =3D sdmmc_variant_init,
+>  };
 >
->         /* Dispatch locking to the block layer */
-> @@ -305,6 +313,9 @@ static ssize_t force_ro_show(struct device *dev, stru=
-ct device_attribute *attr,
->         int ret;
->         struct mmc_blk_data *md =3D mmc_blk_get(dev_to_disk(dev));
+> @@ -336,6 +338,7 @@ static struct variant_data variant_stm32_sdmmcv3 =3D =
+{
+>         .busy_detect            =3D true,
+>         .busy_detect_flag       =3D MCI_STM32_BUSYD0,
+>         .busy_detect_mask       =3D MCI_STM32_BUSYD0ENDMASK,
+> +       .reset_on_resume        =3D true,
+>         .init                   =3D sdmmc_variant_init,
+>  };
 >
-> +       if (!md)
-> +               return -EINVAL;
-> +
->         ret =3D sysfs_emit(buf, "%d\n",
->                          get_disk_ro(dev_to_disk(dev)) ^
->                          md->read_only);
-> @@ -319,6 +330,9 @@ static ssize_t force_ro_store(struct device *dev, str=
-uct device_attribute *attr,
->         struct mmc_blk_data *md =3D mmc_blk_get(dev_to_disk(dev));
->         unsigned long set;
+> @@ -2586,8 +2589,63 @@ static int mmci_runtime_resume(struct device *dev)
+>         return 0;
+>  }
 >
-> +       if (!md)
-> +               return -EINVAL;
+> +static int mmci_reset_on_resume(struct mmci_host *host)
+> +{
+> +       struct device *dev =3D mmc_dev(host->mmc);
+> +       unsigned long flags;
+> +       int ret;
 > +
->         if (kstrtoul(buf, 0, &set)) {
->                 ret =3D -EINVAL;
->                 goto out;
+> +       if (!host->variant->reset_on_resume || !host->rst ||
+> +           host->mmc->ios.power_mode !=3D MMC_POWER_OFF)
+> +               return 0;
+> +
+> +       ret =3D clk_prepare_enable(host->clk);
+> +       if (ret) {
+> +               dev_err(dev, "failed to enable clock: %d\n", ret);
+> +               return ret;
+> +       }
+> +
+> +       ret =3D reset_control_assert(host->rst);
+> +       if (ret) {
+> +               dev_err(dev, "failed to assert reset: %d\n", ret);
+> +               goto out;
+> +       }
+> +
+> +       udelay(2);
+> +
+> +       ret =3D reset_control_deassert(host->rst);
+> +       if (ret) {
+> +               dev_err(dev, "failed to deassert reset: %d\n", ret);
+> +               goto out;
+> +       }
+> +
+> +       spin_lock_irqsave(&host->lock, flags);
+> +       writel(host->clk_reg, host->base + MMCICLOCK);
+> +       writel(host->datactrl_reg, host->base + MMCIDATACTRL);
+> +       writel(host->pwr_reg, host->base + MMCIPOWER);
+> +       mmci_reg_delay(host);
+> +       spin_unlock_irqrestore(&host->lock, flags);
+> +
+> +out:
+> +       clk_disable_unprepare(host->clk);
+> +
+> +       return ret;
+> +}
+> +
+> +static int mmci_resume_noirq(struct device *dev)
+> +{
+> +       struct amba_device *adev =3D to_amba_device(dev);
+> +       struct mmc_host *mmc =3D amba_get_drvdata(adev);
+> +
+> +       if (!mmc)
+> +               return 0;
+> +
+> +       return mmci_reset_on_resume(mmc_priv(mmc));
+> +}
+> +
+>  static const struct dev_pm_ops mmci_dev_pm_ops =3D {
+>         SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_re=
+sume)
+> +       NOIRQ_SYSTEM_SLEEP_PM_OPS(NULL, mmci_resume_noirq)
+>         RUNTIME_PM_OPS(mmci_runtime_suspend, mmci_runtime_resume, NULL)
+>  };
+>
+> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+> index 4d3647f9ec06..3a053e40d113 100644
+> --- a/drivers/mmc/host/mmci.h
+> +++ b/drivers/mmc/host/mmci.h
+> @@ -334,6 +334,9 @@ enum mmci_busy_state {
+>   * @supports_sdio_irq: allow SD I/O card to interrupt the host
+>   * @stm32_idmabsize_mask: stm32 sdmmc idma buffer size.
+>   * @dma_flow_controller: use peripheral as flow controller for DMA.
+> + * @reset_on_resume: on system resume, if the card is powered off, reset=
+ the
+> + *                  IP and restore MMCICLOCK, MMCIDATACTRL and MMCIPOWER=
+, as
+> + *                  the IP may have been used by a bootloader or the boo=
+trom.
+>   */
+>  struct variant_data {
+>         unsigned int            clkreg;
+> @@ -382,6 +385,7 @@ struct variant_data {
+>         u32                     stm32_idmabsize_mask;
+>         u32                     stm32_idmabsize_align;
+>         bool                    dma_flow_controller;
+> +       bool                    reset_on_resume;
+>         void (*init)(struct mmci_host *host);
+>  };
+>
+>
+> ---
+> base-commit: d2616724e01132376c78872b8324f38659af9f28
+> base-tree: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git nex=
+t
+> change-id: 20261113-fix-resume-reset-9bb5714fd505
+>
+> Best regards,
+> --
+> Christophe Kerello <christophe.kerello@foss.st.com>
+>
