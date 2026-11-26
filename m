@@ -1,123 +1,123 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795708222;
-	b=hRIdDpA4mNGKjKyIpJXcEc2Ce+zkRQqUZZUTxRqYme2f2hTNBGrPu0IxjNV8YMbiks29
-	 zKGQT10NbeVGsyVF6IL4J2rwGJAwYCKxKvPN/EOma+bhm6UDg+XKR+CHWRwkr1/3PKgU1
-	 tezxtFQC5Vf7AGJaLBnBijtMDEk4lEItwkT4KnMc8/agtCx9naMGvWVKep/VHR1jLWvWI
-	 HwVtVF9tZvCcjsF0WFZKLHrNe4Ao+uorraKnjO5Ugy4jDL3J5JtghEIXgs42FYVuYddf3
-	 TNqpofeSdPM5XBtAy2dRmyZCo4JKRXaJTuf7Qf3QeF1VmAi/sxB8PW2frHzBmYT5PRA==
+	t=1795710680;
+	b=ycyNJ4EdrjLSL2XRTWUzMBQGqkTqLxiUY2F1HC+SL5VgojrBzq2KwZfSeMEE4nVx3MYe
+	 MENV79A9jjc0ZDzWDleNcsA2O3wPclc7hsSNOWYT81gHIVcsLQlnzihEhbX2CPpoJapqJ
+	 DvrkXol2GcRFS/r+mHQvEP5zhPI0FZCeNVRTiKNON8hDHaBSwUSL6HDbtdBkS7TR7hCCF
+	 FT0HI2yRHvF4/7drL8Nc+u7wEtrhXmrzKKycqesC7YqqFUCnbSh3Zf5A1f7nMZ+wq4Hbd
+	 9lFxbBqQ3eW63BaF2nMbpYfvPF8l3mlfTB7ORAMuxq7pgyUM7xlgoYycWJKcdWBmpiw==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795708222;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795710680;
 	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
 	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
 	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
-	 Cc:Content-Type:Content-Transfer-Encoding:X-Authority-Analysis:
-	 X-Proofpoint-ORIG-GUID:X-Proofpoint-GUID:
-	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-Spam-Info:
+	 Cc:Content-Type:Content-Transfer-Encoding:X-Proofpoint-Spam-Info:
+	 X-Proofpoint-GUID:X-Proofpoint-Spam-Details-Enc:
+	 X-Proofpoint-ORIG-GUID:X-Authority-Analysis:
 	 X-Proofpoint-Virus-Version:X-Proofpoint-Spam-Details;
-	bh=gIwZcK4QOl3Mm5lzx8mQRAanf4vTLDTmM49asUT7xVU=;
-	b=VwKpXnfLvOyev+Y4d+Ypk9Ya04Qb6PWZGrdlNgF56fQCCTJVvk+EX4X13CPQWJsQyotx
-	 SRIZIqxfOhl4yBl/WCGS2lk+OIMKBPnfPBjGPvibTyZx15CMemM4DZTrLrFWNCKIWnN5y
-	 Aaqk2jJMDTNpwux1UdiFpKIvOwwVG+KqHTAvXdtmzNKJkYQySi7MRvdCSx1Wb/ZR8mL+R
-	 elMYm9sfRc9u11dwVi7ZiM5uGZw2DAR3oa6jYdQ3eQddoX+J0TYhlb0xhWUgeE11Kuk9l
-	 g92knJdLG7z9l9GDes4h96JjWLnJtwfnfOmp0NXN5VHpJInp5HAedQtyWYwwIVeHrjw==
+	bh=pmn0FtXxLKA2R9aU92JYzz/Y8uvInEGF5Y8VG+PgdjI=;
+	b=VtsUZ1tSilNS7xq6iV6SbdKhEIhOAOGanXi2wc7XoDm8R/A4J2WV5H7yfIK6UuK4rdvE
+	 3JvzN9SJeT1PR7nK5Iy4awF+EKMlj73WARBCu4pyY/7ZilJZ+ccOawRmMfwOfDclj8/qB
+	 1Xhe6Xh6pM2wY2EoA6q2tW/KNyTYetFjHKZxL1VTPp8AO+6TJ6IARtmtPWxd4sLzLozEk
+	 02Vu+pHgkwHnoldHqyzW+AlIo0IppAW1zb2T7WI4Owg8Qklw+ccTmmmLkD1OwO4R2U1B0
+	 p67Mx65NIq2/KJiv6jCMaTmBP+ArZ7W8UGozc0fUyLp9Ibmgmp5Yu+lHgx4U2ua/Zfw==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=oss.qualcomm.com;
 	spf=pass smtp.mailfrom=oss.qualcomm.com;
-	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b="Dcvo/I7g";
-	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=TYr0bRva;
+	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=WrIRQ8hL;
+	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=WfnLPKPa;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.180.131
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66986606A323
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 15:50:22 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 66986606A323
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF2EA606A31C
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 16:31:19 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org BF2EA606A31C
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=Dcvo/I7g;
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=TYr0bRva
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AQEVYwE3298771
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 15:50:21 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=WrIRQ8hL;
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=WfnLPKPa
+Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AQFu13D1847724
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 16:31:18 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	gIwZcK4QOl3Mm5lzx8mQRAanf4vTLDTmM49asUT7xVU=; b=Dcvo/I7gXFcqEJph
-	3qe+Zy7ukwRz60QpxiUvzYinwPbZ5zXry3KOaePjTQZ3wXEzdF/u7tSb1sXtMWim
-	OXGUpwOIE7v+kpjy33MHwit8tjOuZg3d8akrKLMgDdah69IxiGeV02/L07X+IZTs
-	DL8i4ZqdrKlqmxr2wONtQD9uzMyg1pHnAj7XSNhpQiPzYMqeX/d/sUknJLiV00hp
-	xvOer6QoNUdeZ49hS+pzuv+9IzWQCNWo53ZoCo4v/MnyQOyGSqAewwplxdZIEJim
-	VHK5o//xNesDq1KWF1Bo1qOxz3Tc8vJAdAhOU6nu7B7B4toBzkQxtEeL4YUOuqDR
-	/QidsA==
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com [209.85.214.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4j6ak02wts-1
+	pmn0FtXxLKA2R9aU92JYzz/Y8uvInEGF5Y8VG+PgdjI=; b=WrIRQ8hLwmS0resS
+	ZYtDjIHPzb49P3KaZI9vVriH1FsCrR1nrfxdxDE5r7RM5gAveMkLoNsLyYPwlBTJ
+	VaP9iYcw9YxkAl4EIbwvJyRkZ7na8pDLbLYJ9FHy0uGW+zda7zKX8HrGpPWh0yR2
+	7Any2OJyaEse+cgAGPnwYxwP80q8z7jrsj2gjz34U3dyKLz9Kuly4iCf4j35COuY
+	RuNZ901un8/HbtlI7aOEAE748xo1XN4MmfK5wdJjAEIaNlAIfabFDcaC8esiMT1n
+	PkZNTV9VWv5VCla5x14iqMBCvWkt3yJ1vLhz06IdcewWAwgh9EoTzVgl361/z9xv
+	5gBvkg==
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com [209.85.214.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4j6fw7t1sb-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 15:50:20 +0000 (GMT)
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2f045e399acso62097285ad.2
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 07:50:20 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1795708220; cv=none;
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 16:31:18 +0000 (GMT)
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2f033dc37cfso68336755ad.0
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 08:31:18 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1795710678; cv=none;
         d=google.com; s=arc-20260327;
-        b=e1ONmO3lXDFWXnPrtSVFu11PXMi/8F5hnjVg/Wf/MsLDl8DNWpWTCnqwZqO/Oapsnk
-         xuj9HIS9PbvtRndwr6IbIDa/F3rWoNHWoypj4X2WtWNEiQy4nCnpqi3f5mSj0FIWyRC0
-         hJa67qAuYobM/1CIAcOgBuuSKl/M/M0clkzaOexNrq8PBrnofKo44HRCcDqBxQQUmQcD
-         /LcyVrBXoxeRIBAyR+LM/ZSWqucEQReGR5BpIFSwrfVLO265bTIRMBoDXH9+ahVST5Ml
-         MN+AN3n+yt7JwL26EOXSY8MloIGEPpklm84ff8hmxjp2jOGSysQ19I7wuJBgO3JFvDu5
-         aXyw==
+        b=dmZr0KGFh8lgkYl3N681FzsFGoNc1U9ATpNZM74jBZi7vjjGATBBpNfRJeTBU8BpG5
+         l/Jfdn/2TKkYDBbA8paSIt6QvV9SwWJ5mt91THa8EMdv5E65pRbQi9PW3wTLzxPz6oYa
+         yq3JXIzVQbsVGTXvJV/dJ2+l6sLiNcQTXVaAgCPM+dPHKxm2CXAIWf+cFAy133sDbdP2
+         L6AeVu0BeJFKsJw+1SKBwlI6qYYhhkqswe5z6ZQh/d1U3f0D2zVjMiVvSeSjOr/AhGlZ
+         6yYUfO63sHxDTruay0Ssb0XrVlAOd03K6IFgYUPeGUYr8am+49RBSW+qb0p8ZjHSCr+d
+         FZVA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=gIwZcK4QOl3Mm5lzx8mQRAanf4vTLDTmM49asUT7xVU=;
-        fh=fFf/86oeVEPpj46Qum47r4XT9cv0rVrPHU293/4Ewoc=;
-        b=sDZXMbqHcp6ld61LHtLkQH21Ob1ANW7OBY+9J/SALfdlIg6MHvJ+pKMZudyP19HZlN
-         v6W2iMAqiJa3tr5jQACiWx0fqzOosTts+efMejaFUD0bek85TlU2+fDbupKQBC6Hh6Vn
-         brJ1V1FwpIbNkoIx7WLvnLOw5sftFQ6g8/91+V/vVnvA5ZwLZOrg+1ohXPQbVl86QT59
-         Snvr8hKiDVF5U6wwx4gbhKjfxdXQYfC1HElXj3q2D73hM/dFFcjCK0rcnM/gqqt5ZI+0
-         iYErtZxwuu0hklkkn8EhVuHA73SfLDJv7YNv61MW0JiQjYTS4YMDKlNw9EDBJ7OOhHKD
-         K06w==;
+        bh=pmn0FtXxLKA2R9aU92JYzz/Y8uvInEGF5Y8VG+PgdjI=;
+        fh=kzTrYs0Y51idDSxb9vFU22VIV6YVRmBC0UX/dYsF5Vk=;
+        b=c9JPKBCazy9FVDugK5VKjeUeKOuBcesLSxWPt9k3e4O7Nb3qsr9EhzZ7RckAWfD2Yz
+         Tqpwit7Gm7LJhtdxIA/C9adNUBwQNzPZdGo2wT1byaAV0Q9XdPS/Jo1VMlmwWE/IDi3V
+         PMT2POcHCDqHq8BbWdlD/Ab+Np+eWWyv5Kv4GFUT0v9Y8iZPv8qSWgWNmdBUYbLA+eK0
+         QdMNteSj7r2Oq/8ULB94j1923fEVIrs7ukxF8f8mDJLhVlx4+8+o0xTgEYC9C+CdGUuH
+         4b0MPRZroz0g2tRVmO5RrpkppKtkYoLlkNPz/1Cu+ztltlljJdmjP+kXJRbRtxaoPrB9
+         B9bA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1795708220; x=1796313020; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1795710678; x=1796315478; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=gIwZcK4QOl3Mm5lzx8mQRAanf4vTLDTmM49asUT7xVU=;
-        b=TYr0bRvan2D5sbZOUEVtFhHcqoQVLGMhef0bhOGsS8bQa6JhXTDXgQ+USn5ORgY0vO
-         crndiv1fWxVUyNGnP6zWvpfQ7Nu+B+K9kxwoQwBoOqm3fYfP/oVVeFEZJ/vcwgqQZ9c2
-         CpYFtUXBXodJ5jrWDOzKbapp3yEXVpoIHu4jXFuw9bTYXF+CZLesGbbd9Lb93dIK9t2j
-         BATouYVChdiiVy4nY3Lwrl2Pg1VgCy8V+z3LbVtyi3xmW9dbJaf7eq3bRLGW2WVQFg2R
-         2x8j/aKMrSP8fOjR1l1bX30xymdNJQ2h9mJqrAoeXOwP8dJWw+ZmO+X8j6MvjBErb2do
-         Lf9g==
+        bh=pmn0FtXxLKA2R9aU92JYzz/Y8uvInEGF5Y8VG+PgdjI=;
+        b=WfnLPKPa7fL1N1l8DpZE5C9AGJMUeO2xb2xJukNt1p4LCP4pjPknJr1S+omK7okgC3
+         jXSKjd9u3yS2Sfe4rAFd3G0ViGhWYDbf8OHMmL6ugODAyVfhPkFMSX7Tf27KTw959IBb
+         /XuiDl6l0Taqs0a4eO7uuUwSBv8B5X+fM2hQZtuPSyp4uBBQeoYO+N3EkiAAa0SP+5AJ
+         b2nWWl9eMNPLP3L3wSRM7MOsyN0pZqmg40Cj0R0tRtlMJ0SORu1d+BsVUkboe5OUSBDZ
+         JDmHom1Vwreq/fk6+yPT06p7jlkgCbD64NQ9ZogNzOCnCpwdQraaze+ihgBLuUEgwIzo
+         jDTQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795708220; x=1796313020;
+        d=1e100.net; s=20260707; t=1795710678; x=1796315478;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=gIwZcK4QOl3Mm5lzx8mQRAanf4vTLDTmM49asUT7xVU=;
-        b=NS5/vZsaGesNHg4FDzBtjWwazCstwzYbKsqsS5UKGiXzwPVL0YeHvT/oufanvSJy7d
-         C1ck/v8irMfdrBOeLbOoKRN2FuXRdqPxcVjSQRJTl+zmayNhpwErBQzK6/oIRBZsWewA
-         sb+WKRHS5p6s1pPvURNKAWI+3ZADuSWuIjJWvv4Dt2Qv8ZDqeMc4oOpTUUWzIBxKDfMG
-         GsKvdqZ5RtsfTvqMX8+3Lyw1ztHswtcoJf1EXokVkO7Pr5dHrXSV054E9Uaa6YLxhrxA
-         UCgYnWvVjgVCtDqMPvqCzjRC6rfgQzi0yvaviBEsRyiAr/aigrXTdMUxyazRpjp8ihUN
-         9kIA==
-X-Forwarded-Encrypted: i=1; AL+hErHVeKdHfkLeEjCXSIKFQ5zHgTEtf1Rcjz63KoLvjrrncxG9do1IGqSSx/xYVOiMJHZRDIGxoLpbQos=@vger.kernel.org
-X-Gm-Message-State: APuU4Z8Ujz85XjBYsXWoZZy8ApC4PnCWdwj1H5u68FV4mzUvHC0DhoMx
-	fGzQ0i4XHP1cJ19RZidCG3mE2DWDA3hvj12Hu1CZFPpMd4R19ctezqlM3zKg9iiSgc1weN+LiuN
-	XObYP7ac4NYBCh7SnlNI/w9OlgJFijG9apqn/SkjN2USs4r+LG1pGvOhHdGgWZRPZf2By4/xYxb
-	BMIIgQrpAafwfYqhWqTR5KDJwvvrcVGaNJzSwogQ==
-X-Gm-Gg: AZFdTZdVpjEZUhfwKzDZrj7lD74lyAXazfPycHlE50q37e8YLbKJB9E/9V8Ugw1v/X7
-	GlvbrPe1N7iuOfYoC8mHBj6Ts6DQfcURWP/BsIYnwlBdIl0SFzqzroUzHVJXDSXjgUaCR3GEG4w
-	bLlnVTKdeNgELnNWEpnZf4OL0ACPVH5B6Zo3Pv/avAOfuioKm/sNrF7grg3w==
-X-Received: by 2002:a17:903:198d:b0:2f0:39c6:8ee5 with SMTP id d9443c01a7336-2f03f27787fmr233290485ad.52.1795708219877;
-        Thu, 26 Nov 2026 07:50:19 -0800 (PST)
-X-Received: by 2002:a17:903:198d:b0:2f0:39c6:8ee5 with SMTP id
- d9443c01a7336-2f03f27787fmr233290095ad.52.1795708219369; Thu, 26 Nov 2026
- 07:50:19 -0800 (PST)
+        bh=pmn0FtXxLKA2R9aU92JYzz/Y8uvInEGF5Y8VG+PgdjI=;
+        b=Ddh6iDks1VJCta5jFbO41YzbPtARrzSM8Gu4xSw6xdYc0wCyOPzT67jSLTfngKbH/3
+         9YlZcanG75/FAzclPHfIJE+EN/kvghGZzGhSpnKoIAZ0eszslNMs2lOgx0NgGoL85e+Y
+         Cp4AUB/KrBThzdMRxKxpXdvHgxPEpdgO2PkmY3g2S9yNDXzSDvyn0pA001zcnW1qvjnw
+         PgIWvjA8akkmQv8JGEBbkTk5gYIaMDkJ/Bmr4ChQjap2but4H0Ab3ng1pTCfBFDVXmxJ
+         4FjfxTdMjvPg+V1G+3kU6Xlnq7EdSboE2rXPVJd0uGsYeF15fzAiauQmJDDmQjQhueoa
+         uUqA==
+X-Forwarded-Encrypted: i=1; AL+hErF2cFEMNfCDl8mH6PGKdmnaIbHXfF9Z1Ik9SoKkI9/NiJbsDjhYXzcDocXbVXjIDyBoEqf+Frcc+bE=@vger.kernel.org
+X-Gm-Message-State: APuU4Z+UP9B0PnmJ7ZSZx+IcwXRzuFTUleC0q40VJ9AYhpxqcJsoUpNt
+	rO/oUVc5JyKP3NxJSZxMg53KrEOkqP9uswvKjHSzQf/2mkSOxcYHztfxfPj90s/RiV1gZjO8KIt
+	wg/GqHcUISELbqZy1MBaoe3pBFeJxm8HZTwBNpIh6JKt+VxEHLdm0rzKmT/wz/rktabProSYKjV
+	30jAISxAG4xB0wuu/Ly0v3HTKp+4aozOnnMK+cjA==
+X-Gm-Gg: AZFdTZevQQrs8FovkMmZ5AruR+YXF9P+m/iddbw9xeY7udORUepMHTbYkYbqy1WT7k4
+	o3A/PiJYpmucRYf0W/yIop0DrbPLXWo//OmS6F6YA3ftKjru5BfkNi8GjdhuiszprcQ/E09x0L9
+	IHODyGULG8YoIUMrAj/59nDQOsH7oScl6rijK1ChUHMePeaTTPE95OFs5DlQ==
+X-Received: by 2002:a17:902:c443:b0:2e7:ff72:203f with SMTP id d9443c01a7336-2f03f1a52b5mr138232235ad.61.1795710677282;
+        Thu, 26 Nov 2026 08:31:17 -0800 (PST)
+X-Received: by 2002:a17:902:c443:b0:2e7:ff72:203f with SMTP id
+ d9443c01a7336-2f03f1a52b5mr138231995ad.61.1795710676661; Thu, 26 Nov 2026
+ 08:31:16 -0800 (PST)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -127,139 +127,119 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <1789975099-157594-1-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1789975099-157594-1-git-send-email-shawn.lin@rock-chips.com>
+References: <20261103185344752TLpWp9rb9fhJW6zaJT5TX@zte.com.cn>
+In-Reply-To: <20261103185344752TLpWp9rb9fhJW6zaJT5TX@zte.com.cn>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Thu, 26 Nov 2026 16:50:07 +0100
-X-Gm-Features: Aa3M54r82nwhTksPYmbjufapjUhnrkNXbvAYflMCCiHkeElDYkLBJ88_lHxNLsg
-Message-ID: <CAPx+jO8UC-6be9-24eXgWdrFnm047niARcNR2CaOjm0jP_CEHQ@mail.gmail.com>
-Subject: Re: [PATCH v2 0/3] Add SDIO userspace passthrough support
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@linux.dev>
+Date: Thu, 26 Nov 2026 17:31:04 +0100
+X-Gm-Features: Aa3M54oMAs16SdpNYGtEr9578Sq-hyWptfNulukrcUuGONM4R1Hmxei-ZXSrmF4
+Message-ID: <CAPx+jO8n=0mY7ASqA1Be-sVgsCw8ZaTf2F-Jne9hMHwmJCrvsA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: block: check mmc_blk_get() in the sysfs callbacks
+To: shao.mingyin@zte.com.cn
+Cc: ulfh@kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Authority-Analysis: v=2.4 cv=T4oZ3PKQ c=1 sm=1 tr=0 ts=6b08553d cx=c_pps
- a=cmESyDAEBpBGqyK7t0alAg==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTI2MDA2NCBTYWx0ZWRfX+wepsiEd5LGf
+ 88qAr9aPWrh4++/9FYeAWRPrKqyGHKyKp8wnNGcgoDlQsBH8Vzo+hnATwJvugVfVGu+FycpUggO
+ NsBMWPGKfnpuImJAi5a4zXimEoKXt9Q=
+X-Proofpoint-GUID: YKNaqumt4G4GrOxg_yF-yOa-rbZPLlF-
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTI2MDA2NCBTYWx0ZWRfXwAvUAyx5IW2d
+ ssdCe/hAy+LwqMCEBflIf4tyS7FTb3gS5BrkAhzeOCDg9KYKMkV1RuAamp7DeKGe1qSp9b17p5q
+ xBV0+WBAZQvgbAvRvFX5eDJQ5eyQkYJknH+mtcQ0XcswreMn1sHFfpb/hmJ/cAwB5Dy7DrebsTU
+ xvcvbUgnuwmD8U7i1bAeiAeGLrGNEsRUd4tvDlWzsFBwrCspEqLdQTWRPcKQLkcmj4PDrKXUxvw
+ 2n0Kioa4hcxjl8tdtCVt/H8tLxj08eNwjkTn/OUuy4ps2X0uMH/upf+NlgsZql2qJHcLVCK1IZO
+ HJyUBMMkK8saeIAm9pjPpGYrKnjo0xr60BDzvtdePye5dWNRjjybFB+nLqqxNHm2FxEyhbOUuco
+ pyf2VvjjAWHuHosGUUB2koE5LKTzvjPaHteMfnVu9EXZznX0gnN+FnTNv1pOD5rQHGDl23noOzJ
+ vRCRrPLsuyEZ1B5xfCg==
+X-Proofpoint-ORIG-GUID: YKNaqumt4G4GrOxg_yF-yOa-rbZPLlF-
+X-Authority-Analysis: v=2.4 cv=ePeGH3p1 c=1 sm=1 tr=0 ts=6b085ed6 cx=c_pps
+ a=MTSHoo12Qbhz2p7MsH1ifg==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=ZpdpYltYx_vBUK5n70dp:22 a=s8YR1HE3AAAA:8 a=4V_M4x3YfzuPUH-Wr70A:9
- a=QEXdDO2ut3YA:10 a=1OuFwYUASf3TG4hYMiVC:22 a=jGH_LyMDp9YhSvY-UuyI:22
-X-Proofpoint-ORIG-GUID: -xQ63oz1QNvuRHqLTc-q9KuvxUkSQzYZ
-X-Proofpoint-GUID: -xQ63oz1QNvuRHqLTc-q9KuvxUkSQzYZ
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTI2MDA2MSBTYWx0ZWRfX+DzNidQpX9lN
- R0kMtgrnAaKhGkve+spyQcGIxQm8R3Ggb/oQRswRXogmqEKwzX7eN74Ck4zDF5swTgKBLZZ2kcp
- XUFlaOhVyq569e990eVRhmUNIgvASfa5HWwqgjPDNjtOS3RgAHrV7YnG9oSJR9V51bwzvcYJZfv
- mQEWZA9Mp0dCyMRvVJKiElaEO335lTjWg2N/ZfKh96uW4odsoSEAyhKFAIF6xy9d9a9dmtES9w7
- wirI3j/mJOTWianXGqL9fruSbXeZh2sKEgLO6/xHnQaBOeck93E7l/n+D0PrreIMJpDYwp/pYYv
- 1z2/ZAnii1jguBm5M+kioDdMZkTrT3+I4FkZ2bos6cEKwY5zzs2nafaDdpKv3XNWEA108C2ewMR
- cWyHQ8Dw3McYg6XSj78Cko3GHZTddvcWC1CRB/B5aY4Jc4F8ZXdnL/uvwvBwBsChF58h83Wp7H1
- sOTHyCEY4V02K65Yvuw==
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMTI2MDA2MSBTYWx0ZWRfX0u9AAZy0sPkF
- 2vpHX8ZfjXzKFGzR8l3pDikKGHpO12Wez8hiA0fFSBMADYFa1WGqnWkJAJPm9p8sYrzDyZKzTUN
- dtpubC8uH59vKX9mrRMWXPxwdWNvlBE=
+ a=rJkE3RaqiGZ5pbrm-msn:22 a=1RTuLK3dAAAA:8 a=yHZN7Se_Px891H_nw7kA:9
+ a=QEXdDO2ut3YA:10 a=GvdueXVYPmCkWapjIL-Q:22 a=kRpfLKi8w9umh8uBmg1i:22
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
- definitions=2026-11-26_03,2026-11-26_02,2025-10-01_01
+ definitions=2026-11-26_04,2026-11-26_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- clxscore=1015 priorityscore=1501 spamscore=0 suspectscore=0 phishscore=0
- lowpriorityscore=0 bulkscore=0 malwarescore=0 impostorscore=0 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611260061
+ priorityscore=1501 suspectscore=0 clxscore=1015 adultscore=0
+ lowpriorityscore=0 bulkscore=0 phishscore=0 malwarescore=0 spamscore=0
+ impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2611040001
+ definitions=main-2611260064
 
-On Mon, Sep 21, 2026 at 9:18=E2=80=AFAM Shawn Lin <shawn.lin@rock-chips.com=
-> wrote:
+On Tue, Nov 3, 2026 at 11:54=E2=80=AFAM <shao.mingyin@zte.com.cn> wrote:
 >
+> power_ro_lock_show(), power_ro_lock_store(), force_ro_show() and
+> force_ro_store() dereference the result of mmc_blk_get() without checking
+> it.  mmc_blk_get() uses kref_get_unless_zero() and returns NULL once
+> mmc_blk_kref_release() has run; an already open sysfs attribute can still
+> invoke these callbacks after del_gendisk(), for example.
 >
-> SDIO cards are normally driven by function drivers (brcmfmac,
-> mwifiex, rtw88_8723bs, ...), but bring-up, debugging and factory
-> test frequently need to poke the SDIO register space directly:
-> CCCR/FBR in function 0, or vendor registers before any function
-> driver is bound, and some deployments, notably lightweight IoT
-> boards, want to handle the SDIO function entirely from userspace.
-> Today the only way is to write a tiny kernel driver per device.
+> Other entry points in this file (mmc_blk_ioctl(),
+> mmc_blk_alternative_gpt_sector()) already handle a NULL return.  Do the
+> same here.
 
-My sincere apologies for the huge delay in reviewing this.
-
-I am simply not convinced that it's a good idea to allow SDIO function
-drivers to be implemented in user space. My concern doesn't only cover
-various new use cases this would introduce, but also about bringing
-another ABI to the MMC/SD/SDIO subsystem. And to me, it looks like for
-no good reason.
-
-However, in regards to debugging, bringup and similar, yes, we may
-have some pieces missing. To address these problems, I would rather
-suggest that we look for in-kernel solutions and if it turns out that
-we need some new SDIO helpers, I am certainly open to discuss them.
+How did you reproduce this? Did you verify this on HW?
 
 >
-> So this series adds raw userspace access to the SDIO register
-> space as well a small reference client. Meanwhile, adding a new
-> documentation about how to write a proper SDIO function driver,
-> because I have recently been working on SDIO function drivers
-> and kept referring to the existing drivers for guidance. It turns
-> out that the knowledge is scattered and there is no unified document
-> describing how an SDIO function driver is supposed to be written,
-> despite the MMC core having clear expectations about how the APIs
-> are used.
->
-> In particular, the interrupt model has many pitfalls:
-> sdio_claim_irq()/sdio_release_irq() must be called with the host
-> claimed, the handler runs with the host already claimed and must
-> not sleep or claim the bus itself, and sdio_release_irq() must be
-> called from ->remove() because it is the last chance before the
-> core removes the function devices from mmc_remove_host(). Recent
-> fixes around the SDIO IRQ work and host removal and the discussions
-> on the mailing list showed how easily these contracts get broken.
->
-> Also worth documenting is the buffer requirement of the CMD53 based
-> helpers: the core builds a scatterlist directly from the caller's
-> buffer and the host driver maps it for DMA, so vmalloc() or stack
-> allocated buffers are not acceptable, while the CMD52 byte accessors
-> are safe with stack buffers.
-
-Documentation for SDIO functional drivers would be really great to
-have! Thank you for looking into this!
-
->
-> Changes-in-v2:
-> - drop RFC as I don't include mmc-utils to be sdio usersapce tool
-> - add sdio doc
->
-> Shawn Lin (3):
->   mmc: core: Add SDIO userspace passthrough character device
->   tools/sdio: add sdio-raw userspace client
->   docs: mmc: add introduction to writing SDIO function drivers
->
->  Documentation/driver-api/mmc/index.rst             |   1 +
->  .../driver-api/mmc/sdio-function-drivers.rst       | 211 ++++++
->  MAINTAINERS                                        |   2 +
->  drivers/mmc/Kconfig                                |  11 +
->  drivers/mmc/core/Makefile                          |   1 +
->  drivers/mmc/core/sdio_bus.c                        |  12 +-
->  drivers/mmc/core/sdio_cdev.c                       | 189 ++++++
->  drivers/mmc/core/sdio_cdev.h                       |  21 +
->  include/linux/mmc/sdio_func.h                      |   4 +
->  include/uapi/linux/mmc/sdio_ioctl.h                |  48 ++
->  tools/Makefile                                     |  14 +-
->  tools/sdio/Build                                   |   1 +
->  tools/sdio/Makefile                                |  66 ++
->  tools/sdio/gen-sdio-ids.sh                         |  59 ++
->  tools/sdio/sdio-raw.c                              | 714 +++++++++++++++=
-++++++
->  15 files changed, 1346 insertions(+), 8 deletions(-)
->  create mode 100644 Documentation/driver-api/mmc/sdio-function-drivers.rs=
-t
->  create mode 100644 drivers/mmc/core/sdio_cdev.c
->  create mode 100644 drivers/mmc/core/sdio_cdev.h
->  create mode 100644 include/uapi/linux/mmc/sdio_ioctl.h
->  create mode 100644 tools/sdio/Build
->  create mode 100644 tools/sdio/Makefile
->  create mode 100644 tools/sdio/gen-sdio-ids.sh
->  create mode 100644 tools/sdio/sdio-raw.c
->
-> --
-> 2.7.4
->
+> Fixes: add710eaa886 ("mmc: boot partition ro lock support")
+> Signed-off-by: Shao Mingyin <shao.mingyin@zte.com.cn>
 
 Kind regards
 Uffe
+
+> ---
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index a02bb2fee874..a1e942435575 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -235,9 +235,14 @@ static ssize_t power_ro_lock_show(struct device *dev=
+,
+>  {
+>         int ret;
+>         struct mmc_blk_data *md =3D mmc_blk_get(dev_to_disk(dev));
+> -       struct mmc_card *card =3D md->queue.card;
+> +       struct mmc_card *card;
+>         int locked =3D 0;
+>
+> +       if (!md)
+> +               return -EINVAL;
+> +
+> +       card =3D md->queue.card;
+> +
+>         if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PERM_WP_EN)
+>                 locked =3D 2;
+>         else if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PWR_WP_EN=
+)
+> @@ -266,6 +271,9 @@ static ssize_t power_ro_lock_store(struct device *dev=
+,
+>                 return count;
+>
+>         md =3D mmc_blk_get(dev_to_disk(dev));
+> +       if (!md)
+> +               return -EINVAL;
+> +
+>         mq =3D &md->queue;
+>
+>         /* Dispatch locking to the block layer */
+> @@ -305,6 +313,9 @@ static ssize_t force_ro_show(struct device *dev, stru=
+ct device_attribute *attr,
+>         int ret;
+>         struct mmc_blk_data *md =3D mmc_blk_get(dev_to_disk(dev));
+>
+> +       if (!md)
+> +               return -EINVAL;
+> +
+>         ret =3D sysfs_emit(buf, "%d\n",
+>                          get_disk_ro(dev_to_disk(dev)) ^
+>                          md->read_only);
+> @@ -319,6 +330,9 @@ static ssize_t force_ro_store(struct device *dev, str=
+uct device_attribute *attr,
+>         struct mmc_blk_data *md =3D mmc_blk_get(dev_to_disk(dev));
+>         unsigned long set;
+>
+> +       if (!md)
+> +               return -EINVAL;
+> +
+>         if (kstrtoul(buf, 0, &set)) {
+>                 ret =3D -EINVAL;
+>                 goto out;
