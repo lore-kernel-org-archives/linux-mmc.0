@@ -1,123 +1,123 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795790628;
-	b=mJo8UDmGquSOisAEKucUcshYWZQYY93+H3S6kiVzqXqcFxx0eejVVKr5jPqYXXsJP41Z
-	 7SKdp54D2mnh4kEgWlyk92tZRnaZ17jYoVRBzpsg26JtQv6tSjZ+rxaNy18RVstJaz6/Q
-	 RcvjDP0Dm9vJQyAqhbTXX91raZcXsB3Ct0wV/HuaIYq1rfxZcTyzPPHMA9KAP5EHcvlej
-	 86RdvEfHsAnB5vSbRQh/NTaI0svKkQjj1lYMmAO1jsSu1hD9N3zLO4g4Dzen1/6YDfKjc
-	 Y8D6ggm3QrS4+JdTrA0Ee1B+Is5X+nJgnZpFB8X9pXcmbUHxRMFrWHThBGaSTqYab5Q==
+	t=1795790633;
+	b=BLlB5gEYFbGsL/E5SnDnY9F/yQIdxirLIb30NcXZHQhzTfmc3LEqnjWMD1dJl8mgmHv6
+	 Jc9qu2pXQNOOmZogV4RE/fpT2cT7yhztK2yagub49KGrUsOOmSvswAX08isfvXQvMVQJo
+	 98UxWn7gJirhrFzAjCfSS4S573gA6MYzw5ilbr4X7mNSrL4XUihFj6RYTK7etnuTlCAzZ
+	 +/6wfuctDnusL3Al8T8Lpmm/lfiiw79fgFtdjKWGoC7dgQ36k3P68JU53Z91NTcc/6h9k
+	 AB1ofyLJFMaf4wc1LRZ0XA9lvoFkcdSigfTAVcwKsdFcq58Dl3F6x0UkqaPx6JLnYSA==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795790628;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795790633;
 	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
 	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
 	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
-	 Cc:Content-Type:Content-Transfer-Encoding:X-Proofpoint-GUID:
-	 X-Proofpoint-ORIG-GUID:X-Authority-Analysis:X-Proofpoint-Spam-Info:
+	 Cc:Content-Type:Content-Transfer-Encoding:X-Proofpoint-Spam-Info:
+	 X-Proofpoint-ORIG-GUID:X-Proofpoint-GUID:X-Authority-Analysis:
 	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-Virus-Version:
 	 X-Proofpoint-Spam-Details;
-	bh=S1GibcSi8ppb2aibwn9jnQWyPdpPCwtJ3CDbi0G70gY=;
-	b=PiCCLGr5hRq2A0j1lTpDenKylweYBM2wkZAuyZuECck0au5ghzj7Ph15omV66Crh9Znp
-	 2mbth3wV60hOKH2LVW7cVNYxsbqSwfsczDkwbPOHiU8X/isYfZXxcw/5E9TTBSnGX1aQM
-	 YF1vuga5L0iy+kZmRmMu8ke2dzsHnzotkvrI7jCQCeVsF0qib3qGzDFsNFJKo0+28W2sG
-	 kB44L9iCYg48U45B6i8Gx3TU61WEFEgZj2CWdphemxY1R98FojxrlUJ2zS3vZ4aoquJ1J
-	 d62SKNYx9WWg5xbfeat6tws4Q03cpfF7ncv+k8Ji5BTv81dKx0+PcL1cSmCHNX2iR2w==
+	bh=Qov/vWJdi933tqkTpBJGy3o9z0sNW71HS63CMgKtbjc=;
+	b=iIcXONmpk5hIukDfQpxqr2JrfgEvOpoiCUq3e74T7R0lF6xEUmsbl5NF2omsv5irWdVm
+	 +FvIuYhyuhPsBPOW3+gUDiAVGGGJyC4ghitgIP/aW7ovGbkA2s6CjB3qG4zIyiJpDKSG1
+	 R1sapB+Ci5QYBW3d17IHd5WGegp1pBHCV+vcZiR3aVd+XgJ5mHMhCm0GAIlPfJFbUe7Uv
+	 SLcR3bviDr5jrdyakSHAy289QJb41SLuUdEB2ah7LmIpDt4tH4zX3yO8hbGwL+tipYMmv
+	 +Cd34GN+2re2ah+zqkpfQezNKSBryTZrF2a/V7KKMRDl0mD/A5rrbelAk9pLhnAfP+A==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=oss.qualcomm.com;
 	spf=pass smtp.mailfrom=oss.qualcomm.com;
-	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=p1N9tj7O;
-	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=iwFqb3Wk;
+	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b="gkIWz/iF";
+	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=DJuP3Gpz;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.168.131
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45E03606A338
-	for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2026 14:43:48 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 45E03606A338
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 144AC606A326
+	for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2026 14:43:52 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 144AC606A326
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=p1N9tj7O;
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=iwFqb3Wk
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6ARE1PLP1462702
-	for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2026 14:43:47 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=gkIWz/iF;
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=DJuP3Gpz
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6ARE1HOw2683919
+	for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2026 14:43:52 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	S1GibcSi8ppb2aibwn9jnQWyPdpPCwtJ3CDbi0G70gY=; b=p1N9tj7OkIZ1G7Pi
-	uCg15YplP8iczOFLY7h0M0D1C1x8hIhVCnW97uAA7laN4Sbi7jay9LIIVP12R1MC
-	fujQ2LaKRCRMFF0P7+hkBgXjloYuncHBxdizzOL1hfBYteifZqQkNAYp2LSC6qYv
-	PRI4RGBJUpWPDVG6MZHMsao43P1J2QnJ/bErQqozTORTFTPPxyj8P+l8Bw9O1lY9
-	SoZHzAf5GH4QV2UNXOnHh0JZtxTgPUtFVzoT/VyY2OZZhLw3oeoZSmJewIZo8kad
-	C9wqvRivDmdfAVTYJ6XdHMl/mILtPMl7LUg3CWuubuR6t8LdCZyZYebuusFkOrZB
-	tXDEHg==
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com [209.85.216.69])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4j6pgqme7f-1
+	Qov/vWJdi933tqkTpBJGy3o9z0sNW71HS63CMgKtbjc=; b=gkIWz/iFV3w0u/Pn
+	1OQIAUlMsQ2LDPqtpMp8pP/1Fgy9emY5ax7n9GGu0KfAYPG/e497m1kNP979ghtE
+	f1+Q4pk71MnZ50n198nswwILRMRFwALoHLj1z/cFT8F0ZeHqhLWKpzX2hm55wjto
+	9v5u0bK7RcxdvyBhtaYve0WwLiPaL8zb30OzyTS1WanN0vFHDq2yTemD03PPSEEg
+	cdupaWp4Cxyh6sTaVcc7ioDxRorYNm8y1YO1xvoIsKRSJ90Qy/UJ2NuNIE7z0yGt
+	vl4LVGpvmHNJwOdFCnrRs84lCYJYudiGxxpoBe/ag98U+Mlr0rfIue5E1AxD1H1s
+	9ciRqw==
+Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com [209.85.215.200])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4j73uhj3dk-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2026 14:43:47 +0000 (GMT)
-Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-3b3a74ee77fso5162734a91.0
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2026 06:43:47 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1795790627; cv=none;
+	for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2026 14:43:52 +0000 (GMT)
+Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-cd652c0385bso5488238a12.2
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2026 06:43:52 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1795790632; cv=none;
         d=google.com; s=arc-20260327;
-        b=sUz3ZKOdllhu8V2FPdFnqkvNm2zXLitxLq+dhq0CZfiOxJdBNdO1gKh91UuFg51uqf
-         w1m8tsX7wgu9DlL02EKinBBvTRcg13mKaT/Ir6yfmqQh9ZCVhawTUDc8Wogh0L65ZfFv
-         SwhcaMkWgaMOkSM2N/WxtlIZMq43+dLftrGod6vkSRXPr/FqIDt7y5Nn2V7hC0NBIwhk
-         svHtM0+eP3bH6jVZYJjJzdPhHy7VFOU+iLvfAeun4Ygt+rCn6rZ8GnX1n7lM6YUkDPmc
-         uowP+nx1SAxvYXAQ7cgEJOFm8xECq2JtAJx30zBuQ32S5Kbg/Mo7u5ZcYBLZl4GmPuNW
-         1fCQ==
+        b=s1ev8L3SQPipBwZjpSBQ8eQNN0pdcGPUuuoFNRhCsCJupXBfNq2lq46XO8Rm3gD4Vd
+         nYyqwq+GIkTk8BREGvduHlv9NoW1nTGzkcSLgQEgdNahTTxIG/1Ve6FkvZsAhrL9Dfqu
+         EAGpmozxndvCZPHWo5FpoEinHWHSg8VXu5X97/Wmg3x7YFKYoBy/D7PO46SmeTqoB77c
+         hVQoI05O90uNaV8WAGdSBCcjcZAQYKhWQLE9oK3X0QHuuFXC19Z0pzN1sM8ES4RNhUli
+         sn7U4qWT0QXhhm8fzRWyc83aIzAn9blcQK6SCSfoaDTKsNWKiqmfPewO8SuuJHFppwj2
+         z68Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=S1GibcSi8ppb2aibwn9jnQWyPdpPCwtJ3CDbi0G70gY=;
-        fh=WivGFdGgdFYK4V/FU8Yz55opLG2RNSm6/gqsTQx2Yn8=;
-        b=UvjvdxSsqvEripkFBOQrc987PxnL4e2FkZBMqvfqMyzqGDjnYufpVDTncV2QGAgz2y
-         FyqD9Duda47dH6mA+2z1tMd0y4tcnVOUwOp77kAaYPlY1Zb00kzeUUfxM9WJGdzYzZL6
-         bEbPO7fiaVjwI070VW/VX30+I2gvw0F7TqDgwyzCXvWEKBcJYITXU0ndbZMA4w13gpTm
-         hEOdhN8wulqVGdP/kSAbjOQFdVe9qrYvX+MDhNpVwpF6yhstmlBTgdpY+wU0NFmfeiSC
-         QBLDaGSHXGXIbS8uEQZkdYJ9lQfXSjwQmU/vRdSeJsP13R9T292ejnS9C73Racm//Obi
-         gAQQ==;
+        bh=Qov/vWJdi933tqkTpBJGy3o9z0sNW71HS63CMgKtbjc=;
+        fh=A9D7/PhCFTI79AVplrYgwc1uNLYW84vWP0Npr16mvKg=;
+        b=KNMa+V8Gl+P+BG4BO9LAkVDqrWaC94lPh5Dwg6JzjTZAe0hQgtFTS361cn99CIf1xh
+         FZHdoJ9dK9Grot3Os6PmN+akQOc5e2ikNEHfgKs6ezUdTAIn0KFkAuUaV8t0fgHv9Fm1
+         5gP+cSZRwFT2c2bG+Ff3geHf2HcJSzVVfVvHinSr1Bg59dvos2U6B4XdO4bzstFw0So2
+         5nU+LsBHdzk0ltdtRIm/0yWXesfMuFHQhUWrSwpSyjSQBuEJFsf8UeGOQLgkwF7cQjLj
+         PoRBqIkm+XAyNywpXEPRN5S7EZjCRkTRa7aOubvXUvjsz8UpUtCH8e0iC0HXvvN7W64x
+         ea0A==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1795790627; x=1796395427; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1795790632; x=1796395432; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=S1GibcSi8ppb2aibwn9jnQWyPdpPCwtJ3CDbi0G70gY=;
-        b=iwFqb3Wks/14zHk6lGmhA6yG4ZqEl7pHwwPtZCTK55plFb/uyttaDCri+gUGekPgt4
-         ueEOPyhdBwUeTLNNR3kGHc0aAIj648dDjUCXhNfP/vi5e47ueWG0TDVK8IHbXNgD5rRX
-         Ql/nkXmS/quGeWjW4fsv49P1A3ycs4c2DS78p4CgE9sRn4/lu13TIUZWU10IHxlMzTLm
-         0GfqOjOj7Hze4+Vqr4AnNWJWGFigsUgO2nDuSNTDOlOcA+kzcgHCr1lieeaLzHVMblK+
-         H2iDItm/En+c0Dj26pvD8mEEClqSht/wWFc0/dYhc1cFy/ZK0CblxwZMZwbTAVafSPBh
-         sRwg==
+        bh=Qov/vWJdi933tqkTpBJGy3o9z0sNW71HS63CMgKtbjc=;
+        b=DJuP3GpzLLJGWXbEuiGFc0HqAH9biJ4jt0aFuchD2c1iRlCFlyiOKLHGQ4WZXZTQyy
+         VT0pLrBMovd49nwun2zrMFIf8zcZxhwi+DOqPEBfiNQYDPSZ64pcL1nbkorTHHMBoPpI
+         9Ohpc60cGVCkuWgRJT/KQXeqiTzmN/uuwXVtKYyaxDiVDkXC+TEKCRo3xm6bXEh47xVa
+         bLqCyTqzuH7hwp+e3xFClcgNSf03fewsrX3136hdirnJuNXRTxKUMVvs92mdw4N4Uu6j
+         BBqRwl5ORTo9eaHoI8OwyEtlYT1kb0xRfQ64yR3De2KzTlL23lxd30uDqU0+eIPMWAWB
+         ggEQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795790627; x=1796395427;
+        d=1e100.net; s=20260707; t=1795790632; x=1796395432;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=S1GibcSi8ppb2aibwn9jnQWyPdpPCwtJ3CDbi0G70gY=;
-        b=uY0kPrsfgGMvyBVNAoK4yYDqR9qdP+fXIScay9uBtnhsDfCmgG39vJoU5TToE6sA6T
-         inqlDgGazT94sSQfP/xnxo0bCFXAl73CsNItUDvHTi53GGBirklYAzl8yufUAYE1o8jt
-         9AvDTjGn371JS1lIDZmfL6gGnWTFqjowru6RZmxA0b6HSCqwop4Fu+uGZ4wqRSUw1ug9
-         J9hKEbJvtwstY+5za4tbI8WvSZp15NB3KOISoL0vaHkJWxKZLaZXvwdTT8H46cimsJIH
-         5al/6JYV8WyW1FIlxMSh5Saq1OnxErWxdCVuGHmoiqDYC0eyr/VJcCAP05IgqqIXQpe/
-         l7Mg==
-X-Forwarded-Encrypted: i=1; AL+hErEXVt/cW3ncAd5puJdqguSXsro9ZP50VeBH7p9q0GRUNPm+jcWHmx/mRTxsmOsYxILVxNTMf6T4V+E=@vger.kernel.org
-X-Gm-Message-State: APuU4Z9pV/g7mS2lXfY3ceVk0dBuqZs/UUm8/jlQ9QPE9InSxo0cLgjn
-	3YjFR8Y1iMPtsViivwwfvgxYhchJDzEyB/exPfZi2zmORqh7pnRS3KYxT42+wTC5e0Zn2GI/3tt
-	pF7i6v1T7PF4SCDdJMxVmyUo71o66FwA+o6gct1WiUTY8ttSYiuHmkG0os2ZcxLDcTj6mg507xS
-	boBRDVp8gDmLgf9IvJIsl0tDdIh0x1IWA6G0+STA==
-X-Gm-Gg: AZFdTZdcqxAp4eZNM8ENsvUT+NKV00dnAklp7ue+OFNARWjWBgH7NwBZyZjJDyjGDDh
-	nUB/+THSkrjvu5BIee0uO6nnjOS3nQW+RqNzuh3NzP1GqfeXvHx2z4kfD2wROXBlOkv25+rZuZR
-	EQSSyq0xW0Yn2yaMrEwcaHEL8POJ5vHzP2XU7+yvrK7E7CMQboU9uspz2hEA==
-X-Received: by 2002:a17:90b:5303:b0:3b4:41a8:7850 with SMTP id 98e67ed59e1d1-3b441a87c7bmr20310198a91.6.1795790626971;
-        Fri, 27 Nov 2026 06:43:46 -0800 (PST)
-X-Received: by 2002:a17:90b:5303:b0:3b4:41a8:7850 with SMTP id
- 98e67ed59e1d1-3b441a87c7bmr20310177a91.6.1795790626540; Fri, 27 Nov 2026
- 06:43:46 -0800 (PST)
+        bh=Qov/vWJdi933tqkTpBJGy3o9z0sNW71HS63CMgKtbjc=;
+        b=BWhSxFWct9fvvREG88K2/XQJE2MYXdiukZYYP+5mE2ISFN48a48ayUOMq0kzsLsl7Y
+         LlRLMGAg41WvLmYdf1bdMiA39P9S72Cd5M+rTz/VeXgOX6pX9NBd/tL9RdgiOfEsSbXh
+         l+Taq7FMXjRHPX86oeRMmgTSERJOv19Yo7VJyklME2IvLb6A2VJ5WIsHVArUeSC9Vxup
+         Tppem/56s+YNfNo2/oPnqR5IidUUqIBG/gns1fr/CXYF9cppq9i4/uB0ttVKOXmpN2V4
+         6phgH9ugS3DDRzXBuPVzwF0EODWNz8Hcltx4hMm0wV8XCrKVbEG8APIuH3N33A1mwcdE
+         yPzQ==
+X-Forwarded-Encrypted: i=1; AL+hErHryWNlmQbVmaSzkd83dbr5RkvUZQ3yZCgltzP3XyGrOunwYJ/qcHW71C5RJQY8wQZGfmZMUUuXedc=@vger.kernel.org
+X-Gm-Message-State: APuU4Z/kjD5aUIc5R+pjDd3Sorc6CyW58JgMeTshAmC7M3NYlmxv9Rmr
+	MijiE/zYZnTri395v7Satg9AWo3cTblMS+6b7VKR7ZDu/IcIBakhH9hJ8czLWAl8DLdhhv2etC9
+	rFSoCZQkVMc4tJiOOGy8wP+MON0vTd6QjFa92h3pWHTKY4B5JPH45QfZdtsQ8fw4u7yPGc7y0ih
+	6ZxdNTsURQEUQ7zZ3sQu+j62+oKpBL8424pCjHyQ==
+X-Gm-Gg: AZFdTZe0JmbIX2xWwn7qjQQA4pHR2S2P642bzN2/NF/JIQSHvrGY8BG/VQNXBXv0Iq8
+	3ugGiKY19edgcBcXk4Fw11KqQOk3ouYuKfgZbQRYuJ+pQgVpOOGOc7MfoNTd7VrGIzomyahLdxJ
+	ZE0/3XB/DC5Yvd2Aipjt2PyHwWkIUTMJt+bAn0fzsNNMR0L9mUBwwXgoI6bw==
+X-Received: by 2002:a17:90b:288e:b0:3b3:ab75:c94f with SMTP id 98e67ed59e1d1-3b41c92a098mr23628409a91.31.1795790631634;
+        Fri, 27 Nov 2026 06:43:51 -0800 (PST)
+X-Received: by 2002:a17:90b:288e:b0:3b3:ab75:c94f with SMTP id
+ 98e67ed59e1d1-3b41c92a098mr23628367a91.31.1795790631156; Fri, 27 Nov 2026
+ 06:43:51 -0800 (PST)
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -127,104 +127,100 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261104080705.103689-1-zhuling2709@phytium.com.cn>
-In-Reply-To: <20261104080705.103689-1-zhuling2709@phytium.com.cn>
+References: <20261104091731.16500-3-fourier.thomas@gmail.com>
+In-Reply-To: <20261104091731.16500-3-fourier.thomas@gmail.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Fri, 27 Nov 2026 15:43:35 +0100
-X-Gm-Features: Aa3M54pZ3frAVHJJ2Jd1_S4cQQq7Xtfe5OZdhfiLiioy0IL2PJC7Snx3dAI1u6w
-Message-ID: <CAPx+jO9FhaDrZSvKCQHFsra44_gXBoZ5Z4Zs9ouhRLDYX43QZw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: block: Mark the end of a truncated scatterlist
-To: Zhu Ling <zhuling2709@phytium.com.cn>
-Cc: ulfh@kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        fengjun@phytium.com.cn, wangyinfeng@phytium.com.cn
+Date: Fri, 27 Nov 2026 15:43:38 +0100
+X-Gm-Features: Aa3M54pZo7FzRsU8anhwNWKc0fD1cZ6meSr9t6h0-7ZseSkfhGP3uErCsIV3UyQ
+Message-ID: <CAPx+jO_hrdy02Sz28JNt0vuPB_ACRp6Mf4HX_MtUV4eEiS80uA@mail.gmail.com>
+Subject: Re: [PATCH] memstick: ms_block: fix double free in
+ msb_ftl_initialize() error path
+To: Thomas Fourier <fourier.thomas@gmail.com>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>,
+        Ulf Hansson <ulfh@kernel.org>, Yifei Gao <gyf161023@gmail.com>,
+        Hemanth Selam <hemanth.selam@gmail.com>,
+        Maoyi Xie <maoyixie.tju@gmail.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        "open list:SONY MEMORYSTICK SUBSYSTEM" <linux-mmc@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-GUID: y-F4Vr9r0FdHuq10oclZy2EDDKl9XoSr
-X-Proofpoint-ORIG-GUID: y-F4Vr9r0FdHuq10oclZy2EDDKl9XoSr
-X-Authority-Analysis: v=2.4 cv=A7H5rKWG c=1 sm=1 tr=0 ts=6b099723 cx=c_pps
- a=vVfyC5vLCtgYJKYeQD43oA==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTI3MDA1OCBTYWx0ZWRfX0QKs7ZJtv9tW
+ RVg/nvZzLU4aw2soH7++sBuajhILT9O7Rpl5sNuvjeBen03uVyouOxF4iSTfC1OMTMQs3ae5wrC
+ B9A7Vzcmam0ckctUGExy7vRw0l1aTTo=
+X-Proofpoint-ORIG-GUID: Xmy3ya4N1F5qNFvTryyd6znX6G7VTjeB
+X-Proofpoint-GUID: Xmy3ya4N1F5qNFvTryyd6znX6G7VTjeB
+X-Authority-Analysis: v=2.4 cv=BbBNQbt2 c=1 sm=1 tr=0 ts=6b099728 cx=c_pps
+ a=oF/VQ+ItUULfLr/lQ2/icg==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=YMgV9FUhrdKAYTUUvYB2:22 a=fgrLqfBXAAAA:8 a=Pjbyl_n4pQ3aC6MkrpwA:9
- a=QEXdDO2ut3YA:10 a=rl5im9kqc5Lf4LNbBjHf:22 a=_Ge82aPy-h_wFa7gWU4u:22
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMTI3MDA1OCBTYWx0ZWRfX9gpzdNCv4iu3
- SrEDF5ziLxt88imnqFxbnRW/keQlmhDf+w64Sg0p0FZC97T6fskvjL8nU09Lamr3nUo2VCNJhPg
- cj77eGyBDVxT7U8AqQrSZyrp9m0GM/I=
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTI3MDA1OCBTYWx0ZWRfXz4MhUybtbQgk
- kZgKj9rBWKdInZNx/1e45oLRrQpbDvwxrZ3+GoCNgKQRB8CEGNUFtLAnjIVFSlMiSxru5Bixalg
- my0AE8WJO2hXbYz1+GFjWzeqdgg4W3laFH+u2dlluc80JpKQl2g0jVwNeS+D0PJChd06riDDp0E
- Wz2H70aZkbFSgueaK0GKHZPRZGPufVSYUNFtzrQ0+xuy+U1dZHw3q9WnSCzYPaOxtlpQu7UhdrY
- IuRyN35Rk1hrODrXVH1oSWa2NQ4g6SO5mM6fC/6dKNbpZviFJOg8rNRdjr1m9cA6+eHfet4kFlr
- USCRuknF4mxJxWFqure1SiKYlWorkr3ivIGK1/gSmEEoJDaaEBvk9eqYBs9/z+3k3QA1xyJmnPN
- lwsxdeCdUQHdaMl5tKMHAZyaJeQ6SuACORFge8zFyR1w5GGgyD2+gyW6Tc1kAktdfAwQoPXELTa
- ZBDONqwJ518A50Wkt4A==
+ a=Um2Pa8k9VHT-vaBCBUpS:22 a=pGLkceISAAAA:8 a=2Ahqu8p5lTGcgXNZxgEA:9
+ a=QEXdDO2ut3YA:10 a=3WC7DwWrALyhR5TkjVHa:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTI3MDA1OCBTYWx0ZWRfXyPaOAPPFnE/a
+ sQ7cn0W7yrZCa4PdP6iWW/y1AbA+YrSf/YQ0dbEbFFBCoUAtbbexj/elddkdovALrTY0fIvI/am
+ h9Gb6Xo7wFATQorvj4EiTEStqeSTCdmzwB1cswI47iUGAeNt3ktBUXRbX+wYDsCReBsuRskvE6H
+ jhZeH2ad4zrPlpZuOcUeDZWaXwo0Hh1sg3wCSkUQ9pXSlcnG+TlHrEkKcg8wKUEFDqZIn7UR1NG
+ tU4K2eSZZTjWNVa0dxLfurX+0dCvEJN5WXJ8XdNtaSqmRAQ9MJMPtChV0ksFstgevrCelXo4zWq
+ Fbm48BLV9W2Qh/XVD66oIj36wYDDdguH42PGoUYHdXDKIAo/0Yxak9nx+cRXmqWnhyRIkstjF+u
+ ZkZ/lNJTviKn9i5HJX0wtNSv2GV1PCqhQk6ZyACWKe63yRxJXmiVYkrxsGg3YbBlYovavmjW32p
+ UKEYH8BMXndgfqD+mwA==
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
  definitions=2026-11-27_02,2026-11-27_03,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 suspectscore=0 lowpriorityscore=0 clxscore=1015 bulkscore=0
- priorityscore=1501 malwarescore=0 phishscore=0 spamscore=0 adultscore=0
+ clxscore=1015 suspectscore=0 lowpriorityscore=0 bulkscore=0 adultscore=0
+ priorityscore=1501 phishscore=0 spamscore=0 impostorscore=0 malwarescore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
  reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611270058
 
-On Wed, Nov 4, 2026 at 9:07=E2=80=AFAM Zhu Ling <zhuling2709@phytium.com.cn=
-> wrote:
+On Wed, Nov 4, 2026 at 10:19=E2=80=AFAM Thomas Fourier <fourier.thomas@gmai=
+l.com> wrote:
 >
-> mmc_blk_data_prep() maps the remaining block request before trimming the
-> scatterlist to the size of the current transfer, for example during
-> single-block error recovery.
+> When one of the allocations in msb_ftl_initialize() fails, the function
+> frees msb->used_blocks_bitmap, msb->erased_blocks_bitmap and
+> msb->lba_to_pba_table but leaves the pointers set. The caller
+> msb_init_card() fails and both of its callers (msb_probe() and
+> msb_resume()) call msb_data_clear(), which frees the same three pointers
+> again.
 >
-> When the transfer needs fewer SG entries, the trimming updates sg_len and
-> the length of the final retained entry but leaves SG_END on the original
-> last entry. A host calling sg_last(data->sg, data->sg_len) on this list
-> will hit its end-marker assertion.
+> Do not free them in msb_ftl_initialize().
 >
-> This assertion was reported during read recovery with a Phytium host
-> driver in a vendor Linux 6.6 kernel. The same trimming logic is present i=
-n
-> mainline.
+> This bug was found statically and is theoretical.
 >
-> Mark the final retained entry as the end of the scatterlist. Subsequent
-> blk_rq_map_sg() calls can still extend the list: blk_next_sg() clears
-> premature end markers before advancing to the next entry.
->
-> Fixes: 6a79e391df29 ("mmc_block: ensure all sectors that do not have erro=
-rs are read")
-> Signed-off-by: Zhu Ling <zhuling2709@phytium.com.cn>
+> Signed-off-by: Thomas Fourier <fourier.thomas@gmail.com>
+> Fixes: 0ab30494bc4f ("memstick: add support for legacy memorysticks")
 
-I am surprised that this hasn't been reported before, but the patch
-looks correct to me. So applied for fixes and by adding a stable tag,
-thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
-> 1. I could not find an MMC-specific statement explicitly permitting an
->    unterminated SG prefix. Feedback from MMC maintainers on this
->    interpretation would be appreciated.
+>  drivers/memstick/core/ms_block.c | 6 +-----
+>  1 file changed, 1 insertion(+), 5 deletions(-)
 >
-> 2. bcm2835_prepare_dma() checks sg_is_last() before dma_map_sg().
->    No failure has been reproduced with that driver.
+> diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_=
+block.c
+> index cd4ff1b79a6d..26a04cecd94b 100644
+> --- a/drivers/memstick/core/ms_block.c
+> +++ b/drivers/memstick/core/ms_block.c
+> @@ -1351,12 +1351,8 @@ static int msb_ftl_initialize(struct msb_data *msb=
+)
+>                               GFP_KERNEL);
 >
-> 3. A userspace metadata reproducer triggers the sg_last() assertion with
->    the original trimming loop. With this change, 120 flat-SG cases and
->    36 chained-SG cases pass, including truncation boundaries and rebuildi=
-ng
->    a longer list.
+>         if (!msb->used_blocks_bitmap || !msb->lba_to_pba_table ||
+> -                                               !msb->erased_blocks_bitma=
+p) {
+> -               bitmap_free(msb->used_blocks_bitmap);
+> -               bitmap_free(msb->erased_blocks_bitmap);
+> -               kfree(msb->lba_to_pba_table);
+> +                                               !msb->erased_blocks_bitma=
+p)
+>                 return -ENOMEM;
+> -       }
 >
->  drivers/mmc/core/block.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1506,6 +1506,7 @@
->                         data_size -=3D sg->length;
->                         if (data_size <=3D 0) {
->                                 sg->length +=3D data_size;
-> +                               sg_mark_end(sg);
->                                 i++;
->                                 break;
->                         }
+>         for (i =3D 0; i < msb->zone_count; i++)
+>                 msb->free_block_count[i] =3D MS_BLOCKS_IN_ZONE;
+> --
+> 2.53.0
 >
