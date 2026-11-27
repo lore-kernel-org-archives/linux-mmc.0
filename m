@@ -1,79 +1,79 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
 	t=1795774429;
-	b=DNSOlxHGbB/hQJ68Y1XzlWAtvC8JyVK9LLgf1ChC4yfPx0n6t11IY+zumQs+tujh0vla
-	 JTcy/QZOSzYKnjVfHkLV3F3TU0zxANZUahpw2IAr/1Mr8m9QhYoVPb3902i9nLmLtZesn
-	 rGnh6d+FN89gDfStTvrHkhYsoV4KQWXSfrxNhFHV8xUY6O1X8+R58VAakxhwBS7JvVKcV
-	 0WCfpfHL1ddQD6Sh6Ez6gyusa4933eDRAQiI+MZyhb6gBHF7Vz8o/trM1J8gFtaUXWh+M
-	 35/LQ/LWZzeUkR316aAyTlh87szLmwpLeZ+FyNrtSCRbtFiv6MreHZPOe115hkyaOTA==
+	b=EXllbAQKdRrCHJZAN0TBK+Bi13rbmuvSkQpBw92/v1nE7Uny47QF6vNCbfIcanfjpxAF
+	 8Aag7xwDCB4JNtu/zOo+JsEOQFY6uw1fnFa35R6glSGkkEOsQdHzVc1UI7Xstt3DtOT1k
+	 ZvJcGHKny3BBHlE0mqeXqkKJGiEj8g8tkB/rJXFuVB0MWJciPtOxOIxE+HQlM4GTaZao5
+	 uxavtDBogOV7Orq/MIV871H4QkRKknOU/PySYoIVFR/pm2k44LPZ4PvBFsJjOl/+xjpW+
+	 vImHSHPQYx2wFBxHMNucLatUfA2t3SeHUa4wPtS4gIkw7ZLG3Z2c3uE1WjFPE5mgByQ==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1795774429;
 	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
 	 Content-Type:Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
 	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
 	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=otKhYi7f1KYAID09Ba2fOl2QMPjPmlYRMKc9qtkUFAc=;
-	b=WpuUKQ98cgSnIO44IDHHTm20pIRRzSFZIYqzyIJBbBShh9HbucoQFgAtW5h6ArkluSNn
-	 IXfFyYSrWKDWdVG9rrFqTOfmD6HMjvPJeo1mNaJQiTAAu2LRZrv4Y+EUC0nFSJJi2xkWv
-	 mHwBp6Ker1TovENCbsqvz2f0xBsv2s8JQl7KIUE3LrEyAQYqwUp4InMVFGy05sKF384Hp
-	 USb2loqU6djUdUSCTp3XlIHjaJrD6cMNrLsWhBDuOt3ACOSjlPB9p/MMiY4NlmCnm856z
-	 mt7pWjO6WyfIwNcbDn9c+Bx/lYCgEH0IW4HVlEFtkixhQXCKe+CyTuY+QZD1SYuTrNQ==
+	bh=YULJ69UgB1AzAeC8n0qnr6OGMirEd2PzUnNarHgu9cQ=;
+	b=Vj2lRel26d6W6tecVYDWcixhey4gDjuK2OxoeCU7PsMK1+5lpMKu/EvUQ1DT6vy3ZiEK
+	 DFVfxR2PohldEAmRu3BGgsvhnnSceHDpYa0fXwXFc8LXrKimgt8WR/6Cvq07bUbPlfk5h
+	 7O3Tjm05+NRhgkA26fgkrEkmbaQj+XvAdBnx+P+ONW34/xan2D0fWZasJYY5s6XnE3njW
+	 fLaKs1Ls8U18ag4BpmhG1FVPutSaZ/QJ25r8rzs1LzzOAfRAbdo9EIIKsaS8yFSWAZ0bi
+	 NM+Vqno30LZhRrjauZRIMfedzHdoNWQM/VUjzKJchA5UjHjDaDwBNuWJaL/ADL8Yuiw==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=NNikTaDT;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Ua0vyRCe;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A2D860A5BD4;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A2AC60A5BD3;
 	Fri, 27 Nov 2026 10:13:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=NNikTaDT
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Ua0vyRCe
 Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
 ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
 	t=1795774429;
-	b=fzgZecten4ibPBo/aynIrSKM+ZVAfZ98x5MkEXrlzn2Jz1mv+FBoQAy1Eg/I3MIl3GUZ
-	 MZDvUsVIOgYEAWDr9HoSZ33JH0oytq9PnkBN7TvfTLmjFnDImlPR/4UPPYVYHICgKCVdF
-	 GzKlyGaWjTsmPvq8Z8+flFS+DPyhvSa9S9PRBTywXlX57FT96NzBsHATgeDS/oo/nHQoR
-	 llSDw+h14Gx6bybxwA/XtFM1mIV4nxNFsxID6zzCVQKhIrBhsy7HbveIcfaAdvAIJeSW5
-	 NLbBcd+9y0cLJE8/+PYAkEI4c80Auv5Zpsz8SwcHPBXErxKrw0fsgD7A8yX6DJVDVEg==
+	b=UqOf+Z1libajZn1L2lgIhZJZ7Z0NWCMIK7/rfoD6RHErLTTLhaFjAQX6f6wPS1Q3PgVN
+	 E/Pt2GRGiM9pyX37eRYxnw3uTAxTb0IjjRnPVoLvLUORP1ABsl0F0T3muTwzQsePZw5Nc
+	 g9845EOnAHXi5RiWzEQYv06+4g+jQkLfudFcAQpqdYaoVGkSfmbQ7wEyAbfRYBB3sUjZ3
+	 o1fjERiUg8i3cZjztK68MDmm4NY+X9+v1eiWfa8Er15fJ4F+CecfWwadTgUsvMlFGolJK
+	 z1YZwh55UOCFnEjWLnbf5o3Rv6PYjBpjIERuvwjJvK3VDIu/HeQJJBSJOTZPoGpwX4g==
 ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
 	c=relaxed/relaxed; t=1795774429;
 	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
 	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
 	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
 	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=otKhYi7f1KYAID09Ba2fOl2QMPjPmlYRMKc9qtkUFAc=;
-	b=ZviHf+5kM8fVWavdipadI9bVtvreO91qf4UEnJ0r6badbrn99glCqKBJ5D7pVnb8yySM
-	 s9V2x4EDrC7uDTu0NVEoZpLTJl2idkrqGP2whK8rwvhri4JurtDnMYLi/npjy4VjF6nSL
-	 w64brTpavWoC7L5ZORXQpWk0OcWmNZyun+8IwOwU0ncdxrc9F5y0ocPArY5LfLxdGAyEP
-	 23lDHqWxc5uWprgv7xvVGY260tn3rpLJ0+iKAGnFpz4k9jPeBw3FS0J/bz86Qcn8YSiAe
-	 UsHBXdt8KX0aBNc3Spf/bdkRXi6xBhzWlqmEOvNaIt61CjdEGKIZDm7CrVlFl/sdnDQ==
+	bh=YULJ69UgB1AzAeC8n0qnr6OGMirEd2PzUnNarHgu9cQ=;
+	b=An9M3vQ8ipFWLevbILCsSFhOLalbCeaLXS0PHrde+/kwG25glGGxKLs1rUzHup4yLlLd
+	 OyUZvTuj4l/6iqjCRHyq77Rs8lTspZA+lXxg0Usafn6HuruyIwIfrc29ZTMmEWeaHMQGh
+	 MdEcS/k/GahqaxLUMXV43sitRQsNhUCVKpmdMZ+BhY63nQ55g7DLb8tAR0/1FWIjmGzj+
+	 Xt/fXj75YUXvDpQ1t8EhGmJEZ51lZ7etLsAbrrAdmtF6fJLo7jFwykSVlvLTYsDG9h9WF
+	 TB2wTUeDnWh4qflE8wlJEgat9z7xazS/aThKfPxKXoGboG9TAbJdan+SEzU7gTGB2cg==
 ARC-Authentication-Results: i=1; smtp.kernel.org; 
 	arc=none smtp.remote-ip=100.80.115.77
 Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id D8C6F1F00A1E;
+	by smtp.kernel.org (Postfix) with ESMTPS id 88CC81F00932;
 	Fri, 27 Nov 2026 10:13:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
 	s=k20260515; t=1795774429;
-	bh=otKhYi7f1KYAID09Ba2fOl2QMPjPmlYRMKc9qtkUFAc=;
+	bh=YULJ69UgB1AzAeC8n0qnr6OGMirEd2PzUnNarHgu9cQ=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To;
-	b=NNikTaDTbDLYWvJR/g7+JnhW+sLcUmyq131Z80F6e7zcjuSkfTonf7/YZbJqNqDQw
-	 2erqZpDBH1N1lP4VO7fj/JtIWRut3Ifz6xsOzrnIKr+GFDsgDbqo4zkvKDCF2iDvkX
-	 HZ9gIZAjRLxgRbAEu5NPaQx6i6hlp0grMSr06zHfezjm4nEpKL2UW5rLMO6ZzN5shc
-	 0barQEVHcIG/fUYEUxBui4r/lK3dolrgVwZfuGCDo9bPm1x1zGaQGjw7uYtrrzFIj1
-	 aJfIC+EyoD64BDtmumBg/6Xyl1jB0Siqx8crDcHZIy+MP7ZcxxFYI1GtwtG/vNQ581
-	 JdEApAB5lRzMA==
+	b=Ua0vyRCeECKpmNCDtRK7aGc0rqn6RT437hrkq5lE6MeHJxLS3f+8R0UAPV7GdLQuo
+	 P9NWhGcspymGmNoxMFOJXtr3Fmg5NE/wkynki65hvh4vD53way5Q/q9bwQu0qqNmLw
+	 PSMDAoh3aFQAqIgmTF41viFf+VRxyN3LAORtONlcZI9G9ScHlk5rqXP3tHWsBh+5l+
+	 hS2WTtOoHDnJQWtQLmmuV/TYq9+8iHv35N3QMMee/zXc/UOhNQ7FE6v6coWHi+YSuf
+	 fyp3IWMkq23ucOeYsEusfkQ5GsGaEzhWrgYGWik8UfTumyQGIGcOvWdoGlQ3I0OStK
+	 M/cim+/D6OGSQ==
 Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id 08B604B713;
-	Fri, 27 Nov 2026 10:13:23 +0000 (UTC)
+	by lkml.kernel.org (Postfix) with ESMTP id 99DF54B707;
+	Fri, 27 Nov 2026 10:13:22 +0000 (UTC)
 From: Yuugo Yoneda via B4 Relay <devnull+yogo.0917.sabu.gmail.com@kernel.org>
-Date: Fri, 27 Nov 2026 19:13:11 +0900
-Subject: [PATCH RFC v3 10/13] mmc: sdhci-at550: add SiRF AT550
- programmed-I/O host driver
+Date: Fri, 27 Nov 2026 19:13:08 +0900
+Subject: [PATCH RFC v3 07/13] dt-bindings: input: touchscreen: add SiRF
+ AT550 touchscreen
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -84,7 +84,7 @@ List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Message-Id: <20261127-at550-rfc-v1-v3-10-f2221008912b@gmail.com>
+Message-Id: <20261127-at550-rfc-v1-v3-7-f2221008912b@gmail.com>
 References: <20261127-at550-rfc-v1-v3-0-f2221008912b@gmail.com>
 In-Reply-To: <20261127-at550-rfc-v1-v3-0-f2221008912b@gmail.com>
 To: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
@@ -103,11 +103,11 @@ Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
  linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, soc@lists.linux.dev, 
  Yuugo Yoneda <yogo.0917.sabu@gmail.com>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1795774399; l=3663;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1795774399; l=2016;
  i=yogo.0917.sabu@gmail.com; s=ypl514-20261117; h=from:subject:message-id;
- bh=zroMOlHblXPaJRW0XvRKrL7RwM+BR4h2/zPNcw5DK2Y=;
- b=rlDtAeNkTvi8vm6bH4zbOW+5ouocRpS8BdSbOofqm3ULLVwiOKqC95wdHMf/QeJ7mrWACXCQ0
- xOplD8EiZW0DSOMbx6CUE9IwG/zTpRodVK8z3BP6CgjlJ1sSziFQnAw
+ bh=4WegJ7GDBstjIhoBrc38EpMdTe1TOQiXiQmdRaYl0pM=;
+ b=Bn4YPNDO1uPfagG5kMFTmqie8C77tfv0VRs+DT/W32oYLnCzfHCM+LBKkSPtYnIYwKXdmwKr1
+ qeSa2GfvV7oDNCIUD8gxvzF3cX2xkpcFwb3hBV2gLqEd2i0kVC+GBfi
 X-Developer-Key: i=yogo.0917.sabu@gmail.com; a=ed25519;
  pk=TIQ8Tk4xQrxyn8rmk3GI2f5qg/kO6g2KZm7YOOyBHeg=
 X-Endpoint-Received: by B4 Relay for
@@ -118,117 +118,73 @@ Content-Transfer-Encoding: 7bit
 
 From: Yuugo Yoneda <yogo.0917.sabu@gmail.com>
 
-Add a platform SDHCI host driver for the SiRF AT550 using programmed
-I/O, as CPU-to-controller DMA address translation is not yet validated.
-
-Use sdhci_pltfm_init() with default platform ops and
-sdhci_pltfm_remove(), leaving bus width, clock limits, and
-card-discovery constraints to the device tree.
+Document the Devicetree binding for the SiRF AT550 resistive touchscreen
+controller.
 
 Signed-off-by: Yuugo Yoneda <yogo.0917.sabu@gmail.com>
 ---
- MAINTAINERS                    |  1 +
- drivers/mmc/host/Kconfig       | 10 +++++++++
- drivers/mmc/host/Makefile      |  2 ++
- drivers/mmc/host/sdhci-at550.c | 50 ++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 63 insertions(+)
+ .../bindings/input/touchscreen/sirf,at550-ts.yaml  | 40 ++++++++++++++++++++++
+ MAINTAINERS                                        |  1 +
+ 2 files changed, 41 insertions(+)
 
+diff --git a/Documentation/devicetree/bindings/input/touchscreen/sirf,at550-ts.yaml b/Documentation/devicetree/bindings/input/touchscreen/sirf,at550-ts.yaml
+new file mode 100644
+index 000000000..6edb03afd
+--- /dev/null
++++ b/Documentation/devicetree/bindings/input/touchscreen/sirf,at550-ts.yaml
+@@ -0,0 +1,40 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/input/touchscreen/sirf,at550-ts.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: SiRF AT550 resistive touchscreen
++
++maintainers:
++  - Yuugo Yoneda <yogo.0917.sabu@gmail.com>
++
++allOf:
++  - $ref: touchscreen.yaml#
++
++properties:
++  compatible:
++    const: sirf,at550-ts
++  reg:
++    maxItems: 1
++  clocks:
++    maxItems: 1
++  interrupts:
++    maxItems: 1
++
++required:
++  - compatible
++  - reg
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    touchscreen@80120000 {
++        compatible = "sirf,at550-ts";
++        reg = <0x80120000 0x1000>;
++        touchscreen-size-x = <4096>;
++        touchscreen-size-y = <4096>;
++    };
++
++...
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 1164152dc..9d02a79a2 100644
+index d6ea4d946..e8e239c7e 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -25858,6 +25858,7 @@ F:	Documentation/devicetree/bindings/timer/sirf,at550-timer.yaml
+@@ -25851,6 +25851,7 @@ SIRF AT550 PLATFORM
+ M:	Yuugo Yoneda <yogo.0917.sabu@gmail.com>
+ S:	Odd Fixes
+ F:	Documentation/devicetree/bindings/arm/sirf,at550.yaml
++F:	Documentation/devicetree/bindings/input/touchscreen/sirf,at550-ts.yaml
+ F:	Documentation/devicetree/bindings/interrupt-controller/sirf,at550-intc.yaml
+ F:	Documentation/devicetree/bindings/timer/sirf,at550-timer.yaml
  F:	drivers/clocksource/timer-at550.c
- F:	drivers/input/touchscreen/at550-ts.c
- F:	drivers/irqchip/irq-at550.c
-+F:	drivers/mmc/host/sdhci-at550.c
- 
- SIS 190 ETHERNET DRIVER
- M:	Francois Romieu <romieu@fr.zoreil.com>
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 79bfc425e..72e7c279a 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -1125,3 +1125,13 @@ config MMC_LITEX
- 	  module will be called litex_mmc.
- 
- 	  If unsure, say N.
-+
-+config MMC_SDHCI_AT550
-+	tristate "SiRF AT550 SDHCI host"
-+	depends on MMC_SDHCI_PLTFM && OF
-+	help
-+	  Say Y to enable the AT550 removable SD host using programmed I/O.
-+	  Firmware must configure the peripheral clock and pin multiplexing.
-+	  DMA address translation is not supported by this initial driver.
-+	  Card discovery and bus frequency are configured by the device tree.
-+	  To build as a module, choose M; it will be called sdhci-at550.
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index fd043afab..6f7b0dd14 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -115,3 +115,5 @@ endif
- 
- obj-$(CONFIG_MMC_SDHCI_XENON)	+= sdhci-xenon-driver.o
- sdhci-xenon-driver-y		+= sdhci-xenon.o sdhci-xenon-phy.o
-+
-+obj-$(CONFIG_MMC_SDHCI_AT550) += sdhci-at550.o
-diff --git a/drivers/mmc/host/sdhci-at550.c b/drivers/mmc/host/sdhci-at550.c
-new file mode 100644
-index 000000000..c1f7399ad
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-at550.c
-@@ -0,0 +1,50 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/* Standard SDHCI PIO only: do not assume CPU/PCI DMA address equivalence. */
-+#include <linux/mmc/host.h>
-+#include <linux/module.h>
-+#include <linux/platform_device.h>
-+
-+#include "sdhci-pltfm.h"
-+
-+static const struct sdhci_pltfm_data at550_sdhci_data = {
-+	.quirks = SDHCI_QUIRK_BROKEN_DMA | SDHCI_QUIRK_BROKEN_ADMA,
-+	.quirks2 = SDHCI_QUIRK2_NO_1_8_V,
-+};
-+
-+static int at550_sdhci_probe(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host;
-+	int ret;
-+
-+	host = sdhci_pltfm_init(pdev, &at550_sdhci_data, 0);
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	ret = mmc_of_parse(host->mmc);
-+	if (ret)
-+		return ret;
-+
-+	sdhci_get_property(pdev);
-+
-+	return sdhci_add_host(host);
-+}
-+
-+static const struct of_device_id at550_sdhci_of_match[] = {
-+	{ .compatible = "sirf,at550-sdhci" },
-+	{ }
-+};
-+MODULE_DEVICE_TABLE(of, at550_sdhci_of_match);
-+
-+static struct platform_driver at550_sdhci_driver = {
-+	.probe = at550_sdhci_probe,
-+	.remove = sdhci_pltfm_remove,
-+	.driver = {
-+		.name = "sdhci-at550",
-+		.of_match_table = at550_sdhci_of_match,
-+		.pm = &sdhci_pltfm_pmops,
-+	},
-+};
-+module_platform_driver(at550_sdhci_driver);
-+
-+MODULE_DESCRIPTION("SiRF AT550 SDHCI PIO host");
-+MODULE_LICENSE("GPL");
 
 -- 
 2.56.1
