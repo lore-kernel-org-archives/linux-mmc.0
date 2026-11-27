@@ -1,91 +1,81 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=74.125.82.44
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=192.198.163.10
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795761359;
-	b=30WG208cXJZyTK7RWrJ2bHBao1Ntgq3qSBiGjafetKt6jjghVyJOgcAOzw38dkjZoAXk
-	 JUf7TNIByIjMEwxOn0L7z2JEItIGSc3vj2GP9tAf9ysrXXjACqOkNGHuv0AoTsNXEjCqR
-	 XC438s/4gzASkicQOlKi4Deqne9fn0CozLjfKnaIZ7kbDpcHmuLlrdG7nCiG1LsWo2y7M
-	 k96ttcVkglRX7U5/BAv+PvWhmVmUy99CIPXl44+o7AT4frTwG3XTr8mMBmHn/9BGHcex+
-	 1duW+hsAYvcBNXp1imfMakoR6a0EjWtPNBemBGfU5CW68GMfuQm8aABQpnQHoQz7r4w==
+	t=1795762180;
+	b=BDcsXhNwJySJQIigoTW6ZV1mjm+iSB032iMkWppNh4/+ogDrCySbq/wyAucwyKUSCbMO
+	 iotxYVYh0nQ2ZENqszYfmndfkCcIl2z0ykAu3MIJwzkzAm8scZXlgwBWPuU6uy1yK9+zP
+	 to0v0SQI8o508FVsc1D65Gm+R0fYbne4ZTpgZSEsr4DkDPuvkqv6IizcNW9m+oGVo23tU
+	 5kXuXy3zKohwIAsDjefJIrIEKCDKPAlFtxMJ8XpiUjqwDaZuTWdEDIMreijGgpJ0sRL+r
+	 mp0Jk47Kavzf0bSeK47dQT6bbb78XNuZ/GA5h3ioJ1jsmFtGnGxQMLYwmLHLtzz57kQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795761359;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:To:Cc:Subject:Date:Message-Id:X-Mailer:MIME-Version:
+	a=rsa-sha256; c=relaxed/relaxed; t=1795762180;
+	h=DMARC-Filter:DKIM-Signature:X-CSE-ConnectionGUID:X-CSE-MsgGUID:
+	 X-IronPort-AV:X-IronPort-AV:Received:X-CSE-ConnectionGUID:
+	 X-CSE-MsgGUID:X-ExtLoop1:X-IronPort-AV:Received:From:To:Cc:Subject:
+	 Date:Message-ID:X-Mailer:MIME-Version:Organization:
 	 Content-Transfer-Encoding;
-	bh=c58smJtIE49TlFZiCcn/5RKIJ2RiOGgb/XlEfY2liM0=;
-	b=0FNd9X1oMIiYmH2IQYQjMIYSz3g9tsoVecPzsUMvS6G5EMbE7jNQCswZCO/aeYtpx/cC
-	 A/6LQL056kRce7RzsXGdMpinlcZ0GCM7XlwvvhTQNHFqt2whTlNVxxtfJ9xYjX1X70+oV
-	 KsGBTwEGtkxhPQZeOdXi8s4at+fD2umV5Gd9ViPL/YmQ8wSNecYEHTVgol6Ew1zcokWQ8
-	 GBxM7tLOE492BaANjI6D+WFGrR9dXXPpUblh5e6XwWniJHfQaU8q7UY0y/qOQlump08co
-	 R1z0UhOLcODakGPyM+Bx2g48rQ5GOPuEK8En+VgbdmyvPgbwb9Z805WV92J1Lxx74xw==
+	bh=g3YFHw/tSEqLXgBqxpE4Iab2b4xURFYtdJJcC7WJWIU=;
+	b=bwj10Wag+FJQCtNhhzihjet30E/W7ry9CAeGrXytgm2PjvDmRgLzFdvES44HJZLARI0i
+	 u3aYdU8gaQgOL0GRKws8er12zMZ1hjDLcCgZu8siQnbS6ono6oCM62ffaVfLX9Cn/copl
+	 7s0ki4SoGDmQf3ioJHgzBQZzbXS/6ExoL8k6b6z3ogdDiw/DKGygYGqwmatREED8Y/Uaf
+	 WmfB04YEte2KmNGWxWMDJrekkl63Vih9qCB02xbcyJHEnwSmK0yHR7lswI5sWSOv6/IhR
+	 AC8+tfxtr7Wb6nAXMm84Z6tq8T9VXEuDhV35mBrmfvG5IBrpC04LzcjnKEOKbjTWXXw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=kE+tcPWe;
-	arc=none smtp.remote-ip=74.125.82.44
-Received: from mail-dl1-f44.google.com (mail-dl1-f44.google.com [74.125.82.44])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dmarc=pass header.from=intel.com;
+	spf=pass smtp.mailfrom=intel.com;
+	dkim=pass header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=XSqQePbn;
+	arc=none smtp.remote-ip=192.198.163.10
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.10])
+	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C334A606A31C
-	for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2026 06:35:58 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C334A606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1B72606A321;
+	Fri, 27 Nov 2026 06:49:38 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A1B72606A321
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=kE+tcPWe
-Received: by mail-dl1-f44.google.com with SMTP id a92af1059eb24-18818daa3e7so4268928c88.0
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2026 22:35:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1795761358; x=1796366158; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=c58smJtIE49TlFZiCcn/5RKIJ2RiOGgb/XlEfY2liM0=;
-        b=kE+tcPWeRhYYIoWG4142usDFtudahlWUjC+W1SqgOY2s51+m+MtNz+gFWEN9Cs5OY3
-         /rBtSCd2qfE2Njo5Pl5HjZzDdzku5gyFOgUC/58VZWHJB6aEHuE3JhCzNv06DN1SUtik
-         J9T34M744Wb1UM4SE+crVS1hS8NipaIQZHb3XK3nvGExscL9FPOJvHTiHR4i4IWRa2sn
-         gX9Wsxg/c9xanQ1kxtrq74lanMa9ujIXGmtH7hDtHw670Tqsv7IRvEIMneDN37YGHPw2
-         NQC4oQbxMxUk9Oy95vRNogKtWnNVRRdmrY1q9KSAtuhwL8YdRQhf56JjUqmNi2Vc81A6
-         wmuA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795761358; x=1796366158;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=c58smJtIE49TlFZiCcn/5RKIJ2RiOGgb/XlEfY2liM0=;
-        b=EUtz9ZxpmcKPohDnzimHYbAAu7qxLqlCPW6NQW/2kTd2WwsKMGtkltTmuWCzAjSCoE
-         qVs5IuSqxH0aNiYXu6wqpLlvd7UI+s0VJDgobJe5GjOEYiZfq751XNnwEL1bVP9Zz3bK
-         YGeD/wIClWU1yNaSJta6yBlLGiueEEVxY40JZfOtEw1itraeKuoocjL+Xo3Bsc3LifXg
-         DgjCuLn9CMYg/9bEJ7LiLstwo+zGNDzYziQ4bPirFad2eanhFJ4mIN+jMh6PkETYW/el
-         h/ujwNi9rilETzOUmh3HsgGlq7/Fpf7AL4Lcn2Un+hrqkK4JEIsASQkG4oFaciEyrSYD
-         j1lQ==
-X-Forwarded-Encrypted: i=1; AL+hErHlfpWNZ++/e7J+mRUMzqZTi+LesIL0oA/6DCz+9pFu+QTgSYkepEoZqsnK8VkJCQtYrGU14jel8Tg=@vger.kernel.org
-X-Gm-Message-State: APuU4Z+d3IIw1WQgV2Mb3aIyFuV96SLIU9SNArrhLLpSoEnt/0RgR5JD
-	TSch1hsAtpUimAoc1nywWPHRp3QwEF3+abJlqhJAcczBmcNK6134Vf0/
-X-Gm-Gg: AZFdTZe+iOgb5kv1bui7MIuiXI9wsjHgDCASxwVTkCWtd9QeY+l/Dm4LUoxLSeUeWsI
-	wS0yXGEWylSgFOJmIn/F4ZEUMnXLzZBXT7/LjaKkPh+mVRiAsRNA3EbVU4c0SrcKI3nVN+3Evfu
-	f9soEdAhL6uJfqR4Ifisxlied6yIBJV4lu2uNaZb2fLA9j5uf91IaaS5i8sFcW6RX6Ks3qg52nt
-	7H9zl516HKChEASyRm/yAEFtkBLxiRs0py59Jqv42MfaQZk+ZWH8y5aS0I5W7G6TVkMbrOelFGx
-	rJS36U4VobBSi84X5h0tXr9bCun0PR4JVJKSGRAxQIKoTev6XyUOJyBCI5+f2MqkthqbIEmWPnJ
-	/C+L6u3xjP8rijSqzFBkV0Cfp9ZDXdL4ld9i/W/7sjif8LcTATFBPXmPXq2Uo5jIbwll8ZvoE4i
-	LheqyaT2ZZLn3rQebkSLSIO1T6Bx0PgpN+7eBHCIOqE2CnW4iVEXNXAI5j3mK/s2oEJdp6XKAZJ
-	uindfitQf8ORfHxC+dIqCMuLrcB8xO7RGGqaexvRfD5C9DBJ0ptpSVjNSbdglj2Ltxbx5noUKQQ
-	YkWOUeOv6TLXQisA6LXavYHJ0QlkDW/tjtO+2FpChX/P8kTeaDOO+Q==
-X-Received: by 2002:a05:701a:ccde:20b0:13c:f65c:d5b5 with SMTP id a92af1059eb24-1b55247d471mr22377978c88.3.1795761357899;
-        Thu, 26 Nov 2026 22:35:57 -0800 (PST)
-Received: from csl-conti-dell7858.ntu.edu.sg ([155.69.195.57])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-1b5569bffd2sm50746266c88.0.2026.11.26.22.35.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 26 Nov 2026 22:35:57 -0800 (PST)
-From: Maoyi Xie <maoyixie.tju@gmail.com>
-To: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: Alex Dubov <oakad@yahoo.com>,
+	dkim=pass (2048-bit key, unprotected) header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=XSqQePbn
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1795762179; x=1827298179;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=wMVVDYYiB7wfceZ8fdWQGXCrFPFCMsX5gelPJcZRVFI=;
+  b=XSqQePbn43eu36TvyNYsCBHSQzzcbpOSr10GK5WHlQm1PflBGaDgDmkY
+   nRjhMe8yIg98UK8IfYeb612N1vYy/RvbkffGywfYcjCF1vtthP7DT2BW+
+   fPaZGG74JWSOE4KMYRs+Ce2CMQZplRhClNRsF9I3hoPh0sBB7MwRnZsO/
+   XtAAYZ2MfLG1Ocjbwn3zyyGji41FowA9OCScx6QSHVM2gy4KgrzW+G1+F
+   BQ4x9SUBb+/Y8SDiGplnqBrWWywlACElnaQjI4HSuPLkNWBSvbOQd1UBy
+   xewgD83eDNV3q+NhRIbgY/ihHGNJAlChWfiqr9oUIq19FsJboYmet+A5n
+   A==;
+X-CSE-ConnectionGUID: 52efiIu6TeqLFN1oDsBmtw==
+X-CSE-MsgGUID: 8VntYjVlS2iOLZ552UrCHg==
+X-IronPort-AV: E=McAfee;i="6800,10657,11978"; a="4557174"
+X-IronPort-AV: E=Sophos;i="6.27,236,1787036400"; 
+   d="scan'208";a="4557174"
+Received: from fmviesa010.fm.intel.com ([10.60.135.150])
+  by fmvoesa104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Nov 2026 22:49:38 -0800
+X-CSE-ConnectionGUID: k15tcmmzQoCbF53pndWDHg==
+X-CSE-MsgGUID: +ubeb3rhSBOMH6yjgJd54A==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.27,236,1787036400"; 
+   d="scan'208";a="12940761"
+Received: from ettammin-mobl3.ger.corp.intel.com (HELO ahunter6-desk) ([10.245.245.50])
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Nov 2026 22:49:35 -0800
+From: Adrian Hunter <adrian.hunter@intel.com>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Arnd Bergmann <arnd@arndb.de>
+Cc: "Rafael J. Wysocki" <rafael@kernel.org>,
 	Ulf Hansson <ulfh@kernel.org>,
-	linux-mmc@vger.kernel.org
-Subject: [PATCH] memstick: ms_block: reject an invalid bad block table size
-Date: Fri, 27 Nov 2026 14:35:53 +0800
-Message-Id: <20261127063553.36734-1-maoyixie.tju@gmail.com>
-X-Mailer: git-send-email 2.34.1
+	Ricky Wu <ricky_wu@realtek.com>,
+	Tabby Kitten <nyanpasu256@gmail.com>,
+	WisdomWebMan <wisdomwebman@proton.me>,
+	linux-pm@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] misc: rtsx: Avoid wakeup events from runtime resume during system sleep
+Date: Fri, 27 Nov 2026 08:49:22 +0200
+Message-ID: <20261127064922.13791-1-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.53.0
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Post: <mailto:linux-mmc@vger.kernel.org>
@@ -95,46 +85,70 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-mmc+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
+Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park, 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
 Content-Transfer-Encoding: 8bit
 
-msb_read_bad_block_table() stores the u32 table size from the card boot
-page in an int and checks it only for zero. A size of 0xffffffff
-becomes -1. size_to_read is then 0 or one page, but the loop bound
-data_size / sizeof(u16) becomes huge. The loop faults on ZERO_SIZE_PTR
-or reads past the buffer.
+Userspace such as KDE Plasma writes /sys/power/wakeup_count before
+entering system sleep, so that the kernel aborts the transition if a
+wakeup event is reported.  On machines with a Realtek PCIe card reader,
+suspend then fails:
 
-The table is stored in the boot block. Reject a size that is negative
-or larger than the block.
+  PM: Wakeup pending, aborting suspend
+  PM: active wakeup source: mmc0
 
-Found with a CodeQL-based static analysis tool that we are developing.
-Reproduced in a userspace harness under AddressSanitizer. Not tested on
-hardware.
+During a system sleep transition, the card reader gets runtime resumed,
+for example by mmc_claim_host() in mmc_queue_suspend(), or by
+pci_pm_suspend() and pci_pm_freeze().  rtsx_pci_runtime_resume() then
+calls the SD slot card_event() callback, which calls mmc_detect_change(),
+which reports a wakeup event that aborts the transition.  Plasma writes
+wakeup_count before hibernation too, so hibernation is affected as well.
 
-Fixes: 0ab30494bc4f ("memstick: add support for legacy memorysticks")
+The rescan is not needed then, because the mmc host class .complete()
+callback always triggers a rescan at the end of the transition,
+including when it is aborted.
+
+Skip card_event() while dev->power.is_prepared is set.  The PM core sets
+it after the PCI device is prepared and clears it before the device is
+completed.  The PCI device is prepared before, and completed after, its
+mmc host descendant, so every skipped card_event() is followed by that
+rescan.
+
+Fixes: 5b4258f6721f ("misc: rtsx: rts5249 support runtime PM")
+Reported-by: Tabby Kitten <nyanpasu256@gmail.com>
+Closes: https://lore.kernel.org/linux-mmc/a242799a-d427-48e1-85ef-923f34df843a@gmail.com/
+Reported-by: WisdomWebMan <wisdomwebman@proton.me>
+Closes: https://lore.kernel.org/linux-mmc/MiymQuzpi87stsM7XA5bfyMV6n_W41wNq15OMA_RnicheHtlyXzpdRw6_hg8wwrkFdSclRgrh6ZqKLg1xpBSUA7cBxO6sX0eIPHg3Mx2tw0=@proton.me/
 Cc: stable@vger.kernel.org
-Signed-off-by: Maoyi Xie <maoyixie.tju@gmail.com>
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
-I used an LLM to help write the harness and this patch.
 
- drivers/memstick/core/ms_block.c | 5 +++++
- 1 file changed, 5 insertions(+)
 
-diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
-index d4143a871d69..37b810760642 100644
---- a/drivers/memstick/core/ms_block.c
-+++ b/drivers/memstick/core/ms_block.c
-@@ -1274,6 +1274,11 @@ static int msb_read_bad_block_table(struct msb_data *msb, int block_nr)
- 	if (!data_size)
- 		return 0;
+	Note, this patch has not been tested at all, however WisdomWebMan
+	offered to do testing.
+
+
+ drivers/misc/cardreader/rtsx_pcr.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/misc/cardreader/rtsx_pcr.c b/drivers/misc/cardreader/rtsx_pcr.c
+index c6e602523538..4b9585c961df 100644
+--- a/drivers/misc/cardreader/rtsx_pcr.c
++++ b/drivers/misc/cardreader/rtsx_pcr.c
+@@ -1800,7 +1800,13 @@ static int rtsx_pci_runtime_resume(struct device *device)
  
-+	if (data_size < 0 || data_size > msb->block_size) {
-+		pr_err("Invalid bad block table size: %d\n", data_size);
-+		return -EINVAL;
-+	}
-+
- 	page = data_offset / msb->page_size;
- 	page_offset = data_offset % msb->page_size;
- 	size_to_read =
+ 	rtsx_pci_init_hw(pcr);
+ 
+-	if (pcr->slots[RTSX_SD_CARD].p_dev != NULL) {
++	/*
++	 * card_event() triggers a rescan to catch card changes made while
++	 * runtime suspended, but mmc_detect_change() reports a wakeup event
++	 * that can abort a system sleep transition. Skip it then: the mmc host
++	 * class .complete() callback rescans anyway.
++	 */
++	if (pcr->slots[RTSX_SD_CARD].p_dev != NULL && !device->power.is_prepared) {
+ 		pcr->slots[RTSX_SD_CARD].card_event(
+ 				pcr->slots[RTSX_SD_CARD].p_dev);
+ 	}
 -- 
-2.34.1
+2.53.0
 
